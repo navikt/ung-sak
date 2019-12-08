@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:11.5
         env:
-          POSTGRES_USER: fpabakus_unit
-          POSTGRES_PASSWORD: fpabakus_unit
-          POSTGRES_DB: fpabakus_unit
+          POSTGRES_USER: k9sak_unit
+          POSTGRES_PASSWORD: k9sak_unit
+          POSTGRES_DB: k9sak_unit
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
