@@ -5,15 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.abakus.mapping.IAYFraDtoMapper;
-import no.nav.foreldrepenger.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
@@ -68,6 +69,8 @@ import no.nav.foreldrepenger.kontrakter.iaygrunnlag.ytelse.v1.YtelserDto;
 
 public class IAYDtoMapperRoundtripTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(IAYDtoMapperRoundtripTest.class);
+
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final UUID uuid = UUID.randomUUID();
@@ -95,6 +98,8 @@ public class IAYDtoMapperRoundtripTest {
         InntektArbeidYtelseGrunnlag fpsakGrunnlag = fraDtoMapper.mapTilGrunnlagInklusivRegisterdata(dto, true);
         IAYTilDtoMapper dtoMapper = new IAYTilDtoMapper(aktørId, uuid, uuid);
         InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(fpsakGrunnlag, true);
+
+        logger.info("tidssone info: '{}', '{}'", OffsetDateTime.now(), ZoneId.systemDefault());
 
         // Assert
         assertThat(dtoIgjen.getGrunnlagTidspunkt()).isEqualTo(dto.getGrunnlagTidspunkt());
@@ -216,9 +221,9 @@ public class IAYDtoMapperRoundtripTest {
                     .medAnnenAktivitet(List.of(new OppgittAnnenAktivitetDto(periode, arbeidType)))
                     .medFrilans(new OppgittFrilansDto(List.of(
                         new OppgittFrilansoppdragDto(periode, "MittOppdrag")))
-                            .medErNyoppstartet(false)
-                            .medHarInntektFraFosterhjem(false)
-                            .medHarNærRelasjon(false)));
+                        .medErNyoppstartet(false)
+                        .medHarInntektFraFosterhjem(false)
+                        .medHarNærRelasjon(false)));
 
         return grunnlag;
 

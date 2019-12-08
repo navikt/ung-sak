@@ -1,7 +1,9 @@
 package no.nav.foreldrepenger.domene.abakus.mapping;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -88,7 +90,9 @@ public class IAYTilDtoMapper {
     private void mapRegisterOpplysninger(ArbeidsforholdInformasjon arbeidsforholdInformasjon,
                                          InntektArbeidYtelseAggregat aggregat,
                                          InntektArbeidYtelseGrunnlagDto dto) {
-        var tidspunkt = Optional.ofNullable(aggregat.getOpprettetTidspunkt()).orElse(LocalDateTime.now());
+        var tidspunkt = Optional.ofNullable(aggregat.getOpprettetTidspunkt())
+            .map(it -> it.atZone(ZoneId.systemDefault()).toOffsetDateTime())
+            .orElse(OffsetDateTime.now());
 
         var arbeid = new MapAktørArbeid.MapTilDto(arbeidsforholdInformasjon).map(aggregat.getAktørArbeid());
         var inntekter = new MapAktørInntekt.MapTilDto().map(aggregat.getAktørInntekt());
@@ -102,7 +106,9 @@ public class IAYTilDtoMapper {
 
     private void mapSaksbehandlerOverstyrteOpplysninger(ArbeidsforholdInformasjon arbeidsforholdInformasjon, InntektArbeidYtelseAggregat aggregat,
                                                         InntektArbeidYtelseGrunnlagDto dto) {
-        var tidspunkt = Optional.ofNullable(aggregat.getOpprettetTidspunkt()).orElse(LocalDateTime.now());
+        var tidspunkt = Optional.ofNullable(aggregat.getOpprettetTidspunkt())
+            .map(it -> it.atZone(ZoneId.systemDefault()).toOffsetDateTime())
+            .orElse(OffsetDateTime.now());
 
         var aktørArbeid = aggregat.getAktørArbeid();
         var arbeid = new MapAktørArbeid.MapTilDto(arbeidsforholdInformasjon).map(aktørArbeid);
