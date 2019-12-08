@@ -226,7 +226,6 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         vilkårTypeSkjermlenkeTypeMap.put(VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.UDEFINERT);
         vilkårTypeSkjermlenkeTypeMap.put(VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.UDEFINERT);
         vilkårTypeSkjermlenkeTypeMap.put(VilkårType.UDEFINERT, SkjermlenkeType.UDEFINERT);
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.SØKNADSFRISTVILKÅRET, SkjermlenkeType.UDEFINERT);
         vilkårTypeSkjermlenkeTypeMap.put(VilkårType.OPPTJENINGSVILKÅRET, SkjermlenkeType.UDEFINERT);
         vilkårTypeSkjermlenkeTypeMap.put(VilkårType.OPPTJENINGSPERIODEVILKÅR, SkjermlenkeType.UDEFINERT);
         vilkårTypeSkjermlenkeTypeMap.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.UDEFINERT);
@@ -283,7 +282,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_en_skjermlenketype_og_ett_ikke_godkjent_totrinnskontrollaksjonspunkt_for_behandling_med_en_godkjent_totrinnsvurdering_og_ett_aksjonspunkt_som_ikke_har_samme_aksjonspunktdefinisjon(){
 
         AksjonspunktDefinisjon adFraAksjonspunkt = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon adFraTotrinnvurdering = AksjonspunktDefinisjon.VENT_PÅ_FØDSEL;
+        AksjonspunktDefinisjon adFraTotrinnvurdering = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
         boolean ttvGodkjent = true;
         boolean apAvbrutt = false;
 

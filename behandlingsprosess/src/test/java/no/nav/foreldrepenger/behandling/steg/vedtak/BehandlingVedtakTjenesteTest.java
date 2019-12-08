@@ -163,7 +163,7 @@ public class BehandlingVedtakTjenesteTest {
             .buildFor(behandling);
         boolean ikkeAvslått = !behandlingResultatType.equals(BehandlingResultatType.AVSLÅTT);
         VilkårResultat.builder()
-            .leggTilVilkårResultat(VilkårType.FØDSELSVILKÅRET_MOR, ikkeAvslått ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
+            .leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET, ikkeAvslått ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
                 null, new Properties(), null, false, false, null, null)
             .medVilkårResultatType(ikkeAvslått ? VilkårResultatType.INNVILGET : VilkårResultatType.AVSLÅTT)
             .buildFor(behandling);

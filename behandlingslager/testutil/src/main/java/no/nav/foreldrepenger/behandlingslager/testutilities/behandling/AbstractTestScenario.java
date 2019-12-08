@@ -511,7 +511,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         // opprett og lagre resulater på behandling
         lagreBehandlingsresultatOgVilkårResultat(repositoryProvider, lås);
         builder.medBehandlingResultatType(BehandlingResultatType.AVSLÅTT).medAvslagarsakFritekst("Testavslag")
-            .medAvslagsårsak(Avslagsårsak.ENGANGSSTØNAD_ER_ALLEREDE_UTBETALT_TIL_FAR_MEDMOR).buildFor(behandling);
+            .medAvslagsårsak(Avslagsårsak.SØKER_ER_UTVANDRET).buildFor(behandling);
 
         behandlingRepo.lagre(behandling, lås);
     }

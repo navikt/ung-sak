@@ -681,7 +681,7 @@ public class BehandlingRepositoryImplTest {
         behandlingRepository.lagre(behandling, lås);
 
         VilkårResultat.builder()
-            .leggTilVilkårResultat(VilkårType.FØDSELSVILKÅRET_MOR, innvilget ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
+            .leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET, innvilget ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
                 null, new Properties(), null, false, false, null, null)
             .medVilkårResultatType(innvilget ? VilkårResultatType.INNVILGET : VilkårResultatType.AVSLÅTT)
             .buildFor(behandling);

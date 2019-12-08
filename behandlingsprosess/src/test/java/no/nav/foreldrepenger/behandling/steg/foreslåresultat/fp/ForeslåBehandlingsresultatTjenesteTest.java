@@ -238,12 +238,12 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
         var vilkårsresultatBuilder = VilkårResultat.builder();
         if (vilkårUtfallType.equals(VilkårUtfallType.OPPFYLT)) {
-            vilkårsresultatBuilder.leggTilVilkår(VilkårType.FØDSELSVILKÅRET_MOR, vilkårUtfallType);
+            vilkårsresultatBuilder.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, vilkårUtfallType);
             vilkårsresultatBuilder.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, vilkårUtfallType);
         } else {
             vilkårsresultatBuilder.leggTilVilkårResultatManueltIkkeOppfylt(
-                VilkårType.FØDSELSVILKÅRET_MOR,
-                Avslagsårsak.FØDSELSDATO_IKKE_OPPGITT_ELLER_REGISTRERT);
+                VilkårType.MEDLEMSKAPSVILKÅRET,
+                Avslagsårsak.SØKER_ER_UTVANDRET);
         }
         behandlingRepository.lagre(vilkårsresultatBuilder.buildFor(behandling), lås);
         behandlingRepository.lagre(behandling, lås);

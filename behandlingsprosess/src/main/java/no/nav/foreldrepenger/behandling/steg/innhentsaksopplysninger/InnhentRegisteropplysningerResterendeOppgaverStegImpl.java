@@ -81,7 +81,6 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
 
     }
 
-    // TODO(OJR) flytte denne til egen utleder?
     private List<AksjonspunktDefinisjon> sjekkPersonstatus(BehandlingReferanse ref) {
         List<PersonstatusType> liste = asList(PersonstatusType.BOSA, PersonstatusType.DØD, PersonstatusType.DØDD, PersonstatusType.UTVA, PersonstatusType.ADNR);
 

@@ -89,9 +89,9 @@ public class FagsakRevurderingTest {
     public void kanOppretteRevurderingDersomBehandlingErVedtatt() {
         behandling.avsluttBehandling();
         Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.AVSLÅTT).buildFor(behandling);
-        VilkårResultat.builder().leggTilVilkårResultat(VilkårType.FØDSELSVILKÅRET_MOR,
+        VilkårResultat.builder().leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET,
             VilkårUtfallType.IKKE_OPPFYLT, VilkårUtfallMerknad.VM_1005, null,
-            Avslagsårsak.SØKER_ER_IKKE_BARNETS_FAR_O, false, false, null, null).buildFor(behandling);
+            Avslagsårsak.SØKER_ER_IKKE_BOSATT, false, false, null, null).buildFor(behandling);
 
         FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
         Boolean kanRevurderingOpprettes = tjeneste.kanRevurderingOpprettes(fagsak);
@@ -105,7 +105,7 @@ public class FagsakRevurderingTest {
         Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.AVSLÅTT).buildFor(behandling);
         VilkårResultat.builder().leggTilVilkårResultat(VilkårType.SØKERSOPPLYSNINGSPLIKT,
             VilkårUtfallType.IKKE_OPPFYLT, VilkårUtfallMerknad.VM_1005, null,
-            Avslagsårsak.SØKER_ER_IKKE_BARNETS_FAR_O, false, false, null, null).buildFor(behandling);
+            Avslagsårsak.MANGLENDE_DOKUMENTASJON, false, false, null, null).buildFor(behandling);
 
         FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
         Boolean kanRevurderingOpprettes = tjeneste.kanRevurderingOpprettes(fagsak);

@@ -51,9 +51,9 @@ public class SendBrevForAutopunktTest {
         initMocks(this);
         scenario = TestScenarioBuilder.builderMedSøknad();
         repositoryProvider = scenario.mockBehandlingRepositoryProvider();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VENT_PÅ_FØDSEL, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE, BehandlingStegType.KONTROLLER_FAKTA);
         behandling = scenario.lagMocked();
-        aksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VENT_PÅ_FØDSEL).get();
+        aksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE).get();
 
         repositoryProvider.getAksjonspunktRepository().setFrist(aksjonspunkt, førsteJanuar2019, Venteårsak.AVV_FODSEL);
 

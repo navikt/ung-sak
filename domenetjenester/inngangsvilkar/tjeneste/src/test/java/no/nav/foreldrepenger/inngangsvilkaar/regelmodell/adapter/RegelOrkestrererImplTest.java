@@ -48,46 +48,9 @@ public class RegelOrkestrererImplTest {
     }
 
     @Test
-    public void skal_kalle_regeltjeneste_for_fødselsvilkåret_og_oppdatere_vilkårresultat() {
-        // Arrange
-        VilkårType vilkårType = VilkårType.FØDSELSVILKÅRET_MOR;
-        VilkårData vilkårData = new VilkårData(vilkårType, OPPFYLT, emptyList());
-        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, FagsakYtelseType.FORELDREPENGER)).thenReturn((b) -> vilkårData);
-
-        Behandling behandling = byggBehandlingMedVilkårresultat(VilkårResultatType.IKKE_FASTSATT, vilkårType);
-        when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
-
-        // Act
-        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling));
-
-        // Assert
-        assertThat(regelResultat.getVilkårResultat().getVilkårene()).hasSize(1);
-        assertThat(regelResultat.getVilkårResultat().getVilkårene().iterator().next().getVilkårType())
-                .isEqualTo(vilkårType);
-    }
-
-    @Test
     public void skal_kalle_regeltjeneste_for_medlemskapvilkåret_og_oppdatere_vilkårresultat() {
         // Arrange
         VilkårType vilkårType = VilkårType.MEDLEMSKAPSVILKÅRET;
-        VilkårData vilkårData = new VilkårData(vilkårType, OPPFYLT, emptyList());
-        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, FagsakYtelseType.FORELDREPENGER)).thenReturn((b) -> vilkårData);
-        Behandling behandling = byggBehandlingMedVilkårresultat(VilkårResultatType.IKKE_FASTSATT, vilkårType);
-        when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
-
-        // Act
-        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling));
-
-        // Assert
-        assertThat(regelResultat.getVilkårResultat().getVilkårene()).hasSize(1);
-        assertThat(regelResultat.getVilkårResultat().getVilkårene().iterator().next().getVilkårType())
-                .isEqualTo(vilkårType);
-    }
-
-    @Test
-    public void skal_kalle_regeltjeneste_for_søknadsfristvilkåret_og_oppdatere_vilkårresultat() {
-        // Arrange
-        VilkårType vilkårType = VilkårType.SØKNADSFRISTVILKÅRET;
         VilkårData vilkårData = new VilkårData(vilkårType, OPPFYLT, emptyList());
         when(inngangsvilkårTjeneste.finnVilkår(vilkårType, FagsakYtelseType.FORELDREPENGER)).thenReturn((b) -> vilkårData);
         Behandling behandling = byggBehandlingMedVilkårresultat(VilkårResultatType.IKKE_FASTSATT, vilkårType);
@@ -107,7 +70,7 @@ public class RegelOrkestrererImplTest {
         // Arrange
         Behandling behandling = lagBehandling();
 
-        VilkårType vilkårType = VilkårType.FØDSELSVILKÅRET_MOR;
+        VilkårType vilkårType = VilkårType.MEDLEMSKAPSVILKÅRET;
         boolean erOverstyrt = true;
         VilkårResultat.builder()
                 .leggTilVilkårResultat(vilkårType, OPPFYLT, null, null, null, false, erOverstyrt, null, null)

@@ -87,7 +87,6 @@ public class OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunktTest {
             .leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.OPPFYLT)
             .leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, VilkårUtfallType.OPPFYLT)
             .leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.OPPFYLT)
-            .leggTilVilkår(VilkårType.SØKNADSFRISTVILKÅRET, VilkårUtfallType.OPPFYLT)
             .leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårUtfallType.OPPFYLT)
             .leggTilVilkår(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårUtfallType.OPPFYLT)
             .leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.OPPFYLT)

@@ -81,9 +81,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AVKLAR_OPPHOLDSRETT(AksjonspunktKodeDefinisjon.AVKLAR_OPPHOLDSRETT_KODE,
             AksjonspunktType.MANUELL, "Avklar oppholdsrett.", BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN,
             VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, EnumSet.of(ES, FP, SVP)),
-    VARSEL_REVURDERING_ETTERKONTROLL(
-            AksjonspunktKodeDefinisjon.VARSEL_REVURDERING_ETTERKONTROLL_KODE, AksjonspunktType.MANUELL, "Varsel om revurdering ved automatisk etterkontroll",
-            BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP)),
     VARSEL_REVURDERING_MANUELL(
             AksjonspunktKodeDefinisjon.VARSEL_REVURDERING_MANUELL_KODE, AksjonspunktType.MANUELL, "Varsel om revurdering opprettet manuelt",
             BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP)),
@@ -95,10 +92,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE(
             AksjonspunktKodeDefinisjon.AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE_KODE, AksjonspunktType.MANUELL, "Vurdere om søkers ytelse gjelder samme barn",
             BehandlingStegType.SØKERS_RELASJON_TIL_BARN, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, EnumSet.of(ES, FP)),
-    AVKLAR_OM_ANNEN_FORELDRE_HAR_MOTTATT_STØTTE(
-            AksjonspunktKodeDefinisjon.AVKLAR_OM_ANNEN_FORELDRE_HAR_MOTTATT_STØTTE_KODE, AksjonspunktType.MANUELL,
-            "Vurdere om annen forelder sin ytelse gjelder samme barn", BehandlingStegType.SØKERS_RELASJON_TIL_BARN, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE,
-            TOTRINN, EnumSet.of(ES, FP)),
     VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
             AksjonspunktKodeDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere annen ytelse før vedtak",
             BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
@@ -118,13 +111,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE, AksjonspunktType.MANUELL,
             "Fastsett beregningsgrunnlag for selvstendig næringsdrivende", BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
             VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(FP, SVP)),
-    MANUELL_VURDERING_AV_SØKNADSFRIST(
-            AksjonspunktKodeDefinisjon.MANUELL_VURDERING_AV_SØKNADSFRIST_KODE, AksjonspunktType.MANUELL, "Manuell vurdering av søknadsfrist for foreldrepenger",
-            BehandlingStegType.SØKNADSFRIST, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, EnumSet.of(FP, SVP)),
-    AVKLAR_STARTDATO_FOR_FORELDREPENGEPERIODEN(
-            AksjonspunktKodeDefinisjon.AVKLAR_STARTDATO_FOR_FORELDREPENGEPERIODEN_KODE, AksjonspunktType.MANUELL, "Avklar startdato for foreldrepengeperioden",
-            BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP,
-            ENTRINN, EnumSet.of(ES, FP, SVP)),
     FORDEL_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.FORDEL_BEREGNINGSGRUNNLAG_KODE,
             AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR,
             SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, EnumSet.of(FP, SVP)),
@@ -166,25 +152,12 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             AksjonspunktKodeDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE, AksjonspunktType.MANUELL,
             "Innhent dokumentasjon fra utenlandsk trygdemyndighet",
             BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
-    AVKLAR_FAKTA_UTTAK(AksjonspunktKodeDefinisjon.AVKLAR_FAKTA_UTTAK_KODE,
-            AksjonspunktType.MANUELL, "Avklar fakta uttak", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, UTEN_VILKÅR,
-            SkjermlenkeType.FAKTA_OM_UTTAK, ENTRINN, EnumSet.of(FP, SVP)),
-    FASTSETT_UTTAKPERIODER(AksjonspunktKodeDefinisjon.FASTSETT_UTTAKPERIODER_KODE,
-            AksjonspunktType.MANUELL, "Fastsett uttaksperioder manuelt", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR,
-            SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
     TILKNYTTET_STORTINGET(AksjonspunktKodeDefinisjon.TILKNYTTET_STORTINGET_KODE,
             AksjonspunktType.MANUELL, "Søker er stortingsrepresentant/administrativt ansatt i Stortinget", BehandlingStegType.VURDER_UTTAK,
             VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_REALITETSBEHANDLING_ELLER_KLAGE(
-            AksjonspunktKodeDefinisjon.KONTROLLER_REALITETSBEHANDLING_ELLER_KLAGE_KODE, AksjonspunktType.MANUELL, "Kontroller realitetsbehandling/klage",
-            BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
     KONTROLLER_OPPLYSNINGER_OM_MEDLEMSKAP(
             AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Kontroller opplysninger om medlemskap",
             BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_OPPLYSNINGER_OM_FORDELING_AV_STØNADSPERIODEN(
-            AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_FORDELING_AV_STØNADSPERIODEN_KODE, AksjonspunktType.MANUELL,
-            "Kontroller opplysninger om fordeling av stønadsperioden", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR,
-            SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
     KONTROLLER_OPPLYSNINGER_OM_DØD(
             AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_DØD_KODE, AksjonspunktType.MANUELL, "Kontroller opplysninger om død",
             BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
@@ -200,23 +173,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_ARBEIDSFORHOLD(AksjonspunktKodeDefinisjon.VURDER_ARBEIDSFORHOLD_KODE,
             AksjonspunktType.MANUELL, "Avklar arbeidsforhold", BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT, UTEN_VILKÅR,
             SkjermlenkeType.FAKTA_OM_ARBEIDSFORHOLD, ENTRINN, EnumSet.of(FP, SVP)),
-    AVKLAR_FØRSTE_UTTAKSDATO(AksjonspunktKodeDefinisjon.AVKLAR_FØRSTE_UTTAKSDATO_KODE,
-            AksjonspunktType.MANUELL, "Avklar første uttaksdato", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, UTEN_VILKÅR,
-            SkjermlenkeType.FAKTA_OM_UTTAK, ENTRINN, EnumSet.of(FP, SVP)),
     VURDER_FEILUTBETALING(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE,
             AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStegType.SIMULER_OPPDRAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
     VURDER_INNTREKK(AksjonspunktKodeDefinisjon.VURDER_INNTREKK_KODE,
             AksjonspunktType.MANUELL, "Vurder inntrekk", BehandlingStegType.SIMULER_OPPDRAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
-    AVKLAR_FAKTA_ANNEN_FORELDER_HAR_RETT(
-            AksjonspunktKodeDefinisjon.AVKLAR_FAKTA_ANNEN_FORELDER_HAR_RETT_KODE, AksjonspunktType.MANUELL, "Avklar annen forelder har rett",
-            BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_UTTAK, ENTRINN, EnumSet.of(FP, SVP)),
-    VURDER_DEKNINGSGRAD(AksjonspunktKodeDefinisjon.VURDER_DEKNINGSGRAD_KODE,
-            AksjonspunktType.MANUELL, "Vurder Dekningsgrad", BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR,
-            SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(FP, SVP)),
-    ANNEN_FORELDER_IKKE_RETT_OG_LØPENDE_VEDTAK(
-            AksjonspunktKodeDefinisjon.ANNEN_FORELDER_IKKE_RETT_OG_LØPENDE_VEDTAK_KODE, AksjonspunktType.MANUELL,
-            "Oppgitt at annen forelder ikke rett, men har løpende utbetaling", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, UTEN_VILKÅR,
-            SkjermlenkeType.FAKTA_OM_UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
     VURDER_OPPTJENINGSVILKÅRET(
             AksjonspunktKodeDefinisjon.VURDER_OPPTJENINGSVILKÅRET_KODE, AksjonspunktType.MANUELL, "Manuell vurdering av opptjeningsvilkår",
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET, SkjermlenkeType.PUNKT_FOR_OPPTJENING,
@@ -224,69 +184,42 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
             AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStegType.VURDER_TILBAKETREKK, VurderingspunktType.UT, UTEN_VILKÅR,
             SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, EnumSet.of(FP)),
-    VURDER_SVP_TILRETTELEGGING(
-            AksjonspunktKodeDefinisjon.VURDER_SVP_TILRETTELEGGING_KODE, AksjonspunktType.MANUELL, "Vurder tilrettelegging svangerskapspenger",
-            BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.PUNKT_FOR_SVP_INNGANG, ENTRINN, EnumSet.of(ES, FP, SVP)),
     VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
             AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT, UTEN_VILKÅR,
             SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(ES, FP, SVP)),
-    REGISTRER_PAPIRSØKNAD_SVANGERSKAPSPENGER(
-            AksjonspunktKodeDefinisjon.REGISTRER_PAPIRSØKNAD_SVANGERSKAPSPENGER_KODE, AksjonspunktType.MANUELL, "Registrer papirsøknad svangerskapspenger",
-            BehandlingStegType.REGISTRER_SØKNAD, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
 
     // Gruppe : 600
 
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,
             "Saksbehandler initierer kontroll av søkers opplysningsplikt", BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VurderingspunktType.UT,
         VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, EnumSet.of(ES, FP, SVP)),
-    OVERSTYRING_AV_FØDSELSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_FØDSELSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING,
-            "Overstyring av fødselsvilkåret", BehandlingStegType.SØKERS_RELASJON_TIL_BARN, VurderingspunktType.UT,
-            VilkårType.FØDSELSVILKÅRET_MOR, SkjermlenkeType.PUNKT_FOR_FOEDSEL, TOTRINN, EnumSet.of(ES, FP)),
     OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av medlemskapsvilkåret",
             BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.UT, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.PUNKT_FOR_MEDLEMSKAP,
             TOTRINN, EnumSet.of(ES, FP, SVP)),
     OVERSTYRING_AV_BEREGNING(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNING_KODE,
             AksjonspunktType.OVERSTYRING, "Overstyring av beregning", BehandlingStegType.BEREGN_YTELSE, VurderingspunktType.UT, UTEN_VILKÅR,
             SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(ES, FP, SVP)),
-    OVERSTYRING_AV_UTTAKPERIODER(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_UTTAKPERIODER_KODE, AksjonspunktType.OVERSTYRING, "Overstyr uttaksperioder",
-            BehandlingStegType.BEREGN_YTELSE,
-            VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(ES, FP, SVP)),
     OVERSTYRING_AV_OPPTJENINGSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av opptjeningsvilkåret",
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET, SkjermlenkeType.PUNKT_FOR_OPPTJENING,
             TOTRINN, EnumSet.of(FP, SVP)),
     OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av løpende medlemskapsvilkåret", BehandlingStegType.VULOMED, VurderingspunktType.UT,
             VilkårType.MEDLEMSKAPSVILKÅRET_LØPENDE, SkjermlenkeType.PUNKT_FOR_MEDLEMSKAP_LØPENDE, TOTRINN, EnumSet.of(FP)),
-    OVERSTYRING_AV_FAKTA_UTTAK(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_FAKTA_UTTAK_KODE, AksjonspunktType.OVERSTYRING,
-            "Overstyr søknadsperioder", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
     OVERSTYRING_AV_BEREGNINGSAKTIVITETER(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE, AksjonspunktType.OVERSTYRING,
             "Overstyring av beregningsaktiviteter", BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT,
             UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(FP, SVP)),
     OVERSTYRING_AV_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av beregningsgrunnlag",
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(FP, SVP)),
-    OVERSTYRING_AV_AVKLART_STARTDATO(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_AVKLART_STARTDATO_KODE, AksjonspunktType.MANUELL, "Overstyr avklart startdato for foreldrepengeperioden",
-            BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP,
-            TOTRINN, EnumSet.of(ES, FP, SVP)),
     MANUELL_MARKERING_AV_UTLAND_SAKSTYPE(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE, AksjonspunktType.MANUELL, "Manuell markering av utenlandssak",
             BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTLAND, ENTRINN, EnumSet.of(ES, FP, SVP)),
-    MANUELL_AVKLAR_FAKTA_UTTAK(AksjonspunktKodeDefinisjon.MANUELL_AVKLAR_FAKTA_UTTAK_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,
-            "Saksbehandler initierer kontroll av søknadsperiodene", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, UTEN_VILKÅR,
-            SkjermlenkeType.FAKTA_OM_UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
 
     // Gruppe : 700
 
     AUTO_MANUELT_SATT_PÅ_VENT(AksjonspunktKodeDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT_KODE, AksjonspunktType.AUTOPUNKT,
             "Manuelt satt på vent", BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
             FORBLI, "P4W", EnumSet.of(ES, FP, SVP)),
-    AUTO_VENT_PÅ_FØDSELREGISTRERING(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_FØDSELREGISTRERING_KODE, AksjonspunktType.AUTOPUNKT,
-            "Vent på fødsel ved avklaring av søkers relasjon til barnet", BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
-            TILBAKE, UTEN_FRIST, EnumSet.of(ES, FP, SVP)),
     AUTO_VENTER_PÅ_KOMPLETT_SØKNAD(AksjonspunktKodeDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT,
             "Venter på komplett søknad", BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", EnumSet.of(ES, FP, SVP)),
-    VENT_PÅ_FØDSEL(AksjonspunktKodeDefinisjon.VENT_PÅ_FØDSEL_KODE, AksjonspunktType.AUTOPUNKT,
-            "Vent på fødsel ved avklaring av medlemskap", BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR,
-            UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P3W", EnumSet.of(ES, FP, SVP)),
     AUTO_SATT_PÅ_VENT_REVURDERING(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING_KODE, AksjonspunktType.AUTOPUNKT,
             "Satt på vent etter varsel om revurdering", BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE,
             ENTRINN, FORBLI, "P4W", EnumSet.of(ES, FP)),
@@ -309,9 +242,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             "P3W", EnumSet.of(ES, FP, SVP)),
     AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE, AksjonspunktType.AUTOPUNKT, "Vent på rapporteringsfrist for inntekt",
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
-    AUTO_VENT_PÅ_REGLER_FOR_DØDFØDSEL_80P_DEKNINGSGRAD(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_REGLER_FOR_DØDFØDSEL_80P_DEKNINGSGRAD_KODE, AksjonspunktType.AUTOPUNKT,
-            "Autopunkt dødfødsel 80% dekningsgrad",
-            BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
     AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.AUTOPUNKT,
             "Autopunkt gradering uten beregningsgrunnlag",
             BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
@@ -326,37 +256,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
     AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD(AksjonspunktKodeDefinisjon.AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE, AksjonspunktType.AUTOPUNKT, "Autopunkt gradering flere arbeidsforhold",
             BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
-    AUTO_VENT_ULIKE_STARTDATOER_SVP(AksjonspunktKodeDefinisjon.AUTO_VENT_ULIKE_STARTDATOER_SVP_KODE, AksjonspunktType.AUTOPUNKT, "Autopunkt ulike startdatoer svangerskapspenger",
-            BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
-    AUTO_VENT_DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP(AksjonspunktKodeDefinisjon.AUTO_VENT_DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP_KODE, AksjonspunktType.AUTOPUNKT, "Autopunkt delvis SVP og refusjon",
-            BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
     AUTO_VENT_ETTERLYST_INNTEKTSMELDING(AksjonspunktKodeDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding",
             BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P3W", EnumSet.of(ES, FP, SVP)),
-    AUTO_VENT_AAP_DP_ENESTE_AKTIVITET_SVP(AksjonspunktKodeDefinisjon.AUTO_VENT_AAP_DP_ENESTE_AKTIVITET_SVP_KODE, AksjonspunktType.AUTOPUNKT, "Autopunkt AAP/DP eneste aktivitet SVP",
-            BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(FP, SVP)),
-    AUTO_VENT_FEIL_ENDRINGSSØKNAD(AksjonspunktKodeDefinisjon.AUTO_VENT_FEIL_ENDRINGSSØKNAD, AksjonspunktType.AUTOPUNKT, "Potensielt feil i endringssøknad, kontakt bruker",
-            BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(ES, FP, SVP)),
 
     UNDEFINED,
-
-    // Utgåtte aksjonspunktkoder - kun her for bakoverkompatibilitet. Finnes historisk i fpsak i P, Q, T
-
-    @Deprecated
-    _7024("7024", AksjonspunktType.AUTOPUNKT, "Sett på vent - Arbeidsgiver krever refusjon 3 måneder tilbake i tid (UTGÅTT)"),
-    @Deprecated
-    _7028("7028", AksjonspunktType.AUTOPUNKT, "Sett på vent - Søker har søkt SVP og hatt AAP eller DP siste 10 mnd (UTGÅTT)"),
-    @Deprecated
-    _7029("7029", AksjonspunktType.AUTOPUNKT, "Sett på vent - Støtter ikke FL/SN i svangerskapspenger (UTGÅTT)"),
-    @Deprecated
-    _5024("5024", AksjonspunktType.MANUELL, "Saksbehandler må avklare hvilke verdier som er gjeldene, det er mismatch mellom register- og lokaldata (UTGÅTT)"),
-    @Deprecated
-    _7015("7015", AksjonspunktType.AUTOPUNKT, "Venter på regler for 80% dekningsgrad (UTGÅTT)"),
-    @Deprecated
-    _7016("7016", AksjonspunktType.AUTOPUNKT, "Opprettes når opptjeningsvilkåret blir automatisk avslått. NB! Autopunkt som er innført til prodfeil på opptjenig er fikset (UTGÅTT)"),
-    @Deprecated
-    _7017("7017", AksjonspunktType.AUTOPUNKT, "Sett på vent - ventelønn/vartpenger og militær med flere aktiviteter (UTGÅTT)"),
-    @Deprecated
-    _7021("7021", AksjonspunktType.AUTOPUNKT, "Endring i fordeling av ytelse bakover i tid (UTGÅTT)"),
 
     ;
 
