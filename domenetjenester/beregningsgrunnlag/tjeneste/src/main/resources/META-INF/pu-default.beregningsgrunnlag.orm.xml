@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+      http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
+
+    <sequence-generator name="SEQ_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_BEREGNINGSGRUNNLAG" />
+    <sequence-generator name="SEQ_BG_REGEL_SPORING" allocation-size="50" sequence-name="SEQ_BG_REGEL_SPORING" />
+    <sequence-generator name="SEQ_BG_PERIODE" allocation-size="50" sequence-name="SEQ_BG_PERIODE" />
+    <sequence-generator name="SEQ_BG_PERIODE_REGEL_SPORING" allocation-size="50" sequence-name="SEQ_BG_PERIODE_REGEL_SPORING" />
+    <sequence-generator name="SEQ_BG_PERIODE_AARSAK" allocation-size="50" sequence-name="SEQ_BG_PERIODE_AARSAK" />
+    <sequence-generator name="SEQ_BG_ANDEL_ARBEIDSFORHOLD" allocation-size="50" sequence-name="SEQ_BG_ANDEL_ARBEIDSFORHOLD" />
+    <sequence-generator name="SEQ_BG_PR_STATUS_OG_ANDEL" allocation-size="50" sequence-name="SEQ_BG_PR_STATUS_OG_ANDEL" />
+    <sequence-generator name="SEQ_SAMMENLIGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_SAMMENLIGNINGSGRUNNLAG" />
+    <sequence-generator name="SEQ_BG_SG_PR_STATUS" allocation-size="50" sequence-name="SEQ_BG_SG_PR_STATUS" />
+    <sequence-generator name="SEQ_BG_FAKTA_BER_TILFELLE" allocation-size="50" sequence-name="SEQ_BG_FAKTA_BER_TILFELLE" />
+    <sequence-generator name="SEQ_GR_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_GR_BEREGNINGSGRUNNLAG" />
+    <sequence-generator name="SEQ_BG_FRILANS_ANDEL" allocation-size="50" sequence-name="SEQ_BG_FRILANS_ANDEL" />
+    <sequence-generator name="SEQ_BG_ARBEIDSTAKER_ANDEL" allocation-size="50" sequence-name="SEQ_BG_ARBEIDSTAKER_ANDEL" />
+    <sequence-generator name="SEQ_BG_AKTIVITETER" allocation-size="50" sequence-name="SEQ_BG_AKTIVITETER"/>
+    <sequence-generator name="SEQ_BG_AKTIVITET" allocation-size="50" sequence-name="SEQ_BG_AKTIVITET"/>
+    <sequence-generator name="SEQ_BG_AKTIVITET_OVERSTYRINGER" allocation-size="50" sequence-name="SEQ_BG_AKTIVITET_OVERSTYRINGER"/>
+    <sequence-generator name="SEQ_BG_AKTIVITET_OVERSTYRING" allocation-size="50" sequence-name="SEQ_BG_AKTIVITET_OVERSTYRING"/>
+    <sequence-generator name="SEQ_BG_REFUSJON_OVERSTYRINGER" allocation-size="50" sequence-name="SEQ_BG_REFUSJON_OVERSTYRINGER"/>
+    <sequence-generator name="SEQ_BG_REFUSJON_OVERSTYRING" allocation-size="50" sequence-name="SEQ_BG_REFUSJON_OVERSTYRING"/>
+
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRegelSporing" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivitetStatus" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelSporing" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeÅrsak" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagFaktaOmBeregningTilfelle" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagFrilansAndel" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagArbeidstakerAndel" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyringerEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyringEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningRefusjonOverstyringerEntitet" />
+    <entity class="no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningRefusjonOverstyringEntitet" />
+
+</entity-mappings>

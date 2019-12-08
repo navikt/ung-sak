@@ -1,0 +1,8 @@
+[
+    {
+	    "datasource": "defaultDS",
+	    "user": "k9sak",
+	    "password": "k9sak",
+	    "url": "jdbc:postgresql://127.0.0.1:5432/k9sak"
+    }
+]
