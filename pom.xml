@@ -10,13 +10,6 @@
 	<name>K9SAK :: Root</name>
 	<version>${revision}${sha1}${changelist}</version>
 
-	<scm>
-		<connection>scm:git:http://stash.devillo.no/scm/vedfp/vl-foreldrepenger.git</connection>
-		<developerConnection>scm:git:http://stash.devillo.no/scm/vedfp/vl-foreldrepenger.git</developerConnection>
-		<url>http://stash.devillo.no/projects/VEDFP/repos/vl-foreldrepenger/browse</url>
-		<tag>vl-foreldrepenger-1.0.0</tag>
-	</scm>
-
 	<modules>
 		<module>migreringer</module>
 
@@ -702,16 +695,19 @@
 		</plugins>
 	</build>
 
-  	<distributionManagement>
-		<repository>
-			<id>repo.adeo.no-releases</id>
-			<url>https://repo.adeo.no/repository/maven-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>repo.adeo.no-snapshots</id>
-			<url>https://repo.adeo.no/repository/maven-snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
-		</snapshotRepository>
+  	<scm>
+		<connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
+		<developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
+		<url>https://github.com/navikt/k9-sak</url>
+		<tag>HEAD</tag>
+	</scm>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Github navikt Maven Packages</name>
+            <url>https://maven.pkg.github.com/navikt/k9-sak</url>
+        </repository>
     </distributionManagement>
 
 </project>
