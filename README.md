@@ -8,8 +8,7 @@ Dette er repository for kildkode applikasjonen for saksbehandling av ytelser i k
    
 ## Enhetstester
 Start postgres først for å kjøre alle enhetstester. Bruker schema k9sak_unit
-> cd dev; docker-compose up postgres
-
+`cd dev; docker-compose up postgres`
 
 ## Lokal utvikling
 1. Start postgres først. Bruker schema k9sak lokalt
