@@ -87,16 +87,6 @@ public class BehandlingsoppretterApplikasjonTjeneste {
         }
     }
 
-    public void henleggÅpenFørstegangsbehandlingOgOpprettNy(Long fagsakId, Saksnummer saksnummer) {
-        List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
-
-        if (harMinstEnÅpenFørstegangsbehandling(behandlinger)) {
-            doSendSøknadTilMottak(fagsakId, BehandlingÅrsakType.UDEFINERT);
-        } else {
-            throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeHenleggeÅpenBehandlingOgOppretteNyFørstegangsbehandling(fagsakId).toException();
-        }
-    }
-
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         Boolean kanRevurderingOpprettes = revurderingTjeneste.kanRevurderingOpprettes(fagsak);
@@ -141,11 +131,6 @@ public class BehandlingsoppretterApplikasjonTjeneste {
         boolean minstEnAvsluttet = behandlinger.stream().anyMatch(Behandling::erAvsluttet);
 
         return ingenApenYtelsesBeh && minstEnAvsluttet;
-    }
-
-    private boolean harMinstEnÅpenFørstegangsbehandling(List<Behandling> behandlinger) {
-        return behandlinger.stream()
-            .anyMatch(b -> (b.getType().equals(BehandlingType.FØRSTEGANGSSØKNAD) && !b.erAvsluttet()));
     }
 
     private boolean erEtterKlageGyldigValg(Long fagsakId) {

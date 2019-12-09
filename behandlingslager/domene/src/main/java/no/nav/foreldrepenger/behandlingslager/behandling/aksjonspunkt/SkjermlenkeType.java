@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.behandling.skjermlenke;
+package no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)

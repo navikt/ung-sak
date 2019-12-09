@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Fagsystem;
 import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,6 +32,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestSc
 import no.nav.folketrygdloven.beregningsgrunnlag.ytelse.fp.AksjonspunktUtlederFastsettBeregningsaktiviteterFP;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;

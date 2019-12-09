@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -56,7 +55,7 @@ public class BehandlingVedtakTjenesteTest {
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final Repository repository = repoRule.getRepository();
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final InternalManipulerBehandling manipulerBehandling = new InternalManipulerBehandlingImpl();
+    private final InternalManipulerBehandling manipulerBehandling = new InternalManipulerBehandling();
     private BehandlingVedtakTjeneste behandlingVedtakTjeneste;
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private UttakRepository uttakRepository = repositoryProvider.getUttakRepository();

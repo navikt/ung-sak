@@ -1,23 +1,56 @@
 package no.nav.foreldrepenger.behandlingslager.behandling;
 
+import java.util.Optional;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 /**
  * Kun for invortes bruk (Behandlingskontroll). Evt. tester. Skal ikke aksesseres direkte av andre under normal
  * operasjon.
  */
-public interface InternalManipulerBehandling {
+@ApplicationScoped
+public class InternalManipulerBehandling {
+
+    @Inject
+    public InternalManipulerBehandling() {
+    }
+    
     /**
      * Sett til angitt steg, default steg status.
      */
-    void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType);
+    public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType) {
+        forceOppdaterBehandlingSteg(behandling, stegType, BehandlingStegStatus.UDEFINERT, BehandlingStegStatus.UTFØRT);
+    }
 
     /**
      * Sett Behandling til angitt steg, angitt steg status, default slutt status for andre åpne steg.
      */
-    void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus stegStatus);
+    public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus stegStatus) {
+        forceOppdaterBehandlingSteg(behandling, stegType, stegStatus, BehandlingStegStatus.UTFØRT);
+    }
 
     /**
      * Sett Behandling til angitt steg, angitt steg status, angitt slutt status for andre åpne steg.
      */
-    void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus stegStatus, BehandlingStegStatus ikkeFerdigStegStatus);
+    public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus nesteStegStatus, BehandlingStegStatus ikkeFerdigStegStatus) {
+
+        // finn riktig mapping av kodeverk slik at vi får med dette når Behandling brukes videre.
+        Optional<BehandlingStegTilstand> eksisterendeTilstand = behandling.getSisteBehandlingStegTilstand();
+        if (!eksisterendeTilstand.isPresent() || erUlikeSteg(stegType, eksisterendeTilstand)) {
+            if (eksisterendeTilstand.isPresent() && !BehandlingStegStatus.erSluttStatus(eksisterendeTilstand.get().getBehandlingStegStatus())) {
+                eksisterendeTilstand.ifPresent(it -> it.setBehandlingStegStatus(ikkeFerdigStegStatus));
+            }
+            BehandlingStegTilstand tilstand = new BehandlingStegTilstand(behandling, stegType);
+            tilstand.setBehandlingStegStatus(nesteStegStatus);
+            behandling.oppdaterBehandlingStegOgStatus(tilstand);
+        } else {
+            eksisterendeTilstand.ifPresent(it -> it.setBehandlingStegStatus(nesteStegStatus));
+        }
+    }
+
+    private boolean erUlikeSteg(BehandlingStegType stegType, Optional<BehandlingStegTilstand> eksisterendeTilstand) {
+        return !eksisterendeTilstand.get().getBehandlingSteg().equals(stegType);
+    }
 
 }

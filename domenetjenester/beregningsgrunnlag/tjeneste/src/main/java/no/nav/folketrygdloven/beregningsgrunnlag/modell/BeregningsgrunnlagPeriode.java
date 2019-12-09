@@ -40,8 +40,8 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.Kopimaskin;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
 

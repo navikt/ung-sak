@@ -12,10 +12,6 @@
 	<name>K9SAK :: Behandlingslager - Domene</name>
 
 	<dependencies>
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>felles-kodeverk</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>no.nav.foreldrepenger.felles</groupId>
 			<artifactId>felles-prosesstask</artifactId>
@@ -26,12 +22,27 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+		</dependency>
+		
+		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>no.nav.foreldrepenger.felles</groupId>
 			<artifactId>felles-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles</groupId>
+			<artifactId>felles-db</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml.stream</groupId>
+					<artifactId>stax-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>

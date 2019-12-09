@@ -1,11 +1,11 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
-import no.nav.foreldrepenger.behandlingslager.Kopimaskin;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

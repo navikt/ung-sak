@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.behandling;
+package no.nav.foreldrepenger.behandlingslager.kodeverk;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

@@ -26,7 +26,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.BasisKodeverdi;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
@@ -280,7 +280,7 @@ public class FordelRestTjeneste {
         return builder.build();
     }
 
-    private DokumentKategori utledDokumentKategori(DokumentKategori dokumentKategori, BasisKodeverdi dokumentTypeId) {
+    private DokumentKategori utledDokumentKategori(DokumentKategori dokumentKategori, Kodeverdi dokumentTypeId) {
         if (DokumentTypeId.getSøknadTyper().contains(dokumentTypeId.getKode())) {
             return DokumentKategori.SØKNAD;
         }

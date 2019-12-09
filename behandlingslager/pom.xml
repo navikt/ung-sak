@@ -13,7 +13,6 @@
     <name>K9SAK :: Behandlingslager - Pom</name>
 
     <modules>
-	    <module>felles-kodeverk</module>
         <module>domene</module>
         <module>testutil</module>
     </modules>

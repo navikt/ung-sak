@@ -14,16 +14,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import org.hibernate.jpa.QueryHints;
 
-import no.nav.foreldrepenger.behandlingslager.BehandlingslagerRepository;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.lagretvedtak.LagretVedtak;
 import no.nav.foreldrepenger.behandlingslager.lagretvedtak.LagretVedtakMedBehandlingType;
 import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 @ApplicationScoped
-public class LagretVedtakRepository implements BehandlingslagerRepository {
+public class LagretVedtakRepository {
 
     private EntityManager entityManager;
 

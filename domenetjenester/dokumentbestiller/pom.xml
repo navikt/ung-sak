@@ -77,12 +77,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Infrastrukturtjeneste avhengigheter -->
-		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>batch</artifactId>
-		</dependency>
-
         <dependency>
             <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
             <artifactId>hendelse-dokumentbestilling</artifactId>

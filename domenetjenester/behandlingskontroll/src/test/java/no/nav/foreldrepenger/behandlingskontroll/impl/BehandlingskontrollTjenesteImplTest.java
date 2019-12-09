@@ -26,7 +26,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 
 public class BehandlingskontrollTjenesteImplTest {
@@ -44,7 +43,7 @@ public class BehandlingskontrollTjenesteImplTest {
     private BehandlingskontrollEventPublisererForTest eventPubliserer = new BehandlingskontrollEventPublisererForTest();
     private BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
     private BehandlingskontrollServiceProvider serviceProvider = new BehandlingskontrollServiceProvider(em, behandlingModellRepository, eventPubliserer);
-    private InternalManipulerBehandling manipulerInternBehandling = new InternalManipulerBehandlingImpl();
+    private InternalManipulerBehandling manipulerInternBehandling = new InternalManipulerBehandling();
 
     private BehandlingStegType steg2;
     private BehandlingStegType steg3;

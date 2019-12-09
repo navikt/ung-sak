@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
+import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
@@ -52,7 +52,7 @@ class BehandlingStegVisitor {
 
     private final Behandling behandling;
 
-    private final InternalManipulerBehandlingImpl manipulerInternBehandling;
+    private final InternalManipulerBehandling manipulerInternBehandling;
 
     private final AksjonspunktRepository aksjonspunktRepository;
 
@@ -68,7 +68,7 @@ class BehandlingStegVisitor {
         this.behandlingRepository = serviceProvider.getBehandlingRepository();
         this.aksjonspunktRepository = serviceProvider.getAksjonspunktRepository();
 
-        this.manipulerInternBehandling = new InternalManipulerBehandlingImpl();
+        this.manipulerInternBehandling = new InternalManipulerBehandling();
 
         this.eventPubliserer = Objects.requireNonNullElse(serviceProvider.getEventPubliserer(), BehandlingskontrollEventPubliserer.NULL_EVENT_PUB);
     }

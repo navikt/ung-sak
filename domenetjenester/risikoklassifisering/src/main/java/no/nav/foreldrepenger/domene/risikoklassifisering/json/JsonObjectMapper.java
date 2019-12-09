@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.kodeverk;
+package no.nav.foreldrepenger.domene.risikoklassifisering.json;
 
 import java.io.IOException;
 import java.io.StringWriter;

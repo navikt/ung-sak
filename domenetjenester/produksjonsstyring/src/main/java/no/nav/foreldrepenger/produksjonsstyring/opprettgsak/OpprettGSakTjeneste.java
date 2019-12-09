@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.behandling.Fagsystem;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.tjeneste.virksomhet.behandlesak.v2.WSAktor;
 import no.nav.tjeneste.virksomhet.behandlesak.v2.WSOpprettSakRequest;

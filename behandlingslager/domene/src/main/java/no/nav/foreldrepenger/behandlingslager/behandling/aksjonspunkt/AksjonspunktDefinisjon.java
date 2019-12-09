@@ -33,7 +33,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.skjermlenke.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType.YtelseType;
@@ -275,10 +274,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         }
     }
 
-    private static final Set<String> UTELUKKENDE_AKSJONSPUNKT = Set.of(
-        AksjonspunktKodeDefinisjon.SJEKK_MANGLENDE_FØDSEL_KODE,
-        AksjonspunktKodeDefinisjon.AVKLAR_TERMINBEKREFTELSE_KODE);
-
     @JsonIgnore
     private AksjonspunktType aksjonspunktType = AksjonspunktType.UDEFINERT;
 
@@ -426,7 +421,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     /** Returnerer kode verdi for aksjonspunkt utelukket av denne. */
     public Set<String> getUtelukkendeApdef() {
-        return UTELUKKENDE_AKSJONSPUNKT.stream().filter(ap -> !Objects.equals(kode, ap)).collect(Collectors.toSet());
+        return Set.of();
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.threeten.extra.Interval;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.JsonObjectMapper;
+import no.nav.foreldrepenger.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.AktoerIdDto;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.Opplysningsperiode;

@@ -16,8 +16,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.Kopimaskin;
 
 
 @Entity(name = "BeregningsgrunnlagGrunnlagEntitet")

@@ -11,13 +11,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.ÅrsakskodeMedLovreferanse;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.behandlingslager.uttak.PeriodeResultatÅrsak.MyPeriodeResultatÅrsakSerializer;
 import no.nav.vedtak.konfig.Tid;
 
 @JsonDeserialize(using = PeriodeResultatÅrsakDeserializer.class)
 @JsonSerialize(using = MyPeriodeResultatÅrsakSerializer.class)
-public interface PeriodeResultatÅrsak extends ÅrsakskodeMedLovreferanse, Kodeverdi {
+public interface PeriodeResultatÅrsak extends ÅrsakskodeMedLovreferanse {
 
     PeriodeResultatÅrsak UKJENT = new PeriodeResultatÅrsak() {
 

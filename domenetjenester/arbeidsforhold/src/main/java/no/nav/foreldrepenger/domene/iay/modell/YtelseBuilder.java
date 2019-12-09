@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Fagsystem;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;

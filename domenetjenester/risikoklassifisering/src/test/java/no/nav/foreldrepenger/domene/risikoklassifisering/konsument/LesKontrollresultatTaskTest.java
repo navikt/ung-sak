@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.risikoklassifisering.konsument;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.JsonObjectMapper;
+import no.nav.foreldrepenger.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.json.KontrollresultatMapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;

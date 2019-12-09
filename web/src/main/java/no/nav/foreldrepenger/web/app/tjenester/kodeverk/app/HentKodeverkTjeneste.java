@@ -22,9 +22,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
-import no.nav.foreldrepenger.behandlingslager.behandling.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.behandling.KonsekvensForYtelsen;
 import no.nav.foreldrepenger.behandlingslager.behandling.RevurderingVarslingÅrsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
@@ -39,7 +39,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapMa
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.SivilstandType;
-import no.nav.foreldrepenger.behandlingslager.behandling.skjermlenke.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
@@ -48,7 +47,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.BasisKodeverdi;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.behandlingslager.uttak.IkkeOppfyltÅrsak;
 import no.nav.foreldrepenger.behandlingslager.uttak.InnvilgetÅrsak;
@@ -147,9 +146,9 @@ public class HentKodeverkTjeneste {
         this.enhetsTjeneste = enhetsTjeneste;
     }
 
-    public Map<String, Collection<? extends BasisKodeverdi>> hentGruppertKodeliste() {
+    public Map<String, Collection<? extends Kodeverdi>> hentGruppertKodeliste() {
         // slå sammen kodeverdi og kodeliste maps
-        Map<String, Collection<? extends BasisKodeverdi>> kodelistMap = new LinkedHashMap<>();
+        Map<String, Collection<? extends Kodeverdi>> kodelistMap = new LinkedHashMap<>();
         kodelistMap.putAll(KODEVERDIER_SOM_BRUKES_PÅ_KLIENT);
 
         return kodelistMap;

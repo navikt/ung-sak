@@ -25,12 +25,6 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
-
-        <!-- Infrastrukturtjenester avhengigheter -->
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>batch</artifactId>
-        </dependency>
 		        
         <!-- Integrasjon klient avhengigheter -->
         <dependency>

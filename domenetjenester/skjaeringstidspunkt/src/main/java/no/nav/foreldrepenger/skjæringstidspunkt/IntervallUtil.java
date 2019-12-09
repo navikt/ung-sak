@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager;
+package no.nav.foreldrepenger.skjæringstidspunkt;
 
 import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 

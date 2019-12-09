@@ -28,7 +28,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
@@ -54,7 +53,7 @@ public class EndringskontrollerTest {
     private Instance<StartpunktTjeneste> startpunktTjenesteProviderMock;
     private StartpunktTjeneste startpunktTjenesteMock;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjenesteMock;
-    private InternalManipulerBehandling internalManipulerBehandling = new InternalManipulerBehandlingImpl();
+    private InternalManipulerBehandling internalManipulerBehandling = new InternalManipulerBehandling();
 
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
 

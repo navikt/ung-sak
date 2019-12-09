@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.TraverseEntityGraphFactory;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffEntity;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.diff.Node;
 import no.nav.foreldrepenger.behandlingslager.diff.Pair;
+import no.nav.foreldrepenger.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
 
 public class RegisterdataDiffsjekker {

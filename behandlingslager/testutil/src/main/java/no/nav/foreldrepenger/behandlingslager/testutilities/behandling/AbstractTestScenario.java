@@ -40,7 +40,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
+import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapBehandlingsgrunnlagEntitet;
@@ -637,7 +637,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         this.behandling = behandlingBuilder.build();
 
         if (startSteg != null) {
-            new InternalManipulerBehandlingImpl().forceOppdaterBehandlingSteg(behandling, startSteg);
+            new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, startSteg);
         }
 
         leggTilAksjonspunkter(behandling, repositoryProvider);

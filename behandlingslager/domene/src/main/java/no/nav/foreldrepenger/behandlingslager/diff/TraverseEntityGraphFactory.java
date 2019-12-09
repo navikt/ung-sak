@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager;
+package no.nav.foreldrepenger.behandlingslager.diff;
 
 import java.util.function.Function;
 

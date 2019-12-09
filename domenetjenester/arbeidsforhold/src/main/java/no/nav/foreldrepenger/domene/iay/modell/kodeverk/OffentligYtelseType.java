@@ -11,11 +11,9 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
-
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum OffentligYtelseType implements Kodeverdi, YtelseType {
+public enum OffentligYtelseType implements YtelseType {
 
     UDEFINERT("-", "UNDEFINED", null),
     AAP("AAP", "Arbeidsavklaringspenger", "arbeidsavklaringspenger"),

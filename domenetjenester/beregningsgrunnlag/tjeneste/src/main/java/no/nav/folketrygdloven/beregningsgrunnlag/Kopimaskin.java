@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager;
+package no.nav.folketrygdloven.beregningsgrunnlag;
 
 import java.lang.reflect.Field;
 import java.security.AccessController;
@@ -13,6 +13,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 
 public class Kopimaskin {

@@ -21,7 +21,7 @@ import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingskontrollEvent
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.BasisKodeverdi;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 
 @ApplicationScoped
 public class TestEventObserver {
@@ -121,7 +121,7 @@ public class TestEventObserver {
     private static String hentKode(Optional<BehandlingStegTilstandSnapshot> behandlingStegTilstand) {
         return behandlingStegTilstand
             .map(BehandlingStegTilstandSnapshot::getStatus)
-            .map(BasisKodeverdi::getKode)
+            .map(Kodeverdi::getKode)
             .orElse("");
     }
 

@@ -11,10 +11,10 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
 
-import no.nav.foreldrepenger.behandlingslager.TraverseEntityGraphFactory;
 import no.nav.foreldrepenger.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffEntity;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
+import no.nav.foreldrepenger.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;

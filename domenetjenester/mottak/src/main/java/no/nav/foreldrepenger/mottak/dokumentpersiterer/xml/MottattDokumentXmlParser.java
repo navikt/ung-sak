@@ -6,11 +6,6 @@ import static no.nav.vedtak.felles.xml.XmlUtils.retrieveNameSpaceOfXML;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
-
-import org.xml.sax.SAXException;
-
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.MottattDokumentWrapper;
 import no.nav.vedtak.felles.integrasjon.felles.ws.JaxbHelper;
 
@@ -50,7 +45,7 @@ public final class MottattDokumentXmlParser {
                 dokumentParserKonfig.additionalXsd,
                 dokumentParserKonfig.additionalClasses);
             return MottattDokumentWrapper.tilXmlWrapper(mottattDokument);
-        } catch (JAXBException | XMLStreamException | SAXException e) {
+        } catch (Exception e) {
             throw FACTORY.uventetFeilVedParsingAvSoeknadsXml(namespace, e).toException();
         }
     }
@@ -59,7 +54,7 @@ public final class MottattDokumentXmlParser {
         final String namespace;
         try {
             namespace = retrieveNameSpaceOfXML(xml);
-        } catch (XMLStreamException e) {
+        } catch (Exception e) {
             throw FACTORY.uventetFeilVedParsingAvSoeknadsXml("ukjent", e).toException(); //$NON-NLS-1$
         }
         return namespace;

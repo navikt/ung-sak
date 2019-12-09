@@ -50,7 +50,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
@@ -97,7 +96,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         this.serviceProvider = serviceProvider;
         this.behandlingRepository = serviceProvider.getBehandlingRepository();
         this.behandlingModellRepository = serviceProvider.getBehandlingModellRepository();
-        this.manipulerInternBehandling = new InternalManipulerBehandlingImpl();
+        this.manipulerInternBehandling = new InternalManipulerBehandling();
         this.behandlingStegKonfigurasjon = new BehandlingStegKonfigurasjon(EnumSet.allOf(BehandlingStegStatus.class));
         this.aksjonspunktRepository = serviceProvider.getAksjonspunktRepository();
         this.eventPubliserer = Objects.requireNonNullElse(eventPubliserer, BehandlingskontrollEventPubliserer.NULL_EVENT_PUB);

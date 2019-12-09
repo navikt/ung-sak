@@ -14,7 +14,6 @@
 		<module>migreringer</module>
 
 		<module>behandlingslager</module>
-		<module>infrastrukturtjenester</module>
 		<module>domenetjenester</module>
 		<module>behandlingsprosess</module>
 
@@ -169,11 +168,6 @@
 			</dependency>
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>felles-kodeverk</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>migreringer</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
@@ -181,11 +175,6 @@
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>migreringer</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>batch</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

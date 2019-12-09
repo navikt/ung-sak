@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling.Builder;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandlingImpl;
+import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -83,7 +83,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         this.behandling = behandlingBuilder.build();
 
         if (startSteg != null) {
-            new InternalManipulerBehandlingImpl().forceOppdaterBehandlingSteg(behandling, startSteg);
+            new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, startSteg);
         }
 
         leggTilAksjonspunkter(behandling, repositoryProvider);

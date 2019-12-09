@@ -217,45 +217,6 @@ public class OpprettNyFørstegangsbehandlingTest {
         behandlingsoppretterApplikasjonTjeneste.opprettNyFørstegangsbehandling(behandling.getFagsakId(), behandling.getFagsak().getSaksnummer(),true);
     }
 
-    @Test
-    public void skal_opprette_ny_førstegangsbehandling_når_behandlingen_er_åpen() {
-        //Act
-        mockMottatteDokumentRepository(repositoryProvider);
-        behandlingsoppretterApplikasjonTjeneste.henleggÅpenFørstegangsbehandlingOgOpprettNy(behandling.getFagsakId(), behandling.getFagsak().getSaksnummer());
-
-        //Assert
-        ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskRepository, times(1)).lagre(captor.capture());
-        ProsessTaskData prosessTaskData = captor.getValue();
-        verifiserProsessTaskData(behandling, prosessTaskData, MOTTATT_DOKUMENT_ID,false);
-    }
-
-    @Test
-    public void skal_opprette_ny_førstegangsbehandling_når_behandlingen_er_åpen_elektronisk() {
-        //Act
-        mockMottatteDokumentRepositoryElsokMedBehandling(repositoryProvider);
-        behandlingsoppretterApplikasjonTjeneste.henleggÅpenFørstegangsbehandlingOgOpprettNy(behandling.getFagsakId(), behandling.getFagsak().getSaksnummer());
-
-        //Assert
-        ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskRepository, times(1)).lagre(captor.capture());
-        ProsessTaskData prosessTaskData = captor.getValue();
-        verifiserProsessTaskData(behandling, prosessTaskData, MOTTATT_DOKUMENT_EL_SØKNAD_ID,true);
-    }
-
-    @Test(expected = FunksjonellException.class)
-    public void skal_kaste_funksjonell_feil_når_behandlingen_er_lukket() {
-        //Arrange
-        mockMottatteDokumentRepository(repositoryProvider);
-        behandling.avsluttBehandling();
-
-        //Act
-        behandlingsoppretterApplikasjonTjeneste.henleggÅpenFørstegangsbehandlingOgOpprettNy(behandling.getFagsakId(), behandling.getFagsak().getSaksnummer());
-
-        //Assert
-        verify(prosessTaskRepository, times(0)).lagre(any(ProsessTaskData.class));
-    }
-
     //Verifiserer at den opprettede prosesstasken stemmer overens med MottattDokument-mock
     private void verifiserProsessTaskData(Behandling behandling, ProsessTaskData prosessTaskData, Long ventetDokument, boolean skalhabehandling) {
 
