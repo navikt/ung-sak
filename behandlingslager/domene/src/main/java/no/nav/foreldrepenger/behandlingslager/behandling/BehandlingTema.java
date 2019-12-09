@@ -22,7 +22,7 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingTema implements Kodeverdi {
-    PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320"),  // ny ordning fom 011017
+    PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN),  // ny ordning fom 011017
 
     // FIXME K9 - kodeverk for k9 ytelser i stedet
     ENGANGSSTØNAD("ENGST", "Engangsstønad", "ab0327", FagsakYtelseType.ENGANGSTØNAD),
