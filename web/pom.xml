@@ -92,14 +92,6 @@
 			<artifactId>migreringer</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-			<artifactId>kodeverk-klient</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>kodeverk</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>

@@ -24,10 +24,6 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>kodeverk</artifactId>
-		</dependency>
 
 		<!-- Integrasjon avhengigheter -->
 		<dependency>
