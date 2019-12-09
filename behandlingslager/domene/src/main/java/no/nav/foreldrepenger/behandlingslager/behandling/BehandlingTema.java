@@ -22,6 +22,8 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingTema implements Kodeverdi {
+    PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320"),  // ny ordning fom 011017
+
     // FIXME K9 - kodeverk for k9 ytelser i stedet
     ENGANGSSTØNAD("ENGST", "Engangsstønad", "ab0327", FagsakYtelseType.ENGANGSTØNAD),
     ENGANGSSTØNAD_FØDSEL("ENGST_FODS", "Engangsstønad ved fødsel", "ab0050", FagsakYtelseType.ENGANGSTØNAD),
@@ -33,7 +35,7 @@ public enum BehandlingTema implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 
     ;
-    
+
     private static final Map<String, BehandlingTema> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "BEHANDLING_TEMA";
@@ -67,7 +69,7 @@ public enum BehandlingTema implements Kodeverdi {
         this.fagsakYtelseType = fagsakYtelseType;
     }
 
-    
+
     @JsonCreator
     public static BehandlingTema fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
@@ -100,7 +102,7 @@ public enum BehandlingTema implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
