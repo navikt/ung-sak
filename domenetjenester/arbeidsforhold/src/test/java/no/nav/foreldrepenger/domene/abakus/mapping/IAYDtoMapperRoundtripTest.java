@@ -9,12 +9,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
@@ -69,10 +65,6 @@ import no.nav.foreldrepenger.kontrakter.iaygrunnlag.ytelse.v1.YtelserDto;
 
 public class IAYDtoMapperRoundtripTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(IAYDtoMapperRoundtripTest.class);
-
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final UUID uuid = UUID.randomUUID();
     private final LocalDate fom = LocalDate.now();
     private final LocalDate tom = LocalDate.now();
@@ -99,7 +91,7 @@ public class IAYDtoMapperRoundtripTest {
         IAYTilDtoMapper dtoMapper = new IAYTilDtoMapper(aktørId, uuid, uuid);
         InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(fpsakGrunnlag, true);
 
-        logger.info("tidssone info: '{}', '{}'", OffsetDateTime.now(), ZoneId.systemDefault());
+        System.out.format("tidssone info: '%s', '%s'\n", OffsetDateTime.now(), ZoneId.systemDefault());
 
         // Assert
         assertThat(dtoIgjen.getGrunnlagTidspunkt()).isEqualTo(dto.getGrunnlagTidspunkt());
@@ -107,7 +99,9 @@ public class IAYDtoMapperRoundtripTest {
         assertThat(dtoIgjen.getKoblingReferanse()).isEqualTo(dto.getKoblingReferanse());
         assertThat(dtoIgjen.getOppgittOpptjening()).isEqualToComparingFieldByFieldRecursively(dto.getOppgittOpptjening());
         assertThat(dtoIgjen.getPerson()).isEqualToComparingFieldByFieldRecursively(dto.getPerson());
-
+        
+        assertThat(dtoIgjen.getOverstyrt().getOpprettetTidspunkt()).isEqualTo(dto.getOverstyrt().getOpprettetTidspunkt());
+        
         // mangler mapping av inntektsmeldinger som ikke kommer (grunnet trenger mappe ArbeidsforholdInformasjon)
         assertThat(dtoIgjen.getInntektsmeldinger()).isEqualToComparingFieldByFieldRecursively(dto.getInntektsmeldinger());
 
