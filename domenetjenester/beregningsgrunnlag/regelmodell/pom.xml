@@ -14,19 +14,6 @@
 	<packaging>jar</packaging>
 	<name>K9SAK :: Domenetjenester - Beregningsgrunnlag Regelmodell</name>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<deployAtEnd>true</deployAtEnd>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>no.nav.fpsak.nare</groupId>
@@ -38,8 +25,8 @@
 		</dependency>
 
 		<!-- NB -->
-		<!-- Hold denne modulen fri for avhengigheter til andre deler av løsningen. 
-			(ikke trekk inn behandlingslager el.). Denne skal kunne legges ut som separat 
+		<!-- Hold denne modulen fri for avhengigheter til andre deler av løsningen.
+			(ikke trekk inn behandlingslager el.). Denne skal kunne legges ut som separat
 			bibliotek. -->
 		<!-- NB -->
 
