@@ -21,6 +21,8 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum FagsakYtelseType implements Kodeverdi {
 
+    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn"),
+
     ENGANGSTØNAD("ES", "Engangsstønad"),
     FORELDREPENGER("FP", "Foreldrepenger"),
     SVANGERSKAPSPENGER("SVP", "Svangerskapspenger"),
@@ -40,7 +42,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     }
 
     public enum YtelseType {
-        ES, FP, SVP;
+        PSB, ES, FP, SVP;
     }
 
     @JsonIgnore
@@ -89,7 +91,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     public String getNavn() {
         return navn;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
