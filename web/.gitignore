@@ -1,7 +1,7 @@
-/es.properties
+/app.properties
 /bin/
-/es-local.properties
-/es.properties.backup
+/app-local.properties
+/app.properties.backup
 /logback.xml
 /logback.xml.backup
 /logs/

@@ -16,12 +16,12 @@ public class PropertiesUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesUtils.class);
 
-    private static String TEMPLATE_FILNAVN = "es-dev.properties";
+    private static String TEMPLATE_FILNAVN = "app-dev.properties";
     private static String JETTY_SCHEMAS_LOCAL = "jetty_web_server.json";
 
-    private static String DEV_FILNAVN = "es.properties";
-    private static String DEV_FILNAVN_LOCAL = "es-local.properties";
-    private static String VTP_FILNAVN_LOCAL = "es-vtp.properties";
+    private static String DEV_FILNAVN = "app.properties";
+    private static String DEV_FILNAVN_LOCAL = "app-local.properties";
+    private static String VTP_FILNAVN_LOCAL = "app-vtp.properties";
 
     private PropertiesUtils() {
     }
