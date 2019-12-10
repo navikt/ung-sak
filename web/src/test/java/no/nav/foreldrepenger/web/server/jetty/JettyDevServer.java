@@ -2,9 +2,12 @@ package no.nav.foreldrepenger.web.server.jetty;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -13,8 +16,6 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 import no.nav.foreldrepenger.web.app.JettyTestApplication;
+import no.nav.foreldrepenger.web.server.jetty.db.DatasourceRole;
+import no.nav.foreldrepenger.web.server.jetty.db.DatasourceUtil;
 import no.nav.foreldrepenger.web.server.jetty.db.EnvironmentClass;
 
 public class JettyDevServer extends JettyServer {
@@ -82,6 +85,26 @@ public class JettyDevServer extends JettyServer {
             val = val == null ? defaultValue : val;
         }
         return val;
+    }
+
+    @Override
+    protected void migrerDatabaser() throws IOException {
+        try {
+            super.migrerDatabaser();
+        } catch (IllegalStateException e) {
+            log.info("Migreringer feilet, cleaner og prøver på nytt.");
+            DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 1);
+            try {
+                DevDatabaseScript.clean(migreringDs);
+            } finally {
+                try {
+                    migreringDs.getConnection().close();
+                } catch (SQLException sqlException) {
+                    log.warn("Klarte ikke stenge connection etter migrering", sqlException);
+                }
+            }
+            super.migrerDatabaser();
+        }
     }
 
     @Override

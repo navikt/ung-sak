@@ -24,9 +24,9 @@ import no.nav.foreldrepenger.web.server.jetty.db.EnvironmentClass;
 import no.nav.vedtak.isso.IssoApplication;
 
 public class JettyServer extends AbstractJettyServer {
-    
-    private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
-    
+
+    static final Logger log = LoggerFactory.getLogger(JettyServer.class);
+
     public JettyServer() {
         this(new JettyWebKonfigurasjon());
     }
@@ -108,12 +108,15 @@ public class JettyServer extends AbstractJettyServer {
         DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 1);
         try {
             DatabaseScript.migrate(migreringDs, initSql);
-            migreringDs.getConnection().close();
-        } catch (SQLException e) {
-            log.warn("Klarte ikke stenge connection etter migrering", e);
+        } finally {
+            try {
+                migreringDs.getConnection().close();
+            } catch (SQLException e) {
+                log.warn("Klarte ikke stenge connection etter migrering", e);
+            }
         }
     }
-    
+
     protected EnvironmentClass getEnvironmentClass() {
         return EnvironmentUtil.getEnvironmentClass();
     }
