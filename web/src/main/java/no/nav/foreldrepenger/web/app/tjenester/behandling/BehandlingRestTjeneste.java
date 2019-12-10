@@ -418,7 +418,7 @@ public class BehandlingRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprettNyBehandling(@Parameter(description = "Saksnummer og flagg om det er ny behandling etter klage") @Valid NyBehandlingDto dto)
         throws URISyntaxException {
-        Saksnummer saksnummer = new Saksnummer(Long.toString(dto.getSaksnummer()));
+        Saksnummer saksnummer = new Saksnummer(dto.getSaksnummer());
         Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         String kode = dto.getBehandlingType().getKode();
 

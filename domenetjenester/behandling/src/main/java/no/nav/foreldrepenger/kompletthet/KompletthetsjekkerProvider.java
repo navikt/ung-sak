@@ -14,23 +14,6 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 public class KompletthetsjekkerProvider {
 
     public Kompletthetsjekker finnKompletthetsjekkerFor(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-
-        Instance<Kompletthetsjekker> instance = CDI.current()
-            .select(Kompletthetsjekker.class, new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(ytelseType.getKode()));
-
-        if (instance.isAmbiguous()) {
-            instance = instance.select(new BehandlingTypeRef.BehandlingTypeRefLiteral(behandlingType.getKode()));
-        }
-
-        if (instance.isAmbiguous()) {
-            throw KompletthetFeil.FACTORY.flereImplementasjonerAvKompletthetsjekker(ytelseType.getKode(), behandlingType.getKode()).toException();
-        } else if (instance.isUnsatisfied()) {
-            throw KompletthetFeil.FACTORY.ingenImplementasjonerAvKompletthetssjekker(ytelseType.getKode(), behandlingType.getKode()).toException();
-        }
-        Kompletthetsjekker minInstans = instance.get();
-        if (minInstans.getClass().isAnnotationPresent(Dependent.class)) {
-            throw new IllegalStateException("Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + minInstans.getClass());
-        }
-        return instance.get();
+        return BehandlingTypeRef.Lookup.find(Kompletthetsjekker.class, ytelseType, behandlingType).get();
     }
 }

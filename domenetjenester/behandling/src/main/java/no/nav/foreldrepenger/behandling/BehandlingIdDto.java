@@ -22,9 +22,7 @@ import no.nav.vedtak.sikkerhet.abac.AbacDto;
 @JsonInclude(Include.NON_NULL)
 public class BehandlingIdDto implements AbacDto {
 
-    @Min(0)
-    @Max(Long.MAX_VALUE)
-    private Long saksnummer;
+    private String saksnummer;
 
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -56,7 +54,7 @@ public class BehandlingIdDto implements AbacDto {
         this.behandlingUuid = uuidDto.getBehandlingUuid();
     }
 
-    public BehandlingIdDto(Long saksnummer, Long behandlingId, UUID behandlingUuid) {
+    public BehandlingIdDto(String saksnummer, Long behandlingId, UUID behandlingUuid) {
         this.saksnummer = saksnummer;
         this.behandlingId = behandlingId;
         this.behandlingUuid = behandlingUuid;
@@ -77,7 +75,7 @@ public class BehandlingIdDto implements AbacDto {
         return behandlingUuid;
     }
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 
