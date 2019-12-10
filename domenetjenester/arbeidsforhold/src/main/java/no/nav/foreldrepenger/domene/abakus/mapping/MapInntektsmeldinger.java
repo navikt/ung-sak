@@ -23,18 +23,18 @@ import no.nav.foreldrepenger.domene.iay.modell.UtsettelsePeriode;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Aktør;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.AktørIdPersonident;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.ArbeidsforholdRefDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.JournalpostId;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Organisasjon;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Periode;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.inntektsmelding.v1.GraderingDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.inntektsmelding.v1.InntektsmeldingDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.inntektsmelding.v1.NaturalytelseDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.inntektsmelding.v1.RefusjonDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.inntektsmelding.v1.UtsettelsePeriodeDto;
+import no.nav.abakus.iaygrunnlag.Aktør;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
+import no.nav.abakus.iaygrunnlag.JournalpostId;
+import no.nav.abakus.iaygrunnlag.Organisasjon;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.GraderingDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.NaturalytelseDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.UtsettelsePeriodeDto;
 
 public class MapInntektsmeldinger {
     private static final Comparator<RefusjonDto> COMP_ENDRINGER_REFUSJON = Comparator
@@ -173,10 +173,10 @@ public class MapInntektsmeldinger {
                 return null;
             } else if (internRef != null && eksternRef != null && internRef.getReferanse() != null && eksternRef.getReferanse() != null) {
                 return new ArbeidsforholdRefDto(internRef.getReferanse(), eksternRef.getReferanse(),
-                    no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Fagsystem.AAREGISTERET);
+                    no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem.AAREGISTERET);
             } else if (!validerArbeidsforholdId && eksternRef != null && eksternRef.getReferanse() != null) {
                 return new ArbeidsforholdRefDto(null, eksternRef.getReferanse(),
-                    no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Fagsystem.AAREGISTERET);
+                    no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem.AAREGISTERET);
             } else if (internRef != null && internRef.getReferanse() != null && eksternRef == null) {
                 return null;
             } else {

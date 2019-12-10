@@ -53,14 +53,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
     }
 
     private static FagsakYtelseType mapYtelse(no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType fpsakYtelseKode) {
-        if (fpsakYtelseKode.gjelderEngangsstønad()) {
-            return FagsakYtelseType.ENGANGSTØNAD;
-        } else if (fpsakYtelseKode.gjelderForeldrepenger()) {
-            return FagsakYtelseType.FORELDREPENGER;
-        } else if (fpsakYtelseKode.gjelderSvangerskapspenger()) {
-            return FagsakYtelseType.SVANGERSKAPSPENGER;
-        }
-        throw DokumentbestillerKafkaFeil.FACTORY.fantIkkeYtelseType(fpsakYtelseKode.getKode()).toException();
+        return new FagsakYtelseType(fpsakYtelseKode.getKode());
     }
 
     @Override

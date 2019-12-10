@@ -25,7 +25,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.SkatteOgAvgiftsregelType
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.UtsettelseÅrsak;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseStatus;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 
 public final class KodeverkMapper {
     private static final Map<String, String> YTELSETYPE_FPSAK_TIL_ABAKUS;
@@ -48,12 +48,12 @@ public final class KodeverkMapper {
         YTELSETYPE_ABAKUS_TIL_FPSAK = YTELSETYPE_FPSAK_TIL_ABAKUS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseType mapYtelseTypeTilDto(RelatertYtelseType ytelseType) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapYtelseTypeTilDto(RelatertYtelseType ytelseType) {
         if (ytelseType == null || "-".equals(ytelseType.getKode())) {
             return null;
         }
         String kode = getAbakusYtelseTypeFraFpsak(ytelseType.getKode());
-        return new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseType(kode);
+        return new no.nav.abakus.iaygrunnlag.kodeverk.YtelseType(kode);
     }
 
     private static String getFpsakYtelseTypeFraAbakus(String kode) {
@@ -64,20 +64,20 @@ public final class KodeverkMapper {
         return YTELSETYPE_FPSAK_TIL_ABAKUS.get(kode);
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType ytelseType) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType ytelseType) {
         if (ytelseType == null || "-".equals(ytelseType.getKode())) {
             return null;
         }
         switch (ytelseType.getKodeverk()) {
-            case no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
-                return new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType(ytelseType.getKode());
-            case no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
-                return new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType(ytelseType.getKode());
-            case no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
-                return new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType(ytelseType.getKode());
+            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
+                return new no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType(ytelseType.getKode());
+            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
+                return new no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType(ytelseType.getKode());
+            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
+                return new no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType(ytelseType.getKode());
             default:
                 throw new IllegalArgumentException("Ukjent YtelseType: " + ytelseType + ", kan ikke mappes til "
-                    + no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltYtelseType.class.getName());
+                    + no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType.class.getName());
         }
 
     }
@@ -101,230 +101,230 @@ public final class KodeverkMapper {
         }
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseStatus getAbakusYtelseStatusForFpsakRelatertYtelseTilstand(RelatertYtelseTilstand tilstand) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus getAbakusYtelseStatusForFpsakRelatertYtelseTilstand(RelatertYtelseTilstand tilstand) {
         var kode = tilstand.getKode();
         switch (kode) {
             case "IKKESTARTET":
-                return no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseStatus.OPPRETTET;
+                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.OPPRETTET;
             case "ÅPEN":
-                return no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseStatus.UNDER_BEHANDLING;
+                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.UNDER_BEHANDLING;
             case "AVSLUTTET":
-                return no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseStatus.AVSLUTTET;
+                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.AVSLUTTET;
             case "LØPENDE":
-                return no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseStatus.LØPENDE;
+                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.LØPENDE;
             default:
                 throw new IllegalArgumentException("Ukjent RelatertYtelseTilstand: " + kode);
         }
     }
 
-    static YtelseType mapUtbetaltYtelseTypeTilGrunnlag(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltYtelseType type) {
+    static YtelseType mapUtbetaltYtelseTypeTilGrunnlag(no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType type) {
         if (type == null)
             return OffentligYtelseType.UDEFINERT;
-        var kodeverk = (no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Kodeverk) type; // NOSONAR
+        var kodeverk = (no.nav.abakus.iaygrunnlag.kodeverk.Kodeverk) type; // NOSONAR
         String kode = kodeverk.getKode();
         switch (kodeverk.getKodeverk()) {
-            case no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
+            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
                 return OffentligYtelseType.fraKode(kode);
-            case no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
+            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
                 return NæringsinntektType.fraKode(kode);
-            case no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
+            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
                 return PensjonTrygdType.fraKode(kode);
             default:
                 throw new IllegalArgumentException("Ukjent UtbetaltYtelseType: " + type);
         }
     }
 
-    static TemaUnderkategori getTemaUnderkategori(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.TemaUnderkategori kode) {
+    static TemaUnderkategori getTemaUnderkategori(no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori kode) {
         return kode == null || "-".equals(kode.getKode())
             ? TemaUnderkategori.UDEFINERT
             : TemaUnderkategori.fraKode(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.TemaUnderkategori getBehandlingsTemaUnderkategori(TemaUnderkategori kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori getBehandlingsTemaUnderkategori(TemaUnderkategori kode) {
         return kode == null || TemaUnderkategori.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.TemaUnderkategori(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori(kode.getKode());
     }
 
-    static BekreftetPermisjonStatus getBekreftetPermisjonStatus(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.BekreftetPermisjonStatus kode) {
+    static BekreftetPermisjonStatus getBekreftetPermisjonStatus(no.nav.abakus.iaygrunnlag.kodeverk.BekreftetPermisjonStatus kode) {
         return kode == null || "-".equals(kode.getKode())
             ? BekreftetPermisjonStatus.UDEFINERT
             : BekreftetPermisjonStatus.fraKode(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.BekreftetPermisjonStatus mapBekreftetPermisjonStatus(BekreftetPermisjonStatus status) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.BekreftetPermisjonStatus mapBekreftetPermisjonStatus(BekreftetPermisjonStatus status) {
         return status == null || BekreftetPermisjonStatus.UDEFINERT.equals(status)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.BekreftetPermisjonStatus(status.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.BekreftetPermisjonStatus(status.getKode());
     }
 
-    static Fagsystem mapFagsystemFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Fagsystem dto) {
+    static Fagsystem mapFagsystemFraDto(no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem dto) {
         return dto == null
             ? Fagsystem.UDEFINERT
             : Fagsystem.fraKode(dto.getKode());
     }
 
-    static RelatertYtelseType mapYtelseTypeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseType ytelseType) {
+    static RelatertYtelseType mapYtelseTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.YtelseType ytelseType) {
         if (ytelseType == null)
             return RelatertYtelseType.UDEFINERT;
         String relatertYtelseKode = KodeverkMapper.getFpsakYtelseTypeFraAbakus(ytelseType.getKode());
         return RelatertYtelseType.fraKode(relatertYtelseKode);
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Fagsystem mapFagsystemTilDto(Fagsystem kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem mapFagsystemTilDto(Fagsystem kode) {
         return kode == null || Fagsystem.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Fagsystem(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektPeriodeType mapInntektPeriodeTypeTilDto(InntektPeriodeType hyppighet) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType mapInntektPeriodeTypeTilDto(InntektPeriodeType hyppighet) {
         return hyppighet == null || InntektPeriodeType.UDEFINERT.equals(hyppighet)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektPeriodeType(hyppighet.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType(hyppighet.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Arbeidskategori mapArbeidskategoriTilDto(Arbeidskategori kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori mapArbeidskategoriTilDto(Arbeidskategori kode) {
         return kode == null || Arbeidskategori.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Arbeidskategori(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidType mapArbeidTypeTilDto(ArbeidType arbeidType) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.ArbeidType mapArbeidTypeTilDto(ArbeidType arbeidType) {
         return arbeidType == null || ArbeidType.UDEFINERT.equals(arbeidType)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidType(arbeidType.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.ArbeidType(arbeidType.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType mapPermisjonbeskrivelseTypeTilDto(PermisjonsbeskrivelseType kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType mapPermisjonbeskrivelseTypeTilDto(PermisjonsbeskrivelseType kode) {
         return kode == null || PermisjonsbeskrivelseType.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektskildeType mapInntektsKildeTilDto(InntektsKilde kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.InntektskildeType mapInntektsKildeTilDto(InntektsKilde kode) {
         return kode == null || InntektsKilde.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektskildeType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.InntektskildeType(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektspostType mapInntektspostTypeTilDto(InntektspostType kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.InntektspostType mapInntektspostTypeTilDto(InntektspostType kode) {
         return kode == null || InntektspostType.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektspostType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.InntektspostType(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType mapSkatteOgAvgiftsregelTilDto(SkatteOgAvgiftsregelType kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType mapSkatteOgAvgiftsregelTilDto(SkatteOgAvgiftsregelType kode) {
         return kode == null || SkatteOgAvgiftsregelType.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidsforholdHandlingType mapArbeidsforholdHandlingTypeTilDto(ArbeidsforholdHandlingType kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.ArbeidsforholdHandlingType mapArbeidsforholdHandlingTypeTilDto(ArbeidsforholdHandlingType kode) {
         return kode == null || ArbeidsforholdHandlingType.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidsforholdHandlingType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.ArbeidsforholdHandlingType(kode.getKode());
     }
 
-    static ArbeidType mapArbeidType(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidType dto) {
+    static ArbeidType mapArbeidType(no.nav.abakus.iaygrunnlag.kodeverk.ArbeidType dto) {
         return dto == null
             ? ArbeidType.UDEFINERT
             : ArbeidType.fraKode(dto.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType mapInntektsmeldingInnsendingsårsak(InntektsmeldingInnsendingsårsak kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType mapInntektsmeldingInnsendingsårsak(InntektsmeldingInnsendingsårsak kode) {
         return kode == null || InntektsmeldingInnsendingsårsak.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.NaturalytelseType mapNaturalYtelseTilDto(NaturalYtelseType kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.NaturalytelseType mapNaturalYtelseTilDto(NaturalYtelseType kode) {
         return kode == null || NaturalYtelseType.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.NaturalytelseType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.NaturalytelseType(kode.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtsettelseÅrsakType mapUtsettelseÅrsakTilDto(UtsettelseÅrsak kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.UtsettelseÅrsakType mapUtsettelseÅrsakTilDto(UtsettelseÅrsak kode) {
         return kode == null || UtsettelseÅrsak.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtsettelseÅrsakType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.UtsettelseÅrsakType(kode.getKode());
     }
 
-    static InntektsKilde mapInntektsKildeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektskildeType dto) {
+    static InntektsKilde mapInntektsKildeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektskildeType dto) {
         return dto == null
             ? InntektsKilde.UDEFINERT
             : InntektsKilde.fraKode(dto.getKode());
     }
 
-    static ArbeidsforholdHandlingType mapArbeidsforholdHandlingTypeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidsforholdHandlingType dto) {
+    static ArbeidsforholdHandlingType mapArbeidsforholdHandlingTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.ArbeidsforholdHandlingType dto) {
         return dto == null
             ? ArbeidsforholdHandlingType.UDEFINERT
             : ArbeidsforholdHandlingType.fraKode(dto.getKode());
     }
 
-    static NaturalYtelseType mapNaturalYtelseFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.NaturalytelseType dto) {
+    static NaturalYtelseType mapNaturalYtelseFraDto(no.nav.abakus.iaygrunnlag.kodeverk.NaturalytelseType dto) {
         return dto == null
             ? NaturalYtelseType.UDEFINERT
             : NaturalYtelseType.fraKode(dto.getKode());
     }
 
-    static VirksomhetType mapVirksomhetTypeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.VirksomhetType dto) {
+    static VirksomhetType mapVirksomhetTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType dto) {
         return dto == null
             ? VirksomhetType.UDEFINERT
             : VirksomhetType.fraKode(dto.getKode());
     }
 
-    static SkatteOgAvgiftsregelType mapSkatteOgAvgiftsregelFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType dto) {
+    static SkatteOgAvgiftsregelType mapSkatteOgAvgiftsregelFraDto(no.nav.abakus.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType dto) {
         return dto == null
             ? SkatteOgAvgiftsregelType.UDEFINERT
             : SkatteOgAvgiftsregelType.fraKode(dto.getKode());
     }
 
-    static InntektspostType mapInntektspostTypeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektspostType dto) {
+    static InntektspostType mapInntektspostTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektspostType dto) {
         return dto == null
             ? InntektspostType.UDEFINERT
             : InntektspostType.fraKode(dto.getKode());
     }
 
-    static PermisjonsbeskrivelseType mapPermisjonbeskrivelseTypeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType dto) {
+    static PermisjonsbeskrivelseType mapPermisjonbeskrivelseTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType dto) {
         return dto == null
             ? PermisjonsbeskrivelseType.UDEFINERT
             : PermisjonsbeskrivelseType.fraKode(dto.getKode());
     }
 
-    static Arbeidskategori mapArbeidskategoriFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Arbeidskategori dto) {
+    static Arbeidskategori mapArbeidskategoriFraDto(no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori dto) {
         return dto == null
             ? Arbeidskategori.UDEFINERT
             : Arbeidskategori.fraKode(dto.getKode());
     }
 
-    static InntektPeriodeType mapInntektPeriodeTypeFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektPeriodeType dto) {
+    static InntektPeriodeType mapInntektPeriodeTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType dto) {
         return dto == null
             ? InntektPeriodeType.UDEFINERT
             : InntektPeriodeType.fraKode(dto.getKode());
     }
 
-    static InntektsmeldingInnsendingsårsak mapInntektsmeldingInnsendingsårsakFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType dto) {
+    static InntektsmeldingInnsendingsårsak mapInntektsmeldingInnsendingsårsakFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType dto) {
         return dto == null
             ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : InntektsmeldingInnsendingsårsak.fraKode(dto.getKode());
     }
 
-    static UtsettelseÅrsak mapUtsettelseÅrsakFraDto(no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.UtsettelseÅrsakType dto) {
+    static UtsettelseÅrsak mapUtsettelseÅrsakFraDto(no.nav.abakus.iaygrunnlag.kodeverk.UtsettelseÅrsakType dto) {
         return dto == null
             ? UtsettelseÅrsak.UDEFINERT
             : UtsettelseÅrsak.fraKode(dto.getKode());
     }
 
-    static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.VirksomhetType mapVirksomhetTypeTilDto(VirksomhetType kode) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType mapVirksomhetTypeTilDto(VirksomhetType kode) {
         return kode == null || VirksomhetType.UDEFINERT.equals(kode)
             ? null
-            : new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.VirksomhetType(kode.getKode());
+            : new no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType(kode.getKode());
     }
 
-    public static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseType mapFagsakYtelseTypeTilDto(FagsakYtelseType ytelseType) {
+    public static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapFagsakYtelseTypeTilDto(FagsakYtelseType ytelseType) {
         if (ytelseType == null)
             return null;
-        return new no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseType(ytelseType.getKode());
+        return new no.nav.abakus.iaygrunnlag.kodeverk.YtelseType(ytelseType.getKode());
     }
 
 }

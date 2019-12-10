@@ -292,8 +292,12 @@ public class BeregningIAYTestUtil {
         inntektArbeidYtelseAggregatBuilder = iayTjeneste.opprettBuilderForRegister(behandlingReferanse.getId());
         InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder = inntektArbeidYtelseAggregatBuilder
             .getAktørYtelseBuilder(behandlingReferanse.getAktørId());
-        YtelseBuilder ytelseBuilder = aktørYtelseBuilder.getYtelselseBuilderForType(Fagsystem.INFOTRYGD, ytelseType,
-            Saksnummer.infotrygd(saksnummer));
+        
+        YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
+                .medKilde(Fagsystem.INFOTRYGD)
+                .medYtelseType(ytelseType)
+                .medSaksnummer(Saksnummer.infotrygd(saksnummer));
+        
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         ytelseBuilder.medStatus(relatertYtelseTilstand);
         YtelseGrunnlagBuilder ytelseGrunnlagBuilder = ytelseBuilder.getGrunnlagBuilder()

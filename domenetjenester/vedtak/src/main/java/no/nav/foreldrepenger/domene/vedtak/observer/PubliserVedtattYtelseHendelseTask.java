@@ -22,7 +22,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.ytelse.Ytelse;
+import no.nav.abakus.vedtak.ytelse.Ytelse;
 
 @ApplicationScoped
 @ProsessTask(PubliserVedtattYtelseHendelseTask.TASKTYPE)

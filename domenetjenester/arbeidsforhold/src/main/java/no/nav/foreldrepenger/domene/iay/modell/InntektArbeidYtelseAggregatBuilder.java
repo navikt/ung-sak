@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.domene.iay.modell;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,18 +7,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektsKilde;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
 
 /**
  * Builder for å håndtere en gitt versjon {@link VersjonType} av grunnlaget.
@@ -338,25 +331,6 @@ public class InntektArbeidYtelseAggregatBuilder {
         public AktørYtelseBuilder medAktørId(AktørId aktørId) {
             this.kladd.setAktørId(aktørId);
             return this;
-        }
-
-        public YtelseBuilder getYtelselseBuilderForType(Fagsystem fagsystem, RelatertYtelseType type, Saksnummer sakId) {
-            return kladd.getYtelseBuilderForType(fagsystem, type, sakId);
-        }
-
-        public YtelseBuilder getYtelselseBuilderForType(Fagsystem fagsystem, RelatertYtelseType type, Saksnummer sakId, DatoIntervallEntitet periode,
-                                                        Optional<LocalDate> tidligsteAnvistFom) {
-            return kladd.getYtelseBuilderForType(fagsystem, type, sakId, periode, tidligsteAnvistFom);
-        }
-
-        public YtelseBuilder getYtelselseBuilderForType(Fagsystem fagsystem, RelatertYtelseType type, TemaUnderkategori typeKategori,
-                                                        DatoIntervallEntitet periode) {
-            return kladd.getYtelseBuilderForType(fagsystem, type, typeKategori, periode);
-        }
-
-        public void tilbakestillYtelserFraKildeBeholdAvsluttede(Fagsystem kilde) {
-            this.kladd.getAlleYtelser()
-                .removeIf(yt -> kilde.equals(yt.getKilde()) && !RelatertYtelseTilstand.AVSLUTTET.equals(yt.getStatus()));
         }
 
         public AktørYtelseBuilder leggTilYtelse(YtelseBuilder builder) {

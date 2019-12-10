@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.abakus;
 
-import static no.nav.foreldrepenger.kontrakter.callback.registerdata.Grunnlag.IAY;
+import static no.nav.abakus.callback.registerdata.Grunnlag.IAY;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.APPLIKASJON;
 
@@ -22,11 +22,11 @@ import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.abakus.callback.registerdata.CallbackDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.foreldrepenger.domene.arbeidsforhold.RegisterdataCallback;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.IAYRegisterdataTjeneste;
-import no.nav.foreldrepenger.kontrakter.callback.registerdata.CallbackDto;
 import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;

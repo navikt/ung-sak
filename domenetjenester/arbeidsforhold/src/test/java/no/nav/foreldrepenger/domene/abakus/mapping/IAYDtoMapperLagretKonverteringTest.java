@@ -4,17 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
 
+import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -29,7 +30,6 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
 
 public class IAYDtoMapperLagretKonverteringTest {
@@ -129,7 +129,11 @@ public class IAYDtoMapperLagretKonverteringTest {
 
     private YtelseBuilder lagYtelse(InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder) {
         Saksnummer sakId = new Saksnummer("1200094");
-        YtelseBuilder ytelselseBuilder = aktørYtelseBuilder.getYtelselseBuilderForType(Fagsystem.FPSAK, RelatertYtelseType.SYKEPENGER, sakId);
+        YtelseBuilder ytelselseBuilder = YtelseBuilder.oppdatere(Optional.empty())
+                .medKilde(Fagsystem.K9SAK)
+                .medYtelseType(RelatertYtelseType.SYKEPENGER)
+                .medSaksnummer(sakId);
+        
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)
             .medYtelseType(RelatertYtelseType.FORELDREPENGER)

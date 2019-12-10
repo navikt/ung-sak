@@ -14,10 +14,10 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.AktørIdPersonident;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Periode;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.request.AktørDatoRequest;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
+import no.nav.abakus.iaygrunnlag.request.AktørDatoRequest;
 
 @ApplicationScoped
 public class ArbeidsforholdTjeneste {
