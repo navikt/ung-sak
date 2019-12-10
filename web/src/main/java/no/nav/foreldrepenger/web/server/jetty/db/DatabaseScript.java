@@ -25,5 +25,4 @@ public final class DatabaseScript {
             throw new IllegalStateException("Migrering feiler", fwe);
         }
     }
-
 }
