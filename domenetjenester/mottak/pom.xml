@@ -12,6 +12,11 @@
     <name>K9SAK :: Domenetjenester - Mottak</name>
 
     <dependencies>
+        <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>soknad-pleiepenger-barn</artifactId>
+            <version>1.0.0+712fd47</version>
+        </dependency>
         <!-- Modul interne avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
