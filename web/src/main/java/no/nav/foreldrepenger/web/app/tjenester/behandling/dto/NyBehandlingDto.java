@@ -14,9 +14,7 @@ import no.nav.vedtak.sikkerhet.abac.AbacDto;
 
 public class NyBehandlingDto implements AbacDto {
     @NotNull
-    @Min(0)
-    @Max(Long.MAX_VALUE)
-    private Long saksnummer;
+    private String saksnummer;
 
     @NotNull
     @ValidKodeverk
@@ -28,11 +26,11 @@ public class NyBehandlingDto implements AbacDto {
     @Valid
     private boolean nyBehandlingEtterKlage;
 
-    public void setSaksnummer(Long saksnummer) {
+    public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
     }
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 
@@ -58,6 +56,6 @@ public class NyBehandlingDto implements AbacDto {
 
     @Override
     public AbacDataAttributter abacAttributter() {
-        return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, Long.toString(saksnummer));
+        return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, saksnummer);
     }
 }

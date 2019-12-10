@@ -10,7 +10,7 @@ public class ForsendelseStatusDataDTO {
     private Long journalpostId;
 
     /** GSAK Saksnummer. (samme som Fagsak#saksnummer). */
-    private Long saksnummer;
+    private String saksnummer;
 
     public ForsendelseStatusDataDTO(ForsendelseStatus forsendelseStatus) {
         this.forsendelseStatus = forsendelseStatus;
@@ -32,11 +32,11 @@ public class ForsendelseStatusDataDTO {
         this.journalpostId = journalpostId;
     }
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 
-    public void setSaksnummer(Long saksnummer) {
+    public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
     }
 }
