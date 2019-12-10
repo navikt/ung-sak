@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerPleiepengerBarnSoknad;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,6 +48,7 @@ public class FordelRestTjenesteTest {
 
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private FordelRestTjeneste fordelRestTjeneste;
+    private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
 
     @Before
     public void setup() {
@@ -56,13 +58,15 @@ public class FordelRestTjenesteTest {
         opprettSakOrchestratorMock = mock(OpprettSakOrchestrator.class);
         opprettSakTjenesteMock = mock(OpprettSakTjeneste.class);
         vurderFagsystemTjenesteMock = mock(VurderFagsystemFellesTjeneste.class);
+        dokumentmottakerPleiepengerBarnSoknad = mock(DokumentmottakerPleiepengerBarnSoknad.class);
 
-        fordelRestTjeneste = new FordelRestTjeneste(dokumentmottakTjenesteMock,  
-            journalTjeneste, 
+        fordelRestTjeneste = new FordelRestTjeneste(dokumentmottakTjenesteMock,
+            journalTjeneste,
             fagsakTjenesteMock,
-            opprettSakOrchestratorMock, 
-            opprettSakTjenesteMock, 
-            vurderFagsystemTjenesteMock);
+            opprettSakOrchestratorMock,
+            opprettSakTjenesteMock,
+            vurderFagsystemTjenesteMock,
+            dokumentmottakerPleiepengerBarnSoknad);
     }
 
     @Test
