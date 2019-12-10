@@ -21,11 +21,33 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum FagsakYtelseType implements Kodeverdi {
 
-    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn"),
+    /** Folketrygdloven K4 ytelser. */
+    DAGPENGER("DAG", "Dagpenger"),
 
+    /** Folketrygdloven K8 ytelser. */
+    SYKEPENGER("SP", "Sykepenger"),
+
+    /** Folketrygdloven K9 ytelser. */
+    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn"),
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående"),
+    OMSORGSPENGER("OMP", "Omsorgspenger"),
+    OPPLÆRINGSPENGER("OLP", "Opplæringspenger"),
+    
+    /**@deprecated Gammel infotrygd kode for K9 ytelser. Må tolkes om til ovenstående sammen med TemaUnderkategori.  */
+    @Deprecated
+    PÅRØRENDESYKDOM("PS", "Pårørende sykdom"),
+
+    /** Folketrygdloven K11 ytelser. */
+    ARBEIDSAVKLARINGSPENGER("AAP"),
+
+    /** Folketrygdloven K14 ytelser. */
     ENGANGSTØNAD("ES", "Engangsstønad"),
     FORELDREPENGER("FP", "Foreldrepenger"),
     SVANGERSKAPSPENGER("SVP", "Svangerskapspenger"),
+
+    /** Folketrygdloven K15 ytelser. */
+    ENSLIG_FORSØRGER("EF", "Enslig forsørger"),
+
     UDEFINERT("-", "Ikke definert"),
     ;
 

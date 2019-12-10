@@ -9,6 +9,14 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.abakus.vedtak.ytelse.Aktør;
+import no.nav.abakus.vedtak.ytelse.Periode;
+import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.abakus.vedtak.ytelse.v1.Fagsystem;
+import no.nav.abakus.vedtak.ytelse.v1.YtelseStatus;
+import no.nav.abakus.vedtak.ytelse.v1.YtelseType;
+import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
+import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -18,14 +26,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.vedtak.konfig.Tid;
-import no.nav.vedtak.ytelse.Aktør;
-import no.nav.vedtak.ytelse.Periode;
-import no.nav.vedtak.ytelse.Ytelse;
-import no.nav.vedtak.ytelse.v1.Fagsystem;
-import no.nav.vedtak.ytelse.v1.YtelseStatus;
-import no.nav.vedtak.ytelse.v1.YtelseType;
-import no.nav.vedtak.ytelse.v1.YtelseV1;
-import no.nav.vedtak.ytelse.v1.anvisning.Anvisning;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
@@ -112,7 +112,7 @@ public class VedtattYtelseTjeneste {
 
     private YtelseType map(FagsakYtelseType type) {
         if (FagsakYtelseType.ENGANGSTØNAD.equals(type)) {
-            return YtelseType.ENGANGSSTØNAD;
+            return YtelseType.ENGANGSTØNAD;
         } else if (FagsakYtelseType.FORELDREPENGER.equals(type)) {
             return YtelseType.FORELDREPENGER;
         } else if (FagsakYtelseType.SVANGERSKAPSPENGER.equals(type)) {

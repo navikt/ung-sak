@@ -1,11 +1,11 @@
 package no.nav.foreldrepenger.domene.registerinnhenting;
 
-import static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType.ARBEIDSFORHOLD;
-import static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
-import static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
-import static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
-import static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType.LIGNET_NÆRING;
-import static no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType.YTELSE;
+import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.ARBEIDSFORHOLD;
+import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
+import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.LIGNET_NÆRING;
+import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.YTELSE;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -57,11 +57,11 @@ import no.nav.foreldrepenger.domene.medlem.api.Medlemskapsperiode;
 import no.nav.foreldrepenger.domene.person.tps.PersoninfoAdapter;
 import no.nav.foreldrepenger.domene.registerinnhenting.impl.SaksopplysningerFeil;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.AktørIdPersonident;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Periode;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.RegisterdataType;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.YtelseType;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.request.InnhentRegisterdataRequest;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.foreldrepenger.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.KonfigVerdi;

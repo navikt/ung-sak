@@ -268,7 +268,12 @@ public class AvklarAktiviteterTjenesteImplTest {
     private InntektArbeidYtelseGrunnlag lagAktørYtelse(Tuple<Periode, Integer>... meldekortPerioder) {
         InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder = inntektArbeidYtelseAggregatBuilder.getAktørYtelseBuilder(AKTØR_ID);
-        YtelseBuilder ytelseBuilder = aktørYtelseBuilder.getYtelselseBuilderForType(Fagsystem.ARENA, RelatertYtelseType.ARBEIDSAVKLARINGSPENGER, Saksnummer.arena("12345"));
+        
+        YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
+                .medKilde(Fagsystem.ARENA)
+                .medYtelseType(RelatertYtelseType.ARBEIDSAVKLARINGSPENGER)
+                .medSaksnummer(Saksnummer.arena("12345"));
+        
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT_BEREGNING.minusMonths(6), SKJÆRINGSTIDSPUNKT_BEREGNING.minusDays(1)));
         ytelseBuilder.medStatus(RelatertYtelseTilstand.LØPENDE);
         if (meldekortPerioder != null && meldekortPerioder.length > 0) {

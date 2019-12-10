@@ -36,7 +36,7 @@
 		<felles.version>1.4.0-20191210141540-b48ff5b</felles.version>
 
         <metrics.version>3.2.5</metrics.version>
-		<fp-kontrakter.version>5.0_20191031073150_c3b9f11</fp-kontrakter.version>
+		<fp-kontrakter.version>5.1_20191210141010_6a7f399</fp-kontrakter.version>
 	</properties>
 
 	<prerequisites>
@@ -76,7 +76,7 @@
 
 			<dependency>
 				<groupId>no.nav.foreldrepenger.kontrakter</groupId>
-				<artifactId>foreldrepenger-kontrakter-root</artifactId>
+				<artifactId>fp-kontrakter-root</artifactId>
                 <version>${fp-kontrakter.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
@@ -146,7 +146,7 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.0-20191204105628-3b605eb</version>
+                <version>1.1-20191210172638-09a46f3</version>
             </dependency>
 
 			<!-- Prosjektets egne biblioteker -->

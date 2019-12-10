@@ -47,10 +47,12 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
+		
+		<!-- Kontrakter -->
         <dependency>
-            <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-            <artifactId>hendelse-vedtatt-ytelse</artifactId>
-        </dependency>
+			<groupId>no.nav.foreldrepenger.abakus</groupId>
+			<artifactId>abakus-kontrakt</artifactId>
+		</dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
             <artifactId>fp-topics-manifest</artifactId>

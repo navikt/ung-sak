@@ -28,16 +28,16 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilde
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Aktør;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.AktørIdPersonident;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.ArbeidsforholdRefDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Organisasjon;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Periode;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.PersonIdent;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.arbeid.v1.AktivitetsAvtaleDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.arbeid.v1.ArbeidDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.arbeid.v1.PermisjonDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
+import no.nav.abakus.iaygrunnlag.Aktør;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
+import no.nav.abakus.iaygrunnlag.Organisasjon;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.PersonIdent;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.AktivitetsAvtaleDto;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.ArbeidDto;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.PermisjonDto;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
 import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
 
 public class MapAktørArbeid {
@@ -260,7 +260,7 @@ public class MapAktørArbeid {
             }
 
             return new ArbeidsforholdRefDto(internRef.getReferanse(), eksternRef.getReferanse(),
-                no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.Fagsystem.AAREGISTERET);
+                no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem.AAREGISTERET);
         }
 
         private Aktør mapAktør(Arbeidsgiver arbeidsgiver) {

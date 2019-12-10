@@ -20,6 +20,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 
+/**
+ * @deprecated Fjern denne til fordel, bytt til FagsakYtelseType over alt.
+ */
+@Deprecated(forRemoval = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum RelatertYtelseType implements Kodeverdi {

@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.foreldrepenger.domene.abakus.AbakusTjeneste;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.ArbeidsforholdRefDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Organisasjon;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.Periode;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
-import no.nav.foreldrepenger.kontrakter.iaygrunnlag.kodeverk.ArbeidType;
+import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
+import no.nav.abakus.iaygrunnlag.Organisasjon;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
+import no.nav.abakus.iaygrunnlag.kodeverk.ArbeidType;
 import no.nav.vedtak.konfig.Tid;
 
 public class ArbeidsforholdTjenesteMock {

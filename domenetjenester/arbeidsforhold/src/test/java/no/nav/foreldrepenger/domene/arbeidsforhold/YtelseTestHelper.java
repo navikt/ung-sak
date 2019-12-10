@@ -28,8 +28,12 @@ public class YtelseTestHelper {
     public static InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder leggTilYtelse(InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder,
                                                                                 LocalDate fom, LocalDate tom,
                                                                                 RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, RelatertYtelseType ytelseType) {
-        YtelseBuilder ytelseBuilder = aktørYtelseBuilder.getYtelselseBuilderForType(Fagsystem.INFOTRYGD, ytelseType,
-            Saksnummer.infotrygd(saksnummer));
+        
+        
+        YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
+                .medKilde(Fagsystem.INFOTRYGD)
+                .medYtelseType(ytelseType)
+                .medSaksnummer(new Saksnummer(saksnummer));
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         ytelseBuilder.medStatus(relatertYtelseTilstand);
         aktørYtelseBuilder.leggTilYtelse(ytelseBuilder);

@@ -20,7 +20,8 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Fagsystem implements Kodeverdi {
-
+    
+    K9SAK("K9SAK", "Vedtaksløsning K9 - Pleiepenger", ""),
     FPSAK("FPSAK", "Vedtaksløsning Foreldrepenger", "FS36"),
     TPS("TPS", "TPS", "FS03"),
     JOARK("JOARK", "Joark", "AS36"),

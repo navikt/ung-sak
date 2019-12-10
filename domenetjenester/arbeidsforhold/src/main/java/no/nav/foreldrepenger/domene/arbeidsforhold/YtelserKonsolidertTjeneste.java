@@ -64,25 +64,4 @@ public class YtelserKonsolidertTjeneste {
         return resultat;
     }
 
-    /** Sammenstilt informasjon om vedtatte ytelser fra grunnlag og saker til behandling i VL (som ennå ikke har vedtak). */
-    public List<TilgrensendeYtelserDto> utledAnnenPartsYtelserRelatertTilBehandling(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag, Optional<Set<RelatertYtelseType>> inkluder) {
-
-        var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
-        var ytelser = filter.getFiltrertYtelser();
-
-        Collection<Ytelse> fraGrunnlag = ytelser.stream()
-            .filter(ytelse -> !inkluder.isPresent() || inkluder.get().contains(ytelse.getRelatertYtelseType()))
-            .collect(Collectors.toList());
-        List<TilgrensendeYtelserDto> resultat = new ArrayList<>(BehandlingRelaterteYtelserMapper.mapFraBehandlingRelaterteYtelser(fraGrunnlag));
-
-        Set<Saksnummer> saksnumre = fraGrunnlag.stream().map(Ytelse::getSaksnummer).filter(Objects::nonNull).collect(Collectors.toSet());
-        List<TilgrensendeYtelserDto> resultatÅpen = fagsakRepository.hentForBruker(aktørId).stream()
-            .filter(sak -> !saksnumre.contains(sak.getSaksnummer()))
-            .filter(sak -> !inkluder.isPresent() || inkluder.get().contains(BehandlingRelaterteYtelserMapper.mapFraFagsakYtelseTypeTilRelatertYtelseType(sak.getYtelseType())))
-            .map(sak -> BehandlingRelaterteYtelserMapper.mapFraFagsak(sak, sak.getOpprettetTidspunkt().toLocalDate()))
-            .collect(Collectors.toList());
-
-        resultat.addAll(resultatÅpen);
-        return resultat;
-    }
 }
