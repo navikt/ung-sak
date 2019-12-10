@@ -34,7 +34,7 @@ import no.nav.vedtak.util.Tuple;
 
 @BehandlingStegRef(kode = "VULOMED")
 @BehandlingTypeRef("BT-004")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderLøpendeMedlemskapSteg implements BehandlingSteg {
 

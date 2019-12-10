@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.mottak.hendelser.håndterer.ForretningshendelseHån
 
 @ApplicationScoped
 @ForretningshendelsestypeRef(ForretningshendelsestypeRef.FØDSEL_HENDELSE)
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class FødselForretningshendelseHåndtererImpl implements ForretningshendelseHåndterer {
 
     private ForretningshendelseHåndtererFelles forretningshendelseHåndtererFelles;

@@ -8,7 +8,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 
 public class FagsakDto {
-    private Long saksnummer;
+    private String saksnummer;
     private FagsakYtelseType sakstype;
     private FagsakStatus status;
     private LocalDate barnFodt;
@@ -24,7 +24,7 @@ public class FagsakDto {
     }
 
     public FagsakDto(Fagsak fagsak, PersonDto person, LocalDate barnFodt, Integer antallBarn, Boolean kanRevurderingOpprettes, Boolean skalBehandlesAvInfotrygd) {
-        this.saksnummer = Long.parseLong(fagsak.getSaksnummer().getVerdi());
+        this.saksnummer = fagsak.getSaksnummer().getVerdi();
         this.sakstype = fagsak.getYtelseType();
         this.status = fagsak.getStatus();
         this.person = person;
@@ -36,7 +36,7 @@ public class FagsakDto {
         this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
     }
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 

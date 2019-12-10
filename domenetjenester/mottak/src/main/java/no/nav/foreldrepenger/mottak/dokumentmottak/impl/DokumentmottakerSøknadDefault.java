@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @DokumentGruppeRef("SØKNAD")
 public class DokumentmottakerSøknadDefault extends DokumentmottakerSøknad {
 

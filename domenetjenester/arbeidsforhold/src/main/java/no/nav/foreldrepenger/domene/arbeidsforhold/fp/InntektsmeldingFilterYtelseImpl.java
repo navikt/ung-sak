@@ -21,7 +21,7 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class InntektsmeldingFilterYtelseImpl implements InntektsmeldingFilterYtelse {
 
@@ -58,7 +58,7 @@ public class InntektsmeldingFilterYtelseImpl implements InntektsmeldingFilterYte
     private Map<Arbeidsgiver, Set<Inntektspost>> hentInntekterForUtledningAvInntektsmeldinger(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag grunnlag) {
         LocalDate inntektsPeriodeFom = referanse.getUtledetSkjæringstidspunkt().minus(SJEKK_INNTEKT_PERIODE);
         Map<Arbeidsgiver, Set<Inntektspost>> inntekterPrArbgiver = new HashMap<>();
-        
+
         var filter = grunnlag.getAktørInntektFraRegister(referanse.getAktørId()).map(ai -> new InntektFilter(ai).før(referanse.getUtledetSkjæringstidspunkt())).orElse(InntektFilter.EMPTY);
 
         filter.getAlleInntektPensjonsgivende()

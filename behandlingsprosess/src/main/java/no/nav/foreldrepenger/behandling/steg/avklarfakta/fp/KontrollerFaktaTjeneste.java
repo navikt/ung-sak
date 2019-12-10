@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.StartpunktRef;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @BehandlingTypeRef
 @StartpunktRef
 @ApplicationScoped

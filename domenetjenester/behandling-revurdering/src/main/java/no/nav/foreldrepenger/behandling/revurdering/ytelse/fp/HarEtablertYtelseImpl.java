@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.KonsekvensForYtelsen;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class HarEtablertYtelseImpl implements HarEtablertYtelse {
 
     @Override

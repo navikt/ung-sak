@@ -32,7 +32,7 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "KOFAK")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @StartpunktRef
 @ApplicationScoped
 class KontrollerFaktaStegImpl implements KontrollerFaktaSteg {
@@ -49,7 +49,7 @@ class KontrollerFaktaStegImpl implements KontrollerFaktaSteg {
     @Inject
     KontrollerFaktaStegImpl(BehandlingRepositoryProvider repositoryProvider,
                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                            @FagsakYtelseTypeRef("FP") KontrollerFaktaTjeneste tjeneste) {
+                            @FagsakYtelseTypeRef KontrollerFaktaTjeneste tjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.repositoryProvider = repositoryProvider;

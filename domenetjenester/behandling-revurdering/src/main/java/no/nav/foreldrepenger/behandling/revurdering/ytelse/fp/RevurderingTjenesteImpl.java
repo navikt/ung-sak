@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class RevurderingTjenesteImpl implements RevurderingTjeneste {
 
@@ -44,7 +44,7 @@ public class RevurderingTjenesteImpl implements RevurderingTjeneste {
     public RevurderingTjenesteImpl(BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                    InntektArbeidYtelseTjeneste iayTjeneste,
-                                   @FagsakYtelseTypeRef("FP") RevurderingEndring revurderingEndring,
+                                   @FagsakYtelseTypeRef RevurderingEndring revurderingEndring,
                                    RevurderingTjenesteFelles revurderingTjenesteFelles) {
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();

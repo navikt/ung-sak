@@ -13,15 +13,15 @@ import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @Dependent
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @BehandlingTypeRef("BT-004")
 public class RevurderingBehandlingsresultatutleder extends RevurderingBehandlingsresultatutlederFellesImpl {
 
     @Inject
     public RevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider,  // NOSONAR
                                                  HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                                   @FagsakYtelseTypeRef("FP") HarEtablertYtelse harEtablertYtelse,
-                                                   @FagsakYtelseTypeRef("FP") SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                                   @FagsakYtelseTypeRef HarEtablertYtelse harEtablertYtelse,
+                                                   @FagsakYtelseTypeRef SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                                    MedlemTjeneste medlemTjeneste) {
         super(repositoryProvider,
             beregningsgrunnlagTjeneste,

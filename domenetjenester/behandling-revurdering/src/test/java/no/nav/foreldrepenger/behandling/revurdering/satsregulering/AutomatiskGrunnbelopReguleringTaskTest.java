@@ -47,7 +47,7 @@ public class AutomatiskGrunnbelopReguleringTaskTest {
     private BehandlingRepository behandlingRepository;
 
     @Inject
-    @FagsakYtelseTypeRef("FP")
+    @FagsakYtelseTypeRef
     private RevurderingTjeneste revurderingTjenesteMock;
 
     @Inject

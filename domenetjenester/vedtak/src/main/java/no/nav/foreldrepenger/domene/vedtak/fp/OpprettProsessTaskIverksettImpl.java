@@ -8,7 +8,7 @@ import no.nav.foreldrepenger.domene.vedtak.OpprettProsessTaskIverksettFelles;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksettFelles {
 

@@ -17,7 +17,7 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystem;
 import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesUtils;
 import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemTjeneste;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderFagsystemTjenesteImpl implements VurderFagsystemTjeneste {
 

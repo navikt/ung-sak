@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.mottak.kompletthettjeneste.KompletthetssjekkerSøkn
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-004")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class KompletthetsjekkerRevurderingImpl implements Kompletthetsjekker {
 
     private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
@@ -41,7 +41,7 @@ public class KompletthetsjekkerRevurderingImpl implements Kompletthetsjekker {
     }
 
     @Inject
-    public KompletthetsjekkerRevurderingImpl(@FagsakYtelseTypeRef("FP") @BehandlingTypeRef("BT-004") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
+    public KompletthetsjekkerRevurderingImpl(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-004") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
                                            KompletthetsjekkerFelles fellesUtil,
                                            InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                            SøknadRepository søknadRepository,

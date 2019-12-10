@@ -16,7 +16,7 @@ public class SkjæringstidspunktRegisterinnhentingTjenesteImpl implements Skjær
     }
 
     @Inject
-    public SkjæringstidspunktRegisterinnhentingTjenesteImpl(@FagsakYtelseTypeRef("FP") SkjæringstidspunktRegisterinnhentingTjeneste skjæringstidspunktTjeneste) {
+    public SkjæringstidspunktRegisterinnhentingTjenesteImpl(@FagsakYtelseTypeRef SkjæringstidspunktRegisterinnhentingTjeneste skjæringstidspunktTjeneste) {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 

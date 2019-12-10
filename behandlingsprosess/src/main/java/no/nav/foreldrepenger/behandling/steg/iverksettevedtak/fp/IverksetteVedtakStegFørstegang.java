@@ -14,7 +14,7 @@ import no.nav.foreldrepenger.domene.vedtak.impl.VurderBehandlingerUnderIverksett
 
 @BehandlingStegRef(kode = "IVEDSTEG")
 @BehandlingTypeRef("BT-002") // Førstegangsbehandling
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgrensendeFelles {
 
@@ -24,7 +24,7 @@ public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgren
 
     @Inject
     public IverksetteVedtakStegFørstegang(BehandlingRepositoryProvider repositoryProvider,
-                                            @SuppressWarnings("unused") @FagsakYtelseTypeRef("FP") OpprettProsessTaskIverksett opprettProsessTaskIverksett,
+                                            @SuppressWarnings("unused") @FagsakYtelseTypeRef OpprettProsessTaskIverksett opprettProsessTaskIverksett,
                                             VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
                                             IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse) {
         super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse);

@@ -54,7 +54,7 @@ public class OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunktTest {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     @Inject
     private BeregningRevurderingTestUtil revurderingTestUtil;
-    @Inject @FagsakYtelseTypeRef("FP")
+    @Inject @FagsakYtelseTypeRef
     private RevurderingEndring revurderingEndring;
 
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());

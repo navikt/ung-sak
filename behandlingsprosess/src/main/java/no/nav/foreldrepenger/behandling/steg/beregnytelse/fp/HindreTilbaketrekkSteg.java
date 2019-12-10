@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @BehandlingStegRef(kode = "BERYT_OPPDRAG")
 @BehandlingTypeRef("BT-004")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 
 @ApplicationScoped
 public class HindreTilbaketrekkSteg implements BehandlingSteg {
