@@ -15,7 +15,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktRes
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class AksjonspunktUtlederFastsettBeregningsaktiviteterFP extends AksjonspunktUtlederFastsettBeregningsaktiviteter {
 

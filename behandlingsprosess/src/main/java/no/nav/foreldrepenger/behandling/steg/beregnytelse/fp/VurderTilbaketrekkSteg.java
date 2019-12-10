@@ -21,7 +21,7 @@ import java.util.List;
 
 @BehandlingStegRef(kode = "VURDER_TILBAKETREKK")
 @BehandlingTypeRef("BT-004")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 
 @ApplicationScoped
 public class VurderTilbaketrekkSteg implements BehandlingSteg {

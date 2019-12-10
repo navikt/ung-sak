@@ -32,7 +32,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-004")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class KompletthetssjekkerSøknadRevurderingImpl extends KompletthetssjekkerSøknadImpl {
     private static final Logger LOGGER = LoggerFactory.getLogger(KompletthetssjekkerSøknadRevurderingImpl.class);
 

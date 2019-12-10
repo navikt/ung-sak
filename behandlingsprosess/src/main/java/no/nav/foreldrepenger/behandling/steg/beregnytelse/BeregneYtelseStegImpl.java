@@ -28,7 +28,7 @@ import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste
 
 @BehandlingStegRef(kode = "BERYT")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 
 @ApplicationScoped
 public class BeregneYtelseStegImpl implements BeregneYtelseSteg {

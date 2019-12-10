@@ -52,7 +52,7 @@ public class RevurderingTjenesteImplTest {
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
 
     @Inject
-    @FagsakYtelseTypeRef("FP")
+    @FagsakYtelseTypeRef
     private RevurderingEndring revurderingEndring;
 
     @Before

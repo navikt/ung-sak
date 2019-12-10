@@ -26,7 +26,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class OpptjeningsVilkårTjenesteImpl implements OpptjeningsVilkårTjeneste {
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private InngangsvilkårOversetter inngangsvilkårOversetter;

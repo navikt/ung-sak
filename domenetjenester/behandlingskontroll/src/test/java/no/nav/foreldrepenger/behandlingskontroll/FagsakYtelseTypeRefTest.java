@@ -17,32 +17,32 @@ public class FagsakYtelseTypeRefTest {
 
     @Rule
     public final ExpectedException expected = ExpectedException.none();
-    
+
     @Test
     public void skal_få_duplikat_instans_av_cdi_bean() throws Exception {
         expected.expect(IllegalStateException.class);
         expected.expectMessage("Har flere matchende instanser");
         FagsakYtelseTypeRef.Lookup.find(Bokstav.class, FagsakYtelseType.FORELDREPENGER);
     }
-    
+
     @Test
     public void skal_få_unik_instans_av_cdi_bean() throws Exception {
         var instans = FagsakYtelseTypeRef.Lookup.find(Bokstav.class, FagsakYtelseType.SVANGERSKAPSPENGER);
         Assertions.assertThat(instans).isNotNull();
     }
-    
+
     public interface Bokstav {
     }
-    
+
     @ApplicationScoped
-    @FagsakYtelseTypeRef("FP")
-    
+    @FagsakYtelseTypeRef
+
     public static class A implements Bokstav{
 
     }
 
     @ApplicationScoped
-    @FagsakYtelseTypeRef("FP")
+    @FagsakYtelseTypeRef
     public static class B implements Bokstav{
 
     }

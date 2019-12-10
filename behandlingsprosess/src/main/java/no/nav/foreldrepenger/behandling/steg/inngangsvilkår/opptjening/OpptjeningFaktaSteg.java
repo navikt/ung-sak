@@ -26,7 +26,7 @@ public class OpptjeningFaktaSteg extends OpptjeningFaktaStegFelles {
     public OpptjeningFaktaSteg(BehandlingRepositoryProvider repositoryProvider,
                                  AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet,
                                  AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt,
-                                 @FagsakYtelseTypeRef("FP") OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste,
+                                 @FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         super(repositoryProvider, aksjonspunktutlederBekreftet, aksjonspunktutlederOppgitt, opptjeningsVilkårTjeneste, skjæringstidspunktTjeneste);
     }

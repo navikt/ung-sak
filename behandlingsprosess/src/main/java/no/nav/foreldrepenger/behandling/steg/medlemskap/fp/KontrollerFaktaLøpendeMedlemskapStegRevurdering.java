@@ -33,7 +33,7 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "KOFAK_LOP_MEDL")
 @BehandlingTypeRef("BT-004") //Revurdering
-@FagsakYtelseTypeRef("FP")  //Foreldrepenger
+@FagsakYtelseTypeRef  //Foreldrepenger
 @ApplicationScoped
 public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements KontrollerFaktaLøpendeMedlemskapSteg {
 

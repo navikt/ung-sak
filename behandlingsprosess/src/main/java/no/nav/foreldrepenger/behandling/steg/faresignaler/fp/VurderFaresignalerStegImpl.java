@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 @BehandlingStegRef(kode = "VURDER_FARESIGNALER")
 @BehandlingTypeRef("BT-002")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderFaresignalerStegImpl extends VurderFaresignalerStegFelles {
 

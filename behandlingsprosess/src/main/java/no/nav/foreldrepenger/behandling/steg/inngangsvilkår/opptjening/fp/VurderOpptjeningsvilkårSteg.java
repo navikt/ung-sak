@@ -21,7 +21,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsv
 
 @BehandlingStegRef(kode = "VURDER_OPPTJ")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderOpptjeningsvilkårSteg extends VurderOpptjeningsvilkårStegFelles {
 

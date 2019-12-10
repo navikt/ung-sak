@@ -68,14 +68,8 @@ public class OpplysningsPeriodeTjeneste {
 
     private Interval beregning(Long behandlingId, FagsakYtelseType ytelseType, boolean tilOgMedIdag) {
         final LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.utledSkjæringstidspunktForRegisterInnhenting(behandlingId);
-        if (FagsakYtelseType.FORELDREPENGER.equals(ytelseType)) {
-            return beregnIntervalFP(skjæringstidspunkt, tilOgMedIdag);
-        } else if (FagsakYtelseType.ENGANGSTØNAD.equals(ytelseType)) {
-            return beregnIntervalES(skjæringstidspunkt, tilOgMedIdag);
-        } else if (FagsakYtelseType.SVANGERSKAPSPENGER.equals(ytelseType)) {
-            return beregnIntervalSVP(skjæringstidspunkt, tilOgMedIdag);
-        }
-        throw SkjæringstidspunktFeil.FACTORY.kanIkkeUtledeOpplysningsperiodeForBehandling(behandlingId).toException();
+        // FIXME K9 Blir dette riktig for alle våre ytelser?
+        return beregnIntervalSVP(skjæringstidspunkt, tilOgMedIdag);
     }
 
     private Interval beregnIntervalES(LocalDate skjæringstidspunkt, boolean tilOgMedIdag) {

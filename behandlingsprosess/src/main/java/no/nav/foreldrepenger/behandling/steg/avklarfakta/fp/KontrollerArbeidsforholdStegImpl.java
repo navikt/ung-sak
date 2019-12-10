@@ -23,7 +23,7 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "KOARB")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD")
 @ApplicationScoped
 class KontrollerArbeidsforholdStegImpl implements KontrollerArbeidsforholdSteg {

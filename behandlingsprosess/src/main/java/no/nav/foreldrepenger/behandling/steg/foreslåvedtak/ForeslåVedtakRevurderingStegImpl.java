@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 
 @BehandlingStegRef(kode = "FORVEDSTEG")
 @BehandlingTypeRef("BT-004") //Revurdering
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 
 @ApplicationScoped
 public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {

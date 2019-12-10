@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentMalType;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste {
 
     private UttakRepository uttakRepository;
@@ -45,7 +45,7 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
     ForeslåBehandlingsresultatTjenesteImpl(BehandlingRepositoryProvider repositoryProvider,
                                          AvslagsårsakTjeneste avslagsårsakTjeneste,
                                          DokumentBehandlingTjeneste dokumentBehandlingTjeneste,
-                                         @FagsakYtelseTypeRef("FP") RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
+                                         @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
         this.uttakRepository =repositoryProvider.getUttakRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.avslagsårsakTjeneste =avslagsårsakTjeneste;

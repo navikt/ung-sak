@@ -26,7 +26,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 
 @BehandlingStegRef(kode = "VURDER_OPPTJ_PERIODE")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeStegFelles {
 
@@ -38,9 +38,9 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     }
 
     @Inject
-    public FastsettOpptjeningsperiodeSteg(BehandlingRepositoryProvider repositoryProvider, 
-                                          OpptjeningRepository opptjeningRepository, 
-                                          InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste, 
+    public FastsettOpptjeningsperiodeSteg(BehandlingRepositoryProvider repositoryProvider,
+                                          OpptjeningRepository opptjeningRepository,
+                                          InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
                                           BehandlingsresultatRepository behandlingsresultatRepository) {
         super(repositoryProvider, inngangsvilkårFellesTjeneste, BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE);
         this.opptjeningRepository = opptjeningRepository;

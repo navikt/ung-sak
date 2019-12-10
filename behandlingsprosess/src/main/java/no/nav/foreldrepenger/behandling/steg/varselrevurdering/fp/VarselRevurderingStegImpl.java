@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 
 @BehandlingStegRef(kode = "VRSLREV")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
 
