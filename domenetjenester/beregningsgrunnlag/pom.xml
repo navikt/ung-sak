@@ -8,6 +8,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<name>K9SAK :: Domenetjenester - Beregningsgrunnlag Regelmodell Tjeneste</name>
+	<groupId>no.nav.folketrygdloven</groupId>
 	<artifactId>folketrygdloven-beregningsgrunnlag</artifactId>
 	<packaging>jar</packaging>
 
