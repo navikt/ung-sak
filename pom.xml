@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>no.nav.k9.sak</groupId>
 	<artifactId>k9sak</artifactId>
 	<packaging>pom</packaging>
@@ -43,7 +42,6 @@
 		<!-- deprecated i maven3, men trengs av versions plugin -->
 		<maven>3.6.0</maven>
 	</prerequisites>
-
 
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det har uheldige virkninger ved bruk av import og dependency (bruk composition
 		over arv) da de overstyrer andre scope definisjoner. Sett det heller der det brukes. -->
