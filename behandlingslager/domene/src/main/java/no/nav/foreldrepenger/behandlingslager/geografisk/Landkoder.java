@@ -26,18 +26,25 @@ public class Landkoder implements Kodeverdi {
 
     private static final Map<String, Landkoder> KODER = initKoder();
     
-    public static final Landkoder NOR = fraKode("NOR"); //$NON-NLS-1$
-    public static final Landkoder SWE = fraKode("SWE"); //$NON-NLS-1$
-    public static final Landkoder USA = fraKode("USA"); //$NON-NLS-1$
-    public static final Landkoder PNG = fraKode("PNG"); //$NON-NLS-1$
-    public static final Landkoder BEL = fraKode("BEL"); //$NON-NLS-1$
-    public static final Landkoder FIN = fraKode("FIN"); //$NON-NLS-1$
-    public static final Landkoder CAN = fraKode("CAN"); //$NON-NLS-1$
-    public static final Landkoder ESP = fraKode("ESP"); //$NON-NLS-1$
+    public static final Landkoder NOR = fraKode("NOR");
+    public static final Landkoder SWE = fraKode("SWE");
+    public static final Landkoder USA = fraKode("USA");
+    public static final Landkoder PNG = fraKode("PNG");
+    public static final Landkoder BEL = fraKode("BEL");
+    public static final Landkoder FIN = fraKode("FIN");
+    public static final Landkoder CAN = fraKode("CAN");
+    public static final Landkoder ESP = fraKode("ESP");
 
-    public static final Landkoder UDEFINERT = fraKode("-");  //$NON-NLS-1$
+    /** Kodeverkklient spesifikk konstant. Statsløs bruker */
+    public static final Landkoder STATSLØS = fraKode("XXX");
     
-    /** ISO 3166 3-letter code. */
+    /** Kodeverkklient spesifikk konstant. Bruker oppgir ikke land*/
+    public static final Landkoder UOPPGITT_UKJENT = fraKode("???");
+    
+    /** Egendefinert konstant - ikke definert (null object pattern) for bruk i modeller som krever non-null. */
+    public static final Landkoder UDEFINERT = fraKode("-"); 
+    
+    /** ISO 3166 alpha 3-letter code. */
     private String kode;
     
     /** ISO 3166 2-letter code. */
@@ -132,6 +139,9 @@ public class Landkoder implements Kodeverdi {
             map.put(iso3cc, landkode);
         }
         map.put("-", new Landkoder("-", "Ikke definert"));
+        map.put("???", new Landkoder("???", "Uoppgitt/Ukjent"));
+        map.put("XXX", new Landkoder("XXX", "Statsløs"));
+        
         return Collections.unmodifiableMap(map);
     }
     
