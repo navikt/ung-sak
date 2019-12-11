@@ -56,13 +56,14 @@ public class DokumentmottakerPleiepengerBarnSoknad {
     }
 
 
-    public void mottaSoknad(PleiepengerBarnSoknad soknad, JournalpostId journalPostId) {
+    public void mottaSoknad(PleiepengerBarnSoknad soknad) {
         if (soknad == null) {
             throw new IllegalArgumentException("soknad == null");
         }
         final Behandling behandling = tilknyttBehandling(soknad);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
-        dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
+        // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av historikk.
+        // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
         pleiepengerBarnSoknadPersister.persister(soknad, behandling);
     }
 

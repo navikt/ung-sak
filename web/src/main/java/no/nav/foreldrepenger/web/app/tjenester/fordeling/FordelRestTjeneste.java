@@ -173,11 +173,9 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public void nyMottaJournalpost(@Parameter(description = "JournalpostId og selve søknaden") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) String pleiepengerBarnSoknadMeldingJson) {
-        // FIXME K9 Fjern "TilpassetAbacAttributt": Sett opp sikkerhet og valg av ObjectMapper (se no.nav.foreldrepenger.web.app.jackson.JacksonJsonConfig) slik at vi kan bruke klassen direkte i metodesignaturen
-        final PleiepengerBarnSoknadMelding pleiepengerBarnSoknadMelding = JsonUtils.fromString(pleiepengerBarnSoknadMeldingJson, PleiepengerBarnSoknadMelding.class);
-        final JournalpostId journalpostId = new JournalpostId(pleiepengerBarnSoknadMelding.getJournalpostId());
-        dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknadMelding.getSoknad(), journalpostId);
+    public void psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
+        // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
+        dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {

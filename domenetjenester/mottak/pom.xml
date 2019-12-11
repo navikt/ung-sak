@@ -15,7 +15,7 @@
         <dependency>
             <groupId>no.nav.k9</groupId>
             <artifactId>soknad-pleiepenger-barn</artifactId>
-            <version>1.0.0.2f6a870</version>
+            <version>1.0.0.765799d</version>
         </dependency>
         <!-- Modul interne avhengigheter -->
         <dependency>
