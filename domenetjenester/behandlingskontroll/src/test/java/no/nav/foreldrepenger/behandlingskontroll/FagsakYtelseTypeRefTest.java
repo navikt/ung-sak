@@ -35,14 +35,14 @@ public class FagsakYtelseTypeRefTest {
     }
 
     @ApplicationScoped
-    @FagsakYtelseTypeRef
+    @FagsakYtelseTypeRef("FP")
 
     public static class A implements Bokstav{
 
     }
 
     @ApplicationScoped
-    @FagsakYtelseTypeRef
+    @FagsakYtelseTypeRef("FP")
     public static class B implements Bokstav{
 
     }
