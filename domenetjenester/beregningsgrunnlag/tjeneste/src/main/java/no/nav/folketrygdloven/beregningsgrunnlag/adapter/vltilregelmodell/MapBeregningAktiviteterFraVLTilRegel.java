@@ -8,10 +8,10 @@ import java.util.Optional;
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.kodeverk.MapOpptjeningAktivitetTypeFraVLTilRegel;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.opptjening.OpptjeningAktiviteter;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Aktivitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivPeriode;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Aktivitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivPeriode;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 

@@ -14,9 +14,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningRefusjonOversty
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.refusjon.InntektsmeldingMedRefusjonTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.ArbeidsforholdOgInntektsmelding;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.PeriodeModell;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.SplittetPeriode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.ArbeidsforholdOgInntektsmelding;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.PeriodeModell;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.SplittetPeriode;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
@@ -63,7 +63,7 @@ public class MapFastsettBeregningsgrunnlagPerioderFraVLTilRegelNaturalYtelse ext
                                              LocalDate skjæringstidspunkt,
                                              List<SplittetPeriode> eksisterendePerioder,
                                              List<ArbeidsforholdOgInntektsmelding> regelInntektsmeldinger,
-                                             List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AndelGradering> regelAndelGraderinger) {
+                                             List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AndelGradering> regelAndelGraderinger) {
         return PeriodeModell.builder()
             .medSkjæringstidspunkt(skjæringstidspunkt)
             .medGrunnbeløp(vlBeregningsgrunnlag.getGrunnbeløp().getVerdi())

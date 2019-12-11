@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.opptjening.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.opptjening.OpptjeningAktiviteter.OpptjeningPeriode;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;

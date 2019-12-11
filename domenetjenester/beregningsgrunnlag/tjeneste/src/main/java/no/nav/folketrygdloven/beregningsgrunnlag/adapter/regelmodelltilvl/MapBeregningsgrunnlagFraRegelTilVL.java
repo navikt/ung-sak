@@ -24,12 +24,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.PeriodeÅrsak;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagType;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.Beregningsgrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPrArbeidsforhold;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.SammenligningsGrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrArbeidsforhold;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrStatus;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.SammenligningsGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 
@@ -74,7 +74,7 @@ public class MapBeregningsgrunnlagFraRegelTilVL {
         return nyttVLGrunnlag;
     }
 
-    public no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet mapForFordel(List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPeriode> resultatPerioder, List<RegelResultat> regelResultater,
+    public no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet mapForFordel(List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode> resultatPerioder, List<RegelResultat> regelResultater,
                                                                                                                        no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet eksisterendeVLGrunnlag) {
         Objects.requireNonNull(resultatPerioder, "resultatPerioder");
         Objects.requireNonNull(regelResultater, "regelResultater");
@@ -109,7 +109,7 @@ public class MapBeregningsgrunnlagFraRegelTilVL {
         return eksisterendeVLGrunnlag;
     }
 
-    private void mapPerioder(List<RegelResultat> regelResultater, BeregningsgrunnlagEntitet eksisterendeVLGrunnlag, Steg steg, List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPeriode> beregningsgrunnlagPerioder) {
+    private void mapPerioder(List<RegelResultat> regelResultater, BeregningsgrunnlagEntitet eksisterendeVLGrunnlag, Steg steg, List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode> beregningsgrunnlagPerioder) {
         Iterator<RegelResultat> resultat = regelResultater.iterator();
 
         int vlBGnummer = 0;
@@ -297,7 +297,7 @@ public class MapBeregningsgrunnlagFraRegelTilVL {
             .build(vlBGPeriode);
     }
 
-    private BeregningsgrunnlagPeriode mapBeregningsgrunnlagPeriode(final no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPeriode resultatGrunnlagPeriode,
+    private BeregningsgrunnlagPeriode mapBeregningsgrunnlagPeriode(final no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode resultatGrunnlagPeriode,
                                                                    RegelResultat regelResultat,
                                                                    final BeregningsgrunnlagPeriode vlBGPeriode,
                                                                    no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet eksisterendeVLGrunnlag,
@@ -389,7 +389,7 @@ public class MapBeregningsgrunnlagFraRegelTilVL {
         });
     }
 
-    private List<PeriodeÅrsak> mapPeriodeÅrsaker(List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.PeriodeÅrsak> periodeÅrsaker) {
+    private List<PeriodeÅrsak> mapPeriodeÅrsaker(List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.PeriodeÅrsak> periodeÅrsaker) {
         return periodeÅrsaker.stream()
             .map(MapPeriodeÅrsakFraRegelTilVL::map)
             .collect(Collectors.toList());

@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.ytelse.beregning;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelmodellOversetter;
+import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
 import no.nav.foreldrepenger.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraRegelTilVL;

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
 
 public final class FinnAnsettelsesPeriode {

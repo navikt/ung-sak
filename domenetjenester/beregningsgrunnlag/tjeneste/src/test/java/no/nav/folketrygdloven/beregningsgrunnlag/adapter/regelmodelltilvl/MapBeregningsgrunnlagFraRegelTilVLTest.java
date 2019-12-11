@@ -35,17 +35,17 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagType;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.BeregningsgrunnlagHjemmel;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.ResultatBeregningType;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.grunnlag.inntekt.Arbeidsforhold;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.Beregningsgrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPeriode;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPrArbeidsforhold;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.BeregningsgrunnlagHjemmel;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.ResultatBeregningType;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Arbeidsforhold;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrArbeidsforhold;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrStatus;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.BeregningIAYTestUtil;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
@@ -363,8 +363,8 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     }
 
     private Beregningsgrunnlag buildRegelBGForSN() {
-        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.SN,
-            no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.grunnlag.inntekt.Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
+        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.SN,
+            no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
             BeregningsgrunnlagHjemmel.HJEMMEL_BARE_SELVSTENDIG);
         Beregningsgrunnlag.builder(regelBG).medSammenligningsgrunnlag(buildRegelSammenligningsG()).build();
         Beregningsgrunnlag.builder(regelBG).medSammenligningsgrunnlagPrStatus(AktivitetStatus.SN, buildRegelSammenligningsG()).build();
@@ -376,7 +376,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     }
 
     private Beregningsgrunnlag buildRegelBGForAT() {
-        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.ATFL,
+        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.ATFL,
             null,
             BeregningsgrunnlagHjemmel.HJEMMEL_BARE_ARBEIDSTAKER);
         Beregningsgrunnlag.builder(regelBG).medSammenligningsgrunnlag(buildRegelSammenligningsG()).build();
@@ -389,7 +389,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     }
 
     private Beregningsgrunnlag buildRegelBGForFL() {
-        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.ATFL,
+        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.ATFL,
             null,
             BeregningsgrunnlagHjemmel.HJEMMEL_BARE_FRILANSER);
         Beregningsgrunnlag.builder(regelBG).medSammenligningsgrunnlag(buildRegelSammenligningsG()).build();
@@ -402,7 +402,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     }
 
     private Beregningsgrunnlag buildRegelBGForATFLogSN() {
-        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.ATFL_SN,
+        final Beregningsgrunnlag regelBG = buildRegelBeregningsgrunnlag(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.ATFL_SN,
             null,
             BeregningsgrunnlagHjemmel.HJEMMEL_ARBEIDSTAKER_OG_SELVSTENDIG);
         Beregningsgrunnlag.builder(regelBG).medSammenligningsgrunnlag(buildRegelSammenligningsG()).build();
@@ -422,7 +422,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         final BeregningsgrunnlagPrStatus regelBGPStatus = buildRegelBGPeriode(regelBGP, AktivitetStatus.ATFL, new Periode(MINUS_YEARS_2, MINUS_YEARS_1));
         final BeregningsgrunnlagPrArbeidsforhold regelArbeidsforhold42 = BeregningsgrunnlagPrArbeidsforhold.builder()
             .medArbeidsforhold(Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(ORGNR))
-            .medInntektskategori(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.grunnlag.inntekt.Inntektskategori.ARBEIDSTAKER)
+            .medInntektskategori(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.ARBEIDSTAKER)
             .medAndelNr(andelNr++)
             .medFordeltPrÅr(BigDecimal.valueOf(123.123))
             .medBeregnetPrÅr(BigDecimal.valueOf(123.123))
@@ -435,7 +435,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
 
         final BeregningsgrunnlagPrArbeidsforhold regelArbeidsforhold66 = BeregningsgrunnlagPrArbeidsforhold.builder()
             .medArbeidsforhold(Arbeidsforhold.frilansArbeidsforhold())
-            .medInntektskategori(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.grunnlag.inntekt.Inntektskategori.FRILANSER)
+            .medInntektskategori(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.FRILANSER)
             .medAndelNr(andelNr)
             .medFordeltPrÅr(BigDecimal.valueOf(456.456))
             .medBeregnetPrÅr(BigDecimal.valueOf(456.456))
@@ -459,7 +459,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         regelmodell.setSkjæringstidspunktForBeregning(skjæringstidspunkt);
         regelmodell.setSkjæringstidspunktForOpptjening(skjæringstidspunkt);
         regelmodell.leggTilAktivitetStatus(AktivitetStatus.ATFL);
-        var bgPrStatus = new no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.BeregningsgrunnlagPrStatus(AktivitetStatus.ATFL, arbeidsforhold);
+        var bgPrStatus = new no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.BeregningsgrunnlagPrStatus(AktivitetStatus.ATFL, arbeidsforhold);
         regelmodell.leggTilBeregningsgrunnlagPrStatus(bgPrStatus);
         return regelmodell;
     }
@@ -470,7 +470,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         regelmodell.setSkjæringstidspunktForBeregning(skjæringstidspunkt);
         regelmodell.setSkjæringstidspunktForOpptjening(skjæringstidspunkt);
         regelmodell.leggTilAktivitetStatus(AktivitetStatus.SN);
-        no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.BeregningsgrunnlagPrStatus bgPrStatus = new no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.BeregningsgrunnlagPrStatus(
+        no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.BeregningsgrunnlagPrStatus bgPrStatus = new no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.BeregningsgrunnlagPrStatus(
             AktivitetStatus.SN);
         regelmodell.leggTilBeregningsgrunnlagPrStatus(bgPrStatus);
         return regelmodell;

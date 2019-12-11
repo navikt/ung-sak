@@ -18,7 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.period
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.periodisering.FinnFørsteDagEtterBekreftetPermisjon;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;

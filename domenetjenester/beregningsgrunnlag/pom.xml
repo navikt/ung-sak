@@ -13,7 +13,6 @@
     <packaging>pom</packaging>
 
     <modules>
-		<module>regelmodell</module>
 		<module>tjeneste</module>
     </modules>
 

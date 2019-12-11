@@ -4,7 +4,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.MapBer
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.MapBeregningAktiviteterFraVLTilRegel;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 
 public class FastsettBeregningAktiviteter {
 

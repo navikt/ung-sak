@@ -3,7 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.perio
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.grunnlag.inntekt.NaturalYtelse;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.NaturalYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 
 class MapNaturalytelser {

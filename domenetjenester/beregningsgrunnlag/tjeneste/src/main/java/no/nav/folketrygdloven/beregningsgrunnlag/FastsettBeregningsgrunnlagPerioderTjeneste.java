@@ -13,9 +13,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.period
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.periodisering.MapFastsettBeregningsgrunnlagPerioderFraVLTilRegelRefusjonOgGradering;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.perioder.FastsettPeriodeRegel;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.PeriodeModell;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.SplittetPeriode;
+import no.nav.folketrygdloven.beregningsgrunnlag.perioder.FastsettPeriodeRegel;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.PeriodeModell;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.SplittetPeriode;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 
 @ApplicationScoped

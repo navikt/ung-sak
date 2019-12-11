@@ -24,7 +24,7 @@
 		<!-- Domenetjenester avhengigheter -->
 		<dependency>
 			<groupId>no.nav.folketrygdloven</groupId>
-			<artifactId>folketrygdloven-beregningsgrunnlag-regelmodell</artifactId>
+			<artifactId>beregningsgrunnlag-regelmodell</artifactId>
 		</dependency>
 
 		<!-- Prosjekt avhengigheter -->

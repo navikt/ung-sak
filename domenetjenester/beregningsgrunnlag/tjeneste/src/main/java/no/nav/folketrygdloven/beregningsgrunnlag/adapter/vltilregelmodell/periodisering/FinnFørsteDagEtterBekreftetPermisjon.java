@@ -3,7 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.perio
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.HentBekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;

@@ -9,11 +9,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.MapBGS
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.MapBGStatuserFraVLTilRegel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelmodellOversetter;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regel.RegelFastsettSkjæringstidspunkt;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.status.RegelFastsettStatusVedSkjæringstidspunkt;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
+import no.nav.folketrygdloven.skjæringstidspunkt.regel.RegelFastsettSkjæringstidspunkt;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
+import no.nav.folketrygdloven.skjæringstidspunkt.status.RegelFastsettStatusVedSkjæringstidspunkt;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.fpsak.nare.evaluation.Evaluation;

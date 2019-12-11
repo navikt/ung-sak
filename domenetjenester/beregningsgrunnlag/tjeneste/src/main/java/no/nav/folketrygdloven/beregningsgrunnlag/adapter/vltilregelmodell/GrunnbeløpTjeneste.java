@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Grunnbeløp;
+import no.nav.folketrygdloven.beregningsgrunnlag.Grunnbeløp;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSats;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSatsType;
 

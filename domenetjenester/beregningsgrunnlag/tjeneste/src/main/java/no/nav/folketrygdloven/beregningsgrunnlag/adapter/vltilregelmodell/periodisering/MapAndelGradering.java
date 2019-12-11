@@ -7,8 +7,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.MapArb
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.kodeverk.MapAktivitetStatusV2FraVLTilRegel;
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AndelGradering;
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AndelGradering.Gradering;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AndelGraderingImpl;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Periode;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AndelGraderingImpl;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 
 public final class MapAndelGradering {
     private MapAndelGradering() {
@@ -17,7 +17,7 @@ public final class MapAndelGradering {
 
     public static AndelGraderingImpl mapTilRegelAndelGradering(AndelGradering andelGradering) {
         var regelAktivitetStatus = MapAktivitetStatusV2FraVLTilRegel.map(andelGradering.getAktivitetStatus(), null);
-        List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Gradering> graderinger = mapGraderingPerioder(andelGradering.getGraderinger());
+        List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Gradering> graderinger = mapGraderingPerioder(andelGradering.getGraderinger());
         AndelGraderingImpl.Builder builder = AndelGraderingImpl.builder()
             .medAktivitetStatus(regelAktivitetStatus)
             .medGraderinger(graderinger);
@@ -29,9 +29,9 @@ public final class MapAndelGradering {
         return builder.build();
     }
 
-    private static List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Gradering> mapGraderingPerioder(List<Gradering> graderingList) {
+    private static List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Gradering> mapGraderingPerioder(List<Gradering> graderingList) {
         return graderingList.stream()
-            .map(gradering -> new no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Gradering(
+            .map(gradering -> new no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Gradering(
                 Periode.of(gradering.getPeriode().getFomDato(), gradering.getPeriode().getTomDato()),
                 gradering.getArbeidstidProsent()))
             .collect(Collectors.toList());

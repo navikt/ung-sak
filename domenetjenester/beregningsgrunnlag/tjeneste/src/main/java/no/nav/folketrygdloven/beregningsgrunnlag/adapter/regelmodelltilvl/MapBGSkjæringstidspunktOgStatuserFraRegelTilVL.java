@@ -20,8 +20,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSatsType;
@@ -55,8 +55,8 @@ public class MapBGSkjæringstidspunktOgStatuserFraRegelTilVL {
             throw new IllegalStateException("Antall regelresultater må være 2 for å spore regellogg");
         }
 
-        if (regelModell.getAktivitetStatuser().containsAll(Arrays.asList(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.DP,
-            no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.AAP))) {
+        if (regelModell.getAktivitetStatuser().containsAll(Arrays.asList(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.DP,
+            no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.AAP))) {
             throw new IllegalStateException("Ugyldig kombinasjon av statuser: Kan ikke både ha status AAP og DP samtidig");
         }
         LocalDate skjæringstidspunktForBeregning = regelModell.getSkjæringstidspunktForBeregning();
@@ -127,7 +127,7 @@ public class MapBGSkjæringstidspunktOgStatuserFraRegelTilVL {
                 .build(beregningsgrunnlagPeriode));
     }
 
-    private boolean erATFL(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus aktivitetStatus) {
-        return no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.ATFL.equals(aktivitetStatus);
+    private boolean erATFL(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus aktivitetStatus) {
+        return no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.ATFL.equals(aktivitetStatus);
     }
 }

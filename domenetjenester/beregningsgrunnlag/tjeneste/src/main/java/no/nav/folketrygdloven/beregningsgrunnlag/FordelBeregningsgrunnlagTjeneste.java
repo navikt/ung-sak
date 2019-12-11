@@ -9,10 +9,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.MapBer
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.MapBeregningsgrunnlagFraVLTilRegel;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelmodellOversetter;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.fordel.RegelFordelBeregningsgrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPeriode;
+import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
+import no.nav.folketrygdloven.beregningsgrunnlag.fordel.RegelFordelBeregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 
@@ -55,7 +55,7 @@ public class FordelBeregningsgrunnlagTjeneste {
         return oversetterFraRegel.mapForFordel(regelPerioder, regelResultater, beregningsgrunnlagEntitet);
     }
 
-    private static String toJson(List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.resultat.BeregningsgrunnlagPeriode> regelPerioder) {
+    private static String toJson(List<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode> regelPerioder) {
         return JacksonJsonConfig.toJson(regelPerioder, BeregningsgrunnlagFeil.FEILFACTORY::kanIkkeSerialisereRegelinput);
     }
 
