@@ -2,8 +2,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.kodev
 
 import java.util.EnumMap;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.Aktivitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Aktivitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 
 public class MapOpptjeningAktivitetFraRegelTilVL {

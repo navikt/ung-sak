@@ -10,8 +10,8 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktDefinisjon;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelMerknad;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.RegelResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelMerknad;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
 
 @ApplicationScoped
 public class AksjonspunktUtlederForeslåBeregning {

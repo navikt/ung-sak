@@ -6,33 +6,33 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.grunnlag.inntekt.Arbeidsforhold;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Arbeidsforhold;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 
 public class MapAktivitetStatusVedSkjæringstidspunktFraRegelTilVL {
-    private static final Map<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus, AktivitetStatus> AKTIVITET_STATUS_MAP = new EnumMap<>(
-        no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.class);
+    private static final Map<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus, AktivitetStatus> AKTIVITET_STATUS_MAP = new EnumMap<>(
+        no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.class);
 
     static {
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.AAP, AktivitetStatus.ARBEIDSAVKLARINGSPENGER);
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.BA, AktivitetStatus.BRUKERS_ANDEL);
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.DP, AktivitetStatus.DAGPENGER);
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.KUN_YTELSE, AktivitetStatus.KUN_YTELSE);
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.MS, AktivitetStatus.MILITÆR_ELLER_SIVIL);
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.SN, AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
-        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.UDEFINERT, AktivitetStatus.UDEFINERT);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.AAP, AktivitetStatus.ARBEIDSAVKLARINGSPENGER);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.BA, AktivitetStatus.BRUKERS_ANDEL);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.DP, AktivitetStatus.DAGPENGER);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.KUN_YTELSE, AktivitetStatus.KUN_YTELSE);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.MS, AktivitetStatus.MILITÆR_ELLER_SIVIL);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.SN, AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
+        AKTIVITET_STATUS_MAP.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.UDEFINERT, AktivitetStatus.UDEFINERT);
     }
 
     private MapAktivitetStatusVedSkjæringstidspunktFraRegelTilVL() {
         // skjul private constructor
     }
 
-    static boolean contains(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus aktivitetStatus) {
+    static boolean contains(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus aktivitetStatus) {
         return AKTIVITET_STATUS_MAP.containsKey(aktivitetStatus);
     }
 
-    static AktivitetStatus map(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus aktivitetStatus) {
+    static AktivitetStatus map(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus aktivitetStatus) {
         if (aktivitetStatus == null) {
             return null;
         }
@@ -45,7 +45,7 @@ public class MapAktivitetStatusVedSkjæringstidspunktFraRegelTilVL {
     }
 
     public static AktivitetStatus mapAktivitetStatusfraRegelmodell(AktivitetStatusModell regelmodell,
-                                                                   no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus regelVerdi) {
+                                                                   no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus regelVerdi) {
         if (erATFL(regelVerdi)) {
             return kombinertStatus(regelmodell, false);
         } else if (erATFL_SN(regelVerdi)) {
@@ -54,12 +54,12 @@ public class MapAktivitetStatusVedSkjæringstidspunktFraRegelTilVL {
         return MapAktivitetStatusVedSkjæringstidspunktFraRegelTilVL.map(regelVerdi);
     }
 
-    private static boolean erATFL(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus aktivitetStatus) {
-        return no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.ATFL.equals(aktivitetStatus);
+    private static boolean erATFL(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus aktivitetStatus) {
+        return no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.ATFL.equals(aktivitetStatus);
     }
 
-    private static boolean erATFL_SN(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus aktivitetStatus) {
-        return no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatus.ATFL_SN.equals(aktivitetStatus);
+    private static boolean erATFL_SN(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus aktivitetStatus) {
+        return no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus.ATFL_SN.equals(aktivitetStatus);
     }
 
     private static AktivitetStatus kombinertStatus(AktivitetStatusModell regelmodell, boolean medSN) {

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.periodisering.MapAndelGradering;
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AndelGradering;
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AndelGraderingImpl;
+import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AndelGraderingImpl;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
 
@@ -33,7 +33,7 @@ public class MapAndelGraderingTest {
         AndelGraderingImpl regelAndelGradering = MapAndelGradering.mapTilRegelAndelGradering(vlAndelGradering);
 
         // Assert
-        assertThat(regelAndelGradering.getAktivitetStatus()).isEqualTo(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatusV2.SN);
+        assertThat(regelAndelGradering.getAktivitetStatus()).isEqualTo(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatusV2.SN);
         assertThat(regelAndelGradering.getGraderinger()).hasSize(2);
         assertThat(regelAndelGradering.getGraderinger()).anySatisfy(periode -> {
             assertThat(periode.getFom()).isEqualTo(fom1);
@@ -65,7 +65,7 @@ public class MapAndelGraderingTest {
         AndelGraderingImpl regelAndelGradering = MapAndelGradering.mapTilRegelAndelGradering(vlAndelGradering);
 
         // Assert
-        assertThat(regelAndelGradering.getAktivitetStatus()).isEqualTo(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.regelmodell.AktivitetStatusV2.FL);
+        assertThat(regelAndelGradering.getAktivitetStatus()).isEqualTo(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatusV2.FL);
         assertThat(regelAndelGradering.getGraderinger()).hasSize(2);
         assertThat(regelAndelGradering.getGraderinger()).anySatisfy(periode -> {
             assertThat(periode.getFom()).isEqualTo(fom1);
