@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -55,11 +56,7 @@ import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.jpa.Transaction;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
+import no.nav.vedtak.sikkerhet.abac.*;
 import no.nav.vedtak.util.FPDateUtil;
 
 // FIXME K9 Hei Stian!
@@ -176,10 +173,18 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public void nyMottaJournalpost(@Parameter(description = "JournalpostId og selve søknaden") String pleiepengerBarnSoknadMeldingJson) {
+    public void nyMottaJournalpost(@Parameter(description = "JournalpostId og selve søknaden") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) String pleiepengerBarnSoknadMeldingJson) {
+        // FIXME K9 Fjern "TilpassetAbacAttributt": Sett opp sikkerhet og valg av ObjectMapper (se no.nav.foreldrepenger.web.app.jackson.JacksonJsonConfig) slik at vi kan bruke klassen direkte i metodesignaturen
         final PleiepengerBarnSoknadMelding pleiepengerBarnSoknadMelding = JsonUtils.fromString(pleiepengerBarnSoknadMeldingJson, PleiepengerBarnSoknadMelding.class);
         final JournalpostId journalpostId = new JournalpostId(pleiepengerBarnSoknadMelding.getJournalpostId());
         dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknadMelding.getSoknad(), journalpostId);
+    }
+
+    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
     }
 
     @POST
