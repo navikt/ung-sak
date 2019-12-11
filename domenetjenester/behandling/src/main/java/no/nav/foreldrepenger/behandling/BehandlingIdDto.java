@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -22,6 +24,12 @@ import no.nav.vedtak.sikkerhet.abac.AbacDto;
 @JsonInclude(Include.NON_NULL)
 public class BehandlingIdDto implements AbacDto {
 
+    @Size(
+        max = 19
+    )
+    @Pattern(
+        regexp = "^[a-zA-Z0-9]*$"
+    )
     private String saksnummer;
 
     @Min(0)

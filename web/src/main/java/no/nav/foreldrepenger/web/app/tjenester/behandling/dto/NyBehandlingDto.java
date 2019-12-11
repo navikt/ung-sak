@@ -1,9 +1,7 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.dto;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
@@ -14,6 +12,12 @@ import no.nav.vedtak.sikkerhet.abac.AbacDto;
 
 public class NyBehandlingDto implements AbacDto {
     @NotNull
+    @Size(
+        max = 19
+    )
+    @Pattern(
+        regexp = "^[a-zA-Z0-9]*$"
+    )
     private String saksnummer;
 
     @NotNull

@@ -48,6 +48,7 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -104,6 +105,9 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
 
             // Enforces av UUID selv
             put(UUID.class, singletonList(emptyList()));
+
+            // Sjekkes av separat validator
+            put(PleiepengerBarnSoknad.class, singletonList(emptyList()));
         }
     };
 
@@ -185,6 +189,9 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             return;
         }
         if (besøkteKlasser.contains(klasse)) {
+            return;
+        }
+        if (UNNTATT_FRA_VALIDERING.containsKey(klasse)) {
             return;
         }
 
