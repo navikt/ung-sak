@@ -47,7 +47,7 @@ public enum RelatertYtelseType implements Kodeverdi {
         FagsakYtelseType.FORELDREPENGER,
         Set.of(ENSLIG_FORSØRGER, SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, ARBEIDSAVKLARINGSPENGER, DAGPENGER),
         FagsakYtelseType.SVANGERSKAPSPENGER,
-        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, DAGPENGER)
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, DAGPENGER),
 
         // FIXME K9 Verdiene under er høyst sannsynlig feil -- kun lagt inn for å komme videre i verdikjedetest.
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
