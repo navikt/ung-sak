@@ -28,6 +28,10 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum RelatertYtelseType implements Kodeverdi {
 
+    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn"),
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående"),
+    OMSORGSPENGER("OMP", "Omsorgspenger"),
+    OPPLÆRINGSPENGER("OLP", "Opplæringspenger"),
     ENSLIG_FORSØRGER("ENSLIG_FORSØRGER", "Enslig forsørger"),
     SYKEPENGER("SYKEPENGER", "Sykepenger"),
     SVANGERSKAPSPENGER("SVANGERSKAPSPENGER", "Svangerskapspenger"),
@@ -43,7 +47,12 @@ public enum RelatertYtelseType implements Kodeverdi {
         FagsakYtelseType.FORELDREPENGER,
         Set.of(ENSLIG_FORSØRGER, SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, ARBEIDSAVKLARINGSPENGER, DAGPENGER),
         FagsakYtelseType.SVANGERSKAPSPENGER,
-        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, DAGPENGER));
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, DAGPENGER)
+
+        // FIXME K9 Verdiene under er høyst sannsynlig feil -- kun lagt inn for å komme videre i verdikjedetest.
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER, ENSLIG_FORSØRGER, PÅRØRENDESYKDOM)
+    );
 
     private static final Map<String, RelatertYtelseType> KODER = new LinkedHashMap<>();
 
