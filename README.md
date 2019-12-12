@@ -2,7 +2,7 @@
 
 ![](https://github.com/navikt/k9-sak/workflows/Bygg%20og%20deploy/badge.svg)
 
-Dette er repository for kildkode applikasjonen for saksbehandling av ytelser i kapittel 9 i folketrygden. 
+Dette er repository for kildkode applikasjonen for saksbehandling av ytelser i [Folketrygdloven kapittel 9](https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_5-5#%C2%A79-1)
 
 # Utvikling
    
