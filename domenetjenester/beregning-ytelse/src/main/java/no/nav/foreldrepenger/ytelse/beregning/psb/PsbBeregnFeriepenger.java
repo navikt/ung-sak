@@ -11,6 +11,6 @@ public class PsbBeregnFeriepenger extends BeregnFeriepengerTjeneste {
     // FIXME K9 Hvordan håndterer vi dete for PSB.
 
     public PsbBeregnFeriepenger() {
-        super(0);
+        super(60);
     }
 }
