@@ -36,10 +36,10 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
             }
             // FIXME K9 Definer skjæringstidspunkt for PSB
             return Skjæringstidspunkt.builder()
-                .medFørsteUttaksdato(LocalDate.now().minusDays(10))
-                .medSkjæringstidspunktBeregning(LocalDate.now().minusDays(40))
-                .medUtledetSkjæringstidspunkt(LocalDate.now().minusDays(40))
-                .medSkjæringstidspunktOpptjening(LocalDate.now().minusDays(40))
+                .medFørsteUttaksdato(LocalDate.now().minusMonths(3).withDayOfMonth(1))
+                .medSkjæringstidspunktBeregning(LocalDate.now().minusMonths(3).withDayOfMonth(1))
+                .medUtledetSkjæringstidspunkt(LocalDate.now().minusMonths(3).withDayOfMonth(1))
+                .medSkjæringstidspunktOpptjening(LocalDate.now().minusMonths(3).withDayOfMonth(1).minusDays(28))
                 .build();
             //throw new IllegalStateException("Ukjent ytelse type." + behandling.getFagsakYtelseType());
         } else {
