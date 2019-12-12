@@ -8,7 +8,7 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 /**
  * Sjekk om revurdering endrer utfall for FP.
  */
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class RevurderingEndring extends RevurderingEndringBasertPåKonsekvenserForYtelsen {
 

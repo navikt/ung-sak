@@ -23,6 +23,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderFaktaOmB
 import no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt.AvklarArbeidsforholdDto;
 import no.nav.foreldrepenger.web.app.IndexClasses;
 import no.nav.foreldrepenger.web.app.tjenester.RestImplementationClasses;
+import no.nav.k9.soknad.JsonUtils;
+import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 
 @Provider
 public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
@@ -33,7 +35,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     public JacksonJsonConfig() {
         this(false);
     }
-    
+
     public JacksonJsonConfig(boolean serialiserKodelisteNavn) {
         objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn));
     }
@@ -48,13 +50,13 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
 
         // registrer jackson JsonTypeName subtypes basert på rest implementasjoner
         Collection<Class<?>> restClasses = new RestImplementationClasses().getImplementationClasses();
-        
+
         Set<Class<?>> scanClasses = new LinkedHashSet<>(restClasses);
-        
+
         // hack - additional locations to scan (jars uten rest services) - trenger det her p.t. for å bestemme hvilke jars / maven moduler som skal scannes for andre dtoer
         scanClasses.add(AvklarArbeidsforholdDto.class);
         scanClasses.add(VurderFaktaOmBeregningDto.class);
-        
+
         // avled code location fra klassene
         scanClasses
             .stream()
@@ -98,6 +100,10 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
 
     @Override
     public ObjectMapper getContext(Class<?> type) {
+        // TODO Dette bør gjøres bedre slik at registrering av ObjectMapper gjøres lokalt i Rest-tjenesten.
+        if (type.isAssignableFrom(PleiepengerBarnSoknad.class)) {
+            return JsonUtils.getObjectMapper();
+        }
         return objectMapper;
     }
 

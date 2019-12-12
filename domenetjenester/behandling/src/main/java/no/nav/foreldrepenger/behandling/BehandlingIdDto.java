@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -22,9 +24,13 @@ import no.nav.vedtak.sikkerhet.abac.AbacDto;
 @JsonInclude(Include.NON_NULL)
 public class BehandlingIdDto implements AbacDto {
 
-    @Min(0)
-    @Max(Long.MAX_VALUE)
-    private Long saksnummer;
+    @Size(
+        max = 19
+    )
+    @Pattern(
+        regexp = "^[a-zA-Z0-9]*$"
+    )
+    private String saksnummer;
 
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -56,7 +62,7 @@ public class BehandlingIdDto implements AbacDto {
         this.behandlingUuid = uuidDto.getBehandlingUuid();
     }
 
-    public BehandlingIdDto(Long saksnummer, Long behandlingId, UUID behandlingUuid) {
+    public BehandlingIdDto(String saksnummer, Long behandlingId, UUID behandlingUuid) {
         this.saksnummer = saksnummer;
         this.behandlingId = behandlingId;
         this.behandlingUuid = behandlingUuid;
@@ -77,7 +83,7 @@ public class BehandlingIdDto implements AbacDto {
         return behandlingUuid;
     }
 
-    public Long getSaksnummer() {
+    public String getSaksnummer() {
         return saksnummer;
     }
 

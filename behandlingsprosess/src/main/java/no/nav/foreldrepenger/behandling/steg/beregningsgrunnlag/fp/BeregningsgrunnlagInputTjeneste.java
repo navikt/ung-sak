@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class BeregningsgrunnlagInputTjeneste extends BeregningsgrunnlagInputFelles {
 
     protected BeregningsgrunnlagInputTjeneste() {

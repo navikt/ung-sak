@@ -361,6 +361,9 @@ public class OppgaveTjeneste {
     }
 
     private String finnUnderkategoriKode(FagsakYtelseType fagsakYtelseType) {
+        // FIXME K9 Ser ut som om dette er noe som brukes mot Gosys. Skal dette også være der for PSB?
+        return "PLEIEPENGER_FOR";
+        /*
         if (fagsakYtelseType.gjelderForeldrepenger()) {
             return FP_UNDERKATEGORI;
         } else if (fagsakYtelseType.gjelderEngangsstønad()) {
@@ -369,6 +372,7 @@ public class OppgaveTjeneste {
             return SVP_UNDERKATEGORI;
         }
         throw OppgaveFeilmeldinger.FACTORY.underkategoriIkkeFunnetForFagsakYtelseType(fagsakYtelseType).toException();
+         */
     }
 
     private OpprettOppgaveRequest createRequest(Fagsak fagsak, Personinfo personinfo, OppgaveÅrsak oppgaveÅrsak,

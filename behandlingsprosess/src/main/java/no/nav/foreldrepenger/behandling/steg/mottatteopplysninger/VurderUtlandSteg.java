@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjenest
 
 @BehandlingStegRef(kode = "VURDER_UTLAND")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderUtlandSteg implements BehandlingSteg {
 
@@ -62,7 +62,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
             aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AUTOMATISK_MARKERING_AV_UTENLANDSSAK));
             opprettOppgaveForInnhentingAvDokumentasjon(behandling);
         }
-        
+
         return aksjonspunkter.isEmpty() ? BehandleStegResultat.utførtUtenAksjonspunkter()
             : BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
     }

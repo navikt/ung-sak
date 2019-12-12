@@ -8,6 +8,8 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 
+import java.time.LocalDate;
+
 @ApplicationScoped
 public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
@@ -20,7 +22,7 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
 
     @Inject
     public SkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository,
-                                          @FagsakYtelseTypeRef("FP") SkjæringstidspunktTjeneste foreldrepengerTjeneste) {
+                                          @FagsakYtelseTypeRef SkjæringstidspunktTjeneste foreldrepengerTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.foreldrepengerTjeneste = foreldrepengerTjeneste;
     }
@@ -32,7 +34,14 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
             if (behandling.getFagsakYtelseType().gjelderForeldrepenger()) {
                 return foreldrepengerTjeneste.getSkjæringstidspunkter(behandlingId);
             }
-            throw new IllegalStateException("Ukjent ytelse type." + behandling.getFagsakYtelseType());
+            // FIXME K9 Definer skjæringstidspunkt for PSB
+            return Skjæringstidspunkt.builder()
+                .medFørsteUttaksdato(LocalDate.now().minusDays(10))
+                .medSkjæringstidspunktBeregning(LocalDate.now().minusDays(40))
+                .medUtledetSkjæringstidspunkt(LocalDate.now().minusDays(40))
+                .medSkjæringstidspunktOpptjening(LocalDate.now().minusDays(40))
+                .build();
+            //throw new IllegalStateException("Ukjent ytelse type." + behandling.getFagsakYtelseType());
         } else {
             // returner tom container for andre behandlingtyper
             // (så ser vi om det evt. er noen call paths som kaller på noen form for skjæringstidspunkt)

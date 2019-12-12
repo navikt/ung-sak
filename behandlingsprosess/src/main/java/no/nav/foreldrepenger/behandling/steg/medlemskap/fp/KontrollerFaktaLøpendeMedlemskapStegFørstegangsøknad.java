@@ -11,7 +11,7 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 
 @BehandlingStegRef(kode = "KOFAK_LOP_MEDL")
 @BehandlingTypeRef("BT-002") //Førstegangssøknad
-@FagsakYtelseTypeRef("FP")  //Foreldrepenger
+@FagsakYtelseTypeRef  //Foreldrepenger
 @ApplicationScoped
 public class KontrollerFaktaLøpendeMedlemskapStegFørstegangsøknad implements KontrollerFaktaLøpendeMedlemskapSteg {
 

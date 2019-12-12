@@ -25,7 +25,7 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "VURDERKOMPLETT")
 @BehandlingTypeRef("BT-002")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
@@ -38,7 +38,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     }
 
     @Inject
-    public VurderKompletthetStegImpl(@FagsakYtelseTypeRef("FP") @BehandlingTypeRef("BT-002") Kompletthetsjekker kompletthetsjekker,
+    public VurderKompletthetStegImpl(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") Kompletthetsjekker kompletthetsjekker,
                                        BehandlingRepositoryProvider provider,
                                        VurderKompletthetStegFelles vurderKompletthetStegFelles,
                                        SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {

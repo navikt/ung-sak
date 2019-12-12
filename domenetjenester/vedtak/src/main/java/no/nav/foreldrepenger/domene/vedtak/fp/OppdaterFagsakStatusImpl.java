@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.domene.vedtak.OppdaterFagsakStatus;
 import no.nav.foreldrepenger.domene.vedtak.batch.OppdaterFagsakStatusFelles;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class OppdaterFagsakStatusImpl implements OppdaterFagsakStatus {
 
     private BehandlingRepository behandlingRepository;

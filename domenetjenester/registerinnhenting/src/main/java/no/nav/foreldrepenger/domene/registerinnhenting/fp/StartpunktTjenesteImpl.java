@@ -21,7 +21,7 @@ import no.nav.foreldrepenger.domene.registerinnhenting.StartpunktTjeneste;
 import no.nav.foreldrepenger.domene.registerinnhenting.StartpunktUtleder;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class StartpunktTjenesteImpl implements StartpunktTjeneste {
     private static final Logger LOGGER = LoggerFactory.getLogger(StartpunktTjenesteImpl.class);
 

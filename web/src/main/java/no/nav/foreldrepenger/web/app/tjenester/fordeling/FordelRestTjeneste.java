@@ -6,10 +6,13 @@ import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -22,9 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
+import no.nav.foreldrepenger.behandlingslager.behandling.*;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
@@ -42,21 +43,20 @@ import no.nav.foreldrepenger.kontrakter.fordel.SaksnummerDto;
 import no.nav.foreldrepenger.kontrakter.fordel.VurderFagsystemDto;
 import no.nav.foreldrepenger.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.foreldrepenger.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
+import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerPleiepengerBarnSoknad;
 import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystem;
 import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjeneste;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
+import no.nav.k9.soknad.JsonUtils;
+import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.jpa.Transaction;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
+import no.nav.vedtak.sikkerhet.abac.*;
 import no.nav.vedtak.util.FPDateUtil;
 
 // FIXME K9 Hei Stian!
@@ -83,6 +83,7 @@ public class FordelRestTjeneste {
     private OpprettSakOrchestrator opprettSakOrchestrator;
     private OpprettSakTjeneste opprettSakTjeneste;
     private VurderFagsystemFellesTjeneste vurderFagsystemTjeneste;
+    private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -90,13 +91,16 @@ public class FordelRestTjeneste {
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               JournalTjeneste journalTjeneste, FagsakTjeneste fagsakTjeneste,
-                              OpprettSakOrchestrator opprettSakOrchestrator, OpprettSakTjeneste opprettSakTjeneste, VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste) { // NOSONAR
+                              OpprettSakOrchestrator opprettSakOrchestrator, OpprettSakTjeneste opprettSakTjeneste, VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste,
+                              DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad
+    ) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.journalTjeneste = journalTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.opprettSakOrchestrator = opprettSakOrchestrator;
         this.opprettSakTjeneste = opprettSakTjeneste;
         this.vurderFagsystemTjeneste = vurderFagsystemFellesTjeneste;
+        this.dokumentmottakerPleiepengerBarnSoknad = dokumentmottakerPleiepengerBarnSoknad;
     }
 
     @POST
@@ -161,6 +165,24 @@ public class FordelRestTjeneste {
     public void knyttSakOgJournalpost(@Parameter(description = "Saksnummer og JournalpostId som skal knyttes sammen") @Valid AbacJournalpostKnyttningDto journalpostKnytningDto) {
         opprettSakTjeneste.knyttSakOgJournalpost(new Saksnummer(journalpostKnytningDto.getSaksnummer()),
             new JournalpostId(journalpostKnytningDto.getJournalpostId()));
+    }
+
+    @POST
+    @Path("psbSoknad")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
+    public void psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
+        // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
+        dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
+    }
+
+    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
     }
 
     @POST
@@ -405,5 +427,36 @@ public class FordelRestTjeneste {
             return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
         }
 
+    }
+
+    public static class PleiepengerBarnSoknadMelding {
+        @NotNull
+        @Digits(
+            integer = 18,
+            fraction = 0
+        )
+        private String journalpostId;
+
+        private PleiepengerBarnSoknad soknad;
+
+        public PleiepengerBarnSoknadMelding() {
+
+        }
+
+        public String getJournalpostId() {
+            return journalpostId;
+        }
+
+        public void setJournalpostId(String journalpostId) {
+            this.journalpostId = journalpostId;
+        }
+
+        public PleiepengerBarnSoknad getSoknad() {
+            return soknad;
+        }
+
+        public void setSoknad(PleiepengerBarnSoknad soknad) {
+            this.soknad = soknad;
+        }
     }
 }

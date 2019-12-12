@@ -18,7 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregnings
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class FullføreBeregningsgrunnlagFPImpl extends FullføreBeregningsgrunnlag {
 

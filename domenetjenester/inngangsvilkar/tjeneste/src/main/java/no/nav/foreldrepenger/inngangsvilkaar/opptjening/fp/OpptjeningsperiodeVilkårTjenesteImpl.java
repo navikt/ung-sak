@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.fp.R
 import no.nav.fpsak.nare.evaluation.Evaluation;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class OpptjeningsperiodeVilkårTjenesteImpl implements OpptjeningsperiodeVilkårTjeneste {
 
     private InngangsvilkårOversetter inngangsvilkårOversetter;

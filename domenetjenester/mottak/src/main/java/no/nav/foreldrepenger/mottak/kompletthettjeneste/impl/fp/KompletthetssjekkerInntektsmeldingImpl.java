@@ -16,7 +16,7 @@ import no.nav.foreldrepenger.mottak.kompletthettjeneste.KompletthetssjekkerInnte
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class KompletthetssjekkerInntektsmeldingImpl implements KompletthetssjekkerInntektsmelding {
 
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste;

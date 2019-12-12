@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -19,18 +21,19 @@ public class SaksnummerDto implements AbacDto {
 
     @JsonProperty("saksnummer")
     @NotNull
-    @Digits(integer = 18, fraction = 0)
+    @Size(
+        max = 19
+    )
+    @Pattern(
+        regexp = "^[a-zA-Z0-9]*$"
+    )
     private final String saksnummer;
 
-    public SaksnummerDto(Long saksnummer) {
-        Objects.requireNonNull(saksnummer, "saksnummer");
-        this.saksnummer = saksnummer.toString();
-    }
 
     public SaksnummerDto(String saksnummer) {
         this.saksnummer = saksnummer;
     }
-    
+
     public SaksnummerDto(Saksnummer saksnummer) {
         this.saksnummer = saksnummer.getVerdi();
     }
@@ -38,10 +41,6 @@ public class SaksnummerDto implements AbacDto {
 
     public String getVerdi() {
         return saksnummer;
-    }
-
-    public Long getVerdiSomLong() {
-        return Long.parseLong(saksnummer);
     }
 
     @Override

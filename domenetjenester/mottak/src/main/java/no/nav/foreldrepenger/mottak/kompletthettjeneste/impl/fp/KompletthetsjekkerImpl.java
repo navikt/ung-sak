@@ -30,7 +30,7 @@ import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(KompletthetsjekkerImpl.class);
 
@@ -49,8 +49,8 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     }
 
     @Inject
-    public KompletthetsjekkerImpl(@FagsakYtelseTypeRef("FP") @BehandlingTypeRef("BT-002") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
-                                @FagsakYtelseTypeRef("FP") @BehandlingTypeRef("BT-002") KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding,
+    public KompletthetsjekkerImpl(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
+                                @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding,
                                 InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                 KompletthetsjekkerFelles fellesUtil,
                                 SøknadRepository søknadRepository) {

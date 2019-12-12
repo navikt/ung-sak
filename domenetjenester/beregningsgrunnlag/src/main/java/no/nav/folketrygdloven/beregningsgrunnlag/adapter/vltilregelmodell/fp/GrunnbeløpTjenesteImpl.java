@@ -8,7 +8,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagReposi
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class GrunnbeløpTjenesteImpl extends GrunnbeløpTjeneste {
 

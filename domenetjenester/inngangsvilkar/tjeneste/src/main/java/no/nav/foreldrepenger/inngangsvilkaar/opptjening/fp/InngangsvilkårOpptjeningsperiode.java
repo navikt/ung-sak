@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsperiodeVilkå
 
 @ApplicationScoped
 @VilkårTypeRef(VilkårTypeKoder.FP_VK_21)
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 public class InngangsvilkårOpptjeningsperiode implements Inngangsvilkår {
 
     private OpptjeningsperiodeVilkårTjeneste opptjeningsperiodeVilkårTjeneste;
@@ -23,7 +23,7 @@ public class InngangsvilkårOpptjeningsperiode implements Inngangsvilkår {
     }
 
     @Inject
-    public InngangsvilkårOpptjeningsperiode(@FagsakYtelseTypeRef("FP") OpptjeningsperiodeVilkårTjeneste opptjeningsperiodeVilkårTjeneste) {
+    public InngangsvilkårOpptjeningsperiode(@FagsakYtelseTypeRef OpptjeningsperiodeVilkårTjeneste opptjeningsperiodeVilkårTjeneste) {
         this.opptjeningsperiodeVilkårTjeneste = opptjeningsperiodeVilkårTjeneste;
     }
 

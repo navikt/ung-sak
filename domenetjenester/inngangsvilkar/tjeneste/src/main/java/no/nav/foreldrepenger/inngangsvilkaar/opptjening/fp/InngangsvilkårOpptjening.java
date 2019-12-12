@@ -12,7 +12,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.VilkårTypeRef;
 import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsVilkårTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FP")
+@FagsakYtelseTypeRef
 @VilkårTypeRef(VilkårTypeKoder.FP_VK_23)
 public class InngangsvilkårOpptjening implements Inngangsvilkår {
 
@@ -23,7 +23,7 @@ public class InngangsvilkårOpptjening implements Inngangsvilkår {
     }
 
     @Inject
-    public InngangsvilkårOpptjening(@FagsakYtelseTypeRef("FP") OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste) {
+    public InngangsvilkårOpptjening(@FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste) {
         this.opptjeningsVilkårTjeneste = opptjeningsVilkårTjeneste;
     }
 
