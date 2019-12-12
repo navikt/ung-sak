@@ -20,7 +20,14 @@ public class OpptjeningsaktiviteterPerYtelse {
             OpptjeningAktivitetType.DAGPENGER,
             OpptjeningAktivitetType.ARBEIDSAVKLARING,
             OpptjeningAktivitetType.VENTELØNN_VARTPENGER,
-            OpptjeningAktivitetType.ETTERLØNN_SLUTTPAKKE));
+            OpptjeningAktivitetType.ETTERLØNN_SLUTTPAKKE),
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN, Set.of(
+            OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
+            OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
+            OpptjeningAktivitetType.ARBEIDSAVKLARING)
+        );
+
+    // FIXME K9 Oopptjening fra foreldrepenger skal ekskluderes hvis denne ble godkjent kun på basis av AAP.
 
     private Set<OpptjeningAktivitetType> ekskluderteAktiviteter;
 
