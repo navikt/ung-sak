@@ -1,4 +1,4 @@
-name: Bygg pull request
+name: Sonar analyse
 
 on: 
   push:
