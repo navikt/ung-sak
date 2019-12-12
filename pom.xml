@@ -585,42 +585,53 @@
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>1.1.0</version>
 				</plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.6.1.1688</version>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>agent</id>
+                            <?m2e ignore?>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <destFile>${sonar.jacoco.reportPaths}</destFile>
+                                <append>true</append>
+                                <excludes>${sonar.coverage.exclusions}</excludes>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>agent-it</id>
+                            <?m2e ignore?>
+                            <goals>
+                                <goal>prepare-agent-integration</goal>
+                            </goals>
+                            <configuration>
+                                <destFile>${sonar.jacoco.reportPaths}</destFile>
+                                <append>true</append>
+                                <excludes>${sonar.coverage.exclusions}</excludes>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <sonar.jacoco.reportPaths>${maven.root}/target/jacoco.exec</sonar.jacoco.reportPaths>
+                        <sonar.inclusions>src/main/java/**</sonar.inclusions>
+				        <sonar.exclusions>**/test/**,**/*mock*/**,**/testutilities/**,**/target/**,**/bin/**,**/testdata/**,**/docs/**,**/apidoc/**,target</sonar.exclusions>
+				        <sonar.coverage.exclusions>${sonar.exclusions}</sonar.coverage.exclusions>
+                    </configuration>
+                </plugin>
 			</plugins>
 
 		</pluginManagement>
 
 		<plugins>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>agent</id>
-						<?m2e ignore?>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<configuration>
-							<destFile>${sonar.jacoco.reportPaths}</destFile>
-							<append>true</append>
-							<excludes>${sonar.coverage.exclusions}</excludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>agent-it</id>
-						<?m2e ignore?>
-						<goals>
-							<goal>prepare-agent-integration</goal>
-						</goals>
-						<configuration>
-							<destFile>${sonar.jacoco.reportPaths}</destFile>
-							<append>true</append>
-							<excludes>${sonar.coverage.exclusions}</excludes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
