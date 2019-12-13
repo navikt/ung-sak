@@ -64,7 +64,7 @@ public class VilkårResultat extends BaseEntitet {
     /**
      * Hvorvidt hele vilkårresultatet er overstyrt av Saksbehandler. (fra SF3).
      */
-    
+
     @Column(name = "overstyrt", nullable = false)
     private boolean erOverstyrt = false;
 
@@ -165,7 +165,7 @@ public class VilkårResultat extends BaseEntitet {
         // det gir en deep equals av vilkårene inklusiv alle felter som er mappet til tuple list.
         Map<VilkårType, ?> vilkårThis = toTuples(this.vilkårne);
         Map<VilkårType, ?> vilkårAnnen = toTuples(annen.vilkårne);
-        return vilkårThis.equals(vilkårAnnen);
+        return vilkårThis.equals(vilkårAnnen) && Objects.equals(this.vilkårResultatType, annen.vilkårResultatType);
     }
 
     private static Map<VilkårType, ?> toTuples(Set<Vilkår> vilkårene) {
@@ -223,7 +223,7 @@ public class VilkårResultat extends BaseEntitet {
         Builder() {
             super();
         }
-        
+
         private void validerKanModifisere() {
             if(built) throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
         }
@@ -359,7 +359,7 @@ public class VilkårResultat extends BaseEntitet {
             }
             return buildFor(behandlingsresultat);
         }
-        
+
         /** OBS: Returnerer alltid nytt vilkårresultat. */
         public VilkårResultat build() {
             oppdaterVilkår(resultatKladd);
