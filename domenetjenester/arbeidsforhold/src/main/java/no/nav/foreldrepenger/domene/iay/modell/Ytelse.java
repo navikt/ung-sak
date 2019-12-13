@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.Convert;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
@@ -38,7 +39,7 @@ public class Ytelse extends BaseEntitet implements IndexKey {
     private Saksnummer saksnummer;
 
     @ChangeTracked
-    @Convert(converter=Fagsystem.KodeverdiConverter.class)
+    @Convert(converter = Fagsystem.KodeverdiConverter.class)
     private Fagsystem kilde;
 
     @ChangeTracked
@@ -58,14 +59,11 @@ public class Ytelse extends BaseEntitet implements IndexKey {
         this.saksnummer = ytelse.getSaksnummer();
         this.temaUnderkategori = ytelse.getBehandlingsTema();
         this.kilde = ytelse.getKilde();
-        ytelse.getYtelseGrunnlag().ifPresent(yg -> {
-            YtelseGrunnlag ygn = new YtelseGrunnlag(yg);
-            this.ytelseGrunnlag = ygn;
-        });
-        this.ytelseAnvist = ytelse.getYtelseAnvist().stream().map(ya -> {
-            YtelseAnvist ytelseAnvist = new YtelseAnvist(ya);
-            return ytelseAnvist;
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
+        ytelse.getYtelseGrunnlag().ifPresent(yg -> this.ytelseGrunnlag = new YtelseGrunnlag(yg));
+        this.ytelseAnvist = ytelse.getYtelseAnvist()
+            .stream()
+            .map(YtelseAnvist::new)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override

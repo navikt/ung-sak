@@ -81,7 +81,7 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
     }
 
     private boolean sjekkVilkårAvslått(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.isVilkårAvslått() || !minstEnGyldigUttaksPeriode(behandlingsresultat);
+        return behandlingsresultat.isVilkårAvslått(); // FIXME K9 Midlertidig fjerning av krav om minst én uttaksperiode:  || !minstEnGyldigUttaksPeriode(behandlingsresultat);
     }
 
 

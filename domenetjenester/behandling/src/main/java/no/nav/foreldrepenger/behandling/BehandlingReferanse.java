@@ -51,13 +51,13 @@ public class BehandlingReferanse {
     }
 
     private BehandlingReferanse(FagsakYtelseType fagsakYtelseType,  // NOSONAR
-                                BehandlingType behandlingType, 
-                                AktørId aktørId, 
+                                BehandlingType behandlingType,
+                                AktørId aktørId,
                                 Saksnummer saksnummer,
-                                Long fagsakId, 
-                                Long behandlingId, 
-                                UUID behandlingUuid, 
-                                Optional<Long> originalBehandlingId, 
+                                Long fagsakId,
+                                Long behandlingId,
+                                UUID behandlingUuid,
+                                Optional<Long> originalBehandlingId,
                                 BehandlingStatus behandlingStatus,
                                 Skjæringstidspunkt skjæringstidspunkt) { // NOSONAR
         this.fagsakYtelseType = fagsakYtelseType;
@@ -108,13 +108,13 @@ public class BehandlingReferanse {
     }
 
     public static BehandlingReferanse fra(FagsakYtelseType fagsakYtelseType, // NOSONAR
-                                          BehandlingType behandlingType, 
-                                          AktørId aktørId, 
+                                          BehandlingType behandlingType,
+                                          AktørId aktørId,
                                           Saksnummer saksnummer,
-                                          Long fagsakId, 
-                                          Long behandlingId, 
-                                          UUID behandlingUuid, 
-                                          Optional<Long> originalBehandlingId, 
+                                          Long fagsakId,
+                                          Long behandlingId,
+                                          UUID behandlingUuid,
+                                          Optional<Long> originalBehandlingId,
                                           BehandlingStatus behandlingStatus,
                                           Skjæringstidspunkt skjæringstidspunkt) { // NOSONAR
         return new BehandlingReferanse(fagsakYtelseType,
@@ -233,7 +233,7 @@ public class BehandlingReferanse {
     @Override
     public String toString() {
         return getClass().getSimpleName() + String.format(
-            "<saksnummer=%s, behandlingId=%s, fagsakType=%s, behandlingType=%s, rolle=%s, aktørId=%s, status=%s, skjæringstidspunjkt=%s, originalBehandlingId=%s>",
+            "<saksnummer=%s, behandlingId=%s, fagsakType=%s, behandlingType=%s, aktørId=%s, status=%s, skjæringstidspunkt=%s, originalBehandlingId=%s>",
             saksnummer, behandlingId, fagsakYtelseType, behandlingType, aktørId, behandlingStatus, skjæringstidspunkt, originalBehandlingId);
     }
 
