@@ -50,7 +50,7 @@ public class DokumentKafkaBestillerTest {
 
         ProsessTaskEventPubliserer eventPubliserer = Mockito.mock(ProsessTaskEventPubliserer.class);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        prosessTaskRepository = new ProsessTaskRepositoryImpl(repositoryRule.getEntityManager(), eventPubliserer);
+        prosessTaskRepository = new ProsessTaskRepositoryImpl(repositoryRule.getEntityManager(), null, eventPubliserer);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.lagre(repositoryProvider);

@@ -32,7 +32,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<felles.version>1.4.0-20191210141540-b48ff5b</felles.version>
+		<felles.version>1.4.2-20191216072225-afaf53e</felles.version>
 
         <metrics.version>3.2.5</metrics.version>
 		<fp-kontrakter.version>5.1_20191210141010_6a7f399</fp-kontrakter.version>
@@ -57,11 +57,11 @@
 				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>no.nav.foreldrepenger.felles</groupId>
-				<artifactId>felles-prosesstask</artifactId>
-				<version>${felles.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
+			    <groupId>no.nav.vedtak.prosesstask</groupId>
+			    <artifactId>prosesstask-root</artifactId>
+			    <version>2.0.0-20191216124556-a028808</version>
+                <scope>import</scope>
+				<type>pom</type>			    
 			</dependency>
 
 			<dependency>
@@ -154,11 +154,6 @@
 			</dependency>
 
 			<!-- Prosjektets egne biblioteker -->
-			<dependency>
-				<groupId>no.nav.foreldrepenger.felles</groupId>
-				<artifactId>felles-prosesstask</artifactId>
-				<version>${felles.version}</version>
-			</dependency>
 
 			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>

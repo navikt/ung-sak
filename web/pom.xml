@@ -42,10 +42,15 @@
 		</dependency>
 
 		<!-- Prosjekt avhengigheter -->
-		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-prosesstask</artifactId>
+        <dependency>
+		    <groupId>no.nav.vedtak.prosesstask</groupId>
+		    <artifactId>prosesstask-rest-api</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>no.nav.vedtak.prosesstask</groupId>
+		    <artifactId>prosesstask-legacy</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>risikoklassifisering</artifactId>

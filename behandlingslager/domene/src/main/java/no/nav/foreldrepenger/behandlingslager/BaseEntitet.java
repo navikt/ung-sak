@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -61,7 +62,7 @@ public abstract class BaseEntitet implements Serializable {
         return endretAv;
     }
 
-    public LocalDateTime getEndretTidspunkt() {
+    public LocalDateTime getEndretTidspunkt() { 
         return endretTidspunkt;
     }
 
