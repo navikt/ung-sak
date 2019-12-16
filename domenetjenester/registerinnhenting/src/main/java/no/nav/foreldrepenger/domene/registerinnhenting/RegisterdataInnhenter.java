@@ -294,6 +294,7 @@ public class RegisterdataInnhenter {
         builder.medFødselsdato(personinfo.getFødselsdato())
             .medNavn(personinfo.getNavn())
             .medDødsdato(personinfo.getDødsdato())
+            .medKjønn(personinfo.getKjønn())
             .medSivilstand(personinfo.getSivilstandType())
             .medRegion(personinfo.getRegion());
         informasjonBuilder.leggTil(builder);

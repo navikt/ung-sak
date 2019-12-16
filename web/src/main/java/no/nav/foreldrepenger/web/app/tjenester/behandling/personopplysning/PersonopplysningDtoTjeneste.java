@@ -104,7 +104,7 @@ public class PersonopplysningDtoTjeneste {
             .map(e -> enkelMapping(e, aggregat))
             .collect(Collectors.toList()));
 
-        dto.setBarnSoktFor(Collections.emptyList());
+        dto.setBarnSoktFor(Collections.emptyList()); // TODO K9: Bør liste opp barne det er søkt og pleie for
 
         Optional<PersonopplysningEntitet> ektefelleOpt = aggregat.getEktefelle();
         if (ektefelleOpt.isPresent() && ektefelleOpt.get().equals(søker)) {
@@ -130,7 +130,7 @@ public class PersonopplysningDtoTjeneste {
             gjeldendePersonstatus);
         dto.setAvklartPersonstatus(avklartPersonstatus);
         dto.setSivilstand(personopplysning.getSivilstand());
-
+        dto.setNavBrukerKjonn(personopplysning.getKjønn());
         dto.setAktoerId(personopplysning.getAktørId());
         dto.setNavn(formaterMedStoreOgSmåBokstaver(personopplysning.getNavn()));
         dto.setDodsdato(personopplysning.getDødsdato());
