@@ -93,7 +93,7 @@ public class OpprettNyFørstegangsbehandlingTest {
     public void setup() {
         ProsessTaskEventPubliserer prosessTaskEventPubliserer = Mockito.mock(ProsessTaskEventPubliserer.class);
         Mockito.doNothing().when(prosessTaskEventPubliserer).fireEvent(Mockito.any(ProsessTaskData.class), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        prosessTaskRepository = Mockito.spy(new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), prosessTaskEventPubliserer));
+        prosessTaskRepository = Mockito.spy(new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, prosessTaskEventPubliserer));
         mottatteDokumentTjeneste = mock(MottatteDokumentTjeneste.class);
         when(mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(any(MottattDokument.class))).thenReturn(MOTTATT_DOKUMENT_ID);
 

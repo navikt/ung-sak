@@ -1,6 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.verdikjede.komponenttest;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +40,12 @@ class BeregningInnhentSamletTjenesteStub {
 
         @Override
         public List<AktoerIder> hentAktørIdForPersonIdentSet(Set<String> set) {
-            return Collections.emptyList();
+            return List.of();
+        }
+
+        @Override
+        public List<AktoerIder> hentPersonIdenterForAktørIder(Set<String> aktørIder) {
+            return List.of();
         }
     }
 

@@ -52,7 +52,7 @@ public class HendelserRestTjenesteTest {
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private HendelsemottakRepository hendelsemottakRepository = new HendelsemottakRepository(repoRule.getEntityManager());
-    private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null);
+    private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
     private HendelseSorteringRepository sorteringRepository = mock(HendelseSorteringRepository.class);
     private HendelserRestTjeneste hendelserRestTjeneste;
 

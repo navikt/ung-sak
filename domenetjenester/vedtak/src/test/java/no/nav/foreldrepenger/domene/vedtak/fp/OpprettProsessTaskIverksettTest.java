@@ -40,7 +40,7 @@ public class OpprettProsessTaskIverksettTest {
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null);
+    private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
 
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;

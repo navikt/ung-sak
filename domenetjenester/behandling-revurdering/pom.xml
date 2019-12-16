@@ -39,9 +39,9 @@
         </dependency>
 
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-prosesstask</artifactId>
-        </dependency>
+		    <groupId>no.nav.vedtak.prosesstask</groupId>
+		    <artifactId>prosesstask</artifactId>
+		</dependency>
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

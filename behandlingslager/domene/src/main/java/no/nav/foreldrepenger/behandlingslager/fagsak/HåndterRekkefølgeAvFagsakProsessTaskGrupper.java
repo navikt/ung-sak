@@ -69,7 +69,7 @@ public class HåndterRekkefølgeAvFagsakProsessTaskGrupper implements ProsessTas
 
         Long gruppeSekvensNr = getGruppeSekvensNr();
 
-        BasicCdiProsessTaskDispatcher cdiDispatcher = new BasicCdiProsessTaskDispatcher();
+        BasicCdiProsessTaskDispatcher cdiDispatcher = new BasicCdiProsessTaskDispatcher() {};
 
         for (Entry entry : gruppe.getTasks()) {
 

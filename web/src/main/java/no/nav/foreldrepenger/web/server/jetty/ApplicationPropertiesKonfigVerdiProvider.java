@@ -6,12 +6,13 @@ import java.util.Properties;
 import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.vedtak.konfig.PropertiesKonfigVerdiProvider;
+import no.nav.vedtak.konfig.StandardPropertySource;
 
 @ApplicationScoped
 public class ApplicationPropertiesKonfigVerdiProvider extends PropertiesKonfigVerdiProvider {
 
     protected ApplicationPropertiesKonfigVerdiProvider() {
-        super(initApplicationProperties());
+        super(initApplicationProperties(), StandardPropertySource.APP_PROPERTIES);
     }
 
     static Properties initApplicationProperties() {
