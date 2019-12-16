@@ -178,6 +178,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     @Override
     public String toString() {
         return "PersonopplysningEntitet{" + "id=" + id +
+            ", aktørId=" + aktørId +
             ", brukerKjønn=" + brukerKjønn +
             ", sivilstand=" + sivilstand +
             ", navn='" + navn + '\'' +

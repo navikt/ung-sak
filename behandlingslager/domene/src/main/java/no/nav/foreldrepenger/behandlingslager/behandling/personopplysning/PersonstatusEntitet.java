@@ -123,7 +123,8 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("PersonstatusEntitet{");
-        sb.append("gyldighetsperiode=").append(periode);
+        sb.append("aktørId=").append(aktørId);
+        sb.append(", periode=").append(periode);
         sb.append(", personstatus=").append(personstatus);
         sb.append('}');
         return sb.toString();

@@ -205,7 +205,8 @@ public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, In
     public String toString() {
         final StringBuilder sb = new StringBuilder("PersonAdresseEntitet{");
         sb.append("id=").append(id);
-        sb.append(", gyldighetsperiode=").append(periode);
+        sb.append(", aktørId=").append(aktørId);
+        sb.append(", periode=").append(periode);
         sb.append(", adresseType=").append(adresseType);
         sb.append(", adresselinje1='").append(adresselinje1).append('\'');
         sb.append(", adresselinje2='").append(adresselinje2).append('\'');

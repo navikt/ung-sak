@@ -133,7 +133,8 @@ public class StatsborgerskapEntitet extends BaseEntitet implements HarAktørId, 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("StatsborgerskapEntitet{");
-        sb.append("gyldighetsperiode=").append(periode);
+        sb.append("aktørId=").append(aktørId);
+        sb.append(", periode=").append(periode);
         sb.append(", statsborgerskap=").append(statsborgerskap);
         sb.append('}');
         return sb.toString();

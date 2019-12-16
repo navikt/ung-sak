@@ -44,7 +44,7 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     @ChangeTracked
     private RelasjonsRolleType relasjonsrolle;
 
-    
+
     @Column(name = "har_samme_bosted")
     @ChangeTracked
     private Boolean harSammeBosted = Boolean.FALSE;
@@ -115,6 +115,8 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     public String toString() {
         final StringBuilder sb = new StringBuilder("PersonRelasjonEntitet{");
         sb.append("relasjonsrolle=").append(relasjonsrolle);
+        sb.append(", fra=").append(fraAktørId);
+        sb.append(", til=").append(tilAktørId);
         sb.append('}');
         return sb.toString();
     }
