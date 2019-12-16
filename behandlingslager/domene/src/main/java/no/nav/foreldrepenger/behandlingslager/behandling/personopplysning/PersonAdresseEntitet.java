@@ -208,10 +208,6 @@ public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, In
         sb.append(", aktørId=").append(aktørId);
         sb.append(", periode=").append(periode);
         sb.append(", adresseType=").append(adresseType);
-        sb.append(", adresselinje1='").append(adresselinje1).append('\'');
-        sb.append(", adresselinje2='").append(adresselinje2).append('\'');
-        sb.append(", adresselinje3='").append(adresselinje3).append('\'');
-        sb.append(", adresselinje4='").append(adresselinje4).append('\'');
         sb.append(", postnummer='").append(postnummer).append('\'');
         sb.append(", poststed='").append(poststed).append('\'');
         sb.append(", land='").append(land).append('\'');
