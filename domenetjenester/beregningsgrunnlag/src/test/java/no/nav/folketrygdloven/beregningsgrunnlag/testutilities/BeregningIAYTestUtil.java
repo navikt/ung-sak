@@ -52,7 +52,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent // La stå @Dependent så lenge #oppgittOpptjeningBuilder er et felt her
 public class BeregningIAYTestUtil {
@@ -496,9 +496,7 @@ public class BeregningIAYTestUtil {
         AktivitetsAvtaleBuilder aktivitetsAvtale = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(tilOgMed == null ? DatoIntervallEntitet.fraOgMed(fraOgMed) : DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed))
             .medProsentsats(BigDecimal.TEN)
-            .medSisteLønnsendringsdato(lønnsendringsdato.orElse(null))
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d));
+            .medSisteLønnsendringsdato(lønnsendringsdato.orElse(null));
         AktivitetsAvtaleBuilder arbeidsperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(tilOgMed == null ? DatoIntervallEntitet.fraOgMed(fraOgMed) : DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed));
 

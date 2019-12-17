@@ -33,7 +33,7 @@ import no.nav.abakus.iaygrunnlag.ytelse.v1.FordelingDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class MapAktørYtelse {
     

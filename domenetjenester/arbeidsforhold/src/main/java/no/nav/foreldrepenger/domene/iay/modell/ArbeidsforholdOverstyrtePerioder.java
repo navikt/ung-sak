@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class ArbeidsforholdOverstyrtePerioder extends BaseEntitet implements IndexKey {
 

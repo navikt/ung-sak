@@ -29,7 +29,7 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilde
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.foreldrepenger.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class HentAktiviteterForBeregningTjenesteImplTest {
 

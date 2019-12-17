@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.NaturalYtelseType;
 import no.nav.foreldrepenger.domene.typer.Beløp;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class NaturalYtelse extends BaseEntitet implements IndexKey {
 

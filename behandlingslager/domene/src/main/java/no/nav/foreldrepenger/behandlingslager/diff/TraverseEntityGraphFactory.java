@@ -8,8 +8,8 @@ import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraphConfig;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseJpaEntityGraphConfig;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 public final class TraverseEntityGraphFactory {
     private TraverseEntityGraphFactory() {

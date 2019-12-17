@@ -49,7 +49,6 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjenest
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
-import no.nav.k9.soknad.JsonUtils;
 import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;

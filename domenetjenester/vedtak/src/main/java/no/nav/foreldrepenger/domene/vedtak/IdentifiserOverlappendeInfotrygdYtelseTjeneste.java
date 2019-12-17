@@ -35,7 +35,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.Meldingstype;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @ApplicationScoped
 public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {

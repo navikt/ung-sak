@@ -61,7 +61,7 @@ import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.util.FPDateUtil;
 
@@ -156,9 +156,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         yrkesaktivitetBuilder
             .leggTilAktivitetsAvtale(yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode3.getFomDato(), periode3.getTomDato()))
-                .medProsentsats(BigDecimal.TEN)
-                .medAntallTimer(BigDecimal.valueOf(20.4d))
-                .medAntallTimerFulltid(BigDecimal.valueOf(10.2d)));
+                .medProsentsats(BigDecimal.TEN));
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
 
@@ -429,8 +427,6 @@ public class OpptjeningsperioderTjenesteImplTest {
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(periode)
             .medProsentsats(BigDecimal.valueOf(100))
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d))
             .medBeskrivelse("Ser greit ut");
         AktivitetsAvtaleBuilder ansettelsesperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(periode);
@@ -459,8 +455,6 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(periode)
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d))
             .medBeskrivelse("Ser greit ut");
 
         yrkesaktivitetBuilder
@@ -511,8 +505,6 @@ public class OpptjeningsperioderTjenesteImplTest {
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(periode)
             .medProsentsats(prosentsats)
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d))
             .medBeskrivelse("Ser greit ut");
         AktivitetsAvtaleBuilder ansettelsesperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(periode);

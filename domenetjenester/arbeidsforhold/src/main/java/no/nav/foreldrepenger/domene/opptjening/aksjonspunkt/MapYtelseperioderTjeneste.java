@@ -29,7 +29,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 

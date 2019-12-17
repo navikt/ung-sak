@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class FinnStartdatoPermisjonTest {
 
@@ -67,7 +67,6 @@ public class FinnStartdatoPermisjonTest {
         assertThat(startDato).isEqualTo(ansettelsesDato);
     }
 
-
     @Test
     public void finnStartdatoPermisjonNårAktivitetTilkommerEtterStpUtenInntektsmelding() {
         // Arrange
@@ -99,9 +98,6 @@ public class FinnStartdatoPermisjonTest {
     }
 
     private void lagAktivitetsavtale(AktivitetsAvtaleBuilder aktivitetsavtaleBuilder, DatoIntervallEntitet periode) {
-        aktivitetsavtaleBuilder.medPeriode(periode)
-            .medAntallTimer(BigDecimal.valueOf(37.5))
-            .medProsentsats(BigDecimal.valueOf(100))
-            .medAntallTimerFulltid(BigDecimal.valueOf(37.5));
+        aktivitetsavtaleBuilder.medPeriode(periode).medProsentsats(BigDecimal.valueOf(100));
     }
 }

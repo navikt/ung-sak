@@ -7,7 +7,7 @@ import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraphConfig;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class IAYDiffsjekker {
     private DiffEntity diffEntity;

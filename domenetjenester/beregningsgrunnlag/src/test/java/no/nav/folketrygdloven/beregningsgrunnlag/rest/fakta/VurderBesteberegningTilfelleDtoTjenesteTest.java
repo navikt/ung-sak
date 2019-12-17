@@ -1,6 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta;
 
-import static no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet.fraOgMedTilOgMed;
+import static no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet.fraOgMedTilOgMed;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -28,7 +28,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStat
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 public class VurderBesteberegningTilfelleDtoTjenesteTest {
 

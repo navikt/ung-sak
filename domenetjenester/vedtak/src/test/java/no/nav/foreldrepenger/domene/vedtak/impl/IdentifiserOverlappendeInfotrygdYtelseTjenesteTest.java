@@ -44,7 +44,7 @@ import no.nav.foreldrepenger.domene.vedtak.IdentifiserOverlappendeInfotrygdYtels
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.Meldingstype;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
 

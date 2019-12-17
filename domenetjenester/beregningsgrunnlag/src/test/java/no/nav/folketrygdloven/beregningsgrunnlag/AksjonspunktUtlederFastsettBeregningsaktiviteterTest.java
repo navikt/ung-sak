@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
