@@ -33,7 +33,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.IverksettingStat
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -44,7 +44,7 @@ import no.nav.foreldrepenger.domene.vedtak.IdentifiserOverlappendeInfotrygdYtels
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.Meldingstype;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
 
@@ -955,7 +955,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
                 .medFom(datoList.get(ix++))
                 .medSekvensnummer(sekvensnummer++)
                 .medType(type)
-                .medTypeYtelse(RelatertYtelseType.SYKEPENGER.getKode())
+                .medTypeYtelse(FagsakYtelseType.SYKEPENGER.getKode())
                 .build();
             hendelser.add(hendelse);
         }
@@ -972,7 +972,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
 
     private YtelseBuilder lagYtelse(LocalDate fom, LocalDate tom, RelatertYtelseTilstand relatertYtelseTilstand) {
         return YtelseBuilder.oppdatere(Optional.empty())
-            .medYtelseType(RelatertYtelseType.FORELDREPENGER)
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medKilde(Fagsystem.INFOTRYGD)
             .medStatus(relatertYtelseTilstand);

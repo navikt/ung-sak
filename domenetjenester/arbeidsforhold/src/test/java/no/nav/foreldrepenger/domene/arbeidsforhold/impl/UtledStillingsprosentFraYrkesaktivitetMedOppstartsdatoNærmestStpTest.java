@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class UtledStillingsprosentFraYrkesaktivitetMedOppstartsdatoNærmestStpTest {
 
@@ -96,9 +96,7 @@ public class UtledStillingsprosentFraYrkesaktivitetMedOppstartsdatoNærmestStpTe
             .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
             .leggTilAktivitetsAvtale(YrkesaktivitetBuilder.nyAktivitetsAvtaleBuilder()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
-                .medProsentsats(BigDecimal.valueOf(stillingsprosent))
-                .medAntallTimer(BigDecimal.valueOf(10))
-                .medAntallTimerFulltid(BigDecimal.valueOf(10)))
+                .medProsentsats(BigDecimal.valueOf(stillingsprosent)))
             .build();
     }
 

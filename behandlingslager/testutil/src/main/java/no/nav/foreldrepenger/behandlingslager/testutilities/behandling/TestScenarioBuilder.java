@@ -17,21 +17,20 @@ import no.nav.vedtak.util.FPDateUtil;
  */
 public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilder> {
 
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.FORELDREPENGER;
+    public static final FagsakYtelseType DEFAULT_TEST_YTELSE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-    private TestScenarioBuilder() {
-        super(YTELSE_TYPE);
-        settDefaultSøknad();
-
-    }
-
-    private TestScenarioBuilder(AktørId aktørId) {
-        super(YTELSE_TYPE, aktørId);
+    private TestScenarioBuilder(FagsakYtelseType ytelseType) {
+        super(ytelseType);
         settDefaultSøknad();
     }
 
-    private TestScenarioBuilder(NavBruker navBruker) {
-        super(YTELSE_TYPE, navBruker);
+    private TestScenarioBuilder(FagsakYtelseType ytelseType, AktørId aktørId) {
+        super(ytelseType, aktørId);
+        settDefaultSøknad();
+    }
+
+    private TestScenarioBuilder(FagsakYtelseType ytelseType, NavBruker navBruker) {
+        super(ytelseType, navBruker);
         settDefaultSøknad();
     }
 
@@ -42,27 +41,46 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     }
 
     public static TestScenarioBuilder builderMedSøknad() {
-        return new TestScenarioBuilder();
+        return new TestScenarioBuilder(DEFAULT_TEST_YTELSE);
     }
 
     public static TestScenarioBuilder builderUtenSøknad() {
-        var scenario = new TestScenarioBuilder();
+        return builderUtenSøknad(DEFAULT_TEST_YTELSE);
+    }
+
+    public static TestScenarioBuilder builderUtenSøknad(FagsakYtelseType ytelseType) {
+        var scenario = new TestScenarioBuilder(ytelseType);
         scenario.utenSøknad();
         return scenario;
     }
 
     public static TestScenarioBuilder builderUtenSøknad(AktørId aktørId) {
-        var scenario = new TestScenarioBuilder(aktørId);
+        return builderUtenSøknad(DEFAULT_TEST_YTELSE, aktørId);
+    }
+    
+    public static TestScenarioBuilder builderUtenSøknad(FagsakYtelseType ytelseType, AktørId aktørId) {
+        var scenario = new TestScenarioBuilder(ytelseType, aktørId);
         scenario.utenSøknad();
         return scenario;
     }
 
     public static TestScenarioBuilder builderMedSøknad(AktørId aktørId) {
-        return new TestScenarioBuilder(aktørId);
+        return builderMedSøknad(DEFAULT_TEST_YTELSE, aktørId);
+    }
+
+    public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType ytelseType, AktørId aktørId) {
+        return new TestScenarioBuilder(ytelseType, aktørId);
     }
 
     public static TestScenarioBuilder builderMedSøknad(NavBruker navBruker) {
-        return new TestScenarioBuilder(navBruker);
+        return builderMedSøknad(DEFAULT_TEST_YTELSE, navBruker);
     }
 
+    public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType fagsakYtelseType) {
+        return new TestScenarioBuilder(fagsakYtelseType);
+    }
+
+    public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType fagsakYtelseType, NavBruker navBruker) {
+        return new TestScenarioBuilder(fagsakYtelseType, navBruker);
+    }
 }

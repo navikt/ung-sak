@@ -44,7 +44,7 @@ import no.nav.foreldrepenger.domene.opptjening.aksjonspunkt.OpptjeningAktivitetV
 import no.nav.foreldrepenger.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class OpptjeningsperioderTjeneste {

@@ -11,22 +11,22 @@ import java.util.Set;
 import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.felles.BeregningUtils;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class BeregningUtilsTest {
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2019,1,1);
-    private static final RelatertYtelseType AAP = RelatertYtelseType.ARBEIDSAVKLARINGSPENGER;
+    private static final FagsakYtelseType AAP = FagsakYtelseType.ARBEIDSAVKLARINGSPENGER;
     @Test
     public void skal_finne_ytelse_med_korrekt_ytelsetype() {
         Ytelse aapYtelse = lagYtelse(AAP, SKJÆRINGSTIDSPUNKT.minusMonths(2), SKJÆRINGSTIDSPUNKT.minusMonths(1)).build();
-        Ytelse dpYtelse = lagYtelse(RelatertYtelseType.DAGPENGER, SKJÆRINGSTIDSPUNKT.minusMonths(1), SKJÆRINGSTIDSPUNKT.minusDays(1)).build();
+        Ytelse dpYtelse = lagYtelse(FagsakYtelseType.DAGPENGER, SKJÆRINGSTIDSPUNKT.minusMonths(1), SKJÆRINGSTIDSPUNKT.minusDays(1)).build();
 
         YtelseFilter filter = new YtelseFilter(Arrays.asList(aapYtelse, dpYtelse));
 
@@ -146,7 +146,7 @@ public class BeregningUtilsTest {
     }
 
 
-    private YtelseBuilder lagYtelse(RelatertYtelseType ytelsetype, LocalDate fom, LocalDate tom) {
+    private YtelseBuilder lagYtelse(FagsakYtelseType ytelsetype, LocalDate fom, LocalDate tom) {
         return YtelseBuilder.oppdatere(Optional.empty())
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
                 .medYtelseType(ytelsetype)

@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.AktørArbeid;
@@ -42,7 +42,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.util.FPDateUtil;
 
 public class InntektArbeidYtelseScenario {
@@ -135,8 +135,6 @@ public class InntektArbeidYtelseScenario {
         private LocalDate aktivitetsAvtaleFom = FPDateUtil.iDag().minusYears(3L);
         private LocalDate aktivitetsAvtaleTom = FPDateUtil.iDag();
         private BigDecimal aktivitetsAvtaleProsentsats = BigDecimal.TEN;
-        private BigDecimal aktivitetsAvtaleAntallTimer = BigDecimal.valueOf(20.4d);
-        private BigDecimal aktivitetsAvtaleAntallTimerFulltid = BigDecimal.valueOf(10.2d);
 
         // Virksomhet
         private String orgNr = "21542512";
@@ -157,7 +155,7 @@ public class InntektArbeidYtelseScenario {
         private YtelseType inntektspostYtelseType = OffentligYtelseType.UDEFINERT;
 
         // RelaterteYtelser
-        private RelatertYtelseType ytelseType = null;
+        private FagsakYtelseType ytelseType = null;
         private LocalDate iverksettelsesDato = FPDateUtil.iDag().minusYears(5L);
         private RelatertYtelseTilstand relatertYtelseTilstand = RelatertYtelseTilstand.AVSLUTTET;
         private TemaUnderkategori ytelseBehandlingstema = TemaUnderkategori.FORELDREPENGER_SVANGERSKAPSPENGER;
@@ -215,16 +213,6 @@ public class InntektArbeidYtelseScenario {
             return this;
         }
 
-        public InntektArbeidYtelseScenarioTestBuilder medAktivitetsAvtaleAntallTimer(BigDecimal aktivitetsAvtaleAntallTimer) {
-            this.aktivitetsAvtaleAntallTimer = aktivitetsAvtaleAntallTimer;
-            return this;
-        }
-
-        public InntektArbeidYtelseScenarioTestBuilder medAktivitetsAvtaleAntallTimerFulltid(BigDecimal aktivitetsAvtaleAntallTimerFulltid) {
-            this.aktivitetsAvtaleAntallTimerFulltid = aktivitetsAvtaleAntallTimerFulltid;
-            return this;
-        }
-
         // Virksomhet
         public InntektArbeidYtelseScenarioTestBuilder medOrgNr(String orgNr) {
             this.orgNr = orgNr;
@@ -270,7 +258,7 @@ public class InntektArbeidYtelseScenario {
         }
 
         // Ytelse (YtelseType må settes)
-        public InntektArbeidYtelseScenarioTestBuilder medYtelseType(RelatertYtelseType ytelseType) {
+        public InntektArbeidYtelseScenarioTestBuilder medYtelseType(FagsakYtelseType ytelseType) {
             this.ytelseType = ytelseType;
             return this;
         }
@@ -290,7 +278,7 @@ public class InntektArbeidYtelseScenario {
             return this;
         }
 
-        public YtelseBuilder buildRelaterteYtelserGrunnlag(RelatertYtelseType ytelseType) {
+        public YtelseBuilder buildRelaterteYtelserGrunnlag(FagsakYtelseType ytelseType) {
             return YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(ytelseKilde)
                 .medSaksnummer(saksnummer)
@@ -348,9 +336,7 @@ public class InntektArbeidYtelseScenario {
 
             AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(aktivitetsAvtaleFom, aktivitetsAvtaleTom))
-                .medProsentsats(aktivitetsAvtaleProsentsats)
-                .medAntallTimer(aktivitetsAvtaleAntallTimer)
-                .medAntallTimerFulltid(aktivitetsAvtaleAntallTimerFulltid);
+                .medProsentsats(aktivitetsAvtaleProsentsats);
 
             AktivitetsAvtaleBuilder ansettelsesperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(aktivitetsAvtaleFom, aktivitetsAvtaleTom));

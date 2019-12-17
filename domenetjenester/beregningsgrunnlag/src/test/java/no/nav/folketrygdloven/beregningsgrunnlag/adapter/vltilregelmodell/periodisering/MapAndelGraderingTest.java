@@ -11,7 +11,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.period
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AndelGradering;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AndelGraderingImpl;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class MapAndelGraderingTest {
     @Test

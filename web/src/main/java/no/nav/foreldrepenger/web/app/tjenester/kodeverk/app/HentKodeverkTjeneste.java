@@ -52,7 +52,6 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.behandlingslager.uttak.IkkeOppfyltÅrsak;
 import no.nav.foreldrepenger.behandlingslager.uttak.InnvilgetÅrsak;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
@@ -72,7 +71,7 @@ public class HentKodeverkTjeneste {
 
         map.put(RelatertYtelseTilstand.class.getSimpleName(), RelatertYtelseTilstand.kodeMap().values());
         map.put(FagsakStatus.class.getSimpleName(), FagsakStatus.kodeMap().values());
-        map.put(RelatertYtelseType.class.getSimpleName(), RelatertYtelseType.kodeMap().values());
+        map.put(FagsakYtelseType.class.getSimpleName(), FagsakYtelseType.kodeMap().values());
         map.put(BehandlingÅrsakType.class.getSimpleName(), BehandlingÅrsakType.kodeMap().values());
         map.put(HistorikkBegrunnelseType.class.getSimpleName(), HistorikkBegrunnelseType.kodeMap().values());
         map.put(OppgaveÅrsak.class.getSimpleName(), OppgaveÅrsak.kodeMap().values());

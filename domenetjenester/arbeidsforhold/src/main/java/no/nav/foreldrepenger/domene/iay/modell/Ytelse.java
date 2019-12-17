@@ -8,24 +8,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Convert;
-
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-public class Ytelse extends BaseEntitet implements IndexKey {
+public class Ytelse implements IndexKey {
 
     private YtelseGrunnlag ytelseGrunnlag;
 
-    @Convert(converter = RelatertYtelseType.KodeverdiConverter.class)
-    private RelatertYtelseType relatertYtelseType = RelatertYtelseType.UDEFINERT;
+    private FagsakYtelseType relatertYtelseType = FagsakYtelseType.UDEFINERT;
 
     @ChangeTracked
     private DatoIntervallEntitet periode;
@@ -39,7 +35,6 @@ public class Ytelse extends BaseEntitet implements IndexKey {
     private Saksnummer saksnummer;
 
     @ChangeTracked
-    @Convert(converter = Fagsystem.KodeverdiConverter.class)
     private Fagsystem kilde;
 
     @ChangeTracked
@@ -53,7 +48,7 @@ public class Ytelse extends BaseEntitet implements IndexKey {
     }
 
     public Ytelse(Ytelse ytelse) {
-        this.relatertYtelseType = ytelse.getRelatertYtelseType();
+        this.relatertYtelseType = ytelse.getYtelseType();
         this.status = ytelse.getStatus();
         this.periode = ytelse.getPeriode();
         this.saksnummer = ytelse.getSaksnummer();
@@ -71,11 +66,11 @@ public class Ytelse extends BaseEntitet implements IndexKey {
         return IndexKey.createKey(periode, relatertYtelseType, saksnummer);
     }
 
-    public RelatertYtelseType getRelatertYtelseType() {
+    public FagsakYtelseType getYtelseType() {
         return relatertYtelseType;
     }
 
-    void setRelatertYtelseType(RelatertYtelseType relatertYtelseType) {
+    void setYtelseType(FagsakYtelseType relatertYtelseType) {
         this.relatertYtelseType = relatertYtelseType;
     }
 

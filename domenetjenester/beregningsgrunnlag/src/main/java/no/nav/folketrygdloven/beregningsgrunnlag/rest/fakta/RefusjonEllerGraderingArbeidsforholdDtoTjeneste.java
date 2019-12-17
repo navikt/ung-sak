@@ -24,7 +24,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagArbeidsforholdDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.GraderingEllerRefusjonDto;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class RefusjonEllerGraderingArbeidsforholdDtoTjeneste {

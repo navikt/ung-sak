@@ -45,11 +45,19 @@ public class YtelseForretningshendelseSaksvelger implements ForretningshendelseS
 
     @Override
     public Map<BehandlingÅrsakType, List<Fagsak>> finnRelaterteFagsaker(YtelseForretningshendelse forretningshendelse) {
+        return finnRelaterteFagsaker(null, forretningshendelse);
+    }
+    
+    /**
+     * @param ytelseType (Optional).  Hvis ikke angitt vil returnere alle matchende fagsaker uavh. av ytelseType
+     */
+    @Override
+    public Map<BehandlingÅrsakType, List<Fagsak>> finnRelaterteFagsaker(FagsakYtelseType ytelseType, YtelseForretningshendelse forretningshendelse) {
         Map<BehandlingÅrsakType, List<Fagsak>> resultat = new HashMap<>();
         BehandlingÅrsakType behandlingÅrsakType = finnBehandlingÅrsakType(forretningshendelse.getForretningshendelseType());
         resultat.put(behandlingÅrsakType, fagsakRepository.hentForBruker(forretningshendelse.getAktørId()).stream()
             .filter(fagsak -> !FagsakStatus.AVSLUTTET.equals(fagsak.getStatus()))
-            .filter(fagsak -> fagsak.getYtelseType().equals(FagsakYtelseType.FORELDREPENGER))
+            .filter(fagsak -> ytelseType == null || fagsak.getYtelseType().equals(ytelseType))
             .collect(Collectors.toList()));
         return resultat;
     }

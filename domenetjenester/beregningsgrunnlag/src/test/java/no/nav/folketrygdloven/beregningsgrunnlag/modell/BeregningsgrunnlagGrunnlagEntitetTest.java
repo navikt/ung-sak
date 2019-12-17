@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 public class BeregningsgrunnlagGrunnlagEntitetTest {
 

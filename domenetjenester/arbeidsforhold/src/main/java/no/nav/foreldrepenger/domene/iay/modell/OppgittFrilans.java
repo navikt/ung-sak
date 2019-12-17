@@ -4,11 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 
 
-public class OppgittFrilans extends BaseEntitet {
+public class OppgittFrilans {
 
     private OppgittOpptjening oppgittOpptjening;
 
@@ -20,7 +19,6 @@ public class OppgittFrilans extends BaseEntitet {
 
     @ChangeTracked
     private List<OppgittFrilansoppdrag> frilansoppdrag;
-
 
     public OppgittFrilans() {
     }

@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.fp.Opptjenin
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.util.Tuple;
 
 public class OpptjeningsgrunnlagAdapter {

@@ -10,7 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class SatsTypeTest {

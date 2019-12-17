@@ -4,7 +4,7 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.AbstractLocalDateInterval;
+import no.nav.foreldrepenger.domene.typer.tid.AbstractLocalDateInterval;
 
 import java.time.LocalDate;
 import java.util.*;

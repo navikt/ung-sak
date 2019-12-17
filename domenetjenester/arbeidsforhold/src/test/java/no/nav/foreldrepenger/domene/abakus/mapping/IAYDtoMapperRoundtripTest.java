@@ -5,15 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
 import no.nav.abakus.iaygrunnlag.JournalpostId;
@@ -62,6 +58,9 @@ import no.nav.abakus.iaygrunnlag.ytelse.v1.FordelingDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
+import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 
 public class IAYDtoMapperRoundtripTest {
 
@@ -90,8 +89,6 @@ public class IAYDtoMapperRoundtripTest {
         InntektArbeidYtelseGrunnlag fpsakGrunnlag = fraDtoMapper.mapTilGrunnlagInklusivRegisterdata(dto, true);
         IAYTilDtoMapper dtoMapper = new IAYTilDtoMapper(aktørId, uuid, uuid);
         InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(fpsakGrunnlag, true);
-
-        System.out.format("tidssone info: '%s', '%s'\n", OffsetDateTime.now(), ZoneId.systemDefault());
 
         // Assert
         assertThat(dtoIgjen.getGrunnlagTidspunkt()).isEqualTo(dto.getGrunnlagTidspunkt());

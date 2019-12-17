@@ -68,10 +68,6 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
 
     @Override
     public void håndterAvslåttEllerOpphørtBehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        if (fagsak.getYtelseType().gjelderEngangsstønad()) {
-            dokumentmottakerFelles.opprettTaskForÅVurdereDokument(fagsak, avsluttetBehandling, mottattDokument);
-            return;
-        }
         if (dokumentmottakerFelles.skalOppretteNyFørstegangsbehandling(avsluttetBehandling.getFagsak())) { //#I3
             opprettNyFørstegangsbehandlingForMottattInntektsmelding(mottattDokument, fagsak, avsluttetBehandling);
         } else if (harAvslåttPeriode(avsluttetBehandling) && behandlingsoppretter.harBehandlingsresultatOpphørt(avsluttetBehandling)) { //#I4

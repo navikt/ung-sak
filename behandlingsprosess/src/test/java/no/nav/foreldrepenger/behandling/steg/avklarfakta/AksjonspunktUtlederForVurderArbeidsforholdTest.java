@@ -46,7 +46,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.util.FPDateUtil;
 
@@ -295,9 +295,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
             .medArbeidsforholdId(ref)
             .leggTilAktivitetsAvtale(yrkesaktivitetBuilderForType
                 .getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusMonths(3)), false)
-                .medProsentsats(BigDecimal.valueOf(100))
-                .medAntallTimer(BigDecimal.valueOf(40))
-                .medAntallTimerFulltid(BigDecimal.valueOf(40)))
+                .medProsentsats(BigDecimal.valueOf(100)))
             .leggTilAktivitetsAvtale(yrkesaktivitetBuilderForType
                 .getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusMonths(3)), true));
         arbeidBuilder.leggTilYrkesaktivitet(yrkesaktivitetBuilderForType);

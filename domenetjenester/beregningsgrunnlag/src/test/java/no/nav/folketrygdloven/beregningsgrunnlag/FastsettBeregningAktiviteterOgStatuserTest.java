@@ -49,7 +49,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSats
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -260,7 +260,7 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
         var opptj1 = lagArbeidOgOpptjening(ORG_NUMMER, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(4), SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), arbId1);
         var opptj2 = lagAnnenAktivitetMedOpptjening(ArbeidType.MILITÆR_ELLER_SIVILTJENESTE, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(10), DAGEN_FØR_SFO);
         var opptj3 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2),
-            SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(1).plusDays(1), RelatertYtelseType.ARBEIDSAVKLARINGSPENGER, null);
+            SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(1).plusDays(1), FagsakYtelseType.ARBEIDSAVKLARINGSPENGER, null);
         iayTestUtil.lagreOppgittOpptjening(behandlingReferanse);
 
         // Act
@@ -393,10 +393,10 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
             .build();
 
         leggTilAktørytelse(behandlingReferanse, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(10), SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2),
-            RelatertYtelseTilstand.LØPENDE, behandlingReferanse.getSaksnummer().getVerdi(), RelatertYtelseType.SYKEPENGER,
+            RelatertYtelseTilstand.LØPENDE, behandlingReferanse.getSaksnummer().getVerdi(), FagsakYtelseType.SYKEPENGER,
             Collections.singletonList(ytelseStørrelse1), Arbeidskategori.ARBEIDSTAKER, false);
         leggTilAktørytelse(behandlingReferanse, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2).plusDays(1), DAGEN_FØR_SFO,
-            RelatertYtelseTilstand.LØPENDE, behandlingReferanse.getSaksnummer().getVerdi(), RelatertYtelseType.SYKEPENGER,
+            RelatertYtelseTilstand.LØPENDE, behandlingReferanse.getSaksnummer().getVerdi(), FagsakYtelseType.SYKEPENGER,
             Collections.singletonList(ytelseStørrelse2), Arbeidskategori.ARBEIDSTAKER, false);
 
         var opptj1 = OpptjeningAktiviteter.nyPeriodeOrgnr(OpptjeningAktivitetType.ARBEID,
@@ -415,8 +415,8 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
     public void testSkjæringstidspunktForDagpengemottakerMedSykepenger() {
         // Arrange
         var opptj1 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(10), SKJÆRINGSTIDSPUNKT_OPPTJENING.plusMonths(2),
-            RelatertYtelseType.DAGPENGER, null);
-        var opptj2 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, RelatertYtelseType.SYKEPENGER, ORG_NUMMER);
+            FagsakYtelseType.DAGPENGER, null);
+        var opptj2 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, FagsakYtelseType.SYKEPENGER, ORG_NUMMER);
 
         // Act
         BeregningsgrunnlagEntitet grunnlag = act(new OpptjeningAktiviteter(opptj1, opptj2));
@@ -431,8 +431,8 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
     public void testSkjæringstidspunktForAAPmottakerMedSykepenger() {
         // Arrange
         var opptj1 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(10), SKJÆRINGSTIDSPUNKT_OPPTJENING.plusMonths(2),
-            RelatertYtelseType.ARBEIDSAVKLARINGSPENGER, null);
-        var opptj2 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, RelatertYtelseType.SYKEPENGER, ORG_NUMMER);
+            FagsakYtelseType.ARBEIDSAVKLARINGSPENGER, null);
+        var opptj2 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, FagsakYtelseType.SYKEPENGER, ORG_NUMMER);
 
         // Act
         BeregningsgrunnlagEntitet grunnlag = act(new OpptjeningAktiviteter(opptj1, opptj2));
@@ -487,7 +487,7 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
         var arbId1 = InternArbeidsforholdRef.nyRef();
         // Arrange
         var opptj0 = lagArbeidOgOpptjening(ORG_NUMMER, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(10), SKJÆRINGSTIDSPUNKT_OPPTJENING.plusMonths(2), arbId1);
-        var opptj1 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, RelatertYtelseType.DAGPENGER, null);
+        var opptj1 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, FagsakYtelseType.DAGPENGER, null);
         var opptj2 = lagFrilansOgOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO);
         var opptj3 = lagAnnenAktivitetMedOpptjening(ArbeidType.MILITÆR_ELLER_SIVILTJENESTE, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO);
         var opptj4 = lagNæringOgOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO);
@@ -513,8 +513,8 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
     public void testSkjæringstidspunktForDagpengemottakerMedSykepengerMedFørsteUttaksdagEtterGrunnbeløpEndring() {
         // Arrange
         var opptj1 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(10), SKJÆRINGSTIDSPUNKT_OPPTJENING.plusMonths(2),
-            RelatertYtelseType.DAGPENGER, null);
-        var opptj2 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, RelatertYtelseType.SYKEPENGER, ORG_NUMMER);
+            FagsakYtelseType.DAGPENGER, null);
+        var opptj2 = lagYtelseMedOpptjening(SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(2), DAGEN_FØR_SFO, FagsakYtelseType.SYKEPENGER, ORG_NUMMER);
 
         // Act
         BeregningsgrunnlagEntitet grunnlag = act(new OpptjeningAktiviteter(opptj1, opptj2));
@@ -608,7 +608,7 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
         return OpptjeningAktiviteter.nyPeriode(utledOpptjeningAktivitetType(arbeidType), Periode.of(fom, tom));
     }
 
-    private OpptjeningPeriode lagYtelseMedOpptjening(LocalDate fom, LocalDate tom, RelatertYtelseType relatertYtelseType, String orgnr) {
+    private OpptjeningPeriode lagYtelseMedOpptjening(LocalDate fom, LocalDate tom, FagsakYtelseType relatertYtelseType, String orgnr) {
         leggTilAktørytelse(behandlingReferanse, fom, tom, RelatertYtelseTilstand.LØPENDE, behandlingReferanse.getSaksnummer().getVerdi(),
             relatertYtelseType, Collections.singletonList(lagYtelseStørrelse(orgnr)),
             orgnr == null ? Arbeidskategori.ARBEIDSTAKER : Arbeidskategori.INAKTIV, true);
@@ -623,15 +623,15 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
             .orElse(OpptjeningAktivitetType.UDEFINERT);
     }
 
-    private OpptjeningAktivitetType utledOpptjeningAktivitetType(RelatertYtelseType ytelseType) {
-        return OpptjeningAktivitetType.hentFraRelatertYtelseTyper()
+    private OpptjeningAktivitetType utledOpptjeningAktivitetType(FagsakYtelseType ytelseType) {
+        return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()
                 .get(ytelseType).stream()
                 .findFirst()
                 .orElse(OpptjeningAktivitetType.UDEFINERT);
     }
 
     private void leggTilAktørytelse(BehandlingReferanse behandlingReferanse, LocalDate fom, LocalDate tom, // NOSONAR - brukes bare til test
-                                    RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, RelatertYtelseType ytelseType,
+                                    RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, FagsakYtelseType ytelseType,
                                     List<YtelseStørrelse> ytelseStørrelseList, Arbeidskategori arbeidskategori, boolean medYtelseAnvist) {
         if (medYtelseAnvist) {
             iayTestUtil.leggTilAktørytelse(behandlingReferanse, fom, tom, relatertYtelseTilstand, saksnummer, ytelseType, ytelseStørrelseList, arbeidskategori,

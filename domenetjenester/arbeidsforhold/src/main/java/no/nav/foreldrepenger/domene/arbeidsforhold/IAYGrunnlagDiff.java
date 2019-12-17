@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.util.FPDateUtil;
 
 public class IAYGrunnlagDiff {
-    private static final Set<RelatertYtelseType> EKSLUSIVE_TYPER = Set.of(RelatertYtelseType.FORELDREPENGER, RelatertYtelseType.ENGANGSSTØNAD);
+    private static final Set<FagsakYtelseType> EKSLUSIVE_TYPER = Set.of(FagsakYtelseType.FORELDREPENGER, FagsakYtelseType.ENGANGSTØNAD);
     private InntektArbeidYtelseGrunnlag grunnlag1;
     private InntektArbeidYtelseGrunnlag grunnlag2;
 
@@ -97,9 +97,9 @@ public class IAYGrunnlagDiff {
     }
 
     public AktørYtelseEndring endringPåAktørYtelseForAktør(Saksnummer egetSaksnummer, LocalDate skjæringstidspunkt, AktørId aktørId) {
-        Predicate<Ytelse> predikatEksklusiveTyper = ytelse -> EKSLUSIVE_TYPER.contains(ytelse.getRelatertYtelseType())
+        Predicate<Ytelse> predikatEksklusiveTyper = ytelse -> EKSLUSIVE_TYPER.contains(ytelse.getYtelseType())
             && (ytelse.getSaksnummer() == null || !ytelse.getSaksnummer().equals(egetSaksnummer));
-        Predicate<Ytelse> predikatAndreYtelseTyper = ytelse -> !EKSLUSIVE_TYPER.contains(ytelse.getRelatertYtelseType())
+        Predicate<Ytelse> predikatAndreYtelseTyper = ytelse -> !EKSLUSIVE_TYPER.contains(ytelse.getYtelseType())
             && (ytelse.getSaksnummer() == null || !ytelse.getSaksnummer().equals(egetSaksnummer));
         // Setter fris for å få med nye "parallelle" søknader, men unngår overlapp med neste barn. Kan tunes. Annen søknad får AP når denne vedtatt
         LocalDate datoForEksklusiveTyper = FPDateUtil.iDag().isAfter(skjæringstidspunkt) ? skjæringstidspunkt.plusMonths(3L) : skjæringstidspunkt;

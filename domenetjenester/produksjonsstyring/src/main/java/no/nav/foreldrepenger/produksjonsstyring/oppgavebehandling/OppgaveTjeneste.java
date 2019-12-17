@@ -56,11 +56,6 @@ public class OppgaveTjeneste {
     private static final String NØS_ANSVARLIG_ENHETID = "4151";
     private static final String NØS_FP_UNDERKATEGORI = "FORELDREPE_STO";
 
-
-    // Gosys' kodeverk. Søk på confluence etter ENGANGSST_FOR og se regneark v3.x.y
-    private static final String FP_UNDERKATEGORI = "FORELDREPE_FOR";
-    private static final String ES_UNDERKATEGORI = "ENGANGSST_FOR";
-    private static final String SVP_UNDERKATEGORI = "SVANGERSKAPSPE_FOR";
     private static final String FEILUTBETALING_UNDERKATEGORI = "FEILUTB_FOR";
 
     private Logger logger = LoggerFactory.getLogger(OppgaveTjeneste.class);

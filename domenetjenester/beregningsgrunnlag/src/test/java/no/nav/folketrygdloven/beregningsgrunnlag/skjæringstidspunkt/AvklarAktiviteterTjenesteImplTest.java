@@ -28,7 +28,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAk
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -39,8 +38,8 @@ import no.nav.foreldrepenger.domene.iay.modell.YtelseBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.util.Tuple;
 
 public class AvklarAktiviteterTjenesteImplTest {
@@ -271,7 +270,7 @@ public class AvklarAktiviteterTjenesteImplTest {
         
         YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(Fagsystem.ARENA)
-                .medYtelseType(RelatertYtelseType.ARBEIDSAVKLARINGSPENGER)
+                .medYtelseType(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER)
                 .medSaksnummer(Saksnummer.arena("12345"));
         
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT_BEREGNING.minusMonths(6), SKJÆRINGSTIDSPUNKT_BEREGNING.minusDays(1)));

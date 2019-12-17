@@ -1,12 +1,9 @@
 package no.nav.foreldrepenger.domene.abakus.mapping;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
@@ -25,43 +22,22 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.SkatteOgAvgiftsregelType
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.UtsettelseÅrsak;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
-import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 
 public final class KodeverkMapper {
-    private static final Map<String, String> YTELSETYPE_FPSAK_TIL_ABAKUS;
-    private static final Map<String, String> YTELSETYPE_ABAKUS_TIL_FPSAK;
 
     private KodeverkMapper() {
     }
 
-    static {
-        YTELSETYPE_FPSAK_TIL_ABAKUS = Map.of(
-            "FORELDREPENGER", "FP",
-            "ENGANGSSTØNAD", "ES",
-            "SVANGERSKAPSPENGER", "SVP",
-            "ARBEIDSAVKLARINGSPENGER", "AAP",
-            "DAGPENGER", "DAG",
-            "SYKEPENGER", "SP",
-            "PÅRØRENDESYKDOM", "PS",
-            "ENSLIG_FORSØRGER", "EF");
-
-        YTELSETYPE_ABAKUS_TIL_FPSAK = YTELSETYPE_FPSAK_TIL_ABAKUS.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-    }
-
-    static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapYtelseTypeTilDto(RelatertYtelseType ytelseType) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapYtelseTypeTilDto(FagsakYtelseType ytelseType) {
         if (ytelseType == null || "-".equals(ytelseType.getKode())) {
             return null;
         }
-        String kode = getAbakusYtelseTypeFraFpsak(ytelseType.getKode());
-        return new no.nav.abakus.iaygrunnlag.kodeverk.YtelseType(kode);
+        return new no.nav.abakus.iaygrunnlag.kodeverk.YtelseType(ytelseType.getKode());
     }
 
     private static String getFpsakYtelseTypeFraAbakus(String kode) {
-        return YTELSETYPE_ABAKUS_TIL_FPSAK.get(kode);
-    }
-
-    private static String getAbakusYtelseTypeFraFpsak(String kode) {
-        return YTELSETYPE_FPSAK_TIL_ABAKUS.get(kode);
+        // gjør mapping for å sjekke konsistens
+        return FagsakYtelseType.fraKode(kode).getKode();
     }
 
     static no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType ytelseType) {
@@ -164,11 +140,11 @@ public final class KodeverkMapper {
             : Fagsystem.fraKode(dto.getKode());
     }
 
-    static RelatertYtelseType mapYtelseTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.YtelseType ytelseType) {
+    static FagsakYtelseType mapYtelseTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.YtelseType ytelseType) {
         if (ytelseType == null)
-            return RelatertYtelseType.UDEFINERT;
+            return FagsakYtelseType.UDEFINERT;
         String relatertYtelseKode = KodeverkMapper.getFpsakYtelseTypeFraAbakus(ytelseType.getKode());
-        return RelatertYtelseType.fraKode(relatertYtelseKode);
+        return FagsakYtelseType.fraKode(relatertYtelseKode);
     }
 
     static no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem mapFagsystemTilDto(Fagsystem kode) {

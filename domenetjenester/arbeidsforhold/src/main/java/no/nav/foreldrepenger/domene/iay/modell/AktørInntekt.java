@@ -9,22 +9,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektsKilde;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 
-public class AktørInntekt extends BaseEntitet implements IndexKey {
+public class AktørInntekt implements IndexKey {
 
     private AktørId aktørId;
 
     @ChangeTracked
     private Set<Inntekt> inntekt = new LinkedHashSet<>();
 
-    public AktørInntekt() {
-        //hibernate
+    AktørInntekt() {
     }
 
     /**

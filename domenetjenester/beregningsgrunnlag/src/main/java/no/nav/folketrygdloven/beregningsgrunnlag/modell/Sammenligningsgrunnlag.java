@@ -20,7 +20,7 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Sammenligningsgrunnlag")
 @Table(name = "SAMMENLIGNINGSGRUNNLAG")

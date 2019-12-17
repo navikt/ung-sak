@@ -38,7 +38,7 @@ import no.nav.abakus.iaygrunnlag.arbeid.v1.AktivitetsAvtaleDto;
 import no.nav.abakus.iaygrunnlag.arbeid.v1.ArbeidDto;
 import no.nav.abakus.iaygrunnlag.arbeid.v1.PermisjonDto;
 import no.nav.abakus.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class MapAktørArbeid {
 
@@ -125,8 +125,6 @@ public class MapAktørArbeid {
                 .medBeskrivelse(dto.getBeskrivelse())
                 .medPeriode(mapPeriode(dto.getPeriode()))
                 .medProsentsats(dto.getStillingsprosent())
-                .medAntallTimer(dto.getAntallTimer())
-                .medAntallTimerFulltid(dto.getAntallTimerFulltid())
                 .medSisteLønnsendringsdato(dto.getSistLønnsendring());
         }
 

@@ -9,10 +9,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
 
-public class InntektArbeidYtelseAggregat extends BaseEntitet {
+public class InntektArbeidYtelseAggregat {
 
     private UUID uuid;
 
@@ -25,6 +25,9 @@ public class InntektArbeidYtelseAggregat extends BaseEntitet {
     @ChangeTracked
     private Set<AktørYtelse> aktørYtelse = new LinkedHashSet<>();
 
+    @DiffIgnore
+    private LocalDateTime opprettetTidspunkt;
+
     InntektArbeidYtelseAggregat() {
         // hibernate
     }
@@ -32,6 +35,10 @@ public class InntektArbeidYtelseAggregat extends BaseEntitet {
     InntektArbeidYtelseAggregat(UUID angittEksternReferanse, LocalDateTime angittOpprettetTidspunkt) {
         setOpprettetTidspunkt(angittOpprettetTidspunkt);
         uuid = angittEksternReferanse;
+    }
+
+    private void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     /** copy constructor men med angitt referanse og tidspunkt. Hvis unikt kan denne instansen brukes til lagring. */
@@ -62,6 +69,10 @@ public class InntektArbeidYtelseAggregat extends BaseEntitet {
      */
     InntektArbeidYtelseAggregat(InntektArbeidYtelseAggregat kopierFra) {
         this(kopierFra.getEksternReferanse(), kopierFra.getOpprettetTidspunkt(), kopierFra);
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 
     /** Identifisere en immutable instans av grunnlaget unikt og er egnet for utveksling (eks. til abakus eller andre systemer) */

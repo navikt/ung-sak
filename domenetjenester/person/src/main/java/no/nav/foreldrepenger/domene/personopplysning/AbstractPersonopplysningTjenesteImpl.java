@@ -17,7 +17,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Statsb
 import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public abstract class AbstractPersonopplysningTjenesteImpl implements StandardPersonopplysningTjeneste {
 

@@ -119,8 +119,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     protected BehandleStegResultat stegResultatVilkårIkkeOppfylt(RegelResultat regelResultat, Behandling behandling) {
         // Forbedring: InngangsvilkårStegImpl som annoterbar med FagsakYtelseType og BehandlingType
         // Her hardkodes disse parameterne
-        if (behandling.erRevurdering() && behandling.getFagsak().getYtelseType().equals(FagsakYtelseType.FORELDREPENGER)
-            && !harAvslåttForrigeBehandling(behandling)) {
+        if (behandling.erRevurdering() && !harAvslåttForrigeBehandling(behandling)) {
             return BehandleStegResultat.fremoverførtMedAksjonspunkter(FREMHOPP_TIL_UTTAKSPLAN, regelResultat.getAksjonspunktDefinisjoner());
         }
         return BehandleStegResultat.fremoverførtMedAksjonspunkter(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT, regelResultat.getAksjonspunktDefinisjoner());

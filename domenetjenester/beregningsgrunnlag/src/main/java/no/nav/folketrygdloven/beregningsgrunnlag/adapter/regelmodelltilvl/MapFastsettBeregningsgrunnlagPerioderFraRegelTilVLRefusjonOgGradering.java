@@ -25,7 +25,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStat
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class MapFastsettBeregningsgrunnlagPerioderFraRegelTilVLRefusjonOgGradering extends MapFastsettBeregningsgrunnlagPerioderFraRegelTilVL {

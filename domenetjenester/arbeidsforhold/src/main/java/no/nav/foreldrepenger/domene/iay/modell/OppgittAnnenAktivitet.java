@@ -2,20 +2,17 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.util.Objects;
 
-import javax.persistence.Convert;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 
-public class OppgittAnnenAktivitet extends BaseEntitet implements IndexKey {
+public class OppgittAnnenAktivitet implements IndexKey {
 
     @ChangeTracked
     DatoIntervallEntitet periode;
 
-    @Convert(converter = ArbeidType.KodeverdiConverter.class)
     @ChangeTracked
     private ArbeidType arbeidType;
 
@@ -24,8 +21,7 @@ public class OppgittAnnenAktivitet extends BaseEntitet implements IndexKey {
         this.arbeidType = arbeidType;
     }
 
-    public OppgittAnnenAktivitet() {
-        // hibernate
+    OppgittAnnenAktivitet() {
     }
 
     @Override

@@ -5,8 +5,12 @@ import java.util.Map;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.hendelser.Forretningshendelse;
 
 public interface ForretningshendelseSaksvelger<T extends Forretningshendelse> {
+
     Map<BehandlingÅrsakType, List<Fagsak>> finnRelaterteFagsaker(T forretningshendelse);
+    
+    Map<BehandlingÅrsakType, List<Fagsak>> finnRelaterteFagsaker(FagsakYtelseType fagsakYtelseType, T forretningshendelse);
 }
