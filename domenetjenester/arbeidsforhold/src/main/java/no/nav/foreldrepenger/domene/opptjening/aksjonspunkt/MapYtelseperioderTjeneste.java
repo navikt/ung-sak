@@ -82,7 +82,7 @@ public class MapYtelseperioderTjeneste {
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
         filter.getFiltrertYtelser().stream()
             .filter(ytelse -> !(Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && RelatertYtelseTilstand.ÅPEN.equals(ytelse.getStatus())))
-            .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.FPSAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
+            .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
             .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
                 List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, grunnlag, vurderOpptjening);

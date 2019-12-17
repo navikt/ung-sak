@@ -17,6 +17,8 @@ import no.nav.vedtak.util.FPDateUtil;
  */
 public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilder> {
 
+    public static final FagsakYtelseType DEFAULT_TEST_YTELSE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
     private TestScenarioBuilder(FagsakYtelseType ytelseType) {
         super(ytelseType);
         settDefaultSøknad();
@@ -39,11 +41,11 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     }
 
     public static TestScenarioBuilder builderMedSøknad() {
-        return new TestScenarioBuilder(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        return new TestScenarioBuilder(DEFAULT_TEST_YTELSE);
     }
 
     public static TestScenarioBuilder builderUtenSøknad() {
-        return builderUtenSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        return builderUtenSøknad(DEFAULT_TEST_YTELSE);
     }
 
     public static TestScenarioBuilder builderUtenSøknad(FagsakYtelseType ytelseType) {
@@ -53,7 +55,7 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     }
 
     public static TestScenarioBuilder builderUtenSøknad(AktørId aktørId) {
-        return builderUtenSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, aktørId);
+        return builderUtenSøknad(DEFAULT_TEST_YTELSE, aktørId);
     }
     
     public static TestScenarioBuilder builderUtenSøknad(FagsakYtelseType ytelseType, AktørId aktørId) {
@@ -63,7 +65,7 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     }
 
     public static TestScenarioBuilder builderMedSøknad(AktørId aktørId) {
-        return builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, aktørId);
+        return builderMedSøknad(DEFAULT_TEST_YTELSE, aktørId);
     }
 
     public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType ytelseType, AktørId aktørId) {
@@ -71,7 +73,7 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     }
 
     public static TestScenarioBuilder builderMedSøknad(NavBruker navBruker) {
-        return builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, navBruker);
+        return builderMedSøknad(DEFAULT_TEST_YTELSE, navBruker);
     }
 
     public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType fagsakYtelseType) {

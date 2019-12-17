@@ -35,7 +35,6 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -85,7 +84,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         final Behandling behandling = opprettBehandling(skjæringstidspunkt);
 
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
 
         Virksomhet virksomhet = new VirksomhetEntitet.Builder()
             .medOrgnr(ORG_NUMMER)
@@ -95,10 +94,10 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             .oppdatertOpplysningerNå()
             .build();
 
-        VirksomhetRepository virksomhetRepository = repositoryProvider.getVirksomhetRepository();
+        var virksomhetRepository = repositoryProvider.getVirksomhetRepository();
         virksomhetRepository.lagre(virksomhet);
 
-        OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
+        var oppgitt = OppgittOpptjeningBuilder.ny();
         oppgitt.leggTilEgneNæringer(Collections.singletonList(OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
             .medVirksomhet(ORG_NUMMER)
             .medPeriode(periode)
@@ -123,18 +122,19 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     public void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode_for_vilkår_godkjent() {
         // Arrange
         final Behandling behandling = opprettBehandling(skjæringstidspunkt);
-
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
 
         InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             AKTØRID, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
         // simulerer at det har blitt godkjent i GUI
         InntektArbeidYtelseAggregatBuilder saksbehandling = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             AKTØRID, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandling);
 
@@ -151,12 +151,14 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         LocalDate iDag = LocalDate.now();
         final Behandling behandling = opprettBehandling(iDag);
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(3), iDag.minusMonths(2));
 
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(ORG_NUMMER);
         InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, periode1,
-            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, virksomhet, VersjonType.REGISTER);
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, virksomhet,
+            sisteLønnsendringsdato, 
+            VersjonType.REGISTER);
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
         // simulerer at det har blitt underkjent i GUI
@@ -181,12 +183,14 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
+        
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
         InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10),
@@ -211,13 +215,14 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
 
-        InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
+        var builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.minusDays(2),
@@ -246,13 +251,14 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
 
         InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(
@@ -281,13 +287,15 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
+        
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
 
         InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(
@@ -311,13 +319,13 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-
+        var sisteLønnsendringsdato = skjæringstidspunkt;
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
-
-        InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
+        var builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(
@@ -341,22 +349,24 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         // Arrange
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
+        var sisteLønnsendringsdato = skjæringstidspunkt;
+        Behandling behandling = scenario.lagre(repositoryProvider);
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-        InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
+        var builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.SAKSBEHANDLET);
 
 
-        InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
+        var bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
         // simulerer at det har blitt godkjent i GUI
-        InntektArbeidYtelseAggregatBuilder saksbehandling = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
+        var saksbehandling = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
+            sisteLønnsendringsdato,
             VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandling);
 
@@ -371,7 +381,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     }
 
     private Behandling opprettBehandling(LocalDate iDag) {
-        final Personinfo personinfo = new Personinfo.Builder()
+        Personinfo personinfo = new Personinfo.Builder()
             .medNavn("Navn navnesen")
             .medAktørId(AKTØRID)
             .medFødselsdato(iDag.minusYears(20))
@@ -380,13 +390,13 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             .medPersonIdent(new PersonIdent("12312312312"))
             .medForetrukketSpråk(Språkkode.nb)
             .build();
-        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo));
         fagsakRepository.opprettNy(fagsak);
-        final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
-        final Behandling behandling = builder.build();
+        var builder = Behandling.forFørstegangssøknad(fagsak);
+        Behandling behandling = builder.build();
         Behandlingsresultat.opprettFor(behandling);
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        final VilkårResultat nyttResultat = VilkårResultat.builder().buildFor(behandling);
+        VilkårResultat nyttResultat = VilkårResultat.builder().buildFor(behandling);
         behandlingRepository.lagre(nyttResultat, behandlingRepository.taSkriveLås(behandling));
 
         repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt, false);

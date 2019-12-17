@@ -33,7 +33,7 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "KOFAK_LOP_MEDL")
 @BehandlingTypeRef("BT-004") //Revurdering
-@FagsakYtelseTypeRef  //Foreldrepenger
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements KontrollerFaktaLøpendeMedlemskapSteg {
 
@@ -65,9 +65,6 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements Kontrol
         Long behandlingId = kontekst.getBehandlingId();
         if (skalVurdereLøpendeMedlemskap(kontekst.getBehandlingId())) {
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-            if (!(behandling.erRevurdering() && behandling.getFagsakYtelseType().gjelderForeldrepenger())) {
-                throw new IllegalStateException("Utvikler-feil: Behandler bare revudering i foreldrepengerkontekst!.");
-            }
             Set<LocalDate> finnVurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
             Set<MedlemResultat> resultat = new HashSet<>();
             if (!finnVurderingsdatoer.isEmpty()) {

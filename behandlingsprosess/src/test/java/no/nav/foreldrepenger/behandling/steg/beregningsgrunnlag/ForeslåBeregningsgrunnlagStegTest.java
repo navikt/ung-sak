@@ -72,7 +72,7 @@ public class ForeslåBeregningsgrunnlagStegTest {
         when(kontekst.getBehandlingId()).thenReturn(behandling.getId());
         when(beregningsgrunnlagTjeneste.foreslåBeregningsgrunnlag(any())).thenReturn(beregningsgrunnlagRegelResultat);
 
-        when(inputProvider.getTjeneste(FagsakYtelseType.FORELDREPENGER)).thenReturn(inputTjeneste);
+        when(inputProvider.getTjeneste(any())).thenReturn(inputTjeneste);
         steg = new ForeslåBeregningsgrunnlagSteg(behandlingRepository, beregningsgrunnlagTjeneste, inputProvider);
 
         iayTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of());

@@ -46,9 +46,8 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjenesteImpl;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -66,9 +65,6 @@ public class InngangsvilkårOversetterTest {
 
     private YrkesaktivitetBuilder yrkesaktivitetBuilder;
 
-    @Inject
-    private SkjæringstidspunktTjenesteImpl skjæringstidspunktTjeneste;
-
     @Before
     public void oppsett() {
         oversetter = new InngangsvilkårOversetter(repositoryProvider, personopplysningTjeneste,
@@ -84,12 +80,12 @@ public class InngangsvilkårOversetterTest {
     public void skal_mappe_fra_domenemedlemskap_til_regelmedlemskap() {
         // Arrange
 
-        LocalDate skjæringstidspunkt = LocalDate.now();
+        LocalDate stp = LocalDate.now();
 
         var scenario = lagScenario();
         Behandling behandling = lagre(scenario);
 
-        opprettArbeidOgInntektForBehandling(behandling, skjæringstidspunkt.minusMonths(5), skjæringstidspunkt.plusMonths(4), true);
+        opprettArbeidOgInntektForBehandling(behandling, stp.minusMonths(5), stp.plusMonths(4), true);
         
         VurdertMedlemskap vurdertMedlemskap = new VurdertMedlemskapBuilder()
             .medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.MEDLEM)
@@ -101,7 +97,7 @@ public class InngangsvilkårOversetterTest {
         medlemskapRepository.lagreMedlemskapVurdering(behandling.getId(), vurdertMedlemskap);
 
         // Act
-        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling));
+        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp));
 
         // Assert
         assertTrue(grunnlag.isBrukerAvklartBosatt());
@@ -117,13 +113,13 @@ public class InngangsvilkårOversetterTest {
     public void skal_mappe_fra_domenemedlemskap_til_regelmedlemskap_med_ingen_relevant_arbeid_og_inntekt() {
 
         // Arrange
-        LocalDate skjæringstidspunkt = LocalDate.now();
+        LocalDate stp = LocalDate.now();
         var scenario = lagScenario();
         Behandling behandling = lagre(scenario);
-        opprettArbeidOgInntektForBehandling(behandling, skjæringstidspunkt.minusMonths(5), skjæringstidspunkt.minusDays(1), true);
+        opprettArbeidOgInntektForBehandling(behandling, stp.minusMonths(5), stp.minusDays(1), true);
 
         // Act
-        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling));
+        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp));
 
         // Assert
         assertFalse(grunnlag.harSøkerArbeidsforholdOgInntekt());
@@ -133,13 +129,13 @@ public class InngangsvilkårOversetterTest {
     public void skal_mappe_fra_domenemedlemskap_til_regelmedlemskap_med_relevant_arbeid_og_ingen_pensjonsgivende_inntekt() {
 
         // Arrange
-        LocalDate skjæringstidspunkt = LocalDate.now();
+        LocalDate stp = LocalDate.now();
         var scenario = lagScenario();
         Behandling behandling = lagre(scenario);
-        opprettArbeidOgInntektForBehandling(behandling, skjæringstidspunkt.minusMonths(5), skjæringstidspunkt.plusDays(10), false);
+        opprettArbeidOgInntektForBehandling(behandling, stp.minusMonths(5), stp.plusDays(10), false);
 
         // Act
-        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling));
+        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp));
 
         // Assert
         assertFalse(grunnlag.harSøkerArbeidsforholdOgInntekt());
@@ -231,8 +227,8 @@ public class InngangsvilkårOversetterTest {
         });
     }
 
-    private BehandlingReferanse lagRef(Behandling behandling) {
-        return BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
+    private BehandlingReferanse lagRef(Behandling behandling, LocalDate stp) {
+        return BehandlingReferanse.fra(behandling, stp);
     }
 
 }

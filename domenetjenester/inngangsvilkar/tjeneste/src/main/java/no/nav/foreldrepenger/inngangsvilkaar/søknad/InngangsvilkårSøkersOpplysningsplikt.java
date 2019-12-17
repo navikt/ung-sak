@@ -47,9 +47,8 @@ public class InngangsvilkårSøkersOpplysningsplikt implements Inngangsvilkår {
 
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
         BehandlingType behandlingType = ref.getBehandlingType();
-        if (FagsakYtelseType.FORELDREPENGER.equals(ytelseType) &&
-            BehandlingType.REVURDERING.equals(behandlingType)) {
-            // For revurdering FP skal det ikke utføres vilkårskontroll om opplysningsplikt (NOOP)
+        if (BehandlingType.REVURDERING.equals(behandlingType)) {
+            // For revurdering skal det ikke utføres vilkårskontroll om opplysningsplikt (NOOP)
             return oppfylt;
         }
 

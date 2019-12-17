@@ -70,7 +70,7 @@ public class InngangsvilkårStegImplTest {
     private OpptjeningRepository opptjeningRepository;
 
     @Test
-    public void skal_hoppe_til_uttak_ved_avslag_for_foreldrepenger_ved_revurdering() {
+    public void skal_hoppe_til_uttak_ved_avslag_ved_revurdering() {
         // Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
@@ -99,7 +99,7 @@ public class InngangsvilkårStegImplTest {
     }
 
     @Test
-    public void skal_hoppe_til_uttak_når_forrige_behandling_ikke_er_avslått_og_opptjeningsvilkåret_er_oppfylt_for_foreldrepenger_ved_revurdering() {
+    public void skal_hoppe_til_uttak_når_forrige_behandling_ikke_er_avslått_og_opptjeningsvilkåret_er_oppfylt_for_revurdering() {
         // Arrange
         TestScenarioBuilder førstegangsscenario = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -261,7 +261,6 @@ public class InngangsvilkårStegImplTest {
             .containsExactly(VilkårUtfallType.IKKE_VURDERT);
     }
 
-    // ***** Testklasser *****
     class SutMedlemskapsvilkårSteg extends InngangsvilkårStegImpl {
 
         SutMedlemskapsvilkårSteg(BehandlingRepositoryProvider repositoryProvider, InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste) {

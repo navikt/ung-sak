@@ -52,13 +52,11 @@ public class InngangsvilkårTjeneste {
     public Inngangsvilkår finnVilkår(VilkårType vilkårType, FagsakYtelseType fagsakYtelseType) {
         Instance<Inngangsvilkår> selected = alleInngangsvilkår.select(new VilkårTypeRefLiteral(vilkårType.getKode()));
         if (selected.isAmbiguous()) {
-            selected = selected.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(fagsakYtelseType.getKode()));
-            if (selected.isAmbiguous()) {
-                throw new IllegalArgumentException("Mer enn en implementasjon funnet for vilkårtype:" + vilkårType);
-            }
+            return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType).orElseThrow(() -> new IllegalStateException("Har ikke Inngangsvilkår for " + fagsakYtelseType));
         } else if (selected.isUnsatisfied()) {
             throw new IllegalArgumentException("Ingen implementasjoner funnet for vilkårtype:" + vilkårType);
         }
+
         Inngangsvilkår minInstans = selected.get();
         if (minInstans.getClass().isAnnotationPresent(Dependent.class)) {
             throw new IllegalStateException(

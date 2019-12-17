@@ -43,6 +43,7 @@ public class YtelseTestHelper {
     public static InntektArbeidYtelseAggregatBuilder opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AktørId aktørId, InternArbeidsforholdRef ref,
                                                                                                          DatoIntervallEntitet periode, ArbeidType type,
                                                                                                          BigDecimal prosentsats, Arbeidsgiver arbeidsgiver,
+                                                                                                         LocalDate sisteLønnsendringsdato,
                                                                                                          VersjonType versjonType) {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), versjonType);
@@ -57,6 +58,7 @@ public class YtelseTestHelper {
 
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medProsentsats(prosentsats)
+            .medSisteLønnsendringsdato(sisteLønnsendringsdato)
             .medBeskrivelse("Ser greit ut");
         final AktivitetsAvtaleBuilder ansettelsesPeriode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder(periode, true);
 

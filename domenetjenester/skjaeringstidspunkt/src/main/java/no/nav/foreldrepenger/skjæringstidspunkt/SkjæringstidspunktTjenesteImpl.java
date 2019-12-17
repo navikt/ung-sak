@@ -1,6 +1,10 @@
 package no.nav.foreldrepenger.skjæringstidspunkt;
 
+import java.time.LocalDate;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
@@ -8,13 +12,11 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 
-import java.time.LocalDate;
-
 @ApplicationScoped
 public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private SkjæringstidspunktTjeneste foreldrepengerTjeneste;
+    private Instance<SkjæringstidspunktTjeneste> stpTjenester;
 
     SkjæringstidspunktTjenesteImpl() {
         // CDI
@@ -22,26 +24,20 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
 
     @Inject
     public SkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository,
-                                          @FagsakYtelseTypeRef SkjæringstidspunktTjeneste foreldrepengerTjeneste) {
+                                          @Any Instance<SkjæringstidspunktTjeneste> stpTjenester) {
         this.behandlingRepository = behandlingRepository;
-        this.foreldrepengerTjeneste = foreldrepengerTjeneste;
+        this.stpTjenester = stpTjenester;
     }
 
     @Override
     public Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         if (behandling.erYtelseBehandling()) {
-            if (behandling.getFagsakYtelseType().gjelderForeldrepenger()) {
-                return foreldrepengerTjeneste.getSkjæringstidspunkter(behandlingId);
-            }
-            // FIXME K9 Definer skjæringstidspunkt for PSB
-            return Skjæringstidspunkt.builder()
-                .medFørsteUttaksdato(LocalDate.now().minusMonths(3).withDayOfMonth(1))
-                .medSkjæringstidspunktBeregning(LocalDate.now().minusMonths(3).withDayOfMonth(1))
-                .medUtledetSkjæringstidspunkt(LocalDate.now().minusMonths(3).withDayOfMonth(1))
-                .medSkjæringstidspunktOpptjening(LocalDate.now().minusMonths(3).withDayOfMonth(1).minusDays(28))
-                .build();
-            //throw new IllegalStateException("Ukjent ytelse type." + behandling.getFagsakYtelseType());
+            
+            var stpTjeneste = FagsakYtelseTypeRef.Lookup.find(stpTjenester, behandling.getFagsakYtelseType());
+            // FIXME K9 Definer skjæringstidspunkt
+            var stp = stpTjeneste.orElseThrow().getSkjæringstidspunkter(behandlingId);
+            return stp;
         } else {
             // returner tom container for andre behandlingtyper
             // (så ser vi om det evt. er noen call paths som kaller på noen form for skjæringstidspunkt)

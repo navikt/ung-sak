@@ -33,6 +33,8 @@ import no.nav.vedtak.exception.TekniskException;
 
 public class RegelOrkestrererImplTest {
 
+    private static final FagsakYtelseType YTELSE_TYPE = TestScenarioBuilder.DEFAULT_TEST_YTELSE;
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -52,7 +54,7 @@ public class RegelOrkestrererImplTest {
         // Arrange
         VilkårType vilkårType = VilkårType.MEDLEMSKAPSVILKÅRET;
         VilkårData vilkårData = new VilkårData(vilkårType, OPPFYLT, emptyList());
-        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, FagsakYtelseType.FORELDREPENGER)).thenReturn((b) -> vilkårData);
+        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b) -> vilkårData);
         Behandling behandling = byggBehandlingMedVilkårresultat(VilkårResultatType.IKKE_FASTSATT, vilkårType);
         when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
 
@@ -77,7 +79,7 @@ public class RegelOrkestrererImplTest {
                 .buildFor(behandling);
 
         VilkårData vilkårData = new VilkårData(vilkårType, OPPFYLT, List.of(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
-        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, FagsakYtelseType.FORELDREPENGER)).thenReturn((b) -> vilkårData);
+        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b) -> vilkårData);
         when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
 
         // Act
@@ -99,7 +101,7 @@ public class RegelOrkestrererImplTest {
             .buildFor(behandling);
 
         VilkårData vilkårData = new VilkårData(vilkårType, OPPFYLT, List.of(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
-        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, FagsakYtelseType.FORELDREPENGER)).thenReturn((b) -> vilkårData);
+        when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b) -> vilkårData);
         when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
 
         // Act
