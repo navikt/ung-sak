@@ -4,8 +4,7 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -50,6 +49,7 @@ import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
 import no.nav.k9.soknad.JsonUtils;
+import no.nav.k9.soknad.pleiepengerbarn.InnsendingValidator;
 import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -84,6 +84,7 @@ public class FordelRestTjeneste {
     private OpprettSakTjeneste opprettSakTjeneste;
     private VurderFagsystemFellesTjeneste vurderFagsystemTjeneste;
     private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
+    private InnsendingValidator innsendingValidator = new InnsendingValidator();
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -174,6 +175,10 @@ public class FordelRestTjeneste {
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
     public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
+        final List<no.nav.k9.soknad.felles.Feil> valideringsfeil = innsendingValidator.validate(pleiepengerBarnSoknad);
+        if (!valideringsfeil.isEmpty()) {
+            throw new IllegalArgumentException("Minst én valideringsfeil på innsendt søknad for pleiepenger barn: " + Arrays.toString(valideringsfeil.toArray()));
+        }
         // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
         final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
         return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer().getVerdi());
