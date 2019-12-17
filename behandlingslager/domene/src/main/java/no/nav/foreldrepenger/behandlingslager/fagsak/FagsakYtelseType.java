@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.fagsak;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -154,6 +155,25 @@ public enum FagsakYtelseType implements Kodeverdi {
     @Deprecated
     public final boolean gjelderSvangerskapspenger() {
         return SVANGERSKAPSPENGER.getKode().equals(this.getKode());
+    }
+    
+    private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OPPTJENING_RELATERTYTELSE_CONFIG = Map.of(
+        FagsakYtelseType.FORELDREPENGER,
+        Set.of(ENSLIG_FORSØRGER, SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, ARBEIDSAVKLARINGSPENGER, DAGPENGER),
+        FagsakYtelseType.SVANGERSKAPSPENGER,
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, PÅRØRENDESYKDOM, DAGPENGER),
+
+        // FIXME K9 Verdiene under er høyst sannsynlig feil -- kun lagt inn for å komme videre i verdikjedetest.
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER, ENSLIG_FORSØRGER, PÅRØRENDESYKDOM)
+    );
+    
+    public boolean girOpptjeningsTid(FagsakYtelseType ytelseType) {
+        final var relatertYtelseTypeSet = OPPTJENING_RELATERTYTELSE_CONFIG.get(ytelseType);
+        if (relatertYtelseTypeSet == null) {
+            throw new IllegalStateException("Støtter ikke fagsakYtelseType" + ytelseType);
+        }
+        return relatertYtelseTypeSet.contains(this);
     }
 
     @Converter(autoApply = true)

@@ -10,8 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Convert;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
@@ -20,9 +18,7 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-public class Yrkesaktivitet extends BaseEntitet implements IndexKey {
-
-
+public class Yrkesaktivitet implements IndexKey {
 
     @ChangeTracked
     private Set<AktivitetsAvtale> aktivitetsAvtale = new LinkedHashSet<>();
@@ -41,11 +37,10 @@ public class Yrkesaktivitet extends BaseEntitet implements IndexKey {
 
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    @Convert(converter = ArbeidType.KodeverdiConverter.class)
     @ChangeTracked
     private ArbeidType arbeidType;
 
-    public Yrkesaktivitet() {
+    Yrkesaktivitet() {
         // hibernate
     }
 

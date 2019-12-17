@@ -26,7 +26,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Pe
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.Inntekt;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
@@ -148,13 +148,13 @@ public class MapInntektsgrunnlagVLTilRegel {
                                                             LocalDate skjæringstidspunkt) {
 
         Optional<Ytelse> nyesteVedtakForDagsats = BeregningUtils.sisteVedtakFørStpForType(ytelseFilter, skjæringstidspunkt,
-            Set.of(RelatertYtelseType.DAGPENGER, RelatertYtelseType.ARBEIDSAVKLARINGSPENGER));
+            Set.of(FagsakYtelseType.DAGPENGER, FagsakYtelseType.ARBEIDSAVKLARINGSPENGER));
         if (nyesteVedtakForDagsats.isEmpty()) {
             return;
         }
 
         Optional<YtelseAnvist> sisteUtbetalingFørStp = BeregningUtils.sisteHeleMeldekortFørStp(ytelseFilter, nyesteVedtakForDagsats.get(), skjæringstidspunkt,
-            Set.of(RelatertYtelseType.DAGPENGER, RelatertYtelseType.ARBEIDSAVKLARINGSPENGER));
+            Set.of(FagsakYtelseType.DAGPENGER, FagsakYtelseType.ARBEIDSAVKLARINGSPENGER));
         BigDecimal dagsats = nyesteVedtakForDagsats.get().getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats).map(Beløp::getVerdi)
             .orElse(sisteUtbetalingFørStp.flatMap(YtelseAnvist::getDagsats).map(Beløp::getVerdi).orElse(BigDecimal.ZERO));
         BigDecimal utbetalingsgradProsent = sisteUtbetalingFørStp.flatMap(YtelseAnvist::getUtbetalingsgradProsent)

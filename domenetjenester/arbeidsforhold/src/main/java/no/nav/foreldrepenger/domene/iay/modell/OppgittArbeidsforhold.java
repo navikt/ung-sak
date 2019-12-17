@@ -3,8 +3,6 @@ package no.nav.foreldrepenger.domene.iay.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import javax.persistence.Convert;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
@@ -19,23 +17,19 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
  * OBS: Legger man til nye felter så skal dette oppdateres mange steder:
  * builder, equals, hashcode etc.
  */
-public class OppgittArbeidsforhold extends BaseEntitet implements IndexKey {
-
-
+public class OppgittArbeidsforhold implements IndexKey {
 
     @ChangeTracked
     private DatoIntervallEntitet periode;
 
     private boolean erUtenlandskInntekt;
 
-    @Convert(converter = ArbeidType.KodeverdiConverter.class)
     @ChangeTracked
     private ArbeidType arbeidType;
 
     private OppgittUtenlandskVirksomhet utenlandskVirksomhet = new OppgittUtenlandskVirksomhet();
 
-    public OppgittArbeidsforhold() {
-        // hibernate
+    OppgittArbeidsforhold() {
     }
 
     @Override

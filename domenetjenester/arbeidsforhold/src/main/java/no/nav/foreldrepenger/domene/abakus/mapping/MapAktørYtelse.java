@@ -179,7 +179,7 @@ public class MapAktørYtelse {
         private YtelseDto tilYtelse(Ytelse ytelse) {
             var fagsystem = KodeverkMapper.mapFagsystemTilDto(ytelse.getKilde());
             var periode = mapPeriode(ytelse.getPeriode().getFomDato(), ytelse.getPeriode().getTomDato());
-            var ytelseType = KodeverkMapper.mapYtelseTypeTilDto(ytelse.getRelatertYtelseType());
+            var ytelseType = KodeverkMapper.mapYtelseTypeTilDto(ytelse.getYtelseType());
             var ytelseStatus = KodeverkMapper.getAbakusYtelseStatusForFpsakRelatertYtelseTilstand(ytelse.getStatus());
             var temaUnderkategori = KodeverkMapper.getBehandlingsTemaUnderkategori(ytelse.getBehandlingsTema());
             var dto = new YtelseDto(fagsystem, ytelseType, periode, ytelseStatus)

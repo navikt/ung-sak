@@ -13,7 +13,7 @@ import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -129,12 +129,12 @@ public class IAYDtoMapperLagretKonverteringTest {
         Saksnummer sakId = new Saksnummer("1200094");
         YtelseBuilder ytelselseBuilder = YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(Fagsystem.K9SAK)
-                .medYtelseType(RelatertYtelseType.SYKEPENGER)
+                .medYtelseType(FagsakYtelseType.SYKEPENGER)
                 .medSaksnummer(sakId);
         
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)
-            .medYtelseType(RelatertYtelseType.FORELDREPENGER)
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
             .medBehandlingsTema(TemaUnderkategori.UDEFINERT)
             .medStatus(RelatertYtelseTilstand.AVSLUTTET)
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM_DATO, TOM_DATO))

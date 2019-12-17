@@ -3,22 +3,17 @@ package no.nav.foreldrepenger.domene.iay.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import javax.persistence.Convert;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.UtsettelseÅrsak;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-public class UtsettelsePeriode extends BaseEntitet implements IndexKey {
-
-
+public class UtsettelsePeriode implements IndexKey {
 
     @ChangeTracked
     private DatoIntervallEntitet periode;
 
     @ChangeTracked
-    @Convert(converter = UtsettelseÅrsak.KodeverdiConverter.class)
     private UtsettelseÅrsak årsak = UtsettelseÅrsak.UDEFINERT;
 
     private UtsettelsePeriode(LocalDate fom, LocalDate tom) {

@@ -28,7 +28,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAk
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -271,7 +270,7 @@ public class AvklarAktiviteterTjenesteImplTest {
         
         YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(Fagsystem.ARENA)
-                .medYtelseType(RelatertYtelseType.ARBEIDSAVKLARINGSPENGER)
+                .medYtelseType(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER)
                 .medSaksnummer(Saksnummer.arena("12345"));
         
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT_BEREGNING.minusMonths(6), SKJÆRINGSTIDSPUNKT_BEREGNING.minusDays(1)));

@@ -9,13 +9,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 
-public class InntektArbeidYtelseGrunnlag extends BaseEntitet {
+public class InntektArbeidYtelseGrunnlag {
 
     @DiffIgnore
     private UUID uuid;
@@ -40,8 +39,10 @@ public class InntektArbeidYtelseGrunnlag extends BaseEntitet {
 
     private boolean aktiv = true;
 
+    @DiffIgnore
+    private LocalDateTime opprettetTidspunkt;       
+
     InntektArbeidYtelseGrunnlag() {
-        // for hibernate
     }
 
     public InntektArbeidYtelseGrunnlag(InntektArbeidYtelseGrunnlag grunnlag) {
@@ -58,6 +59,10 @@ public class InntektArbeidYtelseGrunnlag extends BaseEntitet {
     public InntektArbeidYtelseGrunnlag(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt) {
         this.uuid = Objects.requireNonNull(grunnlagReferanse, "grunnlagReferanse");
         setOpprettetTidspunkt(opprettetTidspunkt);
+    }
+
+    private void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     public InntektArbeidYtelseGrunnlag(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt, InntektArbeidYtelseGrunnlag grunnlag) {
@@ -247,5 +252,9 @@ public class InntektArbeidYtelseGrunnlag extends BaseEntitet {
 
     public void fjernSaksbehandlet() {
         saksbehandlet = null;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 }

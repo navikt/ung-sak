@@ -36,7 +36,6 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -191,9 +190,9 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10),
-            RelatertYtelseTilstand.AVSLUTTET, "12342234", RelatertYtelseType.FORELDREPENGER));
+            RelatertYtelseTilstand.AVSLUTTET, "12342234", FagsakYtelseType.FORELDREPENGER));
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(3), skjæringstidspunkt.minusDays(1),
-            RelatertYtelseTilstand.LØPENDE, "1222433", RelatertYtelseType.SYKEPENGER));
+            RelatertYtelseTilstand.LØPENDE, "1222433", FagsakYtelseType.SYKEPENGER));
 
         Long behandlingId = behandling.getId();
         iayTjeneste.lagreIayAggregat(behandlingId, builder);
@@ -222,13 +221,13 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.minusDays(2),
-            RelatertYtelseTilstand.LØPENDE, "12342234", RelatertYtelseType.SYKEPENGER));
+            RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(15), skjæringstidspunkt.minusDays(11),
-            RelatertYtelseTilstand.AVSLUTTET, "1222433", RelatertYtelseType.SYKEPENGER));
+            RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(16),
-            RelatertYtelseTilstand.AVSLUTTET, "124234", RelatertYtelseType.SYKEPENGER));
+            RelatertYtelseTilstand.AVSLUTTET, "124234", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(30), skjæringstidspunkt.minusDays(22),
-            RelatertYtelseTilstand.AVSLUTTET, "123253254", RelatertYtelseType.SYKEPENGER));
+            RelatertYtelseTilstand.AVSLUTTET, "123253254", FagsakYtelseType.SYKEPENGER));
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
@@ -257,13 +256,13 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(30), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(30), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(29), skjæringstidspunkt.minusDays(20), RelatertYtelseTilstand.AVSLUTTET, "1222433", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(29), skjæringstidspunkt.minusDays(20), RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(19), skjæringstidspunkt.minusDays(10), RelatertYtelseTilstand.AVSLUTTET, "124234", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(19), skjæringstidspunkt.minusDays(10), RelatertYtelseTilstand.AVSLUTTET, "124234", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(9), skjæringstidspunkt.minusDays(1), RelatertYtelseTilstand.AVSLUTTET, "123253254", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(9), skjæringstidspunkt.minusDays(1), RelatertYtelseTilstand.AVSLUTTET, "123253254", FagsakYtelseType.SYKEPENGER));
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
@@ -292,9 +291,9 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10), RelatertYtelseTilstand.AVSLUTTET, "1222433", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10), RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
@@ -322,9 +321,9 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             VersjonType.REGISTER);
 
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
         builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(12), RelatertYtelseTilstand.AVSLUTTET, "1222433", RelatertYtelseType.SYKEPENGER));
+            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(12), RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);

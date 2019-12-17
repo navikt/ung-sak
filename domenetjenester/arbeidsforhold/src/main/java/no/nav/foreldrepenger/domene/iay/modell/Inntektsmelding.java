@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.Convert;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -21,9 +19,7 @@ import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
 
-public class Inntektsmelding extends BaseEntitet implements IndexKey {
-
-
+public class Inntektsmelding implements IndexKey {
 
     @ChangeTracked
     private List<Gradering> graderinger = new ArrayList<>();
@@ -76,7 +72,6 @@ public class Inntektsmelding extends BaseEntitet implements IndexKey {
     @ChangeTracked
     private InntektsmeldingInnsendingsårsak innsendingsårsak = InntektsmeldingInnsendingsårsak.UDEFINERT;
 
-    @Convert(converter = FagsakYtelseType.KodeverdiConverter.class)
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
     Inntektsmelding() {

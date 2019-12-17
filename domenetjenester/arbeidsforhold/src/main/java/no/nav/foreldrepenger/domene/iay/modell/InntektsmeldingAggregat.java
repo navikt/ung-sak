@@ -12,11 +12,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 
-public class InntektsmeldingAggregat extends BaseEntitet {
+public class InntektsmeldingAggregat {
 
     private static final Logger logger = LoggerFactory.getLogger(InntektsmeldingAggregat.class);
     private static final String ALTINN_SYSTEM_NAVN = "AltinnPortal";
@@ -26,7 +25,7 @@ public class InntektsmeldingAggregat extends BaseEntitet {
 
     private ArbeidsforholdInformasjon arbeidsforholdInformasjon;
 
-    public InntektsmeldingAggregat() {
+    InntektsmeldingAggregat() {
     }
 
     InntektsmeldingAggregat(InntektsmeldingAggregat inntektsmeldingAggregat) {

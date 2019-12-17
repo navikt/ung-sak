@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.AktørArbeid;
@@ -155,7 +155,7 @@ public class InntektArbeidYtelseScenario {
         private YtelseType inntektspostYtelseType = OffentligYtelseType.UDEFINERT;
 
         // RelaterteYtelser
-        private RelatertYtelseType ytelseType = null;
+        private FagsakYtelseType ytelseType = null;
         private LocalDate iverksettelsesDato = FPDateUtil.iDag().minusYears(5L);
         private RelatertYtelseTilstand relatertYtelseTilstand = RelatertYtelseTilstand.AVSLUTTET;
         private TemaUnderkategori ytelseBehandlingstema = TemaUnderkategori.FORELDREPENGER_SVANGERSKAPSPENGER;
@@ -258,7 +258,7 @@ public class InntektArbeidYtelseScenario {
         }
 
         // Ytelse (YtelseType må settes)
-        public InntektArbeidYtelseScenarioTestBuilder medYtelseType(RelatertYtelseType ytelseType) {
+        public InntektArbeidYtelseScenarioTestBuilder medYtelseType(FagsakYtelseType ytelseType) {
             this.ytelseType = ytelseType;
             return this;
         }
@@ -278,7 +278,7 @@ public class InntektArbeidYtelseScenario {
             return this;
         }
 
-        public YtelseBuilder buildRelaterteYtelserGrunnlag(RelatertYtelseType ytelseType) {
+        public YtelseBuilder buildRelaterteYtelserGrunnlag(FagsakYtelseType ytelseType) {
             return YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(ytelseKilde)
                 .medSaksnummer(saksnummer)

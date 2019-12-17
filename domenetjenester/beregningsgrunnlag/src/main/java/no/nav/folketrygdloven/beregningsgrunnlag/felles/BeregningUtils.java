@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
@@ -23,18 +23,18 @@ public class BeregningUtils {
 
     private BeregningUtils() {}
 
-    public static Optional<Ytelse> sisteVedtakFørStpForType(YtelseFilter ytelseFilter, LocalDate skjæringstidspunkt, Set<RelatertYtelseType> ytelseTyper) {
+    public static Optional<Ytelse> sisteVedtakFørStpForType(YtelseFilter ytelseFilter, LocalDate skjæringstidspunkt, Set<FagsakYtelseType> ytelseTyper) {
         return ytelseFilter.getFiltrertYtelser().stream()
-            .filter(ytelse -> ytelseTyper.contains(ytelse.getRelatertYtelseType()))
+            .filter(ytelse -> ytelseTyper.contains(ytelse.getYtelseType()))
             .filter(ytelse -> !skjæringstidspunkt.isBefore(ytelse.getPeriode().getFomDato()))
             .max(Comparator.comparing(Ytelse::getPeriode).thenComparing(ytelse -> ytelse.getPeriode().getTomDato()));
     }
 
-    public static Optional<YtelseAnvist> sisteHeleMeldekortFørStp(YtelseFilter ytelseFilter, Ytelse sisteVedtak, LocalDate skjæringstidspunkt, Set<RelatertYtelseType> ytelseTyper) {
+    public static Optional<YtelseAnvist> sisteHeleMeldekortFørStp(YtelseFilter ytelseFilter, Ytelse sisteVedtak, LocalDate skjæringstidspunkt, Set<FagsakYtelseType> ytelseTyper) {
         final LocalDate sisteVedtakFom = sisteVedtak.getPeriode().getFomDato();
 
         List<YtelseAnvist> alleMeldekort = ytelseFilter.getFiltrertYtelser().stream()
-            .filter(ytelse -> ytelseTyper.contains(ytelse.getRelatertYtelseType()))
+            .filter(ytelse -> ytelseTyper.contains(ytelse.getYtelseType()))
             .flatMap(ytelse -> ytelse.getYtelseAnvist().stream()).collect(Collectors.toList());
 
         Optional<YtelseAnvist> sisteMeldekort = alleMeldekort.stream()

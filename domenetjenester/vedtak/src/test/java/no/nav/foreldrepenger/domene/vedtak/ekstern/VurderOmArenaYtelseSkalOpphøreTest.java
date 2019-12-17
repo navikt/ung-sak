@@ -28,7 +28,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatTy
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -347,7 +347,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
             .medSaksnummer(new Saksnummer(SAK_ID))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(ytelserFom, ytelserTom))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(RelatertYtelseType.DAGPENGER)
+            .medYtelseType(FagsakYtelseType.DAGPENGER)
             .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
         byggYtelserAnvist(ytelserFom, ytelserTom, t1, ytelseBuilder).forEach(
             ytelseAnvist -> {

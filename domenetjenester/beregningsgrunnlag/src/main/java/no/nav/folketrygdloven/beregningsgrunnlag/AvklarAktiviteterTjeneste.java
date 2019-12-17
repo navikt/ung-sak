@@ -16,7 +16,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
@@ -62,12 +62,12 @@ public class AvklarAktiviteterTjeneste {
     private Optional<BigDecimal> hentUtbetalingsprosentAAP(Optional<AktørYtelse> aktørYtelse, LocalDate skjæringstidspunkt) {
         var ytelseFilter = new YtelseFilter(aktørYtelse).før(skjæringstidspunkt);
 
-        Optional<Ytelse> nyligsteVedtak = BeregningUtils.sisteVedtakFørStpForType(ytelseFilter, skjæringstidspunkt, Set.of(RelatertYtelseType.ARBEIDSAVKLARINGSPENGER));
+        Optional<Ytelse> nyligsteVedtak = BeregningUtils.sisteVedtakFørStpForType(ytelseFilter, skjæringstidspunkt, Set.of(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER));
         if (nyligsteVedtak.isEmpty()) {
             return Optional.empty();
         }
 
-        Optional<YtelseAnvist> nyligsteMeldekort = BeregningUtils.sisteHeleMeldekortFørStp(ytelseFilter, nyligsteVedtak.get(), skjæringstidspunkt, Set.of(RelatertYtelseType.ARBEIDSAVKLARINGSPENGER));
+        Optional<YtelseAnvist> nyligsteMeldekort = BeregningUtils.sisteHeleMeldekortFørStp(ytelseFilter, nyligsteVedtak.get(), skjæringstidspunkt, Set.of(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER));
         return Optional.of(nyligsteMeldekort.flatMap(YtelseAnvist::getUtbetalingsgradProsent).map(Stillingsprosent::getVerdi).orElse(BeregningUtils.MAX_UTBETALING_PROSENT_AAP_DAG));
     }
 

@@ -9,30 +9,29 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingRelaterteYtelserMapper {
 
-    private static final Map<FagsakYtelseType, RelatertYtelseType> YTELSE_TYPE_MAP = Map.of(
-        FagsakYtelseType.ENGANGSTØNAD, RelatertYtelseType.ENGANGSSTØNAD,
-        FagsakYtelseType.FORELDREPENGER, RelatertYtelseType.FORELDREPENGER,
-        FagsakYtelseType.SVANGERSKAPSPENGER, RelatertYtelseType.SVANGERSKAPSPENGER
+    private static final Map<FagsakYtelseType, FagsakYtelseType> YTELSE_TYPE_MAP = Map.of(
+        FagsakYtelseType.ENGANGSTØNAD, FagsakYtelseType.ENGANGSTØNAD,
+        FagsakYtelseType.FORELDREPENGER, FagsakYtelseType.FORELDREPENGER,
+        FagsakYtelseType.SVANGERSKAPSPENGER, FagsakYtelseType.SVANGERSKAPSPENGER
     );
 
-    public static final List<RelatertYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = List.of(
-        RelatertYtelseType.FORELDREPENGER,
-        RelatertYtelseType.ENGANGSSTØNAD,
-        RelatertYtelseType.SYKEPENGER,
-        RelatertYtelseType.ENSLIG_FORSØRGER,
-        RelatertYtelseType.DAGPENGER,
-        RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
-        RelatertYtelseType.SVANGERSKAPSPENGER);
+    public static final List<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = List.of(
+        FagsakYtelseType.FORELDREPENGER,
+        FagsakYtelseType.ENGANGSTØNAD,
+        FagsakYtelseType.SYKEPENGER,
+        FagsakYtelseType.ENSLIG_FORSØRGER,
+        FagsakYtelseType.DAGPENGER,
+        FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
+        FagsakYtelseType.SVANGERSKAPSPENGER);
 
-    public static final List<RelatertYtelseType> RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER = List.of(
-        RelatertYtelseType.FORELDREPENGER,
-        RelatertYtelseType.ENGANGSSTØNAD);
+    public static final List<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER = List.of(
+        FagsakYtelseType.FORELDREPENGER,
+        FagsakYtelseType.ENGANGSTØNAD);
 
     private BehandlingRelaterteYtelserMapper() {
     }
@@ -43,13 +42,13 @@ public class BehandlingRelaterteYtelserMapper {
             .collect(Collectors.toList());
     }
 
-    public static RelatertYtelseType mapFraFagsakYtelseTypeTilRelatertYtelseType(FagsakYtelseType type) {
-        return YTELSE_TYPE_MAP.getOrDefault(type, RelatertYtelseType.UDEFINERT);
+    public static FagsakYtelseType mapFraFagsakYtelseTypeTilRelatertYtelseType(FagsakYtelseType type) {
+        return YTELSE_TYPE_MAP.getOrDefault(type, FagsakYtelseType.UDEFINERT);
     }
 
     private static TilgrensendeYtelserDto lagTilgrensendeYtelse(Ytelse ytelse) {
         TilgrensendeYtelserDto tilgrensendeYtelserDto = new TilgrensendeYtelserDto();
-        tilgrensendeYtelserDto.setRelatertYtelseType(ytelse.getRelatertYtelseType().getKode());
+        tilgrensendeYtelserDto.setRelatertYtelseType(ytelse.getYtelseType().getKode());
         tilgrensendeYtelserDto.setPeriodeFraDato(ytelse.getPeriode().getFomDato());
         tilgrensendeYtelserDto.setPeriodeTilDato(endreTomDatoHvisLøpende(ytelse.getPeriode().getTomDato()));
         tilgrensendeYtelserDto.setStatus(ytelse.getStatus().getKode());
@@ -59,7 +58,7 @@ public class BehandlingRelaterteYtelserMapper {
 
     public static TilgrensendeYtelserDto mapFraFagsak(Fagsak fagsak, LocalDate periodeDato) {
         TilgrensendeYtelserDto tilgrensendeYtelserDto = new TilgrensendeYtelserDto();
-        RelatertYtelseType relatertYtelseType = YTELSE_TYPE_MAP.getOrDefault(fagsak.getYtelseType(), RelatertYtelseType.UDEFINERT);
+        FagsakYtelseType relatertYtelseType = YTELSE_TYPE_MAP.getOrDefault(fagsak.getYtelseType(), FagsakYtelseType.UDEFINERT);
         tilgrensendeYtelserDto.setRelatertYtelseType(relatertYtelseType.getKode());
         tilgrensendeYtelserDto.setStatus(fagsak.getStatus().getKode());
         tilgrensendeYtelserDto.setPeriodeFraDato(periodeDato);
@@ -75,9 +74,9 @@ public class BehandlingRelaterteYtelserMapper {
         return tomDato;
     }
 
-    public static List<RelaterteYtelserDto> samleYtelserBasertPåYtelseType(List<TilgrensendeYtelserDto> tilgrensendeYtelser, List<RelatertYtelseType> ytelsesTyper) {
+    public static List<RelaterteYtelserDto> samleYtelserBasertPåYtelseType(List<TilgrensendeYtelserDto> tilgrensendeYtelser, List<FagsakYtelseType> ytelsesTyper) {
         List<RelaterteYtelserDto> relaterteYtelserDtos = new LinkedList<>();
-        for (RelatertYtelseType relatertYtelseType : ytelsesTyper) {
+        for (FagsakYtelseType relatertYtelseType : ytelsesTyper) {
             relaterteYtelserDtos.add(new RelaterteYtelserDto(relatertYtelseType.getKode(), sortTilgrensendeYtelser(tilgrensendeYtelser, relatertYtelseType.getKode())));
         }
         return relaterteYtelserDtos;

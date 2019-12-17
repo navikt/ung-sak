@@ -65,7 +65,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAk
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -203,7 +203,7 @@ public class MapBeregningsgrunnlagFraVLTilRegelTest {
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder
             .medKilde(Fagsystem.ARENA)
-            .medYtelseType(RelatertYtelseType.DAGPENGER)
+            .medYtelseType(FagsakYtelseType.DAGPENGER)
             .medBehandlingsTema(TemaUnderkategori.UDEFINERT)
             .medStatus(RelatertYtelseTilstand.AVSLUTTET)
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))

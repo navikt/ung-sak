@@ -10,26 +10,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.OrderBy;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 
-public class ArbeidsforholdInformasjon extends BaseEntitet {
-
-
+public class ArbeidsforholdInformasjon {
 
     @ChangeTracked
-    @OrderBy("opprettetTidspunkt ASC")
     private Set<ArbeidsforholdReferanse> referanser = new LinkedHashSet<>();
 
     @ChangeTracked
     private List<ArbeidsforholdOverstyring> overstyringer = new ArrayList<>();
 
-    public ArbeidsforholdInformasjon() {
+    ArbeidsforholdInformasjon() {
     }
 
     public ArbeidsforholdInformasjon(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {

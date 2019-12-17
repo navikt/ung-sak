@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.BehandlingRelaterteYtelserMapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.TilgrensendeYtelserDto;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -40,13 +40,13 @@ public class YtelserKonsolidertTjeneste {
 
 
     /** Sammenstilt informasjon om vedtatte ytelser fra grunnlag og saker til behandling i VL (som ennå ikke har vedtak). */
-    public List<TilgrensendeYtelserDto> utledYtelserRelatertTilBehandling(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag, Optional<Set<RelatertYtelseType>> inkluder) {
+    public List<TilgrensendeYtelserDto> utledYtelserRelatertTilBehandling(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag, Optional<Set<FagsakYtelseType>> inkluder) {
 
         var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
         var ytelser = filter.getFiltrertYtelser();
 
         Collection<Ytelse> fraGrunnlag = ytelser.stream()
-            .filter(ytelse -> !inkluder.isPresent() || inkluder.get().contains(ytelse.getRelatertYtelseType()))
+            .filter(ytelse -> !inkluder.isPresent() || inkluder.get().contains(ytelse.getYtelseType()))
             .collect(Collectors.toList());
         List<TilgrensendeYtelserDto> resultat = new ArrayList<>(BehandlingRelaterteYtelserMapper.mapFraBehandlingRelaterteYtelser(fraGrunnlag));
 

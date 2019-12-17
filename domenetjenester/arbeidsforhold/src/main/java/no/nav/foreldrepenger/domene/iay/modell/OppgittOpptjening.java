@@ -8,12 +8,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 
-public class OppgittOpptjening extends BaseEntitet {
-
-
+public class OppgittOpptjening {
 
     private UUID uuid;
 
@@ -29,22 +26,22 @@ public class OppgittOpptjening extends BaseEntitet {
     @ChangeTracked
     private OppgittFrilans frilans;
 
-    @SuppressWarnings("unused")
-    private OppgittOpptjening() {
-        // hibernate
+    private LocalDateTime opprettetTidspunkt;
+
+    OppgittOpptjening() {
     }
 
     public OppgittOpptjening(UUID eksternReferanse) {
         Objects.requireNonNull(eksternReferanse, "eksternReferanse");
         this.uuid = eksternReferanse;
         // setter tidspunkt til nå slik at dette også er satt for nybakte objekter uten å lagring
-        setOpprettetTidspunkt(LocalDateTime.now());
+        this.opprettetTidspunkt = LocalDateTime.now();
     }
 
     OppgittOpptjening(UUID eksternReferanse, LocalDateTime opprettetTidspunktOriginalt) {
         Objects.requireNonNull(eksternReferanse, "eksternReferanse");
         this.uuid = eksternReferanse;
-        super.setOpprettetTidspunkt(opprettetTidspunktOriginalt);
+        this.opprettetTidspunkt = opprettetTidspunktOriginalt;
     }
 
     /** Identifisere en immutable instans av grunnlaget unikt og er egnet for utveksling (eks. til abakus eller andre systemer) */
@@ -146,5 +143,9 @@ public class OppgittOpptjening extends BaseEntitet {
      */
     public boolean harOpptjening() {
         return !getOppgittArbeidsforhold().isEmpty() || !getEgenNæring().isEmpty() || !getAnnenAktivitet().isEmpty() || !getFrilans().isEmpty();
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 }

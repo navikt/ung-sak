@@ -17,7 +17,7 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
@@ -83,7 +83,7 @@ public class MapYtelseperioderTjeneste {
         filter.getFiltrertYtelser().stream()
             .filter(ytelse -> !(Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && RelatertYtelseTilstand.ÅPEN.equals(ytelse.getStatus())))
             .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.FPSAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
-            .filter(ytelse -> ytelse.getRelatertYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
+            .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
                 List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, grunnlag, vurderOpptjening);
                 ytelsePerioder.addAll(periode);
@@ -125,12 +125,12 @@ public class MapYtelseperioderTjeneste {
     }
 
     private OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
-        if (RelatertYtelseType.PÅRØRENDESYKDOM.equals(ytelse.getRelatertYtelseType())) {
+        if (FagsakYtelseType.PÅRØRENDESYKDOM.equals(ytelse.getYtelseType())) {
             return OpptjeningAktivitetType.hentFraTemaUnderkategori()
                 .getOrDefault(ytelse.getBehandlingsTema(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
         }
-        return OpptjeningAktivitetType.hentFraRelatertYtelseTyper()
-            .getOrDefault(ytelse.getRelatertYtelseType(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
+        return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()
+            .getOrDefault(ytelse.getYtelseType(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
     }
 
     private List<OpptjeningsperiodeForSaksbehandling> slåSammenYtelsePerioder(List<OpptjeningsperiodeForSaksbehandling> ytelser) {

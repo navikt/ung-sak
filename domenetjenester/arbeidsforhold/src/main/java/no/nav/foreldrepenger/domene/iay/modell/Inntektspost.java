@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
@@ -18,7 +17,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-public class Inntektspost extends BaseEntitet implements IndexKey {
+public class Inntektspost implements IndexKey {
 
     private static final Map<String, Map<String, ? extends YtelseType>> YTELSE_TYPER = new LinkedHashMap<>();
 
@@ -44,8 +43,7 @@ public class Inntektspost extends BaseEntitet implements IndexKey {
     @ChangeTracked
     private Beløp beløp;
 
-    public Inntektspost() {
-        // hibernate
+    Inntektspost() {
     }
 
     /**
