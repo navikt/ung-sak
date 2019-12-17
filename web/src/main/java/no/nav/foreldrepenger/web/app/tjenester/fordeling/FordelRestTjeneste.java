@@ -173,9 +173,22 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public void psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
+    public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
         // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
-        dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
+        final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
+        return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer().getVerdi());
+    }
+
+    public static class PleiepengerBarnSoknadMottatt {
+        private final String saksnummer;
+
+        public PleiepengerBarnSoknadMottatt(String saksnummer) {
+            this.saksnummer = saksnummer;
+        }
+
+        public String getSaksnummer() {
+            return saksnummer;
+        }
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
