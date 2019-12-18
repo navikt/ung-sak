@@ -50,10 +50,10 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
 
     @Inject
     public KompletthetsjekkerImpl(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
-                                @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding,
-                                InntektsmeldingTjeneste inntektsmeldingTjeneste,
-                                KompletthetsjekkerFelles fellesUtil,
-                                SøknadRepository søknadRepository) {
+                                  @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding,
+                                  InntektsmeldingTjeneste inntektsmeldingTjeneste,
+                                  KompletthetsjekkerFelles fellesUtil,
+                                  SøknadRepository søknadRepository) {
         this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
@@ -150,9 +150,7 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
         Optional<LocalDateTime> ventefristEtterlysning = finnVentefristForEtterlysning(ref);
         // Gjeldende logikk: Etterlys hvis ingen mottatte
         if (ventefristEtterlysning.isPresent() && inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt()).isEmpty()) {
-            if (!fellesUtil.erSendtBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK)) {
-                fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, null);
-            }
+            fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, null);
             return ventefristEtterlysning;
         }
         return Optional.empty();
