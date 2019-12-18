@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
@@ -25,7 +26,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
-import no.nav.foreldrepenger.behandlingslager.behandling.*;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
+import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
+import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
@@ -54,8 +57,12 @@ import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
-import no.nav.vedtak.felles.jpa.Transaction;
-import no.nav.vedtak.sikkerhet.abac.*;
+import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
+import no.nav.vedtak.sikkerhet.abac.AbacDto;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.vedtak.util.FPDateUtil;
 
 // FIXME K9 Hei Stian!
@@ -65,7 +72,7 @@ import no.nav.vedtak.util.FPDateUtil;
  */
 @Path(FordelRestTjeneste.BASE_PATH)
 @ApplicationScoped
-@Transaction
+@Transactional
 public class FordelRestTjeneste {
 
     static final String BASE_PATH = "/fordel";

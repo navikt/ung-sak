@@ -7,7 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import no.finn.unleash.Unleash;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -20,8 +19,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
-    private static final String PUBLISER_VEDTAK_TIL_ABAKUS = "fpsak.publiser-vedtak-til-abakus";
-    private Unleash unleash;
     private ProsessTaskRepository taskRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository vedtakRepository;
@@ -30,18 +27,15 @@ public class VedtakFattetEventObserver {
     }
 
     @Inject
-    public VedtakFattetEventObserver(Unleash unleash, ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository, BehandlingVedtakRepository vedtakRepository) {
-        this.unleash = unleash;
+    public VedtakFattetEventObserver(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository, BehandlingVedtakRepository vedtakRepository) {
         this.taskRepository = taskRepository;
         this.behandlingRepository = behandlingRepository;
         this.vedtakRepository = vedtakRepository;
     }
 
     public void observerStegOvergang(@Observes BehandlingVedtakEvent event) {
-        if (unleash.isEnabled(PUBLISER_VEDTAK_TIL_ABAKUS, false)) {
-            if (erBehandlingAvRettType(event.getBehandlingId())) {
-                opprettTaskForPubliseringAvVedtak(event.getBehandlingId());
-            }
+        if (erBehandlingAvRettType(event.getBehandlingId())) {
+            opprettTaskForPubliseringAvVedtak(event.getBehandlingId());
         }
     }
 

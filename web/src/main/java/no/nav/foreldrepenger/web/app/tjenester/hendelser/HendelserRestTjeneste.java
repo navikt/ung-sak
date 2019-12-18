@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -24,7 +25,6 @@ import no.nav.foreldrepenger.kontrakter.abonnent.HendelseWrapperDto;
 import no.nav.foreldrepenger.mottak.hendelser.HendelseSorteringTjeneste;
 import no.nav.foreldrepenger.mottak.hendelser.MottattHendelseTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.hendelser.impl.ForretningshendelseRegistrererProvider;
-import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
@@ -35,7 +35,7 @@ import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Transaction
+@Transactional
 public class HendelserRestTjeneste {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HendelserRestTjeneste.class);

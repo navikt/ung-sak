@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -19,14 +20,13 @@ import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto.InnloggetNavAns
 import no.nav.foreldrepenger.web.app.util.LdapUtil;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
-import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Path("/nav-ansatt")
 @ApplicationScoped
-@Transaction
+@Transactional
 public class NavAnsattRestTjeneste {
     private String gruppenavnSaksbehandler;
     private String gruppenavnVeileder;

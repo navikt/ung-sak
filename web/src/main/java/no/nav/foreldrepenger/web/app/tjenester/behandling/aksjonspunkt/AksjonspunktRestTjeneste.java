@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -45,7 +46,7 @@ import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @ApplicationScoped
-@Transaction
+@Transactional
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class AksjonspunktRestTjeneste {

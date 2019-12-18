@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.control.ActivateRequestContext;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.vedtak.felles.AktiverContextOgTransaksjon;
-
 @ApplicationScoped
-@AktiverContextOgTransaksjon
+@ActivateRequestContext
+@Transactional
 public class SimulerOppdragApplikasjonTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(SimulerOppdragApplikasjonTjeneste.class);
