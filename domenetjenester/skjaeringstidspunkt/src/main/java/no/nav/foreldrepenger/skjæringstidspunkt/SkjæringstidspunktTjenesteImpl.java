@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.skjæringstidspunkt;
 
-import java.time.LocalDate;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -33,7 +31,7 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
     public Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         if (behandling.erYtelseBehandling()) {
-            
+
             var stpTjeneste = FagsakYtelseTypeRef.Lookup.find(stpTjenester, behandling.getFagsakYtelseType());
             // FIXME K9 Definer skjæringstidspunkt
             var stp = stpTjeneste.orElseThrow().getSkjæringstidspunkter(behandlingId);
