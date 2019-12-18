@@ -60,8 +60,8 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonConsumer;
-import no.nav.vedtak.felles.jpa.tid.AbstractLocalDateInterval;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -465,9 +465,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         AktivitetsAvtaleBuilder aktivitetsAvtaleBuilder = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder();
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
-            .medProsentsats(BigDecimal.valueOf(100))
-            .medAntallTimer(BigDecimal.valueOf(40))
-            .medAntallTimerFulltid(BigDecimal.valueOf(40));
+            .medProsentsats(BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder ansettelsesperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         yrkesaktivitetBuilder

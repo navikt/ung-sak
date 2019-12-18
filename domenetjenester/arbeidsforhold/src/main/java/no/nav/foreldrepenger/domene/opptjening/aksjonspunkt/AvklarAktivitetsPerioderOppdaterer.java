@@ -40,7 +40,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped

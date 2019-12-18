@@ -77,7 +77,7 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

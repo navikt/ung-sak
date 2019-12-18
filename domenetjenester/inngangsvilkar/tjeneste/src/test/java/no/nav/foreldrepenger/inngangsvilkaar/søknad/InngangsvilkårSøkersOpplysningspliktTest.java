@@ -64,7 +64,7 @@ public class InngangsvilkårSøkersOpplysningspliktTest {
     }
 
     @Test
-    public void revurdering_for_foreldrepenger_skal_alltid_medføre_oppfylt() {
+    public void revurdering_skal_medføre_at_vilkår_er_oppfylt() {
         when(kompletthetssjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetssjekker);
         when(kompletthetssjekker.erForsendelsesgrunnlagKomplett(any()))
             .thenReturn(false);

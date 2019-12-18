@@ -36,7 +36,7 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @ApplicationScoped
 public class BeregningsgrunnlagDtoUtil {

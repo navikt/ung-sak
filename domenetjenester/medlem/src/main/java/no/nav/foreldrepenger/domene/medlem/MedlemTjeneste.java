@@ -49,7 +49,7 @@ import no.nav.foreldrepenger.domene.medlem.impl.MedlemResultat;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.util.FPDateUtil;
 import no.nav.vedtak.util.Tuple;
 

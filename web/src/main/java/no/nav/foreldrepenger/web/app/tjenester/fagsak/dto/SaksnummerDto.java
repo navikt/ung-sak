@@ -1,8 +1,5 @@
 package no.nav.foreldrepenger.web.app.tjenester.fagsak.dto;
 
-import java.util.Objects;
-
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;

@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.*;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

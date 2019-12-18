@@ -25,13 +25,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
+import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerFelles;
-import no.nav.foreldrepenger.mottak.dokumentmottak.impl.Kompletthetskontroller;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -57,39 +55,21 @@ public abstract class DokumentmottakerTestsupport {
 
     protected Behandling opprettNyBehandlingUtenVedtak(FagsakYtelseType fagsakYtelseType) {
         Behandling behandling = null;
-
-        if (fagsakYtelseType.gjelderEngangsstønad()) {
-            var scenario = TestScenarioBuilder.builderMedSøknad()
-                .medBehandlingType(FØRSTEGANGSSØKNAD);
-            behandling = scenario.lagre(repositoryProvider);
-        }
-
-        if (fagsakYtelseType.gjelderForeldrepenger()) {
-            var scenario = TestScenarioBuilder.builderMedSøknad()
-                .medBehandlingType(FØRSTEGANGSSØKNAD);
-            behandling = scenario.lagre(repositoryProvider);
-        }
-
+        var scenario = TestScenarioBuilder.builderMedSøknad(fagsakYtelseType)
+            .medBehandlingType(FØRSTEGANGSSØKNAD);
+        behandling = scenario.lagre(repositoryProvider);
         return behandling;
     }
 
-    protected Behandling opprettBehandling(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, BehandlingResultatType behandlingResultatType, Avslagsårsak avslagsårsak, VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
-        if (fagsakYtelseType.gjelderEngangsstønad()) {
-            var scenario = TestScenarioBuilder.builderMedSøknad()
-                .medBehandlingType(behandlingType);
-            return opprettBehandling(scenario, behandlingResultatType, avslagsårsak, vedtakResultatType, vedtaksdato);
-        }
-
-        if (fagsakYtelseType.gjelderForeldrepenger()) {
-            var scenario = TestScenarioBuilder.builderMedSøknad()
-                .medBehandlingType(behandlingType);
-            return opprettBehandling(scenario, behandlingResultatType, avslagsårsak, vedtakResultatType, vedtaksdato);
-        }
-
-        throw new UnsupportedOperationException("Fiks testoppsett");
+    protected Behandling opprettBehandling(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, BehandlingResultatType behandlingResultatType,
+                                           Avslagsårsak avslagsårsak, VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
+        var scenario = TestScenarioBuilder.builderMedSøknad(fagsakYtelseType)
+            .medBehandlingType(behandlingType);
+        return opprettBehandling(scenario, behandlingResultatType, avslagsårsak, vedtakResultatType, vedtaksdato);
     }
 
-    private Behandling opprettBehandling(AbstractTestScenario<?> scenario, BehandlingResultatType behandlingResultatType, Avslagsårsak avslagsårsak, VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
+    private Behandling opprettBehandling(AbstractTestScenario<?> scenario, BehandlingResultatType behandlingResultatType, Avslagsårsak avslagsårsak,
+                                         VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
 
         scenario.medBehandlingsresultat(Behandlingsresultat.builder()
             .medBehandlingResultatType(behandlingResultatType)
@@ -114,7 +94,6 @@ public abstract class DokumentmottakerTestsupport {
             .leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, VilkårUtfallType.IKKE_OPPFYLT)
             .buildFor(behandling);
         repositoryProvider.getBehandlingRepository().lagre(vilkårResultat, behandlingLås);
-
 
         return behandling;
     }

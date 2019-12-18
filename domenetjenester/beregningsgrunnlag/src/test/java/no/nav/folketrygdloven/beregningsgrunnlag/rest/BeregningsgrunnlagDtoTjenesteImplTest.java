@@ -81,7 +81,7 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonConsumer;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 public class BeregningsgrunnlagDtoTjenesteImplTest {
 

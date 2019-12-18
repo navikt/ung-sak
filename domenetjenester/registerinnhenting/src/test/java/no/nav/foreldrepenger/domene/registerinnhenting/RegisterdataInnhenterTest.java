@@ -156,7 +156,7 @@ public class RegisterdataInnhenterTest {
     private RegisterdataInnhenter lagRegisterdataInnhenter(BehandlingRepositoryProvider repositoryProvider) {
         SkjæringstidspunktRegisterinnhentingTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktRegisterinnhentingTjeneste.class);
         OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste = new OpplysningsPeriodeTjeneste(skjæringstidspunktTjeneste,
-            Period.of(1, 0, 0), Period.of(0, 6, 0), Period.of(0, 4, 0), Period.of(1, 0, 0), Period.of(1, 0, 0), Period.of(0, 6, 0));
+            Period.of(1, 0, 0), Period.of(0, 6, 0));
 
         PersoninfoAdapter personinfoAdapter = mock(PersoninfoAdapter.class);
         MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);

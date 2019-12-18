@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -52,7 +52,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent // La stå @Dependent så lenge #oppgittOpptjeningBuilder er et felt her
 public class BeregningIAYTestUtil {
@@ -286,7 +286,7 @@ public class BeregningIAYTestUtil {
     }
 
     public void leggTilAktørytelse(BehandlingReferanse behandlingReferanse, LocalDate fom, LocalDate tom, // NOSONAR - brukes bare til test
-                                   RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, RelatertYtelseType ytelseType,
+                                   RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, FagsakYtelseType ytelseType,
                                    List<YtelseStørrelse> ytelseStørrelseList, Arbeidskategori arbeidskategori, Periode... meldekortPerioder) {
         InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder;
         inntektArbeidYtelseAggregatBuilder = iayTjeneste.opprettBuilderForRegister(behandlingReferanse.getId());
@@ -496,9 +496,7 @@ public class BeregningIAYTestUtil {
         AktivitetsAvtaleBuilder aktivitetsAvtale = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(tilOgMed == null ? DatoIntervallEntitet.fraOgMed(fraOgMed) : DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed))
             .medProsentsats(BigDecimal.TEN)
-            .medSisteLønnsendringsdato(lønnsendringsdato.orElse(null))
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d));
+            .medSisteLønnsendringsdato(lønnsendringsdato.orElse(null));
         AktivitetsAvtaleBuilder arbeidsperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
             .medPeriode(tilOgMed == null ? DatoIntervallEntitet.fraOgMed(fraOgMed) : DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed));
 

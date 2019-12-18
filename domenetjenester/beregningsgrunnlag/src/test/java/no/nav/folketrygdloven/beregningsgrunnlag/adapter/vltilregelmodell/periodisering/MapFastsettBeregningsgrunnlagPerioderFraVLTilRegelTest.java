@@ -57,8 +57,8 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilde
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.konfig.Tid;
 
 public class MapFastsettBeregningsgrunnlagPerioderFraVLTilRegelTest {

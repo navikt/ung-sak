@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class YtelseAnvistBuilder {
     private final YtelseAnvist ytelseAnvist;

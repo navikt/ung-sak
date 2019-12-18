@@ -43,7 +43,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.Beløp;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @Entity(name = "BeregningsgrunnlagPeriode")
 @Table(name = "BEREGNINGSGRUNNLAG_PERIODE")

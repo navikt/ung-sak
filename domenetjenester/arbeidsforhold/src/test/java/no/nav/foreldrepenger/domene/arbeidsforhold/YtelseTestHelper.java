@@ -7,7 +7,7 @@ import java.util.Optional;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
@@ -21,13 +21,13 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class YtelseTestHelper {
 
     public static InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder leggTilYtelse(InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder,
                                                                                 LocalDate fom, LocalDate tom,
-                                                                                RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, RelatertYtelseType ytelseType) {
+                                                                                RelatertYtelseTilstand relatertYtelseTilstand, String saksnummer, FagsakYtelseType ytelseType) {
         
         
         YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
@@ -43,6 +43,7 @@ public class YtelseTestHelper {
     public static InntektArbeidYtelseAggregatBuilder opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AktørId aktørId, InternArbeidsforholdRef ref,
                                                                                                          DatoIntervallEntitet periode, ArbeidType type,
                                                                                                          BigDecimal prosentsats, Arbeidsgiver arbeidsgiver,
+                                                                                                         LocalDate sisteLønnsendringsdato,
                                                                                                          VersjonType versjonType) {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), versjonType);
@@ -57,8 +58,7 @@ public class YtelseTestHelper {
 
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medProsentsats(prosentsats)
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d))
+            .medSisteLønnsendringsdato(sisteLønnsendringsdato)
             .medBeskrivelse("Ser greit ut");
         final AktivitetsAvtaleBuilder ansettelsesPeriode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder(periode, true);
 

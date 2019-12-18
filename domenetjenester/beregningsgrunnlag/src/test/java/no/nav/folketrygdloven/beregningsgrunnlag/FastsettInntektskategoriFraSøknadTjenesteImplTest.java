@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class FastsettInntektskategoriFraSøknadTjenesteImplTest {
 

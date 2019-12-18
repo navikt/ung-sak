@@ -17,8 +17,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.skjæringstidspunkt.DefaultSkjæringstidspunktTjenesteImpl;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.foreldrepenger.skjæringstidspunkt.fp.SkjæringstidspunktTjenesteImpl;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.BehandlingDtoTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.BehandlingÅrsakDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.UtvidetBehandlingDto;
@@ -37,7 +37,7 @@ public class BehandlingÅrsakDtoTest {
 
     @Before
     public void setup() {
-        skjæringstidspunktTjeneste = new SkjæringstidspunktTjenesteImpl(repositoryProvider.getBehandlingRepository());
+        skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(repositoryProvider.getBehandlingRepository());
         var beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
         behandlingDtoTjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null, unleash);
 

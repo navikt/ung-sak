@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import javax.persistence.Embeddable;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.BekreftetPermisjonStatus;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Embeddable
 public class BekreftetPermisjon {

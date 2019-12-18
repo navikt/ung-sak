@@ -77,8 +77,8 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.vedtak.exception.TekniskException;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.konfig.Tid;
 

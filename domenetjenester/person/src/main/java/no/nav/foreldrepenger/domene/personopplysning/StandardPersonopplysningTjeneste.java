@@ -6,7 +6,7 @@ import java.util.Optional;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public interface StandardPersonopplysningTjeneste {
 

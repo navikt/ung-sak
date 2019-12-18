@@ -9,7 +9,7 @@ import java.util.Set;
 import no.nav.folketrygdloven.beregningsgrunnlag.felles.BeregningUtils;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
@@ -42,14 +42,14 @@ class FinnInntektFraYtelse {
         return Optional.of(finnÅrsbeløp(nyesteVedtak.get(), nyesteMeldekort));
     }
 
-    private static RelatertYtelseType mapTilYtelseType(AktivitetStatus aktivitetStatus) {
+    private static FagsakYtelseType mapTilYtelseType(AktivitetStatus aktivitetStatus) {
         if (AktivitetStatus.DAGPENGER.equals(aktivitetStatus)) {
-            return RelatertYtelseType.DAGPENGER;
+            return FagsakYtelseType.DAGPENGER;
         }
         if (AktivitetStatus.ARBEIDSAVKLARINGSPENGER.equals(aktivitetStatus)) {
-            return RelatertYtelseType.ARBEIDSAVKLARINGSPENGER;
+            return FagsakYtelseType.ARBEIDSAVKLARINGSPENGER;
         }
-        return RelatertYtelseType.UDEFINERT;
+        return FagsakYtelseType.UDEFINERT;
     }
 
     private static BigDecimal finnÅrsbeløp(Ytelse ytelse, Optional<YtelseAnvist> ytelseAnvist) {

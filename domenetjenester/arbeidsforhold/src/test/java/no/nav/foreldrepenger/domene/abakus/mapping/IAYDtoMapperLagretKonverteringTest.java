@@ -13,7 +13,7 @@ import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class IAYDtoMapperLagretKonverteringTest {
 
@@ -66,7 +66,7 @@ public class IAYDtoMapperLagretKonverteringTest {
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
         var aktørYtelseBuilder = aggregatBuilder.getAktørYtelseBuilder(aktørId);
-        aktørYtelseBuilder.leggTilYtelse(lagYtelse(aktørYtelseBuilder));
+        aktørYtelseBuilder.leggTilYtelse(lagYtelse());
 
         var aktivitetsAvtaleBuilder = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder();
         var permisjonBuilder = yrkesaktivitetBuilder.getPermisjonBuilder();
@@ -82,9 +82,7 @@ public class IAYDtoMapperLagretKonverteringTest {
 
         var aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed))
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medSisteLønnsendringsdato(fraOgMed)
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d));
+            .medSisteLønnsendringsdato(fraOgMed);
 
         var yrkesaktivitet = yrkesaktivitetBuilder
             .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
@@ -127,16 +125,16 @@ public class IAYDtoMapperLagretKonverteringTest {
         assertThat(dto).isNotNull();
     }
 
-    private YtelseBuilder lagYtelse(InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder) {
+    private YtelseBuilder lagYtelse() {
         Saksnummer sakId = new Saksnummer("1200094");
         YtelseBuilder ytelselseBuilder = YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(Fagsystem.K9SAK)
-                .medYtelseType(RelatertYtelseType.SYKEPENGER)
+                .medYtelseType(FagsakYtelseType.SYKEPENGER)
                 .medSaksnummer(sakId);
         
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)
-            .medYtelseType(RelatertYtelseType.FORELDREPENGER)
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
             .medBehandlingsTema(TemaUnderkategori.UDEFINERT)
             .medStatus(RelatertYtelseTilstand.AVSLUTTET)
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM_DATO, TOM_DATO))

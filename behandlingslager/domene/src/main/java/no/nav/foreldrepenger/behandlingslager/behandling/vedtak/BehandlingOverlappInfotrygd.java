@@ -15,7 +15,7 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @Entity(name = "BehandlingOverlappInfotrygd")
 @Table(name = "BEHANDLING_OVERLAPP_INFOTRYGD")

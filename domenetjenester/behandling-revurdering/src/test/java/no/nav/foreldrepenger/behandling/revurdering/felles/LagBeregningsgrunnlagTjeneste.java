@@ -8,7 +8,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 public class LagBeregningsgrunnlagTjeneste {
     public static BeregningsgrunnlagEntitet lagBeregningsgrunnlag(LocalDate skjæringstidspunktBeregning,

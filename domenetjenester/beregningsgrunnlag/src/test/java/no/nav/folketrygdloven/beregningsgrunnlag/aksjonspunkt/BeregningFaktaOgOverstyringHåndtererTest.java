@@ -34,7 +34,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAk
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 

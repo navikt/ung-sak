@@ -21,7 +21,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class PersonstatusEndringIdentifisererTest {
 

@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.fagsak;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -32,8 +33,8 @@ public enum FagsakYtelseType implements Kodeverdi {
     PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående"),
     OMSORGSPENGER("OMP", "Omsorgspenger"),
     OPPLÆRINGSPENGER("OLP", "Opplæringspenger"),
-    
-    /**@deprecated Gammel infotrygd kode for K9 ytelser. Må tolkes om til ovenstående sammen med TemaUnderkategori.  */
+
+    /** @deprecated Gammel infotrygd kode for K9 ytelser. Må tolkes om til ovenstående sammen med TemaUnderkategori. */
     @Deprecated
     PÅRØRENDESYKDOM("PS", "Pårørende sykdom"),
 
@@ -48,8 +49,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     /** Folketrygdloven K15 ytelser. */
     ENSLIG_FORSØRGER("EF", "Enslig forsørger"),
 
-    UDEFINERT("-", "Ikke definert"),
-    ;
+    UDEFINERT("-", "Ikke definert"),;
 
     public static final String KODEVERK = "FAGSAK_YTELSE"; //$NON-NLS-1$
 
@@ -154,6 +154,28 @@ public enum FagsakYtelseType implements Kodeverdi {
     @Deprecated
     public final boolean gjelderSvangerskapspenger() {
         return SVANGERSKAPSPENGER.getKode().equals(this.getKode());
+    }
+
+    private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OPPTJENING_RELATERTYTELSE_CONFIG = Map.of(
+        FORELDREPENGER,
+        Set.of(ENSLIG_FORSØRGER, SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER,
+            PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER),
+        
+        SVANGERSKAPSPENGER,
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER,
+            PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER),
+
+        // FIXME K9 Verdiene under er høyst sannsynlig feil -- kun lagt inn for å komme videre i verdikjedetest.
+        PLEIEPENGER_SYKT_BARN,
+        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, ENSLIG_FORSØRGER,
+            PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER));
+
+    public boolean girOpptjeningsTid(FagsakYtelseType ytelseType) {
+        final var relatertYtelseTypeSet = OPPTJENING_RELATERTYTELSE_CONFIG.get(ytelseType);
+        if (relatertYtelseTypeSet == null) {
+            throw new IllegalStateException("Støtter ikke fagsakYtelseType" + ytelseType);
+        }
+        return relatertYtelseTypeSet.contains(this);
     }
 
     @Converter(autoApply = true)

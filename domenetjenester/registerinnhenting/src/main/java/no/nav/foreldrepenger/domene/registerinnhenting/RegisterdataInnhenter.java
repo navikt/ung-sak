@@ -63,7 +63,7 @@ import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.foreldrepenger.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.FPDateUtil;

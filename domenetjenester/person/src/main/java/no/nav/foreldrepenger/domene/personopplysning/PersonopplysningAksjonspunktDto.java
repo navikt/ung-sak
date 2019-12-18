@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.personopplysning;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class PersonopplysningAksjonspunktDto {
 

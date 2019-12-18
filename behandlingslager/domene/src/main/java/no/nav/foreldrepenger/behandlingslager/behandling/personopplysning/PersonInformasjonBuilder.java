@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class PersonInformasjonBuilder {
 

@@ -41,7 +41,7 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class RefusjonEllerGraderingArbeidsforholdDtoTjenesteTest {
 

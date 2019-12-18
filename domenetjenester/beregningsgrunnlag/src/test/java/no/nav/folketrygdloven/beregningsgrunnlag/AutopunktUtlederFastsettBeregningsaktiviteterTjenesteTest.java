@@ -23,7 +23,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestSc
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -73,7 +73,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate fom = LocalDate.of(2018, 9, 1);
         LocalDate tom = LocalDate.of(2019, 5, 1);
         LocalDate meldekortFom = LocalDate.of(2018, 12, 1);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
 
         // Act
@@ -98,7 +98,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate fom = LocalDate.of(2018, 9, 1);
         LocalDate tom = skjæringstidspunktOpptjening.minusDays(1);
         LocalDate meldekortFom = LocalDate.of(2018, 10, 1);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
 
         // Act
@@ -127,7 +127,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate meldekortFom2 = LocalDate.of(2019, 1, 12);
         ref = lagReferanse(skjæringstidspunktOpptjening);
         BeregningsgrunnlagEntitet bg = beregningsgrunnlagTestUtil.lagGjeldendeBeregningsgrunnlag(ref, skjæringstidspunktOpptjening, AktivitetStatus.ARBEIDSTAKER);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom), lagMeldekortPeriode(meldekortFom2));
 
         // Act
@@ -149,7 +149,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate meldekortFom2 = LocalDate.of(2019, 1, 12);
         ref = lagReferanse(skjæringstidspunktOpptjening);
         BeregningsgrunnlagEntitet bg = beregningsgrunnlagTestUtil.lagGjeldendeBeregningsgrunnlag(ref, skjæringstidspunktOpptjening, AktivitetStatus.ARBEIDSAVKLARINGSPENGER);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom), lagMeldekortPeriode(meldekortFom2));
 
         // Act
@@ -171,7 +171,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate meldekortFom2 = LocalDate.of(2019, 1, 12);
         ref = lagReferanse(skjæringstidspunktOpptjening);
         BeregningsgrunnlagEntitet bg = beregningsgrunnlagTestUtil.lagGjeldendeBeregningsgrunnlag(ref, skjæringstidspunktOpptjening, AktivitetStatus.ARBEIDSTAKER);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom), lagMeldekortPeriode(meldekortFom2));
 
         // Act
@@ -192,7 +192,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate tom = LocalDate.of(2019, 5, 1);
         LocalDate meldekortFom = LocalDate.of(2018, 9, 17);
         iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123",
-            RelatertYtelseType.ARBEIDSAVKLARINGSPENGER, Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
+            FagsakYtelseType.ARBEIDSAVKLARINGSPENGER, Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
 
         // Act
         Optional<LocalDate> resultat = AutopunktUtlederFastsettBeregningsaktiviteterTjeneste.skalVenteTilDatoPåMeldekortAAPellerDP(getAktørYtelse(), bg, dagensdato);
@@ -212,7 +212,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate tom = LocalDate.of(2018, 12, 31);
         LocalDate meldekortFom = LocalDate.of(2018, 12, 1);
         iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.AVSLUTTET, "123",
-            RelatertYtelseType.ARBEIDSAVKLARINGSPENGER, Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
+            FagsakYtelseType.ARBEIDSAVKLARINGSPENGER, Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
 
         // Act
         Optional<LocalDate> resultat = AutopunktUtlederFastsettBeregningsaktiviteterTjeneste.skalVenteTilDatoPåMeldekortAAPellerDP(getAktørYtelse(), bg, dagensdato);
@@ -246,7 +246,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate fom = LocalDate.of(2018, 9, 1);
         LocalDate tom = LocalDate.of(2019, 5, 1);
         LocalDate meldekortFom = LocalDate.of(2018, 5, 1);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.DAGPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.DAGPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
 
         // Act
@@ -268,7 +268,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate meldekortFom2 = LocalDate.of(2019, 1, 12);
         ref = lagReferanse(skjæringstidspunktOpptjening);
         BeregningsgrunnlagEntitet bg = beregningsgrunnlagTestUtil.lagGjeldendeBeregningsgrunnlag(ref, skjæringstidspunktOpptjening, AktivitetStatus.DAGPENGER);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", RelatertYtelseType.DAGPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.LØPENDE, "123", FagsakYtelseType.DAGPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom), lagMeldekortPeriode(meldekortFom2));
 
         // Act
@@ -289,7 +289,7 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
         LocalDate fom = LocalDate.of(2018, 9, 3);
         LocalDate tom = LocalDate.of(2019, 2, 11);
         LocalDate meldekortFom = LocalDate.of(2019, 1, 21);
-        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.AVSLUTTET, "123", RelatertYtelseType.ARBEIDSAVKLARINGSPENGER,
+        iayTestUtil.leggTilAktørytelse(ref, fom, tom, RelatertYtelseTilstand.AVSLUTTET, "123", FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
             Collections.emptyList(), Arbeidskategori.ARBEIDSTAKER, lagMeldekortPeriode(meldekortFom));
 
         // Act

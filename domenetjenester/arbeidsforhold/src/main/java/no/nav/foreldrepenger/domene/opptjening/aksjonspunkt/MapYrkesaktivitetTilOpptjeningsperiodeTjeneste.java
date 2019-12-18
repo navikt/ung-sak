@@ -22,7 +22,7 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.foreldrepenger.domene.opptjening.VurderingsStatus;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 

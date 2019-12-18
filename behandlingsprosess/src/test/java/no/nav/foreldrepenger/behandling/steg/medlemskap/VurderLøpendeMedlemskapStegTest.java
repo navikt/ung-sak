@@ -52,7 +52,7 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;

@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalUtil;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Aksjonspunkt")
 @Table(name = "AKSJONSPUNKT")

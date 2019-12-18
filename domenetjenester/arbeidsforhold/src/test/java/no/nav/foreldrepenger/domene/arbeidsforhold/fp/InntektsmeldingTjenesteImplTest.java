@@ -79,7 +79,7 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class InntektsmeldingTjenesteImplTest {
@@ -391,8 +391,6 @@ public class InntektsmeldingTjenesteImplTest {
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(periodeAA)
             .medProsentsats(prosentsats)
-            .medAntallTimer(BigDecimal.valueOf(20.4d))
-            .medAntallTimerFulltid(BigDecimal.valueOf(10.2d))
             .medBeskrivelse("Ser greit ut");
         AktivitetsAvtaleBuilder ansettelsesPeriode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder(periodeYA, true);
 

@@ -18,7 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity
 @Table(name = "UTTAK_RESULTAT_PERIODE")

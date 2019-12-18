@@ -41,7 +41,7 @@ import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped

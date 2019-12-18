@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "BGAndelArbeidsforhold")
 @Table(name = "BG_ANDEL_ARBEIDSFORHOLD")

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.skjæringstidspunkt.fp;
+package no.nav.foreldrepenger.skjæringstidspunkt;
 
 import java.time.LocalDate;
 
@@ -10,21 +10,19 @@ import no.nav.foreldrepenger.behandling.Skjæringstidspunkt.Builder;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktRegisterinnhentingTjeneste;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste , SkjæringstidspunktRegisterinnhentingTjeneste {
+public class DefaultSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste , SkjæringstidspunktRegisterinnhentingTjeneste {
 
     private BehandlingRepository behandlingRepository;
 
-    SkjæringstidspunktTjenesteImpl() {
+    DefaultSkjæringstidspunktTjenesteImpl() {
         // CDI
     }
 
     @Inject
-    public SkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository) {
+    public DefaultSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository) {
         this.behandlingRepository = behandlingRepository;
     }
 

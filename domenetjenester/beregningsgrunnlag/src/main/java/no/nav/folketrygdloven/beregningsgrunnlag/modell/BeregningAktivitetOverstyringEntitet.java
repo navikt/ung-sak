@@ -22,7 +22,7 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.jpa.tid.ÅpenDatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @Entity(name = "BeregningAktivitetOverstyring")
 @Table(name = "BG_AKTIVITET_OVERSTYRING")

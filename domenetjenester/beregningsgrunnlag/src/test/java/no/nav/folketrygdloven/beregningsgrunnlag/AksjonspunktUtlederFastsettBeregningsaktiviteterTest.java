@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
-import no.nav.vedtak.felles.jpa.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,7 +33,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.ytelse.fp.AksjonspunktUtlederFa
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
-import no.nav.foreldrepenger.behandlingslager.ytelse.RelatertYtelseType;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -142,7 +142,7 @@ public class AksjonspunktUtlederFastsettBeregningsaktiviteterTest {
     public void skalUtledeAutopunktVentPåMeldekort() {
         // Arrange
         YtelseBuilder yb = YtelseBuilder.oppdatere(Optional.empty());
-        Ytelse ytelse = yb.medYtelseType(RelatertYtelseType.DAGPENGER)
+        Ytelse ytelse = yb.medYtelseType(FagsakYtelseType.DAGPENGER)
             .medPeriode(DatoIntervallEntitet.fraOgMed(FPDateUtil.iDag().minusMonths(2)))
             .medKilde(Fagsystem.ARENA)
             .medStatus(RelatertYtelseTilstand.LØPENDE)
