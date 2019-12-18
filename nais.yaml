@@ -1,5 +1,5 @@
-image: "repo.adeo.no:5443/fpsak"
-team: teamforeldrepenger
+image: "repo.adeo.no:5443/k9sak"
+team: k9saksbehandling
 replicas:
   min: 4
   max: 6
@@ -35,8 +35,6 @@ prometheus:
 fasitResources:
   used:
   # Applikasjonskonfigurasjon
-# TODO (u139158): PFP-506 endre til ny bruker
-#  - alias: srvfpsak
   - alias: srvengangsstonad
     resourceType: credential
     propertyMap:
@@ -96,33 +94,13 @@ fasitResources:
   - alias: fprisk.kafka.utfor
     resourceType: ApplicationProperties
 
-  # Køer
-  - alias: mqGateway02
-    resourceType: queuemanager
-  - alias: fpsak_channel
-    resourceType: channel
-  - alias: fpsak_okonomi_oppdrag_mottak
-    resourceType: queue
-  - alias: fpsak_okonomi_oppdrag_send
-    resourceType: queue
-  - alias: RAY.AVSTEM_DATA
-    resourceType: queue
-  - alias: SBEH_SAKSBEHANDLING
-    resourceType: queue
-
   # REST
-  - alias: hentinntektlistebolk
-    resourceType: restservice
   - alias: fpoppdrag_simuleringresultat
     resourceType: restservice
   - alias: infotrygd.hendelser.api
     resourceType: restservice
   - alias: fprisk_risikoklassifisering_hent
     resourceType: restservice
-  - alias: sigrun
-    resourceType: restservice
-    propertyMap:
-      url: SigrunRestBeregnetSkatt.url
   - alias: fpformidling.forhaandsvisbrev
     resourceType: restservice
   - alias: fpformidling.bestillbrev
@@ -171,14 +149,6 @@ fasitResources:
     resourceType: webserviceendpoint
     propertyMap:
       endpointUrl: PERSON_V3_URL
-  - alias: virksomhet:infotrygdsak_v1
-    resourceType: webserviceendpoint
-    propertyMap:
-      endpointUrl: INFOTRYGDSAK_V1_URL
-  - alias: virksomhet:Arbeidsforhold_v3
-    resourceType: webserviceendpoint
-    propertyMap:
-      endpointUrl: ARBEIDSFORHOLD_V3_URL
   - alias: virksomhet:Organisasjon_v4
     resourceType: webserviceendpoint
     propertyMap:
@@ -191,18 +161,6 @@ fasitResources:
     resourceType: webserviceendpoint
     propertyMap:
       endpointUrl: BEHANDLESAK_V2_URL
-  - alias: Dokumentproduksjon_v2
-    resourceType: webserviceendpoint
-    propertyMap:
-      endpointUrl: DOKUMENTPRODUKSJON_V2_URL
-  - alias: virksomhet:infotrygdBeregningsgrunnlag_v1
-    resourceType: webserviceendpoint
-    propertyMap:
-      endpointUrl: INFOTRYGDBEREGNINGSGRUNNLAG_V1_URL
-  - alias: virksomhet:MeldekortUtbetalingsgrunnlag_v1
-    resourceType: webserviceendpoint
-    propertyMap:
-      endpointUrl: MELDEKORTUTBETALINGSGRUNNLAG_V1_URL
   - alias: virksomhet:Inntekt_v3
     resourceType: webserviceendpoint
     propertyMap:
@@ -215,79 +173,5 @@ fasitResources:
     resourceType: webserviceendpoint
     propertyMap:
       endpointUrl: OPPGAVE_V3_URL
-  - alias: virksomhet:Kodeverk_v2
-    resourceType: webserviceendpoint
-    propertyMap:
-      endpointUrl: KODEVERK_V2_URL
-  - alias: s3-bucket-fpsak
-    resourceType: credential
-    propertyMap:
-      username: AWS_ACCESS_KEY_ID
-      password: AWS_SECRET_ACCESS_KEY
-  - alias: s3-bucket-link
-    resourceType: baseUrl
-    propertyMap:
-      url: BUCKET_URL
-
-  exposed:
-  # REST
-  - alias: fpsak_journalpostknyttning
-    resourceType: restservice
-    path: "/fpsak/api/fordel/fagsak/knyttJournalpost"
-  - alias: fpsak_mottaJournalpost
-    resourceType: restservice
-    path: "/fpsak/api/fordel/journalpost"
-  - alias: fpsak_opprett_sak
-    resourceType: restservice
-    path: "/fpsak/api/fordel/fagsak/opprett"
-  - alias: fpsak_saksinformasjon
-    resourceType: restservice
-    path: "/fpsak/api/fordel/fagsak/informasjon"
-  - alias: fpsak_vurderFagsystem
-    resourceType: restservice
-    path: "/fpsak/api/fordel/vurderFagsystem"
-
-  - alias: fpsakhendelser_v1
-    resourceType: restservice
-    path: "/fpsak/api/hendelser/"
-  - alias: fpsak_feed_vedtak_fp
-    resourceType: restservice
-    path: "/fpsak/api/vedtak/foreldrepenger"
-  - alias: fpsak_feed_vedtak_svp
-    resourceType: restservice
-    path: "/fpsak/api/vedtak/svangerskapspenger"
-  - alias: fpsak_pip_aktoer_for_sak
-    resourceType: restservice
-    path: "/fpsak/api/pip/aktoer-for-sak"
-
-
-  # Web Services
-  - alias: virksomhet:foreldrepengesak_v1
-    resourceType: webserviceendpoint
-    securityToken: saml
-    path: "/fpsak/tjenester/sak/finnSak/v1"
-    wsdlGroupId: "no.nav.tjenester"
-    wsdlArtifactId: "nav-foreldrepengesak-v1-tjenestespesifikasjon"
-    wsdlVersion: "1.1.0"
-  - alias: virksomhet:behandleForeldrepengesak_v1
-    resourceType: webserviceendpoint
-    securityToken: saml
-    path: "/fpsak/tjenester/sak/opprettSak/v1"
-    wsdlGroupId: "no.nav.tjenester"
-    wsdlArtifactId: "nav-behandleForeldrepengesak-v1-tjenestespesifikasjon"
-    wsdlVersion: "1.0.1"
-  # Web Services Uten datapower
-  - alias: virksomhet:soap_foreldrepengesak_v1
-    resourceType: SoapService
-    securityToken: saml
-    path: "/fpsak/tjenester/sak/finnSak/v1"
-    wsdlGroupId: "no.nav.tjenester"
-    wsdlArtifactId: "nav-foreldrepengesak-v1-tjenestespesifikasjon"
-    wsdlVersion: "1.1.0"
-  - alias: virksomhet:soap_behandleForeldrepengesak_v1
-    resourceType: SoapService
-    securityToken: saml
-    path: "/fpsak/tjenester/sak/opprettSak/v1"
-    wsdlGroupId: "no.nav.tjenester"
-    wsdlArtifactId: "nav-behandleForeldrepengesak-v1-tjenestespesifikasjon"
-    wsdlVersion: "1.0.1"
+  
+  
