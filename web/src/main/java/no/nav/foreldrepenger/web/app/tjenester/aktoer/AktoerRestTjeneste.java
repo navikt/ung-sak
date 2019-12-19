@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
@@ -31,11 +32,10 @@ import no.nav.foreldrepenger.web.app.exceptions.FeilDto;
 import no.nav.foreldrepenger.web.app.exceptions.FeilType;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.FagsakDto;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.PersonDto;
-import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @ApplicationScoped
-@Transaction
+@Transactional
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class AktoerRestTjeneste {

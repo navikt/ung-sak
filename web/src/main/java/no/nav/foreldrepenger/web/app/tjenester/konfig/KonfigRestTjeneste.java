@@ -7,18 +7,18 @@ import java.net.URI;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import io.swagger.v3.oas.annotations.Operation;
-import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("/konfig")
 @ApplicationScoped
-@Transaction
+@Transactional
 @Produces("application/json")
 public class KonfigRestTjeneste {
 
