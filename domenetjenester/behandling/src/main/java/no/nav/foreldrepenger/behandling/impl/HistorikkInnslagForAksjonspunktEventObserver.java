@@ -36,7 +36,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
          * FIXME property vil være satt i produksjon, men ikke i tester. Uansett er løsningen ikke er god. Kan
          * heller bruker IdentType når det fikses.
          */
-                                                        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker) {
+        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker) {
         this.historikkRepository = historikkRepository;
         this.systembruker = systembruker;
     }
