@@ -36,9 +36,8 @@ public enum BehandlingTema implements Kodeverdi {
 
     ;
 
-    private static final Map<String, BehandlingTema> KODER = new LinkedHashMap<>();
-
     public static final String KODEVERK = "BEHANDLING_TEMA";
+    private static final Map<String, BehandlingTema> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -86,28 +85,6 @@ public enum BehandlingTema implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    @Override
-    public String getNavn() {
-        return navn;
-    }
-
-    @JsonProperty
-    @Override
-    public String getKodeverk() {
-        return KODEVERK;
-    }
-
-    @JsonProperty
-    @Override
-    public String getKode() {
-        return kode;
-    }
-
-    @Override
-    public String getOffisiellKode() {
-        return offisiellKode;
-    }
-
     public static void main(String[] args) {
         System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
     }
@@ -139,22 +116,47 @@ public enum BehandlingTema implements Kodeverdi {
 
     }
 
+    public static BehandlingTema fraFagsak(Fagsak fagsak) {
+        // FIXME K9 kodeverk/logikk
+        return fraFagsakHendelse(fagsak.getYtelseType());
+    }
+
+    public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
+        // FIXME K9 kodeverk/logikk
+        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelseType)) {
+            return BehandlingTema.PLEIEPENGER_SYKT_BARN;
+        }
+        return BehandlingTema.UDEFINERT;
+    }
+
+    @Override
+    public String getNavn() {
+        return navn;
+    }
+
+    @JsonProperty
+    @Override
+    public String getKodeverk() {
+        return KODEVERK;
+    }
+
+    @JsonProperty
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    @Override
+    public String getOffisiellKode() {
+        return offisiellKode;
+    }
+
     /**
      * Returnerer true hvis angitt tema gjelder samme ytelse og hendelse som denne. Hendlse trenger kun matche hvis begge temaene amgir dette
      * eksplisitt.
      */
     public boolean erKompatibelMed(BehandlingTema that) {
         return gjelderSammeYtelse(this, that) && (ikkeSpesifikkHendelse(this) || ikkeSpesifikkHendelse(that) || equals(that));
-    }
-
-    public static BehandlingTema fraFagsak(Fagsak fagsak) {
-     // FIXME K9 kodeverk/logikk
-        return fraFagsakHendelse(fagsak.getYtelseType());
-    }
-
-    public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
-        // FIXME K9 kodeverk/logikk
-        return BehandlingTema.UDEFINERT;
     }
 
     public FagsakYtelseType getFagsakYtelseType() {
