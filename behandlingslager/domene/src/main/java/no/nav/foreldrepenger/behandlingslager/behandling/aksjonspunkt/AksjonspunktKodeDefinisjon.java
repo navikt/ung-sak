@@ -11,7 +11,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_SATT_PÅ_VENT_REVURDERING_KODE = "7005";
     public static final String AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER_KODE = "7006";
     public static final String AUTO_VENT_KOMPLETT_OPPDATERING_KODE = "7009";
-    public static final String AUTO_KØET_BEHANDLING_KODE = "7011";
     public static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
     public static final String AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "7019";
     public static final String AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT_KODE = "7020";

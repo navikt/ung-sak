@@ -232,10 +232,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(ES, FP, SVP)),
     AUTO_VENT_KOMPLETT_OPPDATERING(AksjonspunktKodeDefinisjon.AUTO_VENT_KOMPLETT_OPPDATERING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på oppdatering som passerer kompletthetssjekk",
             BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, UTEN_FRIST, EnumSet.of(ES, FP, SVP)),
-
-    AUTO_KØET_BEHANDLING(AksjonspunktKodeDefinisjon.AUTO_KØET_BEHANDLING_KODE,
-            AksjonspunktType.AUTOPUNKT, "Autokøet behandling", BehandlingStegType.INNHENT_SØKNADOPP, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
-        FORBLI, UTEN_FRIST, EnumSet.of(ES, FP, SVP)),
     VENT_PÅ_SØKNAD(AksjonspunktKodeDefinisjon.VENT_PÅ_SØKNAD_KODE,
             AksjonspunktType.AUTOPUNKT, "Venter på søknad", BehandlingStegType.REGISTRER_SØKNAD, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE,
             "P3W", EnumSet.of(ES, FP, SVP)),
