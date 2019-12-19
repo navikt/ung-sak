@@ -5,6 +5,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAG
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
@@ -21,12 +22,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseIdDto;
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatusDataDTO;
 import no.nav.foreldrepenger.mottak.forsendelse.tjeneste.ForsendelseStatusTjeneste;
-import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("/dokumentforsendelse")
 @ApplicationScoped
-@Transaction
+@Transactional
 public class ForsendelseStatusRestTjeneste {
 
     private ForsendelseStatusTjeneste forsendelseStatusTjeneste;

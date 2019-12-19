@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -30,13 +31,12 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.Behandlin
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.MedlemDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.MedlemDtoTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.MedlemV2Dto;
-import no.nav.vedtak.felles.jpa.Transaction;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("")
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
-@Transaction
+@Transactional
 public class PersonRestTjeneste {
 
     public static final String MEDLEMSKAP_PATH = "/behandling/person/medlemskap";
