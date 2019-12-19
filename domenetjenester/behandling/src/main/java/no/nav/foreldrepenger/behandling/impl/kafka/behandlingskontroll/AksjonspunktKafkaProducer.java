@@ -1,6 +1,11 @@
 package no.nav.foreldrepenger.behandling.impl.kafka.behandlingskontroll;
 
-import no.nav.vedtak.konfig.KonfigVerdi;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -13,10 +18,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class AksjonspunktKafkaProducer {
@@ -33,7 +35,7 @@ public class AksjonspunktKafkaProducer {
     @Inject
     public AksjonspunktKafkaProducer(@KonfigVerdi("kafka.aksjonspunkthendelse.topic") String topic,
                                        @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-                                       @KonfigVerdi("kafka.aksjonspunkthendelse.schema.registry.url") String schemaRegistryUrl,
+                                       @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
                                        @KonfigVerdi("kafka.aksjonspunkthendelse.client.id") String clientId,
                                        @KonfigVerdi("systembruker.username") String username,
                                        @KonfigVerdi("systembruker.password") String password) {
