@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.domene.risikoklassifisering.kafka.config;
 
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -9,9 +12,6 @@ import org.apache.kafka.common.errors.AuthenticationException;
 import org.apache.kafka.common.errors.AuthorizationException;
 import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.serialization.StringSerializer;
-
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 public class GenerellMeldingProducer {
 
@@ -29,6 +29,8 @@ public class GenerellMeldingProducer {
         properties.put("bootstrap.servers", bootstrapServers);
         properties.put("schema.registry.url", schemaRegistryUrl);
         properties.put("client.id", clientId);
+        properties.put("ack", "all");
+        properties.put("timeout.ms", "3000");
 
         setSecurity(username, properties);
         setUsernameAndPassword(username, password, properties);

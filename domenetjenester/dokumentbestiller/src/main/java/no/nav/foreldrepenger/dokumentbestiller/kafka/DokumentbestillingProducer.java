@@ -44,6 +44,8 @@ public class DokumentbestillingProducer {
         properties.setProperty("bootstrap.servers", bootstrapServers);
         properties.setProperty("schema.registry.url", schemaRegistryUrl);
         properties.setProperty("client.id", clientId);
+        properties.setProperty("ack", "all");
+        properties.setProperty("timeout.ms", "3000");
 
         setSecurity(username, properties);
         setUsernameAndPassword(username, password, properties);
@@ -75,7 +77,7 @@ public class DokumentbestillingProducer {
         }
     }
 
-    void setUsernameAndPassword(@KonfigVerdi("kafka.username") String username, @KonfigVerdi("kafka.password") String password, Properties properties) {
+    void setUsernameAndPassword(String username, String password, Properties properties) {
         if ((username != null && !username.isEmpty())
                 && (password != null && !password.isEmpty())) {
             String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
