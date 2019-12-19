@@ -44,7 +44,6 @@ public class DokumentbestillingProducer {
         properties.setProperty("bootstrap.servers", bootstrapServers);
         properties.setProperty("schema.registry.url", schemaRegistryUrl);
         properties.setProperty("client.id", clientId);
-        properties.setProperty("delivery.timeout.ms", "3000");
 
         setSecurity(username, properties);
         setUsernameAndPassword(username, password, properties);

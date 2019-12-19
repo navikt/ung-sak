@@ -29,7 +29,6 @@ public class GenerellMeldingProducer {
         properties.put("bootstrap.servers", bootstrapServers);
         properties.put("schema.registry.url", schemaRegistryUrl);
         properties.put("client.id", clientId);
-        properties.put("delivery.timeout.ms", "3000");
 
         setSecurity(username, properties);
         setUsernameAndPassword(username, password, properties);
