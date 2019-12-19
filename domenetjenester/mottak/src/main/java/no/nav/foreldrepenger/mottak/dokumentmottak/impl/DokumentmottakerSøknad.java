@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -69,21 +68,6 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
     }
 
     @Override
-    public void håndterKøetBehandling(MottattDokument mottattDokument, Behandling køetBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        if (harMottattSøknadTidligere(køetBehandling.getId())) { // #S13
-            // Oppdatere behandling gjennom henleggelse
-            Behandling nyKøetBehandling = behandlingsoppretter.oppdaterBehandlingViaHenleggelse(køetBehandling, behandlingÅrsakType);
-            behandlingsoppretter.settSomKøet(nyKøetBehandling);
-            Optional<LocalDate> søknadsdato = revurderingRepository.finnSøknadsdatoFraHenlagtBehandling(nyKøetBehandling);
-            kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(nyKøetBehandling, mottattDokument, søknadsdato);
-        } else { // #S10, #S11, #S12 og #S14
-            // Oppdater køet behandling med søknad
-            Optional<LocalDate> søknadsdato = Optional.empty();
-            kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(køetBehandling, mottattDokument, søknadsdato);
-        }
-    }
-
-    @Override
     public void håndterAvslåttEllerOpphørtBehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling,
                                                      BehandlingÅrsakType behandlingÅrsakType) {
         if (erAvslag(avsluttetBehandling)) { // #S4
@@ -125,24 +109,6 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
     protected void opprettFørstegangsbehandlingMedHistorikkinslagOgKopiAvDokumenter(MottattDokument mottattDokument, Behandling behandlingMedGrunnlag,
                                                                                     Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         dokumentmottakerFelles.opprettNyFørstegangFraBehandlingMedSøknad(fagsak, behandlingÅrsakType, behandlingMedGrunnlag, mottattDokument);
-    }
-
-    @Override
-    public boolean skalOppretteKøetBehandling(Fagsak fagsak) {
-        return true;
-    }
-
-    @Override
-    protected Behandling opprettKøetBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
-        Behandling behandling;
-        if (sisteYtelsesbehandling.isPresent() && harInnvilgetFørstegangsbehandling(sisteYtelsesbehandling.get())) {
-            behandling = behandlingsoppretter.opprettRevurdering(fagsak, behandlingÅrsakType);
-        } else {
-            behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, behandlingÅrsakType, Optional.empty());
-        }
-        behandlingsoppretter.settSomKøet(behandling);
-        return behandling;
     }
 
     private boolean harInnvilgetFørstegangsbehandling(Behandling behandling) {

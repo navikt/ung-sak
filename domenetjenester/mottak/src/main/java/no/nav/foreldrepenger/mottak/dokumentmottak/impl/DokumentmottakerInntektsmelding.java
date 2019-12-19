@@ -61,12 +61,6 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
     }
 
     @Override
-    public void håndterKøetBehandling(MottattDokument mottattDokument, Behandling køetBehandling, BehandlingÅrsakType behandlingÅrsakType) { //#I8, #I9, #I10, #I11
-        dokumentmottakerFelles.leggTilBehandlingsårsak(køetBehandling, getBehandlingÅrsakType());
-        kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(køetBehandling, mottattDokument, Optional.empty());
-    }
-
-    @Override
     public void håndterAvslåttEllerOpphørtBehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, BehandlingÅrsakType behandlingÅrsakType) {
         if (dokumentmottakerFelles.skalOppretteNyFørstegangsbehandling(avsluttetBehandling.getFagsak())) { //#I3
             opprettNyFørstegangsbehandlingForMottattInntektsmelding(mottattDokument, fagsak, avsluttetBehandling);
@@ -76,16 +70,6 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
         } else { //#I5
             dokumentmottakerFelles.opprettTaskForÅVurdereDokument(fagsak, avsluttetBehandling, mottattDokument);
         }
-    }
-
-    @Override
-    public boolean skalOppretteKøetBehandling(Fagsak fagsak) {
-        return true;
-    }
-
-    @Override
-    protected Behandling opprettKøetBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        return behandlingsoppretter.opprettKøetBehandling(fagsak, behandlingÅrsakType);
     }
 
     @Override

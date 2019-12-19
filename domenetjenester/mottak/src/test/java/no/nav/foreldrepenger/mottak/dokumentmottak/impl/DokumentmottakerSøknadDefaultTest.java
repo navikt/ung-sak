@@ -11,9 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -30,11 +27,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -76,8 +71,6 @@ public class DokumentmottakerSøknadDefaultTest {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     @Mock
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
-    @Mock
-    private KøKontroller køKontroller;
 
     private DokumentmottakerSøknad dokumentmottaker;
     private DokumentmottakerFelles dokumentmottakerFelles;
@@ -96,7 +89,7 @@ public class DokumentmottakerSøknadDefaultTest {
         dokumentmottakerFelles = Mockito.spy(dokumentmottakerFelles);
 
         dokumentmottaker = new DokumentmottakerSøknadDefault(repositoryProvider, dokumentmottakerFelles, mottatteDokumentTjeneste,
-            behandlingsoppretter, kompletthetskontroller, køKontroller);
+            behandlingsoppretter, kompletthetskontroller);
         dokumentmottaker = Mockito.spy(dokumentmottaker);
     }
 
@@ -175,68 +168,6 @@ public class DokumentmottakerSøknadDefaultTest {
         //Verifiser at korrekt prosesstask for vurder dokument blir opprettet
         verify(behandlingsoppretter).opprettRevurdering(behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         verify(dokumentmottakerFelles).opprettHistorikk(revurdering, mottattDokument.getJournalpostId());
-    }
-
-    @Test
-    public void skal_opprette_køet_revurdering_og_kjøre_kompletthet_dersom_køet_behandling_ikke_finnes_og_siste_behandling_var_innvilget() {
-        // Arrange - opprette innvilget behandling
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        behandling.avsluttBehandling();
-        BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.UDEFINERT);
-        repoRule.getRepository().lagre(vedtak.getBehandlingsresultat());
-        Fagsak fagsak = behandling.getFagsak();
-
-        // Arrange - mock tjenestekall
-        Behandling nyBehandling = mock(Behandling.class);
-        long behandlingId = 1L;
-        doReturn(behandlingId).when(nyBehandling).getId();
-        doReturn(fagsak).when(nyBehandling).getFagsak();
-        when(behandlingsoppretter.opprettRevurdering(fagsak, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)).thenReturn(nyBehandling);
-
-        // Act - send inn søknad
-        Long fagsakId = fagsak.getId();
-        DokumentTypeId dokumentTypeId = DokumentTypeId.SØKNAD_FORELDREPENGER_FØDSEL;
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, fagsakId, "", now(), true, null);
-        dokumentmottaker.mottaDokumentForKøetBehandling(mottattDokument, fagsak, DokumentTypeId.SØKNAD_FORELDREPENGER_FØDSEL, BehandlingÅrsakType.UDEFINERT);
-
-        // Assert - verifiser flyt
-        verify(behandlingsoppretter).opprettRevurdering(fagsak, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
-        verify(kompletthetskontroller).persisterKøetDokumentOgVurderKompletthet(nyBehandling, mottattDokument, Optional.empty());
-        verify(dokumentmottakerFelles).opprettHistorikk(nyBehandling, mottattDokument.getJournalpostId());
-    }
-
-    @Test
-    public void skal_henlegge_køet_behandling_dersom_søknad_mottatt_tidligere() {
-        // Arrange - opprette køet førstegangsbehandling
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, behandlingLås);
-        simulerKøetBehandling(behandling);
-
-        // Arrange - legg inn søknad i mottatte dokumenter
-        when(mottatteDokumentTjeneste.harMottattDokumentSet(any(), anySet())).thenReturn(true);
-
-        // Arrange - mock tjenestekall
-        Behandling nyKøetBehandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
-        when(behandlingsoppretter.oppdaterBehandlingViaHenleggelse(behandling, null))
-            .thenReturn(nyKøetBehandling);
-
-        // Arrange - bygg søknad
-        Long fagsakId = behandling.getFagsakId();
-        Fagsak fagsak = behandling.getFagsak();
-        DokumentTypeId dokumentTypeId = DokumentTypeId.SØKNAD_FORELDREPENGER_FØDSEL;
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, fagsakId, "", now(), true, null);
-
-        // Act
-        dokumentmottaker.mottaDokumentForKøetBehandling(mottattDokument, fagsak, DokumentTypeId.SØKNAD_FORELDREPENGER_FØDSEL, null);
-
-        // Assert - verifiser flyt
-        verify(behandlingsoppretter).oppdaterBehandlingViaHenleggelse(behandling, null);
-        verify(kompletthetskontroller).persisterKøetDokumentOgVurderKompletthet(nyKøetBehandling, mottattDokument, Optional.empty());
-        verify(dokumentmottakerFelles).opprettHistorikk(behandling, mottattDokument.getJournalpostId());
     }
 
     @Test
@@ -337,13 +268,6 @@ public class DokumentmottakerSøknadDefaultTest {
 
     private Fagsak nyMorFødselFagsak() {
         return TestScenarioBuilder.builderUtenSøknad().lagreFagsak(repositoryProvider);
-    }
-
-    private void simulerKøetBehandling(Behandling behandling) {
-        BehandlingÅrsakType berørtType = BehandlingÅrsakType.KØET_BEHANDLING;
-        new BehandlingÅrsak.Builder(List.of(berørtType)).buildFor(behandling);
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING);
     }
 
 }

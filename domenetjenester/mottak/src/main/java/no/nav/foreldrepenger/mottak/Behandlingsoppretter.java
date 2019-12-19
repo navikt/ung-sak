@@ -23,8 +23,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
@@ -169,18 +167,6 @@ public class Behandlingsoppretter {
         }
     }
 
-    public Behandling opprettKøetBehandling(Fagsak fagsak, BehandlingÅrsakType eksternÅrsak) {
-        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
-        Behandling behandling;
-        if (sisteYtelsesbehandling.isPresent() && !erBehandlingOgFørstegangsbehandlingHenlagt(fagsak)) {
-            behandling = opprettRevurdering(fagsak, eksternÅrsak);
-        } else {
-            behandling = opprettFørstegangsbehandling(fagsak, eksternÅrsak, Optional.empty());
-        }
-        settSomKøet(behandling);
-        return behandling;
-    }
-
     private List<MottattDokument> hentAlleInntektsmeldingdokumenter(Long fagsakId) {
         DokumentTypeId dokumenttypeIM = DokumentTypeId.INNTEKTSMELDING;
         return mottatteDokumentTjeneste.hentMottatteDokumentFagsak(fagsakId).stream()
@@ -196,10 +182,6 @@ public class Behandlingsoppretter {
     private Optional<OrganisasjonsEnhet> utledEnhetFraTidligereBehandling(Behandling tidligereBehandling) {
         // Utleder basert på regler rundt sakskompleks og diskresjonskoder. Vil bruke forrige enhet med mindre noen tilsier Kode6 eller enhet opphørt
         return behandlendeEnhetTjeneste.sjekkEnhetVedNyAvledetBehandling(tidligereBehandling);
-    }
-
-    public void settSomKøet(Behandling nyKøetBehandling) {
-        behandlingskontrollTjeneste.settBehandlingPåVent(nyKøetBehandling, AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING, null, null, Venteårsak.VENT_ÅPEN_BEHANDLING);
     }
 
     public boolean harBehandlingsresultatOpphørt(Behandling behandling) {

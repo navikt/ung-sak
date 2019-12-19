@@ -2,15 +2,11 @@ package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
 import static java.time.LocalDate.now;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -26,7 +22,6 @@ import org.mockito.MockitoAnnotations;
 import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
@@ -238,84 +233,6 @@ public class DokumentmottakerInntektsmeldingTest {
         // Assert
         verify(behandlingsoppretter).opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), dokumentTypeId);
-    }
-
-    @Test
-    public void skal_opprette_køet_revurdering_og_kjøre_kompletthet_dersom_køet_behandling_ikke_finnes() {
-        // Arrange - opprette avsluttet førstegangsbehandling
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        behandling.avsluttBehandling();
-        BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, behandlingLås);
-
-        Behandling revurdering = mock(Behandling.class);
-
-        doReturn(revurdering).when(behandlingsoppretter).opprettKøetBehandling(behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        doNothing().when(kompletthetskontroller).oppdaterKompletthetForKøetBehandling(behandling);
-        doAnswer(invocationOnMock -> { return null;}).when(dokumentmottakerFelles).leggTilBehandlingsårsak(revurdering, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-
-        DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
-
-        // Act
-        dokumentmottaker.mottaDokumentForKøetBehandling(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.UDEFINERT);
-
-        // Assert
-        verify(behandlingsoppretter).opprettKøetBehandling(behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(kompletthetskontroller).persisterKøetDokumentOgVurderKompletthet(revurdering, mottattDokument, Optional.empty());
-        verify(dokumentmottakerFelles).opprettHistorikk(revurdering, mottattDokument.getJournalpostId());
-        verify(dokumentmottakerFelles).leggTilBehandlingsårsak(revurdering, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-    }
-
-    @Test
-    public void skal_opprette_køet_behandling_og_kjøre_kompletthet_dersom_køet_behandling_ikke_finnes() {
-        // Arrange - opprette fagsak uten behandling
-        Fagsak fagsak = DokumentmottakTestUtil.byggFagsak(AktørId.dummy(), new Saksnummer("123"), fagsakRepository);
-
-        // Arrange - sett opp opprettelse av køet behandling
-        Behandling behandling = mock(Behandling.class);
-        doReturn(behandling).when(behandlingsoppretter).opprettKøetBehandling(fagsak, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        doAnswer(invocationOnMock -> { return null;}).when(dokumentmottakerFelles).leggTilBehandlingsårsak(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-
-        // Arrange - bygg inntektsmelding
-        DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, fagsak.getId(), "", now(), true, "123");
-
-        // Act
-        dokumentmottaker.mottaDokumentForKøetBehandling(mottattDokument, fagsak, dokumentTypeId, BehandlingÅrsakType.UDEFINERT);
-
-        // Assert - sjekk flyt
-        verify(behandlingsoppretter).opprettKøetBehandling(fagsak, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(kompletthetskontroller).persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument, Optional.empty());
-        verify(dokumentmottakerFelles).opprettHistorikk(behandling, mottattDokument.getJournalpostId());
-        verify(dokumentmottakerFelles).leggTilBehandlingsårsak(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-    }
-
-    @Test
-    public void skal_oppdatere_køet_behandling_og_kjøre_kompletthet_dersom_køet_behandling_finnes() {
-        // Arrange - opprette køet førstegangsbehandling
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, behandlingLås);
-        simulerKøetBehandling(behandling);
-
-        // Act - send inntektsmelding
-        DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
-        dokumentmottaker.mottaDokumentForKøetBehandling(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.UDEFINERT);
-
-        // Assert - verifiser flyt
-        verify(kompletthetskontroller).persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument, Optional.empty());
-        verify(dokumentmottakerFelles).opprettHistorikk(behandling, mottattDokument.getJournalpostId());
-    }
-
-    private void simulerKøetBehandling(Behandling behandling) {
-        BehandlingÅrsakType berørtType = BehandlingÅrsakType.KØET_BEHANDLING;
-        new BehandlingÅrsak.Builder(List.of(berørtType)).buildFor(behandling);
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING);
     }
 
     private Aksjonspunkt opprettAksjonspunkt(Behandling behandling,

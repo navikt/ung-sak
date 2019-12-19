@@ -18,8 +18,7 @@ public class DokumentmottakerSøknadDefault extends DokumentmottakerSøknad {
                                          DokumentmottakerFelles dokumentmottakerFelles,
                                          MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                          Behandlingsoppretter behandlingsoppretter,
-                                         Kompletthetskontroller kompletthetskontroller,
-                                         KøKontroller køKontroller) {
+                                         Kompletthetskontroller kompletthetskontroller) {
         super(repositoryProvider,
             dokumentmottakerFelles,
             mottatteDokumentTjeneste,

@@ -58,21 +58,6 @@ class DokumentmottakerVedlegg implements Dokumentmottaker {
         }
     }
 
-    @Override
-    public void mottaDokumentForKøetBehandling(MottattDokument mottattDokument, Fagsak fagsak, DokumentTypeId dokumentTypeId, BehandlingÅrsakType behandlingÅrsakType) {
-        dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(mottattDokument.getFagsakId(), mottattDokument.getJournalpostId(), dokumentTypeId);
-
-        Optional<Behandling> eksisterendeKøetBehandling = revurderingRepository.finnKøetYtelsesbehandling(fagsak.getId());
-        Behandling køetBehandling = eksisterendeKøetBehandling
-            .orElseGet(() -> dokumentmottakerFelles.skalOppretteNyFørstegangsbehandling(fagsak) ? behandlingsoppretter.opprettKøetBehandling(fagsak, BehandlingÅrsakType.RE_ANNET) : null);
-        if (køetBehandling != null) {
-            dokumentmottakerFelles.opprettKøetHistorikk(køetBehandling, eksisterendeKøetBehandling.isPresent());
-            kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(køetBehandling, mottattDokument, Optional.empty());
-        } else { //#V6
-            dokumentmottakerFelles.opprettTaskForÅVurdereDokument(fagsak, null, mottattDokument);
-        }
-    }
-
     private void håndterÅpenBehandling(Fagsak fagsak, Behandling behandling, MottattDokument mottattDokument) {
         if (behandling.erYtelseBehandling() && !kompletthetskontroller.vurderBehandlingKomplett(behandling).erOppfylt()) {
             kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);

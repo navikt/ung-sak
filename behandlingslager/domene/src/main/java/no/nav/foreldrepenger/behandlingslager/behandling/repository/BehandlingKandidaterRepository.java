@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.repository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,9 +103,7 @@ public class BehandlingKandidaterRepository {
 
     public List<Behandling> finnBehandlingerForAutomatiskGjenopptagelse() {
 
-        Set<AksjonspunktDefinisjon> køetKode = Set.of(AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING);
-
-        Set<AksjonspunktDefinisjon> autopunktKoder = AUTOPUNKTER.stream().filter(a -> !køetKode.contains(a)).collect(Collectors.toSet());
+        Set<AksjonspunktDefinisjon> autopunktKoder = new HashSet<>(AUTOPUNKTER);
 
         LocalDateTime naa = FPDateUtil.nå();
 

@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.web.app.rest.ResourceLink;
 import no.nav.foreldrepenger.web.app.util.RestUtils;
@@ -68,7 +67,6 @@ public class BehandlingDtoUtil {
         getFristDatoBehandlingPåVent(behandling).ifPresent(dto::setFristBehandlingPåVent);
         getVenteÅrsak(behandling).ifPresent(dto::setVenteÅrsakKode);
         dto.setOriginalVedtaksDato(behandling.getOriginalVedtaksDato());
-        dto.setBehandlingKøet(behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING));
         dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
         dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));

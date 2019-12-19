@@ -599,11 +599,6 @@ public class Behandling extends BaseEntitet {
         return !getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT).isEmpty();
     }
 
-    public boolean erKøet() {
-        return this.getÅpneAksjonspunkterStream()
-            .anyMatch(ap -> AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING.equals(ap.getAksjonspunktDefinisjon()));
-    }
-
     private Stream<Aksjonspunkt> getAksjonspunkterStream() {
         return aksjonspunkter.stream();
     }

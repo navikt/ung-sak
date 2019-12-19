@@ -1,8 +1,5 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -22,21 +19,17 @@ import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 @DokumentGruppeRef("ENDRINGSSØKNAD")
 class DokumentmottakerEndringssøknad extends DokumentmottakerYtelsesesrelatertDokument {
 
-    private KøKontroller køKontroller;
-
     @Inject
     public DokumentmottakerEndringssøknad(BehandlingRepositoryProvider repositoryProvider,
                                           DokumentmottakerFelles dokumentmottakerFelles,
                                           MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                           Behandlingsoppretter behandlingsoppretter,
-                                          Kompletthetskontroller kompletthetskontroller,
-                                          KøKontroller køKontroller) {
+                                          Kompletthetskontroller kompletthetskontroller) {
         super(dokumentmottakerFelles,
             mottatteDokumentTjeneste,
             behandlingsoppretter,
             kompletthetskontroller,
             repositoryProvider);
-        this.køKontroller = køKontroller;
     }
 
     @Override
@@ -47,9 +40,6 @@ class DokumentmottakerEndringssøknad extends DokumentmottakerYtelsesesrelatertD
         dokumentmottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, årsakEndringFraBruker);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
             dokumentmottakerFelles.opprettTaskForÅVurdereDokument(behandling.getFagsak(), behandling, mottattDokument);
-        } else if (harAlleredeMottattEndringssøknad(behandling)) {
-            Behandling nyBehandling = dokumentmottakerFelles.oppdatereViaHenleggelse(behandling, mottattDokument, årsakEndringFraBruker);
-            køKontroller.dekøFørsteBehandlingISakskompleks(nyBehandling);
         } else if (kompletthetErPassert(behandling)) {
             Behandling nyBehandling = dokumentmottakerFelles.oppdatereViaHenleggelse(behandling, mottattDokument, årsakEndringFraBruker);
             dokumentmottakerFelles.opprettTaskForÅStarteBehandling(nyBehandling);
@@ -58,25 +48,6 @@ class DokumentmottakerEndringssøknad extends DokumentmottakerYtelsesesrelatertD
             // Oppdater åpen behandling med Endringssøknad
             dokumentmottakerFelles.leggTilBehandlingsårsak(behandling, årsakEndringFraBruker);
             kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
-        }
-    }
-
-    @Override
-    public void håndterKøetBehandling(MottattDokument mottattDokument, Behandling køetBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        if (BehandlingType.FØRSTEGANGSSØKNAD.equals(køetBehandling.getType())) { //#E16
-            dokumentmottakerFelles.opprettTaskForÅVurdereDokument(køetBehandling.getFagsak(), køetBehandling, mottattDokument);
-        } else if (harAlleredeMottattEndringssøknad(køetBehandling)) { //#E14
-            // Oppdatere behandling gjennom henleggelse
-            Behandling nyKøetBehandling = behandlingsoppretter.oppdaterBehandlingViaHenleggelse(køetBehandling, BehandlingÅrsakType.KØET_BEHANDLING);
-            behandlingsoppretter.settSomKøet(nyKøetBehandling);
-            Optional<LocalDate> søknadsdato = revurderingRepository.finnSøknadsdatoFraHenlagtBehandling(nyKøetBehandling);
-            kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(nyKøetBehandling, mottattDokument, søknadsdato);
-        } else { //#E11, #E13 og #E15
-            // Oppdater køet behandling med søknad
-            Optional<LocalDate> søknadsdato = Optional.empty();
-            dokumentmottakerFelles.leggTilBehandlingsårsak(køetBehandling, !behandlingÅrsakType.equals(BehandlingÅrsakType.UDEFINERT)
-                ? behandlingÅrsakType : getBehandlingÅrsakType());
-            kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(køetBehandling, mottattDokument, søknadsdato);
         }
     }
 
@@ -100,16 +71,6 @@ class DokumentmottakerEndringssøknad extends DokumentmottakerYtelsesesrelatertD
             Behandling revurdering = dokumentmottakerFelles.opprettRevurdering(mottattDokument, fagsak, getBehandlingÅrsakType());
             dokumentmottakerFelles.opprettHistorikk(revurdering, mottattDokument.getJournalpostId());
         }
-    }
-
-    @Override
-    public boolean skalOppretteKøetBehandling(Fagsak fagsak) {
-        return !behandlingsoppretter.erBehandlingOgFørstegangsbehandlingHenlagt(fagsak);
-    }
-
-    @Override
-    protected Behandling opprettKøetBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        return behandlingsoppretter.opprettKøetBehandling(fagsak, behandlingÅrsakType);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.repository;
 
-import static no.nav.vedtak.util.Objects.check;
-
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -95,51 +93,6 @@ public class BehandlingRevurderingRepository {
         query.setParameter("henlagtKoder", BehandlingResultatType.getAlleHenleggelseskoder());
         query.setParameter("etterTidspunkt", sisteInnvilgede.getOpprettetDato());
         return query.getResultList();
-    }
-
-    public Optional<Behandling> finnÅpenYtelsesbehandling(Long fagsakId) {
-        List<Behandling> åpenBehandling = finnÅpenogKøetYtelsebehandling(fagsakId).stream()
-            .filter(beh -> !beh.erKøet())
-            .collect(Collectors.toList());
-        check(åpenBehandling.size() <= 1, "Kan maks ha én åpen ytelsesbehandling"); //$NON-NLS-1$
-        return optionalFirst(åpenBehandling);
-    }
-
-    public Optional<Behandling> finnKøetYtelsesbehandling(Long fagsakId) {
-        List<Behandling> køetBehandling = finnÅpenogKøetYtelsebehandling(fagsakId).stream()
-            .filter(Behandling::erKøet)
-            .collect(Collectors.toList());
-        check(køetBehandling.size() <= 1, "Kan maks ha én køet ytelsesbehandling"); //$NON-NLS-1$
-        return optionalFirst(køetBehandling);
-    }
-
-    private List<Behandling> finnÅpenogKøetYtelsebehandling(Long fagsakId) {
-        Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR //$NON-NLS-1$
-
-        TypedQuery<Long> query = getEntityManager().createQuery(
-            "SELECT b.id " +
-                "from Behandling b " +
-                "where fagsak.id=:fagsakId " +
-                "and status not in (:avsluttet) " +
-                "and behandlingType in (:behandlingType) " +
-                "order by opprettetTidspunkt desc", //$NON-NLS-1$
-            Long.class);
-        query.setParameter("fagsakId", fagsakId); //$NON-NLS-1$
-        query.setParameter(AVSLUTTET_KEY, BehandlingStatus.getFerdigbehandletStatuser()); // $NON-NLS-1$
-        query.setParameter("behandlingType", BehandlingType.getYtelseBehandlingTyper()); //$NON-NLS-1$
-
-        List<Long> behandlingIder = query.getResultList();
-        for (Long behandlingId : behandlingIder) {
-            behandlingLåsRepository.taLås(behandlingId);
-        }
-        final List<Behandling> behandlinger = behandlingIder.stream()
-            .map(behandlingId -> behandlingRepository.hentBehandling(behandlingId))
-            .collect(Collectors.toList());
-        check(behandlinger.size() <= 2, "Kan maks ha én åpen og én køet ytelsesbehandling"); //$NON-NLS-1$
-        check(behandlinger.stream().filter(Behandling::erKøet).count() <= 1, "Kan maks ha én køet ytelsesbehandling"); //$NON-NLS-1$
-        check(behandlinger.stream().filter(it -> !it.erKøet()).count() <= 1, "Kan maks ha én åpen ytelsesbehandling"); //$NON-NLS-1$
-
-        return behandlinger;
     }
 
     public Optional<LocalDate> finnSøknadsdatoFraHenlagtBehandling(Behandling behandling) {

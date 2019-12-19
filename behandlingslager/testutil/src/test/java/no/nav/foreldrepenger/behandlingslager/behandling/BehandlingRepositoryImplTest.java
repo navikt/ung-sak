@@ -382,20 +382,6 @@ public class BehandlingRepositoryImplTest {
     }
 
     @Test
-    public void skal_ikke_finne_for_automatisk_gjenopptagelse_naar_aksjonspunkt_er_køet() {
-
-        // Arrange
-        Behandling behandling1 = opprettBehandlingForAutomatiskGjenopptagelse();
-        opprettAksjonspunkt(behandling1, AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING, imorgen);
-
-        // Act
-        List<Behandling> liste = behandlingKandidaterRepository.finnBehandlingerForAutomatiskGjenopptagelse();
-
-        // Assert
-        assertThat(liste).isEmpty();
-    }
-
-    @Test
     public void skal_ikke_finne_for_automatisk_gjenopptagelse_når_aksjonspunt_er_avbrutt() throws Exception {
         // Arrange
         Behandling behandling = opprettBehandlingForAutomatiskGjenopptagelse();
@@ -650,7 +636,7 @@ public class BehandlingRepositoryImplTest {
     private Behandling opprettBehandlingMedTermindato() {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
-                behandling = scenario.lagre(repositoryProvider);
+        behandling = scenario.lagre(repositoryProvider);
         return behandling;
     }
 

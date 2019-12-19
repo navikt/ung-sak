@@ -70,8 +70,6 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
     private Behandlingsoppretter behandlingsoppretter;
     @Mock
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
-    @Mock
-    private KøKontroller køKontroller;
 
     private DokumentmottakerYtelsesesrelatertDokument dokumentmottaker;
 
@@ -85,7 +83,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottakerFelles = Mockito.spy(dokumentmottakerFelles);
 
         dokumentmottaker = new DokumentmottakerSøknadDefault(repositoryProvider, dokumentmottakerFelles, mottatteDokumentTjeneste,
-            behandlingsoppretter, kompletthetskontroller, køKontroller);
+            behandlingsoppretter, kompletthetskontroller);
 
         dokumentmottaker = Mockito.spy(dokumentmottaker);
 

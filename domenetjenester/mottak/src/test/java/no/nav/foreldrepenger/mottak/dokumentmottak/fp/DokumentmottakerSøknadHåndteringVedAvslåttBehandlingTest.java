@@ -26,7 +26,6 @@ import no.nav.foreldrepenger.mottak.dokumentmottak.impl.Dokumentmottaker;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerFelles;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerSøknadDefault;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerTestsupport;
-import no.nav.foreldrepenger.mottak.dokumentmottak.impl.KøKontroller;
 import no.nav.foreldrepenger.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
@@ -34,19 +33,16 @@ public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends
 
     private Dokumentmottaker dokumentmottakerSøknad;
     private Behandlingsoppretter behandlingsoppretterSpied;
-    private KøKontroller køKontroller;
 
     @Before
     public void setup() {
         this.behandlingsoppretterSpied = Mockito.spy(behandlingsoppretter);
-        this.køKontroller = Mockito.mock(KøKontroller.class);
         dokumentmottakerSøknad = new DokumentmottakerSøknadDefault(
             repositoryProvider,
             dokumentmottakerFelles,
             mottatteDokumentTjeneste,
             behandlingsoppretterSpied,
-            kompletthetskontroller,
-            køKontroller);
+            kompletthetskontroller);
     }
 
 
@@ -71,8 +67,7 @@ public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends
             felles,
             mockMD,
             behandlingsoppretterSpied,
-            kompletthetskontroller,
-            køKontroller);
+            kompletthetskontroller);
         Behandling nyBehandling = opprettNyBehandlingUtenVedtak(FagsakYtelseType.FORELDREPENGER);
         Mockito.doReturn(nyBehandling).when(behandlingsoppretterSpied).opprettNyFørstegangsbehandlingMedImOgVedleggFraForrige(Mockito.any(),  Mockito.any());
         doNothing().when(mockMD).persisterDokumentinnhold(any(), any(), any());

@@ -11,7 +11,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktUtførtEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
@@ -47,10 +46,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
     public void oppretteHistorikkForBehandlingPåVent(@Observes AksjonspunkterFunnetEvent aksjonspunkterFunnetEvent) {
         BehandlingskontrollKontekst ktx = aksjonspunkterFunnetEvent.getKontekst();
         for (Aksjonspunkt aksjonspunkt : aksjonspunkterFunnetEvent.getAksjonspunkter()) {
-            if (aksjonspunkt.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING)) {
-                opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(),
-                    HistorikkinnslagType.BEH_KØET, null, Venteårsak.VENT_ÅPEN_BEHANDLING);
-            } else if (aksjonspunkt.getFristTid() != null) {
+            if (aksjonspunkt.getFristTid() != null) {
                 LocalDateTime frist = aksjonspunkt.getFristTid();
                 Venteårsak venteårsak = aksjonspunkt.getVenteårsak();
                 opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(),
@@ -86,9 +82,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
     public void oppretteHistorikkForGjenopptattBehandling(@Observes AksjonspunktUtførtEvent aksjonspunkterFunnetEvent) {
         for (Aksjonspunkt aksjonspunkt : aksjonspunkterFunnetEvent.getAksjonspunkter()) {
             BehandlingskontrollKontekst ktx = aksjonspunkterFunnetEvent.getKontekst();
-            if (aksjonspunkt.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_KØET_BEHANDLING)) {
-                opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), HistorikkinnslagType.KØET_BEH_GJEN, null, null);
-            } else if (aksjonspunkt.getFristTid() != null) {
+            if (aksjonspunkt.getFristTid() != null) {
                 opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), HistorikkinnslagType.BEH_GJEN, null, null);
             }
         }

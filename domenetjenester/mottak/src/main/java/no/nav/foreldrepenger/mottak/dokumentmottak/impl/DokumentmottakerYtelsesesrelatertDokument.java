@@ -60,13 +60,7 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
 
     public abstract void oppdaterÅpenBehandlingMedDokument(Behandling behandling, MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType);
 
-    public abstract void håndterKøetBehandling(MottattDokument mottattDokument, Behandling køetBehandling, BehandlingÅrsakType behandlingÅrsakType);
-
     public abstract void håndterAvslåttEllerOpphørtBehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, BehandlingÅrsakType behandlingÅrsakType);
-
-    public abstract boolean skalOppretteKøetBehandling(Fagsak fagsak);
-
-    protected abstract Behandling opprettKøetBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType);
 
     protected abstract BehandlingÅrsakType getBehandlingÅrsakType();
     /* TEMPLATE-metoder SLUTT */
@@ -94,23 +88,6 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
             }
         } else {
             oppdaterÅpenBehandlingMedDokument(behandling, mottattDokument, behandlingÅrsakType);
-        }
-    }
-
-    @Override
-    public void mottaDokumentForKøetBehandling(MottattDokument mottattDokument, Fagsak fagsak, DokumentTypeId dokumentTypeId, BehandlingÅrsakType behandlingÅrsakType) {
-        BehandlingÅrsakType behandlingÅrsak = BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType) ?
-            getBehandlingÅrsakType() : behandlingÅrsakType;
-
-        Optional<Behandling> eksisterendeKøetBehandling = revurderingRepository.finnKøetYtelsesbehandling(fagsak.getId());
-        Behandling køetBehandling = eksisterendeKøetBehandling
-            .orElseGet(() -> skalOppretteKøetBehandling(fagsak) ? opprettKøetBehandling(fagsak, behandlingÅrsak) : null);
-        if (køetBehandling != null) {
-            dokumentmottakerFelles.opprettHistorikk(køetBehandling, mottattDokument.getJournalpostId());
-            dokumentmottakerFelles.opprettKøetHistorikk(køetBehandling, eksisterendeKøetBehandling.isPresent());
-            håndterKøetBehandling(mottattDokument, køetBehandling, behandlingÅrsak);
-        } else {
-            dokumentmottakerFelles.opprettTaskForÅVurdereDokument(fagsak, null, mottattDokument); // Skal ikke være mulig for #Sx og #Ix som alltid oppretter køet, men #E12 vil treffe denne
         }
     }
 
