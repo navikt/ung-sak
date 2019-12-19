@@ -1,7 +1,20 @@
 package no.nav.foreldrepenger.ytelse.beregning.psb;
 
+import static java.util.stream.Collectors.toSet;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.uttak.input.BeregningsgrunnlagStatusPeriode;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.foreldrepenger.ytelse.beregning.UttakResultatRepoMapper;
@@ -10,14 +23,6 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
-
-import javax.enterprise.context.ApplicationScoped;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -28,31 +33,23 @@ public class PsbUttakResultatRepoMapper implements UttakResultatRepoMapper {
         //for proxy
     }
 
-    @Override
-    public UttakResultat hentOgMapUttakResultat(UttakInput input) {
-        final UttakResultat uttakResultat = new UttakResultat(mapUttakResultatPeriodes(input));
-        return uttakResultat;
+    private static Function<Map.Entry<DatoIntervallEntitet, Set<BeregningsgrunnlagStatusPeriode>>, UttakResultatPeriode> toUttakResultatPeriode() {
+        return entry -> new UttakResultatPeriode(
+            entry.getKey().getFomDato(),
+            entry.getKey().getTomDato(),
+            toUttakAktiviteter(entry.getValue()),
+            true
+        );
     }
 
-    private List<UttakResultatPeriode> mapUttakResultatPeriodes(UttakInput input) {
-        return input.getBeregningsgrunnlagStatusPerioder().stream()
-            .map(toUttakResultatPeriode())
+    private static List<UttakAktivitet> toUttakAktiviteter(Set<BeregningsgrunnlagStatusPeriode> beregningsgrunnlagStatusPeriode) {
+        // Arbeidsforhold arbeidsforhold, AktivitetStatus aktivitetStatus, boolean erGradering) {
+        return beregningsgrunnlagStatusPeriode.stream()
+            .map(PsbUttakResultatRepoMapper::mapTilUttaksAktiviteter)
             .collect(Collectors.toList());
     }
 
-    private static Function<BeregningsgrunnlagStatusPeriode, UttakResultatPeriode> toUttakResultatPeriode() {
-        return beregningsgrunnlagStatusPeriode -> {
-            return new UttakResultatPeriode(
-                    beregningsgrunnlagStatusPeriode.getFom(),
-                    beregningsgrunnlagStatusPeriode.getTom(),
-                    toUttakAktiviteter(beregningsgrunnlagStatusPeriode),
-                    true
-                );
-        };
-    }
-
-    private static List<UttakAktivitet> toUttakAktiviteter(BeregningsgrunnlagStatusPeriode beregningsgrunnlagStatusPeriode) {
-        // Arbeidsforhold arbeidsforhold, AktivitetStatus aktivitetStatus, boolean erGradering) {
+    private static UttakAktivitet mapTilUttaksAktiviteter(BeregningsgrunnlagStatusPeriode beregningsgrunnlagStatusPeriode) {
         final BigDecimal stillingsgrad = BigDecimal.valueOf(1);
         final BigDecimal utbetalingsgrad = BigDecimal.valueOf(1);
 
@@ -69,7 +66,23 @@ public class PsbUttakResultatRepoMapper implements UttakResultatRepoMapper {
         final Arbeidsforhold arbeidsforhold = arbeidsforholdBuilder.build();
         final AktivitetStatus aktivitetStatus = AktivitetStatus.ATFL;
         final boolean erGradering = false;
-        return Collections.singletonList(new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, aktivitetStatus, erGradering));
+        return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, aktivitetStatus, erGradering);
+    }
+
+    @Override
+    public UttakResultat hentOgMapUttakResultat(UttakInput input) {
+        final UttakResultat uttakResultat = new UttakResultat(mapUttakResultatPeriodes(input));
+        return uttakResultat;
+    }
+
+    private List<UttakResultatPeriode> mapUttakResultatPeriodes(UttakInput input) {
+        return input.getBeregningsgrunnlagStatusPerioder()
+            .stream()
+            .collect(Collectors.groupingBy(BeregningsgrunnlagStatusPeriode::getPeriode, toSet()))
+            .entrySet()
+            .stream()
+            .map(toUttakResultatPeriode())
+            .collect(Collectors.toList());
     }
 
 }

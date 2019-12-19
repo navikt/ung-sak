@@ -40,6 +40,7 @@ public class DefaultSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
         builder.medFørsteUttaksdato(førsteUttaksdato);
         LocalDate skjæringstidspunkt = førsteUttaksdato;
         builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
+        builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
         return builder.build();
     }
 

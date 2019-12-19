@@ -2,9 +2,11 @@ package no.nav.foreldrepenger.web.app.tjenester.fordeling;
 
 import static no.nav.vedtak.feil.LogLevel.WARN;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -26,6 +28,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
@@ -40,7 +43,6 @@ import no.nav.foreldrepenger.kontrakter.fordel.BehandlendeFagsystemDto;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostIdDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
-import no.nav.foreldrepenger.kontrakter.fordel.JournalpostMottakDto;
 import no.nav.foreldrepenger.kontrakter.fordel.OpprettSakDto;
 import no.nav.foreldrepenger.kontrakter.fordel.SaksnummerDto;
 import no.nav.foreldrepenger.kontrakter.fordel.VurderFagsystemDto;
@@ -52,6 +54,7 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjenest
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
+import no.nav.k9.soknad.pleiepengerbarn.InnsendingValidator;
 import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -90,6 +93,7 @@ public class FordelRestTjeneste {
     private OpprettSakTjeneste opprettSakTjeneste;
     private VurderFagsystemFellesTjeneste vurderFagsystemTjeneste;
     private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
+    private InnsendingValidator innsendingValidator = new InnsendingValidator();
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -179,9 +183,26 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public void psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
+    public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
+        final List<no.nav.k9.soknad.felles.Feil> valideringsfeil = innsendingValidator.validate(pleiepengerBarnSoknad);
+        if (!valideringsfeil.isEmpty()) {
+            throw new IllegalArgumentException("Minst én valideringsfeil på innsendt søknad for pleiepenger barn: " + Arrays.toString(valideringsfeil.toArray()));
+        }
         // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
-        dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
+        final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
+        return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer().getVerdi());
+    }
+
+    public static class PleiepengerBarnSoknadMottatt {
+        private final String saksnummer;
+
+        public PleiepengerBarnSoknadMottatt(String saksnummer) {
+            this.saksnummer = saksnummer;
+        }
+
+        public String getSaksnummer() {
+            return saksnummer;
+        }
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
@@ -338,7 +359,7 @@ public class FordelRestTjeneste {
                 throw JournalpostMottakFeil.FACTORY.manglerPayloadLength().toException();
             }
             byte[] bytes = Base64.getUrlDecoder().decode(base64EncodedPayload);
-            String streng = new String(bytes, Charset.forName("UTF-8"));
+            String streng = new String(bytes, StandardCharsets.UTF_8);
             if (streng.length() != deklarertLengde) {
                 throw JournalpostMottakFeil.FACTORY.feilPayloadLength(deklarertLengde, streng.length()).toException();
             }

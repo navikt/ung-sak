@@ -12,6 +12,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStat
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class BeregningsgrunnlagStatusPeriode implements Comparable<BeregningsgrunnlagStatusPeriode> {
 
@@ -84,6 +85,10 @@ public class BeregningsgrunnlagStatusPeriode implements Comparable<Beregningsgru
 
     public AktivitetStatus getAktivitetStatus() {
         return aktivitetStatus;
+    }
+
+    public DatoIntervallEntitet getPeriode() {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
     @Override

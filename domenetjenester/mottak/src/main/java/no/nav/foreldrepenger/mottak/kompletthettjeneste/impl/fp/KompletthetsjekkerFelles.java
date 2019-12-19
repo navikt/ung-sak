@@ -47,8 +47,8 @@ public class KompletthetsjekkerFelles {
 
     @Inject
     public KompletthetsjekkerFelles(BehandlingRepositoryProvider provider,
-                                      DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
-                                      DokumentBehandlingTjeneste dokumentBehandlingTjeneste) {
+                                    DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                                    DokumentBehandlingTjeneste dokumentBehandlingTjeneste) {
         this.søknadRepository = provider.getSøknadRepository();
         this.behandlingRepository = provider.getBehandlingRepository();
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
@@ -81,10 +81,8 @@ public class KompletthetsjekkerFelles {
     }
 
     public void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, String årsakskode) {
-        if (!dokumentBehandlingTjeneste.erDokumentProdusert(behandlingId, dokumentMalType)) {
-            BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, null, årsakskode);
-            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN, false);
-        }
+        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, null, årsakskode);
+        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN, false);
     }
 
     public boolean erSendtBrev(Long behandlingId, DokumentMalType dokumentMalType) {
