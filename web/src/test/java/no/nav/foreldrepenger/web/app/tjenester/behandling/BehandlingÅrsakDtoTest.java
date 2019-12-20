@@ -37,7 +37,7 @@ public class BehandlingÅrsakDtoTest {
 
     @Before
     public void setup() {
-        skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(repositoryProvider.getBehandlingRepository());
+        skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(repositoryProvider.getBehandlingRepository(), repositoryProvider.getOpptjeningRepository(), repositoryProvider.getSøknadRepository());
         var beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
         behandlingDtoTjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null, unleash);
 
