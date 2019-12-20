@@ -63,10 +63,6 @@ public class FagsakApplikasjonTjeneste {
     }
 
     public FagsakSamlingForBruker hentSaker(String søkestreng) {
-        if (!søkestreng.matches("\\d+")) {
-            return FagsakSamlingForBruker.emptyView();
-        }
-
         if (predikatErFnr.test(søkestreng)) {
             return hentSakerForFnr(new PersonIdent(søkestreng));
         } else {

@@ -107,16 +107,9 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.empty()); // Ingen treff i TPS
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(valueOf(SAKSNUMMER));
+        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
 
         // Assert
-        assertThat(view.isEmpty()).isTrue();
-    }
-
-    @Test
-    public void skal_returnere_tomt_view_dersom_søkestreng_ikke_er_gyldig_fnr_eller_saksnr() {
-        FagsakSamlingForBruker view = tjeneste.hentSaker("ugyldig_søkestreng");
-
         assertThat(view.isEmpty()).isTrue();
     }
 
@@ -133,7 +126,7 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_returnere_tomt_view_ved_ukjent_saksnr() {
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.empty());
 
-        FagsakSamlingForBruker view = tjeneste.hentSaker(valueOf(SAKSNUMMER));
+        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
 
         assertThat(view.isEmpty()).isTrue();
     }
