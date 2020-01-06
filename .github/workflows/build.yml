@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - master         # Push events on master branch
-
+env:
+  IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/k9-sak
 jobs:
   build:
 
@@ -37,26 +38,18 @@ jobs:
           echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
           mvn clean deploy --batch-mode --settings ./.github/.m2/settings.xml -Dmaven.wagon.http.pool=false --file pom.xml -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8 -DinstallAtEnd=true -DdeployAtEnd=true
           echo "Deployed artifacts"
+          echo "::set-env name=IMAGE::$IMAGE_BASE:$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
-
-      - name: Sette Docker- navn og tag
-        env:
-          DOCKER_IMAGE: docker.pkg.github.com/${{ github.repository }}/k9-sak
+      - name: Bygg og laste opp docker-image
         run: |
-          echo $DOCKER_IMAGE > .docker_image
-          echo "$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)" > .docker_tag
-      - name: Bygge Docker image
-        run: docker build . --pull -t $(cat .docker_image):$(cat .docker_tag)
-      - name: Laste opp Docker image
-        run: |
+          docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest
           echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
-          docker push $(cat .docker_image):$(cat .docker_tag)
-          docker tag $(cat .docker_image):$(cat .docker_tag) $(cat .docker_image):latest
-          docker push $(cat .docker_image):latest
+          docker push ${IMAGE_BASE}:latest
+          docker push ${IMAGE}
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
       - name: Trigger verdikjede test
