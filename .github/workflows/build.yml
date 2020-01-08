@@ -38,6 +38,7 @@ jobs:
           echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
           mvn clean deploy --batch-mode --settings ./.github/.m2/settings.xml -Dmaven.wagon.http.pool=false --file pom.xml -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8 -DinstallAtEnd=true -DdeployAtEnd=true
           echo "Deployed artifacts"
+          echo "::set-env name=TAG::$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"
           echo "::set-env name=IMAGE::$IMAGE_BASE:$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"
         env:
           GITHUB_USERNAME: x-access-token
@@ -56,4 +57,13 @@ jobs:
         if: success()
         shell: bash
         run: |
-          curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json"  -H "Content-Type: application/json" https://api.github.com/repos/navikt/k9-verdikjede/dispatches --data '{"event_type": "saksbehandling-verdikjede"}'
+          curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" 
+          -H "Accept: application/vnd.github.everest-preview+json"  
+          -H "Content-Type: application/json" 
+          https://api.github.com/repos/navikt/k9-verdikjede/dispatches 
+          --data '{"event_type": "saksbehandling-verdikjede", 
+                   "client_payload": {
+                      "trigger": "${{ github.repository }}",
+                      "version": "${{ env.TAG }}",
+                      "image": "${{ env.IMAGE }}"
+                  }}'
