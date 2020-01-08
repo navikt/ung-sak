@@ -56,4 +56,4 @@ jobs:
         if: success()
         shell: bash
         run: |
-          curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json"  -H "Content-Type: application/json" https://api.github.com/repos/navikt/k9-verdikjede/dispatches --data '{"event_type": "build_application"}'
+          curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json"  -H "Content-Type: application/json" https://api.github.com/repos/navikt/k9-verdikjede/dispatches --data '{"event_type": "saksbehandling-verdikjede"}'
