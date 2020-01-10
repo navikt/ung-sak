@@ -24,8 +24,7 @@
 	<properties>
 		<java.version>11</java.version> <!--Brukes av jenkins -->
 		<argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine> <!-- default argLine for surefire-plugin -->
-		<jacoco.skip>true</jacoco.skip> <!-- default skip coverage -->
-
+		
 		<revision>3.1.0</revision>
 		<sha1></sha1>
 		<changelist>-SNAPSHOT</changelist>
@@ -580,42 +579,16 @@
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>1.1.0</version>
 				</plugin>
+                <plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.7.0.1746</version>
+				</plugin>
 			</plugins>
 
 		</pluginManagement>
 
 		<plugins>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>agent</id>
-						<?m2e ignore?>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<configuration>
-							<destFile>${sonar.jacoco.reportPaths}</destFile>
-							<append>true</append>
-							<excludes>${sonar.coverage.exclusions}</excludes>
-						</configuration>
-					</execution>
-					<execution>
-						<id>agent-it</id>
-						<?m2e ignore?>
-						<goals>
-							<goal>prepare-agent-integration</goal>
-						</goals>
-						<configuration>
-							<destFile>${sonar.jacoco.reportPaths}</destFile>
-							<append>true</append>
-							<excludes>${sonar.coverage.exclusions}</excludes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
@@ -698,7 +671,7 @@
 			<plugin>
 				<groupId>org.jboss.jandex</groupId>
 				<artifactId>jandex-maven-plugin</artifactId>
-				<version>1.0.6</version>
+				<version>1.0.7</version>
 				<executions>
 					<execution>
 						<id>make-index</id>
