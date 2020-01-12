@@ -58,11 +58,11 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
 
         Optional<BehandlingStegStatus> førsteStegStatus = event.getFørsteStegStatus();
 
-        boolean medInngangFørsteSteg = førsteStegStatus.isEmpty() || førsteStegStatus.get().erVedInngang();
+        boolean medInngangFørsteSteg = førsteStegStatus.map(BehandlingStegStatus::erVedInngang).orElse(Boolean.TRUE);
 
         Set<String> aksjonspunktDefinisjonerEtterFra = modell.finnAksjonspunktDefinisjonerFraOgMed(førsteSteg, medInngangFørsteSteg);
 
-        List<Aksjonspunkt> endredeAksjonspunkter = håndterAksjonspunkter(behandling, aksjonspunktDefinisjonerEtterFra, event, førsteSteg, modell);
+        List<Aksjonspunkt> endredeAksjonspunkter = håndterAksjonspunkter(behandling, aksjonspunktDefinisjonerEtterFra, event, førsteSteg, modell, medInngangFørsteSteg);
 
         modell.hvertStegFraOgMedTil(førsteSteg, sisteSteg, true)
             .collect(Collectors.toCollection(ArrayDeque::new))
@@ -83,14 +83,15 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
 
     private List<Aksjonspunkt> håndterAksjonspunkter(Behandling behandling, Set<String> mellomliggendeAksjonspunkt,
                                                      BehandlingStegTilbakeføringEvent event, 
-                                                     BehandlingStegType førsteSteg, BehandlingModell modell) {
+                                                     BehandlingStegType førsteSteg, BehandlingModell modell,
+                                                     boolean tilInngangFørsteSteg) {
         List<Aksjonspunkt> endredeAksjonspunkter = behandling.getAksjonspunkter().stream()
             .filter(a -> !a.erAutopunkt()) // Autopunkt skal ikke håndteres; skal alltid være lukket ved tilbakehopp
             .filter(a -> mellomliggendeAksjonspunkt.contains(a.getAksjonspunktDefinisjon().getKode()))
             .collect(Collectors.toList());
 
         List<Aksjonspunkt> oppdaterteAksjonspunkt = new ArrayList<>();
-        endredeAksjonspunkter.forEach(a -> håndterEndretAksjonspunkt(a, førsteSteg, modell, oppdaterteAksjonspunkt));
+        endredeAksjonspunkter.forEach(a -> håndterEndretAksjonspunkt(a, førsteSteg, modell, oppdaterteAksjonspunkt, tilInngangFørsteSteg));
 
         serviceProvider.getBehandlingRepository().lagre(behandling, event.getKontekst().getSkriveLås());
         return oppdaterteAksjonspunkt;
@@ -115,8 +116,8 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
         }
     }
 
-    private void håndterEndretAksjonspunkt(Aksjonspunkt a, BehandlingStegType førsteSteg, BehandlingModell modell, List<Aksjonspunkt> oppdaterteAksjonspunkt) {
-        if (skalAvbryte(a, førsteSteg, modell)) {
+    private void håndterEndretAksjonspunkt(Aksjonspunkt a, BehandlingStegType førsteSteg, BehandlingModell modell, List<Aksjonspunkt> oppdaterteAksjonspunkt, boolean tilInngangFørsteSteg) {
+        if (skalAvbryte(a, førsteSteg, modell, tilInngangFørsteSteg)) {
             aksjonspunktKontrollRepository.setTilAvbrutt(a);
             oppdaterteAksjonspunkt.add(a);
         } else if (skalReåpne(a, førsteSteg, modell)) {
@@ -140,11 +141,12 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
      * Ved tilbakeføring skal alle påfølgende åpne aksjonspunkt (som IKKE ER OVERSTYRING) som identifiseres i eller
      * senere steg Avbrytes. De som er UTFØRT bilr stående og må evt reutledes - obs en del avklarte AP reutledes ikke.
      */
-    private boolean skalAvbryte(Aksjonspunkt a, BehandlingStegType førsteSteg, BehandlingModell modell) {
+    private boolean skalAvbryte(Aksjonspunkt a, BehandlingStegType førsteSteg, BehandlingModell modell, boolean tilInngangFørsteSteg) {
         boolean erFunnetIFørsteStegEllerSenere = !modell.erStegAFørStegB(a.getBehandlingStegFunnet(), førsteSteg);
         boolean erManueltOpprettet = a.erManueltOpprettet();
         boolean erOpprettetIFørsteSteg = erOpprettetIFørsteSteg(a, førsteSteg);
-        boolean avbryt = !erManueltOpprettet && erFunnetIFørsteStegEllerSenere && !erOpprettetIFørsteSteg;
+        boolean hensyntaÅpneOpprettetIFørste = erOpprettetIFørsteSteg && tilInngangFørsteSteg && a.erÅpentAksjonspunkt();
+        boolean avbryt = !erManueltOpprettet && erFunnetIFørsteStegEllerSenere && (hensyntaÅpneOpprettetIFørste || !erOpprettetIFørsteSteg);
         return avbryt;
     }
 

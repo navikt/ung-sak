@@ -42,7 +42,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapBehandlingsgrunnlagEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
@@ -174,8 +173,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
 
-        AksjonspunktRepository aksjonspunktRepository = Mockito.spy(new AksjonspunktRepository(null));
-
         FagsakRepository mockFagsakRepository = mockFagsakRepository();
         PersonopplysningRepository mockPersonopplysningRepository = lagMockPersonopplysningRepository();
         MedlemskapRepository mockMedlemskapRepository = lagMockMedlemskapRepository();
@@ -191,7 +188,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
         when(repositoryProvider.getFagsakRepository()).thenReturn(mockFagsakRepository);
-        when(repositoryProvider.getAksjonspunktRepository()).thenReturn(aksjonspunktRepository);
         when(repositoryProvider.getPersonopplysningRepository()).thenReturn(mockPersonopplysningRepository);
         when(repositoryProvider.getMedlemskapRepository()).thenReturn(mockMedlemskapRepository);
         when(repositoryProvider.getSøknadRepository()).thenReturn(søknadRepository);

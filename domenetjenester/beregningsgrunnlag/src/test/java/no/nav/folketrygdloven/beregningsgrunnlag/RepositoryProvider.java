@@ -5,7 +5,6 @@ import java.util.Objects;
 import javax.persistence.EntityManager;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
@@ -28,10 +27,6 @@ public class RepositoryProvider {
 
     public BehandlingRepository getBehandlingRepository() {
         return new BehandlingRepository(entityManager);
-    }
-
-    public AksjonspunktRepository getAksjonspunktRepository() {
-        return new AksjonspunktRepository(entityManager);
     }
 
     public FagsakRepository getFagsakRepository() {

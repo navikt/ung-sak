@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -30,7 +29,6 @@ public class BehandlingRepositoryProvider {
     private EntityManager entityManager;
     private BehandlingLåsRepository behandlingLåsRepository;
     private FagsakRepository fagsakRepository;
-    private AksjonspunktRepository aksjonspunktRepository;
     private PersonopplysningRepository personopplysningRepository;
     private MedlemskapRepository medlemskapRepository;
     private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository;
@@ -63,7 +61,6 @@ public class BehandlingRepositoryProvider {
         this.behandlingRepository = new BehandlingRepository(entityManager);
         this.behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
         this.fagsakRepository = new FagsakRepository(entityManager);
-        this.aksjonspunktRepository = new AksjonspunktRepository(entityManager);
         this.fagsakLåsRepository = new FagsakLåsRepository(entityManager);
 
         // behandling aggregater
@@ -103,10 +100,6 @@ public class BehandlingRepositoryProvider {
 
     public PersonopplysningRepository getPersonopplysningRepository() {
         return personopplysningRepository;
-    }
-
-    public AksjonspunktRepository getAksjonspunktRepository() {
-        return aksjonspunktRepository;
     }
 
     public MedlemskapRepository getMedlemskapRepository() {

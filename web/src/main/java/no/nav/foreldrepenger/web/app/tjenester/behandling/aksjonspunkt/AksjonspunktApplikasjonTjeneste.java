@@ -69,7 +69,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    private AksjonspunktRepository aksjonspunktRepository;
+    private AksjonspunktRepository aksjonspunktRepository = new AksjonspunktRepository();
 
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
 
@@ -102,8 +102,6 @@ public class AksjonspunktApplikasjonTjeneste {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.endringsresultatSjekker = endringsresultatSjekker;
-
-        this.aksjonspunktRepository = repositoryProvider.getAksjonspunktRepository();
 
     }
 
