@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,7 +31,7 @@ public enum AksjonspunktStatus implements Kodeverdi {
 
     public static final String KODEVERK = "AKSJONSPUNKT_STATUS";
     private static final Map<String, AksjonspunktStatus> KODER = new LinkedHashMap<>();
-    private static final List<AksjonspunktStatus> ÅPNE_AKSJONSPUNKT_KODER = Arrays.asList(OPPRETTET);
+    private static final List<AksjonspunktStatus> ÅPNE_AKSJONSPUNKT_KODER = List.of(OPPRETTET);
 
     static {
         for (var v : values()) {

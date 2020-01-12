@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.web.app.tjenester.fagsak;
 
-import static java.lang.String.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;

@@ -85,7 +85,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
             .lagre(repositoryProvider);
         behandlingId = behandling.getId();
 
-        BehandlingskontrollTjenesteImpl behandlingskontrollTjenesteImpl = new BehandlingskontrollTjenesteImpl(behandlingskontrollServiceProvider, null);
+        BehandlingskontrollTjenesteImpl behandlingskontrollTjenesteImpl = new BehandlingskontrollTjenesteImpl(behandlingskontrollServiceProvider);
 
         when(behandlendeEnhetTjeneste.sjekkEnhetVedNyAvledetBehandling(any(Fagsak.class))).thenReturn(Optional.empty());
 

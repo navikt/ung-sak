@@ -6,7 +6,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -16,13 +15,11 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 @Dependent
 public class IAYRepositoryProvider {
 
     private FagsakRepository fagsakRepository;
-    private AksjonspunktRepository aksjonspunktRepository;
     private PersonopplysningRepository personopplysningRepository;
     private SøknadRepository søknadRepository;
     private VirksomhetRepository virksomhetRepository;
@@ -31,13 +28,12 @@ public class IAYRepositoryProvider {
     private BehandlingRepository behandlingRepository;
 
     @Inject
-    public IAYRepositoryProvider(@VLPersistenceUnit EntityManager entityManager) {
+    public IAYRepositoryProvider(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
 
         // behandling repositories
         this.behandlingRepository = new BehandlingRepository(entityManager);
         this.fagsakRepository = new FagsakRepository(entityManager);
-        this.aksjonspunktRepository = new AksjonspunktRepository(entityManager);
 
         // behandling aggregater
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
@@ -50,10 +46,6 @@ public class IAYRepositoryProvider {
         // behandling støtte repositories
         this.mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
 
-    }
-
-    public AksjonspunktRepository getAksjonspunktRepository() {
-        return aksjonspunktRepository;
     }
 
     public BehandlingRepository getBehandlingRepository() {

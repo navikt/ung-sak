@@ -69,7 +69,7 @@ public class KompletthetssjekkerTestUtil {
     }
 
 
-    public void byggOgLagreFørstegangsSøknadMedMottattdato(Behandling behandling, LocalDate søknadsdato, LocalDate stp) {
+    public void byggOgLagreFørstegangsSøknadMedMottattdato(Behandling behandling, LocalDate søknadsdato) {
         SøknadEntitet søknad = new SøknadEntitet.Builder().medElektroniskRegistrert(true)
             .medSøknadsdato(søknadsdato)
             .medMottattDato(søknadsdato)

@@ -140,7 +140,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
                                    BehandlingStegType hoppesFraSteg) {
         if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
+            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(repositoryProvider, behandling, kontekst);
             ryddVilkårTyper.ryddVedTilbakeføring(vilkårHåndtertAvSteg());
             behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         }
@@ -152,7 +152,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         //TODO skal man rydde opp ved framoverhopp?
         if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
+            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(repositoryProvider, behandling, kontekst);
             ryddVilkårTyper.ryddVedOverhoppFramover(vilkårHåndtertAvSteg());
             behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         }

@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.behandling.impl;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -19,10 +17,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.foreldrepenger.behandling.PubliserEventTask;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.vedtak.felles.integrasjon.kafka.BehandlingProsessEventDto;
@@ -57,8 +56,8 @@ public class BehandlingskontrollEventObserver {
     }
 
     // Lytter på AksjonspunkterFunnetEvent, filtrer ut når behandling er satt manuelt på vent og legger melding på kafka
-    public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunkterFunnetEvent event) {
-        if (event.getAksjonspunkter().stream().anyMatch(e -> e.getAksjonspunktDefinisjon().equals(AUTO_MANUELT_SATT_PÅ_VENT))) {
+    public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
+        if (event.getAksjonspunkter().stream().anyMatch(e -> e.erOpprettet() && AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT.equals(e.getAksjonspunktDefinisjon()))) {
             try {
                 ProsessTaskData prosessTaskData = opprettProsessTask(event.getBehandlingId(), BehandlingProsessEventDto.EventHendelse.AKSJONSPUNKT_OPPRETTET);
                 prosessTaskRepository.lagre(prosessTaskData);

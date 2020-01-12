@@ -21,6 +21,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -86,7 +87,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, startSteg);
         }
 
-        leggTilAksjonspunkter(behandling, repositoryProvider);
+        leggTilAksjonspunkter(behandling);
 
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
@@ -129,13 +130,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         fagsak.setId(fagsakId);
     }
 
-    private void leggTilAksjonspunkter(Behandling behandling, BehandlingskontrollServiceProvider repositoryProvider) {
+    private void leggTilAksjonspunkter(Behandling behandling) {
         aksjonspunktDefinisjoner.forEach(
             (apDef, stegType) -> {
                 if (stegType != null) {
-                    repositoryProvider.getAksjonspunktRepository().leggTilAksjonspunkt(behandling, apDef, stegType);
+                    new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, apDef, stegType);
                 } else {
-                    repositoryProvider.getAksjonspunktRepository().leggTilAksjonspunkt(behandling, apDef);
+                    new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, apDef);
                 }
             });
     }

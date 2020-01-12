@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.StegProsesseringResultat;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingTransisjonEvent;
@@ -33,7 +33,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 
@@ -54,7 +54,7 @@ class BehandlingStegVisitor {
 
     private final InternalManipulerBehandling manipulerInternBehandling;
 
-    private final AksjonspunktRepository aksjonspunktRepository;
+    private final AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
 
     private BehandlingStegModell stegModell;
 
@@ -66,7 +66,7 @@ class BehandlingStegVisitor {
         this.behandlingModell = Objects.requireNonNull(stegModell.getBehandlingModell(), "BehandlingModell");
         this.kontekst = Objects.requireNonNull(kontekst, "kontekst");
         this.behandlingRepository = serviceProvider.getBehandlingRepository();
-        this.aksjonspunktRepository = serviceProvider.getAksjonspunktRepository();
+        this.aksjonspunktKontrollRepository = serviceProvider.getAksjonspunktKontrollRepository();
 
         this.manipulerInternBehandling = new InternalManipulerBehandling();
 
@@ -94,7 +94,7 @@ class BehandlingStegVisitor {
     private StegProsesseringResultat prosesserSteg(BehandlingStegModell stegModell, boolean gjenoppta) {
         BehandlingSteg steg = stegModell.getSteg();
         BehandlingStegType stegType = stegModell.getBehandlingStegType();
-        AksjonspunktResultatOppretter apHåndterer = new AksjonspunktResultatOppretter(aksjonspunktRepository, behandling);
+        AksjonspunktResultatOppretter apHåndterer = new AksjonspunktResultatOppretter(aksjonspunktKontrollRepository, behandling);
 
         // Sett riktig status for steget før det utføres
         BehandlingStegStatus førStegStatus = behandling.getBehandlingStegStatus();
@@ -157,7 +157,7 @@ class BehandlingStegVisitor {
 
         // Publiser de funnede aksjonspunktene
         if (!funnetAksjonspunkter.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunkterFunnetEvent(kontekst, funnetAksjonspunkter, stegType));
+            eventPubliserer.fireEvent(new AksjonspunktStatusEvent(kontekst, funnetAksjonspunkter, stegType));
         }
     }
 

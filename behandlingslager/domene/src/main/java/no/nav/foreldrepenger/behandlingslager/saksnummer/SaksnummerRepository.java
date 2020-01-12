@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.behandlingslager.saksnummer;
 
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -18,7 +17,7 @@ public class SaksnummerRepository {
     }
 
     @Inject
-    public SaksnummerRepository(@VLPersistenceUnit EntityManager entityManager) {
+    public SaksnummerRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
     }

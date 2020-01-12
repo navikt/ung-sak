@@ -22,7 +22,6 @@ import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 class DokumentmottakerVedlegg implements Dokumentmottaker {
 
     private BehandlingRepository behandlingRepository;
-    private Behandlingsoppretter behandlingsoppretter;
     private DokumentmottakerFelles dokumentmottakerFelles;
     private BehandlingRevurderingRepository revurderingRepository;
     private Kompletthetskontroller kompletthetskontroller;
@@ -34,7 +33,6 @@ class DokumentmottakerVedlegg implements Dokumentmottaker {
                                    Kompletthetskontroller kompletthetskontroller) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
-        this.behandlingsoppretter = behandlingsoppretter;
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.kompletthetskontroller = kompletthetskontroller;
     }

@@ -4,8 +4,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
-
 @ApplicationScoped
 public class BehandlingOverlappInfotrygdRepository {
 
@@ -16,7 +14,7 @@ public class BehandlingOverlappInfotrygdRepository {
     }
 
     @Inject
-    public BehandlingOverlappInfotrygdRepository(@VLPersistenceUnit EntityManager entityManager) {
+    public BehandlingOverlappInfotrygdRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

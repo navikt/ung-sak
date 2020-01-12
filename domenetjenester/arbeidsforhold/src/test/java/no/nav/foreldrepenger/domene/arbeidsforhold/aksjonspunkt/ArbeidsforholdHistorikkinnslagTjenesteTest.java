@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParamet
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
@@ -47,7 +47,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     private JournalConsumer mockJournalProxyService = mock(JournalConsumer.class);
     private IAYRepositoryProvider provider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
     private HistorikkRepository historikkRepository = new HistorikkRepository(repositoryRule.getEntityManager());
-    private AksjonspunktRepository aksjonspunktRepository = provider.getAksjonspunktRepository();
+    private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     private HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
     private DokumentArkivTjeneste dokumentApplikasjonTjeneste = new DokumentArkivTjeneste(mockJournalProxyService, provider.getFagsakRepository());
     private HistorikkTjenesteAdapter historikkAdapter;
@@ -64,7 +64,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
         arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
         IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         behandling = scenario.lagre(provider);
-        aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
+        aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
         skjæringstidspunkt = Skjæringstidspunkt.builder()
             .medUtledetSkjæringstidspunkt(LocalDate.now())
             .build();

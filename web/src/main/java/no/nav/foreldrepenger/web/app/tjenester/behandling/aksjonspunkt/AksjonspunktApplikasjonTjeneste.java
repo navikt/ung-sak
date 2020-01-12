@@ -4,7 +4,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonFeil.FACTORY;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -70,7 +69,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    private AksjonspunktRepository aksjonspunktRepository;
+    private AksjonspunktRepository aksjonspunktRepository = new AksjonspunktRepository();
 
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
 
@@ -103,8 +102,6 @@ public class AksjonspunktApplikasjonTjeneste {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.endringsresultatSjekker = endringsresultatSjekker;
-
-        this.aksjonspunktRepository = repositoryProvider.getAksjonspunktRepository();
 
     }
 
@@ -184,7 +181,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
         List<Aksjonspunkt> utførteAksjonspunkter = lagreHistorikkInnslag(behandling);
 
-        behandlingskontrollTjeneste.aksjonspunkterUtført(kontekst, utførteAksjonspunkter, behandling.getAktivtBehandlingSteg());
+        behandlingskontrollTjeneste.aksjonspunkterEndretStatus(kontekst, behandling.getAktivtBehandlingSteg(), utførteAksjonspunkter);
 
         // Fremoverhopp hvis vilkår settes til AVSLÅTT
         håndterOverhopp(overhoppForOverstyring, kontekst);
@@ -283,7 +280,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
         if (aksjonspunkt.erAvbrutt()) {
             // Må reåpne avbrutte før de kan settes til utført (kunne ha vært én operasjon i aksjonspunktRepository)
-            aksjonspunktRepository.setReåpnet(aksjonspunkt);
+            behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, List.of(aksjonspunkt), Optional.empty());
             behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, null, aksjonspunkt, dto.getBegrunnelse());
         } else {
             behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, null, aksjonspunkt, dto.getBegrunnelse());
@@ -308,7 +305,7 @@ public class AksjonspunktApplikasjonTjeneste {
         } else {
             if (aksjonspunkt.erAvbrutt()) {
                 // Må reåpne avbrutte før de kan settes til utført (kunne ha vært én operasjon i aksjonspunktRepository)
-                aksjonspunktRepository.setReåpnet(aksjonspunkt);
+                behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, List.of(aksjonspunkt), Optional.empty());
             }
             behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, null, List.of(aksjonspunkt));
         }
@@ -340,8 +337,6 @@ public class AksjonspunktApplikasjonTjeneste {
                                                    Behandling behandling,
                                                    Skjæringstidspunkt skjæringstidspunkter) {
 
-        List<Aksjonspunkt> utførteAksjonspunkter = new ArrayList<>();
-        List<Aksjonspunkt> avbrutteAksjonspunkter = new ArrayList<>();
         OverhoppResultat overhoppResultat = OverhoppResultat.tomtResultat();
 
         VilkårResultat.Builder vilkårBuilder = harVilkårResultat(behandling)
@@ -349,19 +344,11 @@ public class AksjonspunktApplikasjonTjeneste {
             : VilkårResultat.builder();
 
         bekreftedeAksjonspunktDtoer
-            .forEach(dto -> bekreftAksjonspunkt(behandling, skjæringstidspunkter, vilkårBuilder, utførteAksjonspunkter, avbrutteAksjonspunkter, overhoppResultat, dto));
-
+            .forEach(dto -> bekreftAksjonspunkt(kontekst, behandling, skjæringstidspunkter, vilkårBuilder, overhoppResultat, dto));
+        
         VilkårResultat vilkårResultat = vilkårBuilder.buildFor(behandling);
         behandlingRepository.lagre(vilkårResultat, kontekst.getSkriveLås());
-
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-
-        if (!avbrutteAksjonspunkter.isEmpty()) {
-            behandlingskontrollTjeneste.aksjonspunkterAvbrutt(kontekst, avbrutteAksjonspunkter, behandling.getAktivtBehandlingSteg());
-        }
-        if (!utførteAksjonspunkter.isEmpty()) {
-            behandlingskontrollTjeneste.aksjonspunkterUtført(kontekst, utførteAksjonspunkter, behandling.getAktivtBehandlingSteg());
-        }
 
         boolean totrinn = overhoppResultat.finnTotrinn();
         overhoppResultat.finnEkstraAksjonspunktResultat().forEach(res -> håndterEkstraAksjonspunktResultat(kontekst, behandling, totrinn, res.getElement1(), res.getElement2()));
@@ -369,11 +356,9 @@ public class AksjonspunktApplikasjonTjeneste {
         return overhoppResultat;
     }
 
-    private void bekreftAksjonspunkt(Behandling behandling,
+    private void bekreftAksjonspunkt(BehandlingskontrollKontekst kontekst, Behandling behandling,
                                      Skjæringstidspunkt skjæringstidspunkter,
                                      Builder vilkårBuilder,
-                                     List<Aksjonspunkt> utførteAksjonspunkter,
-                                     List<Aksjonspunkt> avbrutteAksjonspunkter,
                                      OverhoppResultat overhoppResultat,
                                      BekreftetAksjonspunktDto dto) {
         // Endringskontroll for aksjonspunkt
@@ -390,13 +375,10 @@ public class AksjonspunktApplikasjonTjeneste {
         settToTrinnHvisRevurderingOgEndring(behandling, aksjonspunkt, dto.getBegrunnelse(), snapshotFør, delresultat.kreverTotrinnsKontroll());
 
         if (!aksjonspunkt.erAvbrutt() && delresultat.skalUtføreAksjonspunkt()) {
-            if (aksjonspunktRepository.setTilUtført(aksjonspunkt, dto.getBegrunnelse())) {
-                utførteAksjonspunkter.add(aksjonspunkt);
-            }
+            behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, behandling.getAktivtBehandlingSteg(), aksjonspunkt, dto.getBegrunnelse());
         }
         if (aksjonspunkt.erÅpentAksjonspunkt() && delresultat.skalAvbryteAksjonspunkt()) {
-            aksjonspunktRepository.setTilAvbrutt(aksjonspunkt);
-            avbrutteAksjonspunkter.add(aksjonspunkt);
+            behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, behandling.getAktivtBehandlingSteg(), List.of(aksjonspunkt));
         }
     }
 

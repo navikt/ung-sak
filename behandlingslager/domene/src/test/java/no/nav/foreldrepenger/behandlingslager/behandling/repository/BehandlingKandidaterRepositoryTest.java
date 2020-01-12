@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -26,8 +26,7 @@ public class BehandlingKandidaterRepositoryTest {
     @Inject
     private BehandlingKandidaterRepository sutRepo;
 
-    @Inject
-    private AksjonspunktRepository aksjonspunktRepository;
+    private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     
     @Inject
     private BehandlingRepository behandlingRepository;
@@ -38,8 +37,8 @@ public class BehandlingKandidaterRepositoryTest {
     public void skal_finne_en_kandidat_for_automatisk_gjenopptagelse() throws Exception {
         // Arrange
         var behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
-        var aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
-        aksjonspunktRepository.setFrist(aksjonspunkt, LocalDateTime.now().minusMinutes(1), Venteårsak.FOR_TIDLIG_SOKNAD);
+        var aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt, LocalDateTime.now().minusMinutes(1), Venteårsak.FOR_TIDLIG_SOKNAD);
         behandlingRepository.lagre(behandling);
         
         // Act

@@ -32,8 +32,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -79,7 +79,7 @@ public class ForeslåVedtakTjenesteTest {
 
     private ForeslåVedtakTjeneste tjeneste;
 
-    private AksjonspunktRepository aksjonspunktRepository = repositoryProvider.getAksjonspunktRepository();
+    private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
 
     private ArrayList<Oppgaveinfo> oppgaveinfoerSomReturneres = new ArrayList<>();
 
@@ -127,7 +127,7 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void setterPåVentHvisÅpentAksjonspunktVedtakUtenTotrinnskontroll() {
         // Arrange
-        aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
+        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
@@ -140,7 +140,7 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void nullstillerBehandlingHvisDetEksistererVedtakUtenTotrinnAksjonspunkt() {
         // Arrange
-        aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
+        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
 
         // Act
         tjeneste.foreslåVedtak(behandling, kontekst);
@@ -302,7 +302,7 @@ public class ForeslåVedtakTjenesteTest {
     }
 
     private void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, boolean totrinnsbehandling) {
-        Aksjonspunkt aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
         Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
         Whitebox.setInternalState(aksjonspunkt, "toTrinnsBehandling", totrinnsbehandling);
     }

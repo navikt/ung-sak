@@ -12,8 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegStatusEvent;
@@ -53,7 +52,7 @@ public class TestEventObserver {
         addEvent(event);
     }
 
-    public void observer(@Observes AksjonspunkterFunnetEvent event) {
+    public void observer(@Observes AksjonspunktStatusEvent event) {
         addEvent(event);
     }
 
@@ -66,7 +65,7 @@ public class TestEventObserver {
     }
 
     public static void containsExactly(AksjonspunktDefinisjon[]... ads) {
-        List<AksjonspunktEvent> aksjonspunkterEvents = getEvents(AksjonspunktEvent.class);
+        List<AksjonspunktStatusEvent> aksjonspunkterEvents = getEvents(AksjonspunktStatusEvent.class);
         assertThat(aksjonspunkterEvents).hasSize(ads.length);
         for (int i = 0; i < ads.length; i++) {
             List<Aksjonspunkt> aps = aksjonspunkterEvents.get(i).getAksjonspunkter();

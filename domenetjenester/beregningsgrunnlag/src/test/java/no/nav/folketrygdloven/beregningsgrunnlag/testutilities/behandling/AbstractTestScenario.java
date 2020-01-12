@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -167,12 +167,9 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
 
-        AksjonspunktRepository aksjonspunktRepository = Mockito.spy(new AksjonspunktRepository(null));
-
         FagsakRepository mockFagsakRepository = mockFagsakRepository();
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
         when(repositoryProvider.getFagsakRepository()).thenReturn(mockFagsakRepository);
-        when(repositoryProvider.getAksjonspunktRepository()).thenReturn(aksjonspunktRepository);
 
         return behandlingRepository;
     }
@@ -251,7 +248,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         this.behandling = behandlingBuilder.build();
 
-        leggTilAksjonspunkter(behandling, repositoryProvider);
+        leggTilAksjonspunkter(behandling);
 
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
@@ -276,10 +273,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
     }
 
-    private void leggTilAksjonspunkter(Behandling behandling, RepositoryProvider repositoryProvider) {
+    private void leggTilAksjonspunkter(Behandling behandling) {
         aksjonspunktDefinisjoner.forEach(
             (apDef, stegType) -> {
-                repositoryProvider.getAksjonspunktRepository().leggTilAksjonspunkt(behandling, apDef, stegType);
+                new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, apDef, stegType);
             });
     }
 

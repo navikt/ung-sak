@@ -30,7 +30,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -56,9 +55,7 @@ public class DokumentmottakerSøknadDefaultTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    @Inject
-    private AksjonspunktRepository aksjonspunktRepository;
-
+    
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
     @Mock

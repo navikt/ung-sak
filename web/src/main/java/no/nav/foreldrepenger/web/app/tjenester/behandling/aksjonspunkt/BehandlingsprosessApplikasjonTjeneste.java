@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktUtførtEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
@@ -194,7 +193,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
     /**
      * På grunn av (nyinnført) async-prosessering videre nedover mister vi informasjon her om at det i dette tilfellet er saksbehandler som
      * ber om gjenopptakelse av behandlingen. Det kommer et historikkinnslag om dette (se
-     * {@link AksjonspunktUtførtEvent})
+     * {@link no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent})
      * som eies av systembruker. Derfor velger vi her å legge på et innslag til med saksbehandler som eier slik at historikken blir korrekt.
      */
     private void opprettHistorikkinnslagForManueltGjenopptakelse(Behandling behandling,

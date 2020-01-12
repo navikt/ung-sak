@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.domene.risikoklassifisering.modell;
 
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -21,7 +19,7 @@ public class RisikoklassifiseringRepository {
     }
 
     @Inject
-    public RisikoklassifiseringRepository(@VLPersistenceUnit EntityManager entityManager) {
+    public RisikoklassifiseringRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
     }

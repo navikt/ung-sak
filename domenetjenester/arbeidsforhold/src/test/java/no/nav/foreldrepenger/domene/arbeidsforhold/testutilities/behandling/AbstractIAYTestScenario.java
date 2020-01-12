@@ -33,7 +33,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
@@ -125,8 +124,6 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
 
-        AksjonspunktRepository aksjonspunktRepository = Mockito.spy(new AksjonspunktRepository(null));
-
         FagsakRepository mockFagsakRepository = mockFagsakRepository();
         PersonopplysningRepository mockPersonopplysningRepository = lagMockPersonopplysningRepository();
         SøknadRepository søknadRepository = mockSøknadRepository();
@@ -138,7 +135,6 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
         when(repositoryProvider.getFagsakRepository()).thenReturn(mockFagsakRepository);
-        when(repositoryProvider.getAksjonspunktRepository()).thenReturn(aksjonspunktRepository);
         when(repositoryProvider.getPersonopplysningRepository()).thenReturn(mockPersonopplysningRepository);
         when(repositoryProvider.getSøknadRepository()).thenReturn(søknadRepository);
         when(repositoryProvider.getVirksomhetRepository()).thenReturn(virksomhetRepository);

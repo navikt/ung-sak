@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingModellVisitor;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegKonfigurasjon;
@@ -27,9 +28,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegUtfall;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktAvbruttEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktUtførtEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingTransisjonEvent;
@@ -52,7 +51,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
@@ -67,7 +66,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 @RequestScoped // må være RequestScoped sålenge ikke nøstet prosessering støttes.
 public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjeneste {
 
-    private AksjonspunktRepository aksjonspunktRepository;
+    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
     private InternalManipulerBehandling manipulerInternBehandling;
@@ -90,16 +89,15 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
      * SE KOMMENTAR ØVERST
      */
     @Inject
-    public BehandlingskontrollTjenesteImpl(BehandlingskontrollServiceProvider serviceProvider,
-                                           BehandlingskontrollEventPubliserer eventPubliserer) {
+    public BehandlingskontrollTjenesteImpl(BehandlingskontrollServiceProvider serviceProvider) {
 
         this.serviceProvider = serviceProvider;
         this.behandlingRepository = serviceProvider.getBehandlingRepository();
         this.behandlingModellRepository = serviceProvider.getBehandlingModellRepository();
         this.manipulerInternBehandling = new InternalManipulerBehandling();
         this.behandlingStegKonfigurasjon = new BehandlingStegKonfigurasjon(EnumSet.allOf(BehandlingStegStatus.class));
-        this.aksjonspunktRepository = serviceProvider.getAksjonspunktRepository();
-        this.eventPubliserer = Objects.requireNonNullElse(eventPubliserer, BehandlingskontrollEventPubliserer.NULL_EVENT_PUB);
+        this.aksjonspunktKontrollRepository = serviceProvider.getAksjonspunktKontrollRepository();
+        this.eventPubliserer = serviceProvider.getEventPubliserer();
     }
 
     @Override
@@ -284,25 +282,9 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     }
 
     @Override
-    public void aksjonspunkterUtført(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, BehandlingStegType behandlingStegType) {
+    public void aksjonspunkterEndretStatus(BehandlingskontrollKontekst kontekst, BehandlingStegType behandlingStegType, List<Aksjonspunkt> aksjonspunkter) {    // handlinger som skal skje når funnet
         if (!aksjonspunkter.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunktUtførtEvent(kontekst, aksjonspunkter, behandlingStegType));
-        }
-    }
-
-    @Override
-    public void aksjonspunkterAvbrutt(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, BehandlingStegType behandlingStegType) {
-        if (!aksjonspunkter.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunktAvbruttEvent(kontekst, aksjonspunkter, behandlingStegType));
-        }
-    }
-
-    // for symmetri med aksjonspunkterUtført
-    @Override
-    public void aksjonspunkterFunnet(BehandlingskontrollKontekst kontekst, BehandlingStegType behandlingStegType, List<Aksjonspunkt> aksjonspunkter) {
-        // handlinger som skal skje når funnet
-        if (!aksjonspunkter.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunkterFunnetEvent(kontekst, aksjonspunkter, behandlingStegType));
+            eventPubliserer.fireEvent(new AksjonspunktStatusEvent(kontekst, aksjonspunkter, behandlingStegType));
         }
     }
 
@@ -310,11 +292,9 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     public List<Aksjonspunkt> lagreAksjonspunkterFunnet(BehandlingskontrollKontekst kontekst, List<AksjonspunktDefinisjon> aksjonspunkter) {
         Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
         List<Aksjonspunkt> nyeAksjonspunkt = new ArrayList<>();
-        aksjonspunkter.forEach(apdef -> nyeAksjonspunkt.add(serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, apdef)));
+        aksjonspunkter.forEach(apdef -> nyeAksjonspunkt.add(aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, apdef)));
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-        if (!nyeAksjonspunkt.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunkterFunnetEvent(kontekst, nyeAksjonspunkt, null));
-        }
+        aksjonspunkterEndretStatus(kontekst, null, nyeAksjonspunkt);
         return nyeAksjonspunkt;
     }
 
@@ -323,11 +303,9 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
                                    List<AksjonspunktDefinisjon> aksjonspunkter) {
         Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
         List<Aksjonspunkt> nyeAksjonspunkt = new ArrayList<>();
-        aksjonspunkter.forEach(apdef -> nyeAksjonspunkt.add(serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, apdef, behandlingStegType)));
+        aksjonspunkter.forEach(apdef -> nyeAksjonspunkt.add(aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, apdef, behandlingStegType)));
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-        if (!nyeAksjonspunkt.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunkterFunnetEvent(kontekst, nyeAksjonspunkt, behandlingStegType));
-        }
+        aksjonspunkterEndretStatus(kontekst, behandlingStegType, nyeAksjonspunkt);
         return nyeAksjonspunkt;
     }
 
@@ -336,16 +314,12 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
                                           List<Aksjonspunkt> aksjonspunkter) {
         Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
         List<Aksjonspunkt> utførte = new ArrayList<>();
-        aksjonspunkter.forEach(ap -> {
-            if (!ap.erUtført()) {
-                serviceProvider.getAksjonspunktKontrollRepository().setTilUtført(ap, null);
-                utførte.add(ap);
-            }
+        aksjonspunkter.stream().filter(ap -> !ap.erUtført()).forEach(ap -> {
+            aksjonspunktKontrollRepository.setTilUtført(ap, null);
+            utførte.add(ap);
         });
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-        if (!utførte.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunktUtførtEvent(kontekst, utførte, behandlingStegType));
-        }
+        aksjonspunkterEndretStatus(kontekst, behandlingStegType, utførte);
     }
 
     @Override
@@ -356,14 +330,12 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         List<Aksjonspunkt> utførte = new ArrayList<>();
 
         if (!aksjonspunkt.erUtført() || !Objects.equals(aksjonspunkt.getBegrunnelse(), begrunnelse)) {
-            serviceProvider.getAksjonspunktKontrollRepository().setTilUtført(aksjonspunkt, begrunnelse);
+            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, begrunnelse);
             utførte.add(aksjonspunkt);
         }
 
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-        if (!utførte.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunktUtførtEvent(kontekst, utførte, behandlingStegType));
-        }
+        aksjonspunkterEndretStatus(kontekst, behandlingStegType, utførte);
     }
 
     @Override
@@ -371,27 +343,34 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
                                     List<Aksjonspunkt> aksjonspunkter) {
         Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
         List<Aksjonspunkt> avbrutte = new ArrayList<>();
-        aksjonspunkter.forEach(ap -> {
-            if (!ap.erAvbrutt()) {
-                serviceProvider.getAksjonspunktKontrollRepository().setTilAvbrutt(ap);
-                avbrutte.add(ap);
-            }
+        aksjonspunkter.stream().filter(ap -> !ap.erAvbrutt()).forEach(ap -> {
+            aksjonspunktKontrollRepository.setTilAvbrutt(ap);
+            avbrutte.add(ap);
         });
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-        if (!avbrutte.isEmpty()) {
-            eventPubliserer.fireEvent(new AksjonspunktAvbruttEvent(kontekst, avbrutte, behandlingStegType));
-        }
+        aksjonspunkterEndretStatus(kontekst, behandlingStegType, avbrutte);
     }
 
     @Override
     public void lagreAksjonspunkterReåpnet(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, Optional<Boolean> setTotrinn) {
         Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
-        aksjonspunkter.forEach(ap -> {
-            serviceProvider.getAksjonspunktKontrollRepository().setReåpnet(ap);
-            setTotrinn.filter(Boolean::booleanValue).ifPresent(b -> aksjonspunktRepository.setToTrinnsBehandlingKreves(ap));
-            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-            eventPubliserer.fireEvent(new AksjonspunkterFunnetEvent(kontekst, List.of(ap), ap.getBehandlingStegFunnet()));
+        List<Aksjonspunkt> reåpnet = new ArrayList<>();
+        boolean totrinn = setTotrinn.orElse(Boolean.FALSE);
+        aksjonspunkter.stream().filter(ap -> !ap.erOpprettet()).forEach(ap -> {
+            aksjonspunktKontrollRepository.setReåpnetMedTotrinn(ap, totrinn);
+            reåpnet.add(ap);
         });
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        aksjonspunkterEndretStatus(kontekst, null, reåpnet);
+    }
+
+    @Override
+    public void lagreAksjonspunktResultat(BehandlingskontrollKontekst kontekst, BehandlingStegType behandlingStegType, List<AksjonspunktResultat> aksjonspunktResultater) {
+        Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
+        AksjonspunktResultatOppretter apHåndterer = new AksjonspunktResultatOppretter(aksjonspunktKontrollRepository, behandling);
+        List<Aksjonspunkt> endret = apHåndterer.opprettAksjonspunkter(aksjonspunktResultater, behandlingStegType);
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        aksjonspunkterEndretStatus(kontekst, behandlingStegType, endret);
     }
 
     @Override
@@ -437,11 +416,11 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     public Aksjonspunkt settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjonIn,
                                              BehandlingStegType stegType, LocalDateTime fristTid, Venteårsak venteårsak) {
         BehandlingskontrollKontekst kontekst = initBehandlingskontroll(behandling);
-        Aksjonspunkt aksjonspunkt = serviceProvider.getAksjonspunktKontrollRepository().settBehandlingPåVent(behandling, aksjonspunktDefinisjonIn, stegType, fristTid,
+        Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.settBehandlingPåVent(behandling, aksjonspunktDefinisjonIn, stegType, fristTid,
             venteårsak);
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         if (aksjonspunkt != null) {
-            aksjonspunkterFunnet(kontekst, aksjonspunkt.getBehandlingStegFunnet(), singletonList(aksjonspunkt));
+            aksjonspunkterEndretStatus(kontekst, aksjonspunkt.getBehandlingStegFunnet(), singletonList(aksjonspunkt));
         }
         return aksjonspunkt;
     }
@@ -505,7 +484,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         // må fremoverføres for å trigge riktig events for opprydding
         behandlingFramføringTilSenereBehandlingSteg(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
 
-        publiserFremhoppTransisjon(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
+        publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
 
         // sett Avsluttet og fyr status
         avsluttBehandling(kontekst);
@@ -518,7 +497,9 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
         Optional<BehandlingStegTilstand> stegTilstandFør = doHenleggBehandling(kontekst, årsak);
 
-        publiserFremhoppTransisjon(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
+        // TODO håndter henleggelse fra tidlig steg. Nå avbrytes steget og behandlingen framoverføres ikke (ok?).
+        //  OBS mulig rekursiv prosessering kan oppstå (evt må BehKtrl framføre til ived og fortsette)
+        publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
 
         // sett Avsluttet og fyr status
         avsluttBehandling(kontekst);
@@ -547,13 +528,13 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
         // avbryt aksjonspunkt
         List<Aksjonspunkt> åpneAksjonspunkter = behandling.getÅpneAksjonspunkter();
-        åpneAksjonspunkter.forEach(serviceProvider.getAksjonspunktKontrollRepository()::setTilAvbrutt);
+        åpneAksjonspunkter.forEach(aksjonspunktKontrollRepository::setTilAvbrutt);
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        eventPubliserer.fireEvent(new AksjonspunktAvbruttEvent(kontekst, åpneAksjonspunkter, behandlingStegType));
+        eventPubliserer.fireEvent(new AksjonspunktStatusEvent(kontekst, åpneAksjonspunkter, behandlingStegType));
         return stegTilstandFør;
     }
 
-    private void publiserFremhoppTransisjon(BehandlingskontrollKontekst kontekst, Optional<BehandlingStegTilstand> stegTilstandFør, BehandlingStegType stegEtter) {
+    private void publiserFremhoppTransisjonHenleggelse(BehandlingskontrollKontekst kontekst, Optional<BehandlingStegTilstand> stegTilstandFør, BehandlingStegType stegEtter) {
         // Publiser tranisjonsevent (eventobserver(e) håndterer tilhørende tranisjonsregler)
         boolean erOverhopp = true;
         BehandlingTransisjonEvent event = new BehandlingTransisjonEvent(kontekst, FREMHOPP_TIL_IVERKSETT_VEDTAK, stegTilstandFør.orElse(null), stegEtter, erOverhopp);

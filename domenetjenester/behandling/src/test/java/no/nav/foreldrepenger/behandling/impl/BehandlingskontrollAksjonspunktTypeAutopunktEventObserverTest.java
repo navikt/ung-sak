@@ -21,7 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
@@ -35,6 +35,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
 
     @Rule
     public RepositoryRule repositoryRule = new UnittestRepositoryRule();
+    
     private HistorikkInnslagForAksjonspunktEventObserver observer; // objectet vi tester
 
     private BehandlingskontrollKontekst behandlingskontrollKontekst;
@@ -56,6 +57,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
         when(manuellpunkt.getAksjonspunktDefinisjon()).thenReturn(manuellpunktDefinisjon);
 
         autopunkt = Mockito.mock(Aksjonspunkt.class);
+        when(autopunkt.erOpprettet()).thenReturn(true);
         when(autopunkt.getAksjonspunktDefinisjon()).thenReturn(autopunktDefinisjon);
         when(autopunkt.getFristTid()).thenReturn(LocalDateTime.of(localDate, LocalDateTime.now().toLocalTime()));
 
@@ -69,7 +71,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
     @Test
     public void skal_opprette_historikk_for_behandling_på_vent() {
 
-        AksjonspunkterFunnetEvent event = new AksjonspunkterFunnetEvent(behandlingskontrollKontekst, List.of(autopunkt), null);
+        var event = new AksjonspunktStatusEvent(behandlingskontrollKontekst, List.of(autopunkt), null);
 
         observer.oppretteHistorikkForBehandlingPåVent(event);
 
@@ -79,7 +81,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
     @Test
     public void skalIkkeOppretteHistorikkForManuellPunkt() {
 
-        AksjonspunkterFunnetEvent event = new AksjonspunkterFunnetEvent(behandlingskontrollKontekst, List.of(manuellpunkt), null);
+        var event = new AksjonspunktStatusEvent(behandlingskontrollKontekst, List.of(manuellpunkt), null);
 
         observer.oppretteHistorikkForBehandlingPåVent(event);
 
@@ -89,7 +91,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
     @Test
     public void skalOppretteEnHistorikkForAutoPunktOgSjekkPåResultat() {
 
-        AksjonspunkterFunnetEvent event = new AksjonspunkterFunnetEvent(behandlingskontrollKontekst, List.of(manuellpunkt, autopunkt), null);
+        var event = new AksjonspunktStatusEvent(behandlingskontrollKontekst, List.of(manuellpunkt, autopunkt), null);
 
         ArgumentCaptor<Historikkinnslag> captor = ArgumentCaptor.forClass(Historikkinnslag.class);
 
@@ -110,7 +112,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
     @Test
     public void skalOppretteToHistorikkForAutoPunkt() {
 
-        AksjonspunkterFunnetEvent event = new AksjonspunkterFunnetEvent(behandlingskontrollKontekst, List.of(autopunkt, autopunkt), null);
+        var event = new AksjonspunktStatusEvent(behandlingskontrollKontekst, List.of(autopunkt, autopunkt), null);
 
         observer.oppretteHistorikkForBehandlingPåVent(event);
 

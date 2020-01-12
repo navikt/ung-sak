@@ -1,5 +1,9 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
@@ -8,7 +12,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE)
 public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetAksjonspunktDto {
 
-    private boolean erVarigEndretNaering;
+    @NotNull
+    private Boolean erVarigEndretNaering;
+
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer bruttoBeregningsgrunnlag;
 
     VurderVarigEndringEllerNyoppstartetSNDto() {
         // For Jackson
@@ -23,4 +32,10 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetAksjonspu
     public boolean getErVarigEndretNaering() {
         return erVarigEndretNaering;
     }
+
+
+    public Integer getBruttoBeregningsgrunnlag() {
+        return bruttoBeregningsgrunnlag;
+    }
+
 }

@@ -10,10 +10,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktAvbruttEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktTilbakeførtEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktUtførtEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegStatusEvent;
@@ -47,7 +44,7 @@ public class BehandlingskontrollEventPubliserer {
     public void fireEvent(BehandlingStegOvergangEvent event) {
         Optional<BehandlingStegTilstandSnapshot> fraTilstand = event.getFraTilstand();
         Optional<BehandlingStegTilstandSnapshot> nyTilstand = event.getTilTilstand();
-        if ((!fraTilstand.isPresent() && !nyTilstand.isPresent())
+        if ((fraTilstand.isEmpty() && nyTilstand.isEmpty())
                 || (fraTilstand.isPresent() && nyTilstand.isPresent() && Objects.equals(fraTilstand.get(), nyTilstand.get()))) {
             // ikke fyr duplikate events
             return;
@@ -81,19 +78,7 @@ public class BehandlingskontrollEventPubliserer {
         doFireEvent(event);
     }
 
-    public void fireEvent(AksjonspunktUtførtEvent event) {
-        doFireEvent(event);
-    }
-
-    public void fireEvent(AksjonspunktAvbruttEvent event) {
-        doFireEvent(event);
-    }
-
-    public void fireEvent(AksjonspunkterFunnetEvent event) {
-        doFireEvent(event);
-    }
-
-    public void fireEvent(AksjonspunktTilbakeførtEvent event) {
+    public void fireEvent(AksjonspunktStatusEvent event) {
         doFireEvent(event);
     }
 

@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
@@ -26,7 +25,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallTy
 
 class RyddVilkårTyper {
 
-    private BehandlingRepository behandlingRepository;
+    private final BehandlingRepository behandlingRepository;
     private final Behandling behandling;
     private final BehandlingskontrollKontekst kontekst;
 
@@ -38,9 +37,8 @@ class RyddVilkårTyper {
         OPPRYDDER_FOR_AVKLARTE_DATA.put(MEDLEMSKAPSVILKÅRET, r -> r.medlemskapRepository.slettAvklarteMedlemskapsdata(r.behandling.getId(), r.kontekst.getSkriveLås()));
     }
 
-    public RyddVilkårTyper(@SuppressWarnings("unused") BehandlingStegModell modell, 
-                           BehandlingRepositoryProvider repositoryProvider,
-                           Behandling behandling, 
+    public RyddVilkårTyper(BehandlingRepositoryProvider repositoryProvider, 
+                           Behandling behandling,
                            BehandlingskontrollKontekst kontekst) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -48,12 +46,12 @@ class RyddVilkårTyper {
         this.kontekst = kontekst;
     }
 
-    public void ryddVedOverhoppFramover(List<VilkårType> vilkårTyper) {
+    void ryddVedOverhoppFramover(List<VilkårType> vilkårTyper) {
         slettAvklarteFakta(vilkårTyper);
         nullstillVilkår(vilkårTyper, true);
     }
 
-    public void ryddVedTilbakeføring(List<VilkårType> vilkårTyper) {
+    void ryddVedTilbakeføring(List<VilkårType> vilkårTyper) {
         nullstillInngangsvilkår();
         nullstillVilkår(vilkårTyper, false);
         nullstillVedtaksresultat();

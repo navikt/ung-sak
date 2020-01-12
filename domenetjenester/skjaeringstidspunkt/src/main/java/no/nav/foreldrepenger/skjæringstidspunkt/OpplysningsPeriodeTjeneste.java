@@ -53,7 +53,7 @@ public class OpplysningsPeriodeTjeneste {
         return beregning(behandlingId, ytelseType, true);
     }
 
-    private Interval beregning(Long behandlingId, FagsakYtelseType ytelseType, boolean tilOgMedIdag) {
+    private Interval beregning(Long behandlingId, @SuppressWarnings("unused") FagsakYtelseType ytelseType, boolean tilOgMedIdag) {
         final LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.utledSkjæringstidspunktForRegisterInnhenting(behandlingId);
         // FIXME K9 Blir dette riktig for alle våre ytelser?
         return beregnInterval(skjæringstidspunkt, tilOgMedIdag);

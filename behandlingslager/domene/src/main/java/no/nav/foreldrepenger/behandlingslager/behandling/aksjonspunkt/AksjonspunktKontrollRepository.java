@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,7 +22,9 @@ import no.nav.vedtak.util.FPDateUtil;
 public class AksjonspunktKontrollRepository {
 
     private static final Logger log = LoggerFactory.getLogger(AksjonspunktKontrollRepository.class);
-
+    
+    private static final Set<AksjonspunktDefinisjon> IKKE_AKTUELL_TOTRINN = Set.of(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL, AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+    
     @Inject
     public AksjonspunktKontrollRepository() {
     }
@@ -97,6 +100,14 @@ public class AksjonspunktKontrollRepository {
         log.info("Setter aksjonspunkt reåpnet: {}", aksjonspunkt.getAksjonspunktDefinisjon());
         aksjonspunkt.setStatus(AksjonspunktStatus.OPPRETTET, aksjonspunkt.getBegrunnelse());
     }
+    
+    public void setReåpnetMedTotrinn(Aksjonspunkt aksjonspunkt, boolean setToTrinn) {
+        log.info("Setter aksjonspunkt reåpnet: {}", aksjonspunkt.getAksjonspunktDefinisjon());
+        aksjonspunkt.setStatus(AksjonspunktStatus.OPPRETTET, aksjonspunkt.getBegrunnelse());
+        if (setToTrinn && !aksjonspunkt.isToTrinnsBehandling() && !IKKE_AKTUELL_TOTRINN.contains(aksjonspunkt.getAksjonspunktDefinisjon())) {
+            aksjonspunkt.settToTrinnsFlag();
+        }
+    }
 
     public void setTilAvbrutt(Aksjonspunkt aksjonspunkt) {
         log.info("Setter aksjonspunkt avbrutt: {}", aksjonspunkt.getAksjonspunktDefinisjon());
@@ -108,7 +119,7 @@ public class AksjonspunktKontrollRepository {
         return aksjonspunkt.setStatus(AksjonspunktStatus.UTFØRT, begrunnelse);
     }
 
-    private void setFrist(Aksjonspunkt ap, LocalDateTime fristTid, Venteårsak venteårsak) {
+    public void setFrist(Aksjonspunkt ap, LocalDateTime fristTid, Venteårsak venteårsak) {
         ap.setFristTid(fristTid);
         ap.setVenteårsak(venteårsak);
     }
