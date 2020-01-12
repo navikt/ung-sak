@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.foreldrepenger.behandling.FagsakStatusEvent;
 import no.nav.foreldrepenger.behandling.impl.BehandlingEnhetEvent;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktAvbruttEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktTilbakeførtEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktUtførtEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -31,22 +28,7 @@ public class DatavarehusEventObserver {
     public DatavarehusEventObserver() {
     }
 
-    public void observerAksjonspunktUtførtEvent(@Observes AksjonspunktUtførtEvent event) {
-        List<Aksjonspunkt> aksjonspunkter = event.getAksjonspunkter();
-        log.debug("Lagrer {} aksjonspunkter i DVH datavarehus, for behandling {} og steg {}", aksjonspunkter.size(), event.getBehandlingId(), event.getBehandlingStegType());//NOSONAR
-    }
-
-    public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunkterFunnetEvent event) {
-        List<Aksjonspunkt> aksjonspunkter = event.getAksjonspunkter();
-        log.debug("Lagrer {} aksjonspunkter i DVH datavarehus, for behandling {} og steg {}", aksjonspunkter.size(), event.getBehandlingId(), event.getBehandlingStegType());//NOSONAR
-    }
-
-    public void observerAksjonspunktTilbakeførtEvent(@Observes AksjonspunktTilbakeførtEvent event) {
-        List<Aksjonspunkt> aksjonspunkter = event.getAksjonspunkter();
-        log.debug("Lagrer {} aksjonspunkter i DVH datavarehus, for behandling {} og steg {}", aksjonspunkter.size(), event.getBehandlingId(), event.getBehandlingStegType());//NOSONAR
-    }
-
-    public void observerAksjonspunktAvbruttEvent(@Observes AksjonspunktAvbruttEvent event) {
+    public void observerAksjonspunktStatusEvent(@Observes AksjonspunktStatusEvent event) {
         List<Aksjonspunkt> aksjonspunkter = event.getAksjonspunkter();
         log.debug("Lagrer {} aksjonspunkter i DVH datavarehus, for behandling {} og steg {}", aksjonspunkter.size(), event.getBehandlingId(), event.getBehandlingStegType());//NOSONAR
     }

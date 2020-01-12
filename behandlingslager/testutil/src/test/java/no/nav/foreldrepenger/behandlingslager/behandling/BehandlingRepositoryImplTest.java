@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingKandidaterRepository;
@@ -76,8 +76,7 @@ public class BehandlingRepositoryImplTest {
     @Inject
     private FagsakRepository fagsakRepository;
 
-    @Inject
-    private AksjonspunktRepository aksjonspunktRepository;
+    private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
 
     private Saksnummer saksnummer = new Saksnummer("2");
     private Fagsak fagsak = FagsakBuilder.nyEngangstønad().medSaksnummer(saksnummer).build();
@@ -357,7 +356,7 @@ public class BehandlingRepositoryImplTest {
         LocalDateTime.now().minusDays(1);
         Behandling behandling1 = opprettBehandlingForAutomatiskGjenopptagelse();
         Aksjonspunkt aksjonspunkt = opprettAksjonspunkt(behandling1, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT, igår);
-        aksjonspunktRepository.setTilUtført(aksjonspunkt, "ferdig");
+        aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "ferdig");
         lagreBehandling(behandling1);
 
         // Act
@@ -386,7 +385,7 @@ public class BehandlingRepositoryImplTest {
         // Arrange
         Behandling behandling = opprettBehandlingForAutomatiskGjenopptagelse();
         Aksjonspunkt aksjonspunkt = opprettAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT, igår);
-        aksjonspunktRepository.setTilAvbrutt(aksjonspunkt);
+        aksjonspunktTestSupport.setTilAvbrutt(aksjonspunkt);
         lagreBehandling(behandling);
 
         // Act
@@ -418,8 +417,8 @@ public class BehandlingRepositoryImplTest {
         assertThat(liste).isEmpty();
 
         // Arrange
-        aksjonspunktRepository.setTilUtført(ap2, "Begrunnelse");
-        aksjonspunktRepository.setTilUtført(ap3, "Begrunnelse");
+        aksjonspunktTestSupport.setTilUtført(ap2, "Begrunnelse");
+        aksjonspunktTestSupport.setTilUtført(ap3, "Begrunnelse");
         lagreBehandling(behandling2, behandling3);
 
         // Act
@@ -591,8 +590,8 @@ public class BehandlingRepositoryImplTest {
                                              AksjonspunktDefinisjon aksjonspunktDefinisjon,
                                              LocalDateTime frist) {
 
-        Aksjonspunkt aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        aksjonspunktRepository.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT);
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT);
         return aksjonspunkt;
     }
 

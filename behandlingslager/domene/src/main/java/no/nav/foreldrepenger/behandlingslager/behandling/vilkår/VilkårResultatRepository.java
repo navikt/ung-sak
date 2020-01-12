@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 @ApplicationScoped
 public class VilkårResultatRepository {
@@ -20,7 +19,7 @@ public class VilkårResultatRepository {
     }
 
     @Inject
-    public VilkårResultatRepository(@VLPersistenceUnit EntityManager entityManager) {
+    public VilkårResultatRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
     }

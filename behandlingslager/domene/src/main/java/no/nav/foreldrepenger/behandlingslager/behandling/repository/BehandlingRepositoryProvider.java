@@ -20,7 +20,6 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 /**
  * Provider for å enklere å kunne hente ut ulike repository uten for mange injection points.
@@ -54,7 +53,7 @@ public class BehandlingRepositoryProvider {
     }
 
     @Inject
-    public BehandlingRepositoryProvider(@VLPersistenceUnit EntityManager entityManager) {
+    public BehandlingRepositoryProvider(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
 

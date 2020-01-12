@@ -20,6 +20,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -45,7 +46,8 @@ public class SendBrevForAutopunktTest {
     private TestScenarioBuilder scenario;
     private LocalDateTime førsteJanuar2019 = LocalDateTime.of(LocalDate.of(2019, 1, 1), LocalTime.of(12, 0));
     private BehandlingRepositoryProvider repositoryProvider;
-
+    private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
+    
     @Before
     public void setUp() {
         initMocks(this);
@@ -55,7 +57,7 @@ public class SendBrevForAutopunktTest {
         behandling = scenario.lagMocked();
         aksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE).get();
 
-        repositoryProvider.getAksjonspunktRepository().setFrist(aksjonspunkt, førsteJanuar2019, Venteårsak.AVV_FODSEL);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt, førsteJanuar2019, Venteårsak.AVV_FODSEL);
 
         sendBrevForAutopunkt = new SendBrevForAutopunkt(dokumentBestillerApplikasjonTjeneste,
             dokumentBehandlingTjeneste,

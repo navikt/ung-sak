@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
@@ -30,14 +30,15 @@ public class AbstractOverstyringshåndtererTest {
 
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+   
     private EntityManager em = repoRule.getEntityManager();
+    
     @Inject
     private AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjeneste;
 
-
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(em);
 
-    private AksjonspunktRepository aksjonspunktRepository = new AksjonspunktRepository(em);
+    private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
 
     @Test
     public void skal_reaktivere_inaktivt_aksjonspunkt() throws Exception {

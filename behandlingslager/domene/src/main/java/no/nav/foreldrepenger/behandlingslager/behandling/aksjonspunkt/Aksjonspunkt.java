@@ -266,7 +266,7 @@ public class Aksjonspunkt extends BaseEntitet {
     }
 
     /**
-     * Intern Builder. Bruk {@link AksjonspunktRepository} til å legge til og endre {@link Aksjonspunkt}.
+     * Intern Builder. Bruk Repository-klasser til å legge til og endre {@link Aksjonspunkt}.
      */
     static class Builder {
         private Aksjonspunkt opprinneligAp;

@@ -111,7 +111,7 @@ public class KompletthetsjekkerTest {
         LocalDate stp = FPDateUtil.iDag().plusDays(2).plusWeeks(3);
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         mockManglendeInntektsmeldingGrunnlag();
-        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, FPDateUtil.iDag().minusWeeks(1), stp);
+        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, FPDateUtil.iDag().minusWeeks(1));
         when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
 
         // Act
@@ -137,7 +137,7 @@ public class KompletthetsjekkerTest {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         mockManglendeInntektsmeldingGrunnlag();
-        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, FPDateUtil.iDag().minusWeeks(1), STARTDATO);
+        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, FPDateUtil.iDag().minusWeeks(1));
         when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
 
         // Act

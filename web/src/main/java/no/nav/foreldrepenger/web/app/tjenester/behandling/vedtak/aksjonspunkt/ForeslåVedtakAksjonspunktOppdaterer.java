@@ -51,7 +51,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
             super.oppdaterVedtaksbrev(dto, param, builder);
         } else {
-            opprettAksjonspunktForFatterVedtak(behandling, builder);
+            opprettAksjonspunktForFatterVedtak(builder);
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
             opprettHistorikkinnslag(behandling);
         }

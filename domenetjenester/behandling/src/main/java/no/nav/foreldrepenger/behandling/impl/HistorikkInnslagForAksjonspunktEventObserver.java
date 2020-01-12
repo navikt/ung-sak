@@ -8,8 +8,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktUtførtEvent;
-import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunkterFunnetEvent;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
@@ -43,10 +42,10 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
     /**
      * @param aksjonspunkterFunnetEvent
      */
-    public void oppretteHistorikkForBehandlingPåVent(@Observes AksjonspunkterFunnetEvent aksjonspunkterFunnetEvent) {
+    public void oppretteHistorikkForBehandlingPåVent(@Observes AksjonspunktStatusEvent aksjonspunkterFunnetEvent) {
         BehandlingskontrollKontekst ktx = aksjonspunkterFunnetEvent.getKontekst();
         for (Aksjonspunkt aksjonspunkt : aksjonspunkterFunnetEvent.getAksjonspunkter()) {
-            if (aksjonspunkt.getFristTid() != null) {
+            if (aksjonspunkt.erOpprettet() && aksjonspunkt.getFristTid() != null) {
                 LocalDateTime frist = aksjonspunkt.getFristTid();
                 Venteårsak venteårsak = aksjonspunkt.getVenteårsak();
                 opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(),
@@ -79,10 +78,10 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
         historikkRepository.lagre(historikkinnslag);
     }
 
-    public void oppretteHistorikkForGjenopptattBehandling(@Observes AksjonspunktUtførtEvent aksjonspunkterFunnetEvent) {
+    public void oppretteHistorikkForGjenopptattBehandling(@Observes AksjonspunktStatusEvent aksjonspunkterFunnetEvent) {
         for (Aksjonspunkt aksjonspunkt : aksjonspunkterFunnetEvent.getAksjonspunkter()) {
             BehandlingskontrollKontekst ktx = aksjonspunkterFunnetEvent.getKontekst();
-            if (aksjonspunkt.getFristTid() != null) {
+            if (aksjonspunkt.erUtført() && aksjonspunkt.getFristTid() != null) {
                 opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), HistorikkinnslagType.BEH_GJEN, null, null);
             }
         }

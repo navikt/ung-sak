@@ -48,18 +48,16 @@ public class AksjonspunktutlederForMedlemskapSkjæringstidspunkt implements Aksj
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var skjæringstidspunkt = skjæringstidspunkter.getUtledetSkjæringstidspunkt();
         Set<MedlemResultat> resultat = tjeneste.vurderMedlemskap(param.getRef(), skjæringstidspunkt);
-        return mapTilAksjonspunktDef(resultat);
+        return resultat.stream()
+                .map(mr -> opprettForMedlemResultat(mr))
+               .collect(Collectors.toList());
     }
 
-    private List<AksjonspunktResultat> mapTilAksjonspunktDef(Set<MedlemResultat> resultat) {
-       return resultat
-            .stream()
-            .map(mr -> {
-                AksjonspunktDefinisjon aksjonspunktDefinisjon = mapMedlemResulatTilAkDef.get(mr);
-                if (aksjonspunktDefinisjon == null) {
-                    throw new IllegalStateException("Utvikler-feil: Mangler mapping til aksjonspunktDefinisjon for  " + mr.name()); //$NON-NLS-1$
-                }
-                return AksjonspunktResultat.opprettForAksjonspunkt(aksjonspunktDefinisjon);
-            }).collect(Collectors.toList());
+    private AksjonspunktResultat opprettForMedlemResultat(MedlemResultat mr) {
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = mapMedlemResulatTilAkDef.get(mr);
+        if (aksjonspunktDefinisjon == null) {
+            throw new IllegalStateException("Utvikler-feil: Mangler mapping til aksjonspunktDefinisjon for  " + mr.name()); //$NON-NLS-1$
+        }
+        return AksjonspunktResultat.opprettForAksjonspunkt(aksjonspunktDefinisjon);
     }
 }

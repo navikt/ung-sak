@@ -350,7 +350,7 @@ public class RegisterdataInnhenter {
         }
     }
 
-    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
+    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, @SuppressWarnings("unused") Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
         // FIXME K9 filtrer på relevante barn
         return relaterteBarn;

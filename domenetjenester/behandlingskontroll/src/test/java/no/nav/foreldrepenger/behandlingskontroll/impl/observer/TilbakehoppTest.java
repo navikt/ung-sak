@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.behandlingskontroll.impl.observer;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus.OPPRETTET;
 import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderingspunktType.INN;
 import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderingspunktType.UT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +41,9 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
 public class TilbakehoppTest {
+    
+    @Rule
+    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private BehandlingStegType steg1;
     private BehandlingStegType steg2;
@@ -50,9 +52,6 @@ public class TilbakehoppTest {
     private BehandlingStegType steg5;
 
     private List<StegTransisjon> transisjoner = new ArrayList<>();
-
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private EntityManager em = repoRule.getEntityManager();
     private final BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
     private BehandlingskontrollServiceProvider serviceProvider = new BehandlingskontrollServiceProvider(em, behandlingModellRepository, null);
@@ -61,7 +60,7 @@ public class TilbakehoppTest {
     private BehandlingskontrollTransisjonTilbakeføringEventObserver observer = new BehandlingskontrollTransisjonTilbakeføringEventObserver(serviceProvider) {
         @Override
         protected void hoppBakover(BehandlingStegModell s,
-                                   no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent event,
+                                   BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent event,
                                    BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
             transisjoner.add(new StegTransisjon(TransisjonType.HOPP_OVER_BAKOVER, s.getBehandlingStegType()));
         }
@@ -127,7 +126,11 @@ public class TilbakehoppTest {
     }
 
     private void assertAPGjenåpnesVedTilbakehopp(StegPort fra, BehandlingStegType til, Aksjonspunkt ap) {
-        assertAPStatusEtterHopp(fra, til, ap).isEqualTo(OPPRETTET);
+        assertAPStatusEtterHopp(fra, til, ap).isEqualTo(AksjonspunktStatus.OPPRETTET);
+    }
+    
+    private void assertAPAvbrytesVedTilbakehopp(StegPort fra, BehandlingStegType til, Aksjonspunkt ap) {
+        assertAPStatusEtterHopp(fra, til, ap).isEqualTo(AksjonspunktStatus.AVBRUTT);
     }
 
     private void assertAPUendretVedTilbakehopp(StegPort fra, BehandlingStegType til, Aksjonspunkt ap) {

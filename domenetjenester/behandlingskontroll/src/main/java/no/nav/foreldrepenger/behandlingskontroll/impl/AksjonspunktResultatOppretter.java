@@ -3,11 +3,11 @@ package no.nav.foreldrepenger.behandlingskontroll.impl;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
@@ -15,103 +15,72 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 
 /**
  * Håndterer aksjonspunktresultat og oppretter/reaktiverer aksjonspunkt
  * Brukes fra StegVisitor og Endringskontroller for lik håndtering
  */
-public class AksjonspunktResultatOppretter {
+class AksjonspunktResultatOppretter {
 
     private final Behandling behandling;
 
-    private final AksjonspunktRepository aksjonspunktRepository;
-
-    public AksjonspunktResultatOppretter(AksjonspunktRepository aksjonspunktRepository, Behandling behandling) {
+    private final AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
+    private Map<AksjonspunktDefinisjon, Aksjonspunkt> eksisterende = new LinkedHashMap<>();
+    
+    AksjonspunktResultatOppretter(AksjonspunktKontrollRepository aksjonspunktKontrollRepository, Behandling behandling) {
         this.behandling = Objects.requireNonNull(behandling, "behandling");
-        this.aksjonspunktRepository = aksjonspunktRepository;
+        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
+        behandling.getAksjonspunkter().forEach(ap -> this.eksisterende.putIfAbsent(ap.getAksjonspunktDefinisjon(), ap));
     }
-
 
     /**
      * Lagrer nye aksjonspunkt, og gjenåpner dem hvis de alleerede står til avbrutt/utført
      */
-    public List<Aksjonspunkt> opprettAksjonspunkter(List<AksjonspunktResultat> apResultater, BehandlingStegType behandlingStegType) {
+    List<Aksjonspunkt> opprettAksjonspunkter(List<AksjonspunktResultat> apResultater, BehandlingStegType behandlingStegType) {
 
         if (!apResultater.isEmpty()) {
-            List<Aksjonspunkt> funnetAksjonspunkter = new ArrayList<>();
-            fjernGjensidigEkskluderendeAksjonspunkter(apResultater);
-            funnetAksjonspunkter.addAll(leggTilNyeAksjonspunkterPåBehandling(behandlingStegType, apResultater, behandling));
-            funnetAksjonspunkter.addAll(reåpneAvbrutteOgUtførteAksjonspunkter(apResultater, behandling));
-            return funnetAksjonspunkter;
+            List<Aksjonspunkt> endringAksjonspunkter = new ArrayList<>();
+            endringAksjonspunkter.addAll(fjernGjensidigEkskluderendeAksjonspunkter(apResultater));
+            endringAksjonspunkter.addAll(leggTilResultatPåBehandling(behandlingStegType, apResultater));
+            return endringAksjonspunkter;
         } else {
             return new ArrayList<>();
         }
     }
 
-    private void fjernGjensidigEkskluderendeAksjonspunkter(List<AksjonspunktResultat> nyeApResultater) {
+    private List<Aksjonspunkt> fjernGjensidigEkskluderendeAksjonspunkter(List<AksjonspunktResultat> nyeApResultater) {
+        List<Aksjonspunkt> avbrutteAksjonspunkter = new ArrayList<>();
         Set<String> nyeApDef = nyeApResultater.stream().map(AksjonspunktResultat::getAksjonspunktDefinisjon).map(AksjonspunktDefinisjon::getKode).collect(toSet());
-        behandling.getÅpneAksjonspunkter().stream()
+        eksisterende.values().stream()
+            .filter(Aksjonspunkt::erÅpentAksjonspunkt)
             .filter(ap -> ap.getAksjonspunktDefinisjon().getUtelukkendeApdef().stream().anyMatch(nyeApDef::contains))
-            .forEach(aksjonspunktRepository::setTilAvbrutt);
+            .forEach(ap -> {
+                aksjonspunktKontrollRepository.setTilAvbrutt(ap);
+                avbrutteAksjonspunkter.add(ap);
+            });
+        return avbrutteAksjonspunkter;
     }
 
-    private List<Aksjonspunkt> reåpneAvbrutteOgUtførteAksjonspunkter(List<AksjonspunktResultat> nyeDefinisjoner,
-                                                                     Behandling behandling) {
-        List<Aksjonspunkt> reåpnedeAksjonspunkter = new ArrayList<>();
-
-        Map<AksjonspunktDefinisjon, AksjonspunktResultat> aksjonspunktResultatMap = nyeDefinisjoner.stream()
-            .collect(Collectors.toMap(AksjonspunktResultat::getAksjonspunktDefinisjon, Function.identity()));
-
-        Set<Aksjonspunkt> skalReåpnes = behandling.getAksjonspunkter().stream()
-            .filter(ap -> ap.erUtført() || ap.erAvbrutt())
-            .filter(ap -> aksjonspunktResultatMap.get(ap.getAksjonspunktDefinisjon()) != null)
-            .collect(Collectors.toSet());
-
-
-        skalReåpnes.forEach((Aksjonspunkt ap) -> {
-            aksjonspunktRepository.setReåpnet(ap);
-            AksjonspunktResultat aksjonspunktResultat = aksjonspunktResultatMap.get(ap.getAksjonspunktDefinisjon());
-            if (aksjonspunktResultat.getFrist() != null) {
-                aksjonspunktRepository.setFrist(ap, aksjonspunktResultat.getFrist(), aksjonspunktResultat.getVenteårsak());
-            }
-            reåpnedeAksjonspunkter.add(ap);
-        });
-
-        return reåpnedeAksjonspunkter;
-    }
-
-    private List<Aksjonspunkt> leggTilNyeAksjonspunkterPåBehandling(BehandlingStegType behandlingStegType,
-                                                                    List<AksjonspunktResultat> nyeDefinisjoner,
-                                                                    Behandling behandling) {
-
-        List<AksjonspunktDefinisjon> eksisterendeDefinisjoner = behandling.getAksjonspunkter().stream()
-            .map(Aksjonspunkt::getAksjonspunktDefinisjon)
+    private List<Aksjonspunkt> leggTilResultatPåBehandling(BehandlingStegType behandlingStegType, List<AksjonspunktResultat> resultat) {
+        return resultat.stream()
+            .map(ar -> oppdaterAksjonspunktMedResultat(behandlingStegType, ar))
             .collect(Collectors.toList());
-
-        List<AksjonspunktResultat> nyeAksjonspunkt = nyeDefinisjoner.stream()
-            .filter(apDefWrapper -> !eksisterendeDefinisjoner.contains(apDefWrapper.getAksjonspunktDefinisjon()))
-            .collect(Collectors.toList());
-
-        return leggTilAksjonspunkt(behandlingStegType, behandling, nyeAksjonspunkt);
     }
 
-    private List<Aksjonspunkt> leggTilAksjonspunkt(BehandlingStegType behandlingStegType, Behandling behandling,
-                                                   List<AksjonspunktResultat> nyeAksjonspunkt) {
-
-        List<Aksjonspunkt> aksjonspunkter = new ArrayList<>();
-        nyeAksjonspunkt.forEach((AksjonspunktResultat apResultat) -> {
-
-            Aksjonspunkt aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, apResultat.getAksjonspunktDefinisjon(),
-                behandlingStegType);
-
-            if (apResultat.getFrist() != null) {
-                aksjonspunktRepository.setFrist(aksjonspunkt, apResultat.getFrist(), apResultat.getVenteårsak());
-            }
-
-            aksjonspunkter.add(aksjonspunkt);
-        });
-        return aksjonspunkter;
+    private Aksjonspunkt oppdaterAksjonspunktMedResultat(BehandlingStegType behandlingStegType, AksjonspunktResultat resultat) {
+        Aksjonspunkt oppdatert = eksisterende.get(resultat.getAksjonspunktDefinisjon());
+        if (oppdatert == null) {
+            oppdatert = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, resultat.getAksjonspunktDefinisjon(), behandlingStegType);
+            eksisterende.putIfAbsent(oppdatert.getAksjonspunktDefinisjon(), oppdatert);
+        }
+        if (oppdatert.erUtført() || oppdatert.erAvbrutt()) {
+            aksjonspunktKontrollRepository.setReåpnet(oppdatert);
+        }
+        if (resultat.getFrist() != null) {
+            aksjonspunktKontrollRepository.setFrist(oppdatert, resultat.getFrist(), resultat.getVenteårsak());
+        }
+        return oppdatert;
     }
 
 }

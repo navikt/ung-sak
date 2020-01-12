@@ -65,7 +65,7 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
             Behandling behandling = param.getBehandling();
             settFritekstBrev(behandling, dto.getOverskrift(), dto.getFritekstBrev());
             opprettToTrinnsKontrollpunktForFritekstBrev(dto, behandling, builder);
-            opprettAksjonspunktForFatterVedtak(behandling, builder);
+            opprettAksjonspunktForFatterVedtak(builder);
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
             opprettHistorikkinnslag(behandling);
         }
@@ -106,7 +106,7 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         }
     }
 
-    void opprettAksjonspunktForFatterVedtak(Behandling behandling, OppdateringResultat.Builder builder) {
+    void opprettAksjonspunktForFatterVedtak(OppdateringResultat.Builder builder) {
         builder.medEkstraAksjonspunktResultat(AksjonspunktDefinisjon.FATTER_VEDTAK, AksjonspunktStatus.OPPRETTET);
     }
 

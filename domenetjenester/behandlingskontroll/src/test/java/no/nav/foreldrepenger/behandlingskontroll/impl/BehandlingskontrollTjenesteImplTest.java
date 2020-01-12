@@ -235,7 +235,7 @@ public class BehandlingskontrollTjenesteImplTest {
     @Test
     public void skal_ha_guard_mot_nøstet_behandlingskontroll_ved_prossesering_tilbakeføring_og_framføring() throws Exception {
 
-        this.kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider, eventPubliserer) {
+        this.kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider) {
             @Override
             protected BehandlingStegUtfall doProsesserBehandling(BehandlingskontrollKontekst kontekst, BehandlingModell modell,
                                                                  BehandlingModellVisitor visitor) {
@@ -272,7 +272,7 @@ public class BehandlingskontrollTjenesteImplTest {
     }
 
     private void initBehandlingskontrollTjeneste() {
-        this.kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider, eventPubliserer);
+        this.kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
     }
 
 

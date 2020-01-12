@@ -21,7 +21,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 import no.nav.vedtak.util.FPDateUtil;
 
 /**
@@ -44,7 +43,7 @@ public class BehandlingKandidaterRepository {
     }
 
     @Inject
-    public BehandlingKandidaterRepository(@VLPersistenceUnit EntityManager entityManager) {
+    public BehandlingKandidaterRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

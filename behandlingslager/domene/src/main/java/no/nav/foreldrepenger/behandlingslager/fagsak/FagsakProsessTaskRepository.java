@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskEvent;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
@@ -51,7 +50,7 @@ public class FagsakProsessTaskRepository {
     }
 
     @Inject
-    public FagsakProsessTaskRepository(@VLPersistenceUnit EntityManager entityManager, ProsessTaskRepository prosessTaskRepository) {
+    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository) {
         this.entityManager = entityManager;
         this.prosessTaskRepository = prosessTaskRepository;
     }

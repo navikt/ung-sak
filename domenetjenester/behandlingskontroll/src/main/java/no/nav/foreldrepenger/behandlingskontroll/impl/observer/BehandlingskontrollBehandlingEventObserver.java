@@ -50,7 +50,7 @@ public class BehandlingskontrollBehandlingEventObserver {
         Optional<BehandlingStegTilstandSnapshot> fraTilstand = event.getFraTilstand();
         Optional<BehandlingStegTilstandSnapshot> tilTilstand = event.getTilTilstand();
 
-        if ((!fraTilstand.isPresent() && !tilTilstand.isPresent())
+        if ((fraTilstand.isEmpty() && tilTilstand.isEmpty())
             || (fraTilstand.isPresent() && tilTilstand.isPresent() && Objects.equals(fraTilstand.get(), tilTilstand.get()))) {
             // gjør ingenting - ingen endring i steg
             return;

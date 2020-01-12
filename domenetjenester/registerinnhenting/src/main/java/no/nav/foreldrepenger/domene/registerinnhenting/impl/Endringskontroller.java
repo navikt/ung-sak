@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.domene.registerinnhenting.impl;
 
 import java.util.Collections;
 import java.util.List;
+
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -17,15 +18,11 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.StartpunktRef;
-import no.nav.foreldrepenger.behandlingskontroll.impl.AksjonspunktResultatOppretter;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
 import no.nav.foreldrepenger.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.foreldrepenger.domene.registerinnhenting.StartpunktTjeneste;
@@ -42,7 +39,6 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 public class Endringskontroller {
     private static final Logger LOGGER = LoggerFactory.getLogger(Endringskontroller.class);
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private AksjonspunktRepository aksjonspunktRepository;
     private OppgaveTjeneste oppgaveTjeneste;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
     private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenester;
@@ -55,7 +51,6 @@ public class Endringskontroller {
 
     @Inject
     public Endringskontroller(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                              BehandlingRepositoryProvider provider,
                               @Any Instance<StartpunktTjeneste> startpunktTjenester,
                               OppgaveTjeneste oppgaveTjeneste,
                               RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
@@ -63,7 +58,6 @@ public class Endringskontroller {
                               SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.aksjonspunktRepository = provider.getAksjonspunktRepository();
         this.startpunktTjenester = startpunktTjenester;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
@@ -103,11 +97,8 @@ public class Endringskontroller {
         // Gjør aksjonspunktutledning utenom steg kun hvis man har passert KOFAK og evt hopper tilbake. Dette pga KOARB.UT->INN
         if (harUtførtKontrollerFakta(behandling)) {
             BehandlingStegType funnetSteg = tilbakeføres ? tilSteg : fraSteg;
-            AksjonspunktResultatOppretter apHåndterer = new AksjonspunktResultatOppretter(aksjonspunktRepository, behandling);
             List<AksjonspunktResultat> aksjonspunktResultater = utledAksjonspunkterTilHøyreForStartpunkt(ref, startpunktType);
-            List<Aksjonspunkt> nyeAP = apHåndterer.opprettAksjonspunkter(aksjonspunktResultater, funnetSteg);
-            // TODO erstatt med ny metode i beh.kontroll for oppretting av AP
-            behandlingskontrollTjeneste.aksjonspunkterFunnet(kontekst, funnetSteg, nyeAP);
+            behandlingskontrollTjeneste.lagreAksjonspunktResultat(kontekst, funnetSteg, aksjonspunktResultater);
         }
 
         if (tilbakeføres) {

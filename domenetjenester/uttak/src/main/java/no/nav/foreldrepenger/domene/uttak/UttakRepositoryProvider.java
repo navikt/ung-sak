@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 /**
  * Provider for å enklere å kunne hente ut ulike repository uten for mange injection points.
@@ -20,7 +19,7 @@ public class UttakRepositoryProvider {
     }
 
     @Inject
-    public UttakRepositoryProvider(@VLPersistenceUnit EntityManager entityManager) {
+    public UttakRepositoryProvider(EntityManager entityManager) {
         // behandling aggregater
         this.uttakRepository = new UttakRepository(entityManager);
 

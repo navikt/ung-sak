@@ -11,14 +11,12 @@ import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingModellRepository
 import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingskontrollEventPubliserer;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLås;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 /**
  * Provider for å enklere å kunne hente ut ulike repository uten for mange injection points.
@@ -29,7 +27,6 @@ public class BehandlingskontrollServiceProvider {
     private EntityManager entityManager;
     private BehandlingLåsRepository behandlingLåsRepository;
     private FagsakRepository fagsakRepository;
-    private AksjonspunktRepository aksjonspunktRepository;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private BehandlingRepository behandlingRepository;
     private FagsakLåsRepository fagsakLåsRepository;
@@ -38,7 +35,7 @@ public class BehandlingskontrollServiceProvider {
     private BehandlingskontrollEventPubliserer eventPubliserer;
 
     @Inject
-    public BehandlingskontrollServiceProvider(@VLPersistenceUnit EntityManager entityManager, BehandlingModellRepository behandlingModellRepository, BehandlingskontrollEventPubliserer eventPubliserer) {
+    public BehandlingskontrollServiceProvider(EntityManager entityManager, BehandlingModellRepository behandlingModellRepository, BehandlingskontrollEventPubliserer eventPubliserer) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
 
@@ -48,7 +45,6 @@ public class BehandlingskontrollServiceProvider {
         this.behandlingRepository = new BehandlingRepository(entityManager);
         this.behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
         this.fagsakRepository = new FagsakRepository(entityManager);
-        this.aksjonspunktRepository = new AksjonspunktRepository(entityManager);
         this.aksjonspunktKontrollRepository = new AksjonspunktKontrollRepository();
         this.fagsakLåsRepository = new FagsakLåsRepository(entityManager);
         this.tekniskRepository = new TekniskRepository(entityManager);
@@ -60,24 +56,18 @@ public class BehandlingskontrollServiceProvider {
                                               FagsakLåsRepository fagsakLåsRepository,
                                               BehandlingLåsRepository behandlingLåsRepository,
                                               BehandlingModellRepository behandlingModellRepository,
-                                              AksjonspunktRepository aksjonspunktRepository,
                                               AksjonspunktKontrollRepository aksjonspunktKontrollRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.fagsakLåsRepository = fagsakLåsRepository;
         this.behandlingLåsRepository = behandlingLåsRepository;
         this.behandlingModellRepository = behandlingModellRepository;
-        this.aksjonspunktRepository = aksjonspunktRepository;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.eventPubliserer = BehandlingskontrollEventPubliserer.NULL_EVENT_PUB;
     }
 
     BehandlingskontrollServiceProvider() {
         // for CDI proxy
-    }
-
-    public AksjonspunktRepository getAksjonspunktRepository() {
-        return aksjonspunktRepository;
     }
 
     public AksjonspunktKontrollRepository getAksjonspunktKontrollRepository() {

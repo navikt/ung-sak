@@ -33,7 +33,7 @@ class AksjonspunktDtoMapper {
         dto.setDefinisjon(aksjonspunktDefinisjon);
         dto.setStatus(aksjonspunkt.getStatus());
         dto.setBegrunnelse(aksjonspunkt.getBegrunnelse());
-        dto.setVilkarType(finnVilkårType(aksjonspunkt, behandling));
+        dto.setVilkarType(finnVilkårType(aksjonspunkt));
         dto.setToTrinnsBehandling(aksjonspunkt.isToTrinnsBehandling() || aksjonspunktDefinisjon.getDefaultTotrinnBehandling());
         dto.setFristTid(aksjonspunkt.getFristTid());
 
@@ -52,7 +52,7 @@ class AksjonspunktDtoMapper {
         return dto;
     }
 
-    private static VilkårType finnVilkårType(Aksjonspunkt aksjonspunkt, Behandling behandling) {
+    private static VilkårType finnVilkårType(Aksjonspunkt aksjonspunkt) {
         AksjonspunktDefinisjon aksjonspunktDefinisjon = aksjonspunkt.getAksjonspunktDefinisjon();
         return aksjonspunktDefinisjon.getVilkårType();
     }

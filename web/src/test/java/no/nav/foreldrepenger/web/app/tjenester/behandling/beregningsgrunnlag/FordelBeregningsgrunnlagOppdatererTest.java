@@ -36,7 +36,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParamet
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
@@ -83,7 +83,7 @@ public class FordelBeregningsgrunnlagOppdatererTest {
     public Behandling behandling;
 
     private final HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste = Mockito.mock(HentBeregningsgrunnlagTjeneste.class);
-    private final AksjonspunktRepository aksjonspunktRepository = new AksjonspunktRepository(repositoryRule.getEntityManager());
+    private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
     private Aksjonspunkt aksjonspunkt;
 
     @Before

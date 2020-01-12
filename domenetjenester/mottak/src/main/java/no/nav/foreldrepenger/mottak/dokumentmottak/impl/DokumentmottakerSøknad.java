@@ -3,8 +3,6 @@ package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
@@ -16,8 +14,6 @@ import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 
 public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesrelatertDokument {
 
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
     public DokumentmottakerSøknad(BehandlingRepositoryProvider repositoryProvider,
                                   DokumentmottakerFelles dokumentmottakerFelles,
                                   MottatteDokumentTjeneste mottatteDokumentTjeneste,
@@ -28,7 +24,6 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
             behandlingsoppretter,
             kompletthetskontroller,
             repositoryProvider);
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
     @Override
@@ -56,7 +51,7 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
     public void oppdaterÅpenBehandlingMedDokument(Behandling behandling, MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) {
         dokumentmottakerFelles.opprettHistorikk(behandling, mottattDokument.getJournalpostId());
 
-        Fagsak fagsak = behandling.getFagsak();
+        behandling.getFagsak();
 
         if (harMottattSøknadTidligere(behandling.getId())) { // #S2
             // Oppdatere behandling gjennom henleggelse
@@ -109,26 +104,6 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
     protected void opprettFørstegangsbehandlingMedHistorikkinslagOgKopiAvDokumenter(MottattDokument mottattDokument, Behandling behandlingMedGrunnlag,
                                                                                     Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         dokumentmottakerFelles.opprettNyFørstegangFraBehandlingMedSøknad(fagsak, behandlingÅrsakType, behandlingMedGrunnlag, mottattDokument);
-    }
-
-    private boolean harInnvilgetFørstegangsbehandling(Behandling behandling) {
-        if (behandling.erRevurdering()) {
-            behandling = finnFørstegangsbehandling(behandling);
-        }
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandling.getId());
-        return behandlingsresultat.isPresent() && behandlingsresultat.get().isBehandlingsresultatInnvilget();
-    }
-
-    private Behandling finnFørstegangsbehandling(Behandling revurdering) {
-        Optional<Behandling> behandling = revurdering.getOriginalBehandling();
-        if (behandling.isPresent()) {
-            if (!behandling.get().erRevurdering()) {
-                return behandling.get();
-            } else {
-                return finnFørstegangsbehandling(behandling.get());
-            }
-        }
-        throw new IllegalStateException("Utvikler-feil: Revurdering " + revurdering.getId() + " har ikke original behandling");
     }
 
     @Override

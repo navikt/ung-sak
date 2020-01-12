@@ -22,7 +22,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStat
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -39,7 +38,7 @@ public class BehandlingRevurderingRepository {
     }
 
     @Inject
-    public BehandlingRevurderingRepository(@VLPersistenceUnit EntityManager entityManager,
+    public BehandlingRevurderingRepository(EntityManager entityManager,
                                                BehandlingRepository behandlingRepository,
                                                SøknadRepository søknadRepository,
                                                BehandlingLåsRepository behandlingLåsRepository) {
@@ -110,10 +109,6 @@ public class BehandlingRevurderingRepository {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst();
-    }
-
-    private static Optional<Behandling> optionalFirst(List<Behandling> behandlinger) {
-        return behandlinger.isEmpty() ? Optional.empty() : Optional.of(behandlinger.get(0));
     }
 
     /** Liste av fagsakId, aktørId for saker som trenger G-regulering og det ikke finnes åpen behandling */

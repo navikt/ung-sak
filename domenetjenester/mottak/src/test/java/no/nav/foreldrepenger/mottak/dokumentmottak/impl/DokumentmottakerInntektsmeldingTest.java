@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -57,9 +57,9 @@ public class DokumentmottakerInntektsmeldingTest {
     private BehandlingRepository behandlingRepository;
     @Inject
     private FagsakRepository fagsakRepository;
-    @Inject
-    private AksjonspunktRepository aksjonspunktRepository;
-
+    
+    private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
+    
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
     @Mock

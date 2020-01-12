@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.web.app;
 
 import java.lang.reflect.Modifier;
+import java.util.TreeMap;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -22,15 +23,18 @@ public class ListProsessTaskTest {
 
     @Test
     public void list_prosesstask_handlers() throws Exception {
+        var tasks = new TreeMap<String, ProsessTaskHandler>();
         for (var pt : handlers) {
             if (!Modifier.isAbstract(pt.getClass().getModifiers())) {
                 ProsessTask ann = pt.getClass().getAnnotation(ProsessTask.class);
                 if (ann == null) {
                     System.out.println("Mangler Definisjon: " + pt.getClass().getName());
                 } else {
-                    System.out.println("ProsessTask: " + ann.value());
+                    tasks.put(ann.value(), pt);
                 }
             }
         }
+
+        tasks.forEach((v, p) -> System.out.println("ProsessTask: " + v + "[" + p.getClass().getName() + "]"));
     }
 }

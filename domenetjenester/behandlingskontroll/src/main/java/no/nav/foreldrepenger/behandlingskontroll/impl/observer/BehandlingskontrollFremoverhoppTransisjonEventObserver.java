@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.behandlingskontroll.impl.observer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
+import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
@@ -50,7 +51,7 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
         BehandlingStegType sisteSteg = transisjonEvent.getSisteSteg();
         Optional<BehandlingStegStatus> førsteStegStatus = transisjonEvent.getFørsteStegStatus();
 
-        boolean medInngangFørsteSteg = !førsteStegStatus.isPresent() || førsteStegStatus.get().erVedInngang();
+        boolean medInngangFørsteSteg = førsteStegStatus.isEmpty() || førsteStegStatus.get().erVedInngang();
 
         Set<String> aksjonspunktDefinisjonerEtterFra = modell.finnAksjonspunktDefinisjonerFraOgMed(førsteSteg, medInngangFørsteSteg);
         Set<String> aksjonspunktDefinisjonerEtterTil = modell.finnAksjonspunktDefinisjonerFraOgMed(sisteSteg, true);
@@ -58,10 +59,13 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
         Set<String> mellomliggende = new HashSet<>(aksjonspunktDefinisjonerEtterFra);
         mellomliggende.removeAll(aksjonspunktDefinisjonerEtterTil);
 
-        håndterAksjonspunkter(behandling, mellomliggende, (a) -> {
-            if (a.erÅpentAksjonspunkt()) {
+        List<Aksjonspunkt> avbrutte = new ArrayList<>();
+        behandling.getAksjonspunkter().stream()
+            .filter(a -> mellomliggende.contains(a.getAksjonspunktDefinisjon().getKode()))
+            .filter(Aksjonspunkt::erÅpentAksjonspunkt)
+            .forEach(a -> {
                 avbrytAksjonspunkt(a);
-            }
+                avbrutte.add(a);
         });
 
         if (skalBesøkeStegene(transisjonEvent.getTransisjonIdentifikator())) {
@@ -77,6 +81,10 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
         }
         // Lagre oppdateringer; eventhåndteringen skal være autonom og selv ferdigstille oppdateringer på behandlingen
         lagre(transisjonEvent, behandling);
+        
+        if (!avbrutte.isEmpty() && serviceProvider.getEventPubliserer() != null) {
+            serviceProvider.getEventPubliserer().fireEvent(new AksjonspunktStatusEvent(transisjonEvent.getKontekst(), avbrutte, førsteSteg));
+        }
     }
 
     protected void lagre(BehandlingTransisjonEvent transisjonEvent, Behandling behandling) {
@@ -84,7 +92,7 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
     }
 
     protected void avbrytAksjonspunkt(Aksjonspunkt a) {
-        serviceProvider.getAksjonspunktRepository().setTilAvbrutt(a);
+        serviceProvider.getAksjonspunktKontrollRepository().setTilAvbrutt(a);
     }
 
     protected void hoppFramover(BehandlingStegModell stegModell, BehandlingTransisjonEvent transisjonEvent, BehandlingStegType sisteSteg,
@@ -98,13 +106,6 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
 
     private boolean skalBesøkeStegene(TransisjonIdentifikator transisjon) {
         return !FellesTransisjoner.erSpolfremTransisjon(transisjon);
-    }
-
-    private void håndterAksjonspunkter(Behandling behandling, Set<String> mellomliggendeAksjonspunkt,
-                                       Consumer<Aksjonspunkt> action) {
-        behandling.getAksjonspunkter().stream()
-            .filter(a -> mellomliggendeAksjonspunkt.contains(a.getAksjonspunktDefinisjon().getKode()))
-            .forEach(action);
     }
 
 }

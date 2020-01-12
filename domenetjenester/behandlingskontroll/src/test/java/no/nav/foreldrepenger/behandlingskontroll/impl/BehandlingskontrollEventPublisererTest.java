@@ -55,7 +55,7 @@ public class BehandlingskontrollEventPublisererTest {
     public void setup() {
         BehandlingModellImpl behandlingModell = byggModell();
 
-        kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider, eventPubliserer) {
+        kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider) {
             @Override
             protected BehandlingModellImpl getModell(BehandlingType behandlingType, FagsakYtelseType ytelseType) {
                 return behandlingModell;
@@ -80,7 +80,7 @@ public class BehandlingskontrollEventPublisererTest {
         BehandlingStegType stegType = BehandlingStegType.SØKERS_RELASJON_TIL_BARN;
 
         Aksjonspunkt aksjonspunkt = serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT, stegType);
-        kontrollTjeneste.aksjonspunkterFunnet(kontekst, stegType, List.of(aksjonspunkt));
+        kontrollTjeneste.aksjonspunkterEndretStatus(kontekst, stegType, List.of(aksjonspunkt));
 
         AksjonspunktDefinisjon[] ads = {AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT};
         TestEventObserver.containsExactly(ads);

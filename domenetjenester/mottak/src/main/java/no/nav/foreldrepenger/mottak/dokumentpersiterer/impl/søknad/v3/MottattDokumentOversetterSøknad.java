@@ -48,13 +48,10 @@ import no.nav.vedtak.felles.xml.soeknad.svangerskapspenger.v1.Svangerskapspenger
 @ApplicationScoped
 public class MottattDokumentOversetterSøknad implements MottattDokumentOversetter<MottattDokumentWrapperSøknad> { // NOSONAR - (essv)kan akseptere lang mapperklasse
 
-    private VirksomhetTjeneste virksomhetTjeneste;
     private PersonopplysningRepository personopplysningRepository;
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
-    private TpsTjeneste tpsTjeneste;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
     private FagsakRepository fagsakRepository;
 
     MottattDokumentOversetterSøknad() {
@@ -66,12 +63,9 @@ public class MottattDokumentOversetterSøknad implements MottattDokumentOversett
                                            VirksomhetTjeneste virksomhetTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            TpsTjeneste tpsTjeneste) {
-        this.iayTjeneste = iayTjeneste;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
-        this.virksomhetTjeneste = virksomhetTjeneste;
-        this.tpsTjeneste = tpsTjeneste;
         this.behandlingRevurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
     }

@@ -14,7 +14,6 @@ import javax.persistence.TypedQuery;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
-import no.nav.vedtak.felles.jpa.VLPersistenceUnit;
 
 @ApplicationScoped
 public class UttakRepository  {
@@ -23,7 +22,7 @@ public class UttakRepository  {
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Inject
-    public UttakRepository(@VLPersistenceUnit EntityManager entityManager) {
+    public UttakRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
         this.behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
