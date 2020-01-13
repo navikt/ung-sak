@@ -12,7 +12,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 
 @ApplicationScoped
-public class ForeldrepengerModellProducer {
+public class PSBModellProducer {
 
     private static final String YTELSE = "FP";
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.FORELDREPENGER;

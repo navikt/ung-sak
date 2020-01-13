@@ -355,7 +355,7 @@ public class OppgaveTjeneste {
         return createRequest(fagsak, personinfo, oppgaveÅrsak, enhetsId, beskrivelse, prioritetKode, fristDager, finnUnderkategoriKode(fagsak.getYtelseType()));
     }
 
-    private String finnUnderkategoriKode(FagsakYtelseType fagsakYtelseType) {
+    private String finnUnderkategoriKode(@SuppressWarnings("unused") FagsakYtelseType fagsakYtelseType) {
         // FIXME K9 Ser ut som om dette er noe som brukes mot Gosys. Skal dette også være der for PSB?
         return "PLEIEPENGER_FOR";
         /*

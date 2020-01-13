@@ -1,8 +1,7 @@
-package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.fp;
+package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode;
 
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsperiodeGrunnlag;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.FastsettOpptjeningsperiode;
 import no.nav.fpsak.nare.RuleService;
 import no.nav.fpsak.nare.Ruleset;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
@@ -39,11 +38,11 @@ public class RegelFastsettOpptjeningsperiode implements RuleService<Opptjeningsp
         Ruleset<OpptjeningsperiodeGrunnlag> rs = new Ruleset<>();
         Specification<OpptjeningsperiodeGrunnlag> fastsettOpptjeningsperiode = new FastsettOpptjeningsperiode();
 
-        Specification<OpptjeningsperiodeGrunnlag> fastsettSkjæringsdatoSvp =
-            rs.beregningsRegel("FP_VK 21.1", "Fastsett periode: Svangerskap",
+        Specification<OpptjeningsperiodeGrunnlag> fastsettSkjæringsdato =
+            rs.beregningsRegel("FP_VK 21.1", "Fastsett periode: ",
                 new FastsettSkjæringsdato(), fastsettOpptjeningsperiode);
 
         // Start fastsett opptjeningsperiode
-        return rs.regel(ID, BESKRIVELSE, fastsettSkjæringsdatoSvp);
+        return rs.regel(ID, BESKRIVELSE, fastsettSkjæringsdato);
     }
 }

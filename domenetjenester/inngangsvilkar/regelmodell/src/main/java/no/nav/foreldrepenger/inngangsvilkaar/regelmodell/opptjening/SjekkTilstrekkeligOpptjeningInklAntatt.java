@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.fp.OpptjeningsvilkårForeldrepenger;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.doc.RuleOutcomeDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -27,7 +26,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
         @RuleOutcomeDocumentation(code = SjekkTilstrekkeligOpptjeningInklAntatt.LEGG_PÅ_VENT_ID, result = Resultat.IKKE_VURDERT, description = "Ikke tilstrekkelig opptjening, men kan oppnås hvis inntekt kommer for siste måneder senere."),
         @RuleOutcomeDocumentation(code = SjekkTilstrekkeligOpptjeningInklAntatt.IKKE_TILSTREKKELIG_OPPTJENING_ID, result = Resultat.NEI, description = "Ikke tilstrekkelig opptjening")
 })
-public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<OpptjeningsvilkårMellomregning> {
+public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<MellomregningOpptjeningsvilkårData> {
 
     public static final String ID = SjekkTilstrekkeligOpptjeningInklAntatt.class.getSimpleName();
 
@@ -44,7 +43,7 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Op
     }
 
     @Override
-    public Evaluation evaluate(OpptjeningsvilkårMellomregning data) {
+    public Evaluation evaluate(MellomregningOpptjeningsvilkårData data) {
         Period antattTotalOpptjening = data.getAntattTotalOpptjening().getOpptjentPeriode();
         Period bekreftetOpptjeningPeriode = data.getBekreftetOpptjening().getOpptjentPeriode();
 
@@ -55,7 +54,6 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Op
             return ja();
         }
 
-        //TODO(OJR) burde kanskje lage et egen regelsett for SVP, da det er store forskjeller?
         if ((data.getGrunnlag().getSkalGodkjenneBasertPåAntatt())) {
             OpptjentTidslinje antattOpptjeningTidsserie = data.getAntattTotalOpptjening();
             LocalDateTimeline<Boolean> avkortetTidsserie = antattOpptjeningTidsserie.getTidslinje().intersection(data.getGrunnlag().getOpptjeningPeriode());
@@ -97,7 +95,7 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Op
         return evaluation;
     }
 
-    private LocalDate beregnFristForOpptjeningsopplysninger(OpptjeningsvilkårMellomregning data) {
+    private LocalDate beregnFristForOpptjeningsopplysninger(MellomregningOpptjeningsvilkårData data) {
         LocalDate skjæringstidspunkt = data.getGrunnlag().getSisteDatoForOpptjening();
 
         // first er 5 i måned etter skjæringstidspunktet
@@ -105,7 +103,7 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Op
         return frist;
     }
 
-    private boolean manglerInntektForSisteMånederIOpptjeningsperiodenINoenArbeidsforhold(OpptjeningsvilkårMellomregning data) {
+    private boolean manglerInntektForSisteMånederIOpptjeningsperiodenINoenArbeidsforhold(MellomregningOpptjeningsvilkårData data) {
         LocalDate sisteDatoIOpptjening = data.getGrunnlag().getSisteDatoForOpptjening();
 
         Map<Aktivitet, LocalDateTimeline<Boolean>> åpneArbeidsforhold;
@@ -135,12 +133,12 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Op
             return manglerInntektRapportertSisteParMåneder;
     }
 
-    private void loggAntattOpptjeningPeriode(OpptjeningsvilkårMellomregning data, Evaluation ev) {
+    private void loggAntattOpptjeningPeriode(MellomregningOpptjeningsvilkårData data, Evaluation ev) {
         OpptjentTidslinje antattTotalOpptjening = data.getAntattTotalOpptjening();
-        ev.setEvaluationProperty(OpptjeningsvilkårForeldrepenger.EVAL_RESULT_ANTATT_AKTIVITET_TIDSLINJE, antattTotalOpptjening.getTidslinje());
-        ev.setEvaluationProperty(OpptjeningsvilkårForeldrepenger.EVAL_RESULT_ANTATT_GODKJENT, antattTotalOpptjening.getOpptjentPeriode());
+        ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_ANTATT_AKTIVITET_TIDSLINJE, antattTotalOpptjening.getTidslinje());
+        ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_ANTATT_GODKJENT, antattTotalOpptjening.getOpptjentPeriode());
         if (data.getOpptjeningOpplysningerFrist() != null) {
-            ev.setEvaluationProperty(OpptjeningsvilkårForeldrepenger.EVAL_RESULT_FRIST_FOR_OPPTJENING_OPPLYSNINGER, data.getOpptjeningOpplysningerFrist());
+            ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_FRIST_FOR_OPPTJENING_OPPLYSNINGER, data.getOpptjeningOpplysningerFrist());
         }
     }
 }

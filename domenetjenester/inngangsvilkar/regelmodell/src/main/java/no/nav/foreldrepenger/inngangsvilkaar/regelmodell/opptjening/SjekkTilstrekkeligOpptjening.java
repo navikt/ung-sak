@@ -21,7 +21,7 @@ import no.nav.fpsak.nare.specification.LeafSpecification;
  * </ul>
  */
 @RuleDocumentation(value = "FP_VK_23.2.1")
-public class SjekkTilstrekkeligOpptjening extends LeafSpecification<OpptjeningsvilkårMellomregning> {
+public class SjekkTilstrekkeligOpptjening extends LeafSpecification<MellomregningOpptjeningsvilkårData> {
     public static final String ID = SjekkTilstrekkeligOpptjening.class.getSimpleName();
 
     public SjekkTilstrekkeligOpptjening() {
@@ -29,7 +29,7 @@ public class SjekkTilstrekkeligOpptjening extends LeafSpecification<Opptjeningsv
     }
 
     @Override
-    public Evaluation evaluate(OpptjeningsvilkårMellomregning data) {
+    public Evaluation evaluate(MellomregningOpptjeningsvilkårData data) {
         Period opptjentPeriode = data.getBekreftetOpptjening().getOpptjentPeriode();
 
         if (data.sjekkErInnenforMinstePeriodeGodkjent(opptjentPeriode)) {

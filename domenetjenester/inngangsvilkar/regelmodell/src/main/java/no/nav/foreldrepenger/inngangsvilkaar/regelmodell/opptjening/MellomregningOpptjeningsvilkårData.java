@@ -22,9 +22,9 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 /**
  * Data underlag inkludert mellomregning og mellomresultater brukt i vilkårsvurderingen.
  */
-public class OpptjeningsvilkårMellomregning {
+public class MellomregningOpptjeningsvilkårData {
 
-    private final Map<Aktivitet, AktivitetMellomregning> mellomregning = new HashMap<>();
+    private final Map<Aktivitet, MellomregningAktivitetData> mellomregning = new HashMap<>();
 
     /** Beregnet total opptjening (inklusiv bekreftet og antatt) */
     private OpptjentTidslinje antattTotalOpptjening;
@@ -43,7 +43,7 @@ public class OpptjeningsvilkårMellomregning {
     /** Frist for å motta opptjening opplysninger (henger sammen med Aksjonspunkt 7006 "Venter på Opptjeningsopplysninger"). */
     private LocalDate opptjeningOpplysningerFrist;
 
-    public OpptjeningsvilkårMellomregning(Opptjeningsgrunnlag grunnlag) {
+    public MellomregningOpptjeningsvilkårData(Opptjeningsgrunnlag grunnlag) {
         this.grunnlag = grunnlag;
         LocalDateInterval maxIntervall = grunnlag.getOpptjeningPeriode();
 
@@ -51,23 +51,23 @@ public class OpptjeningsvilkårMellomregning {
         splitAktiviter(
             a -> a.getVurderingsStatus() == null)
                 .forEach(e -> mellomregning.computeIfAbsent(e.getKey(),
-                    a -> new AktivitetMellomregning(a, e.getValue())));
+                    a -> new MellomregningAktivitetData(a, e.getValue())));
 
         splitAktiviter(
             a -> Objects.equals(AktivitetPeriode.VurderingsStatus.TIL_VURDERING, a.getVurderingsStatus()))
                 .forEach(e -> mellomregning.computeIfAbsent(e.getKey(),
-                    a -> new AktivitetMellomregning(a, e.getValue())));
+                    a -> new MellomregningAktivitetData(a, e.getValue())));
 
         splitAktiviter(
             a -> Objects.equals(AktivitetPeriode.VurderingsStatus.VURDERT_GODKJENT, a.getVurderingsStatus()))
                 .forEach(e -> mellomregning.computeIfAbsent(e.getKey(),
-                    AktivitetMellomregning::new).setAktivitetManueltGodkjent(e.getValue()));
+                    MellomregningAktivitetData::new).setAktivitetManueltGodkjent(e.getValue()));
 
         splitAktiviter(
             a -> Objects.equals(AktivitetPeriode.VurderingsStatus.VURDERT_UNDERKJENT, a.getVurderingsStatus()))
                 .forEach(
                     e -> mellomregning.computeIfAbsent(e.getKey(),
-                        AktivitetMellomregning::new).setAktivitetManueltUnderkjent(e.getValue()));
+                        MellomregningAktivitetData::new).setAktivitetManueltUnderkjent(e.getValue()));
 
         // grupper inntektperioder etter aktivitet og avkort i forhold til angitt startDato/skjæringstidspunkt
         Map<Aktivitet, Set<LocalDateSegment<Long>>> grupperInntekterEtterAktiitet = grunnlag.getInntektPerioder().stream().collect(
@@ -83,7 +83,7 @@ public class OpptjeningsvilkårMellomregning {
             .filter(e -> !e.getValue().isEmpty())
             .forEach(
                 e -> mellomregning.computeIfAbsent(e.getKey(),
-                    AktivitetMellomregning::new).setInntektTidslinjer(e.getValue()));
+                    MellomregningAktivitetData::new).setInntektTidslinjer(e.getValue()));
 
     }
 
@@ -106,10 +106,10 @@ public class OpptjeningsvilkårMellomregning {
     }
 
     public Map<Aktivitet, LocalDateTimeline<Boolean>> getAkseptertMellomliggendePerioder() {
-        return getMellomregningTidslinje(AktivitetMellomregning::getAkseptertMellomliggendePerioder);
+        return getMellomregningTidslinje(MellomregningAktivitetData::getAkseptertMellomliggendePerioder);
     }
 
-    private <V> Map<Aktivitet, LocalDateTimeline<V>> getMellomregningTidslinje(Function<AktivitetMellomregning, LocalDateTimeline<V>> fieldGetter) {
+    private <V> Map<Aktivitet, LocalDateTimeline<V>> getMellomregningTidslinje(Function<MellomregningAktivitetData, LocalDateTimeline<V>> fieldGetter) {
         return mellomregning.entrySet().stream()
             .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), fieldGetter.apply(e.getValue())))
             .filter(e -> !e.getValue().isEmpty())
@@ -145,10 +145,10 @@ public class OpptjeningsvilkårMellomregning {
         }
         LocalDateInterval underkjennIntervall = new LocalDateInterval(splitDato.plusDays(1), grunnlag.getSisteDatoForOpptjening());
         LocalDateTimeline<Boolean> underkjennTimeline = new LocalDateTimeline<>(splitDato.plusDays(1), grunnlag.getSisteDatoForOpptjening(), Boolean.TRUE);
-        AktivitetMellomregning aktivitetMellomregning = mellomregning.get(aktivitet);
+        MellomregningAktivitetData aktivitetMellomregning = mellomregning.get(aktivitet);
 
         aktivitetMellomregning.setAktivitetUnderkjent(underkjennTimeline);
-        if (!AktivitetMellomregning.EMPTY.equals(aktivitetMellomregning.getAktivitetManueltGodkjent())) {
+        if (!MellomregningAktivitetData.EMPTY.equals(aktivitetMellomregning.getAktivitetManueltGodkjent())) {
             // Må overskrive manuell godkjenning da annen aktivitet gjerne er vurdert i aksjonspunkt i steg 82
             aktivitetMellomregning.setAktivitetManueltGodkjent(aktivitetMellomregning.getAktivitetManueltGodkjent().disjoint(underkjennIntervall));
         }
@@ -156,7 +156,7 @@ public class OpptjeningsvilkårMellomregning {
     }
 
     private Map<Aktivitet, LocalDateTimeline<Boolean>> getAntattGodkjentPerioder() {
-        return getMellomregningTidslinje(AktivitetMellomregning::getAktivitetAntattGodkjent);
+        return getMellomregningTidslinje(MellomregningAktivitetData::getAktivitetAntattGodkjent);
     }
 
     OpptjentTidslinje getAntattTotalOpptjening() {
@@ -172,7 +172,7 @@ public class OpptjeningsvilkårMellomregning {
     }
 
     Map<Aktivitet, LocalDateTimeline<Long>> getInntektTidslinjer() {
-        return getMellomregningTidslinje(AktivitetMellomregning::getInntektTidslinjer);
+        return getMellomregningTidslinje(MellomregningAktivitetData::getInntektTidslinjer);
     }
 
     OpptjentTidslinje getTotalOpptjening() {
@@ -180,7 +180,7 @@ public class OpptjeningsvilkårMellomregning {
     }
 
     public Map<Aktivitet, LocalDateTimeline<Boolean>> getUnderkjentePerioder() {
-        return getMellomregningTidslinje(AktivitetMellomregning::getAktivitetUnderkjent);
+        return getMellomregningTidslinje(MellomregningAktivitetData::getAktivitetUnderkjent);
     }
 
     public void oppdaterOutputResultat(OpptjeningsvilkårResultat outputResultat) {

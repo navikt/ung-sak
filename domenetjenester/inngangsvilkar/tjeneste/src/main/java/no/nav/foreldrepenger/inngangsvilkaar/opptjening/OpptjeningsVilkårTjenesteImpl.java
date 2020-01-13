@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.inngangsvilkaar.opptjening.fp;
+package no.nav.foreldrepenger.inngangsvilkaar.opptjening;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -17,11 +17,9 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
-import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsVilkårTjeneste;
-import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsgrunnlagAdapter;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.svp.OpptjeningsvilkårSvangerskapspenger;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.vedtak.util.FPDateUtil;
 
@@ -69,7 +67,7 @@ public class OpptjeningsVilkårTjenesteImpl implements OpptjeningsVilkårTjenest
 
         // returner egen output i tillegg for senere lagring
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
-        Evaluation evaluation = new OpptjeningsvilkårSvangerskapspenger().evaluer(grunnlag, output);
+        Evaluation evaluation = new Opptjeningsvilkår().evaluer(grunnlag, output);
 
         VilkårData vilkårData = inngangsvilkårOversetter.tilVilkårData(VilkårType.OPPTJENINGSVILKÅRET, evaluation, grunnlag);
         vilkårData.setEkstraVilkårresultat(output);

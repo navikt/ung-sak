@@ -48,12 +48,6 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
     private Period maksMellomliggendePeriodeForArbeidsforhold = Period.ofDays(14);
 
     /**
-     * Minste periode for en foregående periode i et arbeidsforhold for at en mellomliggende periode skal regnes med.
-     */
-    @JsonIgnore
-    private Period minForegåendeForMellomliggendePeriodeForArbeidsforhold = Period.ofWeeks(4);
-
-    /**
      * Minste antall dager med bekreftet opptjening for å kunne legge på vent (sees i sammenheng med
      * {@link #minsteAntallMånederForVent}.
      */
@@ -124,10 +118,6 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
         return maksMellomliggendePeriodeForArbeidsforhold;
     }
 
-    public Period getMinForegåendeForMellomliggendePeriodeForArbeidsforhold() {
-        return minForegåendeForMellomliggendePeriodeForArbeidsforhold;
-    }
-
     public int getMinsteAntallDagerForVent() {
         return minsteAntallDagerForVent;
     }
@@ -164,10 +154,6 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
         aktivitetPerioder.add(input);
     }
 
-    public void leggTil(InntektPeriode input) {
-        inntektPerioder.add(input);
-    }
-
     /**
      * Legg til aktivitet for en angitt intervall
      *
@@ -176,7 +162,6 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
      * @param aktivitet
      *            - aktivitet
      */
-    // TODO(OJR) fiks ved å endre testdekning
     public void leggTil(LocalDateInterval datoIntervall, Aktivitet aktivitet) {
         leggTil(new AktivitetPeriode(datoIntervall, aktivitet, AktivitetPeriode.VurderingsStatus.TIL_VURDERING));
     }
@@ -188,10 +173,6 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
 
     public void setMaksMellomliggendePeriodeForArbeidsforhold(Period maksMellomliggendePeriodeForArbeidsforhold) {
         this.maksMellomliggendePeriodeForArbeidsforhold = maksMellomliggendePeriodeForArbeidsforhold;
-    }
-
-    public void setMinForegåendeForMellomliggendePeriodeForArbeidsforhold(Period minForegåendeForMellomliggendePeriodeForArbeidsforhold) {
-        this.minForegåendeForMellomliggendePeriodeForArbeidsforhold = minForegåendeForMellomliggendePeriodeForArbeidsforhold;
     }
 
     public void setMinsteAntallDagerForVent(int minsteAntallDagerForVent) {

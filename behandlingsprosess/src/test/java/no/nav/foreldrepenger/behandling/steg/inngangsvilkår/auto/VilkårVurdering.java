@@ -30,9 +30,9 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsv
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsperiodeGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.fp.OpptjeningsvilkårForeldrepenger;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.fp.RegelFastsettOpptjeningsperiode;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.RegelFastsettOpptjeningsperiode;
 import no.nav.fpsak.nare.RuleService;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
@@ -173,7 +173,7 @@ class VilkårVurdering {
             return new Tuple(new Tuple<>(MedlemskapsvilkårGrunnlag.class, new NoneObject()), new Medlemskapsvilkår());
         }
         if (VilkårType.OPPTJENINGSVILKÅRET.equals(vilkår)) {
-            return new Tuple(new Tuple<>(Opptjeningsgrunnlag.class, new OpptjeningsvilkårResultat()), new OpptjeningsvilkårForeldrepenger());
+            return new Tuple(new Tuple<>(Opptjeningsgrunnlag.class, new OpptjeningsvilkårResultat()), new Opptjeningsvilkår());
         }
         if (VilkårType.OPPTJENINGSPERIODEVILKÅR.equals(vilkår)) {
             return new Tuple(new Tuple<>(OpptjeningsperiodeGrunnlag.class, new OpptjeningsPeriode()), new RegelFastsettOpptjeningsperiode());
