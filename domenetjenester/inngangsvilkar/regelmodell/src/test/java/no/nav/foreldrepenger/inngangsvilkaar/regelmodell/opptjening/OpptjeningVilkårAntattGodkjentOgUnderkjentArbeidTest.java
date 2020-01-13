@@ -8,13 +8,12 @@ import java.util.Map.Entry;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.fp.OpptjeningsvilkårForeldrepenger;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 public class OpptjeningVilkårAntattGodkjentOgUnderkjentArbeidTest {
 
-    private final String ARBEID = OpptjeningsvilkårForeldrepenger.ARBEID;
+    private final String ARBEID = Opptjeningsvilkår.ARBEID;
 
     private final Aktivitet bigCorp=new Aktivitet(ARBEID, "BigCorp", Aktivitet.ReferanseType.ORGNR);
     private final Aktivitet smallCorp = new Aktivitet(ARBEID, "SmallCorp", Aktivitet.ReferanseType.ORGNR);
@@ -44,7 +43,7 @@ public class OpptjeningVilkårAntattGodkjentOgUnderkjentArbeidTest {
         grunnlag.leggTilRapportertInntekt(new LocalDateInterval(o1, o2), bigCorp, 0L);
 
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
-        new OpptjeningsvilkårForeldrepenger().evaluer(grunnlag, output);
+        new Opptjeningsvilkår().evaluer(grunnlag, output);
 
         assertThat(output.getAntattGodkjentePerioder()).isEmpty();
 
@@ -77,7 +76,7 @@ public class OpptjeningVilkårAntattGodkjentOgUnderkjentArbeidTest {
         grunnlag.leggTilRapportertInntekt(new LocalDateInterval(dt1, dt3), bigCorp, 1L);
 
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
-        new OpptjeningsvilkårForeldrepenger().evaluer(grunnlag, output);
+        new Opptjeningsvilkår().evaluer(grunnlag, output);
 
         assertThat(output.getUnderkjentePerioder()).isEmpty();
 
@@ -111,7 +110,7 @@ public class OpptjeningVilkårAntattGodkjentOgUnderkjentArbeidTest {
 
         // Act
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
-        new OpptjeningsvilkårForeldrepenger().evaluer(grunnlag, output);
+        new Opptjeningsvilkår().evaluer(grunnlag, output);
 
         LocalDate førsteAntattGodkjenteDag = behandlingstidspunkt.plusMonths(1).minus(Period.ofMonths(2)).withDayOfMonth(1);
 

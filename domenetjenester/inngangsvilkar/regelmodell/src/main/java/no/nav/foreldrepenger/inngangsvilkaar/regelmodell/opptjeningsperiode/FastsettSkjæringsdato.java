@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.fp;
+package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode;
 
 import java.util.HashMap;
 import java.util.Map;

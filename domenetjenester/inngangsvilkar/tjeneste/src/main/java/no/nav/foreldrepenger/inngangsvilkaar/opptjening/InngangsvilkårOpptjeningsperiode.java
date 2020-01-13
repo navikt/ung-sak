@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.inngangsvilkaar.opptjening.fp;
+package no.nav.foreldrepenger.inngangsvilkaar.opptjening;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,7 +9,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårTypeKode
 import no.nav.foreldrepenger.inngangsvilkaar.Inngangsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårTypeRef;
-import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsperiodeVilkårTjeneste;
 
 @ApplicationScoped
 @VilkårTypeRef(VilkårTypeKoder.FP_VK_21)

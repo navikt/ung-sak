@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.fp.OpptjeningsvilkårForeldrepenger;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
@@ -27,17 +26,17 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
  * Perioder der det ikke finnes inntekter underkjennes som aktivitet.
  */
 @RuleDocumentation("FP_VK_23.1.1")
-public class SjekkInntektSamsvarerMedArbeidAktivitet extends LeafSpecification<OpptjeningsvilkårMellomregning> {
+public class SjekkInntektSamsvarerMedArbeidAktivitet extends LeafSpecification<MellomregningOpptjeningsvilkårData> {
     public static final String ID = SjekkInntektSamsvarerMedArbeidAktivitet.class.getSimpleName();
 
-    private static final String ARBEID = OpptjeningsvilkårForeldrepenger.ARBEID;
+    private static final String ARBEID = Opptjeningsvilkår.ARBEID;
 
     public SjekkInntektSamsvarerMedArbeidAktivitet() {
         super(ID);
     }
 
     @Override
-    public Evaluation evaluate(OpptjeningsvilkårMellomregning data) {
+    public Evaluation evaluate(MellomregningOpptjeningsvilkårData data) {
 
         Map<Aktivitet, LocalDateTimeline<AktivitetStatus>> ikkeGodkjent = finnPerioderSomIkkeHarNokInntektForOpplystArbeid(data);
 
@@ -61,19 +60,19 @@ public class SjekkInntektSamsvarerMedArbeidAktivitet extends LeafSpecification<O
 
         Evaluation evaluation = ja();
 
-        evaluation.setEvaluationProperty(OpptjeningsvilkårForeldrepenger.EVAL_RESULT_UNDERKJENTE_PERIODER, data.getUnderkjentePerioder());
+        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_UNDERKJENTE_PERIODER, data.getUnderkjentePerioder());
 
         return evaluation;
     }
 
-    private static LocalDate sisteAntattGodkjentDato(OpptjeningsvilkårMellomregning data) {
+    private static LocalDate sisteAntattGodkjentDato(MellomregningOpptjeningsvilkårData data) {
         if(data.getGrunnlag().getBehandlingsTidspunkt().isAfter(data.getGrunnlag().getSisteDatoForOpptjening())) {
             return data.getGrunnlag().getBehandlingsTidspunkt();
         }
         return data.getGrunnlag().getSisteDatoForOpptjening();
     }
 
-    private Map<Aktivitet, LocalDateTimeline<AktivitetStatus>> finnPerioderSomIkkeHarNokInntektForOpplystArbeid(OpptjeningsvilkårMellomregning data) {
+    private Map<Aktivitet, LocalDateTimeline<AktivitetStatus>> finnPerioderSomIkkeHarNokInntektForOpplystArbeid(MellomregningOpptjeningsvilkårData data) {
 
         Map<Aktivitet, LocalDateTimeline<Boolean>> aktiviteter = data.getAktivitetTidslinjer(false, false);
         Map<Aktivitet, LocalDateTimeline<Long>> inntekter = data.getInntektTidslinjer();

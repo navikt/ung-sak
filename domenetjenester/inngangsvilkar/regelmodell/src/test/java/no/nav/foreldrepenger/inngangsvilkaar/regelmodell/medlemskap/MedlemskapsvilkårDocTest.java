@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
 import no.nav.fpsak.nare.doc.RuleDescriptionDigraph;
 import no.nav.fpsak.nare.specification.Specification;
 
@@ -13,9 +13,9 @@ public class MedlemskapsvilkårDocTest {
         Specification<MedlemskapsvilkårGrunnlag> vilkår = new Medlemskapsvilkår().getSpecification();
         RuleDescriptionDigraph digraph = new RuleDescriptionDigraph(vilkår.ruleDescription());
 
-        @SuppressWarnings("unused")
         String json = digraph.toJson();
 
-//        System.out.println(json);
+        // sjekk at den inneholder noen standard felter
+        Assertions.assertThat(json).isNotNull().contains("root", "nodes", "source", "target", "role", "ruleId", "id", "ruleDescription", "operator", "rule");
     }
 }

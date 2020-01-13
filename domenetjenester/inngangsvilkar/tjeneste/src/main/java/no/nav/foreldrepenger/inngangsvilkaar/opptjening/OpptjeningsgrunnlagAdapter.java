@@ -12,29 +12,29 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.foreldrepenger.domene.opptjening.VurderingsStatus;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Aktivitet;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Aktivitet.ReferanseType;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.AktivitetPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.fp.OpptjeningsvilkårForeldrepenger;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.util.Tuple;
 
-public class OpptjeningsgrunnlagAdapter {
+class OpptjeningsgrunnlagAdapter {
     private LocalDate behandlingstidspunkt;
     private LocalDate startDato;
     private LocalDate sluttDato;
 
-    public OpptjeningsgrunnlagAdapter(LocalDate behandlingstidspunkt, LocalDate startDato, LocalDate sluttDato) {
+    OpptjeningsgrunnlagAdapter(LocalDate behandlingstidspunkt, LocalDate startDato, LocalDate sluttDato) {
         this.behandlingstidspunkt = behandlingstidspunkt;
         this.startDato = startDato;
         this.sluttDato = sluttDato;
     }
 
-    public Opptjeningsgrunnlag mapTilGrunnlag(Collection<OpptjeningAktivitetPeriode> opptjeningAktiveter,
+    Opptjeningsgrunnlag mapTilGrunnlag(Collection<OpptjeningAktivitetPeriode> opptjeningAktiveter,
                                               Collection<OpptjeningInntektPeriode> opptjeningInntekter) {
         Opptjeningsgrunnlag opptjeningsGrunnlag = new Opptjeningsgrunnlag(behandlingstidspunkt, startDato, sluttDato);
 
@@ -62,10 +62,10 @@ public class OpptjeningsgrunnlagAdapter {
 
             if (refType != null) {
                 if (opptjeningsnøkkel.harType(Opptjeningsnøkkel.Type.ARBEIDSFORHOLD_ID)) {
-                    Aktivitet aktivitet = new Aktivitet(OpptjeningsvilkårForeldrepenger.ARBEID, getAktivitetReferanseFraNøkkel(opptjeningsnøkkel), refType);
+                    Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, getAktivitetReferanseFraNøkkel(opptjeningsnøkkel), refType);
                     opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
                 } else {
-                    Aktivitet aktivitet = new Aktivitet(OpptjeningsvilkårForeldrepenger.ARBEID, opptjeningsnøkkel.getVerdi(), refType);
+                    Aktivitet aktivitet = new Aktivitet(Opptjeningsvilkår.ARBEID, opptjeningsnøkkel.getVerdi(), refType);
                     opptjeningsGrunnlag.leggTilRapportertInntekt(dateInterval, aktivitet, beløpHeltall);
                 }
             }

@@ -6,7 +6,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 /**
  * Mellomregning per aktivitet.
  */
-class AktivitetMellomregning {
+class MellomregningAktivitetData {
 
     @SuppressWarnings("unchecked")
     static final LocalDateTimeline<Boolean> EMPTY = LocalDateTimeline.EMPTY_TIMELINE;
@@ -42,11 +42,11 @@ class AktivitetMellomregning {
     @SuppressWarnings("unchecked")
     private LocalDateTimeline<Long> inntektTidslinjer = LocalDateTimeline.EMPTY_TIMELINE;
 
-    AktivitetMellomregning(Aktivitet a) {
+    MellomregningAktivitetData(Aktivitet a) {
         this(a, EMPTY);
     }
 
-    AktivitetMellomregning(Aktivitet aktivitet, LocalDateTimeline<Boolean> aktivitetTidslinje) {
+    MellomregningAktivitetData(Aktivitet aktivitet, LocalDateTimeline<Boolean> aktivitetTidslinje) {
         this.aktivitet = aktivitet;
         this.aktivitetTidslinjer = aktivitetTidslinje;
     }
