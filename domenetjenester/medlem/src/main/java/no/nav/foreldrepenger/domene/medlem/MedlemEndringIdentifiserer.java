@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.domene.medlem.identifiserer;
+package no.nav.foreldrepenger.domene.medlem;
 
 import java.time.LocalDate;
 import java.util.Map;
