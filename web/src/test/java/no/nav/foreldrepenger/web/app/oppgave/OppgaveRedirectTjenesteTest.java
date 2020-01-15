@@ -37,7 +37,7 @@ public class OppgaveRedirectTjenesteTest {
 
     @Before
     public void setContextPath() {
-        ContextPathHolder.instance("/fpsak");
+        ContextPathHolder.instance("/sak");
     }
 
     @Before
@@ -51,7 +51,7 @@ public class OppgaveRedirectTjenesteTest {
 
         String feilmelding = "Sak+kan+ikke+%C3%A5pnes%2C+da+referanse+mangler.";
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/#?errormessage=" + feilmelding);
+        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/#?errormessage=" + feilmelding);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class OppgaveRedirectTjenesteTest {
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto("2"));
         String feilmelding = "Det+finnes+ingen+sak+med+dette+saksnummeret%3A+2";
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/#?errormessage=" + feilmelding);
+        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/#?errormessage=" + feilmelding);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), null);
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/fagsak/22/");
+        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/fagsak/22/");
     }
 
     @Test
@@ -86,7 +86,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto(saksnummer));
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/fagsak/22/");
+        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/fagsak/22/");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class OppgaveRedirectTjenesteTest {
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto(saksnummer));
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
         String feilmelding = "Oppgaven+med+1+er+ikke+registrert+p%C3%A5+sak+22";
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/#?errormessage=" + feilmelding);
+        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/#?errormessage=" + feilmelding);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto(saksnummer));
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/fagsak/22/");
+        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/fagsak/22/");
     }
 
     @Test
@@ -132,7 +132,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response responseSnr = tjeneste.doRedirect(null, new SaksnummerDto(saksnummer));
         assertThat(responseSnr.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(responseSnr.getLocation().toString()).isEqualTo("https://erstatter.nav.no/fpsak/fagsak/22/");
+        assertThat(responseSnr.getLocation().toString()).isEqualTo("https://erstatter.nav.no/sak/fagsak/22/");
 
     }
 }

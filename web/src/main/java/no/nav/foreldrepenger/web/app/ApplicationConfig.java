@@ -38,7 +38,7 @@ public class ApplicationConfig extends Application {
 
         oas.info(info)
             .addServersItem(new Server()
-                .url("/fpsak")); // FIXME K9 : Oppdater til ny path
+                .url("/sak"));
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)

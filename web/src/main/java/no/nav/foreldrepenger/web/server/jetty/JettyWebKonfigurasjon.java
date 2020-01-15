@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.web.server.jetty;
 
 public class JettyWebKonfigurasjon implements AppKonfigurasjon {
-    public static final String CONTEXT_PATH = "/fpsak";
+    public static final String CONTEXT_PATH = "/sak";
     private static final String SWAGGER_HASH = "sha256-6xt9RSofOxTOnITgu6HcR2S/aDexY8L/y98mZG1Rulc=";
 
     private Integer serverPort;
