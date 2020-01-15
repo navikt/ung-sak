@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto;
 
 import java.time.LocalDateTime;
 
-import no.nav.vedtak.util.FPDateUtil;
+import java.time.LocalDate;
 
 public class InnloggetNavAnsattDto {
 
@@ -40,7 +40,7 @@ public class InnloggetNavAnsattDto {
         this.kanBehandleKode6 = kanBehandleKode6;
         this.kanBehandleKode7 = kanBehandleKode7;
         this.skalViseDetaljerteFeilmeldinger = skalViseDetaljerteFeilmeldinger;
-        this.funksjonellTid = FPDateUtil.nå();
+        this.funksjonellTid = LocalDateTime.now();
     }
 
     public static Builder builder() {

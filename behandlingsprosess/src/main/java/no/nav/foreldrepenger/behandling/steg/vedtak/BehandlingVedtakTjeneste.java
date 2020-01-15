@@ -22,7 +22,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatTy
 import no.nav.foreldrepenger.domene.uttak.OpphørUttakTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 public class BehandlingVedtakTjeneste {
@@ -61,7 +60,7 @@ public class BehandlingVedtakTjeneste {
         }
         vedtakResultatType = UtledVedtakResultatType.utled(behandling, opphørsdato, skjæringstidspunkt);
         String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandling);
-        LocalDateTime vedtakstidspunkt = FPDateUtil.nå();
+        LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 
         boolean erRevurderingMedUendretUtfall = revurderingTjeneste.erRevurderingMedUendretUtfall(behandling);
         BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()

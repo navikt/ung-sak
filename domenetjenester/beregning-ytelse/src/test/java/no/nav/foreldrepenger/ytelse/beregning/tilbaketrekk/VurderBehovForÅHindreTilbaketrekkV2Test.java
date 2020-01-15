@@ -25,10 +25,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.vedtak.util.FPDateUtil;
+import java.time.LocalDate;
 
 public class VurderBehovForÅHindreTilbaketrekkV2Test {
-    private static final String FUNKSJONELT_TIDSOFFSET = FPDateUtil.SystemConfiguredClockProvider.PROPERTY_KEY_OFFSET_PERIODE;
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2019, Month.JANUARY, 20);
     private static final LocalDate ANDRE_PERIODE_FOM = SKJÆRINGSTIDSPUNKT.plusMonths(5);
@@ -49,7 +48,6 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
     @AfterClass
     public static void teardown() {
         settSimulertNåtidTil(LocalDate.now());
-        FPDateUtil.init();
     }
 
     @Test
@@ -387,7 +385,5 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
 
     private static void settSimulertNåtidTil(LocalDate dato) {
         Period periode = Period.between(LocalDate.now(), dato);
-        System.setProperty(FUNKSJONELT_TIDSOFFSET, periode.toString());
-        FPDateUtil.init();
     }
 }

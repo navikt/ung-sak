@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.vedtak.util.FPDateUtil;
+import java.time.LocalDate;
 
 /**
  * Skal kun brukes av tester som av en eller annen grunn må tukle
@@ -47,7 +47,7 @@ public class AksjonspunktTestSupport {
         if (frist.isPresent()) {
             adBuilder.medFristTid(frist.get());
         } else if (aksjonspunktDefinisjon.getFristPeriod() != null) {
-            adBuilder.medFristTid(FPDateUtil.nå().plus(aksjonspunktDefinisjon.getFristPeriod()));
+            adBuilder.medFristTid(LocalDateTime.now().plus(aksjonspunktDefinisjon.getFristPeriod()));
         }
 
         if (venteÅrsak.isPresent()) {

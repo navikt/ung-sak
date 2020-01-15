@@ -44,7 +44,6 @@ import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvistBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
-import no.nav.vedtak.util.FPDateUtil;
 
 public class AksjonspunktUtlederFastsettBeregningsaktiviteterTest {
 
@@ -71,7 +70,7 @@ public class AksjonspunktUtlederFastsettBeregningsaktiviteterTest {
     @Before
     public void setUp() {
         erOverstyrt = false;
-        LocalDate SKJÆRINGSTIDSPUNKT = FPDateUtil.iDag();
+        LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
         beregningsgrunnlag = BeregningsgrunnlagEntitet.builder().medSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT).build();
         beregningAktivitetAggregat = BeregningAktivitetAggregatEntitet.builder()
             .medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT)
@@ -143,7 +142,7 @@ public class AksjonspunktUtlederFastsettBeregningsaktiviteterTest {
         // Arrange
         YtelseBuilder yb = YtelseBuilder.oppdatere(Optional.empty());
         Ytelse ytelse = yb.medYtelseType(FagsakYtelseType.DAGPENGER)
-            .medPeriode(DatoIntervallEntitet.fraOgMed(FPDateUtil.iDag().minusMonths(2)))
+            .medPeriode(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusMonths(2)))
             .medKilde(Fagsystem.ARENA)
             .medStatus(RelatertYtelseTilstand.LØPENDE)
             .medYtelseAnvist(lagYtelseAnvist(yb.getAnvistBuilder()))
@@ -164,7 +163,7 @@ public class AksjonspunktUtlederFastsettBeregningsaktiviteterTest {
     }
 
     private YtelseAnvist lagYtelseAnvist(YtelseAnvistBuilder anvistBuilder) {
-        return anvistBuilder.medAnvistPeriode(DatoIntervallEntitet.fraOgMed(FPDateUtil.iDag().minusMonths(1))).build();
+        return anvistBuilder.medAnvistPeriode(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusMonths(1))).build();
     }
 
     @Test

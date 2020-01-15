@@ -34,7 +34,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe.Entry;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskEntitet;
-import no.nav.vedtak.util.FPDateUtil;
 
 /** Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks. */
 @ApplicationScoped
@@ -158,7 +157,7 @@ public class FagsakProsessTaskRepository {
     public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, Long behandlingId, String gruppe) {
         Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR
 
-        LocalDateTime now = FPDateUtil.nå().withNano(0).withSecond(0);
+        LocalDateTime now = LocalDateTime.now().withNano(0).withSecond(0);
 
         // et tidsrom for neste kjøring vi kan ta hensyn til. Det som er lenger ut i fremtiden er ikke relevant her, kun det vi kan forvente
         // kjøres i umiddelbar fremtid. tar i tillegg hensyn til alt som skulle ha vært kjørt tilbake i tid (som har stoppet av en eller annen

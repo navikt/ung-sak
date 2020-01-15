@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,7 +29,6 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
-import no.nav.vedtak.util.FPDateUtil;
 
 public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
 
@@ -55,12 +53,6 @@ public class AutopunktUtlederFastsettBeregningsaktiviteterTjenesteTest {
 
     private BehandlingReferanse lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider, iayTjeneste::lagreIayAggregat, iayTjeneste::lagreOppgittOpptjening);
-    }
-
-    @After
-    public void after() {
-        System.clearProperty(FPDateUtil.SystemConfiguredClockProvider.PROPERTY_KEY_OFFSET_PERIODE);
-        FPDateUtil.init();
     }
 
     @Test

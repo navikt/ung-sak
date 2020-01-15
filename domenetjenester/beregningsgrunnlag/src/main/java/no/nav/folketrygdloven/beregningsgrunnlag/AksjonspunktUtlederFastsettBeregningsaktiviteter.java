@@ -20,7 +20,6 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
-import no.nav.vedtak.util.FPDateUtil;
 
 public abstract class AksjonspunktUtlederFastsettBeregningsaktiviteter {
 
@@ -49,10 +48,10 @@ public abstract class AksjonspunktUtlederFastsettBeregningsaktiviteter {
                                                                                Optional<AktørYtelse> aktørYtelse,
                                                                                boolean erOverstyrt) {
         List<Arbeidsgiver> arbeidsgivere = inntektsmeldinger.stream().map(Inntektsmelding::getArbeidsgiver).collect(Collectors.toList());
-        if (beregningsperiodeTjeneste.skalVentePåInnrapporteringAvInntekt(beregningsgrunnlag, arbeidsgivere, FPDateUtil.iDag())) {
+        if (beregningsperiodeTjeneste.skalVentePåInnrapporteringAvInntekt(beregningsgrunnlag, arbeidsgivere, LocalDate.now())) {
             return List.of(opprettSettPåVentAutopunktForVentPåRapportering(beregningsgrunnlag));
         }
-        Optional<LocalDate> ventPåMeldekortFrist = AutopunktUtlederFastsettBeregningsaktiviteterTjeneste.skalVenteTilDatoPåMeldekortAAPellerDP(aktørYtelse, beregningsgrunnlag, FPDateUtil.iDag());
+        Optional<LocalDate> ventPåMeldekortFrist = AutopunktUtlederFastsettBeregningsaktiviteterTjeneste.skalVenteTilDatoPåMeldekortAAPellerDP(aktørYtelse, beregningsgrunnlag, LocalDate.now());
         if (ventPåMeldekortFrist.isPresent()) {
             return List.of(opprettSettPåVentAutopunktMeldekort(ventPåMeldekortFrist.get()));
         }

@@ -44,7 +44,6 @@ import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
 import no.nav.foreldrepenger.mottak.kompletthettjeneste.KompletthetssjekkerInntektsmelding;
 import no.nav.foreldrepenger.mottak.kompletthettjeneste.impl.KompletthetssjekkerTestUtil;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.util.FPDateUtil;
 
 public class KompletthetsjekkerTest {
 
@@ -108,10 +107,10 @@ public class KompletthetsjekkerTest {
     @Test
     public void skal_etterlyse_mer_enn_3ukerfør() {
         // Arrange
-        LocalDate stp = FPDateUtil.iDag().plusDays(2).plusWeeks(3);
+        LocalDate stp = LocalDate.now().plusDays(2).plusWeeks(3);
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         mockManglendeInntektsmeldingGrunnlag();
-        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, FPDateUtil.iDag().minusWeeks(1));
+        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, LocalDate.now().minusWeeks(1));
         when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
 
         // Act
@@ -119,11 +118,11 @@ public class KompletthetsjekkerTest {
 
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isFalse();
-        assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(FPDateUtil.iDag().plusWeeks(3));
+        assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(LocalDate.now().plusWeeks(3));
         verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any(), Mockito.anyBoolean());
 
         // Act 2
-        stp = FPDateUtil.iDag().plusWeeks(3);
+        stp = LocalDate.now().plusWeeks(3);
         KompletthetResultat kompletthetResultat2 = kompletthetsjekkerImpl.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
 
         // Assert
@@ -137,7 +136,7 @@ public class KompletthetsjekkerTest {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         mockManglendeInntektsmeldingGrunnlag();
-        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, FPDateUtil.iDag().minusWeeks(1));
+        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, LocalDate.now().minusWeeks(1));
         when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
 
         // Act
@@ -145,7 +144,7 @@ public class KompletthetsjekkerTest {
 
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isFalse();
-        assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(FPDateUtil.iDag().plusWeeks(3));
+        assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(LocalDate.now().plusWeeks(3));
         verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any(), Mockito.anyBoolean());
     }
 

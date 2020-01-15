@@ -89,7 +89,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
-import no.nav.vedtak.util.FPDateUtil;
+import java.time.LocalDate;
 
 /**
  * Default test scenario builder for å definere opp testdata med enkle defaults.
@@ -496,7 +496,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     public void buildAvsluttet(BehandlingRepository behandlingRepo, BehandlingRepositoryProvider repositoryProvider) {
         Builder behandlingBuilder = grunnBuild(repositoryProvider);
 
-        behandling = behandlingBuilder.medAvsluttetDato(FPDateUtil.nå()).build();
+        behandling = behandlingBuilder.medAvsluttetDato(LocalDateTime.now()).build();
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
 
@@ -826,19 +826,19 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             .erTidligereOpphold(true)
             .medLand(Landkoder.NOR)
             .medPeriode(
-                FPDateUtil.iDag().minusYears(1),
-                FPDateUtil.iDag())
+                LocalDate.now().minusYears(1),
+                LocalDate.now())
             .build();
         MedlemskapOppgittLandOppholdEntitet oppholdNorgeNestePeriode = new MedlemskapOppgittLandOppholdEntitet.Builder()
             .erTidligereOpphold(false)
             .medLand(Landkoder.NOR)
             .medPeriode(
-                FPDateUtil.iDag(),
-                FPDateUtil.iDag().plusYears(1))
+                LocalDate.now(),
+                LocalDate.now().plusYears(1))
             .build();
         List<MedlemskapOppgittLandOppholdEntitet> oppholdNorge = List.of(oppholdNorgeNestePeriode, oppholdNorgeSistePeriode);
 
-        oppgittTilknytningBuilder.medOpphold(oppholdNorge).medOppholdNå(true).medOppgittDato(FPDateUtil.iDag());
+        oppgittTilknytningBuilder.medOpphold(oppholdNorge).medOppholdNå(true).medOppgittDato(LocalDate.now());
         return oppgittTilknytningBuilder;
     }
 

@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandling.revurdering.satsregulering;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -17,7 +18,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.util.FPDateUtil;
 import no.nav.vedtak.util.Tuple;
 
 /**
@@ -50,7 +50,7 @@ public class AutomatiskGrunnbelopReguleringBatchTask implements ProsessTaskHandl
         final var dryRunProperty = prosessTaskData.getPropertyValue(KEY_DRY_RUN);
         final boolean dryRun = dryRunProperty != null && Boolean.parseBoolean(dryRunProperty);
 
-        BeregningSats gjeldende = beregningsresultatRepository.finnEksaktSats(BeregningSatsType.GRUNNBELØP, FPDateUtil.iDag());
+        BeregningSats gjeldende = beregningsresultatRepository.finnEksaktSats(BeregningSatsType.GRUNNBELØP, LocalDate.now());
         BeregningSats forrige = beregningsresultatRepository.finnEksaktSats(BeregningSatsType.GRUNNBELØP, gjeldende.getPeriode().getFomDato().minusDays(1));
         long avkortingAntallG = beregningsresultatRepository.avkortingMultiplikatorG(gjeldende.getPeriode().getFomDato().minusDays(1));
         List<Tuple<Long, AktørId>> tilVurdering = behandlingRevurderingRepository.finnSakerMedBehovForGrunnbeløpRegulering(gjeldende.getVerdi(), forrige.getVerdi(), avkortingAntallG, gjeldende.getPeriode().getFomDato());

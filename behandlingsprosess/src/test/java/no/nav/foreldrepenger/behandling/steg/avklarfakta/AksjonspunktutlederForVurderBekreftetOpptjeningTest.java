@@ -40,7 +40,6 @@ import no.nav.foreldrepenger.domene.opptjening.aksjonspunkt.AksjonspunktutlederF
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.util.FPDateUtil;
 
 public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     @Rule
@@ -51,7 +50,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     private OpptjeningRepository opptjeningRepository;
 
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private final Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(FPDateUtil.iDag()).build();
+    private final Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
 
     @Spy
     private AksjonspunktutlederForVurderBekreftetOpptjening utleder = new AksjonspunktutlederForVurderBekreftetOpptjening(

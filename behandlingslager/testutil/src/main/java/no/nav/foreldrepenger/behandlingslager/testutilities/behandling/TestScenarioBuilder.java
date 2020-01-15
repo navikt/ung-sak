@@ -1,10 +1,11 @@
 package no.nav.foreldrepenger.behandlingslager.testutilities.behandling;
 
+import java.time.LocalDate;
+
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.util.FPDateUtil;
 
 /**
  * Default test scenario builder.
@@ -37,7 +38,7 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     private void settDefaultSøknad() {
             medSøknad()
                 .medRelasjonsRolleType(RelasjonsRolleType.MORA)
-                .medSøknadsdato(FPDateUtil.iDag());
+                .medSøknadsdato(LocalDate.now());
     }
 
     public static TestScenarioBuilder builderMedSøknad() {

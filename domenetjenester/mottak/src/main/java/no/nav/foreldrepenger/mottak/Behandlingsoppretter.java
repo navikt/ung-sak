@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.mottak;
 
 import static java.util.stream.Collectors.toList;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +36,6 @@ import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.DokumentPersistererTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.vedtak.util.FPDateUtil;
 
 @Dependent
 public class Behandlingsoppretter {
@@ -90,7 +90,7 @@ public class Behandlingsoppretter {
             if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
             }
-            beh.setBehandlingstidFrist(FPDateUtil.iDag().plusWeeks(behandlingType.getBehandlingstidFristUker()));
+            beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
             OrganisasjonsEnhet enhet = tidligereBehandling.map(b -> utledEnhetFraTidligereBehandling(b).orElse(b.getBehandlendeOrganisasjonsEnhet()))
                 .orElse(finnBehandlendeEnhet(beh));
             beh.setBehandlendeEnhet(enhet);

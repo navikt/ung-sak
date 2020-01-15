@@ -7,6 +7,7 @@ import static no.nav.foreldrepenger.behandling.steg.kompletthet.VurderKompletthe
 import static no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat.opprettForAksjonspunkt;
 import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,6 @@ import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
 import no.nav.foreldrepenger.mottak.kompletthettjeneste.KompletthetModell;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.util.FPDateUtil;
 
 
 @BehandlingStegRef(kode = "INREG_AVSL")
@@ -103,7 +103,7 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
     private boolean erSøkerUnder18ar(BehandlingReferanse ref) {
         PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
         PersonopplysningEntitet søker = personopplysninger.getSøker();
-        return søker.getFødselsdato().isAfter(FPDateUtil.iDag().minusYears(18));
+        return søker.getFødselsdato().isAfter(LocalDate.now().minusYears(18));
     }
 
 }

@@ -33,7 +33,6 @@ import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimuleringResultatDto;
 import no.nav.foreldrepenger.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.foreldrepenger.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.vedtak.exception.TekniskException;
-import no.nav.vedtak.util.FPDateUtil;
 
 @BehandlingStegRef(kode = "SIMOPP")
 @BehandlingTypeRef
@@ -139,7 +138,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     }
 
     private LocalDateTime utledNesteKjøring() {
-        LocalDateTime currentTime = FPDateUtil.nå();
+        LocalDateTime currentTime = LocalDateTime.now();
         if (DayOfWeek.SATURDAY.equals(currentTime.getDayOfWeek()) || DayOfWeek.SUNDAY.equals(currentTime.getDayOfWeek())) {
             return kommendeMandag(currentTime);
         } else if (DayOfWeek.FRIDAY.equals(currentTime.getDayOfWeek()) && currentTime.getHour() > STENGETID) {

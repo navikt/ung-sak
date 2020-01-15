@@ -13,7 +13,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.vedtak.konfig.Tid;
-import no.nav.vedtak.util.FPDateUtil;
 
 class MapBRAndelSammenligningTidslinje {
     private MapBRAndelSammenligningTidslinje() {
@@ -34,7 +33,7 @@ class MapBRAndelSammenligningTidslinje {
     }
 
     private static LocalDateTimeline<List<BeregningsresultatAndel>> identifiserUtbetaltPeriode() {
-        LocalDate alleredeUtbetaltTom = FinnAlleredeUtbetaltTom.finn(FPDateUtil.iDag());
+        LocalDate alleredeUtbetaltTom = FinnAlleredeUtbetaltTom.finn(LocalDate.now());
         return new LocalDateTimeline<>(
             Tid.TIDENES_BEGYNNELSE,
             alleredeUtbetaltTom,

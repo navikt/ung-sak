@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandling.steg.avklarfakta;
 import static java.util.Collections.emptyList;
 import static no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -30,7 +31,6 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 public class AksjonspunktUtlederForVurderArbeidsforhold implements AksjonspunktUtleder {
@@ -102,7 +102,7 @@ public class AksjonspunktUtlederForVurderArbeidsforhold implements AksjonspunktU
     }
 
     private AksjonspunktResultat opprettSettPåVentAutopunktUgyldigInntektsmelding() {
-        LocalDateTime frist = LocalDateTime.of(FPDateUtil.iDag().plusDays(14), LocalTime.MIDNIGHT);
+        LocalDateTime frist = LocalDateTime.of(LocalDate.now().plusDays(14), LocalTime.MIDNIGHT);
         AksjonspunktDefinisjon apDef = AksjonspunktDefinisjon.AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID;
         return AksjonspunktResultat.opprettForAksjonspunktMedFrist(apDef, Venteårsak.VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID, frist);
     }

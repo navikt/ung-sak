@@ -15,7 +15,6 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.vedtak.util.FPDateUtil;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -27,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraderingUtenBeregningsgrunnlagTjenesteTest {
 
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = FPDateUtil.iDag();
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
     private static final String ORGNR = "915933149";
 
     @Rule

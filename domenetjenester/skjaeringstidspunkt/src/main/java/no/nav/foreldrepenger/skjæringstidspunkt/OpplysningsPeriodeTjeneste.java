@@ -10,7 +10,6 @@ import org.threeten.extra.Interval;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 public class OpplysningsPeriodeTjeneste {
@@ -64,6 +63,6 @@ public class OpplysningsPeriodeTjeneste {
     }
 
     private Interval beregnInterval(LocalDate fom, LocalDate tom, boolean tilOgMedIdag) {
-        return IntervallUtil.byggIntervall(fom, tilOgMedIdag && tom.isBefore(FPDateUtil.iDag()) ? FPDateUtil.iDag() : tom);
+        return IntervallUtil.byggIntervall(fom, tilOgMedIdag && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
 }

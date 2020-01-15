@@ -13,7 +13,6 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.vedtak.util.FPDateUtil;
 
 public class FinnOmSøkerHarArbeidsforholdOgInntekt {
 
@@ -64,7 +63,7 @@ public class FinnOmSøkerHarArbeidsforholdOgInntekt {
 
     private static boolean sjekkOmGjelderRelevantArbeidsgiverOgNærSkjæringstidspunktet(InntektFilter filter, LocalDate skjæringstidspunkt,
                                                                                        List<Arbeidsgiver> aktørArbeid) {
-        LocalDate iDag = FPDateUtil.iDag();
+        LocalDate iDag = LocalDate.now();
         return filter.anyMatchFilter((inntekt, inntektspost) -> {
             return aktørArbeid.contains(inntekt.getArbeidsgiver())
                 && ErInntektNærSkjæringstidspunkt.erNær(inntektspost, skjæringstidspunkt, iDag);

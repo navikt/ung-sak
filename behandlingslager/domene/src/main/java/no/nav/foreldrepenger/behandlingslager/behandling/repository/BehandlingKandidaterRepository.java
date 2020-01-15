@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.vedtak.util.FPDateUtil;
 
 /**
  * Ulike spesialmetoder for å hente opp behandlinger som er kandidater for videre spesiell prosessering, slik som
@@ -69,7 +69,7 @@ public class BehandlingKandidaterRepository {
                 "AND behandling.behandlingType = :revurderingType", //$NON-NLS-1$
             Behandling.class);
 
-        query.setParameter("idag", FPDateUtil.iDag()); //$NON-NLS-1$
+        query.setParameter("idag", LocalDate.now()); //$NON-NLS-1$
         query.setParameter("revurderingType", BehandlingType.REVURDERING);
         query.setParameter("endringType", BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS);
@@ -87,7 +87,7 @@ public class BehandlingKandidaterRepository {
                 "AND behandling.behandlingType in (:list)", //$NON-NLS-1$
             Behandling.class);
 
-        query.setParameter("idag", FPDateUtil.iDag()); //$NON-NLS-1$
+        query.setParameter("idag", LocalDate.now()); //$NON-NLS-1$
         query.setParameter("list", behandlingTyperMedVarselBrev);
         query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS);
         query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
@@ -104,7 +104,7 @@ public class BehandlingKandidaterRepository {
 
         Set<AksjonspunktDefinisjon> autopunktKoder = new HashSet<>(AUTOPUNKTER);
 
-        LocalDateTime naa = FPDateUtil.nå();
+        LocalDateTime naa = LocalDateTime.now();
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             " SELECT DISTINCT b " +
