@@ -125,7 +125,7 @@ public class EntityTest {
         }
     }
 
-    @Ignore("Venter til etter migrering av aliased tables")
+    @Ignore("FIXME er ikke portet til Postgres")
     @Test
     public void sjekk_felt_mapping_primitive_felt_i_entiteter_må_ha_not_nullable_i_db() throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
@@ -155,7 +155,7 @@ public class EntityTest {
         }
     }
 
-    @Ignore("Venter til etter migrering av aliased tables")
+    @Ignore("FIXME er ikke portet til Postgres")
     @Test
     public void sjekk_felt_ikke_primitive_wrappere_kan_ikke_være_not_nullable_i_db() throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);

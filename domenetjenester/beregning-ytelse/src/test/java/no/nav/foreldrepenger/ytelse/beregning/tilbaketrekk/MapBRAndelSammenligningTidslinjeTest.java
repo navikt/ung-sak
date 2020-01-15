@@ -23,7 +23,7 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
-@Ignore
+@Ignore("FIXME: Avhenger av at klokka går (har fjernet FPDateUtil)")
 public class MapBRAndelSammenligningTidslinjeTest {
 
     private static final LocalDate STP = LocalDate.of(2019,9,1);

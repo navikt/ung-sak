@@ -20,13 +20,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.BRAndelSammenligning;
-import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.MapBRAndelSammenligningTidslinje;
-import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.VurderBehovForÅHindreTilbaketrekk;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import java.time.LocalDate;
 
-@Ignore
 public class VurderBehovForÅHindreTilbaketrekkTest {
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2019, Month.JANUARY, 20);
@@ -139,6 +134,7 @@ public class VurderBehovForÅHindreTilbaketrekkTest {
         assertThat(resultat).isFalse();
     }
 
+    @Ignore("FIXME: Avhenger av at klokka går (har fjernet FPDateUtil)")
     @Test
     public void reduksjonEtterUtbetaltTomSkalGiEmpty() {
         // Arrange
