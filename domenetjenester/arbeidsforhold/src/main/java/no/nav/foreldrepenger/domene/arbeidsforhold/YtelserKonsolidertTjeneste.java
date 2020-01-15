@@ -22,7 +22,6 @@ import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 public class YtelserKonsolidertTjeneste {
@@ -51,7 +50,7 @@ public class YtelserKonsolidertTjeneste {
         List<TilgrensendeYtelserDto> resultat = new ArrayList<>(BehandlingRelaterteYtelserMapper.mapFraBehandlingRelaterteYtelser(fraGrunnlag));
 
         Set<Saksnummer> saksnumre = fraGrunnlag.stream().map(Ytelse::getSaksnummer).filter(Objects::nonNull).collect(Collectors.toSet());
-        LocalDate iDag = FPDateUtil.iDag();
+        LocalDate iDag = LocalDate.now();
         Set<FagsakStatus> statuser = Set.of(FagsakStatus.OPPRETTET, FagsakStatus.UNDER_BEHANDLING);
         List<TilgrensendeYtelserDto> resultatÅpen = fagsakRepository.hentForBruker(aktørId).stream()
             .filter(sak -> !saksnumre.contains(sak.getSaksnummer()))

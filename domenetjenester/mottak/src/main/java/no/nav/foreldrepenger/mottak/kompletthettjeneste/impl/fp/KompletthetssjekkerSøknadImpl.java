@@ -21,7 +21,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.foreldrepenger.mottak.kompletthettjeneste.KompletthetssjekkerSøknad;
-import no.nav.vedtak.util.FPDateUtil;
 
 public abstract class KompletthetssjekkerSøknadImpl implements KompletthetssjekkerSøknad {
 
@@ -46,7 +45,7 @@ public abstract class KompletthetssjekkerSøknadImpl implements Kompletthetssjek
         Optional<LocalDate> permisjonsstart = ref.getSkjæringstidspunkt().getSkjæringstidspunktHvisUtledet();
         if (permisjonsstart.isPresent()) {
             LocalDate ventefrist = permisjonsstart.get().minus(ventefristForTidligSøknad);
-            boolean erSøknadMottattForTidlig = ventefrist.isAfter(FPDateUtil.iDag());
+            boolean erSøknadMottattForTidlig = ventefrist.isAfter(LocalDate.now());
             if (erSøknadMottattForTidlig) {
                 LocalDateTime ventefristTidspunkt = ventefrist.atStartOfDay();
                 return Optional.of(ventefristTidspunkt);

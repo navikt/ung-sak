@@ -53,7 +53,7 @@ import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.util.FPDateUtil;
+import java.time.LocalDate;
 
 @SqlResultSetMappings(value = {
         @SqlResultSetMapping(name = "PipDataResult", classes = {
@@ -349,7 +349,7 @@ public class Behandling extends BaseEntitet {
     public void avsluttBehandling() {
         lukkBehandlingStegStatuser(this.behandlingStegTilstander, BehandlingStegStatus.UTFØRT);
         this.status = BehandlingStatus.AVSLUTTET;
-        this.avsluttetDato = FPDateUtil.nå();
+        this.avsluttetDato = LocalDateTime.now();
     }
 
     private void lukkBehandlingStegStatuser(Collection<BehandlingStegTilstand> stegTilstander, BehandlingStegStatus sluttStatusForSteg) {
@@ -792,7 +792,7 @@ public class Behandling extends BaseEntitet {
         private String behandlendeEnhetNavn;
         private String behandlendeEnhetÅrsak;
 
-        private LocalDate behandlingstidFrist = FPDateUtil.iDag().plusWeeks(6);
+        private LocalDate behandlingstidFrist = LocalDate.now().plusWeeks(6);
 
         private BehandlingÅrsak.Builder behandlingÅrsakBuilder;
 

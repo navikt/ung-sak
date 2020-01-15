@@ -17,7 +17,6 @@ import javax.persistence.Query;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.vedtak.util.FPDateUtil;
 /**
  * Oppdatering av tilstand for etterkontroll av behandling.
  */
@@ -83,7 +82,7 @@ public class EtterkontrollRepository {
 
     public List<Behandling> finnKandidaterForAutomatiskEtterkontroll(Period etterkontrollTidTilbake) {
 
-        LocalDate datoTilbakeITid = FPDateUtil.iDag().minus(etterkontrollTidTilbake);
+        LocalDate datoTilbakeITid = LocalDate.now().minus(etterkontrollTidTilbake);
         java.time.LocalDateTime datoTidTilbake = datoTilbakeITid.atStartOfDay();
 
         Query query1 = getEntityManager().createQuery(

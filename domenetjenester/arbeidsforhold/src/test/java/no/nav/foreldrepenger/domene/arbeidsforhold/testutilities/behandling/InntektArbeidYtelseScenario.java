@@ -43,7 +43,6 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.util.FPDateUtil;
 
 public class InntektArbeidYtelseScenario {
 
@@ -126,14 +125,14 @@ public class InntektArbeidYtelseScenario {
         private InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder;
 
         // Permisjon
-        private LocalDate permisjonFom = FPDateUtil.iDag().minusWeeks(9L);
-        private LocalDate permisjonTom = FPDateUtil.iDag().minusWeeks(2L);
+        private LocalDate permisjonFom = LocalDate.now().minusWeeks(9L);
+        private LocalDate permisjonTom = LocalDate.now().minusWeeks(2L);
         private BigDecimal permisjonsprosent = BigDecimal.valueOf(100);
         private PermisjonsbeskrivelseType permisjonsbeskrivelseType = PermisjonsbeskrivelseType.UDEFINERT;
 
         // AktivitetsAvtale
-        private LocalDate aktivitetsAvtaleFom = FPDateUtil.iDag().minusYears(3L);
-        private LocalDate aktivitetsAvtaleTom = FPDateUtil.iDag();
+        private LocalDate aktivitetsAvtaleFom = LocalDate.now().minusYears(3L);
+        private LocalDate aktivitetsAvtaleTom = LocalDate.now();
         private BigDecimal aktivitetsAvtaleProsentsats = BigDecimal.TEN;
 
         // Virksomhet
@@ -150,13 +149,13 @@ public class InntektArbeidYtelseScenario {
         // Inntektspost
         private InntektspostType inntektspostType = InntektspostType.UDEFINERT;
         private BigDecimal inntektspostBeløp = BigDecimal.TEN;
-        private LocalDate inntektspostFom = FPDateUtil.iDag().minusYears(3L);
-        private LocalDate inntektspostTom = FPDateUtil.iDag();
+        private LocalDate inntektspostFom = LocalDate.now().minusYears(3L);
+        private LocalDate inntektspostTom = LocalDate.now();
         private YtelseType inntektspostYtelseType = OffentligYtelseType.UDEFINERT;
 
         // RelaterteYtelser
         private FagsakYtelseType ytelseType = null;
-        private LocalDate iverksettelsesDato = FPDateUtil.iDag().minusYears(5L);
+        private LocalDate iverksettelsesDato = LocalDate.now().minusYears(5L);
         private RelatertYtelseTilstand relatertYtelseTilstand = RelatertYtelseTilstand.AVSLUTTET;
         private TemaUnderkategori ytelseBehandlingstema = TemaUnderkategori.FORELDREPENGER_SVANGERSKAPSPENGER;
         private LocalDate tomDato;

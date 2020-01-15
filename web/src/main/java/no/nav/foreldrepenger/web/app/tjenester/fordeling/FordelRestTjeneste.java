@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.web.app.tjenester.fordeling;
 import static no.nav.vedtak.feil.LogLevel.WARN;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -66,7 +67,6 @@ import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.vedtak.util.FPDateUtil;
 
 // FIXME K9 Hei Stian!
 
@@ -323,7 +323,7 @@ public class FordelRestTjeneste {
             builder.medPayloadXml(payloadXml.get()); // NOSONAR
         }
 
-        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(FPDateUtil.iDag())); // NOSONAR
+        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(LocalDate.now())); // NOSONAR
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottattTidspunkt()); // NOSONAR
 
         return builder.build();

@@ -44,7 +44,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
-import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 public class OppgaveTjeneste {
@@ -158,8 +157,8 @@ public class OppgaveTjeneste {
             .medUnderkategoriKode(NØS_FP_UNDERKATEGORI)
             .medPrioritetKode(PrioritetKode.HOY_STO.name())
             .medLest(false)
-            .medAktivFra(FPDateUtil.iDag())
-            .medAktivTil(helgeJustertFrist(FPDateUtil.iDag().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
+            .medAktivFra(LocalDate.now())
+            .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
             .medBrukerTypeKode(BrukerType.PERSON)
             .medFnr(hentPersonInfo(behandling.getNavBruker().getAktørId()).getPersonIdent().getIdent())
             .medSaksnummer(saksnummer.getVerdi())
@@ -193,8 +192,8 @@ public class OppgaveTjeneste {
             .medUnderkategoriKode(NØS_FP_UNDERKATEGORI)
             .medPrioritetKode(PrioritetKode.HOY_STO.name())
             .medLest(false)
-            .medAktivFra(FPDateUtil.iDag())
-            .medAktivTil(helgeJustertFrist(FPDateUtil.iDag().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
+            .medAktivFra(LocalDate.now())
+            .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
             .medBrukerTypeKode(BrukerType.PERSON)
             .medFnr(hentPersonInfo(behandling.getNavBruker().getAktørId()).getPersonIdent().getIdent())
             .medSaksnummer(saksnummer.getVerdi())
@@ -211,8 +210,8 @@ public class OppgaveTjeneste {
             .medAnsvarligEnhetId(behandling.getBehandlendeEnhet())
             .medFagomradeKode(FagomradeKode.FOR.getKode())
             .medFnr(hentPersonInfo(behandling.getNavBruker().getAktørId()).getPersonIdent().getIdent())
-            .medAktivFra(FPDateUtil.iDag())
-            .medAktivTil(helgeJustertFrist(FPDateUtil.iDag().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
+            .medAktivFra(LocalDate.now())
+            .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
             .medOppgavetypeKode(OppgaveÅrsak.BEHANDLE_SAK_INFOTRYGD.getKode())
             .medSaksnummer(saksnummer.getVerdi())
             .medPrioritetKode(PrioritetKode.NORM_FOR.toString())
@@ -382,8 +381,8 @@ public class OppgaveTjeneste {
             .medFagomradeKode(FagomradeKode.FOR.getKode())
             .medFnr(personinfo.getPersonIdent().getIdent())
             .medBrukerTypeKode(BrukerType.PERSON)
-            .medAktivFra(FPDateUtil.iDag())
-            .medAktivTil(helgeJustertFrist(FPDateUtil.iDag().plusDays(fristDager)))
+            .medAktivFra(LocalDate.now())
+            .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(fristDager)))
             .medOppgavetypeKode(oppgaveÅrsak.getKode())
             .medSaksnummer(fagsak.getSaksnummer() != null ? fagsak.getSaksnummer().getVerdi() : fagsak.getId().toString()) // Mer iht PK-38815
             .medPrioritetKode(prioritetKode.toString())

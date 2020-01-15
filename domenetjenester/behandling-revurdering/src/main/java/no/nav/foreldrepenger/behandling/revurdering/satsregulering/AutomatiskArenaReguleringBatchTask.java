@@ -17,7 +17,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.util.FPDateUtil;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -27,7 +26,7 @@ public class AutomatiskArenaReguleringBatchTask implements ProsessTaskHandler {
     public static final String KEY_SATS_DATO = "satsDato";
     public static final String KEY_DRY_RUN = "dryRun";
     public static final String TASKTYPE = "batch.arenaRegulering";
-    static final LocalDate DATO = LocalDate.of(FPDateUtil.iDag().getYear(), 5, 1);
+    static final LocalDate DATO = LocalDate.of(LocalDate.now().getYear(), 5, 1);
     private static final Logger log = LoggerFactory.getLogger(AutomatiskArenaReguleringBatchTask.class);
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     private ProsessTaskRepository prosessTaskRepository;

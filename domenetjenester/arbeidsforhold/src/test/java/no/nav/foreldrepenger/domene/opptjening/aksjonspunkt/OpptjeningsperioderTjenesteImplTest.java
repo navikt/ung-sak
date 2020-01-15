@@ -63,7 +63,6 @@ import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.util.FPDateUtil;
 
 @RunWith(CdiRunner.class)
 public class OpptjeningsperioderTjenesteImplTest {
@@ -248,7 +247,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, FPDateUtil.iDag().minusMonths(10), FPDateUtil.iDag().minusDays(1), false);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
         List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
@@ -295,7 +294,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, FPDateUtil.iDag().minusMonths(10), FPDateUtil.iDag().minusDays(1), false);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
         List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
@@ -339,7 +338,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, FPDateUtil.iDag().minusMonths(10), FPDateUtil.iDag().minusDays(1), false);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
         List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref);

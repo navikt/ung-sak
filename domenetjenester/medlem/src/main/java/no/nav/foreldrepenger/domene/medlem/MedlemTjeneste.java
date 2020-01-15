@@ -50,7 +50,6 @@ import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.util.FPDateUtil;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -132,7 +131,7 @@ public class MedlemTjeneste {
         if (revurderingBehandling.erRevurdering() && revurderingBehandling.getFagsakYtelseType().gjelderForeldrepenger()) {
             AktørId aktørId = revurderingBehandling.getAktørId();
             Long behandlingId = revurderingBehandling.getId();
-            DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMedTilOgMed(finnStartdato(revurderingBehandling), FPDateUtil.iDag());
+            DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMedTilOgMed(finnStartdato(revurderingBehandling), LocalDate.now());
             Optional<PersonopplysningerAggregat> historikkAggregat = personopplysningTjeneste
                 .hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, intervall);
 
@@ -263,7 +262,7 @@ public class MedlemTjeneste {
             }
         }
 
-        return startDato.isAfter(FPDateUtil.iDag()) ? FPDateUtil.iDag() : startDato;
+        return startDato.isAfter(LocalDate.now()) ? LocalDate.now() : startDato;
     }
 
     public Tuple<VilkårUtfallType, Avslagsårsak> utledVilkårUtfall(Behandling revurdering) {

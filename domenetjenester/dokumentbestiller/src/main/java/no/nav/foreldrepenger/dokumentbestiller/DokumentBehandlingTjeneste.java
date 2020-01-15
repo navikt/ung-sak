@@ -20,7 +20,6 @@ import no.nav.foreldrepenger.dokumentbestiller.dto.BrevmalDto;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.BehandlingUuidDto;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.DokumentProdusertDto;
-import no.nav.vedtak.util.FPDateUtil;
 
 @ApplicationScoped
 public class DokumentBehandlingTjeneste {
@@ -88,7 +87,7 @@ public class DokumentBehandlingTjeneste {
     }
 
     LocalDate finnNyFristManuelt(Behandling behandling) {
-        return FPDateUtil.iDag().plusWeeks(behandling.getType().getBehandlingstidFristUker());
+        return LocalDate.now().plusWeeks(behandling.getType().getBehandlingstidFristUker());
     }
 
     public void utvidBehandlingsfristManueltMedlemskap(Long behandlingId) {

@@ -40,7 +40,7 @@ import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
  * kun aksesseres gjennom native sql), men p.t. høyst sannsynlig ikke.
  * Bør gjennomgås jevnlig for å luke manglende contract av db skjema.
  */
-@Ignore(value="TODO: Fix for postgres")
+@Ignore(value="FIXME: Er ikke portet til Postgres")
 public class RapporterUnmappedKolonnerIDatabaseTest {
     private static final Logger log = LoggerFactory.getLogger(RapporterUnmappedKolonnerIDatabaseTest.class);
 

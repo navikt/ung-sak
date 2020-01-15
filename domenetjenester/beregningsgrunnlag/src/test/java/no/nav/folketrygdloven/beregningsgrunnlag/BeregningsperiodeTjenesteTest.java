@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,7 +28,6 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.util.FPDateUtil;
 
 @RunWith(CdiRunner.class)
 public class BeregningsperiodeTjenesteTest {
@@ -65,12 +63,6 @@ public class BeregningsperiodeTjenesteTest {
 
     private BehandlingReferanse lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider, iayTestUtil.getIayTjeneste()::lagreIayAggregat, iayTestUtil.getIayTjeneste()::lagreOppgittOpptjening);
-    }
-
-    @AfterClass
-    public static void after() {
-        System.clearProperty(FPDateUtil.SystemConfiguredClockProvider.PROPERTY_KEY_OFFSET_PERIODE);
-        FPDateUtil.init();
     }
 
     private void opprettArbeidsforhold() {
