@@ -4,14 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
@@ -23,84 +20,83 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
-@Ignore("FIXME: Avhenger av at klokka går (har fjernet FPDateUtil)")
 public class MapBRAndelSammenligningTidslinjeTest {
 
-    private static final LocalDate STP = LocalDate.of(2019,9,1);
     private static final Arbeidsgiver AG1 = Arbeidsgiver.virksomhet("923609016");
     private static final Arbeidsgiver AG2 = Arbeidsgiver.virksomhet("987123987");
     private static final InternArbeidsforholdRef REF1 = InternArbeidsforholdRef.nyRef();
     private static final InternArbeidsforholdRef REF2 = InternArbeidsforholdRef.nyRef();
 
-    @After
-    public void teardown() {
-        settSimulertNåtidTil(LocalDate.now());
-    }
-
     @Test
     public void skal_teste_at_tidslinje_lages_korrekt_når_begge_resultat_er_like_og_ingenting_er_utbetalt() {
         // Arrange
-        settSimulertNåtidTil(STP.minusDays(1));
-        BeregningsresultatPeriode periode = lagResultatMedPeriode(STP, STP.plusDays(15));
-        BeregningsresultatPeriode periode2 = lagResultatMedPeriode(STP.plusDays(16), STP.plusDays(29));
-        BeregningsresultatPeriode periode3 = lagResultatMedPeriode(STP.plusDays(30), STP.plusDays(40));
+        var stp = LocalDate.of(2019, 9, 01);
+        var utbetaltTom = stp.minusDays(1);
+        
+        BeregningsresultatPeriode periode = lagResultatMedPeriode(stp, stp.plusDays(15));
+        BeregningsresultatPeriode periode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(29));
+        BeregningsresultatPeriode periode3 = lagResultatMedPeriode(stp.plusDays(30), stp.plusDays(40));
         BeregningsresultatAndel andel = lagAndelForPeriode(periode, AG1, REF1);
         lagAndelForPeriode(periode2, AG1, REF1);
         lagAndelForPeriode(periode3, AG1, REF1);
 
         // Act
-        LocalDateTimeline<BRAndelSammenligning> tidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(Arrays.asList(periode, periode2, periode3), Arrays.asList(periode, periode2, periode3));
+        LocalDateTimeline<BRAndelSammenligning> tidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(Arrays.asList(periode, periode2, periode3), Arrays.asList(periode, periode2, periode3), utbetaltTom);
 
         // Assert
         assertThat(tidslinje.toSegments()).hasSize(3);
         ArrayList<LocalDateSegment<BRAndelSammenligning>> segmenter = new ArrayList<>(tidslinje.toSegments());
 
-        assertSegment(segmenter.get(0), STP, STP.plusDays(15), Collections.singletonList(andel), Collections.emptyList());
-        assertSegment(segmenter.get(1), STP.plusDays(16), STP.plusDays(29), Collections.singletonList(andel), Collections.emptyList());
-        assertSegment(segmenter.get(2), STP.plusDays(30), STP.plusDays(40), Collections.singletonList(andel), Collections.emptyList());
+        assertSegment(segmenter.get(0), stp, stp.plusDays(15), Collections.singletonList(andel), Collections.emptyList());
+        assertSegment(segmenter.get(1), stp.plusDays(16), stp.plusDays(29), Collections.singletonList(andel), Collections.emptyList());
+        assertSegment(segmenter.get(2), stp.plusDays(30), stp.plusDays(40), Collections.singletonList(andel), Collections.emptyList());
     }
 
     @Test
     public void skal_teste_at_tidslinje_lages_korrekt_når_begge_resultat_er_like_og_noe_er_utbetalt() {
         // Arrange
-        settSimulertNåtidTil(STP.plusDays(20));
-        BeregningsresultatPeriode periode = lagResultatMedPeriode(STP, STP.plusDays(15));
-        BeregningsresultatPeriode periode2 = lagResultatMedPeriode(STP.plusDays(16), STP.plusDays(25));
-        BeregningsresultatPeriode periode3 = lagResultatMedPeriode(STP.plusDays(26), STP.plusDays(40));
+        var stp = LocalDate.of(2019, 9, 01);
+        var utbetaltTom = stp.plusDays(20);
+        
+        BeregningsresultatPeriode periode = lagResultatMedPeriode(stp, stp.plusDays(15));
+        BeregningsresultatPeriode periode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(25));
+        BeregningsresultatPeriode periode3 = lagResultatMedPeriode(stp.plusDays(26), stp.plusDays(40));
         BeregningsresultatAndel andel = lagAndelForPeriode(periode, AG1, REF1);
         lagAndelForPeriode(periode2, AG1, REF1);
         lagAndelForPeriode(periode3, AG1, REF1);
 
         // Act
-        LocalDateTimeline<BRAndelSammenligning> tidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(Arrays.asList(periode, periode2, periode3), Arrays.asList(periode, periode2, periode3));
+        LocalDateTimeline<BRAndelSammenligning> tidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(Arrays.asList(periode, periode2, periode3), Arrays.asList(periode, periode2, periode3),
+            utbetaltTom);
 
         // Assert
         assertThat(tidslinje.toSegments()).hasSize(4);
         ArrayList<LocalDateSegment<BRAndelSammenligning>> segmenter = new ArrayList<>(tidslinje.toSegments());
 
-        assertSegment(segmenter.get(0), STP, STP.plusDays(15), Collections.singletonList(andel), Collections.singletonList(andel));
-        assertSegment(segmenter.get(1), STP.plusDays(16), STP.plusDays(25), Collections.singletonList(andel), Collections.singletonList(andel));
-        assertSegment(segmenter.get(2), STP.plusDays(26), STP.plusDays(29), Collections.singletonList(andel), Collections.singletonList(andel));
-        assertSegment(segmenter.get(3), STP.plusDays(30), STP.plusDays(40), Collections.singletonList(andel), Collections.emptyList());
+        assertSegment(segmenter.get(0), stp, stp.plusDays(15), Collections.singletonList(andel), Collections.singletonList(andel));
+        assertSegment(segmenter.get(1), stp.plusDays(16), stp.plusDays(25), Collections.singletonList(andel), Collections.singletonList(andel));
+        assertSegment(segmenter.get(2), stp.plusDays(26), stp.plusDays(29), Collections.singletonList(andel), Collections.singletonList(andel));
+        assertSegment(segmenter.get(3), stp.plusDays(30), stp.plusDays(40), Collections.singletonList(andel), Collections.emptyList());
     }
 
     @Test
     public void skal_teste_at_tidslinje_lages_korrekt_når_nytt_resultat_har_ekstra_andel_og_noe_er_utbetalt() {
         // Arrange
-        settSimulertNåtidTil(STP.plusDays(20));
-
+        var stp = LocalDate.of(2019, 9, 01);
+        var utbetaltTom = stp.plusDays(20);
+        
         // Gammelt resultat
-        BeregningsresultatPeriode gammelPeriode = lagResultatMedPeriode(STP, STP.plusDays(15));
-        BeregningsresultatPeriode gammelPeriode2 = lagResultatMedPeriode(STP.plusDays(16), STP.plusDays(25));
-        BeregningsresultatPeriode gammelPeriode3 = lagResultatMedPeriode(STP.plusDays(26), STP.plusDays(40));
+        BeregningsresultatPeriode gammelPeriode = lagResultatMedPeriode(stp, stp.plusDays(15));
+        BeregningsresultatPeriode gammelPeriode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(25));
+        BeregningsresultatPeriode gammelPeriode3 = lagResultatMedPeriode(stp.plusDays(26), stp.plusDays(40));
         BeregningsresultatAndel gammelAndel = lagAndelForPeriode(gammelPeriode, AG1, REF1);
         lagAndelForPeriode(gammelPeriode2, AG1, REF1);
         lagAndelForPeriode(gammelPeriode3, AG1, REF1);
 
         // Nytt resultat
-        BeregningsresultatPeriode nyPeriode = lagResultatMedPeriode(STP, STP.plusDays(15));
-        BeregningsresultatPeriode nyPeriode2 = lagResultatMedPeriode(STP.plusDays(16), STP.plusDays(25));
-        BeregningsresultatPeriode nyPeriode3 = lagResultatMedPeriode(STP.plusDays(26), STP.plusDays(40));
+        BeregningsresultatPeriode nyPeriode = lagResultatMedPeriode(stp, stp.plusDays(15));
+        BeregningsresultatPeriode nyPeriode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(25));
+        BeregningsresultatPeriode nyPeriode3 = lagResultatMedPeriode(stp.plusDays(26), stp.plusDays(40));
         BeregningsresultatAndel nyAndel = lagAndelForPeriode(nyPeriode, AG1, REF1);
         lagAndelForPeriode(nyPeriode2, AG1, REF1);
         BeregningsresultatAndel nyAndel2 = lagAndelForPeriode(nyPeriode2, AG2, REF2);
@@ -108,16 +104,17 @@ public class MapBRAndelSammenligningTidslinjeTest {
 
 
         // Act
-        LocalDateTimeline<BRAndelSammenligning> tidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(Arrays.asList(gammelPeriode, gammelPeriode2, gammelPeriode3), Arrays.asList(nyPeriode, nyPeriode2, nyPeriode3));
+        LocalDateTimeline<BRAndelSammenligning> tidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(Arrays.asList(gammelPeriode, gammelPeriode2, gammelPeriode3), Arrays.asList(nyPeriode, nyPeriode2, nyPeriode3),
+            utbetaltTom);
 
         // Assert
         assertThat(tidslinje.toSegments()).hasSize(4);
         ArrayList<LocalDateSegment<BRAndelSammenligning>> segmenter = new ArrayList<>(tidslinje.toSegments());
 
-        assertSegment(segmenter.get(0), STP, STP.plusDays(15), Collections.singletonList(nyAndel), Collections.singletonList(gammelAndel));
-        assertSegment(segmenter.get(1), STP.plusDays(16), STP.plusDays(25), Arrays.asList(nyAndel, nyAndel2), Collections.singletonList(gammelAndel));
-        assertSegment(segmenter.get(2), STP.plusDays(26), STP.plusDays(29), Collections.singletonList(nyAndel), Collections.singletonList(gammelAndel));
-        assertSegment(segmenter.get(3), STP.plusDays(30), STP.plusDays(40), Collections.singletonList(nyAndel), Collections.emptyList());
+        assertSegment(segmenter.get(0), stp, stp.plusDays(15), Collections.singletonList(nyAndel), Collections.singletonList(gammelAndel));
+        assertSegment(segmenter.get(1), stp.plusDays(16), stp.plusDays(25), Arrays.asList(nyAndel, nyAndel2), Collections.singletonList(gammelAndel));
+        assertSegment(segmenter.get(2), stp.plusDays(26), stp.plusDays(29), Collections.singletonList(nyAndel), Collections.singletonList(gammelAndel));
+        assertSegment(segmenter.get(3), stp.plusDays(30), stp.plusDays(40), Collections.singletonList(nyAndel), Collections.emptyList());
     }
 
     private void assertSegment(LocalDateSegment<BRAndelSammenligning> segment, LocalDate fom, LocalDate tom, List<BeregningsresultatAndel> nyeForventedeAndeler, List<BeregningsresultatAndel> forrigeForventedeAndeler) {
@@ -153,10 +150,5 @@ public class MapBRAndelSammenligningTidslinjeTest {
             .medBeregningsresultatPeriodeFomOgTom(fom, tom)
             .build(resultat);
     }
-
-    private void settSimulertNåtidTil(LocalDate dato) {
-        Period periode = Period.between(LocalDate.now(), dato);
-    }
-
 
 }
