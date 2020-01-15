@@ -31,7 +31,7 @@ public class RedirectExceptionMapperTest {
         Whitebox.setInternalState(exceptionMapper, "loadBalancerUrl", "https://erstatter.nav.no");
         Whitebox.setInternalState(exceptionMapper, "generalRestExceptionMapper", generalRestExceptionMapper);
 
-        ContextPathHolder.instance("/fpsak");
+        ContextPathHolder.instance("/sak");
     }
 
     @Test
@@ -57,7 +57,7 @@ public class RedirectExceptionMapperTest {
         assertThat(response.getMetadata().get("Content-Encoding").get(0))
             .isEqualTo("UTF-8");
         assertThat(response.getMetadata().get("Location").get(0).toString())
-            .isEqualTo("https://erstatter.nav.no/fpsak/#?errorcode=feilmelding");
+            .isEqualTo("https://erstatter.nav.no/sak/#?errorcode=feilmelding");
     }
 
 }
