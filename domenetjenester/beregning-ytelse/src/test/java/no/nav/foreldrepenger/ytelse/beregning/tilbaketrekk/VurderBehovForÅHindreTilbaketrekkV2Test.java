@@ -4,19 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.Period;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.BRAndelSammenligning;
-import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.MapBRAndelSammenligningTidslinje;
-import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.VurderBehovForÅHindreTilbaketrekkV2;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
@@ -25,12 +15,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import java.time.LocalDate;
 
 public class VurderBehovForÅHindreTilbaketrekkV2Test {
 
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2019, Month.JANUARY, 20);
+    private static final LocalDate UTBETALT_TOM = LocalDate.now();
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now().minusDays(15);
     private static final LocalDate ANDRE_PERIODE_FOM = SKJÆRINGSTIDSPUNKT.plusMonths(5);
     private static final LocalDate SISTE_UTTAKSDAG = SKJÆRINGSTIDSPUNKT.plusMonths(9);
 
@@ -40,16 +31,6 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
     private static final InternArbeidsforholdRef REF1 = InternArbeidsforholdRef.nyRef();
     private static final InternArbeidsforholdRef REF2 = InternArbeidsforholdRef.nyRef();
     private static final InternArbeidsforholdRef REF3 = InternArbeidsforholdRef.nyRef();
-
-    @BeforeClass
-    public static void beforeClass() {
-        settSimulertNåtidTil(LocalDate.of(2019, Month.FEBRUARY, 4));
-    }
-
-    @AfterClass
-    public static void teardown() {
-        settSimulertNåtidTil(LocalDate.now());
-    }
 
     @Test
     public void ingenEndringSkalGiEmpty() {
@@ -61,7 +42,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = denneTY.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -82,7 +64,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         // Act
         boolean resultat = VurderBehovForÅHindreTilbaketrekkV2.skalVurdereTilbaketrekk(MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         ));
 
         // Assert
@@ -98,7 +81,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = denneTY.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -116,7 +100,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = Collections.emptyList();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -135,7 +120,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = denneTY.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -145,7 +131,6 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         assertThat(resultat).isFalse();
     }
 
-    @Ignore("FIXME: Avhenger av at klokka går (har fjernet FPDateUtil)")
     @Test
     public void reduksjonEtterUtbetaltTomSkalGiEmpty() {
         // Arrange
@@ -172,7 +157,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = denneTY.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -221,7 +207,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = revurderingBR.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -272,7 +259,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = revurderingBR.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -330,7 +318,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         List<BeregningsresultatPeriode> denneTYPerioder = revurderingBR.getBeregningsresultatPerioder();
         LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTYPerioder,
-            denneTYPerioder
+            denneTYPerioder,
+            UTBETALT_TOM
         );
 
         // Act
@@ -385,7 +374,4 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
             .build(brp);
     }
 
-    private static void settSimulertNåtidTil(LocalDate dato) {
-        Period periode = Period.between(LocalDate.now(), dato);
-    }
 }

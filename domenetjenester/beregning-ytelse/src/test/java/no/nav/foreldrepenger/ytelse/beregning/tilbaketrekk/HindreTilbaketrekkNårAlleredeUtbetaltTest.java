@@ -5,11 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.Period;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import no.finn.unleash.FakeUnleash;
@@ -20,7 +18,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 
-@Ignore("FIXME: Avhenger av at klokka går (har fjernet FPDateUtil)")
 public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2019, Month.JANUARY, 20);
@@ -54,7 +51,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
     @Test
     public void omfordel_til_bruker_når_det_krever_refusjon_tilbake_i_tid() {
         // Arrange
-        settSimulertNåtidTil(LocalDate.of(2019, Month.FEBRUARY, 4));
+        LocalDate tom = LocalDate.of(2019, Month.FEBRUARY, 4);
         int forventetDagsats = 1000;
         BeregningsresultatEntitet forrigeTY = lagBeregningsresultatFP(true, forventetDagsats);
         BeregningsresultatEntitet beregningsgrunnlagTY = lagBeregningsresultatFP(false, forventetDagsats);
@@ -62,7 +59,8 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
         // Act
         BeregningsresultatEntitet utbetTY = tjeneste.reberegn(beregningsgrunnlagTY, MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTY.getBeregningsresultatPerioder(),
-            beregningsgrunnlagTY.getBeregningsresultatPerioder()));
+            beregningsgrunnlagTY.getBeregningsresultatPerioder(),
+            tom));
 
         // Assert
         List<BeregningsresultatPeriode> beregningsresultatPerioder = utbetTY.getBeregningsresultatPerioder();
@@ -110,7 +108,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
     @Test
     public void skal_avkorte_men_ikke_omfordele_fra_bruker() {
         // Arrange
-        settSimulertNåtidTil(LocalDate.of(2019, Month.FEBRUARY, 4));
+        LocalDate utbetaltTom = LocalDate.of(2019, Month.FEBRUARY, 4);
         BeregningsresultatPeriode forrigeBrp = lagBeregningsresultatPeriode();
         lagAndel(forrigeBrp, ARBEIDSGIVER1, true, 0);
         lagAndel(forrigeBrp, ARBEIDSGIVER1, false, 1500);
@@ -127,7 +125,8 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
         // Act
         BeregningsresultatEntitet utbetTY = tjeneste.reberegn(beregningsgrunnlagTY, MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTY.getBeregningsresultatPerioder(),
-            beregningsgrunnlagTY.getBeregningsresultatPerioder()));
+            beregningsgrunnlagTY.getBeregningsresultatPerioder(),
+            utbetaltTom));
 
         // Assert
         List<BeregningsresultatPeriode> beregningsresultatPerioder = utbetTY.getBeregningsresultatPerioder();
@@ -205,7 +204,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
     @Test
     public void skal_fordele_refusjon_til_to_nye_arbeidsgivere() {
         // Arrange
-        settSimulertNåtidTil(LocalDate.of(2019, Month.FEBRUARY, 4));
+        LocalDate utbetaltTom = LocalDate.of(2019, Month.FEBRUARY, 4);
         BeregningsresultatPeriode forrigeBrp = lagBeregningsresultatPeriode();
         lagAndel(forrigeBrp, ARBEIDSGIVER1, true, 0);
         lagAndel(forrigeBrp, ARBEIDSGIVER1, false, 1500);
@@ -225,7 +224,8 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
         // Act
         BeregningsresultatEntitet utbetTY = tjeneste.reberegn(beregningsgrunnlagTY, MapBRAndelSammenligningTidslinje.opprettTidslinje(
             forrigeTY.getBeregningsresultatPerioder(),
-            beregningsgrunnlagTY.getBeregningsresultatPerioder()));
+            beregningsgrunnlagTY.getBeregningsresultatPerioder(),
+            utbetaltTom));
 
         // Assert
         List<BeregningsresultatPeriode> beregningsresultatPerioder = utbetTY.getBeregningsresultatPerioder();
@@ -335,8 +335,4 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
             .build(brp);
     }
 
-    private void settSimulertNåtidTil(LocalDate dato) {
-        Period periode = Period.between(LocalDate.now(), dato);
-//        System.setProperty(FUNKSJONELT_TIDSOFFSET, periode.toString());
-    }
 }
