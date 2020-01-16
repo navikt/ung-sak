@@ -89,7 +89,6 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
-import java.time.LocalDate;
 
 /**
  * Default test scenario builder for å definere opp testdata med enkle defaults.

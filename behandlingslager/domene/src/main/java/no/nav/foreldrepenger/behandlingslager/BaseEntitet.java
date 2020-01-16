@@ -11,7 +11,6 @@ import javax.persistence.PreUpdate;
 
 import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
-import java.time.LocalDate;
 
 /**
  * En basis {@link Entity} klasse som håndtere felles standarder for utformign av tabeller (eks. sporing av hvem som har

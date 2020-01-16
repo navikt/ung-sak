@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.historikk.OppgaveÅrsak;
-import java.time.LocalDate;
 
 @Entity(name = "OppgaveBehandlingKobling")
 @Table(name = "OPPGAVE_BEHANDLING_KOBLING")

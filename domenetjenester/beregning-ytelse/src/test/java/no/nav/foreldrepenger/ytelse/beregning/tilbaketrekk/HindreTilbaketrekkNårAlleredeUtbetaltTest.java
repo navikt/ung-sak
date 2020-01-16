@@ -10,7 +10,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -30,7 +29,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
 
     @Before
     public void setup() {
-        tjeneste = new HindreTilbaketrekkNårAlleredeUtbetalt(new FakeUnleash());
+        tjeneste = new HindreTilbaketrekkNårAlleredeUtbetalt();
     }
 
     /**

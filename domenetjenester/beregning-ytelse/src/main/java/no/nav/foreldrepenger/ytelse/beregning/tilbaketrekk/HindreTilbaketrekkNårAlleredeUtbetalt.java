@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.finn.unleash.Unleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregningsgrunnlag;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.Beregningsresultat;
@@ -12,17 +11,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 @ApplicationScoped
 public class HindreTilbaketrekkNårAlleredeUtbetalt {
-    private static final String TOGGLE = "fpsak.match.beregningsresultat";
     
-    private Unleash unleash;
-    
+    @Inject
     HindreTilbaketrekkNårAlleredeUtbetalt() {
         // for CDI proxy
-    }
-
-    @Inject
-    public HindreTilbaketrekkNårAlleredeUtbetalt(Unleash unleash) {
-        this.unleash = unleash;
     }
 
     /**
@@ -41,7 +33,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetalt {
             .build();
 
         for (LocalDateSegment<BRAndelSammenligning> segment : tidslinje.toSegments()) {
-            HindreTilbaketrekkBeregningsresultatPeriode.omfordelPeriodeVedBehov(utbetaltTY, segment, unleash.isEnabled(TOGGLE));
+            HindreTilbaketrekkBeregningsresultatPeriode.omfordelPeriodeVedBehov(utbetaltTY, segment);
         }
         return utbetaltTY;
     }

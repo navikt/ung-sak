@@ -53,7 +53,6 @@ import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.feil.FeilFactory;
-import java.time.LocalDate;
 
 @SqlResultSetMappings(value = {
         @SqlResultSetMapping(name = "PipDataResult", classes = {
