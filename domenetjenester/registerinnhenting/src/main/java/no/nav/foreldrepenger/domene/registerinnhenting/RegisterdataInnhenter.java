@@ -66,7 +66,6 @@ import no.nav.foreldrepenger.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
-import java.time.LocalDate;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {

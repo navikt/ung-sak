@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import java.time.LocalDate;
 
 /**
  * Skal kun brukes av tester som av en eller annen grunn må tukle

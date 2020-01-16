@@ -4,8 +4,10 @@ package no.nav.foreldrepenger.behandlingslager.behandling.beregning;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -20,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -46,6 +49,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     private BeregningsresultatEntitet beregningsresultat;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatPeriode", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OrderBy("arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
 
     @Embedded
@@ -66,9 +70,12 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     public LocalDate getBeregningsresultatPeriodeTom() {
         return periode.getTomDato();
     }
-
+    
     public List<BeregningsresultatAndel> getBeregningsresultatAndelList() {
-        return Collections.unmodifiableList(beregningsresultatAndelList);
+        return Collections.unmodifiableList(beregningsresultatAndelList)
+                .stream()
+                .sorted(COMP_BEREGININGSRESULTAT_ANDEL)
+                .collect(Collectors.toList());
     }
 
     public BeregningsresultatEntitet getBeregningsresultat() {
@@ -150,5 +157,13 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             Objects.requireNonNull(beregningsresultatPeriodeMal.periode.getTomDato(), "beregningsresultaPeriodeTom");
         }
     }
+    
+    private static final Comparator<BeregningsresultatAndel> COMP_BEREGININGSRESULTAT_ANDEL = Comparator
+            .comparing((BeregningsresultatAndel ba) -> ba.getArbeidsforholdIdentifikator(), Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(ba -> ba.getArbeidsforholdRef().getReferanse(), Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(ba -> ba.getAktivitetStatus(), Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(ba -> ba.getInntektskategori(), Comparator.nullsLast(Comparator.naturalOrder()))
+            ;
+
 }
 

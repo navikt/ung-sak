@@ -14,7 +14,7 @@ class HindreTilbaketrekkBeregningsresultatPeriode {
         // skjul public constructor
     }
 
-    static BeregningsresultatPeriode omfordelPeriodeVedBehov(BeregningsresultatEntitet utbetaltTY, LocalDateSegment<BRAndelSammenligning> segment, boolean brukToggletMatchingAvAndeler) {
+    static BeregningsresultatPeriode omfordelPeriodeVedBehov(BeregningsresultatEntitet utbetaltTY, LocalDateSegment<BRAndelSammenligning> segment) {
         int bgDagsats = segment.getValue().getBgAndeler().stream()
             .mapToInt(BeregningsresultatAndel::getDagsats)
             .sum();
@@ -34,16 +34,9 @@ class HindreTilbaketrekkBeregningsresultatPeriode {
                     .build(beregningsresultatPeriode)
             );
         } else {
-            if (brukToggletMatchingAvAndeler) {
-                List<BeregningsresultatAndel.Builder> builders = OmfordelUtbetaltYtelseV2.omfordel(forrigeAndeler, bgAndeler);
-                builders.forEach(builder -> builder.build(beregningsresultatPeriode));
-                postcondition(bgDagsats, beregningsresultatPeriode);
-
-            } else {
-                List<BeregningsresultatAndel.Builder> builders = OmfordelUtbetaltYtelse.omfordel(forrigeAndeler, bgAndeler);
-                builders.forEach(builder -> builder.build(beregningsresultatPeriode));
-                postcondition(bgDagsats, beregningsresultatPeriode);
-            }
+            List<BeregningsresultatAndel.Builder> builders = OmfordelUtbetaltYtelseV2.omfordel(forrigeAndeler, bgAndeler);
+            builders.forEach(builder -> builder.build(beregningsresultatPeriode));
+            postcondition(bgDagsats, beregningsresultatPeriode);
         }
         return beregningsresultatPeriode;
     }

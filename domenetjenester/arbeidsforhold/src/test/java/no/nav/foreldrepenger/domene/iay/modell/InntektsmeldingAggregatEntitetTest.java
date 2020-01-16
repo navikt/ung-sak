@@ -12,7 +12,6 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
-import java.time.LocalDate;
 
 public class InntektsmeldingAggregatEntitetTest {
 

@@ -2,8 +2,6 @@ package no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto;
 
 import java.time.LocalDateTime;
 
-import java.time.LocalDate;
-
 public class InnloggetNavAnsattDto {
 
     private final String brukernavn;
