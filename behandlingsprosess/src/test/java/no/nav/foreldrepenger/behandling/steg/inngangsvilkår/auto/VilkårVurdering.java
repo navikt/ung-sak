@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
@@ -81,11 +81,11 @@ class VilkårVurdering {
     }
 
     public void vurderCase(ErrorCollector collector,
-                           BiConsumer<VilkårResultat, Object> extraDataValidering, 
+                           BiConsumer<VilkårResultat, Object> extraDataValidering,
                            Collection<File> files,
-                           final Tuple<Tuple<Class<Object>, Object>, 
-                           RuleService<Object>> vilkårRegel, 
-                           final ObjectMapper mapper, 
+                           final Tuple<Tuple<Class<Object>, Object>,
+                           RuleService<Object>> vilkårRegel,
+                           final ObjectMapper mapper,
                            File inputFile) {
         try {
             final Optional<File> outputFile = finnOutputFil(files, inputFile);
@@ -96,10 +96,10 @@ class VilkårVurdering {
         }
     }
 
-    public void vurderCase(ErrorCollector collector, 
+    public void vurderCase(ErrorCollector collector,
                            BiConsumer<VilkårResultat, Object> extraDataValidering,
-                           final Tuple<Tuple<Class<Object>, Object>, RuleService<Object>> vilkårRegel, 
-                           final ObjectMapper mapper, 
+                           final Tuple<Tuple<Class<Object>, Object>, RuleService<Object>> vilkårRegel,
+                           final ObjectMapper mapper,
                            File inputFile,
                            File outputFile)
             throws IOException, JsonParseException, JsonMappingException {
@@ -151,16 +151,16 @@ class VilkårVurdering {
                 Resultat res = ev.result();
                 switch (res) {
                     case JA:
-                        return VilkårUtfallType.OPPFYLT.getKode();
+                        return Utfall.OPPFYLT.getKode();
                     case NEI:
-                        return VilkårUtfallType.IKKE_OPPFYLT.getKode();
+                        return Utfall.IKKE_OPPFYLT.getKode();
                     case IKKE_VURDERT:
-                        return VilkårUtfallType.IKKE_VURDERT.getKode();
+                        return Utfall.IKKE_VURDERT.getKode();
                     default:
                         throw new IllegalArgumentException("Ukjent Resultat:" + res + " ved evaluering av:" + ev);
                 }
             } else {
-                return VilkårUtfallType.OPPFYLT.getKode();
+                return Utfall.OPPFYLT.getKode();
             }
         }
 

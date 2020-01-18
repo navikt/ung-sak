@@ -24,8 +24,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.DefaultVilkårUtleder;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.UtledeteVilkår;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -74,6 +75,25 @@ class KontrollerFaktaStegImpl implements KontrollerFaktaSteg {
         opprettVilkår(utledeteVilkår, behandling, kontekst.getSkriveLås());
     }
 
+    private void opprettVilkår(UtledeteVilkår utledeteVilkår, Behandling behandling, BehandlingLås skriveLås) {
+        // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
+        VilkårResultatBuilder vilkårBuilder = getBehandlingsresultat(behandling) != null
+            ? VilkårResultat.builderFraEksisterende(getBehandlingsresultat(behandling).getVilkårResultat())
+            : VilkårResultat.builder();
+        final var vilkårResultat = vilkårBuilder.leggTilIkkeVurderteVilkår(utledPerioderTilVurdering(behandling.getId()), utledeteVilkår.getAlleAvklarte()).build();
+        getBehandlingsresultat(behandling).medOppdatertVilkårResultat(vilkårResultat);
+        behandlingRepository.lagre(getBehandlingsresultat(behandling).getVilkårResultat(), skriveLås);
+    }
+
+    private List<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId) {
+        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+        return List.of(DatoIntervallEntitet.fraOgMed(skjæringstidspunkter.getUtledetSkjæringstidspunkt())); // FIXME (k9) - Søknadsperioder som skal vurderes
+    }
+
+    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
+        return behandling.getBehandlingsresultat();
+    }
+
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.KONTROLLER_FAKTA.equals(fraSteg)) {
@@ -81,20 +101,4 @@ class KontrollerFaktaStegImpl implements KontrollerFaktaSteg {
             rydder.ryddRegisterdata();
         }
     }
-
-    private void opprettVilkår(UtledeteVilkår utledeteVilkår, Behandling behandling, BehandlingLås skriveLås) {
-        // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
-        VilkårResultat.Builder vilkårBuilder = getBehandlingsresultat(behandling) != null
-            ? VilkårResultat.builderFraEksisterende(getBehandlingsresultat(behandling).getVilkårResultat())
-            : VilkårResultat.builder();
-        utledeteVilkår.getAlleAvklarte()
-            .forEach(vilkårType -> vilkårBuilder.leggTilVilkår(vilkårType, VilkårUtfallType.IKKE_VURDERT));
-        vilkårBuilder.buildFor(behandling);
-        behandlingRepository.lagre(getBehandlingsresultat(behandling).getVilkårResultat(), skriveLås);
-    }
-
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandling.getBehandlingsresultat();
-    }
-
 }

@@ -31,8 +31,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
@@ -95,9 +96,11 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurderingTest {
 
         Behandling revudering = opprettRevurdering(behandling);
 
-        VilkårResultat.Builder inngangsvilkårBuilder = VilkårResultat.builder();
-        inngangsvilkårBuilder.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.OPPFYLT);
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.buildFor(revudering);
+        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat.builder();
+        final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, iDag).medUtfall(Utfall.OPPFYLT));
+        inngangsvilkårBuilder.leggTil(vilkårBuilder);
+        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
 
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
         behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
@@ -130,9 +133,11 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurderingTest {
 
         Behandling revudering = opprettRevurdering(behandling);
 
-        VilkårResultat.Builder inngangsvilkårBuilder = VilkårResultat.builder();
-        inngangsvilkårBuilder.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.IKKE_OPPFYLT);
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.buildFor(revudering);
+        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat.builder();
+        final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, iDag).medUtfall(Utfall.IKKE_OPPFYLT));
+        inngangsvilkårBuilder.leggTil(vilkårBuilder);
+        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
 
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
         behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);

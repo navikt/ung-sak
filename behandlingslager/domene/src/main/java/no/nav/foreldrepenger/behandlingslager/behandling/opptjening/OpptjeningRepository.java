@@ -60,14 +60,9 @@ public class OpptjeningRepository {
             throw new IllegalArgumentException(
                 "Utvikler-feil: kan ikke sette opptjening før VilkårResultat er lagd for Behandling:" + behandling.getId()); //$NON-NLS-1$
         }
-        if (!behandling.equals(vilkårResultat.getOriginalBehandling())) {
-            throw new IllegalArgumentException(
-                "Utvikler-feil: kan ikke sette opptjening på vilkårResultat fra tidligere behandling. behanlding= " + behandling.getId() //$NON-NLS-1$
-                    + ", original=" + vilkårResultat); //$NON-NLS-1$
-        }
         return vilkårResultat;
     }
-    
+
     /**
      * Finn gjeldende opptjening for denne behandlingen.
      */

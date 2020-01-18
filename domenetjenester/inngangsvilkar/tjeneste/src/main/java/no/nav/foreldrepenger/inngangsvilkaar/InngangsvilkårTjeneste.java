@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.inngangsvilkaar;
 
-import java.util.Objects;
+import java.time.LocalDate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -16,13 +16,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepo
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårTypeRef.VilkårTypeRefLiteral;
+import no.nav.vedtak.konfig.Tid;
 
 /**
  * Denne angir implementasjon som skal brukes for en gitt {@link VilkårType} slik at {@link Vilkår} og
@@ -79,49 +80,48 @@ public class InngangsvilkårTjeneste {
     /**
      * Overstyr søkers opplysningsplikt.
      */
-    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, VilkårUtfallType utfall, BehandlingskontrollKontekst kontekst) {
+    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, Utfall utfall, BehandlingskontrollKontekst kontekst) {
         Avslagsårsak avslagsårsak = Avslagsårsak.MANGLENDE_DOKUMENTASJON;
         VilkårType vilkårType = VilkårType.SØKERSOPPLYSNINGSPLIKT;
 
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        VilkårResultat vilkårResultat = getBehandlingsresultat(behandlingId).getVilkårResultat();
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        final var behandlingsresultat = getBehandlingsresultat(behandlingId);
+        VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
+        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
 
-        if (Objects.equals(VilkårUtfallType.OPPFYLT, utfall)) {
-            builder.overstyrVilkår(vilkårType, utfall, null);
-            if (!finnesOverstyrteAvviste(vilkårResultat, vilkårType)) {
-                builder.medVilkårResultatType(VilkårResultatType.IKKE_FASTSATT);
-            }
-        } else {
-            builder.overstyrVilkår(vilkårType, utfall, avslagsårsak);
-            builder.medVilkårResultatType(VilkårResultatType.AVSLÅTT);
-        }
-        builder.buildFor(behandling);
-        behandlingRepository.lagre(getBehandlingsresultat(behandlingId).getVilkårResultat(), kontekst.getSkriveLås());
+        final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        builder.leggTil(vilkårBuilder
+            .leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME k9 : Benytte virkelige datoer
+                .medUtfallOverstyrt(utfall)
+                .medAvslagsårsak(Utfall.IKKE_OPPFYLT.equals(utfall) ? avslagsårsak : null)
+            )
+        );
+        final var oppdatertVikårResultat = builder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(oppdatertVikårResultat);
+        behandlingRepository.lagre(oppdatertVikårResultat, kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
     /**
      * Overstyr gitt aksjonspunkt på Inngangsvilkår.
      */
-    public void overstyrAksjonspunkt(Long behandlingId, VilkårType vilkårType, VilkårUtfallType utfall, String avslagsårsakKode,
+    public void overstyrAksjonspunkt(Long behandlingId, VilkårType vilkårType, Utfall utfall, String avslagsårsakKode,
                                      BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        VilkårResultat vilkårResultat = getBehandlingsresultat(behandlingId).getVilkårResultat();
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        final var behandlingsresultat = getBehandlingsresultat(behandlingId);
+        VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
+        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
 
         Avslagsårsak avslagsårsak = finnAvslagsårsak(avslagsårsakKode, utfall);
-        builder.overstyrVilkår(vilkårType, utfall, avslagsårsak);
-        if (utfall.equals(VilkårUtfallType.IKKE_OPPFYLT)) {
-            builder.medVilkårResultatType(VilkårResultatType.AVSLÅTT);
-        } else if (utfall.equals(VilkårUtfallType.OPPFYLT)) {
-            if (!finnesOverstyrteAvviste(vilkårResultat, vilkårType)) {
-                builder.medVilkårResultatType(VilkårResultatType.IKKE_FASTSATT);
-            }
-        }
-        VilkårResultat resultat = builder.buildFor(behandling);
+        final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        builder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .medUtfallOverstyrt(utfall)
+            .medAvslagsårsak(avslagsårsak)));
+
+        VilkårResultat resultat = builder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(resultat);
         behandlingRepository.lagre(resultat, kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
@@ -130,15 +130,9 @@ public class InngangsvilkårTjeneste {
         return behandlingsresultatRepository.hent(behandlingId);
     }
 
-    private boolean finnesOverstyrteAvviste(VilkårResultat vilkårResultat, VilkårType vilkårType) {
-        return vilkårResultat.getVilkårene().stream()
-            .filter(vilkår -> !vilkår.getVilkårType().equals(vilkårType))
-            .anyMatch(vilkår -> vilkår.erOverstyrt() && vilkår.erIkkeOppfylt());
-    }
-
-    private Avslagsårsak finnAvslagsårsak(String avslagsÅrsakKode, VilkårUtfallType utfall) {
+    private Avslagsårsak finnAvslagsårsak(String avslagsÅrsakKode, Utfall utfall) {
         Avslagsårsak avslagsårsak;
-        if (avslagsÅrsakKode == null || utfall.equals(VilkårUtfallType.OPPFYLT)) {
+        if (avslagsÅrsakKode == null || utfall.equals(Utfall.OPPFYLT)) {
             avslagsårsak = Avslagsårsak.UDEFINERT;
         } else {
             avslagsårsak = Avslagsårsak.fraKode(avslagsÅrsakKode);

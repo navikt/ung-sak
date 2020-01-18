@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 
 @Entity(name = "Behandlingsresultat")
 @Table(name = "BEHANDLING_RESULTAT")
@@ -41,10 +41,10 @@ public class Behandlingsresultat extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "inngangsvilkar_resultat_id"
-    /* , updatable = false // får ikke satt denne til false, men skal aldri kunne endres dersom satt tidligere */
-    /* , nullable=false // kan være null, men når den er satt kan ikke oppdateres */
+        /* , updatable = false // får ikke satt denne til false, men skal aldri kunne endres dersom satt tidligere */
+        /* , nullable=false // kan være null, men når den er satt kan ikke oppdateres */
     )
     private VilkårResultat vilkårResultat;
 
@@ -53,7 +53,7 @@ public class Behandlingsresultat extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "behandlingsresultat")
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "behandlingsresultat")
     private BehandlingVedtak behandlingVedtak;
 
     @Convert(converter = BehandlingResultatType.KodeverdiConverter.class)
@@ -85,14 +85,28 @@ public class Behandlingsresultat extends BaseEntitet {
         // for hibernate
     }
 
+    public static Behandlingsresultat opprettFor(Behandling behandling) {
+        return builder().buildFor(behandling);
+    }
+
+    public static Builder builderForInngangsvilkår() {
+        return new Builder(VilkårResultat.builder());
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builderFraEksisterende(Behandlingsresultat behandlingsresultat) {
+        return new Builder(behandlingsresultat, false);
+    }
+
+    public static Builder builderEndreEksisterende(Behandlingsresultat behandlingsresultat) {
+        return new Builder(behandlingsresultat, true);
+    }
+
     public VilkårResultat medOppdatertVilkårResultat(VilkårResultat nyttResultat) {
-        if (nyttResultat != null && vilkårResultat != null && nyttResultat != vilkårResultat) {
-            if (!nyttResultat.erLik(vilkårResultat)) {
-                this.vilkårResultat = nyttResultat;
-            }
-        } else {
-            this.vilkårResultat = nyttResultat;
-        }
+        this.vilkårResultat = nyttResultat;
         return this.vilkårResultat;
     }
 
@@ -108,19 +122,19 @@ public class Behandlingsresultat extends BaseEntitet {
         return behandling;
     }
 
+    /**
+     * NB: ikke eksponer settere fra modellen. Skal ha package-scope.
+     */
+    void setBehandling(Behandling behandling) {
+        this.behandling = behandling;
+    }
+
     public Long getBehandlingId() {
         return behandling.getId();
     }
 
     public VilkårResultat getVilkårResultat() {
         return vilkårResultat;
-    }
-
-    /**
-     * NB: ikke eksponer settere fra modellen. Skal ha package-scope.
-     */
-    void setBehandling(Behandling behandling) {
-        this.behandling = behandling;
     }
 
     public BehandlingVedtak getBehandlingVedtak() {
@@ -168,26 +182,6 @@ public class Behandlingsresultat extends BaseEntitet {
         return getClass().getSimpleName() + "<>";
     }
 
-    public static Behandlingsresultat opprettFor(Behandling behandling) {
-        return builder().buildFor(behandling);
-    }
-
-    public static Builder builderForInngangsvilkår() {
-        return new Builder(VilkårResultat.builder());
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder builderFraEksisterende(Behandlingsresultat behandlingsresultat) {
-        return new Builder(behandlingsresultat, false);
-    }
-
-    public static Builder builderEndreEksisterende(Behandlingsresultat behandlingsresultat) {
-        return new Builder(behandlingsresultat, true);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -208,13 +202,46 @@ public class Behandlingsresultat extends BaseEntitet {
         return Objects.hash(getBehandling());
     }
 
+    public boolean isBehandlingHenlagt() {
+        return BehandlingResultatType.getAlleHenleggelseskoder().contains(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatAvslåttOrOpphørt() {
+        return BehandlingResultatType.AVSLÅTT.equals(behandlingResultatType)
+            || BehandlingResultatType.OPPHØR.equals(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatAvslått() {
+        return BehandlingResultatType.AVSLÅTT.equals(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatOpphørt() {
+        return BehandlingResultatType.OPPHØR.equals(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatInnvilget() {
+        return BehandlingResultatType.INNVILGET.equals(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatForeldrepengerEndret() {
+        return BehandlingResultatType.INNVILGET_ENDRING.equals(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatIkkeEndret() {
+        return BehandlingResultatType.INGEN_ENDRING.equals(behandlingResultatType);
+    }
+
+    public boolean isBehandlingsresultatHenlagt() {
+        return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(behandlingResultatType);
+    }
+
     public static class Builder {
 
         private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        private VilkårResultat.Builder vilkårResultatBuilder;
+        private VilkårResultatBuilder vilkårResultatBuilder;
         private boolean built;
 
-        Builder(VilkårResultat.Builder builder) {
+        Builder(VilkårResultatBuilder builder) {
             this.vilkårResultatBuilder = builder;
         }
 
@@ -224,7 +251,7 @@ public class Behandlingsresultat extends BaseEntitet {
             }
             if (gammeltResultat != null && gammeltResultat.getVilkårResultat() != null) {
                 this.vilkårResultatBuilder = VilkårResultat
-                    .builderFraEksisterende(gammeltResultat.getVilkårResultat());
+                    .kopiFraEksisterende(gammeltResultat.getVilkårResultat());
             }
         }
 
@@ -289,7 +316,7 @@ public class Behandlingsresultat extends BaseEntitet {
 
         public Behandlingsresultat build() {
             if (vilkårResultatBuilder != null) {
-                VilkårResultat vilkårResultat = vilkårResultatBuilder.buildFor(behandlingsresultat);
+                VilkårResultat vilkårResultat = vilkårResultatBuilder.build();
                 behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
             }
             built = true;
@@ -303,48 +330,11 @@ public class Behandlingsresultat extends BaseEntitet {
         public Behandlingsresultat buildFor(Behandling behandling) {
             behandling.setBehandlingresultat(behandlingsresultat);
             if (vilkårResultatBuilder != null) {
-                VilkårResultat vilkårResultat = vilkårResultatBuilder.buildFor(behandlingsresultat);
+                VilkårResultat vilkårResultat = vilkårResultatBuilder.build();
                 behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
             }
             built = true;
             return behandlingsresultat;
         }
-    }
-
-    public boolean isBehandlingHenlagt() {
-        return BehandlingResultatType.getAlleHenleggelseskoder().contains(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatAvslåttOrOpphørt() {
-        return BehandlingResultatType.AVSLÅTT.equals(behandlingResultatType)
-            || BehandlingResultatType.OPPHØR.equals(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatAvslått() {
-        return BehandlingResultatType.AVSLÅTT.equals(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatOpphørt() {
-        return BehandlingResultatType.OPPHØR.equals(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatInnvilget() {
-        return BehandlingResultatType.INNVILGET.equals(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatForeldrepengerEndret() {
-        return BehandlingResultatType.INNVILGET_ENDRING.equals(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatIkkeEndret() {
-        return BehandlingResultatType.INGEN_ENDRING.equals(behandlingResultatType);
-    }
-
-    public boolean isVilkårAvslått() {
-        return VilkårResultatType.AVSLÅTT.equals(vilkårResultat.getVilkårResultatType());
-    }
-
-    public boolean isBehandlingsresultatHenlagt() {
-        return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(behandlingResultatType);
     }
 }

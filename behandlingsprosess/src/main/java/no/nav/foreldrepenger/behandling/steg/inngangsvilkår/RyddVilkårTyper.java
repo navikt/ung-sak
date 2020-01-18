@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.inngangsvilkår;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType.IKKE_FASTSATT;
 import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 
 import java.util.HashMap;
@@ -11,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
@@ -21,23 +21,22 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 
 class RyddVilkårTyper {
 
-    private final BehandlingRepository behandlingRepository;
-    private final Behandling behandling;
-    private final BehandlingskontrollKontekst kontekst;
-
     static Map<VilkårType, Consumer<RyddVilkårTyper>> OPPRYDDER_FOR_AVKLARTE_DATA = new HashMap<>();
-    private MedlemskapRepository medlemskapRepository;
-
 
     static {
         OPPRYDDER_FOR_AVKLARTE_DATA.put(MEDLEMSKAPSVILKÅRET, r -> r.medlemskapRepository.slettAvklarteMedlemskapsdata(r.behandling.getId(), r.kontekst.getSkriveLås()));
     }
 
-    public RyddVilkårTyper(BehandlingRepositoryProvider repositoryProvider, 
+    private final Behandling behandling;
+    private final BehandlingskontrollKontekst kontekst;
+    private BehandlingRepository behandlingRepository;
+    private MedlemskapRepository medlemskapRepository;
+
+    public RyddVilkårTyper(@SuppressWarnings("unused") BehandlingStegModell modell,
+                           BehandlingRepositoryProvider repositoryProvider,
                            Behandling behandling,
                            BehandlingskontrollKontekst kontekst) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -46,14 +45,7 @@ class RyddVilkårTyper {
         this.kontekst = kontekst;
     }
 
-    void ryddVedOverhoppFramover(List<VilkårType> vilkårTyper) {
-        slettAvklarteFakta(vilkårTyper);
-        nullstillVilkår(vilkårTyper, true);
-    }
-
-    void ryddVedTilbakeføring(List<VilkårType> vilkårTyper) {
-        nullstillInngangsvilkår();
-        nullstillVilkår(vilkårTyper, false);
+    public void ryddVedTilbakeføring(List<VilkårType> vilkårTyper) {
         nullstillVedtaksresultat();
     }
 
@@ -79,44 +71,6 @@ class RyddVilkårTyper {
                 ryddVilkårConsumer.accept(this);
             }
         });
-    }
-
-    private void nullstillInngangsvilkår() {
-        Optional<VilkårResultat> vilkårResultatOpt = Optional.ofNullable(getBehandlingsresultat(behandling))
-            .map(Behandlingsresultat::getVilkårResultat)
-            .filter(inng -> !inng.erOverstyrt());
-        if (!vilkårResultatOpt.isPresent()) {
-            return;
-        }
-
-        VilkårResultat vilkårResultat = vilkårResultatOpt.get();
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
-        if (!vilkårResultat.getVilkårResultatType().equals(IKKE_FASTSATT)) {
-            builder.medVilkårResultatType(IKKE_FASTSATT);
-        }
-        builder.buildFor(behandling);
-    }
-
-    private void nullstillVilkår(List<VilkårType> vilkårTyper, boolean nullstillOverstyring) {
-        Optional<VilkårResultat> vilkårResultatOpt = Optional.ofNullable(getBehandlingsresultat(behandling))
-            .map(Behandlingsresultat::getVilkårResultat);
-        if (!vilkårResultatOpt.isPresent()) {
-            return;
-        }
-        VilkårResultat vilkårResultat = vilkårResultatOpt.get();
-
-        List<Vilkår> vilkårSomSkalNullstilles = vilkårResultat.getVilkårene().stream()
-            .filter(v -> vilkårTyper.contains(v.getVilkårType()))
-            .collect(toList());
-        if (vilkårSomSkalNullstilles.isEmpty()) {
-            return;
-        }
-
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
-        vilkårSomSkalNullstilles.stream()
-            .filter(it -> !it.erOverstyrt() || nullstillOverstyring)
-            .forEach(vilkår -> builder.nullstillVilkår(vilkår.getVilkårType(), !nullstillOverstyring ? vilkår.getVilkårUtfallOverstyrt() : VilkårUtfallType.UDEFINERT));
-        builder.buildFor(behandling);
     }
 
 }

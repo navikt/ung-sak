@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -23,11 +24,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatTy
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -54,7 +55,7 @@ public abstract class DokumentmottakerTestsupport {
     protected BehandlingRepositoryProvider repositoryProvider;
 
     protected Behandling opprettNyBehandlingUtenVedtak(FagsakYtelseType fagsakYtelseType) {
-        Behandling behandling = null;
+        Behandling behandling;
         var scenario = TestScenarioBuilder.builderMedSøknad(fagsakYtelseType)
             .medBehandlingType(FØRSTEGANGSSØKNAD);
         behandling = scenario.lagre(repositoryProvider);
@@ -79,9 +80,10 @@ public abstract class DokumentmottakerTestsupport {
         BehandlingLås behandlingLås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);
         repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
 
+        final var behandlingsresultat = behandling.getBehandlingsresultat();
         BehandlingVedtak originalVedtak = BehandlingVedtak.builder()
             .medVedtakstidspunkt(vedtaksdato.atStartOfDay())
-            .medBehandlingsresultat(behandling.getBehandlingsresultat())
+            .medBehandlingsresultat(behandlingsresultat)
             .medVedtakResultatType(vedtakResultatType)
             .medAnsvarligSaksbehandler("fornavn etternavn")
             .build();
@@ -91,9 +93,11 @@ public abstract class DokumentmottakerTestsupport {
         repositoryProvider.getBehandlingVedtakRepository().lagre(originalVedtak, behandlingLås);
 
         VilkårResultat vilkårResultat = VilkårResultat.builder()
-            .leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, VilkårUtfallType.IKKE_OPPFYLT)
-            .buildFor(behandling);
+            .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMed(LocalDate.now())), VilkårType.SØKERSOPPLYSNINGSPLIKT)
+            .build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         repositoryProvider.getBehandlingRepository().lagre(vilkårResultat, behandlingLås);
+        repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
 
         return behandling;
     }

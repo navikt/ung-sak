@@ -26,7 +26,8 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
@@ -40,7 +41,7 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 @Table(name = "OPPTJENING")
 public class Opptjening extends BaseEntitet {
 
-    
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -136,11 +137,14 @@ public class Opptjening extends BaseEntitet {
     }
 
     public boolean erOpptjeningPeriodeVilkårOppfylt() {
-        VilkårUtfallType opptjeningVilkårUtfall = getVilkårResultat().getVilkårene().stream()
+        Utfall opptjeningVilkårUtfall = getVilkårResultat().getVilkårene().stream()
             .filter(v -> VilkårType.OPPTJENINGSPERIODEVILKÅR.equals(v.getVilkårType()))
-            .map(Vilkår::getGjeldendeVilkårUtfall)
-            .findFirst().orElse(VilkårUtfallType.IKKE_VURDERT);
-        return VilkårUtfallType.OPPFYLT.equals(opptjeningVilkårUtfall);
+            .map(Vilkår::getPerioder)
+            .flatMap(Collection::stream)
+            .map(VilkårPeriode::getGjeldendeUtfall)
+            .findFirst()
+            .orElse(Utfall.IKKE_VURDERT);
+        return Utfall.OPPFYLT.equals(opptjeningVilkårUtfall);
     }
 
     @Override

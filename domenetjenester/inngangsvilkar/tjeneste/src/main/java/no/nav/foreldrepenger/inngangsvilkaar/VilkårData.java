@@ -5,15 +5,17 @@ import java.util.Properties;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårData {
+    private final DatoIntervallEntitet periode;
     private final VilkårType vilkårType;
-    private VilkårUtfallType utfallType;
-    private Properties merknadParametere;
     private final List<AksjonspunktDefinisjon> apDefinisjoner;
+    private Utfall utfallType;
+    private Properties merknadParametere;
     private VilkårUtfallMerknad vilkårUtfallMerknad;
     private Avslagsårsak avslagsårsak;
     private String regelEvaluering;
@@ -21,11 +23,13 @@ public class VilkårData {
     private boolean erOverstyrt;
     private Object data;
 
-    /** Ctor som tar alle parametere inkl. regel input og evaluering. */
-    public VilkårData(VilkårType vilkårType, VilkårUtfallType utfallType, Properties merknadParametere,
-            List<AksjonspunktDefinisjon> apDefinisjoner, VilkårUtfallMerknad vilkårUtfallMerknad,
-            Avslagsårsak avslagsårsak, String regelEvaluering, String regelInput, boolean erOverstyrt) {
-
+    /**
+     * Ctor som tar alle parametere inkl. regel input og evaluering.
+     */
+    public VilkårData(DatoIntervallEntitet periode, VilkårType vilkårType, Utfall utfallType, Properties merknadParametere,
+                      List<AksjonspunktDefinisjon> apDefinisjoner, VilkårUtfallMerknad vilkårUtfallMerknad,
+                      Avslagsårsak avslagsårsak, String regelEvaluering, String regelInput, boolean erOverstyrt) {
+        this.periode = periode;
         this.vilkårType = vilkårType;
         this.utfallType = utfallType;
         this.merknadParametere = merknadParametere;
@@ -37,25 +41,29 @@ public class VilkårData {
         this.erOverstyrt = erOverstyrt;
     }
 
-    /** Ctor som tar minimum av parametere, og ingen regel evaluering og input data.  Vil heller aldri være overstyrt. */
-    public VilkårData(VilkårType vilkårType, VilkårUtfallType utfallType, List<AksjonspunktDefinisjon> apDefinisjoner) {
-        this(vilkårType, utfallType, new Properties(), apDefinisjoner, null, null, null, null, false);
-    }
-
-    /** (Optional) ekstra resultat data. */
-    public void setEkstraVilkårresultat(Object data) {
-        this.data = data;
+    /**
+     * Ctor som tar minimum av parametere, og ingen regel evaluering og input data.  Vil heller aldri være overstyrt.
+     */
+    public VilkårData(DatoIntervallEntitet periode, VilkårType vilkårType, Utfall utfallType, List<AksjonspunktDefinisjon> apDefinisjoner) {
+        this(periode, vilkårType, utfallType, new Properties(), apDefinisjoner, null, null, null, null, false);
     }
 
     public Object getEkstraVilkårresultat() {
         return data;
     }
 
+    /**
+     * (Optional) ekstra resultat data.
+     */
+    public void setEkstraVilkårresultat(Object data) {
+        this.data = data;
+    }
+
     public VilkårType getVilkårType() {
         return vilkårType;
     }
 
-    public VilkårUtfallType getUtfallType() {
+    public Utfall getUtfallType() {
         return utfallType;
     }
 
@@ -85,5 +93,9 @@ public class VilkårData {
 
     public boolean erOverstyrt() {
         return erOverstyrt;
+    }
+
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
     }
 }

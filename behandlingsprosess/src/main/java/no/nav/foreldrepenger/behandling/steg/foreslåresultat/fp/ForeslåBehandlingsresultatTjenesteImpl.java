@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.foreslåresultat.fp;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -15,6 +16,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepo
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
@@ -43,15 +45,15 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
 
     @Inject
     ForeslåBehandlingsresultatTjenesteImpl(BehandlingRepositoryProvider repositoryProvider,
-                                         AvslagsårsakTjeneste avslagsårsakTjeneste,
-                                         DokumentBehandlingTjeneste dokumentBehandlingTjeneste,
-                                         @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
-        this.uttakRepository =repositoryProvider.getUttakRepository();
+                                           AvslagsårsakTjeneste avslagsårsakTjeneste,
+                                           DokumentBehandlingTjeneste dokumentBehandlingTjeneste,
+                                           @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
+        this.uttakRepository = repositoryProvider.getUttakRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
-        this.avslagsårsakTjeneste =avslagsårsakTjeneste;
-        this.revurderingBehandlingsresultatutlederFelles =revurderingBehandlingsresultatutlederFelles;
-        this.dokumentBehandlingTjeneste =dokumentBehandlingTjeneste;
-        this.behandlingsresultatRepository =repositoryProvider.getBehandlingsresultatRepository();
+        this.avslagsårsakTjeneste = avslagsårsakTjeneste;
+        this.revurderingBehandlingsresultatutlederFelles = revurderingBehandlingsresultatutlederFelles;
+        this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
+        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
 
@@ -81,12 +83,17 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
     }
 
     private boolean sjekkVilkårAvslått(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.isVilkårAvslått(); // FIXME K9 Midlertidig fjerning av krav om minst én uttaksperiode:  || !minstEnGyldigUttaksPeriode(behandlingsresultat);
+        return behandlingsresultat.getVilkårResultat()
+            .getVilkårene()
+            .stream()
+            .map(Vilkår::getPerioder)
+            .flatMap(Collection::stream)
+            .anyMatch(vp -> Utfall.IKKE_OPPFYLT.equals(vp.getGjeldendeUtfall()));
     }
 
 
     private void vilkårAvslått(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
-        Optional<Vilkår> ikkeOppfyltVilkår = behandlingsresultat.getVilkårResultat().hentIkkeOppfyltVilkår();
+        Optional<Vilkår> ikkeOppfyltVilkår = finnAvslåtteVilkår(behandlingsresultat);
         ikkeOppfyltVilkår.ifPresent(vilkår -> {
             Avslagsårsak avslagsårsak = avslagsårsakTjeneste.finnAvslagsårsak(vilkår);
             behandlingsresultat.setAvslagsårsak(avslagsårsak);
@@ -101,6 +108,14 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
                 resultatBuilder.medVedtaksbrev(Vedtaksbrev.INGEN);
             }
         }
+    }
+
+    private Optional<Vilkår> finnAvslåtteVilkår(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getVilkårResultat()
+            .getVilkårene()
+            .stream()
+            .filter(vilkår -> vilkår.getPerioder().stream().anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall())))
+            .findFirst();
     }
 
     private boolean skalTilInfoTrygd(BehandlingReferanse ref) {

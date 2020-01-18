@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,10 +15,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
-import no.nav.foreldrepenger.inngangsvilkaar.søknad.InngangsvilkårSøkersOpplysningsplikt;
 import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
 import no.nav.foreldrepenger.kompletthet.KompletthetsjekkerProvider;
 
@@ -25,6 +27,7 @@ public class InngangsvilkårSøkersOpplysningspliktTest {
     InngangsvilkårSøkersOpplysningsplikt testObjekt;
     private KompletthetsjekkerProvider kompletthetssjekkerProvider = mock(KompletthetsjekkerProvider.class);
     private Kompletthetsjekker kompletthetssjekker = mock(Kompletthetsjekker.class);
+    private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(LocalDate.now());
 
     @Before
     public void setup() {
@@ -39,11 +42,11 @@ public class InngangsvilkårSøkersOpplysningspliktTest {
             .thenReturn(true);
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
 
-        VilkårData vilkårData = testObjekt.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = testObjekt.vurderVilkår(lagRef(behandling), periode);
 
         assertThat(vilkårData).isNotNull();
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.SØKERSOPPLYSNINGSPLIKT);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
         assertThat(vilkårData.getApDefinisjoner()).isEmpty();
     }
 
@@ -54,11 +57,11 @@ public class InngangsvilkårSøkersOpplysningspliktTest {
             .thenReturn(false);
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
 
-        VilkårData vilkårData = testObjekt.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = testObjekt.vurderVilkår(lagRef(behandling), periode);
 
         assertThat(vilkårData).isNotNull();
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.SØKERSOPPLYSNINGSPLIKT);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_VURDERT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_VURDERT);
         assertThat(vilkårData.getApDefinisjoner()).hasSize(1);
         assertThat(vilkårData.getApDefinisjoner()).contains(AksjonspunktDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU);
     }
@@ -72,11 +75,11 @@ public class InngangsvilkårSøkersOpplysningspliktTest {
             .medBehandlingType(BehandlingType.REVURDERING)
             .lagMocked();
 
-        VilkårData vilkårData = testObjekt.vurderVilkår(lagRef(revurdering));
+        VilkårData vilkårData = testObjekt.vurderVilkår(lagRef(revurdering), periode);
 
         assertThat(vilkårData).isNotNull();
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.SØKERSOPPLYSNINGSPLIKT);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
         assertThat(vilkårData.getApDefinisjoner()).isEmpty();
     }
 

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Properties;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,10 +21,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -39,7 +38,7 @@ import no.nav.vedtak.felles.testutilities.db.Repository;
 public class BehandlingRevurderingRepositoryImplTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
-    
+
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
@@ -52,7 +51,7 @@ public class BehandlingRevurderingRepositoryImplTest {
 
     @Test
     public void skal_finne_henlagte_behandlinger_etter_forrige_ferdigbehandlede_søknad() {
-        
+
         behandling = opprettRevurderingsKandidat();
 
         Long fagsakId = behandling.getFagsakId();
@@ -66,17 +65,17 @@ public class BehandlingRevurderingRepositoryImplTest {
         revurderingsBehandling.avsluttBehandling();
         behandlingRepository.lagreOgClear(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
         revurderingsBehandling = behandlingRepository.hentBehandling(revurderingsBehandling.getId());
-        
+
         Behandling nyRevurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
             .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)).build();
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
-        
+
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());
         oppdaterMedBehandlingsresultatAvslagOgLagre(nyRevurderingsBehandling);
         nyRevurderingsBehandling.avsluttBehandling();
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());
-        
+
         Long revurderingsBehandlingId = revurderingsBehandling.getId();
         List<Behandling> result = behandlingRevurderingRepository.finnHenlagteBehandlingerEtterSisteInnvilgedeIkkeHenlagteBehandling(fagsakId);
         assertThat(result).isNotEmpty();
@@ -145,15 +144,18 @@ public class BehandlingRevurderingRepositoryImplTest {
     }
 
     private void oppdaterMedBehandlingsresultatAvslagOgLagre(Behandling behandling) {
-        VilkårResultat.builder()
-            .leggTilVilkårResultat(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.IKKE_OPPFYLT,
-                null, new Properties(), null, false, false, null, null)
-            .medVilkårResultatType(VilkårResultatType.AVSLÅTT)
+        final var resultatBuilder = VilkårResultat.builder();
+        final var vilkårBuilder = resultatBuilder
+            .hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
+            .leggTil(new VilkårPeriodeBuilder().medPeriode(LocalDate.now(), LocalDate.now().plusDays(30)).medUtfall(Utfall.IKKE_OPPFYLT));
+        final var vilkårResultat = resultatBuilder
+            .leggTil(vilkårBuilder)
+            .build();
+
+        final var behandlingsresultat = Behandlingsresultat.builderForInngangsvilkår()
+            .medBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET)
             .buildFor(behandling);
-
-        Behandlingsresultat.builderEndreEksisterende(getBehandlingsresultat(behandling))
-            .medBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
-
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         Repository repository = repoRule.getRepository();
 
         repository.lagre(behandling);

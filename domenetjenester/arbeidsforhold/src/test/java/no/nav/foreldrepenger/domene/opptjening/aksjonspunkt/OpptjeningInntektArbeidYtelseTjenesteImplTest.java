@@ -109,7 +109,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Assert
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref)
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, periode.getFomDato())
             .stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.NÆRING)).collect(Collectors.toList());
 
         assertThat(perioder).hasSize(1);
@@ -140,7 +140,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Act
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref);
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, skjæringstidspunkt);
         assertThat(perioder).hasSize(1);
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_GODKJENT)).collect(Collectors.toList()))
             .hasSize(1);
@@ -157,7 +157,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(ORG_NUMMER);
         InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, periode1,
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, virksomhet,
-            sisteLønnsendringsdato, 
+            sisteLønnsendringsdato,
             VersjonType.REGISTER);
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
@@ -172,7 +172,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Act
         BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse);
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, skjæringstidspunkt);
         assertThat(perioder).hasSize(1);
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_UNDERKJENT)).collect(Collectors.toList()))
             .hasSize(1);
@@ -184,7 +184,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
-        
+
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
@@ -288,7 +288,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
-        
+
         final Behandling behandling = scenario.lagre(repositoryProvider);
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
 
@@ -394,9 +394,10 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = builder.build();
-        Behandlingsresultat.opprettFor(behandling);
+        final var behandlingsresultat = Behandlingsresultat.opprettFor(behandling);
+        VilkårResultat nyttResultat = VilkårResultat.builder().build();
+        behandlingsresultat.medOppdatertVilkårResultat(nyttResultat);
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        VilkårResultat nyttResultat = VilkårResultat.builder().buildFor(behandling);
         behandlingRepository.lagre(nyttResultat, behandlingRepository.taSkriveLås(behandling));
 
         repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt, false);

@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.domene.opptjening.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -21,12 +22,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAk
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.domene.opptjening.Opptjeningsfeil;
 import no.nav.foreldrepenger.domene.opptjening.dto.AvklarOpptjeningsvilkåretDto;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
+import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkåretDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -60,13 +63,13 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
 
     @Override
     public OppdateringResultat oppdater(AvklarOpptjeningsvilkåretDto dto, AksjonspunktOppdaterParameter param) {
-        VilkårUtfallType nyttUtfall = dto.getErVilkarOk() ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT;
+        Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         VilkårResultat vilkårResultat = behandlingsresultatRepository.hent(param.getBehandlingId()).getVilkårResultat();
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
-        if (nyttUtfall.equals(VilkårUtfallType.OPPFYLT)) {
+        if (nyttUtfall.equals(Utfall.OPPFYLT)) {
             sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId());
             oppdaterUtfallOgLagre(behandling, vilkårResultat, nyttUtfall);
             return OppdateringResultat.utenOveropp();
@@ -77,15 +80,17 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         return OppdateringResultat.medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR);
     }
 
-    private void oppdaterUtfallOgLagre(Behandling behandling, VilkårResultat vilkårResultat, VilkårUtfallType utfallType) {
+    private void oppdaterUtfallOgLagre(Behandling behandling, VilkårResultat vilkårResultat, Utfall utfallType) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
-        if (utfallType.equals(VilkårUtfallType.OPPFYLT)) {
-            builder.leggTilVilkårResultatManueltOppfylt(VilkårType.OPPTJENINGSVILKÅRET);
-        } else {
-            builder.leggTilVilkårResultatManueltIkkeOppfylt(VilkårType.OPPTJENINGSVILKÅRET, Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING);
-        }
-        VilkårResultat resultat = builder.buildFor(behandling);
+        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
+        // FIXME (k9) : legge inn faktiske perioder fra dto
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .medUtfall(utfallType)
+            .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
+        builder.leggTil(vilkårBuilder);
+        VilkårResultat resultat = builder.build();
+        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(resultat);
         behandlingRepository.lagre(resultat, kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
@@ -102,7 +107,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         throw Opptjeningsfeil.FACTORY.opptjeningPreconditionFailed().toException();
     }
 
-    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, VilkårUtfallType nyVerdi, String begrunnelse) {
+    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {
         historikkAdapter.tekstBuilder()
             .medEndretFelt(HistorikkEndretFeltType.OPPTJENINGSVILKARET, null, nyVerdi);
 

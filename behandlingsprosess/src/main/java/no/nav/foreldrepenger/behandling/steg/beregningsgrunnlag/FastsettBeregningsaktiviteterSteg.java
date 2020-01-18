@@ -22,7 +22,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.inngangsvilkaar.InngangsvilkårTjeneste;
 
@@ -59,7 +59,6 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        preconditions(behandling);
         var input = getInputTjeneste(behandling.getFagsakYtelseType()).lagInput(behandling);
 
         if (beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(behandling, input.getBehandlingReferanse())) {
@@ -82,17 +81,6 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         } else {
             beregningsgrunnlagTjeneste.getRyddBeregningsgrunnlag(kontekst).ryddFastsettSkjæringstidspunktVedTilbakeføring();
         }
-    }
-
-    private void preconditions(Behandling behandling) {
-        VilkårResultat vilkårResultat = behandling.getBehandlingsresultat().getVilkårResultat();
-        Optional<Vilkår> ikkeOppfyltVilkår = vilkårResultat.getVilkårene().stream()
-            .filter(vilkår -> !vilkår.getGjeldendeVilkårUtfall().equals(VilkårUtfallType.OPPFYLT))
-            .filter(vilkår -> inngangsvilkårTjeneste.erInngangsvilkår(vilkår.getVilkårType()))
-            .findFirst();
-        ikkeOppfyltVilkår.ifPresent(vilkår -> {
-            throw new IllegalStateException("Utvikler-feil: Det finnes vilkår som ikke er oppfylt " + vilkår.getVilkårType());
-        });
     }
 
     private BeregningsgrunnlagInputFelles getInputTjeneste(FagsakYtelseType ytelseType) {

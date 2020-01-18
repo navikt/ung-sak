@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.foreslåresultat;
 
+import java.util.Objects;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -7,6 +8,8 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -21,9 +24,10 @@ public class AvslagsårsakTjeneste {
     }
 
     public Avslagsårsak finnAvslagsårsak(Vilkår vilkår) {
-        Avslagsårsak avslagsårsak = vilkår.getGjeldendeAvslagsårsak();
+        var avslagsårsak = vilkår.getPerioder().stream().map(VilkårPeriode::getAvslagsårsak).filter(Objects::nonNull).findFirst().orElse(null);
         if (avslagsårsak == null) {
-            if (vilkår.getVilkårUtfallMerknad() == null) {
+            final var merknad = vilkår.getPerioder().stream().map(VilkårPeriode::getMerknad).filter(Objects::nonNull).findFirst().orElse(null);
+            if (merknad == null) {
 
                 Set<Avslagsårsak> avslagsårsaker = vilkår.getVilkårType().getAvslagsårsaker();
                 if (avslagsårsaker.size() != 1) {
@@ -33,10 +37,10 @@ public class AvslagsårsakTjeneste {
                     return avslagsårsaker.iterator().next();
                 }
             }
-            avslagsårsak = Avslagsårsak.fraKode(vilkår.getVilkårUtfallMerknad().getKode());
+            avslagsårsak = Avslagsårsak.fraKode(merknad.getKode());
             if (avslagsårsak == null) {
                 throw AvslagsårsakFeil.FEILFACTORY
-                    .kanIkkeUtledeAvslagsårsakFraUtfallMerknad(vilkår.getVilkårUtfallMerknad().getKode())
+                    .kanIkkeUtledeAvslagsårsakFraUtfallMerknad(merknad.getKode())
                     .toException();
             }
         }

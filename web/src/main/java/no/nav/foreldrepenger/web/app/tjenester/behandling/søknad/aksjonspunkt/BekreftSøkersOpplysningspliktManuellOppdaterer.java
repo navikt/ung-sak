@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,13 +20,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Skjermlenk
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat.Builder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
+import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = BekreftSokersOpplysningspliktManuDto.class, adapter=AksjonspunktOppdaterer.class)
+@DtoTilServiceAdapter(dto = BekreftSokersOpplysningspliktManuDto.class, adapter = AksjonspunktOppdaterer.class)
 public class BekreftSøkersOpplysningspliktManuellOppdaterer implements AksjonspunktOppdaterer<BekreftSokersOpplysningspliktManuDto> {
 
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
@@ -49,15 +51,16 @@ public class BekreftSøkersOpplysningspliktManuellOppdaterer implements Aksjonsp
         Avslagsårsak avslagsårsak = erVilkårOk ? null : Avslagsårsak.MANGLENDE_DOKUMENTASJON;
         List<Aksjonspunkt> åpneAksjonspunkter = behandling.getÅpneAksjonspunkter();
         OppdateringResultat.Builder resultatBuilder = OppdateringResultat.utenTransisjon();
-        Builder vilkårBuilder = param.getVilkårResultatBuilder();
+        VilkårResultatBuilder vilkårBuilder = param.getVilkårResultatBuilder();
         if (erVilkårOk) {
             // Reverser vedtak uten totrinnskontroll
 
             behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL)
                 .ifPresent(ap -> resultatBuilder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
 
-            vilkårBuilder.leggTilVilkårResultatManueltOppfylt(VilkårType.SØKERSOPPLYSNINGSPLIKT);
-            vilkårBuilder.medVilkårResultatType(VilkårResultatType.IKKE_FASTSATT);
+            final var builder = vilkårBuilder.hentBuilderFor(VilkårType.SØKERSOPPLYSNINGSPLIKT);
+            builder.leggTil(builder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfallManuell(Utfall.OPPFYLT));
+            vilkårBuilder.leggTil(builder);
 
             return resultatBuilder.build();
         } else {
@@ -65,9 +68,11 @@ public class BekreftSøkersOpplysningspliktManuellOppdaterer implements Aksjonsp
             åpneAksjonspunkter.stream()
                 .filter(a -> !a.getAksjonspunktDefinisjon().getKode().equals(dto.getKode())) // Ikke seg selv
                 .forEach(a -> resultatBuilder.medEkstraAksjonspunktResultat(a.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
-
-            vilkårBuilder.leggTilVilkårResultatManueltIkkeOppfylt(VilkårType.SØKERSOPPLYSNINGSPLIKT, avslagsårsak);
-            vilkårBuilder.medVilkårResultatType(VilkårResultatType.AVSLÅTT);
+            final var builder = vilkårBuilder.hentBuilderFor(VilkårType.SØKERSOPPLYSNINGSPLIKT);
+            builder.leggTil(builder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+                .medUtfallManuell(Utfall.IKKE_OPPFYLT)
+                .medAvslagsårsak(avslagsårsak));
+            vilkårBuilder.leggTil(builder);
 
             return resultatBuilder
                 .medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR)

@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
@@ -364,7 +364,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
     private void opprettBehandlingFor(Optional<VilkårType> vilkårTypeOpt) {
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        vilkårTypeOpt.ifPresent(vt -> scenario.leggTilVilkår(vt, VilkårUtfallType.UDEFINERT));
+        vilkårTypeOpt.ifPresent(vt -> scenario.leggTilVilkår(vt, Utfall.UDEFINERT));
         behandling = scenario.lagMocked();
     }
 

@@ -59,11 +59,13 @@ public class InngangsvilkårOversetterTest {
 
     @Inject
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
-    
+
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
     private YrkesaktivitetBuilder yrkesaktivitetBuilder;
+
+    private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(LocalDate.now());
 
     @Before
     public void oppsett() {
@@ -86,7 +88,7 @@ public class InngangsvilkårOversetterTest {
         Behandling behandling = lagre(scenario);
 
         opprettArbeidOgInntektForBehandling(behandling, stp.minusMonths(5), stp.plusMonths(4), true);
-        
+
         VurdertMedlemskap vurdertMedlemskap = new VurdertMedlemskapBuilder()
             .medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.MEDLEM)
             .medBosattVurdering(true)
@@ -97,7 +99,7 @@ public class InngangsvilkårOversetterTest {
         medlemskapRepository.lagreMedlemskapVurdering(behandling.getId(), vurdertMedlemskap);
 
         // Act
-        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp));
+        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp), periode);
 
         // Assert
         assertTrue(grunnlag.isBrukerAvklartBosatt());
@@ -119,7 +121,7 @@ public class InngangsvilkårOversetterTest {
         opprettArbeidOgInntektForBehandling(behandling, stp.minusMonths(5), stp.minusDays(1), true);
 
         // Act
-        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp));
+        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp), periode);
 
         // Assert
         assertFalse(grunnlag.harSøkerArbeidsforholdOgInntekt());
@@ -135,7 +137,7 @@ public class InngangsvilkårOversetterTest {
         opprettArbeidOgInntektForBehandling(behandling, stp.minusMonths(5), stp.plusDays(10), false);
 
         // Act
-        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp));
+        MedlemskapsvilkårGrunnlag grunnlag = oversetter.oversettTilRegelModellMedlemskap(lagRef(behandling, stp), periode);
 
         // Assert
         assertFalse(grunnlag.harSøkerArbeidsforholdOgInntekt());
@@ -161,7 +163,7 @@ public class InngangsvilkårOversetterTest {
                                                                                    boolean harPensjonsgivendeInntekt) {
 
         String orgnr = "42";
-        
+
         var aggregatBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         AktørId aktørId = behandling.getAktørId();
         lagAktørArbeid(aggregatBuilder, aktørId, orgnr, fom, tom, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, Optional.empty());

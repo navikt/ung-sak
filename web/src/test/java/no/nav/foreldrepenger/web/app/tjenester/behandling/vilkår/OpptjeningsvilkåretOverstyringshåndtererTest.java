@@ -23,7 +23,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinns
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
@@ -47,7 +47,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR);
-        scenario.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.OPPFYLT);
+        scenario.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.OPPFYLT);
         scenario.lagre(repositoryProvider);
 
         Behandling behandling = scenario.getBehandling();
@@ -76,7 +76,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR);
-        scenario.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.OPPFYLT);
+        scenario.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.OPPFYLT);
         scenario.lagre(repositoryProvider);
 
         Behandling behandling = scenario.getBehandling();
@@ -105,7 +105,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR);
-        scenario.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.OPPFYLT);
+        scenario.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.OPPFYLT);
         scenario.lagre(repositoryProvider);
 
         Behandling behandling = scenario.getBehandling();

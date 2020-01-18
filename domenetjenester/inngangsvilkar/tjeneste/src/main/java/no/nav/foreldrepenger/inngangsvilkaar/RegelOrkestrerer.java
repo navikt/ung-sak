@@ -3,16 +3,12 @@ package no.nav.foreldrepenger.inngangsvilkaar;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static no.nav.foreldrepenger.inngangsvilkaar.RegelintegrasjonFeil.FEILFACTORY;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,11 +18,14 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class RegelOrkestrerer {
@@ -42,7 +41,8 @@ public class RegelOrkestrerer {
         this.inngangsvilkårTjeneste = inngangsvilkårTjeneste;
     }
 
-    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref) {
+    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, DatoIntervallEntitet periode) {
+        Objects.requireNonNull(periode, "Perioden som skal vurderes må være satt");
         VilkårResultat vilkårResultat = inngangsvilkårTjeneste.getBehandlingsresultat(ref.getBehandlingId()).getVilkårResultat();
         List<Vilkår> matchendeVilkårPåBehandling = vilkårResultat.getVilkårene().stream()
             .filter(v -> vilkårHåndtertAvSteg.contains(v.getVilkårType()))
@@ -51,15 +51,11 @@ public class RegelOrkestrerer {
 
         Vilkår vilkår = matchendeVilkårPåBehandling.isEmpty() ? null : matchendeVilkårPåBehandling.get(0);
         if (vilkår == null) {
-            // Intet vilkår skal eksekveres i regelmotor, men sikrer at det samlede inngangsvilkår-utfallet blir korrekt
-            // ved å utlede det fra alle vilkårsutfallene
-            Set<VilkårUtfallType> alleUtfall = hentAlleVilkårsutfall(vilkårResultat);
-            VilkårResultatType inngangsvilkårUtfall = utledInngangsvilkårUtfall(alleUtfall);
-            oppdaterBehandlingMedVilkårresultat(behandling, inngangsvilkårUtfall);
+            // Intet vilkår skal eksekveres i regelmotor
             return new RegelResultat(vilkårResultat, emptyList(), emptyMap());
         }
 
-        VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår);
+        VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
 
         // Ekstraresultat
         HashMap<VilkårType, Object> ekstraResultater = new HashMap<>();
@@ -68,24 +64,24 @@ public class RegelOrkestrerer {
         }
 
         // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
-        Set<VilkårUtfallType> alleUtfall = sammenslåVilkårUtfall(vilkårResultat, vilkårDataResultat);
-        VilkårResultatType inngangsvilkårUtfall = utledInngangsvilkårUtfall(alleUtfall);
-        oppdaterBehandlingMedVilkårresultat(behandling, vilkårDataResultat, inngangsvilkårUtfall);
+        oppdaterBehandlingMedVilkårresultat(behandling, vilkårDataResultat);
 
         // Aksjonspunkter
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        if (!vilkår.erOverstyrt()) {
-            // TODO (essv): PKMANTIS-1988 Sjekk med Anita om AP for manuell vurdering skal (gjen)opprettes dersom allerede overstyrt
-            aksjonspunktDefinisjoner = vilkårDataResultat.getApDefinisjoner();
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = vilkårDataResultat.getApDefinisjoner();
+        if (erPeriodenOverstyrt(vilkår, periode)) {
+            aksjonspunktDefinisjoner = List.of();
         }
 
         return new RegelResultat(vilkårResultat, aksjonspunktDefinisjoner, ekstraResultater);
     }
 
-    private Set<VilkårUtfallType> hentAlleVilkårsutfall(VilkårResultat vilkårResultat) {
-        return vilkårResultat.getVilkårene().stream()
-            .map(Vilkår::getGjeldendeVilkårUtfall)
-            .collect(toSet());
+    private boolean erPeriodenOverstyrt(Vilkår vilkår, DatoIntervallEntitet periode) {
+        return vilkår.getPerioder()
+            .stream()
+            .filter(it -> it.getPeriode().equals(periode))
+            .map(VilkårPeriode::getErOverstyrt)
+            .findFirst()
+            .orElse(false);
     }
 
     private void validerMaksEttVilkår(List<Vilkår> vilkårSomSkalBehandle) {
@@ -94,74 +90,56 @@ public class RegelOrkestrerer {
                 "Her angis vilkår: " + vilkårSomSkalBehandle.stream().map(v -> v.getVilkårType().getKode()).collect(Collectors.joining(",")));
     }
 
-    protected VilkårData vurderVilkår(VilkårType vilkårType, BehandlingReferanse ref) {
+    protected VilkårData vurderVilkår(VilkårType vilkårType, BehandlingReferanse ref, DatoIntervallEntitet periode) {
         Inngangsvilkår inngangsvilkår = inngangsvilkårTjeneste.finnVilkår(vilkårType, ref.getFagsakYtelseType());
-        return inngangsvilkår.vurderVilkår(ref);
+        return inngangsvilkår.vurderVilkår(ref, periode);
     }
 
-    private Set<VilkårUtfallType> sammenslåVilkårUtfall(VilkårResultat vilkårResultat,
-                                                        VilkårData vdRegelmotor) {
-        Map<VilkårType, Vilkår> vilkårTyper = vilkårResultat.getVilkårene().stream()
-            .collect(toMap(v -> v.getVilkårType(), v -> v));
-        Map<VilkårType, VilkårUtfallType> vilkårUtfall = vilkårResultat.getVilkårene().stream()
-            .collect(toMap(v -> v.getVilkårType(), v -> v.getGjeldendeVilkårUtfall()));
-
-        Vilkår matchendeVilkår = vilkårTyper.get(vdRegelmotor.getVilkårType());
-        java.util.Objects.requireNonNull(matchendeVilkår, "skal finnes match"); //$NON-NLS-1$
-        // Utfall fra automatisk regelvurdering skal legges til settet av utfall, dersom vilkår ikke er manuelt vurdert
-        if (!(matchendeVilkår.erManueltVurdert() || matchendeVilkår.erOverstyrt())) {
-            vilkårUtfall.put(vdRegelmotor.getVilkårType(), vdRegelmotor.getUtfallType());
-        }
-
-        return new HashSet<>(vilkårUtfall.values());
+    private VilkårData kjørRegelmotor(BehandlingReferanse ref, Vilkår vilkår, DatoIntervallEntitet periode) {
+        return vurderVilkår(vilkår.getVilkårType(), ref, periode);
     }
 
-    private VilkårData kjørRegelmotor(BehandlingReferanse ref, Vilkår vilkår) {
-        return vurderVilkår(vilkår.getVilkårType(), ref);
-    }
-
-    public VilkårResultatType utledInngangsvilkårUtfall(Collection<VilkårUtfallType> vilkårene) {
+    public ResultatType utledInngangsvilkårUtfall(Collection<Utfall> vilkårene) {
         boolean oppfylt = vilkårene.stream()
-            .anyMatch(utfall -> utfall.equals(VilkårUtfallType.OPPFYLT));
+            .anyMatch(utfall -> utfall.equals(Utfall.OPPFYLT));
         boolean ikkeOppfylt = vilkårene.stream()
-            .anyMatch(vilkår -> vilkår.equals(VilkårUtfallType.IKKE_OPPFYLT));
+            .anyMatch(vilkår -> vilkår.equals(Utfall.IKKE_OPPFYLT));
         boolean ikkeVurdert = vilkårene.stream()
-            .anyMatch(vilkår -> vilkår.equals(VilkårUtfallType.IKKE_VURDERT));
+            .anyMatch(vilkår -> vilkår.equals(Utfall.IKKE_VURDERT));
 
         // Enkeltutfallene per vilkår sammenstilles til et samlet vilkårsresultat.
         // Høyest rangerte enkeltutfall ift samlet vilkårsresultat sjekkes først, deretter nest høyeste osv.
-        VilkårResultatType vilkårResultatType;
+        ResultatType resultatType;
         if (ikkeOppfylt) {
-            vilkårResultatType = VilkårResultatType.AVSLÅTT;
+            resultatType = ResultatType.AVSLÅTT;
         } else if (ikkeVurdert) {
-            vilkårResultatType = VilkårResultatType.IKKE_FASTSATT;
+            resultatType = ResultatType.IKKE_FASTSATT;
         } else if (oppfylt) {
-            vilkårResultatType = VilkårResultatType.INNVILGET;
+            resultatType = ResultatType.INNVILGET;
         } else {
             throw FEILFACTORY.kanIkkeUtledeVilkårsresultatFraRegelmotor().toException();
         }
 
-        return vilkårResultatType;
+        return resultatType;
     }
 
-    private void oppdaterBehandlingMedVilkårresultat(Behandling behandling, VilkårResultatType inngangsvilkårUtfall) {
-        VilkårResultat.Builder builder = VilkårResultat
-            .builderFraEksisterende(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId()).getVilkårResultat())
-            .medVilkårResultatType(inngangsvilkårUtfall);
-        builder.buildFor(behandling);
-    }
+    private void oppdaterBehandlingMedVilkårresultat(Behandling behandling, VilkårData vilkårData) {
+        final var behandlingsresultat = inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId());
 
-    private void oppdaterBehandlingMedVilkårresultat(Behandling behandling,
-                                                     VilkårData vilkårData, VilkårResultatType inngangsvilkårUtfall) {
+        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
 
-        VilkårResultat.Builder builder = VilkårResultat
-            .builderFraEksisterende(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId()).getVilkårResultat())
-            .medVilkårResultatType(inngangsvilkårUtfall);
-        builder.leggTilVilkårResultat(vilkårData.getVilkårType(),
-            vilkårData.getUtfallType(), vilkårData.getVilkårUtfallMerknad(), vilkårData.getMerknadParametere(),
-            vilkårData.getAvslagsårsak(), false, vilkårData.erOverstyrt(),
-            vilkårData.getRegelEvaluering(), vilkårData.getRegelInput());
+        final var vilkårBuilder = builder.hentBuilderFor(vilkårData.getVilkårType());
+        final var periode = vilkårData.getPeriode();
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+            .medUtfall(vilkårData.getUtfallType())
+            .medMerknadParametere(vilkårData.getMerknadParametere())
+            .medRegelEvaluering(vilkårData.getRegelEvaluering())
+            .medRegelInput(vilkårData.getRegelInput())
+            .medAvslagsårsak(vilkårData.getAvslagsårsak())
+            .medMerknad(vilkårData.getVilkårUtfallMerknad()));
+        builder.leggTil(vilkårBuilder);
 
-        builder.buildFor(behandling);
+        final var resultat = builder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(resultat);
     }
 }

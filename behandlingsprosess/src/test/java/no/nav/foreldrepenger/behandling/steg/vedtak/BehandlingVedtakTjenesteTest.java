@@ -30,9 +30,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingslager.uttak.IkkeOppfyltÅrsak;
@@ -47,6 +48,7 @@ import no.nav.foreldrepenger.domene.uttak.UttakRepositoryProvider;
 import no.nav.foreldrepenger.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.vedtak.felles.testutilities.db.Repository;
+import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingVedtakTjenesteTest {
 
@@ -161,14 +163,15 @@ public class BehandlingVedtakTjenesteTest {
             .medBehandlingResultatType(behandlingResultatType)
             .buildFor(behandling);
         boolean ikkeAvslått = !behandlingResultatType.equals(BehandlingResultatType.AVSLÅTT);
-        VilkårResultat.builder()
-            .leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET, ikkeAvslått ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
-                null, new Properties(), null, false, false, null, null)
-            .medVilkårResultatType(ikkeAvslått ? VilkårResultatType.INNVILGET : VilkårResultatType.AVSLÅTT)
-            .buildFor(behandling);
+        final var vilkårResultatBuilder = VilkårResultat.builder();
+        final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(ikkeAvslått ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT));
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        VilkårResultat vilkårResultat = vilkårResultatBuilder.build();
 
         BehandlingLås lås = kontekst.getSkriveLås();
         Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
 
         behandlingRepository.lagre(behandling, lås);

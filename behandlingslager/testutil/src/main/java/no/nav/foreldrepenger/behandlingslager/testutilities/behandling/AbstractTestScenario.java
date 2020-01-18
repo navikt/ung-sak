@@ -67,10 +67,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLås;
@@ -89,6 +92,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
+import no.nav.vedtak.konfig.Tid;
 
 /**
  * Default test scenario builder for å definere opp testdata med enkle defaults.
@@ -123,8 +127,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private BehandlingStegType startSteg;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
-    private VilkårResultatType vilkårResultatType = VilkårResultatType.IKKE_FASTSATT;
-    private Map<VilkårType, VilkårUtfallType> vilkårTyper = new HashMap<>();
+    private ResultatType resultatType = ResultatType.IKKE_FASTSATT;
+    private Map<VilkårType, Utfall> vilkårTyper = new HashMap<>();
     private List<MedlemskapPerioderEntitet> medlemskapPerioder = new ArrayList<>();
     private Long fagsakId = nyId();
     private LocalDate behandlingstidFrist;
@@ -522,12 +526,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
             personer.stream().filter(a -> a.getType().equals(PersonopplysningVersjonType.OVERSTYRT))
                 .findFirst().ifPresent(b -> {
-                    if (personer.stream().noneMatch(c -> c.getType().equals(PersonopplysningVersjonType.REGISTRERT))) {
-                        // Sjekker om overstyring er ok, mao om registeropplysninger finnes
-                        personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
-                    }
-                    lagrePersoninfo(behandling, b, personopplysningRepository);
-                });
+                if (personer.stream().noneMatch(c -> c.getType().equals(PersonopplysningVersjonType.REGISTRERT))) {
+                    // Sjekker om overstyring er ok, mao om registeropplysninger finnes
+                    personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
+                }
+                lagrePersoninfo(behandling, b, personopplysningRepository);
+            });
 
         } else {
             PersonInformasjon registerInformasjon = PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT)
@@ -741,17 +745,18 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             : behandlingresultatBuilder).buildFor(behandling);
         behandlingresultatBuilder = null; // resett
 
-        VilkårResultat.Builder inngangsvilkårBuilder = VilkårResultat
-            .builderFraEksisterende(behandlingsresultat.getVilkårResultat())
-            .medVilkårResultatType(vilkårResultatType);
+        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat
+            .builderFraEksisterende(behandlingsresultat.getVilkårResultat());
 
         vilkårTyper.forEach((vilkårType, vilkårUtfallType) -> {
-            inngangsvilkårBuilder.leggTilVilkår(vilkårType, vilkårUtfallType);
+            inngangsvilkårBuilder.leggTil(new VilkårBuilder().medType(vilkårType).leggTil(new VilkårPeriodeBuilder()
+                .medPeriode(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+                .medUtfall(vilkårUtfallType)));
         });
 
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.buildFor(behandling);
+        behandlingsresultat.medOppdatertVilkårResultat(inngangsvilkårBuilder.build());
 
-        repoProvider.getBehandlingRepository().lagre(vilkårResultat, lås);
+        repoProvider.getBehandlingRepository().lagre(behandlingsresultat.getVilkårResultat(), lås);
 
         if (behandlingVedtakBuilder != null) {
             // Må lagre Behandling for at Behandlingsresultat ikke skal være transient når BehandlingVedtak blir lagret:
@@ -866,14 +871,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
-    public S leggTilVilkår(VilkårType vilkårType, VilkårUtfallType vilkårUtfallType) {
-        vilkårTyper.put(vilkårType, vilkårUtfallType);
+    public S leggTilVilkår(VilkårType vilkårType, Utfall utfall) {
+        vilkårTyper.put(vilkårType, utfall);
         return (S) this;
     }
 
     @SuppressWarnings("unchecked")
-    public S medVilkårResultatType(VilkårResultatType vilkårResultatType) {
-        this.vilkårResultatType = vilkårResultatType;
+    public S medVilkårResultatType(ResultatType resultatType) {
+        this.resultatType = resultatType;
         return (S) this;
     }
 
