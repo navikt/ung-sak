@@ -57,6 +57,7 @@ import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
+import no.nav.foreldrepenger.historikk.HistorikkAvklartSoeknadsperiodeType;
 import no.nav.foreldrepenger.historikk.OppgaveÅrsak;
 import no.nav.foreldrepenger.historikk.VurderArbeidsforholdHistorikkinnslag;
 import no.nav.foreldrepenger.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
@@ -100,6 +101,7 @@ public class HentKodeverkTjeneste {
         map.put(HistorikkEndretFeltType.class.getSimpleName(), HistorikkEndretFeltType.kodeMap().values());
         map.put(HistorikkinnslagType.class.getSimpleName(), HistorikkinnslagType.kodeMap().values());
         map.put(HistorikkAktør.class.getSimpleName(), HistorikkAktør.kodeMap().values());
+        map.put(HistorikkAvklartSoeknadsperiodeType.class.getSimpleName(), HistorikkAvklartSoeknadsperiodeType.kodeMap().values());
         map.put(BehandlingStatus.class.getSimpleName(), BehandlingStatus.kodeMap().values());
         map.put(MedlemskapDekningType.class.getSimpleName(), MedlemskapDekningType.kodeMap().values());
         map.put(MedlemskapType.class.getSimpleName(), MedlemskapType.kodeMap().values());
@@ -114,7 +116,7 @@ public class HentKodeverkTjeneste {
         map.put(Landkoder.class.getSimpleName(), Landkoder.kodeMap().values());
         map.put(Språkkode.class.getSimpleName(), Språkkode.kodeMap().values());
         map.put(DokumentTypeId.class.getSimpleName(), DokumentTypeId.kodeMap().values());
-        
+
         Map<String, Collection<? extends Kodeverdi>> mapFiltered = new LinkedHashMap<>();
 
         map.entrySet().forEach(e -> {
@@ -124,7 +126,7 @@ public class HentKodeverkTjeneste {
         KODEVERDIER_SOM_BRUKES_PÅ_KLIENT = Collections.unmodifiableMap(mapFiltered);
 
     }
-    
+
     private BehandlendeEnhetTjeneste enhetsTjeneste;
 
     HentKodeverkTjeneste() {
