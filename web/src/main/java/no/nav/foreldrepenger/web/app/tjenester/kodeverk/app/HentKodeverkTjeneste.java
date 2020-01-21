@@ -113,7 +113,7 @@ public class HentKodeverkTjeneste {
         map.put(Region.class.getSimpleName(), Region.kodeMap().values());
         map.put(Landkoder.class.getSimpleName(), Landkoder.kodeMap().values());
         map.put(Språkkode.class.getSimpleName(), Språkkode.kodeMap().values());
-        map.put(VedtakResultatType.class.getSimpleName(), Språkkode.kodeMap().values());
+        map.put(VedtakResultatType.class.getSimpleName(), VedtakResultatType.kodeMap().values());
         map.put(DokumentTypeId.class.getSimpleName(), DokumentTypeId.kodeMap().values());
 
         Map<String, Collection<? extends Kodeverdi>> mapFiltered = new LinkedHashMap<>();
