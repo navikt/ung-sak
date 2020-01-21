@@ -29,17 +29,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsa
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkBegrunnelseType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkOpplysningType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
+import no.nav.foreldrepenger.behandlingslager.behandling.historikk.*;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapDekningType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.SivilstandType;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
@@ -102,6 +99,7 @@ public class HentKodeverkTjeneste {
         map.put(HistorikkinnslagType.class.getSimpleName(), HistorikkinnslagType.kodeMap().values());
         map.put(HistorikkAktør.class.getSimpleName(), HistorikkAktør.kodeMap().values());
         map.put(HistorikkAvklartSoeknadsperiodeType.class.getSimpleName(), HistorikkAvklartSoeknadsperiodeType.kodeMap().values());
+        map.put(HistorikkResultatType.class.getSimpleName(), HistorikkResultatType.kodeMap().values());
         map.put(BehandlingStatus.class.getSimpleName(), BehandlingStatus.kodeMap().values());
         map.put(MedlemskapDekningType.class.getSimpleName(), MedlemskapDekningType.kodeMap().values());
         map.put(MedlemskapType.class.getSimpleName(), MedlemskapType.kodeMap().values());
@@ -115,6 +113,7 @@ public class HentKodeverkTjeneste {
         map.put(Region.class.getSimpleName(), Region.kodeMap().values());
         map.put(Landkoder.class.getSimpleName(), Landkoder.kodeMap().values());
         map.put(Språkkode.class.getSimpleName(), Språkkode.kodeMap().values());
+        map.put(VedtakResultatType.class.getSimpleName(), Språkkode.kodeMap().values());
         map.put(DokumentTypeId.class.getSimpleName(), DokumentTypeId.kodeMap().values());
 
         Map<String, Collection<? extends Kodeverdi>> mapFiltered = new LinkedHashMap<>();
