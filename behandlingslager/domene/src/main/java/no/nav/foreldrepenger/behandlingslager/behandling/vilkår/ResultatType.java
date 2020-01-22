@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.behandling.vilkår;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -19,48 +20,45 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum VilkårUtfallType implements Kodeverdi {
-    OPPFYLT("OPPFYLT", "Oppfylt"),
-    IKKE_OPPFYLT("IKKE_OPPFYLT", "Ikke oppfylt"),
-    IKKE_VURDERT("IKKE_VURDERT", "Ikke vurdert"),
-    IKKE_RELEVANT("IKKE_RELEVANT", "Ikke relevant"),
-    AVSLAAS_I_ANNET_VILKAAR("AVSLAAS_I_ANNET_VILKAAR", "Avslås i annet vilkår"),
-
-    UDEFINERT("-", "Ikke definert"),
-
+public enum ResultatType implements Kodeverdi {
+     INNVILGET("INNVILGET", "Innvilget"),
+     DELEVIS_AVSLÅTT("DELEVIS_AVSLÅTT", "Delevis avslått"),
+     AVSLÅTT("AVSLAATT", "Avslått"),
+     IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
+     UDEFINERT("-", "Ikke definert"),
     ;
-    
-    private static final Map<String, VilkårUtfallType> KODER = new LinkedHashMap<>();
-    
-    public static final String KODEVERK = "VILKAR_UTFALL_TYPE";
+
+    private static final Map<String, ResultatType> KODER = new LinkedHashMap<>();
+
+    public static final String KODEVERK = "VILKAR_RESULTAT_TYPE";
 
     @JsonIgnore
     private String navn;
 
     private String kode;
 
-    private VilkårUtfallType(String kode) {
+    private ResultatType(String kode) {
         this.kode = kode;
     }
 
-    private VilkårUtfallType(String kode, String navn) {
+    private ResultatType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
     @JsonCreator
-    public static VilkårUtfallType fraKode(@JsonProperty("kode") String kode) {
+    public static ResultatType fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return null;
         }
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent VilkårUtfallType: " + kode);
+            throw new IllegalArgumentException("Ukjent VilkårResultatType: " + kode);
         }
         return ad;
     }
-    
-    public static Map<String, VilkårUtfallType> kodeMap() {
+
+    public static Map<String, ResultatType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
 
@@ -70,10 +68,9 @@ public enum VilkårUtfallType implements Kodeverdi {
     }
 
     public static void main(String[] args) {
-        System.out.println(KODER.keySet());
+        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
     }
-    
-    
+
     @JsonProperty
     @Override
     public String getKodeverk() {
@@ -85,12 +82,12 @@ public enum VilkårUtfallType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
@@ -98,18 +95,18 @@ public enum VilkårUtfallType implements Kodeverdi {
             }
         }
     }
-    
+
     @Converter(autoApply = true)
-    public static class KodeverdiConverter implements AttributeConverter<VilkårUtfallType, String> {
+    public static class KodeverdiConverter implements AttributeConverter<ResultatType, String> {
         @Override
-        public String convertToDatabaseColumn(VilkårUtfallType attribute) {
+        public String convertToDatabaseColumn(ResultatType attribute) {
             return attribute == null ? null : attribute.getKode();
         }
 
         @Override
-        public VilkårUtfallType convertToEntityAttribute(String dbData) {
+        public ResultatType convertToEntityAttribute(String dbData) {
             return dbData == null ? null : fraKode(dbData);
         }
     }
-    
+
 }

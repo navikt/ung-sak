@@ -1,7 +1,8 @@
 package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType.IKKE_VURDERT;
+import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall.IKKE_VURDERT;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
@@ -11,7 +12,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.vedtak.konfig.Tid;
 
 public class RyddOpptjening {
 
@@ -27,7 +30,7 @@ public class RyddOpptjening {
 
     public void ryddOpp() {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        Optional<Vilkår> vilkår = ryddOppVilkårsvurderinger(behandling);
+        Optional<Vilkår> vilkår = ryddOppVilkårsvurderinger(behandling, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
         if (vilkår.isPresent()) {
             opptjeningRepository.deaktiverOpptjening(behandling);
             tilbakestillOpptjenigsperiodevilkår(behandling);
@@ -36,10 +39,10 @@ public class RyddOpptjening {
 
     public void ryddOppAktiviteter() {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        ryddOppVilkårsvurderinger(behandling);
+        ryddOppVilkårsvurderinger(behandling, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
     }
 
-    private Optional<Vilkår> ryddOppVilkårsvurderinger(Behandling behandling) {
+    private Optional<Vilkår> ryddOppVilkårsvurderinger(Behandling behandling, LocalDate fom, LocalDate tom) {
         VilkårResultat vilkårResultat = hentVilkårResultat(behandling);
         if (vilkårResultat == null) {
             return Optional.empty();
@@ -49,9 +52,13 @@ public class RyddOpptjening {
             .findFirst();
 
         if (opptjeningVilkår.isPresent()) {
-            VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat)
-                .leggTilVilkår(opptjeningVilkår.get().getVilkårType(), IKKE_VURDERT);
-            builder.buildFor(behandling);
+            VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+            final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+                .medUtfall(IKKE_VURDERT));
+            builder.leggTil(vilkårBuilder);
+            final var nyttResultat = builder.build();
+            behandling.getBehandlingsresultat().medOppdatertVilkårResultat(nyttResultat);
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
         return opptjeningVilkår;
@@ -72,9 +79,13 @@ public class RyddOpptjening {
             .filter(vilkåret -> vilkåret.getVilkårType().equals(VilkårType.OPPTJENINGSPERIODEVILKÅR))
             .findFirst();
         if (opptjeningPeriodeVilkår.isPresent()) {
-            VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat)
-                .leggTilVilkår(opptjeningPeriodeVilkår.get().getVilkårType(), IKKE_VURDERT);
-            builder.buildFor(behandling);
+            VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+            final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSPERIODEVILKÅR);
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+                .medUtfall(IKKE_VURDERT));
+            builder.leggTil(vilkårBuilder);
+            final var nyttResultat = builder.build();
+            behandling.getBehandlingsresultat().medOppdatertVilkårResultat(nyttResultat);
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
     }

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,10 +37,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingslager.uttak.PeriodeResultatType;
 import no.nav.foreldrepenger.behandlingslager.uttak.PeriodeResultatÅrsak;
@@ -49,7 +51,9 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
 public class ForeslåBehandlingsresultatTjenesteTest {
@@ -58,7 +62,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-
+    private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
     private DokumentBehandlingTjeneste dokumentBehandlingTjeneste = mock(DokumentBehandlingTjeneste.class);
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
@@ -66,13 +70,12 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private ForeslåBehandlingsresultatTjenesteImpl tjeneste;
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
-    private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
 
     @Before
     public void setup() {
         AvslagsårsakTjeneste avslagsårsakTjeneste = new AvslagsårsakTjeneste();
-        when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(VilkårUtfallType.OPPFYLT, Avslagsårsak.UDEFINERT));
+        when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,
             beregningsgrunnlagTjeneste,
             new HarEtablertYtelseImpl(),
@@ -89,7 +92,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         // Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
-        inngangsvilkårOgUttak(behandling, VilkårUtfallType.OPPFYLT);
+        inngangsvilkårOgUttak(behandling, Utfall.OPPFYLT);
 
         // Act
         Behandlingsresultat behandlingsresultat = foreslåBehandlingsresultat(behandling);
@@ -114,7 +117,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         // Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
-        inngangsvilkårOgUttak(behandling, VilkårUtfallType.OPPFYLT);
+        inngangsvilkårOgUttak(behandling, Utfall.OPPFYLT);
         getBehandlingsresultat(behandling).setAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON);
 
         // Act
@@ -130,7 +133,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
         Behandling revurdering = lagRevurdering(behandling);
-        inngangsvilkårOgUttak(revurdering, VilkårUtfallType.OPPFYLT);
+        inngangsvilkårOgUttak(revurdering, Utfall.OPPFYLT);
 
         // Act
         foreslåBehandlingsresultat(revurdering);
@@ -159,7 +162,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
         Behandling revurdering = lagRevurdering(behandling);
-        inngangsvilkårOgUttak(revurdering, VilkårUtfallType.IKKE_OPPFYLT);
+        inngangsvilkårOgUttak(revurdering, Utfall.IKKE_OPPFYLT);
 
         // Act
         foreslåBehandlingsresultat(revurdering);
@@ -190,7 +193,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
         Behandling revurdering = lagRevurdering(behandling);
-        inngangsvilkårOgUttak(revurdering, VilkårUtfallType.IKKE_OPPFYLT);
+        inngangsvilkårOgUttak(revurdering, Utfall.IKKE_OPPFYLT);
         revurdering.getFagsak().setSkalTilInfotrygd(true);
 
         // Act
@@ -198,27 +201,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
         // Assert
         verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), anyBoolean());
-    }
-
-    @Test
-    public void skalKalleBestemBehandlingsresultatNårAvslåttRevurderingPåAvslåttFørstegangsbehandling() {
-
-        // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        inngangsvilkårOgUttak(behandling, VilkårUtfallType.IKKE_OPPFYLT);
-        foreslåBehandlingsresultat(behandling);
-        behandling.avsluttBehandling();
-        Behandling revurdering = lagRevurdering(behandling);
-
-        // Act
-        Behandlingsresultat behandlingsresultat = foreslåBehandlingsresultat(revurdering);
-
-        // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), anyBoolean());
-
-        assertThat(behandlingsresultat.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.INGEN_ENDRING);
-        assertThat(behandlingsresultat.getVedtaksbrev()).isEqualTo(Vedtaksbrev.INGEN);
     }
 
     private Behandling lagRevurdering(Behandling originalBehandling) {
@@ -233,23 +215,30 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         return revurdering;
     }
 
-    private void inngangsvilkårOgUttak(Behandling behandling, VilkårUtfallType vilkårUtfallType) {
+    private void inngangsvilkårOgUttak(Behandling behandling, Utfall utfall) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
 
         var vilkårsresultatBuilder = VilkårResultat.builder();
-        if (vilkårUtfallType.equals(VilkårUtfallType.OPPFYLT)) {
-            vilkårsresultatBuilder.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, vilkårUtfallType);
-            vilkårsresultatBuilder.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, vilkårUtfallType);
+        if (utfall.equals(Utfall.OPPFYLT)) {
+            leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.OPPTJENINGSVILKÅRET, null);
+            leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.MEDLEMSKAPSVILKÅRET, null);
         } else {
-            vilkårsresultatBuilder.leggTilVilkårResultatManueltIkkeOppfylt(
-                VilkårType.MEDLEMSKAPSVILKÅRET,
-                Avslagsårsak.SØKER_ER_UTVANDRET);
+            leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.MEDLEMSKAPSVILKÅRET, Avslagsårsak.SØKER_ER_UTVANDRET);
+
         }
-        behandlingRepository.lagre(vilkårsresultatBuilder.buildFor(behandling), lås);
+        final var vilkårResultat = vilkårsresultatBuilder.build();
+        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(vilkårResultat);
+        behandlingRepository.lagre(vilkårResultat, lås);
         behandlingRepository.lagre(behandling, lås);
-        if (vilkårUtfallType.equals(VilkårUtfallType.OPPFYLT)) {
+        if (utfall.equals(Utfall.OPPFYLT)) {
             lagreUttak(behandling);
         }
+    }
+
+    private void leggTilVilkårMedUtfall(Utfall utfall, VilkårResultatBuilder vilkårsresultatBuilder, VilkårType opptjeningsvilkåret, Avslagsårsak søkerErUtvandret) {
+        final var opptjeningBuilder = vilkårsresultatBuilder.hentBuilderFor(opptjeningsvilkåret);
+        opptjeningBuilder.leggTil(opptjeningBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(utfall).medAvslagsårsak(søkerErUtvandret));
+        vilkårsresultatBuilder.leggTil(opptjeningBuilder);
     }
 
     private void lagreUttak(Behandling behandling) {
@@ -269,8 +258,12 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
-        VilkårResultat.builder().medVilkårResultatType(VilkårResultatType.AVSLÅTT).buildFor(behandling);
-        behandlingRepository.lagre(getBehandlingsresultat(behandling).getVilkårResultat(), behandlingRepository.taSkriveLås(behandling));
+        final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
+        final var vilkårResultat = VilkårResultat.builder()
+            .leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(Utfall.IKKE_OPPFYLT)))
+            .build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
+        behandlingRepository.lagre(vilkårResultat, behandlingRepository.taSkriveLås(behandling));
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {

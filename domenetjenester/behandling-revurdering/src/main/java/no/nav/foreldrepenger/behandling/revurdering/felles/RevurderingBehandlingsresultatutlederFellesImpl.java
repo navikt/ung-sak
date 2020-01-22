@@ -22,7 +22,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -37,7 +37,7 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingsresultatRepository behandlingsresultatRepository;
     private HarEtablertYtelse harEtablertYtelse;
-    
+
     // FIXME K9 håndter revurdering
     @SuppressWarnings("unused")
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
@@ -93,8 +93,8 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
             return OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt.fastsett(revurdering);
         }
 
-        Tuple<VilkårUtfallType, Avslagsårsak> utfall = medlemTjeneste.utledVilkårUtfall(revurdering);
-        if (!utfall.getElement1().equals(VilkårUtfallType.OPPFYLT)) {
+        Tuple<Utfall, Avslagsårsak> utfall = medlemTjeneste.utledVilkårUtfall(revurdering);
+        if (!utfall.getElement1().equals(Utfall.OPPFYLT)) {
             Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
             Behandlingsresultat.Builder behandlingsresultatBuilder = Behandlingsresultat.builderEndreEksisterende(behandlingsresultat);
             behandlingsresultatBuilder.medBehandlingResultatType(BehandlingResultatType.OPPHØR);

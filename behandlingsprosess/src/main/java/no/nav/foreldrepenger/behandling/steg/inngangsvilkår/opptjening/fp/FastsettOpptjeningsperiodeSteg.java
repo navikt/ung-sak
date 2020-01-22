@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening.fp;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,6 +24,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.vedtak.konfig.Tid;
 
 
 @BehandlingStegRef(kode = "VURDER_OPPTJ_PERIODE")
@@ -51,7 +56,7 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg,
                                    BehandlingStegType sisteSteg) {
-        if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
+        if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
             super.vedHoppOverBakover(kontekst, modell, førsteSteg, sisteSteg);
             new RyddOpptjening(behandlingRepository, opptjeningRepository, kontekst).ryddOpp();
         }
@@ -61,7 +66,7 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     public void vedHoppOverFramover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg,
                                     BehandlingStegType sisteSteg) {
         if (!behandlingRepository.hentBehandling(kontekst.getBehandlingId()).erRevurdering()) {
-            if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
+            if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
                 super.vedHoppOverFramover(kontekst, modell, førsteSteg, sisteSteg);
                 new RyddOpptjening(behandlingRepository, opptjeningRepository, kontekst).ryddOpp();
             }
@@ -70,12 +75,18 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     }
 
     @Override
-    protected boolean erVilkårOverstyrt(Long behandlingId) {
+    protected boolean erVilkårOverstyrt(Long behandlingId, LocalDate fom, LocalDate tom) {
         Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
         Optional<VilkårResultat> resultatOpt = behandlingsresultat.map(Behandlingsresultat::getVilkårResultat);
         if (resultatOpt.isPresent()) {
             VilkårResultat vilkårResultat = resultatOpt.get();
-            return vilkårResultat.getVilkårene().stream().filter(vilkår -> vilkår.getVilkårType().equals(VilkårType.OPPTJENINGSVILKÅRET)).anyMatch(Vilkår::erOverstyrt);
+            return vilkårResultat.getVilkårene()
+                .stream()
+                .filter(vilkår -> VilkårType.OPPTJENINGSVILKÅRET.equals(vilkår.getVilkårType()))
+                .map(Vilkår::getPerioder)
+                .flatMap(Collection::stream)
+                .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
+                .anyMatch(VilkårPeriode::getErOverstyrt);
         }
         return false;
     }

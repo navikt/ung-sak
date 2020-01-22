@@ -38,9 +38,6 @@ public class KompletthetModell {
         map.put(VENT_PGA_FOR_TIDLIG_SØKNAD, (kontroller, ref) -> finnKompletthetssjekker(kontroller, ref).vurderSøknadMottattForTidlig(ref));
         map.put(AUTO_VENT_ETTERLYST_INNTEKTSMELDING, (kontroller, ref) -> finnKompletthetssjekker(kontroller, ref).vurderEtterlysningInntektsmelding(ref));
 
-        // Køet behandling kan inntreffe FØR kompletthetssteget er passert - men er ikke tilknyttet til noen kompletthetssjekk
-//        map.put(AUTO_KØET_BEHANDLING, (kontroller, behandling) -> KompletthetResultat.oppfylt());
-
         KOMPLETTHETSFUNKSJONER = Collections.unmodifiableMap(map);
     }
 
@@ -89,7 +86,7 @@ public class KompletthetModell {
     public KompletthetResultat vurderKompletthet(BehandlingReferanse ref, List<AksjonspunktDefinisjon> åpneAksjonspunkter) {
         Optional<AksjonspunktDefinisjon> åpentAutopunkt = åpneAksjonspunkter.stream()
             .findFirst();
-        if (åpentAutopunkt.isPresent() && erAutopunktTilknyttetKompletthetssjekk(åpentAutopunkt)) {
+        if (åpentAutopunkt.map(this::erAutopunktTilknyttetKompletthetssjekk).orElse(false)) {
             return vurderKompletthet(ref, åpentAutopunkt.get());
         }
         if (!erKompletthetssjekkPassert(ref.getBehandlingId())) {
@@ -101,8 +98,8 @@ public class KompletthetModell {
         return vurderKompletthet(ref, defaultAutopunkt);
     }
 
-    private boolean erAutopunktTilknyttetKompletthetssjekk(Optional<AksjonspunktDefinisjon> åpentAutopunkt) {
-        return KOMPLETTHETSFUNKSJONER.containsKey(åpentAutopunkt.get());
+    private boolean erAutopunktTilknyttetKompletthetssjekk(AksjonspunktDefinisjon åpentAutopunkt) {
+        return KOMPLETTHETSFUNKSJONER.containsKey(åpentAutopunkt);
     }
 
     private AksjonspunktDefinisjon finnSisteAutopunktKnyttetTilKompletthetssjekk(BehandlingReferanse ref) {

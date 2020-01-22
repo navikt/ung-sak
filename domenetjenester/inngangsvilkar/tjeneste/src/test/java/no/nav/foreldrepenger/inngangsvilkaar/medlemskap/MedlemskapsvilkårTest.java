@@ -32,7 +32,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Sivils
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
@@ -86,7 +86,9 @@ public class MedlemskapsvilkårTest {
     private Behandling lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider);
     }
-    
+
+    private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(SKJÆRINGSTIDSPUNKT);
+
     @Before
     public void before() throws Exception {
         this.oversetter = new InngangsvilkårOversetter(repositoryProvider,
@@ -108,11 +110,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1020);
     }
 
@@ -129,11 +131,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1020);
     }
 
@@ -156,7 +158,7 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         ObjectMapper om = new ObjectMapper();
         JsonNode jsonNode = om.readTree(vilkårData.getRegelInput());
@@ -164,7 +166,7 @@ public class MedlemskapsvilkårTest {
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
         assertThat(vilkårData.getRegelInput()).isNotEmpty();
         assertThat(personStatusType).isEqualTo("BOSA");
     }
@@ -186,11 +188,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1021);
     }
 
@@ -212,11 +214,11 @@ public class MedlemskapsvilkårTest {
 
         opprettArbeidOgInntektForBehandling(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(5), SKJÆRINGSTIDSPUNKT.plusDays(2));
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
     }
 
     /**
@@ -239,11 +241,11 @@ public class MedlemskapsvilkårTest {
         opprettArbeidOgInntektForBehandling(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(5), SKJÆRINGSTIDSPUNKT.plusDays(2));
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
     }
 
     /**
@@ -265,11 +267,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1025);
     }
 
@@ -294,11 +296,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
     }
 
     /**
@@ -324,11 +326,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
     }
 
     /**
@@ -354,11 +356,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1024);
     }
 
@@ -386,11 +388,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1023);
     }
 
@@ -417,11 +419,11 @@ public class MedlemskapsvilkårTest {
         Behandling behandling = lagre(scenario);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
     }
 
     /**
@@ -446,11 +448,11 @@ public class MedlemskapsvilkårTest {
         repositoryProvider.getPersonopplysningRepository().lagre(behandlingId, personInformasjonBuilder);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.IKKE_OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårData.getVilkårUtfallMerknad()).isEqualTo(VilkårUtfallMerknad.VM_1021);
     }
 
@@ -478,11 +480,11 @@ public class MedlemskapsvilkårTest {
         repositoryProvider.getPersonopplysningRepository().lagre(behandlingId, personInformasjonBuilder);
 
         // Act
-        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling));
+        VilkårData vilkårData = vurderMedlemskapsvilkarEngangsstonad.vurderVilkår(lagRef(behandling), periode);
 
         // Assert
         assertThat(vilkårData.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkårData.getUtfallType()).isEqualTo(VilkårUtfallType.OPPFYLT);
+        assertThat(vilkårData.getUtfallType()).isEqualTo(Utfall.OPPFYLT);
     }
 
     /**

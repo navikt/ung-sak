@@ -15,7 +15,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.VilkårGrunnlag;
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -30,7 +31,7 @@ public class VilkårUtfallOversetter {
     public VilkårUtfallOversetter() {
     }
 
-    public VilkårData oversett(VilkårType vilkårType, Evaluation evaluation, VilkårGrunnlag grunnlag) {
+    public VilkårData oversett(VilkårType vilkårType, Evaluation evaluation, VilkårGrunnlag grunnlag, DatoIntervallEntitet periode) {
         EvaluationSummary summary = new EvaluationSummary(evaluation);
 
         String regelEvalueringJson = EvaluationSerializer.asJson(evaluation);
@@ -46,14 +47,14 @@ public class VilkårUtfallOversetter {
         // input!!
         logger.info("json grunnlag for " + vilkårType.getKode() + ": " + jsonGrunnlag); // NOSONAR
 
-        VilkårUtfallType vilkårUtfallType = getVilkårUtfallType(summary);
+        Utfall utfall = getVilkårUtfallType(summary);
 
         Properties merknadParametere = getMerknadParametere(summary);
 
         List<AksjonspunktDefinisjon> apDefinisjoner = getAksjonspunktDefinisjoner(summary);
         VilkårUtfallMerknad vilkårUtfallMerknad = getVilkårUtfallMerknad(summary);
 
-        return new VilkårData(vilkårType, vilkårUtfallType, merknadParametere, apDefinisjoner, vilkårUtfallMerknad, null,
+        return new VilkårData(periode, vilkårType, utfall, merknadParametere, apDefinisjoner, vilkårUtfallMerknad, null,
             regelEvalueringJson, jsonGrunnlag, false);
 
     }
@@ -97,23 +98,23 @@ public class VilkårUtfallOversetter {
         return params;
     }
 
-    private VilkårUtfallType getVilkårUtfallType(EvaluationSummary summary) {
+    private Utfall getVilkårUtfallType(EvaluationSummary summary) {
         Collection<Evaluation> leafEvaluations = summary.leafEvaluations();
         for (Evaluation ev : leafEvaluations) {
             if (ev.getOutcome() != null) {
                 Resultat res = ev.result();
                 switch (res) {
                     case JA:
-                        return VilkårUtfallType.OPPFYLT;
+                        return Utfall.OPPFYLT;
                     case NEI:
-                        return VilkårUtfallType.IKKE_OPPFYLT;
+                        return Utfall.IKKE_OPPFYLT;
                     case IKKE_VURDERT:
-                        return VilkårUtfallType.IKKE_VURDERT;
+                        return Utfall.IKKE_VURDERT;
                     default:
                         throw new IllegalArgumentException("Ukjent Resultat:" + res + " ved evaluering av:" + ev);
                 }
             } else {
-                return VilkårUtfallType.OPPFYLT;
+                return Utfall.OPPFYLT;
             }
         }
 

@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,9 +33,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.IverksettingStat
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.aktør.NavBrukerBuilder;
@@ -46,8 +44,10 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.Repository;
+import no.nav.vedtak.konfig.Tid;
 
 @RunWith(CdiRunner.class)
 public class BehandlingRepositoryImplTest {
@@ -271,9 +271,12 @@ public class BehandlingRepositoryImplTest {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);
 
+        final var e1 = DatoIntervallEntitet.fraOgMed(LocalDate.now());
         VilkårResultat vilkårResultat = VilkårResultat.builder()
-            .leggTilVilkår(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårUtfallType.IKKE_VURDERT)
-            .buildFor(behandling);
+            .leggTilIkkeVurderteVilkår(List.of(e1), VilkårType.OPPTJENINGSPERIODEVILKÅR)
+            .build();
+        Behandlingsresultat.builderForInngangsvilkår().buildFor(behandling);
+        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(vilkårResultat);
 
         // Act
         behandlingRepository.lagre(vilkårResultat, lås);
@@ -285,14 +288,14 @@ public class BehandlingRepositoryImplTest {
         assertThat(vilkårResultat.getVilkårene().iterator().next().getVilkårType()).isEqualTo(VilkårType.OPPTJENINGSPERIODEVILKÅR);
 
         // Arrange
-        VilkårResultat.builderFraEksisterende(vilkårResultat)
-            .leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, VilkårUtfallType.IKKE_VURDERT)
+        final var vilkårResultat1 = VilkårResultat.builderFraEksisterende(vilkårResultat)
+            .leggTilIkkeVurderteVilkår(List.of(e1), VilkårType.OPPTJENINGSVILKÅRET)
             .fjernVilkår(VilkårType.OPPTJENINGSPERIODEVILKÅR)
-            .buildFor(behandling);
-
+            .build();
+        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(vilkårResultat1);
         // Act
         behandlingRepository.lagre(behandling, lås);
-        behandlingRepository.lagre(vilkårResultat, lås);
+        behandlingRepository.lagre(vilkårResultat1, lås);
         repository.flushAndClear();
 
         // Assert
@@ -300,9 +303,6 @@ public class BehandlingRepositoryImplTest {
         assertThat(getBehandlingsresultat(opphentetBehandling).getVilkårResultat().getVilkårene()).hasSize(1);
         assertThat(getBehandlingsresultat(opphentetBehandling).getVilkårResultat().getVilkårene().iterator().next().getVilkårType())
             .isEqualTo(VilkårType.OPPTJENINGSVILKÅRET);
-        List<Vilkår> alleVilkår = repository.hentAlle(Vilkår.class);
-        assertThat(alleVilkår).hasSize(1);
-        assertThat(alleVilkår.get(0)).isEqualTo(getBehandlingsresultat(opphentetBehandling).getVilkårResultat().getVilkårene().iterator().next());
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
@@ -665,11 +665,11 @@ public class BehandlingRepositoryImplTest {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);
 
-        VilkårResultat.builder()
-            .leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET, innvilget ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
-                null, new Properties(), null, false, false, null, null)
-            .medVilkårResultatType(innvilget ? VilkårResultatType.INNVILGET : VilkårResultatType.AVSLÅTT)
-            .buildFor(behandling);
+        final var vilkårResultatBuilder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+        final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        final var vilkårResultat = vilkårResultatBuilder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(innvilget ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)))
+            .build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
 
         return behandlingsresultat;

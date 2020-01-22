@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.KonsekvensForYtelsen;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
@@ -55,19 +55,6 @@ public class FastsettBehandlingsresultatVedAvslagPåAvslagTest {
         assertThat(erAvslagPåAvslag).isFalse();
     }
 
-    @Test
-    public void skal_gi_avslag_på_avslag() {
-        // Arrange
-
-        // Act
-        boolean erAvslagPåAvslag = FastsettBehandlingsresultatVedAvslagPåAvslag.vurder(
-            lagBehandlingsresultat(revurdering, BehandlingResultatType.INGEN_ENDRING, KonsekvensForYtelsen.INGEN_ENDRING),
-            lagBehandlingsresultat(originalBehandling, BehandlingResultatType.AVSLÅTT, KonsekvensForYtelsen.UDEFINERT));
-
-        // Assert
-        assertThat(erAvslagPåAvslag).isTrue();
-    }
-
     private Behandling lagRevurdering(Behandling originalBehandling) {
         Behandling revurdering = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING)
             .medBehandlingÅrsak(
@@ -83,7 +70,8 @@ public class FastsettBehandlingsresultatVedAvslagPåAvslagTest {
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder().medBehandlingResultatType(resultatType)
             .leggTilKonsekvensForYtelsen(konsekvensForYtelsen).buildFor(behandling);
 
-        VilkårResultat.builder().medVilkårResultatType(VilkårResultatType.AVSLÅTT).buildFor(behandling);
+        final var build = VilkårResultat.builder().build();
+        behandlingsresultat.medOppdatertVilkårResultat(build);
         behandlingRepository.lagre(behandling.getBehandlingsresultat().getVilkårResultat(), behandlingRepository.taSkriveLås(behandling));
 
         return Optional.of(behandlingsresultat);

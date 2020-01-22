@@ -24,9 +24,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.Medlemskapsv
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -61,18 +63,19 @@ public class MedlemskapTjenesteImplTest {
         Behandling behandling = tuple.getElement1();
         Behandlingsresultat behandlingsresultat = tuple.getElement2();
 
-        VilkårResultat.Builder vilkår = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
-        vilkår.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.IKKE_OPPFYLT);
-        vilkår.overstyrVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.OPPFYLT, null);
+        VilkårResultatBuilder vilkår = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+        final var vilkårBuilder = vilkår.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(now, LocalDate.MAX).medUtfall(Utfall.IKKE_OPPFYLT).medUtfallOverstyrt(Utfall.OPPFYLT));
 
-        VilkårResultat vilkårResultat = vilkår.buildFor(behandling);
+        VilkårResultat vilkårResultat = vilkår.build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(vilkårResultat, lås);
 
         MedlemskapVilkårPeriodeGrunnlagEntitet.Builder grBuilder = medlemskapVilkårPeriodeRepository.hentBuilderFor(behandling);
         MedlemskapsvilkårPeriodeEntitet.Builder builder = grBuilder.getPeriodeBuilder();
         MedlemskapsvilkårPerioderEntitet.Builder periode = builder.getBuilderForVurderingsdato(now);
-        periode.medVilkårUtfall(VilkårUtfallType.IKKE_OPPFYLT);
+        periode.medVilkårUtfall(Utfall.IKKE_OPPFYLT);
         builder.leggTil(periode);
         grBuilder.medMedlemskapsvilkårPeriode(builder);
         medlemskapVilkårPeriodeRepository.lagreMedlemskapsvilkår(behandling, grBuilder);

@@ -21,21 +21,23 @@ class VilkårDtoMapper {
         if (behandlingsresultat != null) {
             VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
             if (vilkårResultat != null) {
-                List<VilkårDto> list = vilkårResultat.getVilkårene().stream().map(vilkår -> {
-                    VilkårDto dto = new VilkårDto();
-                    dto.setAvslagKode(vilkår.getAvslagsårsak() != null ? vilkår.getAvslagsårsak().getKode() : null);
-                    dto.setVilkarType(vilkår.getVilkårType());
-                    dto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
-                    dto.setVilkarStatus(vilkår.getGjeldendeVilkårUtfall());
-                    dto.setMerknadParametere(vilkår.getMerknadParametere());
-                    dto.setOverstyrbar(erOverstyrbar(vilkår, behandling));
+                List<VilkårDto> list = vilkårResultat.getVilkårene().stream().flatMap(vilkår -> {
+                    return vilkår.getPerioder().stream().map(it -> {
+                        VilkårDto dto = new VilkårDto();
+                        dto.setAvslagKode(it.getAvslagsårsak() != null ? it.getAvslagsårsak().getKode() : null);
+                        dto.setVilkarType(vilkår.getVilkårType());
+                        dto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
+                        dto.setVilkarStatus(it.getGjeldendeUtfall());
+                        dto.setMerknadParametere(it.getMerknadParametere());
+                        dto.setOverstyrbar(erOverstyrbar(vilkår, behandling));
 
-                    if (medVilkårkjøring) {
-                        dto.setInput(vilkår.getRegelInput());
-                        dto.setEvaluering(vilkår.getRegelEvaluering());
-                    }
+                        if (medVilkårkjøring) {
+                            dto.setInput(it.getRegelInput());
+                            dto.setEvaluering(it.getRegelEvaluering());
+                        }
 
-                    return dto;
+                        return dto;
+                    });
                 }).collect(Collectors.toList());
                 return list;
             }

@@ -894,7 +894,7 @@ public class Behandling extends BaseEntitet {
                 behandling.avsluttetDato = avsluttetDato.withNano(0);
             }
             if (resultatBuilder != null) {
-                Behandlingsresultat behandlingsresultat = resultatBuilder.buildFor(behandling);
+                Behandlingsresultat behandlingsresultat = resultatBuilder.build();
                 behandling.setBehandlingresultat(behandlingsresultat);
             }
 

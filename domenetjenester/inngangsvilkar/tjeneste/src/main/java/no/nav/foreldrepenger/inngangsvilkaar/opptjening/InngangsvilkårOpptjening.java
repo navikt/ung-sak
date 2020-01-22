@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårTypeKoder;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.Inngangsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårTypeRef;
@@ -27,9 +28,9 @@ public class InngangsvilkårOpptjening implements Inngangsvilkår {
     }
 
     @Override
-    public VilkårData vurderVilkår(BehandlingReferanse ref) {
+    public VilkårData vurderVilkår(BehandlingReferanse ref, DatoIntervallEntitet periode) {
         // returner egen output i tillegg for senere lagring
-        return opptjeningsVilkårTjeneste.vurderOpptjeningsVilkår(ref);
+        return opptjeningsVilkårTjeneste.vurderOpptjeningsVilkår(ref, periode);
     }
 
 }

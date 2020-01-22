@@ -11,6 +11,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
@@ -18,8 +19,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 
 @ApplicationScoped
@@ -66,16 +66,11 @@ public class RevurderingTjenesteFelles {
         VilkårResultat origVilkårResultat = origBehandling.getBehandlingsresultat().getVilkårResultat();
         Objects.requireNonNull(origVilkårResultat, "Vilkårsresultat må være satt på revurderingens originale behandling");
 
-        VilkårResultat.Builder vilkårBuilder = VilkårResultat.builder();
-        origVilkårResultat.getVilkårene().stream()
-            .forEach(vilkår -> vilkårBuilder
-                .medUtfallManuelt(vilkår.getVilkårUtfallManuelt())
-                .medUtfallOverstyrt(vilkår.getVilkårUtfallOverstyrt())
-                .leggTilVilkårResultat(vilkår.getVilkårType(), VilkårUtfallType.IKKE_VURDERT, vilkår.getVilkårUtfallMerknad(),
-                    vilkår.getMerknadParametere(), vilkår.getAvslagsårsak(), vilkår.erManueltVurdert(), vilkår.erOverstyrt(), vilkår.getRegelEvaluering(),
-                    vilkår.getRegelInput()));
-        vilkårBuilder.medVilkårResultatType(VilkårResultatType.IKKE_FASTSATT);
-        VilkårResultat vilkårResultat = vilkårBuilder.buildFor(revurdering);
+        final var behandlingsresultat = Behandlingsresultat.builderFraEksisterende(origBehandling.getBehandlingsresultat()).buildFor(revurdering);
+        VilkårResultatBuilder vilkårBuilder = VilkårResultatBuilder.kopi(origVilkårResultat);
+
+        VilkårResultat vilkårResultat = vilkårBuilder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         behandlingRepository.lagre(vilkårResultat, kontekst.getSkriveLås());
         behandlingRepository.lagre(revurdering, kontekst.getSkriveLås());
 

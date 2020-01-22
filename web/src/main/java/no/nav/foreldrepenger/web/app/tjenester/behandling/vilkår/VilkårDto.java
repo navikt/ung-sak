@@ -7,12 +7,12 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 
 public class VilkårDto {
 
     private VilkårType vilkarType;
-    private VilkårUtfallType vilkarStatus;
+    private Utfall vilkarStatus;
     private Properties merknadParametere;
     private String avslagKode;
     private String lovReferanse;
@@ -28,12 +28,12 @@ public class VilkårDto {
 
     public VilkårDto(
                      VilkårType vilkårType,
-                     VilkårUtfallType vilkårUtfallType,
+                     Utfall utfall,
                      Properties merknadParametere,
                      String avslagKode,
                      String lovReferanse) {
         this.vilkarType = vilkårType;
-        this.vilkarStatus = vilkårUtfallType;
+        this.vilkarStatus = utfall;
         this.merknadParametere = merknadParametere;
         this.avslagKode = avslagKode;
         this.lovReferanse = lovReferanse;
@@ -46,7 +46,7 @@ public class VilkårDto {
         return vilkarType;
     }
 
-    public VilkårUtfallType getVilkarStatus() {
+    public Utfall getVilkarStatus() {
         return vilkarStatus;
     }
 
@@ -74,7 +74,7 @@ public class VilkårDto {
         this.vilkarType = vilkarType;
     }
 
-    public void setVilkarStatus(VilkårUtfallType vilkarStatus) {
+    public void setVilkarStatus(Utfall vilkarStatus) {
         this.vilkarStatus = vilkarStatus;
     }
 

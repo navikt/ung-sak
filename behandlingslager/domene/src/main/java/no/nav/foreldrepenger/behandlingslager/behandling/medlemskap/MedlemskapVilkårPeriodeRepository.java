@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 import no.nav.vedtak.util.Tuple;
@@ -76,22 +76,22 @@ public class MedlemskapVilkårPeriodeRepository {
         lagreOgFlush(behandling, builder.build());
     }
 
-    public Tuple<VilkårUtfallType, VilkårUtfallMerknad> utledeVilkårStatus(Behandling behandling) {
+    public Tuple<Utfall, VilkårUtfallMerknad> utledeVilkårStatus(Behandling behandling) {
         Optional<MedlemskapVilkårPeriodeGrunnlagEntitet> medlemOpt = hentAktivtGrunnlag(behandling);
         if (medlemOpt.isPresent()) {
             MedlemskapsvilkårPeriodeEntitet medlemskapsvilkårPeriode = medlemOpt.get().getMedlemskapsvilkårPeriode();
             Set<MedlemskapsvilkårPerioderEntitet> perioder = medlemskapsvilkårPeriode.getPerioder();
             Optional<MedlemskapsvilkårPerioderEntitet> periodeOpt = perioder
                     .stream()
-                    .filter(m -> VilkårUtfallType.IKKE_OPPFYLT.equals(m.getVilkårUtfall()))
+                    .filter(m -> Utfall.IKKE_OPPFYLT.equals(m.getVilkårUtfall()))
                     .findFirst();
             if (periodeOpt.isPresent()) {
-                return new Tuple<>(VilkårUtfallType.IKKE_OPPFYLT, periodeOpt.get().getVilkårUtfallMerknad());
+                return new Tuple<>(Utfall.IKKE_OPPFYLT, periodeOpt.get().getVilkårUtfallMerknad());
             } else if (!perioder.isEmpty()) {
-                return new Tuple<>(VilkårUtfallType.OPPFYLT, VilkårUtfallMerknad.UDEFINERT);
+                return new Tuple<>(Utfall.OPPFYLT, VilkårUtfallMerknad.UDEFINERT);
             }
         }
-        return new Tuple<>(VilkårUtfallType.IKKE_VURDERT, VilkårUtfallMerknad.UDEFINERT);
+        return new Tuple<>(Utfall.IKKE_VURDERT, VilkårUtfallMerknad.UDEFINERT);
     }
 
     public Optional<LocalDate> hentOpphørsdatoHvisEksisterer(Behandling behandling) {
@@ -103,16 +103,16 @@ public class MedlemskapVilkårPeriodeRepository {
             MedlemskapsvilkårPeriodeEntitet entitet = periodeEntitet.get();
             OverstyrtLøpendeMedlemskap overstyringOpt = entitet.getOverstyring();
             if (overstyringOpt.getOverstyringsdato().isPresent()) {
-                if (overstyringOpt.getVilkårUtfall().equals(VilkårUtfallType.IKKE_OPPFYLT)) {
+                if (overstyringOpt.getVilkårUtfall().equals(Utfall.IKKE_OPPFYLT)) {
                     return overstyringOpt.getOverstyringsdato();
-                } else if (overstyringOpt.getVilkårUtfall().equals(VilkårUtfallType.OPPFYLT)) {
+                } else if (overstyringOpt.getVilkårUtfall().equals(Utfall.OPPFYLT)) {
                     return Optional.empty();
                 }
             }
         }
         return periodeEntitet
                 .map(MedlemskapsvilkårPeriodeEntitet::getPerioder)
-                .flatMap(perioder -> perioder.stream().filter(p -> VilkårUtfallType.IKKE_OPPFYLT.equals(p.getVilkårUtfall()))
+                .flatMap(perioder -> perioder.stream().filter(p -> Utfall.IKKE_OPPFYLT.equals(p.getVilkårUtfall()))
                     .map(MedlemskapsvilkårPerioderEntitet::getVurderingsdato).findFirst());
     }
 

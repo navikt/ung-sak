@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening.felles;
 
 import static java.util.Collections.singletonList;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.foreldrepenger.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
@@ -13,8 +14,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
+import no.nav.vedtak.konfig.Tid;
 
 public abstract class FastsettOpptjeningsperiodeStegFelles extends InngangsvilkårStegImpl {
 
@@ -32,23 +35,17 @@ public abstract class FastsettOpptjeningsperiodeStegFelles extends Inngangsvilk�
     }
 
     @Override
-    protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat) {
-        OpptjeningsPeriode op = (OpptjeningsPeriode) regelResultat.getEkstraResultater().get(VilkårType.OPPTJENINGSPERIODEVILKÅR);
+    protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        OpptjeningsPeriode op = ((OpptjeningsPeriode) regelResultat.getEkstraResultaterPerPeriode().get(VilkårType.OPPTJENINGSPERIODEVILKÅR).get(periode));
         if (op == null) {
             throw new IllegalArgumentException(
                 "Utvikler-feil: finner ikke resultat etter evaluering av Inngangsvilkår/Opptjening:" + behandling.getId());
         }
-        Opptjening opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, op.getOpptjeningsperiodeFom(), op.getOpptjeningsperiodeTom(), erVilkårOverstyrt(behandling.getId()));
+        Opptjening opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, op.getOpptjeningsperiodeFom(), op.getOpptjeningsperiodeTom(), erVilkårOverstyrt(behandling.getId(), periode.getFomDato(), periode.getTomDato()));
         if (opptjening == null) {
             throw new IllegalArgumentException(
                 "Utvikler-feil: får ikke persistert ny opptjeningsperiode:" + behandling.getId());
         }
-    }
-
-    @Override
-    protected boolean skipSteget(BehandlingskontrollKontekst kontekst) {
-        // for OPPTJENINGSPERIODEVIKÅRET skipper vi ikke selv om det er overstyrt.
-        return false;
     }
 
     @Override

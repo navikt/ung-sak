@@ -29,7 +29,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -41,6 +41,7 @@ import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
 import no.nav.foreldrepenger.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
@@ -84,10 +85,10 @@ public class VurderLøpendeMedlemskap {
         Map<LocalDate, VilkårData> resultat = new TreeMap<>();
 
         for (Map.Entry<LocalDate, MedlemskapsvilkårGrunnlag> entry : lagGrunnlag(behandlingId).entrySet()) {
-            VilkårData data = evaluerGrunnlag(entry.getValue());
-            if (data.getUtfallType().equals(VilkårUtfallType.OPPFYLT)) {
+            VilkårData data = evaluerGrunnlag(entry.getValue(), DatoIntervallEntitet.fraOgMed(entry.getKey()));
+            if (data.getUtfallType().equals(Utfall.OPPFYLT)) {
                 resultat.put(entry.getKey(), data);
-            } else if (data.getUtfallType().equals(VilkårUtfallType.IKKE_OPPFYLT)) {
+            } else if (data.getUtfallType().equals(Utfall.IKKE_OPPFYLT)) {
                 if (data.getVilkårUtfallMerknad() == null) {
                     throw new IllegalStateException("Forventer at vilkår utfall merknad er satt når vilkåret blir satt til IKKE_OPPFYLT for grunnlag:" + entry.getValue().toString());
                 }
@@ -98,14 +99,15 @@ public class VurderLøpendeMedlemskap {
         return resultat;
     }
 
-    private VilkårData evaluerGrunnlag(MedlemskapsvilkårGrunnlag grunnlag) {
+    private VilkårData evaluerGrunnlag(MedlemskapsvilkårGrunnlag grunnlag, DatoIntervallEntitet periode) {
         Evaluation evaluation = new Medlemskapsvilkår().evaluer(grunnlag);
-        return inngangsvilkårOversetter.tilVilkårData(VilkårType.MEDLEMSKAPSVILKÅRET_LØPENDE, evaluation, grunnlag);
+        return inngangsvilkårOversetter.tilVilkårData(VilkårType.MEDLEMSKAPSVILKÅRET_LØPENDE, evaluation, grunnlag, periode);
     }
 
     private Map<LocalDate, MedlemskapsvilkårGrunnlag> lagGrunnlag(Long behandlingId) {
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
         Optional<VurdertMedlemskapPeriodeEntitet> vurdertMedlemskapPeriode = medlemskap.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap);
+        // FIXME K9 : Skrive om til å vurdere de periodene som vilkåret er brutt opp på.
         List<LocalDate> vurderingsdatoerListe = utledVurderingsdatoerMedlemskap.finnVurderingsdatoer(behandlingId)
             .stream()
             .sorted(LocalDate::compareTo)

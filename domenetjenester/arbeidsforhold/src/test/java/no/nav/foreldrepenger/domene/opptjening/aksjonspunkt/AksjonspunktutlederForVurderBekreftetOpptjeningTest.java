@@ -93,8 +93,9 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         final Behandling behandling = builder.build();
         Behandlingsresultat.opprettFor(behandling);
+        final VilkårResultat nyttResultat = VilkårResultat.builder().build();
+        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(nyttResultat);
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        final VilkårResultat nyttResultat = VilkårResultat.builder().buildFor(behandling);
         behandlingRepository.lagre(nyttResultat, behandlingRepository.taSkriveLås(behandling));
 
         repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt, false);
