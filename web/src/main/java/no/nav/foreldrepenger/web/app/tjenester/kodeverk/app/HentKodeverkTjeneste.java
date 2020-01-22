@@ -96,6 +96,7 @@ public class HentKodeverkTjeneste {
         map.put(ArbeidsforholdHandlingType.class.getSimpleName(), ArbeidsforholdHandlingType.kodeMap().values());
         map.put(HistorikkOpplysningType.class.getSimpleName(), HistorikkOpplysningType.kodeMap().values());
         map.put(HistorikkEndretFeltType.class.getSimpleName(), HistorikkEndretFeltType.kodeMap().values());
+        map.put(HistorikkEndretFeltVerdiType.class.getSimpleName(), HistorikkEndretFeltVerdiType.kodeMap().values());
         map.put(HistorikkinnslagType.class.getSimpleName(), HistorikkinnslagType.kodeMap().values());
         map.put(HistorikkAktør.class.getSimpleName(), HistorikkAktør.kodeMap().values());
         map.put(HistorikkAvklartSoeknadsperiodeType.class.getSimpleName(), HistorikkAvklartSoeknadsperiodeType.kodeMap().values());
