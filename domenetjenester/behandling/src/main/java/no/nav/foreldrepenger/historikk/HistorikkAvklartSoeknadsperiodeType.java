@@ -18,18 +18,18 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum HistorikkAvklartSoeknadsperiodeType implements Kodeverdi {
 
-    GRADERING("GRADERING", "Gradering på grunn av arbeid"),
-    UTSETTELSE_ARBEID("UTSETTELSE_ARBEID", "Utsettelse på grunn av arbeid"),
-    UTSETTELSE_FERIE("UTSETTELSE_FERIE", "Utsettelse på grunn av ferie"),
-    UTSETTELSE_SKYDOM("UTSETTELSE_SKYDOM", "Utsettelse på grunn av sykdom/skade"),
-    UTSETTELSE_INSTITUSJON_SØKER("UTSETTELSE_INSTITUSJON_SØKER", "Utsettelse på grunn av innleggelse av forelder"),
-    UTSETTELSE_INSTITUSJON_BARN("UTSETTELSE_INSTITUSJON_BARN", "Utsettelse på grunn av innleggelse av barn"),
+    GRADERING("GRADERING", "Uttak: gradering"),
+    UTSETTELSE_ARBEID("UTSETTELSE_ARBEID", "Utsettelse: arbeid"),
+    UTSETTELSE_FERIE("UTSETTELSE_FERIE", "Utsettelse: ferie"),
+    UTSETTELSE_SKYDOM("UTSETTELSE_SKYDOM", "Utsettelse: sykdom/skade"),
+    UTSETTELSE_INSTITUSJON_SØKER("UTSETTELSE_INSTITUSJON_SØKER", "Utsettelse: innleggelse av forelder"),
+    UTSETTELSE_INSTITUSJON_BARN("UTSETTELSE_INSTITUSJON_BARN", "Utsettelse: innleggelse av barn"),
     NY_SOEKNADSPERIODE("NY_SOEKNADSPERIODE", "Ny periode er lagt til"),
-    SLETTET_SOEKNASPERIODE("SLETTET_SOEKNASPERIODE", "Periode slettet"),
-    OVERFOERING_ALENEOMSORG("OVERFOERING_ALENEOMSORG", "Overføring: aleneomsorg"),
+    SLETTET_SOEKNASPERIODE("SLETTET_SOEKNASPERIODE", "Perioden er slettet"),
+    OVERFOERING_ALENEOMSORG("OVERFOERING_ALENEOMSORG", "Overføring: søker har aleneomsorg"),
     OVERFOERING_SKYDOM("OVERFOERING_SKYDOM", "Overføring: sykdom/skade"),
     OVERFOERING_INNLEGGELSE("OVERFOERING_INNLEGGELSE", "Overføring: innleggelse"),
-    OVERFOERING_IKKE_RETT("OVERFOERING_IKKE_RETT", "Overføring: ikke rett"),
+    OVERFOERING_IKKE_RETT("OVERFOERING_IKKE_RETT", "Overføring: annen forelder har ikke rett"),
     UTTAK("UTTAK", "Uttak"),
     OPPHOLD("OPPHOLD", "Opphold: annen foreldres uttak"),
 
@@ -94,7 +94,7 @@ public enum HistorikkAvklartSoeknadsperiodeType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
