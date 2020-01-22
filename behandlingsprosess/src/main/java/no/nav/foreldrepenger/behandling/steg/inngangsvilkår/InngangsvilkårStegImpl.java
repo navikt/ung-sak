@@ -72,14 +72,17 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
     private List<AksjonspunktDefinisjon> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
         final var intervaller = perioderTilVurdering(kontekst.getBehandlingId());
-        final var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
-        intervaller.forEach(iterval -> aksjonspunkter.addAll(vurderPeriode(vilkår, iterval, behandling, kontekst)));
-        return aksjonspunkter;
-    }
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(behandling.getId()));
+        RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), behandling, ref, intervaller);
 
-    protected boolean skipVurderingAvPeriode(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periode) {
-        // Hvis vilkåret er overstyrt skal vi ikke kjøre forrettningslogikken
-        return erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato());
+        // Oppdater behandling
+        behandlingRepository.lagre(regelResultat.getVilkårResultat(), kontekst.getSkriveLås());
+
+        for (DatoIntervallEntitet intervall : intervaller) {
+            utførtRegler(kontekst, behandling, regelResultat, intervall);
+        }
+
+        return regelResultat.getAksjonspunktDefinisjoner();
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
@@ -161,25 +164,11 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
                 .map(Vilkår::getPerioder)
                 .flatMap(Collection::stream)
                 .filter(vp -> Utfall.IKKE_VURDERT.equals(vp.getGjeldendeUtfall()))
+                .filter(vp -> !erVilkårOverstyrt(behandlingId, vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()))
                 .map(VilkårPeriode::getPeriode)
                 .collect(Collectors.toList());
         }
         return List.of();
     }
 
-    @Override
-    public List<AksjonspunktDefinisjon> vurderPeriode(VilkårType vilkårType, DatoIntervallEntitet periode, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        if (skipVurderingAvPeriode(kontekst, periode)) {
-            return List.of();
-        }
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(behandling.getId()));
-        RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkårType), behandling, ref, periode);
-
-        // Oppdater behandling
-        behandlingRepository.lagre(regelResultat.getVilkårResultat(), kontekst.getSkriveLås());
-
-        utførtRegler(kontekst, behandling, regelResultat, periode);
-
-        return regelResultat.getAksjonspunktDefinisjoner();
-    }
 }

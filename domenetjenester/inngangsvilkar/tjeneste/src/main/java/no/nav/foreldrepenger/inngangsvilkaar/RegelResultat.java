@@ -8,15 +8,16 @@ import java.util.Optional;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class RegelResultat {
     private final VilkårResultat vilkårResultat;
     private final List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner;
 
-    private final Map<VilkårType, Object> ekstraResultater;
+    private final Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater;
 
     public RegelResultat(VilkårResultat vilkårResultat, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner,
-            Map<VilkårType, Object> ekstraResultater) {
+                         Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater) {
         this.vilkårResultat = vilkårResultat;
         this.aksjonspunktDefinisjoner = aksjonspunktDefinisjoner;
         this.ekstraResultater = ekstraResultater;
@@ -27,6 +28,10 @@ public class RegelResultat {
     }
 
     public Map<VilkårType, Object> getEkstraResultater() {
+        return Collections.unmodifiableMap(ekstraResultater);
+    }
+
+    public Map<VilkårType, Map<DatoIntervallEntitet, Object>> getEkstraResultaterPerPeriode() {
         return Collections.unmodifiableMap(ekstraResultater);
     }
 

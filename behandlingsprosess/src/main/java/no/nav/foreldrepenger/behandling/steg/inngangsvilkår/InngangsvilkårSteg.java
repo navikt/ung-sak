@@ -15,6 +15,4 @@ public interface InngangsvilkårSteg extends BehandlingSteg {
     List<VilkårType> vilkårHåndtertAvSteg();
 
     List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId);
-
-    List<AksjonspunktDefinisjon> vurderPeriode(VilkårType vilkårType, DatoIntervallEntitet datoIntervallEntitet, Behandling behandling, BehandlingskontrollKontekst kontekst);
 }

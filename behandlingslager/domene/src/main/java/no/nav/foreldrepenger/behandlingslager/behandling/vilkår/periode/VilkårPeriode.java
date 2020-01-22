@@ -159,7 +159,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     }
 
     void setUtfallMerknad(VilkårUtfallMerknad utfallMerknad) {
-        this.utfallMerknad = utfallMerknad;
+        this.utfallMerknad = utfallMerknad != null ? utfallMerknad : VilkårUtfallMerknad.UDEFINERT;
     }
 
     public Properties getMerknadParametere() {

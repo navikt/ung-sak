@@ -18,7 +18,9 @@ public class VilkårResultatBuilder {
 
     VilkårResultatBuilder(VilkårResultat eksisterendeResultat) {
         super();
-        this.kladd = eksisterendeResultat;
+        if (eksisterendeResultat != null) {
+            this.kladd = eksisterendeResultat;
+        }
     }
 
     public static VilkårResultatBuilder kopi(VilkårResultat origVilkårResultat) {

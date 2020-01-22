@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.inngangsvilkår;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -29,8 +30,8 @@ public class InngangsvilkårFellesTjeneste  {
         this.regelOrkestrerer = regelOrkestrerer;
     }
 
-    RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, DatoIntervallEntitet datoIntervallEntitet) {
-        return regelOrkestrerer.vurderInngangsvilkår(vilkårHåndtertAvSteg, behandling, ref, datoIntervallEntitet);
+    RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, List<DatoIntervallEntitet> intervaller) {
+        return regelOrkestrerer.vurderInngangsvilkår(vilkårHåndtertAvSteg, behandling, ref, intervaller);
     }
 
     Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId) {

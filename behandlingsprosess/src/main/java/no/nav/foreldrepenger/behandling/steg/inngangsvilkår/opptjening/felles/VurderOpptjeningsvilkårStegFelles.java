@@ -54,7 +54,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     @Override
     protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
         if (vilkårErVurdert(regelResultat, periode.getFomDato(), periode.getTomDato())) {
-            OpptjeningsvilkårResultat opres = getVilkårresultat(behandling, regelResultat);
+            OpptjeningsvilkårResultat opres = getVilkårresultat(behandling, regelResultat, periode);
             MapTilOpptjeningAktiviteter mapper = new MapTilOpptjeningAktiviteter();
             List<OpptjeningAktivitet> aktiviteter = mapTilOpptjeningsaktiviteter(mapper, opres);
             opptjeningRepository.lagreOpptjeningResultat(behandling, opres.getResultatOpptjent(), aktiviteter);
@@ -66,9 +66,10 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
     protected abstract List<OpptjeningAktivitet> mapTilOpptjeningsaktiviteter(MapTilOpptjeningAktiviteter mapper, OpptjeningsvilkårResultat oppResultat);
 
-    private OpptjeningsvilkårResultat getVilkårresultat(Behandling behandling, RegelResultat regelResultat) {
-        OpptjeningsvilkårResultat op = (OpptjeningsvilkårResultat) regelResultat.getEkstraResultater()
-            .get(OPPTJENINGSVILKÅRET);
+    private OpptjeningsvilkårResultat getVilkårresultat(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        OpptjeningsvilkårResultat op = (OpptjeningsvilkårResultat) regelResultat.getEkstraResultaterPerPeriode()
+            .get(OPPTJENINGSVILKÅRET)
+            .get(periode);
         if (op == null) {
             throw new IllegalArgumentException(
                 "Utvikler-feil: finner ikke resultat fra evaluering av Inngangsvilkår/Opptjeningsvilkåret:" + behandling.getId());

@@ -5,9 +5,11 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static no.nav.foreldrepenger.inngangsvilkaar.RegelintegrasjonFeil.FEILFACTORY;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,8 +43,8 @@ public class RegelOrkestrerer {
         this.inngangsvilkårTjeneste = inngangsvilkårTjeneste;
     }
 
-    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, DatoIntervallEntitet periode) {
-        Objects.requireNonNull(periode, "Perioden som skal vurderes må være satt");
+    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, List<DatoIntervallEntitet> perioder) {
+        Objects.requireNonNull(perioder, "Perioden som skal vurderes må være satt");
         VilkårResultat vilkårResultat = inngangsvilkårTjeneste.getBehandlingsresultat(ref.getBehandlingId()).getVilkårResultat();
         List<Vilkår> matchendeVilkårPåBehandling = vilkårResultat.getVilkårene().stream()
             .filter(v -> vilkårHåndtertAvSteg.contains(v.getVilkårType()))
@@ -55,21 +57,25 @@ public class RegelOrkestrerer {
             return new RegelResultat(vilkårResultat, emptyList(), emptyMap());
         }
 
-        VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
+        Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater = new HashMap<>();
 
-        // Ekstraresultat
-        HashMap<VilkårType, Object> ekstraResultater = new HashMap<>();
-        if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
-            ekstraResultater.put(vilkårDataResultat.getVilkårType(), vilkårDataResultat.getEkstraVilkårresultat());
-        }
+        for (DatoIntervallEntitet periode : perioder) {
+            VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
+            // Ekstraresultat
+            ekstraResultater = new HashMap<>();
+            if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
+                final var ekstradataMap = ekstraResultater.getOrDefault(vilkårDataResultat.getVilkårType(), new HashMap<>());
+                ekstradataMap.put(vilkårDataResultat.getPeriode(), vilkårDataResultat.getEkstraVilkårresultat());
+                ekstraResultater.put(vilkårDataResultat.getVilkårType(), ekstradataMap);
+            }
 
-        // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
-        oppdaterBehandlingMedVilkårresultat(behandling, vilkårDataResultat);
-
-        // Aksjonspunkter
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = vilkårDataResultat.getApDefinisjoner();
-        if (erPeriodenOverstyrt(vilkår, periode)) {
-            aksjonspunktDefinisjoner = List.of();
+            // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
+            oppdaterBehandlingMedVilkårresultat(behandling, vilkårDataResultat);
+            // Aksjonspunkter
+            if (!erPeriodenOverstyrt(vilkår, periode)) {
+                aksjonspunktDefinisjoner.addAll(vilkårDataResultat.getApDefinisjoner());
+            }
         }
 
         return new RegelResultat(vilkårResultat, aksjonspunktDefinisjoner, ekstraResultater);

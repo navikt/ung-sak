@@ -81,10 +81,11 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     }
 
     void setPerioder(List<VilkårPeriode> perioder) {
-        this.perioder = perioder
+        this.perioder.clear();
+        this.perioder.addAll(perioder
             .stream()
             .peek(it -> it.setVilkår(this))
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()));
     }
 
     @Override

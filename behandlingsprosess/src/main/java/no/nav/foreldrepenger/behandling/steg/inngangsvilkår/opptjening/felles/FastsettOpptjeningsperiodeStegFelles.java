@@ -36,22 +36,16 @@ public abstract class FastsettOpptjeningsperiodeStegFelles extends Inngangsvilk�
 
     @Override
     protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        OpptjeningsPeriode op = (OpptjeningsPeriode) regelResultat.getEkstraResultater().get(VilkårType.OPPTJENINGSPERIODEVILKÅR);
+        OpptjeningsPeriode op = ((OpptjeningsPeriode) regelResultat.getEkstraResultaterPerPeriode().get(VilkårType.OPPTJENINGSPERIODEVILKÅR).get(periode));
         if (op == null) {
             throw new IllegalArgumentException(
                 "Utvikler-feil: finner ikke resultat etter evaluering av Inngangsvilkår/Opptjening:" + behandling.getId());
         }
-        Opptjening opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, op.getOpptjeningsperiodeFom(), op.getOpptjeningsperiodeTom(), erVilkårOverstyrt(behandling.getId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE));
+        Opptjening opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, op.getOpptjeningsperiodeFom(), op.getOpptjeningsperiodeTom(), erVilkårOverstyrt(behandling.getId(), periode.getFomDato(), periode.getTomDato()));
         if (opptjening == null) {
             throw new IllegalArgumentException(
                 "Utvikler-feil: får ikke persistert ny opptjeningsperiode:" + behandling.getId());
         }
-    }
-
-    @Override
-    protected boolean skipVurderingAvPeriode(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periode) {
-        // for OPPTJENINGSPERIODEVIKÅRET skipper vi ikke selv om det er overstyrt.
-        return false;
     }
 
     @Override

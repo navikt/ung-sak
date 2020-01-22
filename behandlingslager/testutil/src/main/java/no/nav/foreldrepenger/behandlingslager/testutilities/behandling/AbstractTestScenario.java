@@ -750,13 +750,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         vilkårTyper.forEach((vilkårType, vilkårUtfallType) -> {
             inngangsvilkårBuilder.leggTil(new VilkårBuilder().medType(vilkårType).leggTil(new VilkårPeriodeBuilder()
-                .medPeriode(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+                .medPeriode(LocalDate.now().minusMonths(3), LocalDate.now())
                 .medUtfall(vilkårUtfallType)));
         });
 
-        behandlingsresultat.medOppdatertVilkårResultat(inngangsvilkårBuilder.build());
+        final var build = inngangsvilkårBuilder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(build);
 
-        repoProvider.getBehandlingRepository().lagre(behandlingsresultat.getVilkårResultat(), lås);
+        repoProvider.getBehandlingRepository().lagre(build, lås);
 
         if (behandlingVedtakBuilder != null) {
             // Må lagre Behandling for at Behandlingsresultat ikke skal være transient når BehandlingVedtak blir lagret:
