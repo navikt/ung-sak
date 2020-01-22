@@ -14,6 +14,7 @@ public class VilkårBuilder {
 
     private final Vilkår vilkåret;
     private LocalDateTimeline<VilkårPeriode> vilkårTidslinje;
+    private boolean bygget = false;
 
     public VilkårBuilder() {
         this.vilkåret = new Vilkår();
@@ -26,11 +27,13 @@ public class VilkårBuilder {
     }
 
     public VilkårBuilder medType(VilkårType type) {
+        validerBuilder();
         vilkåret.setVilkårType(type);
         return this;
     }
 
     public VilkårBuilder leggTil(VilkårPeriodeBuilder periodeBuilder) {
+        validerBuilder();
         final var periode = periodeBuilder.build();
         final var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), periode);
         final var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
@@ -73,14 +76,22 @@ public class VilkårBuilder {
     }
 
     Vilkår build() {
-        // TODO: tidslinje komprimering osv
+        validerBuilder();
+        bygget = true;
         vilkåret.setPerioder(vilkårTidslinje.compress().toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList()));
         return vilkåret;
     }
 
+    private void validerBuilder() {
+        if (bygget) {
+            throw new IllegalStateException("Skal ikke gjenbruke builders");
+        }
+    }
+
     public VilkårPeriodeBuilder hentBuilderFor(LocalDate fom, LocalDate tom) {
+        validerBuilder();
         final var intersection = vilkårTidslinje.getSegment(new LocalDateInterval(fom, tom));
-        if(intersection == null) {
+        if (intersection == null) {
             return new VilkårPeriodeBuilder()
                 .medPeriode(fom, tom);
         }
