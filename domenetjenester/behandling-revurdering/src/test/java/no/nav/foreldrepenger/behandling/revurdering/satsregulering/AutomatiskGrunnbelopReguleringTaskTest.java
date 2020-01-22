@@ -26,9 +26,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -113,8 +113,8 @@ public class AutomatiskGrunnbelopReguleringTaskTest {
         var scenario = TestScenarioBuilder.builderMedSøknad()
             .medSøknadDato(dato.minusDays(20));
 
-        scenario.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.OPPFYLT);
-        scenario.medVilkårResultatType(VilkårResultatType.INNVILGET);
+        scenario.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, Utfall.OPPFYLT);
+        scenario.medVilkårResultatType(ResultatType.INNVILGET);
 
         scenario.medBehandlingVedtak()
             .medVedtakResultatType(VedtakResultatType.INNVILGET)

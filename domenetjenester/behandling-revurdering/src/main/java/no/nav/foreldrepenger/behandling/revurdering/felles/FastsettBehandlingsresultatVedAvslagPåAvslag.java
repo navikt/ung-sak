@@ -30,6 +30,6 @@ class FastsettBehandlingsresultatVedAvslagPåAvslag {
     }
 
     private static boolean erAvslagPåAvslag(Behandlingsresultat resRevurdering, Behandlingsresultat resOriginal) {
-        return resRevurdering.isVilkårAvslått() && resOriginal.isBehandlingsresultatAvslått();
+        return false;
     }
 }

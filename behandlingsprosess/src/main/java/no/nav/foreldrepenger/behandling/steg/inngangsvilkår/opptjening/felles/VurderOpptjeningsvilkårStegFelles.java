@@ -2,9 +2,11 @@ package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening.felles;
 
 import static java.util.Collections.singletonList;
 
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
 import no.nav.foreldrepenger.behandling.steg.inngangsvilkår.InngangsvilkårStegImpl;
@@ -18,11 +20,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAk
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
+import no.nav.vedtak.konfig.Tid;
 
 public abstract class VurderOpptjeningsvilkårStegFelles extends InngangsvilkårStegImpl {
 
@@ -37,9 +41,9 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
         // CDI proxy
     }
 
-    public VurderOpptjeningsvilkårStegFelles(BehandlingRepositoryProvider repositoryProvider, 
-                                             OpptjeningRepository opptjeningRepository, 
-                                             InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste, 
+    public VurderOpptjeningsvilkårStegFelles(BehandlingRepositoryProvider repositoryProvider,
+                                             OpptjeningRepository opptjeningRepository,
+                                             InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
                                              BehandlingStegType behandlingStegType) {
         super(repositoryProvider, inngangsvilkårFellesTjeneste, behandlingStegType);
         this.opptjeningRepository = opptjeningRepository;
@@ -48,9 +52,9 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     }
 
     @Override
-    protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat) {
-        if (vilkårErVurdert(regelResultat)) {
-            OpptjeningsvilkårResultat opres = getVilkårresultat(behandling, regelResultat);
+    protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        if (vilkårErVurdert(regelResultat, periode.getFomDato(), periode.getTomDato())) {
+            OpptjeningsvilkårResultat opres = getVilkårresultat(behandling, regelResultat, periode);
             MapTilOpptjeningAktiviteter mapper = new MapTilOpptjeningAktiviteter();
             List<OpptjeningAktivitet> aktiviteter = mapTilOpptjeningsaktiviteter(mapper, opres);
             opptjeningRepository.lagreOpptjeningResultat(behandling, opres.getResultatOpptjent(), aktiviteter);
@@ -62,9 +66,10 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
     protected abstract List<OpptjeningAktivitet> mapTilOpptjeningsaktiviteter(MapTilOpptjeningAktiviteter mapper, OpptjeningsvilkårResultat oppResultat);
 
-    private OpptjeningsvilkårResultat getVilkårresultat(Behandling behandling, RegelResultat regelResultat) {
-        OpptjeningsvilkårResultat op = (OpptjeningsvilkårResultat) regelResultat.getEkstraResultater()
-            .get(OPPTJENINGSVILKÅRET);
+    private OpptjeningsvilkårResultat getVilkårresultat(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        OpptjeningsvilkårResultat op = (OpptjeningsvilkårResultat) regelResultat.getEkstraResultaterPerPeriode()
+            .get(OPPTJENINGSVILKÅRET)
+            .get(periode);
         if (op == null) {
             throw new IllegalArgumentException(
                 "Utvikler-feil: finner ikke resultat fra evaluering av Inngangsvilkår/Opptjeningsvilkåret:" + behandling.getId());
@@ -72,18 +77,22 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
         return op;
     }
 
-    private boolean vilkårErVurdert(RegelResultat regelResultat) {
-        Optional<Vilkår> opptjeningsvilkår = regelResultat.getVilkårResultat().getVilkårene().stream()
+    private boolean vilkårErVurdert(RegelResultat regelResultat, LocalDate fom, LocalDate tom) {
+        final var berørtePerioder = regelResultat.getVilkårResultat()
+            .getVilkårene()
+            .stream()
             .filter(v -> v.getVilkårType().equals(OPPTJENINGSVILKÅRET))
-            .findFirst();
-        return opptjeningsvilkår.map(v -> !v.getGjeldendeVilkårUtfall().equals(VilkårUtfallType.IKKE_VURDERT))
-            .orElse(Boolean.FALSE);
+            .map(Vilkår::getPerioder)
+            .flatMap(Collection::stream)
+            .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
+            .collect(Collectors.toList());
+        return berørtePerioder.stream().noneMatch(it -> it.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT));
     }
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType hoppesTilSteg, BehandlingStegType hoppesFraSteg) {
         super.vedHoppOverBakover(kontekst, modell, hoppesTilSteg, hoppesFraSteg);
-        if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
+        if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
             new RyddOpptjening(behandlingRepository, opptjeningRepository, kontekst).ryddOppAktiviteter();
         }
     }
@@ -93,7 +102,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
                                     BehandlingStegType hoppesTilSteg) {
         super.vedHoppOverFramover(kontekst, modell, hoppesFraSteg, hoppesTilSteg);
         if (!repositoryProvider.getBehandlingRepository().hentBehandling(kontekst.getBehandlingId()).erRevurdering()) {
-            if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
+            if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
                 new RyddOpptjening(behandlingRepository, opptjeningRepository, kontekst).ryddOppAktiviteter();
             }
         }

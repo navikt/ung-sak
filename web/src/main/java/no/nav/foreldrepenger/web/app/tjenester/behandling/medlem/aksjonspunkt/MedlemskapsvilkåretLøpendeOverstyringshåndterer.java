@@ -21,10 +21,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
+import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyringMedlemskapsvilkåretLøpendeDto.class, adapter = Overstyringshåndterer.class)
@@ -63,20 +65,29 @@ public class MedlemskapsvilkåretLøpendeOverstyringshåndterer extends Abstract
         MedlemskapVilkårPeriodeGrunnlagEntitet.Builder grBuilder = medlemskapVilkårPeriodeRepository.hentBuilderFor(behandling);
         MedlemskapsvilkårPeriodeEntitet.Builder periodeBuilder = grBuilder.getPeriodeBuilder();
 
-        VilkårResultat.Builder vilkårBuilder = VilkårResultat.builderFraEksisterende(behandling.getBehandlingsresultat().getVilkårResultat());
+        final var behandlingsresultat = behandling.getBehandlingsresultat();
+        VilkårResultatBuilder vilkårBuilder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
         if (dto.getErVilkarOk()) {
             periodeBuilder.opprettOverstryingOppfylt(dto.getOverstryingsdato());
-            vilkårBuilder.leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET_LØPENDE, VilkårUtfallType.OPPFYLT, null, null, null, false, true, null, null);
+            final var builder = vilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+            builder.leggTil(builder.hentBuilderFor(dto.getOverstryingsdato(), Tid.TIDENES_ENDE) // FIXME (k9) : få periode fra dto
+                .medUtfallOverstyrt(Utfall.OPPFYLT));
+            vilkårBuilder.leggTil(builder);
         } else {
             Avslagsårsak avslagsårsak = Avslagsårsak.fraKode(dto.getAvslagskode());
             periodeBuilder.opprettOverstryingAvslag(dto.getOverstryingsdato(), avslagsårsak);
-            vilkårBuilder.leggTilVilkårResultat(VilkårType.MEDLEMSKAPSVILKÅRET_LØPENDE, VilkårUtfallType.IKKE_OPPFYLT, null, null, avslagsårsak, false, true,
-                null, null);
+            final var builder = vilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+            builder.leggTil(builder.hentBuilderFor(dto.getOverstryingsdato(), Tid.TIDENES_ENDE) // FIXME (k9) : få periode fra dto
+                .medUtfallOverstyrt(Utfall.IKKE_OPPFYLT)
+                .medAvslagsårsak(avslagsårsak));
+            vilkårBuilder.leggTil(builder);
         }
+        final var vilkårResultat = vilkårBuilder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         BehandlingLås lås = kontekst.getSkriveLås();
         grBuilder.medMedlemskapsvilkårPeriode(periodeBuilder);
         medlemskapVilkårPeriodeRepository.lagreMedlemskapsvilkår(behandling, grBuilder);
-        behandlingRepository.lagre(vilkårBuilder.buildFor(behandling), lås);
+        behandlingRepository.lagre(vilkårResultat, lås);
         return OppdateringResultat.utenOveropp();
     }
 }

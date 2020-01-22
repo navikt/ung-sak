@@ -29,7 +29,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Relasj
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -66,7 +67,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private Fagsak fagsak;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
-    private VilkårResultatType vilkårResultatType = VilkårResultatType.IKKE_FASTSATT;
+    private ResultatType resultatType = ResultatType.IKKE_FASTSATT;
     private Long fagsakId = nyId();
     private BehandlingRepository mockBehandlingRepository;
     private BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
@@ -303,11 +304,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         Behandlingsresultat behandlingsresultat = (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
             : behandlingresultatBuilder).buildFor(behandling);
 
-        VilkårResultat.Builder inngangsvilkårBuilder = VilkårResultat
-            .builderFraEksisterende(behandlingsresultat.getVilkårResultat())
-            .medVilkårResultatType(vilkårResultatType);
+        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat
+            .builderFraEksisterende(behandlingsresultat.getVilkårResultat());
 
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.buildFor(behandling);
+        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
 
         repoProvider.getBehandlingRepository().lagre(vilkårResultat, lås);
 

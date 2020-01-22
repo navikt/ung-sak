@@ -34,7 +34,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -80,7 +80,7 @@ public class ForeslåBeregningsgrunnlagStegTest {
     @Test
     public void stegUtførtUtenAksjonspunkter() {
         // Arrange
-        opprettVilkårResultatForBehandling(VilkårResultatType.INNVILGET);
+        opprettVilkårResultatForBehandling(ResultatType.INNVILGET);
 
         // Act
         BehandleStegResultat resultat = steg.utførSteg(kontekst);
@@ -93,7 +93,7 @@ public class ForeslåBeregningsgrunnlagStegTest {
     @Test
     public void stegUtførtNårRegelResultatInneholderAutopunkt() {
         // Arrange
-        opprettVilkårResultatForBehandling(VilkårResultatType.INNVILGET);
+        opprettVilkårResultatForBehandling(ResultatType.INNVILGET);
         BeregningAksjonspunktResultat aksjonspunktResultat = BeregningAksjonspunktResultat.opprettFor(BeregningAksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS);
         when(beregningsgrunnlagRegelResultat.getAksjonspunkter()).thenReturn(Collections.singletonList(aksjonspunktResultat));
 
@@ -106,9 +106,8 @@ public class ForeslåBeregningsgrunnlagStegTest {
         assertThat(resultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS);
     }
 
-    private void opprettVilkårResultatForBehandling(VilkårResultatType resultatType) {
-        VilkårResultat vilkårResultat = VilkårResultat.builder().medVilkårResultatType(resultatType)
-            .buildFor(behandling);
+    private void opprettVilkårResultatForBehandling(ResultatType resultatType) {
+        VilkårResultat vilkårResultat = VilkårResultat.builder().build();
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(behandling);
         behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
     }

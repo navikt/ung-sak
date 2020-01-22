@@ -15,10 +15,11 @@
 	<sequence-generator name="SEQ_VILKAR" allocation-size="50" sequence-name="SEQ_VILKAR" />
 
 	<sequence-generator name="SEQ_MOTTATT_DOKUMENT" allocation-size="50" sequence-name="SEQ_MOTTATT_DOKUMENT" />
-	
+
 	<sequence-generator name="SEQ_BEHANDLING_ARSAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_ARSAK" />
-	
-	
+	<sequence-generator name="SEQ_VILKAR_PERIODE" allocation-size="50" sequence-name="SEQ_VILKAR_PERIODE" />
+
+
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.Behandling" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak" />
@@ -33,5 +34,6 @@
 
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår" />
+	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode" />
 
 </entity-mappings>

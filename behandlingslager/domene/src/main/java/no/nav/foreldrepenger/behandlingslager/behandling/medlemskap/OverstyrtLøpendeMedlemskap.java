@@ -8,7 +8,7 @@ import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 
 @Embeddable
@@ -18,9 +18,9 @@ public class OverstyrtLøpendeMedlemskap {
     @Column(name = "overstyringsdato")
     private LocalDate overstyringsdato;
 
-    @Convert(converter = VilkårUtfallType.KodeverdiConverter.class)
+    @Convert(converter = Utfall.KodeverdiConverter.class)
     @Column(name="overstyrt_utfall", nullable = false)
-    private VilkårUtfallType vilkårUtfall = VilkårUtfallType.UDEFINERT;
+    private Utfall vilkårUtfall = Utfall.UDEFINERT;
 
     @ChangeTracked
     @Convert(converter = Avslagsårsak.KodeverdiConverter.class)
@@ -31,7 +31,7 @@ public class OverstyrtLøpendeMedlemskap {
         //hibernate
     }
 
-    public OverstyrtLøpendeMedlemskap(LocalDate overstyringsdato, VilkårUtfallType vilkårUtfall, Avslagsårsak avslagsårsak) {
+    public OverstyrtLøpendeMedlemskap(LocalDate overstyringsdato, Utfall vilkårUtfall, Avslagsårsak avslagsårsak) {
         this.overstyringsdato = overstyringsdato;
         this.vilkårUtfall = vilkårUtfall;
         this.avslagsårsak = avslagsårsak;
@@ -41,7 +41,7 @@ public class OverstyrtLøpendeMedlemskap {
         return Optional.ofNullable(overstyringsdato);
     }
 
-    public VilkårUtfallType getVilkårUtfall() {
+    public Utfall getVilkårUtfall() {
         return vilkårUtfall;
     }
 

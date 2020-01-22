@@ -15,6 +15,7 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
@@ -40,13 +41,12 @@ public class OpptjeningsVilkårTjenesteImpl implements OpptjeningsVilkårTjenest
 
 
     @Override
-    public VilkårData vurderOpptjeningsVilkår(BehandlingReferanse behandlingReferanse) {
+    public VilkårData vurderOpptjeningsVilkår(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
         Long behandlingId = behandlingReferanse.getBehandlingId();
         AktørId aktørId = behandlingReferanse.getAktørId();
-        LocalDate skjæringstidspunkt = behandlingReferanse.getUtledetSkjæringstidspunkt();
 
-        List<OpptjeningAktivitetPeriode> relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse);
-        List<OpptjeningInntektPeriode> relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, skjæringstidspunkt);
+        List<OpptjeningAktivitetPeriode> relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, periode.getFomDato());
+        List<OpptjeningInntektPeriode> relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, periode.getFomDato());
         Opptjening opptjening = opptjeningTjeneste.hentOpptjening(behandlingId);
 
         LocalDate behandlingstidspunkt = LocalDate.now();
@@ -68,7 +68,7 @@ public class OpptjeningsVilkårTjenesteImpl implements OpptjeningsVilkårTjenest
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
         Evaluation evaluation = new Opptjeningsvilkår().evaluer(grunnlag, output);
 
-        VilkårData vilkårData = inngangsvilkårOversetter.tilVilkårData(VilkårType.OPPTJENINGSVILKÅRET, evaluation, grunnlag);
+        VilkårData vilkårData = inngangsvilkårOversetter.tilVilkårData(VilkårType.OPPTJENINGSVILKÅRET, evaluation, grunnlag, periode);
         vilkårData.setEkstraVilkårresultat(output);
 
         return vilkårData;

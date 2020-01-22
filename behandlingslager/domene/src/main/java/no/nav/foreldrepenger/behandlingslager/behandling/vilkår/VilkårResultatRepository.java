@@ -31,15 +31,12 @@ public class VilkårResultatRepository {
     public VilkårResultat hent(Long behandlingId) {
         return behandlingsresultatRepository.hent(behandlingId).getVilkårResultat();
     }
-    
+
     public void lagre(Long behandlingId, VilkårResultat resultat) {
         var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
-        if(resultat.getOriginalBehandlingsresultat()==null) {
-            resultat.setOriginalBehandlingsresultat(behandlingsresultat);
-        }
         behandlingsresultat.medOppdatertVilkårResultat(resultat);
         entityManager.persist(resultat);
         behandlingsresultatRepository.lagre(behandlingId, behandlingsresultat);
     }
-    
+
 }

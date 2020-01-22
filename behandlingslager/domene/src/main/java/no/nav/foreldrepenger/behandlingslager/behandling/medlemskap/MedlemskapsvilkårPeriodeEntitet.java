@@ -22,7 +22,7 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "MedlemskapsvilkårPeriode")
@@ -109,7 +109,7 @@ public class MedlemskapsvilkårPeriodeEntitet extends BaseEntitet {
         perioder.add(entitet);
     }
 
-    void opprettOverstyringFor(LocalDate overstryingsdato, VilkårUtfallType utfall, Avslagsårsak avslagsårsak) {
+    void opprettOverstyringFor(LocalDate overstryingsdato, Utfall utfall, Avslagsårsak avslagsårsak) {
         this.overstyrtLøpendeMedlemskap = new OverstyrtLøpendeMedlemskap(overstryingsdato, utfall, avslagsårsak);
     }
 
@@ -140,12 +140,12 @@ public class MedlemskapsvilkårPeriodeEntitet extends BaseEntitet {
         }
 
         public MedlemskapsvilkårPeriodeEntitet.Builder opprettOverstryingAvslag(LocalDate overstryingsdato, Avslagsårsak avslagsårsak) {
-            kladd.opprettOverstyringFor(overstryingsdato, VilkårUtfallType.IKKE_OPPFYLT, avslagsårsak);
+            kladd.opprettOverstyringFor(overstryingsdato, Utfall.IKKE_OPPFYLT, avslagsårsak);
             return this;
         }
 
         public MedlemskapsvilkårPeriodeEntitet.Builder opprettOverstryingOppfylt(LocalDate overstryingsdato) {
-            kladd.opprettOverstyringFor(overstryingsdato, VilkårUtfallType.OPPFYLT, Avslagsårsak.UDEFINERT);
+            kladd.opprettOverstyringFor(overstryingsdato, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
             return this;
         }
 

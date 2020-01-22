@@ -29,6 +29,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 
@@ -203,7 +204,9 @@ public class BehandlingRepository {
         return query.getResultList();
     }
 
-    /** Kaller lagre Behandling, og renser first-level cache i JPA. */
+    /**
+     * Kaller lagre Behandling, og renser first-level cache i JPA.
+     */
     public Long lagreOgClear(Behandling behandling, BehandlingLås lås) {
         Long id = lagre(behandling, lås);
         getEntityManager().clear();
@@ -284,6 +287,9 @@ public class BehandlingRepository {
      */
     public Long lagre(VilkårResultat vilkårResultat, BehandlingLås lås) {
         long id = lagre(vilkårResultat);
+        final var behandling = hentBehandling(lås.getBehandlingId());
+        final var behandlingsresultat = getBehandlingsresultat(behandling);
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         verifiserBehandlingLås(lås);
         getEntityManager().flush();
         return id;
@@ -377,29 +383,19 @@ public class BehandlingRepository {
     }
 
     private Long lagre(VilkårResultat vilkårResultat) {
-        Behandling originalBehandling = vilkårResultat.getOriginalBehandling();
-
-        if (originalBehandling == null || originalBehandling.getId() == null) {
-            throw new IllegalStateException("Glemt å lagre " // NOSONAR //$NON-NLS-1$
-                + Behandling.class.getSimpleName()
-                + "? Denne må lagres separat siden "// NOSONAR //$NON-NLS-1$
-                + VilkårResultat.class.getSimpleName()
-                + " er et separat aggregat delt mellom flere behandlinger"); //$NON-NLS-1$ // NOSONAR
-        }
-
-        getEntityManager().persist(originalBehandling);
         getEntityManager().persist(vilkårResultat);
-        for (Vilkår ivr : vilkårResultat.getVilkårene()) {
-            getEntityManager().persist(ivr);
-            getEntityManager().persist(ivr.getVilkårResultat());
-            for (Vilkår vr : ivr.getVilkårResultat().getVilkårene()) {
-                getEntityManager().persist(vr);
+        for (Vilkår vilkår : vilkårResultat.getVilkårene()) {
+            getEntityManager().persist(vilkår);
+            for (VilkårPeriode vilkårPeriode : vilkår.getPerioder()) {
+                getEntityManager().persist(vilkårPeriode);
             }
         }
         return vilkårResultat.getId();
     }
 
-    /** sjekk lås og oppgrader til skriv */
+    /**
+     * sjekk lås og oppgrader til skriv
+     */
     public void verifiserBehandlingLås(BehandlingLås lås) {
         BehandlingLåsRepository låsHåndterer = new BehandlingLåsRepository(getEntityManager());
         låsHåndterer.oppdaterLåsVersjon(lås);

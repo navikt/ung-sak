@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.behandling.steg.inngangsvilkår;
 
-import static no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
-import static no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_UTTAKSPLAN;
-
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -17,14 +17,18 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
+import no.nav.vedtak.konfig.Tid;
 
 public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     private BehandlingRepository behandlingRepository;
@@ -58,32 +62,27 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
             throw new IllegalArgumentException(String.format("Utviklerfeil: Steg[%s] håndterer ikke angitte vilkår %s", this.getClass(), vilkårTyper)); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        if (skipSteget(kontekst)) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-        // vilkårTyper kan her vær tom, men vi går videre med et likevel (VURDERSAMLET steget skriver ned vilkåresultat)
-
+        final var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         // Kall regelmotor
+        vilkårTyper.forEach(vilkår -> aksjonspunkter.addAll(vurderVilkårIPerioder(vilkår, behandling, kontekst)));
+
+        // Returner behandlingsresultat
+        return stegResultat(aksjonspunkter);
+    }
+
+    private List<AksjonspunktDefinisjon> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
+        final var intervaller = perioderTilVurdering(kontekst.getBehandlingId());
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(behandling.getId()));
-        RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(vilkårTyper, behandling, ref);
+        RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), behandling, ref, intervaller);
 
         // Oppdater behandling
         behandlingRepository.lagre(regelResultat.getVilkårResultat(), kontekst.getSkriveLås());
 
-        utførtRegler(kontekst, behandling, regelResultat);
-
-        // Returner behandlingsresultat
-        if (erNoenVilkårIkkeOppfylt(regelResultat) && !harÅpentOverstyringspunktForInneværendeSteg(behandling)) {
-            return stegResultatVilkårIkkeOppfylt(regelResultat, behandling);
-        } else {
-            return stegResultat(regelResultat);
+        for (DatoIntervallEntitet intervall : intervaller) {
+            utførtRegler(kontekst, behandling, regelResultat, intervall);
         }
-    }
 
-    protected boolean skipSteget(BehandlingskontrollKontekst kontekst) {
-        // Hvis vilkåret er overstyrt skal vi ikke kjøre forrettningslogikken
-        return erVilkårOverstyrt(kontekst.getBehandlingId());
+        return regelResultat.getAksjonspunktDefinisjoner();
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
@@ -111,36 +110,21 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
                 aksjonspunkt.getAksjonspunktDefinisjon().getBehandlingSteg().equals(behandlingStegType));
     }
 
-    protected BehandleStegResultat stegResultat(RegelResultat regelResultat) {
-        return BehandleStegResultat.utførtMedAksjonspunkter(regelResultat.getAksjonspunktDefinisjoner());
-    }
-
-    protected BehandleStegResultat stegResultatVilkårIkkeOppfylt(RegelResultat regelResultat, Behandling behandling) {
-        // Forbedring: InngangsvilkårStegImpl som annoterbar med FagsakYtelseType og BehandlingType
-        // Her hardkodes disse parameterne
-        if (behandling.erRevurdering() && !harAvslåttForrigeBehandling(behandling)) {
-            return BehandleStegResultat.fremoverførtMedAksjonspunkter(FREMHOPP_TIL_UTTAKSPLAN, regelResultat.getAksjonspunktDefinisjoner());
-        }
-        return BehandleStegResultat.fremoverførtMedAksjonspunkter(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT, regelResultat.getAksjonspunktDefinisjoner());
+    protected BehandleStegResultat stegResultat(List<AksjonspunktDefinisjon> aksjonspunkter) {
+        return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
     @SuppressWarnings("unused")
-    protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat) {
+    protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
         // template method
-    }
-
-    private boolean erNoenVilkårIkkeOppfylt(RegelResultat regelResultat) {
-        return regelResultat.getVilkårResultat().getVilkårene().stream()
-            .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
-            .anyMatch(v -> v.getGjeldendeVilkårUtfall().equals(VilkårUtfallType.IKKE_OPPFYLT));
     }
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType hoppesTilSteg,
                                    BehandlingStegType hoppesFraSteg) {
-        if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
+        if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) { // Fixme (k9) - Periodene som er knyttet til søknaden
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(repositoryProvider, behandling, kontekst);
+            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
             ryddVilkårTyper.ryddVedTilbakeføring(vilkårHåndtertAvSteg());
             behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         }
@@ -149,22 +133,42 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     @Override
     public void vedHoppOverFramover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType hoppesFraSteg,
                                     BehandlingStegType hoppesTilSteg) {
-        //TODO skal man rydde opp ved framoverhopp?
-        if (!erVilkårOverstyrt(kontekst.getBehandlingId())) {
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(repositoryProvider, behandling, kontekst);
-            ryddVilkårTyper.ryddVedOverhoppFramover(vilkårHåndtertAvSteg());
-            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        }
+        // TODO (k9) : skal det hoppes fremover?
     }
 
-    protected boolean erVilkårOverstyrt(Long behandlingId) {
+    protected boolean erVilkårOverstyrt(Long behandlingId, LocalDate fom, LocalDate tom) {
         Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
         Optional<VilkårResultat> resultatOpt = behandlingsresultat.map(Behandlingsresultat::getVilkårResultat);
         if (resultatOpt.isPresent()) {
             VilkårResultat vilkårResultat = resultatOpt.get();
-            return vilkårResultat.getVilkårene().stream().filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType())).anyMatch(Vilkår::erOverstyrt);
+            return vilkårResultat.getVilkårene()
+                .stream()
+                .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
+                .map(Vilkår::getPerioder)
+                .flatMap(Collection::stream)
+                .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))) // FIXME (k9) : Er det rett med overlapper her? Bør kanskje hente ut perioden direkte med fom tom som key
+                .anyMatch(VilkårPeriode::getErOverstyrt);
         }
         return false;
     }
+
+    @Override
+    public List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
+        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
+        Optional<VilkårResultat> resultatOpt = behandlingsresultat.map(Behandlingsresultat::getVilkårResultat);
+        if (resultatOpt.isPresent()) {
+            VilkårResultat vilkårResultat = resultatOpt.get();
+            return vilkårResultat.getVilkårene()
+                .stream()
+                .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
+                .map(Vilkår::getPerioder)
+                .flatMap(Collection::stream)
+                .filter(vp -> Utfall.IKKE_VURDERT.equals(vp.getGjeldendeUtfall()))
+                .filter(vp -> !erVilkårOverstyrt(behandlingId, vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()))
+                .map(VilkårPeriode::getPeriode)
+                .collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
 }

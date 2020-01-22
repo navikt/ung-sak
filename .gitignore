@@ -13,6 +13,9 @@ _*.sh
 es.properties
 es-local.properties
 es.properties.backup
+app.properties
+app-local.properties
+app.properties.backup
 *.zip
 *.versionsBackup
 *.log

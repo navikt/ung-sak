@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.behandling.steg.medlemskap.fp;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -24,8 +25,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepo
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.medlem.VurderMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemResultat;
@@ -63,12 +65,12 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements Kontrol
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        if (skalVurdereLøpendeMedlemskap(kontekst.getBehandlingId())) {
+        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+        if (skalVurdereLøpendeMedlemskap(kontekst.getBehandlingId(), skjæringstidspunkter)) {
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
             Set<LocalDate> finnVurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
             Set<MedlemResultat> resultat = new HashSet<>();
             if (!finnVurderingsdatoer.isEmpty()) {
-                Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
                 BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
                 finnVurderingsdatoer.forEach(dato -> resultat.addAll(vurderMedlemskapTjeneste.vurderMedlemskap(ref, dato)));
             }
@@ -79,10 +81,15 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements Kontrol
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean skalVurdereLøpendeMedlemskap(Long behandlingId) {
+    private boolean skalVurdereLøpendeMedlemskap(Long behandlingId, Skjæringstidspunkt skjæringstidspunkter) {
         Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
-        return behandlingsresultat.map(b -> b.getVilkårResultat().getVilkårene()).orElse(Collections.emptyList())
+        return behandlingsresultat.map(b -> b.getVilkårResultat().getVilkårene())
+            .orElse(Collections.emptyList())
             .stream()
-            .anyMatch(v -> v.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET) && v.getGjeldendeVilkårUtfall().equals(VilkårUtfallType.OPPFYLT));
+            .filter(v -> v.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET))
+            .map(Vilkår::getPerioder)
+            .flatMap(Collection::stream)
+            .filter(vp -> vp.getPeriode().inkluderer(skjæringstidspunkter.getUtledetSkjæringstidspunkt()))
+            .anyMatch(vp -> vp.getGjeldendeUtfall().equals(Utfall.OPPFYLT));
     }
 }

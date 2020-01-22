@@ -1,76 +1,90 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.vilkår;
 
-import java.util.Objects;
-import java.util.Properties;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
-class VilkårBuilder {
-    private VilkårType vilkårType;
-    private Avslagsårsak avslagsårsak;
-    private VilkårUtfallType vilkårUtfall;
-    private VilkårUtfallMerknad vilkårUtfallMerknad;
-    private Properties merknadParametere;
-    private VilkårUtfallType vilkårUtfallManuell;
-    private VilkårUtfallType vilkårUtfallOverstyrt;
-    private String regelEvaluering;
-    private String regelInput;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
-    VilkårBuilder medVilkårType(VilkårType vilkårType) {
-        this.vilkårType = vilkårType;
+public class VilkårBuilder {
+
+    private final Vilkår vilkåret;
+    private LocalDateTimeline<VilkårPeriode> vilkårTidslinje;
+
+    public VilkårBuilder() {
+        this.vilkåret = new Vilkår();
+        this.vilkårTidslinje = new LocalDateTimeline<>(List.of());
+    }
+
+    VilkårBuilder(Vilkår vilkåret) {
+        this.vilkåret = vilkåret;
+        this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder().stream().map(a -> new LocalDateSegment<>(a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), a)).collect(Collectors.toList()));
+    }
+
+    public VilkårBuilder medType(VilkårType type) {
+        vilkåret.setVilkårType(type);
         return this;
     }
 
-    VilkårBuilder medAvslagsårsak(Avslagsårsak avslagsårsak) {
-        this.avslagsårsak = avslagsårsak;
+    public VilkårBuilder leggTil(VilkårPeriodeBuilder periodeBuilder) {
+        final var periode = periodeBuilder.build();
+        final var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), periode);
+        final var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
+
+        this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
         return this;
     }
 
-    VilkårBuilder medVilkårUtfall(VilkårUtfallType vilkårUtfall) {
-        this.vilkårUtfall = vilkårUtfall;
-        return this;
+    private LocalDateSegment<VilkårPeriode> sjekkVurdering(LocalDateInterval di,
+                                                           LocalDateSegment<VilkårPeriode> førsteVersjon,
+                                                           LocalDateSegment<VilkårPeriode> sisteVersjon) {
+
+        if (førsteVersjon == null && sisteVersjon != null) {
+            return lagSegment(di, sisteVersjon.getValue());
+        } else if (sisteVersjon == null && førsteVersjon != null) {
+            return lagSegment(di, førsteVersjon.getValue());
+        }
+
+        VilkårPeriode første = førsteVersjon.getValue();
+        VilkårPeriode siste = sisteVersjon.getValue();
+
+        // TODO: Er det rett å prioriterer overstyrte vilkårsperioder?
+        if (første.getErOverstyrt() && siste.getErOverstyrt()) {
+            // Begge er overstyrt så ta siste
+            return sisteVersjon;
+        } else if (!første.getErOverstyrt() && siste.getErOverstyrt()) {
+            return lagSegment(di, siste);
+        } else if (første.getErOverstyrt() && !siste.getErOverstyrt()) {
+            return lagSegment(di, første);
+        } else {
+            return sisteVersjon;
+        }
     }
 
-    VilkårBuilder medVilkårUtfallMerknad(VilkårUtfallMerknad vilkårUtfallMerknad) {
-        this.vilkårUtfallMerknad = vilkårUtfallMerknad;
-        return this;
-    }
-
-    VilkårBuilder medMerknadParametere(Properties merknadParametere) {
-        this.merknadParametere = merknadParametere;
-        return this;
-    }
-
-    VilkårBuilder medUtfallManuell(VilkårUtfallType vilkårUtfallManuell) {
-        this.vilkårUtfallManuell = vilkårUtfallManuell;
-        return this;
-    }
-
-    VilkårBuilder medUtfallOverstyrt(VilkårUtfallType vilkårUtfallOverstyrt) {
-        this.vilkårUtfallOverstyrt = vilkårUtfallOverstyrt;
-        return this;
-    }
-
-    VilkårBuilder medRegelEvaluering(String regelEvaluering) {
-        this.regelEvaluering = regelEvaluering;
-        return this;
-    }
-
-    VilkårBuilder medRegelInput(String regelInput) {
-        this.regelInput = regelInput;
-        return this;
+    private LocalDateSegment<VilkårPeriode> lagSegment(LocalDateInterval di, VilkårPeriode siste) {
+        VilkårPeriodeBuilder builder = new VilkårPeriodeBuilder(siste);
+        VilkårPeriode aktivitetPeriode = builder.medPeriode(di.getFomDato(), di.getTomDato()).build();
+        return new LocalDateSegment<>(di, aktivitetPeriode);
     }
 
     Vilkår build() {
-        Vilkår vilkår = new Vilkår();
-        Objects.requireNonNull(vilkårType, "vilkårType");
-        vilkår.setVilkårType(vilkårType);
-        vilkår.setVilkårUtfall(vilkårUtfall);
-        vilkår.setVilkårUtfallMerknad(vilkårUtfallMerknad);
-        vilkår.setAvslagsårsak(avslagsårsak);
-        vilkår.setMerknadParametere(merknadParametere);
-        vilkår.setVilkårUtfallManuelt(vilkårUtfallManuell);
-        vilkår.setVilkårUtfallOverstyrt(vilkårUtfallOverstyrt);
-        vilkår.setRegelEvaluering(regelEvaluering);
-        vilkår.setRegelInput(regelInput);
-        return vilkår;
+        // TODO: tidslinje komprimering osv
+        vilkåret.setPerioder(vilkårTidslinje.compress().toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList()));
+        return vilkåret;
+    }
+
+    public VilkårPeriodeBuilder hentBuilderFor(LocalDate fom, LocalDate tom) {
+        final var intersection = vilkårTidslinje.getSegment(new LocalDateInterval(fom, tom));
+        if(intersection == null) {
+            return new VilkårPeriodeBuilder()
+                .medPeriode(fom, tom);
+        }
+        return new VilkårPeriodeBuilder(intersection.getValue())
+            .medPeriode(fom, tom);
     }
 }

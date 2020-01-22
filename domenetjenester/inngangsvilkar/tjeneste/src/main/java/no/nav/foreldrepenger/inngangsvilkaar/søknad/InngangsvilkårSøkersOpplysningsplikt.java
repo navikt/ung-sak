@@ -12,8 +12,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårTypeKoder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.Inngangsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårTypeRef;
@@ -35,14 +36,14 @@ public class InngangsvilkårSøkersOpplysningsplikt implements Inngangsvilkår {
     }
 
     @Override
-    public VilkårData vurderVilkår(BehandlingReferanse ref) {
-        return vurderOpplysningspliktOppfyltAutomatisk(ref);
+    public VilkårData vurderVilkår(BehandlingReferanse ref, DatoIntervallEntitet periode) {
+        return vurderOpplysningspliktOppfyltAutomatisk(ref, periode);
     }
 
-    private VilkårData vurderOpplysningspliktOppfyltAutomatisk(BehandlingReferanse ref) {
-        VilkårData oppfylt = new VilkårData(VilkårType.SØKERSOPPLYSNINGSPLIKT, VilkårUtfallType.OPPFYLT, Collections.emptyList());
+    private VilkårData vurderOpplysningspliktOppfyltAutomatisk(BehandlingReferanse ref, DatoIntervallEntitet periode) {
+        VilkårData oppfylt = new VilkårData(periode, VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.OPPFYLT, Collections.emptyList());
 
-        VilkårData manuellVurdering = new VilkårData(VilkårType.SØKERSOPPLYSNINGSPLIKT, VilkårUtfallType.IKKE_VURDERT,
+        VilkårData manuellVurdering = new VilkårData(periode, VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_VURDERT,
             singletonList(AksjonspunktDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU));
 
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();

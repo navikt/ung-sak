@@ -16,7 +16,7 @@ import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 
@@ -45,9 +45,9 @@ public class MedlemskapsvilkårPerioderEntitet extends BaseEntitet implements In
     private LocalDate vurderingsdato;
 
     @ChangeTracked
-    @Convert(converter = VilkårUtfallType.KodeverdiConverter.class)
+    @Convert(converter = Utfall.KodeverdiConverter.class)
     @Column(name="vilkar_utfall", nullable = false)
-    private VilkårUtfallType vilkårUtfall = VilkårUtfallType.UDEFINERT;
+    private Utfall vilkårUtfall = Utfall.UDEFINERT;
 
     @ChangeTracked
     @Convert(converter = VilkårUtfallMerknad.KodeverdiConverter.class)
@@ -94,7 +94,7 @@ public class MedlemskapsvilkårPerioderEntitet extends BaseEntitet implements In
     }
 
 
-    public VilkårUtfallType getVilkårUtfall() {
+    public Utfall getVilkårUtfall() {
         return vilkårUtfall;
     }
 
@@ -158,7 +158,7 @@ public class MedlemskapsvilkårPerioderEntitet extends BaseEntitet implements In
             return builder;
         }
 
-        public Builder medVilkårUtfall(VilkårUtfallType vilkårUtfall) {
+        public Builder medVilkårUtfall(Utfall vilkårUtfall) {
             mal.vilkårUtfall = vilkårUtfall;
             return this;
         }

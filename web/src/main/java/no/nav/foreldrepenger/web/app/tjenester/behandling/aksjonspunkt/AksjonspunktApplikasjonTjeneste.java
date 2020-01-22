@@ -4,6 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonFeil.FACTORY;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinns
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat.Builder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -339,14 +340,16 @@ public class AksjonspunktApplikasjonTjeneste {
 
         OverhoppResultat overhoppResultat = OverhoppResultat.tomtResultat();
 
-        VilkårResultat.Builder vilkårBuilder = harVilkårResultat(behandling)
-            ? VilkårResultat.builderFraEksisterende(getBehandlingsresultat(behandling).getVilkårResultat())
+        final var behandlingsresultat = getBehandlingsresultat(behandling);
+        VilkårResultatBuilder vilkårBuilder = harVilkårResultat(behandling)
+            ? VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat())
             : VilkårResultat.builder();
 
         bekreftedeAksjonspunktDtoer
             .forEach(dto -> bekreftAksjonspunkt(kontekst, behandling, skjæringstidspunkter, vilkårBuilder, overhoppResultat, dto));
-        
-        VilkårResultat vilkårResultat = vilkårBuilder.buildFor(behandling);
+
+        VilkårResultat vilkårResultat = vilkårBuilder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         behandlingRepository.lagre(vilkårResultat, kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
 
@@ -358,7 +361,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private void bekreftAksjonspunkt(BehandlingskontrollKontekst kontekst, Behandling behandling,
                                      Skjæringstidspunkt skjæringstidspunkter,
-                                     Builder vilkårBuilder,
+                                     VilkårResultatBuilder vilkårBuilder,
                                      OverhoppResultat overhoppResultat,
                                      BekreftetAksjonspunktDto dto) {
         // Endringskontroll for aksjonspunkt

@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.behandlingslager.behandling.vilkår;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
@@ -20,47 +19,56 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum VilkårResultatType implements Kodeverdi {
-     INNVILGET("INNVILGET", "Innvilget"),
-     AVSLÅTT("AVSLAATT", "Avslått"),
-     IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
-    
-     UDEFINERT("-", "Ikke definert"),
-
+public enum Utfall implements Kodeverdi {
+    OPPFYLT("OPPFYLT", "Oppfylt"),
+    IKKE_OPPFYLT("IKKE_OPPFYLT", "Ikke oppfylt"),
+    IKKE_VURDERT("IKKE_VURDERT", "Ikke vurdert"),
+    IKKE_RELEVANT("IKKE_RELEVANT", "Ikke relevant"),
+    UDEFINERT("-", "Ikke definert"),
     ;
-    
-    private static final Map<String, VilkårResultatType> KODER = new LinkedHashMap<>();
-    
-    public static final String KODEVERK = "VILKAR_RESULTAT_TYPE";
+
+    public static final String KODEVERK = "VILKAR_UTFALL_TYPE";
+    private static final Map<String, Utfall> KODER = new LinkedHashMap<>();
+
+    static {
+        for (var v : values()) {
+            if (KODER.putIfAbsent(v.kode, v) != null) {
+                throw new IllegalArgumentException("Duplikat : " + v.kode);
+            }
+        }
+    }
 
     @JsonIgnore
     private String navn;
-
     private String kode;
 
-    private VilkårResultatType(String kode) {
+    private Utfall(String kode) {
         this.kode = kode;
     }
 
-    private VilkårResultatType(String kode, String navn) {
+    private Utfall(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
     @JsonCreator
-    public static VilkårResultatType fraKode(@JsonProperty("kode") String kode) {
+    public static Utfall fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return null;
         }
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent VilkårResultatType: " + kode);
+            throw new IllegalArgumentException("Ukjent VilkårUtfallType: " + kode);
         }
         return ad;
     }
-    
-    public static Map<String, VilkårResultatType> kodeMap() {
+
+    public static Map<String, Utfall> kodeMap() {
         return Collections.unmodifiableMap(KODER);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(KODER.keySet());
     }
 
     @Override
@@ -68,10 +76,6 @@ public enum VilkårResultatType implements Kodeverdi {
         return navn;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
-    }
-    
     @JsonProperty
     @Override
     public String getKodeverk() {
@@ -83,29 +87,21 @@ public enum VilkårResultatType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
-    static {
-        for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
-            }
-        }
-    }
-    
+
     @Converter(autoApply = true)
-    public static class KodeverdiConverter implements AttributeConverter<VilkårResultatType, String> {
+    public static class KodeverdiConverter implements AttributeConverter<Utfall, String> {
         @Override
-        public String convertToDatabaseColumn(VilkårResultatType attribute) {
+        public String convertToDatabaseColumn(Utfall attribute) {
             return attribute == null ? null : attribute.getKode();
         }
 
         @Override
-        public VilkårResultatType convertToEntityAttribute(String dbData) {
+        public Utfall convertToEntityAttribute(String dbData) {
             return dbData == null ? null : fraKode(dbData);
         }
     }

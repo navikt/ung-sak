@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType.IKKE_VURDERT;
+import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall.IKKE_VURDERT;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,12 +17,15 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
+import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 class BeregningsgrunnlagVilkårTjeneste {
@@ -44,18 +47,19 @@ class BeregningsgrunnlagVilkårTjeneste {
 
     void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, BeregningsgrunnlagRegelResultat beregningsgrunnlagResultat) {
         boolean vilkårOppfylt = beregningsgrunnlagResultat.getVilkårOppfylt();
-        String regelEvaluering = beregningsgrunnlagResultat.getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0).getRegelEvalueringVilkårvurdering();
-        String regelInput = beregningsgrunnlagResultat.getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0).getRegelInputVilkårvurdering();
-        VilkårResultat.Builder vilkårResultatBuilder = opprettVilkårsResultat(kontekst.getBehandlingId(), regelEvaluering, regelInput, vilkårOppfylt);
+        final var beregningsgrunnlagPeriode = beregningsgrunnlagResultat.getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0);
+        String regelEvaluering = beregningsgrunnlagPeriode.getRegelEvalueringVilkårvurdering();
+        String regelInput = beregningsgrunnlagPeriode.getRegelInputVilkårvurdering();
+        final var behandlingsresultat = getBehandlingsresultat(kontekst.getBehandlingId());
+        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(regelEvaluering, regelInput, vilkårOppfylt, behandlingsresultat);
         if (!vilkårOppfylt) {
-            Behandlingsresultat behandlingsresultat = getBehandlingsresultat(kontekst.getBehandlingId());
             Behandlingsresultat.builderEndreEksisterende(behandlingsresultat).medBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             behandlingsresultat.setAvslagsårsak(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
             behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), behandlingsresultat);
         }
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        vilkårResultatBuilder.buildFor(behandling);
-        behandlingRepository.lagre(getBehandlingsresultat(kontekst.getBehandlingId()).getVilkårResultat(), kontekst.getSkriveLås());
+        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultatBuilder.build());
+        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
@@ -63,21 +67,19 @@ class BeregningsgrunnlagVilkårTjeneste {
         return behandlingsresultatRepository.hent(behandlingId);
     }
 
-    private VilkårResultat.Builder opprettVilkårsResultat(Long behandlingId, String regelEvaluering, String regelInput, boolean oppfylt) {
-        VilkårResultat vilkårResultat = getBehandlingsresultat(behandlingId).getVilkårResultat();
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
-        return builder
-            .medVilkårResultatType(oppfylt ? VilkårResultatType.INNVILGET : VilkårResultatType.AVSLÅTT)
-            .leggTilVilkårResultat(
-                VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
-                oppfylt ? VilkårUtfallType.OPPFYLT : VilkårUtfallType.IKKE_OPPFYLT,
-                oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041,
-                new Properties(),
-                oppfylt ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
-                false,
-                false,
-                regelEvaluering,
-                regelInput);
+    private VilkårResultatBuilder opprettVilkårsResultat(String regelEvaluering, String regelInput, boolean oppfylt, Behandlingsresultat behandlingsresultat) {
+        VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
+        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        final var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        vilkårBuilder.leggTil(vilkårBuilder
+            .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .medUtfall(oppfylt ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)
+            .medMerknad(oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041)
+            .medAvslagsårsak(oppfylt ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG)
+            .medRegelInput(regelInput)
+            .medRegelEvaluering(regelEvaluering));
+        builder.leggTil(vilkårBuilder);
+        return builder;
     }
 
     void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst) {
@@ -89,30 +91,34 @@ class BeregningsgrunnlagVilkårTjeneste {
     private void ryddOppVilkårsvurdering(BehandlingskontrollKontekst kontekst, Optional<Behandlingsresultat> behandlingresultatOpt) {
         Optional<VilkårResultat> vilkårResultatOpt = behandlingresultatOpt
             .map(Behandlingsresultat::getVilkårResultat);
-        if (!vilkårResultatOpt.isPresent()) {
+        if (vilkårResultatOpt.isEmpty()) {
             return;
         }
         VilkårResultat vilkårResultat = vilkårResultatOpt.get();
         Optional<Vilkår> beregningsvilkåret = vilkårResultat.getVilkårene().stream()
             .filter(vilkår -> vilkår.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .findFirst();
-        if (!beregningsvilkåret.isPresent()) {
+        if (beregningsvilkåret.isEmpty()) {
             return;
         }
-        VilkårResultat.Builder builder = VilkårResultat.builderFraEksisterende(vilkårResultat)
-            .leggTilVilkår(beregningsvilkåret.get().getVilkårType(), IKKE_VURDERT);
-        behandlingRepository.lagre(builder.buildFor(behandlingRepository.hentBehandling(kontekst.getBehandlingId())), kontekst.getSkriveLås());
+        final var behandlingsresultat = behandlingresultatOpt.get();
+        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        final var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        final var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);// FIXME (k9) hent ut for perioden(e) som skal evalueres
+        vilkårBuilder.leggTil(vilkårPeriodeBuilder.medUtfall(IKKE_VURDERT));
+        final var nyttResultat = builder.build();
+        behandlingsresultat.medOppdatertVilkårResultat(nyttResultat);
+        behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), behandlingsresultat);
+        behandlingRepository.lagre(nyttResultat, kontekst.getSkriveLås());
     }
 
     private void nullstillVedtaksresultat(BehandlingskontrollKontekst kontekst, Optional<Behandlingsresultat> behandlingresultatOpt) {
         if (behandlingresultatOpt.isEmpty() || Objects.equals(behandlingresultatOpt.get().getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
             return;
         }
-        Behandlingsresultat.Builder builder = Behandlingsresultat.builderEndreEksisterende(behandlingresultatOpt.get()).medBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
+        Behandlingsresultat.Builder builder = Behandlingsresultat.builderEndreEksisterende(behandlingresultatOpt.get())
+            .medBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
         behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
     }
-
-
-
 
 }

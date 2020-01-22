@@ -37,7 +37,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinns
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.vedtak.feil.Feil;
@@ -63,7 +63,7 @@ public class HistorikkInnslagTekstBuilder {
         new SimpleEntry<>(SkjermlenkeType.KODEVERK, SkjermlenkeType.kodeMap()),
 
         new SimpleEntry<>(VedtakResultatType.KODEVERK, VedtakResultatType.kodeMap()),
-        new SimpleEntry<>(VilkårUtfallType.KODEVERK, VilkårUtfallType.kodeMap()),
+        new SimpleEntry<>(Utfall.KODEVERK, Utfall.kodeMap()),
 
         // ulike domenespesifikke kodeverk som tillates
 

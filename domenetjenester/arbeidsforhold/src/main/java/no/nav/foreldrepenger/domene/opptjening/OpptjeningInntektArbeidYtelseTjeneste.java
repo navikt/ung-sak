@@ -151,9 +151,9 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         return !periode1.getFomDato().isAfter(periode2.getTomDato().plusDays(1));
     }
 
-    public List<OpptjeningAktivitetPeriode> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse) {
+    public List<OpptjeningAktivitetPeriode> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse, LocalDate fomDato) {
         final List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste
-            .hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse);
+            .hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, fomDato);
 
         return perioder.stream().map(this::mapTilPerioder).collect(Collectors.toList());
     }

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
@@ -34,7 +35,7 @@ public class OpptjeningsperiodeVilkårTjenesteImpl implements Opptjeningsperiode
     }
 
     @Override
-    public VilkårData vurderOpptjeningsperiodeVilkår(BehandlingReferanse behandlingReferanse, LocalDate førsteUttaksdato) {
+    public VilkårData vurderOpptjeningsperiodeVilkår(BehandlingReferanse behandlingReferanse, LocalDate førsteUttaksdato, DatoIntervallEntitet periode) {
         OpptjeningsperiodeGrunnlag grunnlag = new OpptjeningsperiodeGrunnlag();
 
         grunnlag.setFørsteUttaksDato(førsteUttaksdato);
@@ -43,7 +44,7 @@ public class OpptjeningsperiodeVilkårTjenesteImpl implements Opptjeningsperiode
         final OpptjeningsPeriode data = new OpptjeningsPeriode();
         Evaluation evaluation = new RegelFastsettOpptjeningsperiode().evaluer(grunnlag, data);
 
-        VilkårData resultat = inngangsvilkårOversetter.tilVilkårData(VilkårType.OPPTJENINGSPERIODEVILKÅR, evaluation, grunnlag);
+        VilkårData resultat = inngangsvilkårOversetter.tilVilkårData(VilkårType.OPPTJENINGSPERIODEVILKÅR, evaluation, grunnlag, periode);
         resultat.setEkstraVilkårresultat(data);
         return resultat;
     }

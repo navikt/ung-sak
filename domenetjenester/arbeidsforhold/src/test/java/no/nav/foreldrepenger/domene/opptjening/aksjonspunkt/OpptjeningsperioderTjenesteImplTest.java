@@ -341,7 +341,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -353,7 +353,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         InntektArbeidYtelseAggregatBuilder saksbehandlet = opprettOverstyrtOppgittOpptjening(periode1, ArbeidType.FRILANSER, AKTØRID,
             VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref);
+        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -482,9 +482,10 @@ public class OpptjeningsperioderTjenesteImplTest {
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         final Behandling behandling = builder.build();
-        Behandlingsresultat.opprettFor(behandling);
+        final var behandlingsresultat = Behandlingsresultat.opprettFor(behandling);
+        final VilkårResultat nyttResultat = VilkårResultat.builder().build();
+        behandlingsresultat.medOppdatertVilkårResultat(nyttResultat);
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        final VilkårResultat nyttResultat = VilkårResultat.builder().buildFor(behandling);
         behandlingRepository.lagre(nyttResultat, behandlingRepository.taSkriveLås(behandling));
         return behandling;
     }

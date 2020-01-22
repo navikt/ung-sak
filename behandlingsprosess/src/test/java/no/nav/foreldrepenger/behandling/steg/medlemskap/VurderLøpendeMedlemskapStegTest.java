@@ -38,9 +38,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
@@ -51,8 +52,8 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
@@ -103,9 +104,11 @@ public class VurderLøpendeMedlemskapStegTest {
         avslutterBehandlingOgFagsak(behandling);
 
         Behandling revudering = opprettRevudering(behandling);
-        VilkårResultat.Builder inngangsvilkårBuilder = VilkårResultat.builder();
-        inngangsvilkårBuilder.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, VilkårUtfallType.OPPFYLT);
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.buildFor(revudering);
+        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat.builder();
+        final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, datoMedEndring).medUtfall(Utfall.OPPFYLT));
+        inngangsvilkårBuilder.leggTil(vilkårBuilder);
+        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
 
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
         behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
@@ -135,7 +138,7 @@ public class VurderLøpendeMedlemskapStegTest {
         Optional<MedlemskapVilkårPeriodeGrunnlagEntitet> grunnlagOpt = medlemskapVilkårPeriodeRepository.hentAggregatHvisEksisterer(revudering);
         assertThat(grunnlagOpt).isPresent();
         MedlemskapVilkårPeriodeGrunnlagEntitet grunnlag = grunnlagOpt.get();
-        List<MedlemskapsvilkårPerioderEntitet> ikkeOppfylt = grunnlag.getMedlemskapsvilkårPeriode().getPerioder().stream().filter(p -> p.getVilkårUtfall().equals(VilkårUtfallType.IKKE_OPPFYLT)).collect(Collectors.toList());
+        List<MedlemskapsvilkårPerioderEntitet> ikkeOppfylt = grunnlag.getMedlemskapsvilkårPeriode().getPerioder().stream().filter(p -> p.getVilkårUtfall().equals(Utfall.IKKE_OPPFYLT)).collect(Collectors.toList());
         assertThat(ikkeOppfylt).hasSize(1);
     }
 
