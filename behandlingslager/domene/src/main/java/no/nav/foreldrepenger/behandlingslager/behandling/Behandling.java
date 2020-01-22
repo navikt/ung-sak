@@ -782,7 +782,7 @@ public class Behandling extends BaseEntitet {
         /**
          * optional
          */
-        private Behandlingsresultat.Builder resultatBuilder = Behandlingsresultat.builder();
+        private Behandlingsresultat.Builder resultatBuilder;
 
         private LocalDateTime opprettetDato;
         private LocalDateTime avsluttetDato;
