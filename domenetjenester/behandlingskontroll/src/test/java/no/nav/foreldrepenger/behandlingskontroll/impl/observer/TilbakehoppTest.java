@@ -42,19 +42,17 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
 public class TilbakehoppTest {
-    
+
+    private final BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
     private BehandlingStegType steg1;
     private BehandlingStegType steg2;
     private BehandlingStegType steg3;
     private BehandlingStegType steg4;
     private BehandlingStegType steg5;
-
     private List<StegTransisjon> transisjoner = new ArrayList<>();
     private EntityManager em = repoRule.getEntityManager();
-    private final BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
     private BehandlingskontrollServiceProvider serviceProvider = new BehandlingskontrollServiceProvider(em, behandlingModellRepository, null);
     private final BehandlingRepository behandlingRepository = serviceProvider.getBehandlingRepository();
 
@@ -88,20 +86,20 @@ public class TilbakehoppTest {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg1), løsesI(steg2, UT)));
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg1), løsesI(steg3, INN)));
     }
-    
+
     public void skal_avbryte_åpent_aksjonspunkt_som_oppsto_i_steget_det_hoppes_tilbake_til_inngang() {
         assertAPAvbrytesVedTilbakehopp(fra(steg2, UT), til(steg2, INN), medAP(identifisertI(steg2), løsesI(steg2, UT), AksjonspunktStatus.OPPRETTET, false));
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg2, INN), medAP(identifisertI(steg2), løsesI(steg3, INN), AksjonspunktStatus.OPPRETTET, false));
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medAP(identifisertI(steg2), løsesI(steg3, UT), AksjonspunktStatus.OPPRETTET, false));
     }
-    
+
     @Ignore("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_avbryte_aksjonspunkter_som_oppsto_etter_tilsteget() {
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg2), løsesI(steg3, INN)));
     }
-    
+
     @Ignore("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_ikke_endre_utførte_aksjonspunkter_som_oppsto_i_steget_det_hoppes_til() {
@@ -109,7 +107,7 @@ public class TilbakehoppTest {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medUtførtAP(identifisertI(steg2), løsesI(steg3, INN)));
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
     }
-    
+
     @Ignore("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_ikke_endre_aksjonspunkter_som_oppsto_før_til_steget_og_som_skulle_utføres_i_eller_etter_til_steget() {
@@ -158,14 +156,16 @@ public class TilbakehoppTest {
     private void assertAPGjenåpnesVedTilbakehopp(StegPort fra, StegPort til, Aksjonspunkt ap) {
         assertAPStatusEtterHopp(fra, til, ap).isEqualTo(AksjonspunktStatus.OPPRETTET);
     }
-    
+
     private void assertAPAvbrytesVedTilbakehopp(StegPort fra, StegPort til, Aksjonspunkt ap) {
         assertAPStatusEtterHopp(fra, til, ap).isEqualTo(AksjonspunktStatus.AVBRUTT);
     }
 
     private void assertAPUendretVedTilbakehopp(StegPort fra, StegPort til, Aksjonspunkt ap) {
-        AksjonspunktStatus orginalStatus = ap.getStatus();
-        assertAPStatusEtterHopp(fra, til, ap).isEqualTo(orginalStatus);
+        if (ap != null) {
+            AksjonspunktStatus orginalStatus = ap.getStatus();
+            assertAPStatusEtterHopp(fra, til, ap).isEqualTo(orginalStatus);
+        }
     }
 
     private AbstractComparableAssert<?, AksjonspunktStatus> assertAPStatusEtterHopp(StegPort fra, StegPort til, Aksjonspunkt ap) {
@@ -254,9 +254,11 @@ public class TilbakehoppTest {
         behandling = Behandling.nyBehandlingFor(ytelseBehandling.getFagsak(), BehandlingType.FØRSTEGANGSSØKNAD).build();
         behandlingLås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, behandlingLås);
-        Aksjonspunkt ap = serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, ad, idSteg);
-
-        if (status.getKode().equals(AksjonspunktStatus.UTFØRT.getKode())) {
+        Aksjonspunkt ap = null;
+        if (ad != null) {
+            ap = serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, ad, idSteg);
+        }
+        if (status.getKode().equals(AksjonspunktStatus.UTFØRT.getKode()) && ap != null) {
             serviceProvider.getAksjonspunktKontrollRepository().setTilUtført(ap, "ferdig");
         } else if (status.getKode().equals(AksjonspunktStatus.OPPRETTET.getKode())) {
             // dette er default-status ved opprettelse

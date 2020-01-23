@@ -91,6 +91,9 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDER_FARESIGNALER_KODE = "5095";
 
+    // PSB
+    public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
+
     // Andre koder
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;
     public static final VilkårType UTEN_VILKÅR = null;

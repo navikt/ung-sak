@@ -24,6 +24,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     FAKTA_OM_BEREGNING("FAKTA_OM_BEREGNING", "Fakta om beregning"),
     FAKTA_OM_FORDELING("FAKTA_OM_FORDELING", "Fakta om fordeling"),
     FAKTA_OM_MEDLEMSKAP("FAKTA_OM_MEDLEMSKAP", "Fakta om medlemskap"),
+    FAKTA_OM_MEDISINSK("FAKTA_OM_MEDISINSK", "Fakta om medisinsk"),
     FAKTA_OM_OPPTJENING("FAKTA_OM_OPPTJENING", "Fakta om opptjening"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     FAKTA_OM_UTTAK("FAKTA_OM_UTTAK", "Fakta om uttak"),
@@ -41,12 +42,12 @@ public enum SkjermlenkeType implements Kodeverdi {
     VEDTAK("VEDTAK", "Vedtak"),
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler"),
     ;
-    
+
     private static final Map<String, SkjermlenkeType> KODER = new LinkedHashMap<>();
-    
+
     public static final String KODEVERK = "SKJERMLENKE_TYPE"; //$NON-NLS-1$
 
-    
+
 
     static {
         for (var v : values()) {
@@ -58,7 +59,7 @@ public enum SkjermlenkeType implements Kodeverdi {
 
     @JsonIgnore
     private String navn;
-    
+
     private String kode;
 
     private SkjermlenkeType(String kode) {
@@ -81,7 +82,7 @@ public enum SkjermlenkeType implements Kodeverdi {
         }
         return ad;
     }
-    
+
     public static Map<String, SkjermlenkeType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -91,18 +92,18 @@ public enum SkjermlenkeType implements Kodeverdi {
     public String getNavn() {
         return navn;
     }
-    
+
     @JsonProperty
     @Override
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     @Override
     public String getKodeverk() {
         return KODEVERK;

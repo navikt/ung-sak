@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.behandlingskontroll.modeller;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
@@ -7,9 +10,6 @@ import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingModellImpl;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
 
 @ApplicationScoped
 public class PleiepengerBarnModellProducer {
@@ -32,6 +32,7 @@ public class PleiepengerBarnModellProducer {
             BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
             BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
+            BehandlingStegType.VURDER_MEDISINSKVILKÅR,
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
@@ -68,6 +69,7 @@ public class PleiepengerBarnModellProducer {
             BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
             BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
+            BehandlingStegType.VURDER_MEDISINSKVILKÅR,
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,

@@ -22,4 +22,6 @@ public final class VilkårTypeKoder {
 
     public static final String SVP_VK_1 = "SVP_VK_1";
 
+    public static final String PSB_VK_1 = "PSB_VK_1";
+
 }

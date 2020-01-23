@@ -10,6 +10,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtlederHolder;
 import no.nav.foreldrepenger.behandling.steg.avklarfakta.AksjonspunktUtlederForTilleggsopplysninger;
 import no.nav.foreldrepenger.behandling.steg.avklarfakta.KontrollerFaktaUtledere;
+import no.nav.foreldrepenger.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedisinskvilkår;
 import no.nav.foreldrepenger.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskapSkjæringstidspunkt;
 
 @ApplicationScoped
@@ -37,6 +38,6 @@ class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
     private void leggTilStandardUtledere(AksjonspunktUtlederHolder utlederHolder) {
         utlederHolder.leggTil(AksjonspunktutlederForMedlemskapSkjæringstidspunkt.class)
             .leggTil(AksjonspunktUtlederForTilleggsopplysninger.class)
-            ;
+            .leggTil(AksjonspunktutlederForMedisinskvilkår.class);
     }
 }

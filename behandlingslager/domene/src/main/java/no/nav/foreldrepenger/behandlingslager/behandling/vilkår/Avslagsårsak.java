@@ -39,13 +39,14 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
     ARBEIDSTAKER_KAN_OMPLASSERES("1064", "§14-4 første ledd: Arbeidstaker kan omplasseres til annet høvelig arbeid", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 1. ledd\"}]}]}"),
     SN_FL_HAR_IKKE_DOKUMENTERT_RISIKOFAKTORER("1065", "§14-4 andre ledd: Næringsdrivende/frilanser har ikke dokumentert risikofaktorer", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
     SN_FL_HAR_MULIGHET_TIL_Å_TILRETTELEGGE_SITT_VIRKE("1066", "§14-4 andre ledd: Næringsdrivende/frilanser har mulighet til å tilrettelegge sitt virke", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
+    IKKE_MEDISINSK_BEHOV("1067", "Ikke tilstrekkelig medisinsk behov", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"21-3,21-7\"}]}]}"),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
     UDEFINERT("-", "Ikke definert", null),
 
     ;
-    
+
     private static final Map<String, Avslagsårsak> KODER = new LinkedHashMap<>();
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
@@ -55,7 +56,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
     }
 
     public static final String KODEVERK = "AVSLAGSARSAK"; //$NON-NLS-1$
-    
+
     // TODO endre fra raw json
     @JsonIgnore
     private String lovReferanse;
@@ -82,7 +83,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
         }
         return ad;
     }
-    
+
     public static Map<String, Avslagsårsak> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -91,13 +92,13 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
     public String getNavn() {
         return navn;
     }
-    
+
     @JsonProperty
     @Override
     public String getKode() {
         return kode;
     }
-    
+
     @JsonProperty
     @Override
     public String getKodeverk() {
@@ -108,7 +109,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     /**
      * Get vilkår dette avslaget kan opptre i.
      */

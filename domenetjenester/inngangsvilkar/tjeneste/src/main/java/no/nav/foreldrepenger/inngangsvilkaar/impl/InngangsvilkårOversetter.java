@@ -29,6 +29,7 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.FinnOmSøkerHarArbeidsforholdOgInntekt;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.VilkårGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.MedisinskvilkårGrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.PersonStatusType;
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -45,8 +46,6 @@ public class InngangsvilkårOversetter {
         // for CDI proxy
     }
 
-    /**
-     */
     @Inject
     public InngangsvilkårOversetter(BehandlingRepositoryProvider repositoryProvider,
                                     BasisPersonopplysningTjeneste personopplysningTjeneste,
@@ -168,5 +167,9 @@ public class InngangsvilkårOversetter {
 
     public VilkårData tilVilkårData(VilkårType vilkårType, Evaluation evaluation, VilkårGrunnlag grunnlag, DatoIntervallEntitet periode) {
         return new VilkårUtfallOversetter().oversett(vilkårType, evaluation, grunnlag, periode);
+    }
+
+    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(BehandlingReferanse ref, DatoIntervallEntitet periode) {
+        return new MedisinskvilkårGrunnlag(true); // FIXME (k9) : Map reele data inn
     }
 }

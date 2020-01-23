@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.inngangsvilkaar.impl;
 
 import static java.util.Arrays.asList;
 import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
+import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.MEDISINSKEVILKÅR;
 import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
 import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
@@ -22,9 +23,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 @ApplicationScoped
 public class DefaultVilkårUtleder implements VilkårUtleder {
 
-    private static  final List<VilkårType> STANDARDVILKÅR = asList(
-        MEDLEMSKAPSVILKÅRET,
+    private static final List<VilkårType> STANDARDVILKÅR = asList(
         SØKERSOPPLYSNINGSPLIKT,
+        MEDLEMSKAPSVILKÅRET,
+        MEDISINSKEVILKÅR,
         OPPTJENINGSPERIODEVILKÅR,
         OPPTJENINGSVILKÅRET,
         BEREGNINGSGRUNNLAGVILKÅR);

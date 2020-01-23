@@ -8,8 +8,7 @@ public interface Inngangsvilkår {
     /**
      * Vurder vilkår og returner utfall
      *
-     * @param ref
-     *            - med grunnlag som skal vurderes
+     * @param ref     - med grunnlag som skal vurderes
      * @param periode
      * @return {@link VilkårData} som beskriver utfall
      */

@@ -40,6 +40,10 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
         Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT,
         Avslagsårsak.SØKER_ER_IKKE_BOSATT),
+    MEDISINSKEVILKÅR(VilkårTypeKoder.PSB_VK_1,
+        "Medisinskevilkår",
+        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 14-2"),
+        Avslagsårsak.IKKE_MEDISINSK_BEHOV),
     SØKERSOPPLYSNINGSPLIKT(VilkårTypeKoder.FP_VK_34,
         "Søkers opplysningsplikt",
         Map.of(FagsakYtelseType.ENGANGSTØNAD, "§§ 21-3 og 21-7", FagsakYtelseType.FORELDREPENGER, "§§ 21-3 og 21-7"),
@@ -63,7 +67,7 @@ public enum VilkårType implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", Map.of()),
 
     ;
-   
+
     private static final Map<String, VilkårType> KODER = new LinkedHashMap<>();
     private static final Map<VilkårType, Set<Avslagsårsak>> INDEKS_VILKÅR_AVSLAGSÅRSAKER = new LinkedHashMap<>(); // NOSONAR
     private static final Map<Avslagsårsak, Set<VilkårType>> INDEKS_AVSLAGSÅRSAK_VILKÅR = new LinkedHashMap<>(); // NOSONAR
@@ -79,7 +83,7 @@ public enum VilkårType implements Kodeverdi {
     private Set<Avslagsårsak> avslagsårsaker;
 
     private String kode;
-    
+
     private VilkårType(String kode) {
         this.kode = kode;
     }
@@ -92,7 +96,7 @@ public enum VilkårType implements Kodeverdi {
         this.navn = navn;
         this.lovReferanser = lovReferanser;
         this.avslagsårsaker = Set.of(avslagsårsaker);
-        
+
     }
 
     public String getLovReferanse(FagsakYtelseType fagsakYtelseType) {
@@ -120,7 +124,7 @@ public enum VilkårType implements Kodeverdi {
         }
         return ad;
     }
-    
+
     public static Map<String, VilkårType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -136,7 +140,7 @@ public enum VilkårType implements Kodeverdi {
     public static Set<VilkårType> getVilkårTyper(Avslagsårsak avslagsårsak) {
         return INDEKS_AVSLAGSÅRSAK_VILKÅR.get(avslagsårsak);
     }
-    
+
     @JsonProperty
     @Override
     public String getKodeverk() {
@@ -148,23 +152,23 @@ public enum VilkårType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
-            
+
             INDEKS_VILKÅR_AVSLAGSÅRSAKER.put(v, v.avslagsårsaker);
             v.avslagsårsaker.forEach(a -> INDEKS_AVSLAGSÅRSAK_VILKÅR.computeIfAbsent(a, (k) -> new HashSet<>(4)).add(v));
         }
     }
-    
+
     @Converter(autoApply = true)
     public static class KodeverdiConverter implements AttributeConverter<VilkårType, String> {
         @Override
