@@ -39,11 +39,10 @@ import no.nav.foreldrepenger.domene.typer.Beløp;
 public class BeregningsgrunnlagDtoTjeneste {
 
     private static final int SEKS = 6;
+    private final Map<FagsakYtelseType, BiConsumer<BeregningsgrunnlagInput, BeregningsgrunnlagDto>> ytelsespesifikkMapper = Map.of(/* FIXME K9 ytelsesppesifikt grunnlag */);
     private BeregningsgrunnlagRepository beregningsgrunnlagRepository;
     private FaktaOmBeregningDtoTjeneste faktaOmBeregningDtoTjeneste;
     private BeregningsgrunnlagPrStatusOgAndelDtoTjeneste andelDtoTjeneste;
-
-    private final Map<FagsakYtelseType, BiConsumer<BeregningsgrunnlagInput, BeregningsgrunnlagDto>> ytelsespesifikkMapper = Map .of(/* FIXME K9 ytelsesppesifikt grunnlag */);
 
     BeregningsgrunnlagDtoTjeneste() {
         // Hibernate
@@ -110,7 +109,28 @@ public class BeregningsgrunnlagDtoTjeneste {
     private void mapSammenlingingsgrunnlagPrStatus(BeregningsgrunnlagInput input, BeregningsgrunnlagDto dto) {
         var beregningsgrunnlag = input.getBeregningsgrunnlag();
         List<SammenligningsgrunnlagDto> sammenligningsgrunnlagDto = lagSammenligningsgrunnlagDtoPrStatus(beregningsgrunnlag);
-        dto.setSammenligningsgrunnlagPrStatus(sammenligningsgrunnlagDto);
+        if (sammenligningsgrunnlagDto.isEmpty() && dto.getSammenligningsgrunnlag() != null) {
+            dto.getSammenligningsgrunnlag().setSammenligningsgrunnlagType(SammenligningsgrunnlagType.SAMMENLIGNING_ATFL_SN);
+            dto.getSammenligningsgrunnlag().setDifferanseBeregnet(finnDifferanseBeregnetGammeltSammenliningsgrunnlag(beregningsgrunnlag, dto.getSammenligningsgrunnlag().getRapportertPrAar()));
+            dto.setSammenligningsgrunnlagPrStatus(List.of(dto.getSammenligningsgrunnlag()));
+        } else {
+            dto.setSammenligningsgrunnlagPrStatus(sammenligningsgrunnlagDto);
+        }
+    }
+
+    private BigDecimal finnDifferanseBeregnetGammeltSammenliningsgrunnlag(BeregningsgrunnlagEntitet beregningsgrunnlag, BigDecimal rapportertPrÅr) {
+        BigDecimal beregnet;
+        if (finnesAndelMedSN(beregningsgrunnlag)) {
+            beregnet = hentBeregnetSelvstendigNæringsdrivende(beregningsgrunnlag);
+        } else {
+            beregnet = hentBeregnetSamletArbeidstakerOgFrilanser(beregningsgrunnlag);
+        }
+        return beregnet.subtract(rapportertPrÅr);
+    }
+
+    private boolean finnesAndelMedSN(BeregningsgrunnlagEntitet beregningsgrunnlag) {
+        return beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList().stream()
+            .anyMatch(b -> b.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE));
     }
 
     private void mapBeregningsgrunnlagAktivitetStatus(BeregningsgrunnlagInput input, BeregningsgrunnlagDto dto) {
@@ -205,13 +225,13 @@ public class BeregningsgrunnlagDtoTjeneste {
 
     }
 
-    private BigDecimal finnDifferanseBeregnet(BeregningsgrunnlagEntitet beregningsgrunnlag, SammenligningsgrunnlagPrStatus sammenligningsgrunnlagPrStatus){
+    private BigDecimal finnDifferanseBeregnet(BeregningsgrunnlagEntitet beregningsgrunnlag, SammenligningsgrunnlagPrStatus sammenligningsgrunnlagPrStatus) {
         BigDecimal beregnet;
-        if(sammenligningsgrunnlagPrStatus.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_AT)){
+        if (sammenligningsgrunnlagPrStatus.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_AT)) {
             beregnet = hentBeregnetArbeidstaker(beregningsgrunnlag);
-        } else if(sammenligningsgrunnlagPrStatus.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_FL)){
+        } else if (sammenligningsgrunnlagPrStatus.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_FL)) {
             beregnet = hentBeregnetFrilanser(beregningsgrunnlag);
-        } else if(sammenligningsgrunnlagPrStatus.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_SN)){
+        } else if (sammenligningsgrunnlagPrStatus.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_SN)) {
             beregnet = hentBeregnetSelvstendigNæringsdrivende(beregningsgrunnlag);
         } else {
             beregnet = hentBeregnetSamletArbeidstakerOgFrilanser(beregningsgrunnlag);
