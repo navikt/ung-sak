@@ -1,0 +1,79 @@
+name: Bygg og deploy
+
+on:
+  push:
+    branches:
+      - nais-deploy
+env:
+  IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/k9-sak
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:11.5
+        env:
+          POSTGRES_USER: k9sak_unit
+          POSTGRES_PASSWORD: k9sak_unit
+          POSTGRES_DB: k9sak_unit
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+      - name: Build artifacts & deploy
+        shell: bash
+        run: |
+          echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
+          mvn jacoco:prepare-agent deploy -e --batch-mode --settings ./.github/.m2/settings.xml -Dmaven.wagon.http.pool=false --file pom.xml -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8 -DinstallAtEnd=true -DdeployAtEnd=true -Djacoco.destFile=$(pwd)/target/jacoco.exec
+          # har ikke tilgang til sonarcloud sålenge dette er private repo, kommenterer derfor ut neste linje
+          # mvn jacoco:report sonar:sonar -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Djacoco.dataFile=$(pwd)/target/jacoco.exec -Dsonar.projectKey="navikt_k9-sak" -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization=navit -Dsonar.login=${SONAR_TOKEN}
+          echo "Deployed artifacts"
+          echo "::set-env name=TAG::$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"
+          echo "::set-env name=IMAGE::$IMAGE_BASE:$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          DATASOURCE_HOST: localhost
+          DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
+      - name: Bygg og laste opp docker-image
+        run: |
+          docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest .
+          echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
+          docker push ${IMAGE_BASE}:latest
+          docker push ${IMAGE}
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+      - name: Trigger verdikjede test
+        if: success()
+        shell: bash
+        run: |
+          curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" \
+          -H "Accept: application/vnd.github.everest-preview+json" \
+          -H "Content-Type: application/json" \
+          https://api.github.com/repos/navikt/k9-verdikjede/dispatches \
+          --data '{"event_type": "saksbehandling-verdikjede", 
+                   "client_payload": {
+                      "trigger": "${{ github.repository }}",
+                      "version": "${{ env.TAG }}",
+                      "image": "${{ env.IMAGE }}"
+                  }}'
+      - name: Deploy til testmiljø
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: dev-fss
+          RESOURCE: nais/dev-fss.yml

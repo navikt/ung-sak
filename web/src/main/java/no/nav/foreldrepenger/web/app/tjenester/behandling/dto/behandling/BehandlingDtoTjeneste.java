@@ -62,6 +62,8 @@ import no.nav.foreldrepenger.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.vedtak.konfig.PropertyUtil;
+import no.nav.vedtak.util.env.Environment;
 
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
@@ -324,8 +326,8 @@ public class BehandlingDtoTjeneste {
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
         // fpoppdrag.override.proxy.url brukes ved testing lokalt
         BehandlingIdDto idDto = new BehandlingIdDto(behandling.getId());
-        String fpoppdragOverrideUrl = System.getProperty("fpoppdrag.override.proxy.url");
-        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/fpoppdrag/api";
+        String fpoppdragOverrideUrl = Environment.current().getProperty("fpoppdrag.override.proxy.url");
+        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/k9-oppdrag/api";
         return Optional.of(ResourceLink.post(baseUurl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", idDto));
     }
 

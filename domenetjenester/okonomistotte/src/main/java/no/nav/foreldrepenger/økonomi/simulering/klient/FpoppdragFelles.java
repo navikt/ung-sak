@@ -9,7 +9,7 @@ class FpoppdragFelles {
 
     private static final Logger logger = LoggerFactory.getLogger(FpoppdragFelles.class);
 
-    static final String FPOPPDRAG_BASE_URL = "http://fpoppdrag/fpoppdrag/api";
+    static final String FPOPPDRAG_BASE_URL = "http://k9-oppdrag/oppdrag/api";
     static final String FPOPPDRAG_OVERRIDE_URL = "fpoppdrag.override.direkte.url";
 
     private FpoppdragFelles() {
