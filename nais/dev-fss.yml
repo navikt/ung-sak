@@ -153,7 +153,7 @@ spec:
       value: https://k9-oppdrag.nais.preprod.local/oppdrag/api/simulering/resultat
 
     # Web services
-    - name: AKTOER_V2_UR
+    - name: AKTOER_V2_URL
       value: https://app-q1.adeo.no/aktoerregister/ws/Aktoer/v2
     - name: PERSON_V3_URL
       value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
