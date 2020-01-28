@@ -50,6 +50,10 @@ spec:
     - name: APP_NAME
       value: "K9SAK"
     
+    - name: DEFAULTDS_USERNAME
+      value: k9-sak
+    - name: DEFAULTDS_URL
+      value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-sak
 # "DEFAULTDS_USERNAME=k9sak"
 #      - "DEFAULTDS_PASSWORD=k9sak"
 #      - "DEFAULTDS_URL=jdbc:postgresql://postgres:5432/k9sak"
