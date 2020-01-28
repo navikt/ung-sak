@@ -54,11 +54,6 @@ spec:
       value: k9-sak
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-sak
-# "DEFAULTDS_USERNAME=k9sak"
-#      - "DEFAULTDS_PASSWORD=k9sak"
-#      - "DEFAULTDS_URL=jdbc:postgresql://postgres:5432/k9sak"
-#      - "NAV_TRUSTSTORE_PATH=/var/run/secrets/naisd.io/truststore.jks"
-
 
     # Appdynamics
 #    - name: APPDYNAMICS_CONTROLLER_HOST_NAME
@@ -70,16 +65,16 @@ spec:
 #    - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
 #      value: NON-PROD
 
-    #OPENIDCONNECT_ISSOHOST=http://vtp:8060/rest/isso/oauth2
-    #OPENIDCONNECT_ISSOISSUER=https://vtp_local/issuer
-    #OPENIDCONNECT_ISSOJWKS=http://vtp:8060/rest/isso/oauth2/connect/jwk_uri
-    #OPENIDCONNECT_USERNAME=fpsak-localhost
-
     #LOADBALANCER_URL=http://localhost:9000
-    #SYSTEMBRUKER_USERNAME=vtp
-    #SYSTEMBRUKER_PASSWORD=vtp
 
-
+    - name: OPENIDCONNECT_ISSOHOST
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OPENIDCONNECT_ISSOISSUER
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OPENIDCONNECT_ISSOJWKS
+      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
+    - name: OPENIDCONNECT_USERNAME
+      value: k9-sak-q1
 
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
