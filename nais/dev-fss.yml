@@ -40,6 +40,9 @@ spec:
     - "https://k9-sak.nais.preprod.local/"
   vault:
     enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/serviceuser
+        kvPath: /serviceuser/data/dev/srvk9sak
   sidecar: true
   env:
     - name: TZ
