@@ -22,8 +22,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
@@ -37,12 +37,10 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 public abstract class DokumentmottakerTestsupport {
 
     protected static final int FRIST_INNSENDING_UKER = 6;
-    protected final LocalDate DATO_ETTER_INNSENDINGSFRISTEN = LocalDate.now().minusWeeks(FRIST_INNSENDING_UKER + 2);
-    protected final LocalDate DATO_FØR_INNSENDINGSFRISTEN = LocalDate.now().minusWeeks(FRIST_INNSENDING_UKER - 2);
-
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
+    protected final LocalDate DATO_ETTER_INNSENDINGSFRISTEN = LocalDate.now().minusWeeks(FRIST_INNSENDING_UKER + 2);
+    protected final LocalDate DATO_FØR_INNSENDINGSFRISTEN = LocalDate.now().minusWeeks(FRIST_INNSENDING_UKER - 2);
     @Inject
     protected DokumentmottakerFelles dokumentmottakerFelles;
     @Inject
@@ -92,12 +90,11 @@ public abstract class DokumentmottakerTestsupport {
         behandling.avsluttBehandling();
         repositoryProvider.getBehandlingVedtakRepository().lagre(originalVedtak, behandlingLås);
 
-        VilkårResultat vilkårResultat = VilkårResultat.builder()
+        Vilkårene vilkårene = Vilkårene.builder()
             .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMed(LocalDate.now())), VilkårType.SØKERSOPPLYSNINGSPLIKT)
             .build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        repositoryProvider.getBehandlingRepository().lagre(vilkårResultat, behandlingLås);
         repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
 
         return behandling;
     }

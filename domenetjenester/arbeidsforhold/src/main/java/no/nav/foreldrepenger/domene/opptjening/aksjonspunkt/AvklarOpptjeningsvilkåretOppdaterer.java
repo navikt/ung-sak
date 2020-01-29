@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.domene.opptjening.aksjonspunkt;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,18 +13,19 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.domene.opptjening.Opptjeningsfeil;
 import no.nav.foreldrepenger.domene.opptjening.dto.AvklarOpptjeningsvilkåretDto;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -38,7 +38,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
 
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private HistorikkTjenesteAdapter historikkAdapter;
 
@@ -50,13 +50,13 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     @Inject
     public AvklarOpptjeningsvilkåretOppdaterer(OpptjeningRepository opptjeningRepository,
                                                BehandlingRepository behandlingRepository,
-                                               BehandlingsresultatRepository behandlingsresultatRepository,
+                                               VilkårResultatRepository vilkårResultatRepository,
                                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                HistorikkTjenesteAdapter historikkAdapter) {
 
         this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.historikkAdapter = historikkAdapter;
     }
@@ -64,35 +64,37 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     @Override
     public OppdateringResultat oppdater(AvklarOpptjeningsvilkåretDto dto, AksjonspunktOppdaterParameter param) {
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        VilkårResultat vilkårResultat = behandlingsresultatRepository.hent(param.getBehandlingId()).getVilkårResultat();
+        Vilkårene vilkårene = vilkårResultatRepository.hent(param.getBehandlingId());
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
         if (nyttUtfall.equals(Utfall.OPPFYLT)) {
             sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId());
-            oppdaterUtfallOgLagre(behandling, vilkårResultat, nyttUtfall);
+            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås());
+
             return OppdateringResultat.utenOveropp();
+        } else {
+
+            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås());
+
+            return OppdateringResultat.medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR);
         }
-
-        oppdaterUtfallOgLagre(behandling, vilkårResultat, nyttUtfall);
-
-        return OppdateringResultat.medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR);
     }
 
-    private void oppdaterUtfallOgLagre(Behandling behandling, VilkårResultat vilkårResultat, Utfall utfallType) {
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
-        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+    private void oppdaterUtfallOgLagre(Behandling behandling, Vilkårene vilkårene, Utfall utfallType, BehandlingLås skriveLås) {
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
         // FIXME (k9) : legge inn faktiske perioder fra dto
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
             .medUtfall(utfallType)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
         builder.leggTil(vilkårBuilder);
-        VilkårResultat resultat = builder.build();
-        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(resultat);
-        behandlingRepository.lagre(resultat, kontekst.getSkriveLås());
-        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        Vilkårene resultat = builder.build();
+
+        vilkårResultatRepository.lagre(behandling.getId(), resultat);
+        behandlingRepository.lagre(behandling, skriveLås);
     }
 
     private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId) {

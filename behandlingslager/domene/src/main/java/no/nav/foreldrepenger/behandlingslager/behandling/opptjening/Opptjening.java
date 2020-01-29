@@ -23,11 +23,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
@@ -35,7 +31,6 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
  * Entitet som representerer Opptjening. Denne har også et sett med {@link OpptjeningAktivitet}.
  * Grafen her er immutable og tillater ikke endring av data elementer annet enn metadata (aktiv flagg osv.)
  * {@link OpptjeningRepository} besørger riktig oppdatering og skriving, og oppretting av nytt innslag ved hver endring.
- *
  */
 @Entity(name = "Opptjening")
 @Table(name = "OPPTJENING")
@@ -54,7 +49,7 @@ public class Opptjening extends BaseEntitet {
     private Long id;
 
     /* Mapper kun fra denne og ikke bi-directional, gjør vedlikehold enklere. */
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok siden aktiviteter er eid av denne */)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true /* ok siden aktiviteter er eid av denne */)
     @JoinColumn(name = "OPPTJENINGSPERIODE_ID", nullable = false, updatable = false)
     private List<OpptjeningAktivitet> opptjeningAktivitet = new ArrayList<>();
 
@@ -67,8 +62,8 @@ public class Opptjening extends BaseEntitet {
     private long versjon;
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "vilkar_resultat_id", nullable = false, updatable = false)
-    private VilkårResultat vilkårResultat;
+    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
+    private Behandling behandling;
 
     public Opptjening(LocalDate fom, LocalDate tom) {
         Objects.requireNonNull(fom, "opptjeningsperiodeFom");
@@ -76,12 +71,14 @@ public class Opptjening extends BaseEntitet {
         this.opptjeningPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
-    /** copy-constructor. */
+    /**
+     * copy-constructor.
+     */
     public Opptjening(Opptjening annen) {
         this.opptjeningPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(annen.getFom(), annen.getTom());
         this.opptjentPeriode = annen.getOpptjentPeriode() == null ? null : annen.getOpptjentPeriode().toString();
         this.opptjeningAktivitet
-                .addAll(annen.getOpptjeningAktivitet().stream().map(oa -> new OpptjeningAktivitet(oa)).collect(Collectors.toList()));
+            .addAll(annen.getOpptjeningAktivitet().stream().map(oa -> new OpptjeningAktivitet(oa)).collect(Collectors.toList()));
         // kopierer ikke data som ikke er relevante (aktiv, versjon, id, etc)
 
     }
@@ -99,7 +96,7 @@ public class Opptjening extends BaseEntitet {
         }
         Opptjening other = (Opptjening) obj;
         return Objects.equals(this.getFom(), other.getFom())
-                && Objects.equals(this.getTom(), other.getTom());
+            && Objects.equals(this.getTom(), other.getTom());
     }
 
     public Boolean getAktiv() {
@@ -119,37 +116,37 @@ public class Opptjening extends BaseEntitet {
         return Collections.unmodifiableList(opptjeningAktivitet);
     }
 
+    void setOpptjeningAktivitet(Collection<OpptjeningAktivitet> opptjeningAktivitet) {
+        this.opptjeningAktivitet.clear();
+        this.opptjeningAktivitet.addAll(opptjeningAktivitet);
+    }
+
     public Period getOpptjentPeriode() {
         return opptjentPeriode == null ? null : Period.parse(opptjentPeriode);
+    }
+
+    void setOpptjentPeriode(Period opptjentPeriode) {
+        this.opptjentPeriode = opptjentPeriode == null ? null : opptjentPeriode.toString();
     }
 
     public LocalDate getTom() {
         return opptjeningPeriode.getTomDato();
     }
 
-    public VilkårResultat getVilkårResultat() {
-        return vilkårResultat;
-    }
-
-    /** fom/tom opptjening er gjort. */
+    /**
+     * fom/tom opptjening er gjort.
+     */
     public DatoIntervallEntitet getOpptjeningPeriode() {
         return opptjeningPeriode;
-    }
-
-    public boolean erOpptjeningPeriodeVilkårOppfylt() {
-        Utfall opptjeningVilkårUtfall = getVilkårResultat().getVilkårene().stream()
-            .filter(v -> VilkårType.OPPTJENINGSPERIODEVILKÅR.equals(v.getVilkårType()))
-            .map(Vilkår::getPerioder)
-            .flatMap(Collection::stream)
-            .map(VilkårPeriode::getGjeldendeUtfall)
-            .findFirst()
-            .orElse(Utfall.IKKE_VURDERT);
-        return Utfall.OPPFYLT.equals(opptjeningVilkårUtfall);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(opptjeningPeriode);
+    }
+
+    void setBehandling(Behandling behandlingId) {
+        this.behandling = behandlingId;
     }
 
     public void setInaktiv() {
@@ -162,23 +159,10 @@ public class Opptjening extends BaseEntitet {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-                "id=" + id + ", " //$NON-NLS-2$ //$NON-NLS-3$
+            "id=" + id + ", " //$NON-NLS-2$ //$NON-NLS-3$
             + "opptjeningsperiodeFom=" + opptjeningPeriode.getFomDato() + ", " //$NON-NLS-1$ //$NON-NLS-2$
             + "opptjeningsperiodeTom=" + opptjeningPeriode.getTomDato() + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + (opptjentPeriode == null ? "" : ", opptjentPeriode=" + opptjentPeriode) //$NON-NLS-1$
-                + ">"; //$NON-NLS-1$
-    }
-
-    void setOpptjeningAktivitet(Collection<OpptjeningAktivitet> opptjeningAktivitet) {
-        this.opptjeningAktivitet.clear();
-        this.opptjeningAktivitet.addAll(opptjeningAktivitet);
-    }
-
-    void setOpptjentPeriode(Period opptjentPeriode) {
-        this.opptjentPeriode = opptjentPeriode == null ? null : opptjentPeriode.toString();
-    }
-
-    void setVilkårResultat(VilkårResultat vilkårResultat) {
-        this.vilkårResultat = vilkårResultat;
+            + (opptjentPeriode == null ? "" : ", opptjentPeriode=" + opptjentPeriode) //$NON-NLS-1$
+            + ">"; //$NON-NLS-1$
     }
 }

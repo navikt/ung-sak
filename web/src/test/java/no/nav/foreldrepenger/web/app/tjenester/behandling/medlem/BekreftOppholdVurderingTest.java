@@ -71,7 +71,7 @@ public class BekreftOppholdVurderingTest {
 
         // Act
         final MedlemTjeneste medlemskapTjeneste = new MedlemTjeneste(repositoryProvider,
-            mock(HentMedlemskapFraRegister.class), repositoryProvider.getMedlemskapVilkårPeriodeRepository(), skjæringstidspunktTjeneste,
+            mock(HentMedlemskapFraRegister.class), skjæringstidspunktTjeneste,
             personopplysningTjeneste, mock(UtledVurderingsdatoerForMedlemskapTjeneste.class), mock(VurderMedlemskapTjeneste.class));
         final MedlemskapAksjonspunktTjeneste medlemskapAksjonspunktTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class), skjæringstidspunktTjeneste);
@@ -111,7 +111,7 @@ public class BekreftOppholdVurderingTest {
 
         // Act
         final MedlemTjeneste medlemskapTjeneste = new MedlemTjeneste(repositoryProvider,
-            mock(HentMedlemskapFraRegister.class), repositoryProvider.getMedlemskapVilkårPeriodeRepository(), skjæringstidspunktTjeneste,
+            mock(HentMedlemskapFraRegister.class), skjæringstidspunktTjeneste,
             personopplysningTjeneste, mock(UtledVurderingsdatoerForMedlemskapTjeneste.class), mock(VurderMedlemskapTjeneste.class));
         final MedlemskapAksjonspunktTjeneste medlemskapAksjonspunktTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class), skjæringstidspunktTjeneste);

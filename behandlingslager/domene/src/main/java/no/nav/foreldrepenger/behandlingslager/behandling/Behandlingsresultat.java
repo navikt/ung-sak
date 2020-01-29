@@ -26,8 +26,8 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 
 @Entity(name = "Behandlingsresultat")
 @Table(name = "BEHANDLING_RESULTAT")
@@ -40,13 +40,6 @@ public class Behandlingsresultat extends BaseEntitet {
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
-
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "inngangsvilkar_resultat_id"
-        /* , updatable = false // får ikke satt denne til false, men skal aldri kunne endres dersom satt tidligere */
-        /* , nullable=false // kan være null, men når den er satt kan ikke oppdateres */
-    )
-    private VilkårResultat vilkårResultat;
 
     /* bruker @ManyToOne siden JPA ikke støtter OneToOne join på non-PK column. */
     @ManyToOne(optional = false)
@@ -90,7 +83,7 @@ public class Behandlingsresultat extends BaseEntitet {
     }
 
     public static Builder builderForInngangsvilkår() {
-        return new Builder(VilkårResultat.builder());
+        return new Builder(Vilkårene.builder());
     }
 
     public static Builder builder() {
@@ -103,11 +96,6 @@ public class Behandlingsresultat extends BaseEntitet {
 
     public static Builder builderEndreEksisterende(Behandlingsresultat behandlingsresultat) {
         return new Builder(behandlingsresultat, true);
-    }
-
-    public VilkårResultat medOppdatertVilkårResultat(VilkårResultat nyttResultat) {
-        this.vilkårResultat = nyttResultat;
-        return this.vilkårResultat;
     }
 
     public Long getId() {
@@ -131,10 +119,6 @@ public class Behandlingsresultat extends BaseEntitet {
 
     public Long getBehandlingId() {
         return behandling.getId();
-    }
-
-    public VilkårResultat getVilkårResultat() {
-        return vilkårResultat;
     }
 
     public BehandlingVedtak getBehandlingVedtak() {
@@ -238,20 +222,14 @@ public class Behandlingsresultat extends BaseEntitet {
     public static class Builder {
 
         private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        private VilkårResultatBuilder vilkårResultatBuilder;
         private boolean built;
 
         Builder(VilkårResultatBuilder builder) {
-            this.vilkårResultatBuilder = builder;
         }
 
         Builder(Behandlingsresultat gammeltResultat, boolean endreEksisterende) {
             if (endreEksisterende) {
                 behandlingsresultat = gammeltResultat;
-            }
-            if (gammeltResultat != null && gammeltResultat.getVilkårResultat() != null) {
-                this.vilkårResultatBuilder = VilkårResultat
-                    .kopiFraEksisterende(gammeltResultat.getVilkårResultat());
             }
         }
 
@@ -315,10 +293,6 @@ public class Behandlingsresultat extends BaseEntitet {
         }
 
         public Behandlingsresultat build() {
-            if (vilkårResultatBuilder != null) {
-                VilkårResultat vilkårResultat = vilkårResultatBuilder.build();
-                behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-            }
             built = true;
             return behandlingsresultat;
         }
@@ -329,10 +303,6 @@ public class Behandlingsresultat extends BaseEntitet {
         @Deprecated
         public Behandlingsresultat buildFor(Behandling behandling) {
             behandling.setBehandlingresultat(behandlingsresultat);
-            if (vilkårResultatBuilder != null) {
-                VilkårResultat vilkårResultat = vilkårResultatBuilder.build();
-                behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-            }
             built = true;
             return behandlingsresultat;
         }

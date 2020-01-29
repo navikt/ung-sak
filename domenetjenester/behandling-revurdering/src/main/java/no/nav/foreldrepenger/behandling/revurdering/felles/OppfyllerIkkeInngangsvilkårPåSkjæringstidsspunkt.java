@@ -19,8 +19,7 @@ class OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt {
     }
 
     //TODO(OJR) burde kanskje innfører en egenskap som tilsier at MEDLEMSKAPSVILKÅRET_LØPENDE ikke er et inngangsvilkår?
-    public static boolean vurder(Behandling revurdering) {
-        List<Vilkår> vilkårene = revurdering.getBehandlingsresultat().getVilkårResultat().getVilkårene();
+    public static boolean vurder(List<Vilkår> vilkårene) {
         final ChronoLocalDate chronoLocalDate = LocalDate.now();
         return vilkårene.stream()
             .map(Vilkår::getPerioder)
@@ -29,13 +28,12 @@ class OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt {
             .anyMatch(v -> !Utfall.OPPFYLT.equals(v.getGjeldendeUtfall()));
     }
 
-    public static Behandlingsresultat fastsett(Behandling revurdering) {
-        boolean skalBeregnesIInfotrygd = harIngenBeregningsreglerILøsningen(revurdering);
+    public static Behandlingsresultat fastsett(Behandling revurdering, List<Vilkår> vilkårene) {
+        boolean skalBeregnesIInfotrygd = harIngenBeregningsreglerILøsningen(vilkårene);
         return SettOpphørOgIkkeRett.fastsett(revurdering, skalBeregnesIInfotrygd ? Vedtaksbrev.INGEN : Vedtaksbrev.AUTOMATISK);
     }
 
-    private static boolean harIngenBeregningsreglerILøsningen(Behandling revurdering) {
-        List<Vilkår> vilkårene = revurdering.getBehandlingsresultat().getVilkårResultat().getVilkårene();
+    private static boolean harIngenBeregningsreglerILøsningen(List<Vilkår> vilkårene) {
         return vilkårene.stream()
             .filter(vilkår -> VilkårType.BEREGNINGSGRUNNLAGVILKÅR.equals(vilkår.getVilkårType()))
             .map(Vilkår::getPerioder)

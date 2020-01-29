@@ -27,7 +27,6 @@ import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagInputFelles;
 import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagInputProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -81,7 +80,7 @@ public class BeregningsgrunnlagRestTjeneste {
             ? behandlingRepository.hentBehandling(id)
             : behandlingRepository.hentBehandling(behandlingId.getBehandlingUuid());
         final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
-        if (!opptjening.map(Opptjening::erOpptjeningPeriodeVilkårOppfylt).orElse(Boolean.FALSE)) {
+        if (opptjening.isEmpty()) {
             return null;
         }
         Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = iayTjeneste.finnGrunnlag(id);
@@ -104,7 +103,7 @@ public class BeregningsgrunnlagRestTjeneste {
     public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
         Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
         final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
-        if (!opptjening.map(Opptjening::erOpptjeningPeriodeVilkårOppfylt).orElse(Boolean.FALSE)) {
+        if (opptjening.isEmpty()) {
             return null;
         }
 

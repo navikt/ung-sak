@@ -22,7 +22,7 @@ public class VilkårBuilder {
     }
 
     VilkårBuilder(Vilkår vilkåret) {
-        this.vilkåret = vilkåret;
+        this.vilkåret = new Vilkår(vilkåret);
         this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder().stream().map(a -> new LocalDateSegment<>(a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), a)).collect(Collectors.toList()));
     }
 
@@ -78,7 +78,12 @@ public class VilkårBuilder {
     Vilkår build() {
         validerBuilder();
         bygget = true;
-        vilkåret.setPerioder(vilkårTidslinje.compress().toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList()));
+        final var collect = vilkårTidslinje.compress()
+            .toSegments()
+            .stream()
+            .map(LocalDateSegment::getValue)
+            .collect(Collectors.toList());
+        vilkåret.setPerioder(collect);
         return vilkåret;
     }
 

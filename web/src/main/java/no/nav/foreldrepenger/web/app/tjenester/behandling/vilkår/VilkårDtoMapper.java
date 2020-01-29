@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 
 
 class VilkårDtoMapper {
@@ -16,12 +16,11 @@ class VilkårDtoMapper {
         // SONAR - Utility classes should not have public constructors
     }
 
-    static List<VilkårDto> lagVilkarDto(Behandling behandling, boolean medVilkårkjøring) {
+    static List<VilkårDto> lagVilkarDto(Behandling behandling, boolean medVilkårkjøring, Vilkårene vilkårene) {
         Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
         if (behandlingsresultat != null) {
-            VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
-            if (vilkårResultat != null) {
-                List<VilkårDto> list = vilkårResultat.getVilkårene().stream().flatMap(vilkår -> {
+            if (vilkårene != null) {
+                return vilkårene.getVilkårene().stream().flatMap(vilkår -> {
                     return vilkår.getPerioder().stream().map(it -> {
                         VilkårDto dto = new VilkårDto();
                         dto.setAvslagKode(it.getAvslagsårsak() != null ? it.getAvslagsårsak().getKode() : null);
@@ -39,7 +38,6 @@ class VilkårDtoMapper {
                         return dto;
                     });
                 }).collect(Collectors.toList());
-                return list;
             }
         }
         return Collections.emptyList();

@@ -67,6 +67,11 @@ public class VilkårPeriodeBuilder {
         return this;
     }
 
+    public VilkårPeriodeBuilder medBegrunnelse(String begrunnelse) {
+        this.entitet.setBegrunnelse(begrunnelse);
+        return this;
+    }
+
     public VilkårPeriode build() {
         if (bygget) {
             throw new IllegalStateException("Builderen har allerede blitt bygget.");

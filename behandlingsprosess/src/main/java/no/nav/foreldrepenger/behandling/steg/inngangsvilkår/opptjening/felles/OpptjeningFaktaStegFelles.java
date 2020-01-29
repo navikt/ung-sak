@@ -16,7 +16,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
@@ -79,11 +79,10 @@ public abstract class OpptjeningFaktaStegFelles implements BehandlingSteg {
     }
 
     private List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
-        Optional<Behandlingsresultat> behandlingsresultat = repositoryProvider.getBehandlingsresultatRepository().hentHvisEksisterer(behandlingId);
-        Optional<VilkårResultat> resultatOpt = behandlingsresultat.map(Behandlingsresultat::getVilkårResultat);
+        Optional<Vilkårene> resultatOpt = repositoryProvider.getVilkårResultatRepository().hentHvisEksisterer(behandlingId);
         if (resultatOpt.isPresent()) {
-            VilkårResultat vilkårResultat = resultatOpt.get();
-            return vilkårResultat.getVilkårene()
+            Vilkårene vilkårene = resultatOpt.get();
+            return vilkårene.getVilkårene()
                 .stream()
                 .filter(vilkår -> VilkårType.OPPTJENINGSVILKÅRET.equals(vilkår.getVilkårType()))
                 .map(Vilkår::getPerioder)

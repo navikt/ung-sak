@@ -31,8 +31,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.IverksettingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -262,53 +261,9 @@ public class BehandlingRepositoryImplTest {
         assertThat(stringVurderÅrsakMap.containsValue(VurderÅrsak.FEIL_FAKTA)).isTrue();
     }
 
-    @Test
-    public void skal_slette_vilkår_som_blir_fjernet_til_tross_for_at_Hibernate_har_problemer_med_orphan_removal() {
-        // Arrange
-        Fagsak fagsak = byggFagsak(AktørId.dummy());
-        behandling = byggBehandlingForElektroniskSøknad(fagsak, LocalDate.now());
-
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, lås);
-
-        final var e1 = DatoIntervallEntitet.fraOgMed(LocalDate.now());
-        VilkårResultat vilkårResultat = VilkårResultat.builder()
-            .leggTilIkkeVurderteVilkår(List.of(e1), VilkårType.OPPTJENINGSPERIODEVILKÅR)
-            .build();
-        Behandlingsresultat.builderForInngangsvilkår().buildFor(behandling);
-        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(vilkårResultat);
-
-        // Act
-        behandlingRepository.lagre(vilkårResultat, lås);
-
-        behandlingRepository.lagre(behandling, lås);
-
-        // Assert
-        assertThat(vilkårResultat.getVilkårene()).hasSize(1);
-        assertThat(vilkårResultat.getVilkårene().iterator().next().getVilkårType()).isEqualTo(VilkårType.OPPTJENINGSPERIODEVILKÅR);
-
-        // Arrange
-        final var vilkårResultat1 = VilkårResultat.builderFraEksisterende(vilkårResultat)
-            .leggTilIkkeVurderteVilkår(List.of(e1), VilkårType.OPPTJENINGSVILKÅRET)
-            .fjernVilkår(VilkårType.OPPTJENINGSPERIODEVILKÅR)
-            .build();
-        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(vilkårResultat1);
-        // Act
-        behandlingRepository.lagre(behandling, lås);
-        behandlingRepository.lagre(vilkårResultat1, lås);
-        repository.flushAndClear();
-
-        // Assert
-        Behandling opphentetBehandling = repository.hent(Behandling.class, behandling.getId());
-        assertThat(getBehandlingsresultat(opphentetBehandling).getVilkårResultat().getVilkårene()).hasSize(1);
-        assertThat(getBehandlingsresultat(opphentetBehandling).getVilkårResultat().getVilkårene().iterator().next().getVilkårType())
-            .isEqualTo(VilkårType.OPPTJENINGSVILKÅRET);
-    }
-
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
         return behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
     }
-
 
     @Test
     public void skal_finne_for_automatisk_gjenopptagelse_naar_alle_kriterier_oppfylt() {
@@ -664,13 +619,6 @@ public class BehandlingRepositoryImplTest {
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);
-
-        final var vilkårResultatBuilder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
-        final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
-        final var vilkårResultat = vilkårResultatBuilder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(innvilget ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)))
-            .build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
 
         return behandlingsresultat;
     }

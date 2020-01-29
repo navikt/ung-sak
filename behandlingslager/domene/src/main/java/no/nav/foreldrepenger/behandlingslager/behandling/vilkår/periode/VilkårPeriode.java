@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.jpa.converters.PropertiesToStringConverter;
 
 @Entity
-@Table(name = "VILKAR_PERIODE")
+@Table(name = "VR_VILKAR_PERIODE")
 public class VilkårPeriode extends BaseEntitet implements IndexKey {
 
     @Id
@@ -50,29 +50,40 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
     private DatoIntervallEntitet periode;
+
     @Convert(converter = Utfall.KodeverdiConverter.class)
     @Column(name = "utfall", nullable = false)
     private Utfall utfall = Utfall.UDEFINERT;
+
     @Convert(converter = Utfall.KodeverdiConverter.class)
     @Column(name = "overstyrt_utfall", nullable = false)
     private Utfall overstyrtUtfall = Utfall.UDEFINERT;
+
     @Convert(converter = VilkårUtfallMerknad.KodeverdiConverter.class)
     @Column(name = "merknad", nullable = false)
     private VilkårUtfallMerknad utfallMerknad = VilkårUtfallMerknad.UDEFINERT;
+
     @Convert(converter = PropertiesToStringConverter.class)
     @Column(name = "merknad_parametere")
     private Properties merknadParametere = new Properties();
+
     @Convert(converter = Avslagsårsak.KodeverdiConverter.class)
     @Column(name = "avslag_kode", nullable = false)
     private Avslagsårsak avslagsårsak = Avslagsårsak.UDEFINERT;
+
+    @Column(name = "BEGRUNNELSE")
+    private String begrunnelse;
+
     @Lob
     @Column(name = "regel_evaluering", columnDefinition = "text")
     @Basic(fetch = FetchType.LAZY)
     private String regelEvaluering;
+
     @Lob
     @Column(name = "regel_input", columnDefinition = "text")
     @Basic(fetch = FetchType.LAZY)
     private String regelInput;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -152,6 +163,14 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
 
     void setOverstyrtUtfall(Utfall overstyrtUtfall) {
         this.overstyrtUtfall = overstyrtUtfall;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
     }
 
     public VilkårUtfallMerknad getMerknad() {

@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.Vilkår
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 
 @Entity(name = "Vilkar")
-@Table(name = "VILKAR")
+@Table(name = "VR_VILKAR")
 public class Vilkår extends BaseEntitet implements IndexKey {
 
     @Id
@@ -33,13 +33,13 @@ public class Vilkår extends BaseEntitet implements IndexKey {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "vilkar_resultat_id", nullable = false, updatable = false)
-    private VilkårResultat vilkårResultat;
+    private Vilkårene vilkårene;
 
     @Convert(converter = VilkårType.KodeverdiConverter.class)
     @Column(name = "vilkar_type", nullable = false, updatable = false)
     private VilkårType vilkårType;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "vilkår")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, mappedBy = "vilkår")
     private List<VilkårPeriode> perioder = new ArrayList<>();
 
     @Version
@@ -72,8 +72,8 @@ public class Vilkår extends BaseEntitet implements IndexKey {
         this.vilkårType = vilkårType;
     }
 
-    void setVilkårResultat(VilkårResultat vilkårResultat) {
-        this.vilkårResultat = vilkårResultat;
+    void setVilkårene(Vilkårene vilkårene) {
+        this.vilkårene = vilkårene;
     }
 
     public List<VilkårPeriode> getPerioder() {

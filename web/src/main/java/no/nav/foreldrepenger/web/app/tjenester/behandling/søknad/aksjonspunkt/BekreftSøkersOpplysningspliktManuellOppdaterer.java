@@ -59,7 +59,8 @@ public class BekreftSøkersOpplysningspliktManuellOppdaterer implements Aksjonsp
                 .ifPresent(ap -> resultatBuilder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
 
             final var builder = vilkårBuilder.hentBuilderFor(VilkårType.SØKERSOPPLYSNINGSPLIKT);
-            builder.leggTil(builder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfallManuell(Utfall.OPPFYLT));
+            builder.leggTil(builder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+                .medUtfallManuell(Utfall.OPPFYLT));
             vilkårBuilder.leggTil(builder);
 
             return resultatBuilder.build();

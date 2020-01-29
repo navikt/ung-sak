@@ -18,6 +18,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
@@ -38,6 +40,7 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
     private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private FagsakRepository fagsakRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     ForeslåBehandlingsresultatTjenesteImpl() {
         // for CDI proxy
@@ -54,6 +57,7 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
         this.revurderingBehandlingsresultatutlederFelles = revurderingBehandlingsresultatutlederFelles;
         this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
         this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
 
@@ -67,8 +71,9 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
     public Behandlingsresultat foreslåBehandlingsresultat(BehandlingReferanse ref) {
         Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         if (behandlingsresultat.isPresent()) {
-            if (sjekkVilkårAvslått(behandlingsresultat.get())) {
-                vilkårAvslått(ref, behandlingsresultat.get());
+            final var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+            if (sjekkVilkårAvslått(vilkårene)) {
+                vilkårAvslått(ref, behandlingsresultat.get(), vilkårene);
             } else {
                 Behandlingsresultat.builderEndreEksisterende(behandlingsresultat.get()).medBehandlingResultatType(BehandlingResultatType.INNVILGET);
                 // Må nullstille avslagårsak (for symmetri med setting avslagsårsak ovenfor, hvor avslagårsak kopieres fra et vilkår)
@@ -82,9 +87,8 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
         return behandlingsresultat.orElse(null);
     }
 
-    private boolean sjekkVilkårAvslått(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.getVilkårResultat()
-            .getVilkårene()
+    private boolean sjekkVilkårAvslått(Vilkårene vilkårene) {
+        return vilkårene.getVilkårene()
             .stream()
             .map(Vilkår::getPerioder)
             .flatMap(Collection::stream)
@@ -92,8 +96,8 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
     }
 
 
-    private void vilkårAvslått(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
-        Optional<Vilkår> ikkeOppfyltVilkår = finnAvslåtteVilkår(behandlingsresultat);
+    private void vilkårAvslått(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat, Vilkårene vilkårene) {
+        Optional<Vilkår> ikkeOppfyltVilkår = finnAvslåtteVilkår(vilkårene);
         ikkeOppfyltVilkår.ifPresent(vilkår -> {
             Avslagsårsak avslagsårsak = avslagsårsakTjeneste.finnAvslagsårsak(vilkår);
             behandlingsresultat.setAvslagsårsak(avslagsårsak);
@@ -110,9 +114,8 @@ class ForeslåBehandlingsresultatTjenesteImpl implements no.nav.foreldrepenger.b
         }
     }
 
-    private Optional<Vilkår> finnAvslåtteVilkår(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.getVilkårResultat()
-            .getVilkårene()
+    private Optional<Vilkår> finnAvslåtteVilkår(Vilkårene vilkårene) {
+        return vilkårene.getVilkårene()
             .stream()
             .filter(vilkår -> vilkår.getPerioder().stream().anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall())))
             .findFirst();

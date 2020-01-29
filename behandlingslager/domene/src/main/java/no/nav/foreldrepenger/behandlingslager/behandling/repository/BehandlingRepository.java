@@ -28,7 +28,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
@@ -278,24 +278,6 @@ public class BehandlingRepository {
     }
 
     /**
-     * Lagrer vilkårResultat på en Behandling. Sørger for at samtidige oppdateringer på samme Behandling, eller
-     * andre Behandlinger
-     * på samme Fagsak ikke kan gjøres samtidig.
-     *
-     * @return id for {@link VilkårResultat} opprettet/endret.
-     * @see BehandlingLås
-     */
-    public Long lagre(VilkårResultat vilkårResultat, BehandlingLås lås) {
-        long id = lagre(vilkårResultat);
-        final var behandling = hentBehandling(lås.getBehandlingId());
-        final var behandlingsresultat = getBehandlingsresultat(behandling);
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        verifiserBehandlingLås(lås);
-        getEntityManager().flush();
-        return id;
-    }
-
-    /**
      * Ta lås for oppdatering av behandling/fagsak. Påkrevd før lagring.
      * Convenience metode som tar hele entiteten.
      *
@@ -382,15 +364,15 @@ public class BehandlingRepository {
         return query;
     }
 
-    private Long lagre(VilkårResultat vilkårResultat) {
-        getEntityManager().persist(vilkårResultat);
-        for (Vilkår vilkår : vilkårResultat.getVilkårene()) {
+    private Long lagre(Vilkårene vilkårene) {
+        getEntityManager().persist(vilkårene);
+        for (Vilkår vilkår : vilkårene.getVilkårene()) {
             getEntityManager().persist(vilkår);
             for (VilkårPeriode vilkårPeriode : vilkår.getPerioder()) {
                 getEntityManager().persist(vilkårPeriode);
             }
         }
-        return vilkårResultat.getId();
+        return vilkårene.getId();
     }
 
     /**
@@ -407,11 +389,6 @@ public class BehandlingRepository {
         Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
         if (behandlingsresultat != null) {
             getEntityManager().persist(behandlingsresultat);
-
-            VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
-            if (vilkårResultat != null && vilkårResultat.getId() == null) {
-                throw flereAggregatOpprettelserISammeLagringException(VilkårResultat.class);
-            }
         }
         List<BehandlingÅrsak> behandlingÅrsak = behandling.getBehandlingÅrsaker();
         behandlingÅrsak.forEach(getEntityManager()::persist);

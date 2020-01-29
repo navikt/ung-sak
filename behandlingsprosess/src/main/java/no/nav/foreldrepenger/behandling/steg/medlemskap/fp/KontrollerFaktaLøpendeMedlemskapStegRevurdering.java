@@ -27,7 +27,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.medlem.VurderMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemResultat;
@@ -39,12 +41,12 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @ApplicationScoped
 public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements KontrollerFaktaLøpendeMedlemskapSteg {
 
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private UtledVurderingsdatoerForMedlemskapTjeneste tjeneste;
 
     private BehandlingRepository behandlingRepository;
     private VurderMedlemskapTjeneste vurderMedlemskapTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     KontrollerFaktaLøpendeMedlemskapStegRevurdering() {
         //CDI
@@ -59,7 +61,7 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements Kontrol
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.vurderMedlemskapTjeneste = vurderMedlemskapTjeneste;
-        this.behandlingsresultatRepository = provider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = provider.getVilkårResultatRepository();
     }
 
     @Override
@@ -82,8 +84,8 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurdering implements Kontrol
     }
 
     private boolean skalVurdereLøpendeMedlemskap(Long behandlingId, Skjæringstidspunkt skjæringstidspunkter) {
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
-        return behandlingsresultat.map(b -> b.getVilkårResultat().getVilkårene())
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+        return vilkårene.map(Vilkårene::getVilkårene)
             .orElse(Collections.emptyList())
             .stream()
             .filter(v -> v.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET))

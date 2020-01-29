@@ -22,9 +22,9 @@ import javax.persistence.Version;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 
-@Entity(name = "VilkarResultat")
-@Table(name = "VILKAR_RESULTAT")
-public class VilkårResultat extends BaseEntitet {
+@Entity(name = "Vilkårene")
+@Table(name = "VR_VILKAR_RESULTAT")
+public class Vilkårene extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VILKAR_RESULTAT")
@@ -35,17 +35,17 @@ public class VilkårResultat extends BaseEntitet {
     private long versjon;
 
     // CascadeType.ALL + orphanRemoval=true må til for at Vilkår skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "vilkårResultat")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, mappedBy = "vilkårene")
     private Set<Vilkår> vilkårne = new LinkedHashSet<>();
 
-    VilkårResultat() {
+    Vilkårene() {
         // for hibernate
     }
 
-    VilkårResultat(VilkårResultat resultat) {
+    Vilkårene(Vilkårene resultat) {
         if (resultat != null) {
             // For kopi mellom behandlinger
-            this.vilkårne = resultat.vilkårne.stream().map(Vilkår::new).peek(v -> v.setVilkårResultat(this)).collect(Collectors.toSet());
+            this.vilkårne = resultat.vilkårne.stream().map(Vilkår::new).peek(v -> v.setVilkårene(this)).collect(Collectors.toSet());
         }
     }
 
@@ -53,11 +53,7 @@ public class VilkårResultat extends BaseEntitet {
         return new VilkårResultatBuilder();
     }
 
-    public static VilkårResultatBuilder kopiFraEksisterende(VilkårResultat eksisterendeResultat) {
-        return new VilkårResultatBuilder(new VilkårResultat(eksisterendeResultat));
-    }
-
-    public static VilkårResultatBuilder builderFraEksisterende(VilkårResultat eksisterendeResultat) {
+    public static VilkårResultatBuilder builderFraEksisterende(Vilkårene eksisterendeResultat) {
         return new VilkårResultatBuilder(eksisterendeResultat);
     }
 
@@ -73,7 +69,8 @@ public class VilkårResultat extends BaseEntitet {
     }
 
     void leggTilVilkår(Vilkår vilkår) {
-        vilkår.setVilkårResultat(this);
+        vilkårne.removeIf(it -> it.getVilkårType().equals(vilkår.getVilkårType()));
+        vilkår.setVilkårene(this);
         vilkårne.add(vilkår);
     }
 
@@ -95,10 +92,10 @@ public class VilkårResultat extends BaseEntitet {
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
-        } else if (!(obj instanceof VilkårResultat)) {
+        } else if (!(obj instanceof Vilkårene)) {
             return false;
         }
-        VilkårResultat other = (VilkårResultat) obj;
+        Vilkårene other = (Vilkårene) obj;
         return Objects.equals(vilkårne, other.vilkårne);
     }
 

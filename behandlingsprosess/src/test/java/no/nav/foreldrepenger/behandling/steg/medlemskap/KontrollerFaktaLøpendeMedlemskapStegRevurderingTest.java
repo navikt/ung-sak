@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
@@ -96,16 +96,15 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurderingTest {
 
         Behandling revudering = opprettRevurdering(behandling);
 
-        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat.builder();
+        VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
         final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, iDag).medUtfall(Utfall.OPPFYLT));
         inngangsvilkårBuilder.leggTil(vilkårBuilder);
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
+        Vilkårene vilkårene = inngangsvilkårBuilder.build();
 
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, behandlingRepository.taSkriveLås(revudering));
         repository.lagre(behandlingsresultat);
+        provider.getVilkårResultatRepository().lagre(revudering.getId(), vilkårene);
         oppdaterMedlem(datoMedEndring, periode, revudering.getId());
 
         // Act
@@ -133,16 +132,15 @@ public class KontrollerFaktaLøpendeMedlemskapStegRevurderingTest {
 
         Behandling revudering = opprettRevurdering(behandling);
 
-        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat.builder();
+        VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
         final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, iDag).medUtfall(Utfall.IKKE_OPPFYLT));
         inngangsvilkårBuilder.leggTil(vilkårBuilder);
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
+        Vilkårene vilkårene = inngangsvilkårBuilder.build();
 
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, behandlingRepository.taSkriveLås(revudering));
         repository.lagre(behandlingsresultat);
+        provider.getVilkårResultatRepository().lagre(revudering.getId(), vilkårene);
         oppdaterMedlem(datoMedEndring, periode, revudering.getId());
 
         // Act

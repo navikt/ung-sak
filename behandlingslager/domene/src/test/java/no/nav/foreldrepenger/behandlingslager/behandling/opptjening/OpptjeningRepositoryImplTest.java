@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
@@ -140,8 +140,8 @@ public class OpptjeningRepositoryImplTest {
         Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
         var resultat = Behandlingsresultat.builder().build();
         behandlingBuilder.lagreBehandlingsresultat(behandling.getId(), resultat);
-        
-        var vilkårResultat = VilkårResultat.builder().build();
+
+        var vilkårResultat = Vilkårene.builder().build();
         behandlingBuilder.lagreVilkårResultat(behandling.getId(), vilkårResultat);
         return behandling;
     }

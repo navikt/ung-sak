@@ -23,6 +23,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -41,6 +42,7 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
     // FIXME K9 håndter revurdering
     @SuppressWarnings("unused")
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     protected RevurderingBehandlingsresultatutlederFellesImpl() {
         // for CDI proxy
@@ -57,6 +59,7 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.medlemTjeneste = medlemTjeneste;
         this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.harEtablertYtelse = harEtablertYtelse;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
@@ -87,10 +90,10 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
             /* 2b */
             return FastsettBehandlingsresultatVedAvslagPåAvslag.fastsett(revurdering);
         }
-
-        if (OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt.vurder(revurdering)) {
+        final var vilkårene = vilkårResultatRepository.hent(revurdering.getId());
+        if (OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt.vurder(vilkårene.getVilkårene())) {
             /* 2c */
-            return OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt.fastsett(revurdering);
+            return OppfyllerIkkeInngangsvilkårPåSkjæringstidsspunkt.fastsett(revurdering, vilkårene.getVilkårene());
         }
 
         Tuple<Utfall, Avslagsårsak> utfall = medlemTjeneste.utledVilkårUtfall(revurdering);

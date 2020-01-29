@@ -33,7 +33,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -57,11 +58,13 @@ public class ForeslåBeregningsgrunnlagStegTest {
     private final InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     @Mock
     BeregningsgrunnlagInputProvider inputProvider;
+    private BehandlingRepositoryProvider behandlingRepositoryProvider;
 
     @Before
     public void setUp() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
+        behandlingRepositoryProvider = scenario.mockBehandlingRepositoryProvider();
         var ref = BehandlingReferanse.fra(behandling, Skjæringstidspunkt.builder().medSkjæringstidspunktOpptjening(LocalDate.now()).build());
         K9BeregningsgrunnlagInput k9BeregningsgrunnlagInput = new K9BeregningsgrunnlagInput();
         var input = new BeregningsgrunnlagInput(ref, null, null, AktivitetGradering.INGEN_GRADERING, k9BeregningsgrunnlagInput);
@@ -107,8 +110,8 @@ public class ForeslåBeregningsgrunnlagStegTest {
     }
 
     private void opprettVilkårResultatForBehandling(ResultatType resultatType) {
-        VilkårResultat vilkårResultat = VilkårResultat.builder().build();
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(behandling);
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
+        Vilkårene vilkårene = Vilkårene.builder().build();
+        Behandlingsresultat.opprettFor(behandling);
+        behandlingRepositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
     }
 }

@@ -23,7 +23,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -31,6 +32,8 @@ import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
 import no.nav.vedtak.konfig.Tid;
 
 public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
+
+    private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
     private BehandlingRepositoryProvider repositoryProvider;
@@ -41,6 +44,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         this.repositoryProvider = repositoryProvider;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.inngangsvilkårFellesTjeneste = inngangsvilkårFellesTjeneste;
         this.behandlingStegType = behandlingStegType;
     }
@@ -53,7 +57,9 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         // Hent behandlingsgrunnlag og vilkårtyper
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         List<VilkårType> vilkårHåndtertAvSteg = vilkårHåndtertAvSteg();
-        Set<VilkårType> vilkårTyper = getBehandlingsresultat(behandling).getVilkårResultat().getVilkårene().stream()
+        Set<VilkårType> vilkårTyper = vilkårResultatRepository.hent(kontekst.getBehandlingId())
+            .getVilkårene()
+            .stream()
             .map(Vilkår::getVilkårType)
             .filter(vilkårHåndtertAvSteg::contains)
             .collect(Collectors.toSet());
@@ -76,7 +82,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), behandling, ref, intervaller);
 
         // Oppdater behandling
-        behandlingRepository.lagre(regelResultat.getVilkårResultat(), kontekst.getSkriveLås());
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), regelResultat.getVilkårene());
 
         for (DatoIntervallEntitet intervall : intervaller) {
             utførtRegler(kontekst, behandling, regelResultat, intervall);
@@ -137,11 +143,10 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     }
 
     protected boolean erVilkårOverstyrt(Long behandlingId, LocalDate fom, LocalDate tom) {
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
-        Optional<VilkårResultat> resultatOpt = behandlingsresultat.map(Behandlingsresultat::getVilkårResultat);
+        Optional<Vilkårene> resultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (resultatOpt.isPresent()) {
-            VilkårResultat vilkårResultat = resultatOpt.get();
-            return vilkårResultat.getVilkårene()
+            Vilkårene vilkårene = resultatOpt.get();
+            return vilkårene.getVilkårene()
                 .stream()
                 .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
                 .map(Vilkår::getPerioder)
@@ -154,11 +159,10 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
     @Override
     public List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
-        Optional<VilkårResultat> resultatOpt = behandlingsresultat.map(Behandlingsresultat::getVilkårResultat);
+        Optional<Vilkårene> resultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (resultatOpt.isPresent()) {
-            VilkårResultat vilkårResultat = resultatOpt.get();
-            return vilkårResultat.getVilkårene()
+            Vilkårene vilkårene = resultatOpt.get();
+            return vilkårene.getVilkårene()
                 .stream()
                 .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
                 .map(Vilkår::getPerioder)

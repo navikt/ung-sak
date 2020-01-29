@@ -10,11 +10,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepo
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
@@ -31,7 +31,6 @@ public class BehandlingRepositoryProvider {
     private FagsakRepository fagsakRepository;
     private PersonopplysningRepository personopplysningRepository;
     private MedlemskapRepository medlemskapRepository;
-    private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository;
     private HistorikkRepository historikkRepository;
     private SøknadRepository søknadRepository;
     private UttakRepository uttakRepository;
@@ -42,6 +41,7 @@ public class BehandlingRepositoryProvider {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     private BehandlingRepository behandlingRepository;
     private FagsakLåsRepository fagsakLåsRepository;
@@ -65,7 +65,6 @@ public class BehandlingRepositoryProvider {
 
         // behandling aggregater
         this.medlemskapRepository = new MedlemskapRepository(entityManager);
-        this.medlemskapVilkårPeriodeRepository = new MedlemskapVilkårPeriodeRepository(entityManager);
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
         this.personopplysningRepository = new PersonopplysningRepository(entityManager);
         this.søknadRepository = new SøknadRepository(entityManager, this.behandlingRepository);
@@ -76,6 +75,7 @@ public class BehandlingRepositoryProvider {
         this.virksomhetRepository = new VirksomhetRepository();
 
         // behandling resultat aggregater
+        this.vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         this.beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
 
         // behandling støtte repositories
@@ -106,10 +106,6 @@ public class BehandlingRepositoryProvider {
         return medlemskapRepository;
     }
 
-    public MedlemskapVilkårPeriodeRepository getMedlemskapVilkårPeriodeRepository() {
-        return medlemskapVilkårPeriodeRepository;
-    }
-
     public BehandlingLåsRepository getBehandlingLåsRepository() {
         return behandlingLåsRepository;
     }
@@ -117,6 +113,10 @@ public class BehandlingRepositoryProvider {
     public FagsakRepository getFagsakRepository() {
         // bridge metode før sammenkobling medBehandling
         return fagsakRepository;
+    }
+
+    public VilkårResultatRepository getVilkårResultatRepository() {
+        return vilkårResultatRepository;
     }
 
     public HistorikkRepository getHistorikkRepository() {

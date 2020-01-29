@@ -21,9 +21,10 @@ import org.mockito.Mockito;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -43,12 +44,11 @@ public class RegelOrkestrererImplTest {
     private RegelOrkestrerer orkestrerer;
 
     private InngangsvilkårTjeneste inngangsvilkårTjeneste;
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @Before
     public void oppsett() {
         inngangsvilkårTjeneste = Mockito.mock(InngangsvilkårTjeneste.class);
-
-        orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste);
     }
 
     @Test
@@ -59,14 +59,13 @@ public class RegelOrkestrererImplTest {
         VilkårData vilkårData = new VilkårData(intervall, vilkårType, OPPFYLT, emptyList());
         when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b, periode) -> vilkårData);
         Behandling behandling = byggBehandlingMedVilkårresultat(vilkårType);
-        when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
 
         // Act
         RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling), List.of(intervall));
 
         // Assert
-        assertThat(regelResultat.getVilkårResultat().getVilkårene()).hasSize(1);
-        assertThat(regelResultat.getVilkårResultat().getVilkårene().iterator().next().getVilkårType())
+        assertThat(regelResultat.getVilkårene().getVilkårene()).hasSize(1);
+        assertThat(regelResultat.getVilkårene().getVilkårene().iterator().next().getVilkårType())
             .isEqualTo(vilkårType);
     }
 
@@ -77,13 +76,12 @@ public class RegelOrkestrererImplTest {
 
         VilkårType vilkårType = VilkårType.MEDLEMSKAPSVILKÅRET;
         DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMed(LocalDate.now());
-        final var resultatBuilder = VilkårResultat.builder();
+        final var resultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
         resultatBuilder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(intervall.getFomDato(), intervall.getTomDato()).medUtfallOverstyrt(OPPFYLT)));
-        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(resultatBuilder.build());
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), resultatBuilder.build());
         VilkårData vilkårData = new VilkårData(intervall, vilkårType, OPPFYLT, List.of(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
         when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b, periode) -> vilkårData);
-        when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
 
         // Act
         RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling), List.of(intervall));
@@ -98,15 +96,14 @@ public class RegelOrkestrererImplTest {
         Behandling behandling = lagBehandling();
         VilkårType vilkårType = VilkårType.OPPTJENINGSVILKÅRET;
         DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMed(LocalDate.now());
-        final var resultatBuilder = VilkårResultat.builder();
+        final var resultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
         resultatBuilder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(intervall.getFomDato(), intervall.getTomDato())
             .medUtfallManuell(OPPFYLT)));
-        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(resultatBuilder.build());
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), resultatBuilder.build());
 
         VilkårData vilkårData = new VilkårData(intervall, vilkårType, OPPFYLT, List.of(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
         when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b, periode) -> vilkårData);
-        when(inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId())).thenReturn(behandling.getBehandlingsresultat());
 
         // Act
         RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling), List.of(intervall));
@@ -118,6 +115,7 @@ public class RegelOrkestrererImplTest {
 
     @Test
     public void skal_sammenstille_individuelle_vilkårsutfall_til_ett_samlet_vilkårresultat() {
+        orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste, null);
         // Enkelt vilkårutfall
         assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(IKKE_OPPFYLT))).isEqualTo(ResultatType.AVSLÅTT);
         assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(IKKE_VURDERT))).isEqualTo(ResultatType.IKKE_FASTSATT);
@@ -133,21 +131,24 @@ public class RegelOrkestrererImplTest {
     @Test
     public void skal_kaste_feil_dersom_vilkårsresultat_ikke_kan_utledes() {
         expectedException.expect(TekniskException.class);
+        orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste, null);
 
         orkestrerer.utledInngangsvilkårUtfall(emptyList());
     }
 
     private Behandling byggBehandlingMedVilkårresultat(VilkårType vilkårType) {
         Behandling behandling = lagBehandling();
-        final var resultatBuilder = VilkårResultat.builder()
+        final var resultatBuilder = Vilkårene.builder()
             .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMed(LocalDate.now())), vilkårType);
-        behandling.getBehandlingsresultat()
-            .medOppdatertVilkårResultat(resultatBuilder.build());
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), resultatBuilder.build());
         return behandling;
     }
 
     private Behandling lagBehandling() {
-        return TestScenarioBuilder.builderMedSøknad().lagMocked();
+        final var testScenarioBuilder = TestScenarioBuilder.builderMedSøknad();
+        repositoryProvider = testScenarioBuilder.mockBehandlingRepositoryProvider();
+        orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste, repositoryProvider.getVilkårResultatRepository());
+        return testScenarioBuilder.lagMocked();
     }
 
 }

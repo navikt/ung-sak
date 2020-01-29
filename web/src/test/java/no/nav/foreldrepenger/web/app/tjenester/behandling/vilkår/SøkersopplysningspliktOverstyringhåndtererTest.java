@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.vilkår;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -21,8 +22,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndr
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vilkår.aksjonspunkt.dto.OverstyringSokersOpplysingspliktDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -45,6 +49,10 @@ public class SøkersopplysningspliktOverstyringhåndtererTest {
         scenario.lagre(repositoryProvider);
 
         Behandling behandling = scenario.getBehandling();
+        final var vilkårene = Vilkårene.builder()
+            .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMed(LocalDate.now())), VilkårType.SØKERSOPPLYSNINGSPLIKT)
+            .build();
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
         // Dto
         OverstyringSokersOpplysingspliktDto overstyringspunktDto = new OverstyringSokersOpplysingspliktDto(false,
             "test av overstyring");

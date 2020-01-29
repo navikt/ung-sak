@@ -21,7 +21,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAg
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -37,6 +38,7 @@ public class EndringsresultatSjekker {
 
     private OpptjeningRepository opptjeningRepository;
     private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     EndringsresultatSjekker() {
         // For CDI
@@ -53,6 +55,7 @@ public class EndringsresultatSjekker {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = provider.getOpptjeningRepository();
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.vilkårResultatRepository = provider.getVilkårResultatRepository();
     }
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
@@ -65,7 +68,7 @@ public class EndringsresultatSjekker {
                 .orElse(EndringsresultatSnapshot.utenSnapshot(InntektArbeidYtelseGrunnlag.class));
 
         snapshot.leggTil(iaySnapshot);
-        
+
         return snapshot;
     }
 
@@ -111,11 +114,10 @@ public class EndringsresultatSjekker {
     }
 
     private EndringsresultatSnapshot lagVilkårResultatIdSnapshotAvTidsstempel(Behandling behandling) {
-       return Optional.ofNullable(behandling.getBehandlingsresultat())
-                 .map(Behandlingsresultat::getVilkårResultat)
+       return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
                  .map(vilkårResultat ->
-                     EndringsresultatSnapshot.medSnapshot(VilkårResultat.class, hentLongVerdiAvEndretTid(vilkårResultat)))
-                 .orElse(EndringsresultatSnapshot.utenSnapshot(VilkårResultat.class));
+                     EndringsresultatSnapshot.medSnapshot(Vilkårene.class, hentLongVerdiAvEndretTid(vilkårResultat)))
+                 .orElse(EndringsresultatSnapshot.utenSnapshot(Vilkårene.class));
     }
 
     //Denne metoden bør legges i Tjeneste

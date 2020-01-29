@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -102,7 +102,7 @@ public class BasicBehandlingBuilder {
         return fagsak;
     }
 
-    public void lagreVilkårResultat(Long behandlingId, VilkårResultat vilkårResultat) {
-        vilkårResultatRepository.lagre(behandlingId, vilkårResultat);
+    public void lagreVilkårResultat(Long behandlingId, Vilkårene vilkårene) {
+        vilkårResultatRepository.lagre(behandlingId, vilkårene);
     }
 }

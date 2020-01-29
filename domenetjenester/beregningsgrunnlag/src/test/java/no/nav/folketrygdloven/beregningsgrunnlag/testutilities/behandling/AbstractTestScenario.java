@@ -28,7 +28,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -301,16 +301,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     private void lagreBehandlingsresultatOgVilkårResultat(RepositoryProvider repoProvider, BehandlingLås lås) {
         // opprett og lagre behandlingsresultat med VilkårResultat og BehandlingVedtak
-        Behandlingsresultat behandlingsresultat = (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
+        (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
             : behandlingresultatBuilder).buildFor(behandling);
-
-        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat
-            .builderFraEksisterende(behandlingsresultat.getVilkårResultat());
-
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-
-        repoProvider.getBehandlingRepository().lagre(vilkårResultat, lås);
 
     }
 

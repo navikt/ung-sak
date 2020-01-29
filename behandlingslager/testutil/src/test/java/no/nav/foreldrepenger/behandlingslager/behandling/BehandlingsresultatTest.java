@@ -42,7 +42,6 @@ public class BehandlingsresultatTest {
         Behandlingsresultat behandlingsresultat = behandlingsresultatBuilder.buildFor(behandling);
 
         assertThat(behandlingsresultat).isNotNull();
-        assertThat(behandlingsresultat.getVilkårResultat()).isNotNull();
     }
 
     @Test
@@ -55,8 +54,6 @@ public class BehandlingsresultatTest {
         assertThat(behandling.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
         assertThat(behandlingsresultat.getBehandlingId()).isNotNull();
 
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
         lagreBehandling(behandling);
 
         Long id = behandling.getId();

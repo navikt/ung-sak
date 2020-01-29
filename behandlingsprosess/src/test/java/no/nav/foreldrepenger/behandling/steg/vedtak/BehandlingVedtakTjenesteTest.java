@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,9 +28,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -163,17 +160,14 @@ public class BehandlingVedtakTjenesteTest {
             .medBehandlingResultatType(behandlingResultatType)
             .buildFor(behandling);
         boolean ikkeAvslått = !behandlingResultatType.equals(BehandlingResultatType.AVSLÅTT);
-        final var vilkårResultatBuilder = VilkårResultat.builder();
+        final var vilkårResultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(ikkeAvslått ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT));
         vilkårResultatBuilder.leggTil(vilkårBuilder);
-        VilkårResultat vilkårResultat = vilkårResultatBuilder.build();
+        Vilkårene vilkårene = vilkårResultatBuilder.build();
 
         BehandlingLås lås = kontekst.getSkriveLås();
-        Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
-
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
         behandlingRepository.lagre(behandling, lås);
         repository.flush();
     }

@@ -25,7 +25,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -70,6 +71,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
+    private VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(repoRule.getEntityManager());
     private VirksomhetTjeneste virksomhetTjeneste = new VirksomhetTjeneste(null, repositoryProvider.getVirksomhetRepository());
     private AksjonspunktutlederForVurderOppgittOpptjening apoOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste);
     private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(opptjeningRepository, iayTjeneste);
@@ -394,11 +396,10 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = builder.build();
-        final var behandlingsresultat = Behandlingsresultat.opprettFor(behandling);
-        VilkårResultat nyttResultat = VilkårResultat.builder().build();
-        behandlingsresultat.medOppdatertVilkårResultat(nyttResultat);
+        Behandlingsresultat.opprettFor(behandling);
+        Vilkårene nyttResultat = Vilkårene.builder().build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        behandlingRepository.lagre(nyttResultat, behandlingRepository.taSkriveLås(behandling));
+        vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
 
         repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt, false);
         return behandling;

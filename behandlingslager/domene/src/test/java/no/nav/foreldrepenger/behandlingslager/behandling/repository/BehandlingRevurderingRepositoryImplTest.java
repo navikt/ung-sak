@@ -22,8 +22,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
@@ -42,6 +43,7 @@ public class BehandlingRevurderingRepositoryImplTest {
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private final VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(repoRule.getEntityManager());
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private final BehandlingRevurderingRepository behandlingRevurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
     private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
@@ -144,7 +146,7 @@ public class BehandlingRevurderingRepositoryImplTest {
     }
 
     private void oppdaterMedBehandlingsresultatAvslagOgLagre(Behandling behandling) {
-        final var resultatBuilder = VilkårResultat.builder();
+        final var resultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = resultatBuilder
             .hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder().medPeriode(LocalDate.now(), LocalDate.now().plusDays(30)).medUtfall(Utfall.IKKE_OPPFYLT));
@@ -152,16 +154,14 @@ public class BehandlingRevurderingRepositoryImplTest {
             .leggTil(vilkårBuilder)
             .build();
 
-        final var behandlingsresultat = Behandlingsresultat.builderForInngangsvilkår()
+        Behandlingsresultat.builderForInngangsvilkår()
             .medBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET)
             .buildFor(behandling);
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
         Repository repository = repoRule.getRepository();
 
         repository.lagre(behandling);
 
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(getBehandlingsresultat(behandling).getVilkårResultat(), lås);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {

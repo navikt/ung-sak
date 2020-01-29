@@ -24,8 +24,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittArbeidsforhold;
@@ -47,6 +48,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
     private OppgaveTjeneste oppgaveTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     VurderUtlandSteg() {
         // for CDI proxy
@@ -59,6 +61,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {// NOSONAR
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = provider.getBehandlingRepository();
+        this.vilkårResultatRepository = provider.getVilkårResultatRepository();
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
@@ -91,19 +94,18 @@ public class VurderUtlandSteg implements BehandlingSteg {
 
     private void opprettVilkår(UtledeteVilkår utledeteVilkår, Behandling behandling, BehandlingLås skriveLås) {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
-        final var behandlingsresultat = getBehandlingsresultat(behandling);
-        VilkårResultatBuilder vilkårBuilder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+        opprettBehandlingsresultatHvisIkkeEksisterende(behandling);
+        final var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
         final var vilkårResultat = vilkårBuilder.leggTilIkkeVurderteVilkår(utledPerioderTilVurdering(behandling.getId()), utledeteVilkår.getAlleAvklarte()).build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), skriveLås);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
+    private void opprettBehandlingsresultatHvisIkkeEksisterende(Behandling behandling) {
         var behandlingsresultat = behandling.getBehandlingsresultat();
         if (behandlingsresultat == null) {
-            behandlingsresultat = Behandlingsresultat.builder().buildFor(behandling);
+            Behandlingsresultat.builder().buildFor(behandling);
         }
-        return behandlingsresultat;
     }
 
     private List<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId) {

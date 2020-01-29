@@ -4,8 +4,8 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -28,9 +28,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPe
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapsvilkårPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
@@ -39,9 +36,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
@@ -68,7 +67,6 @@ public class VurderLøpendeMedlemskapStegTest {
     private MedlemskapRepository medlemskapRepository = provider.getMedlemskapRepository();
     private PersonopplysningRepository personopplysningRepository = provider.getPersonopplysningRepository();
     private FagsakRepository fagsakRepository = provider.getFagsakRepository();
-    private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository = provider.getMedlemskapVilkårPeriodeRepository();
     private Repository repository = repositoryRule.getRepository();
 
     private VurderLøpendeMedlemskapSteg steg;
@@ -104,16 +102,15 @@ public class VurderLøpendeMedlemskapStegTest {
         avslutterBehandlingOgFagsak(behandling);
 
         Behandling revudering = opprettRevudering(behandling);
-        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat.builder();
+        VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
         final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, datoMedEndring).medUtfall(Utfall.OPPFYLT));
         inngangsvilkårBuilder.leggTil(vilkårBuilder);
-        VilkårResultat vilkårResultat = inngangsvilkårBuilder.build();
+        Vilkårene vilkårene = inngangsvilkårBuilder.build();
 
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, behandlingRepository.taSkriveLås(revudering));
         repository.lagre(behandlingsresultat);
+        provider.getVilkårResultatRepository().lagre(revudering.getId(), vilkårene);
         oppdaterMedlem(datoMedEndring, periode, revudering.getId());
 
         VurdertMedlemskapPeriodeEntitet.Builder builder = new VurdertMedlemskapPeriodeEntitet.Builder();
@@ -135,10 +132,13 @@ public class VurderLøpendeMedlemskapStegTest {
         // Act
         steg.utførSteg(kontekst);
 
-        Optional<MedlemskapVilkårPeriodeGrunnlagEntitet> grunnlagOpt = medlemskapVilkårPeriodeRepository.hentAggregatHvisEksisterer(revudering);
-        assertThat(grunnlagOpt).isPresent();
-        MedlemskapVilkårPeriodeGrunnlagEntitet grunnlag = grunnlagOpt.get();
-        List<MedlemskapsvilkårPerioderEntitet> ikkeOppfylt = grunnlag.getMedlemskapsvilkårPeriode().getPerioder().stream().filter(p -> p.getVilkårUtfall().equals(Utfall.IKKE_OPPFYLT)).collect(Collectors.toList());
+
+        final var nyeVilkårene = provider.getVilkårResultatRepository().hentHvisEksisterer(revudering.getId());
+        assertThat(nyeVilkårene).isPresent();
+        Vilkårene grunnlag = nyeVilkårene.get();
+        List<VilkårPeriode> ikkeOppfylt = grunnlag.getVilkårene().stream().filter(it -> VilkårType.MEDLEMSKAPSVILKÅRET.equals(it.getVilkårType()))
+            .map(Vilkår::getPerioder).flatMap(Collection::stream).filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT))
+            .collect(Collectors.toList());
         assertThat(ikkeOppfylt).hasSize(1);
     }
 
@@ -154,8 +154,6 @@ public class VurderLøpendeMedlemskapStegTest {
 
         Behandlingsresultat.Builder builder = Behandlingsresultat.builderForInngangsvilkår();
         Behandlingsresultat behandlingsresultat = builder.buildFor(revudering);
-
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), behandlingRepository.taSkriveLås(revurderingId));
 
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(behandlingId, revurderingId);
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(behandlingId, revurderingId);

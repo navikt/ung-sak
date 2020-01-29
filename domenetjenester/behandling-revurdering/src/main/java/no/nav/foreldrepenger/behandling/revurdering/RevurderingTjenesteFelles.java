@@ -14,12 +14,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 
 @ApplicationScoped
@@ -27,9 +26,9 @@ public class RevurderingTjenesteFelles {
 
     private BehandlingRepository behandlingRepository;
     private FagsakRevurdering fagsakRevurdering;
-    private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository;
     private OpptjeningRepository opptjeningRepository;
     private RevurderingHistorikk revurderingHistorikk;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     public RevurderingTjenesteFelles() {
         // for CDI proxy
@@ -39,9 +38,9 @@ public class RevurderingTjenesteFelles {
     public RevurderingTjenesteFelles(BehandlingRepositoryProvider repositoryProvider) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.fagsakRevurdering = new FagsakRevurdering(repositoryProvider.getBehandlingRepository());
-        this.medlemskapVilkårPeriodeRepository = repositoryProvider.getMedlemskapVilkårPeriodeRepository();
         this.opptjeningRepository = repositoryProvider.getOpptjeningRepository();
         this.revurderingHistorikk = new RevurderingHistorikk(repositoryProvider.getHistorikkRepository());
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
     public Behandling opprettRevurderingsbehandling(BehandlingÅrsakType revurderingÅrsakType, Behandling opprinneligBehandling, boolean manueltOpprettet,
@@ -63,19 +62,10 @@ public class RevurderingTjenesteFelles {
     }
 
     public void kopierVilkårsresultat(Behandling origBehandling, Behandling revurdering, BehandlingskontrollKontekst kontekst) {
-        VilkårResultat origVilkårResultat = origBehandling.getBehandlingsresultat().getVilkårResultat();
-        Objects.requireNonNull(origVilkårResultat, "Vilkårsresultat må være satt på revurderingens originale behandling");
+        Behandlingsresultat.builderFraEksisterende(origBehandling.getBehandlingsresultat()).buildFor(revurdering);
 
-        final var behandlingsresultat = Behandlingsresultat.builderFraEksisterende(origBehandling.getBehandlingsresultat()).buildFor(revurdering);
-        VilkårResultatBuilder vilkårBuilder = VilkårResultatBuilder.kopi(origVilkårResultat);
-
-        VilkårResultat vilkårResultat = vilkårBuilder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, kontekst.getSkriveLås());
+        vilkårResultatRepository.kopier(origBehandling.getId(), revurdering.getId());
         behandlingRepository.lagre(revurdering, kontekst.getSkriveLås());
-
-        // MedlemskapsvilkårPerioder er tilknyttet vilkårresultat, ikke behandling
-        medlemskapVilkårPeriodeRepository.kopierGrunnlagFraEksisterendeBehandling(origBehandling, revurdering);
 
         // Kan være at førstegangsbehandling ble avslått før den har kommet til opptjening.
         if (opptjeningRepository.finnOpptjening(origBehandling.getId()).isPresent()) {

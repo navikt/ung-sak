@@ -7,7 +7,7 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 
@@ -38,18 +38,18 @@ public final class AksjonspunktOppdaterParameter {
 
     // Test-only
     public AksjonspunktOppdaterParameter(Behandling behandling, Aksjonspunkt aksjonspunkt, BekreftetAksjonspunktDto dto) {
-        this(behandling, Optional.ofNullable(aksjonspunkt), null, VilkårResultat.builder(), dto.getBegrunnelse());
+        this(behandling, Optional.ofNullable(aksjonspunkt), null, Vilkårene.builder(), dto.getBegrunnelse());
 
     }
 
     // Test-only
     public AksjonspunktOppdaterParameter(Behandling behandling, Optional<Aksjonspunkt> aksjonspunkt, BekreftetAksjonspunktDto dto) {
-        this(behandling, aksjonspunkt, null, VilkårResultat.builder(), dto.getBegrunnelse());
+        this(behandling, aksjonspunkt, null, Vilkårene.builder(), dto.getBegrunnelse());
     }
 
     // Test-only
     public AksjonspunktOppdaterParameter(Behandling behandling, Aksjonspunkt aksjonspunkt, Skjæringstidspunkt skjæringstidspunkt, String begrunnelse) {
-        this(behandling, Optional.ofNullable(aksjonspunkt), skjæringstidspunkt, VilkårResultat.builder(), begrunnelse);
+        this(behandling, Optional.ofNullable(aksjonspunkt), skjæringstidspunkt, Vilkårene.builder(), begrunnelse);
     }
 
     /**

@@ -21,6 +21,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.IverksettingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.vedtak.felles.testutilities.Whitebox;
@@ -35,6 +37,7 @@ public class VurderBehandlingerUnderIverksettelseTest {
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private final BehandlingVedtakRepository behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
+    private final VilkårResultatRepository vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
 
     private final VurderBehandlingerUnderIverksettelse tjeneste = new VurderBehandlingerUnderIverksettelse(repositoryProvider);
 
@@ -105,7 +108,7 @@ public class VurderBehandlingerUnderIverksettelseTest {
         behandlingRepository.lagre(revurdering, lås);
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.builderForInngangsvilkår().buildFor(revurdering);
         repository.lagre(behandlingsresultat);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
+        vilkårResultatRepository.lagre(revurdering.getId(), Vilkårene.builder().build());
         return revurdering;
     }
 

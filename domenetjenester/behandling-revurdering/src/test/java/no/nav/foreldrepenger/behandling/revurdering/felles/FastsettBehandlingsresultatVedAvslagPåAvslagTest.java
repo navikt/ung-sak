@@ -17,10 +17,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.KonsekvensForYtelsen;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
+import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class FastsettBehandlingsresultatVedAvslagPåAvslagTest {
@@ -31,6 +31,7 @@ public class FastsettBehandlingsresultatVedAvslagPåAvslagTest {
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
 
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private VilkårResultatRepository vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     private Behandling originalBehandling;
     private Behandling revurdering;
 
@@ -70,9 +71,8 @@ public class FastsettBehandlingsresultatVedAvslagPåAvslagTest {
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder().medBehandlingResultatType(resultatType)
             .leggTilKonsekvensForYtelsen(konsekvensForYtelsen).buildFor(behandling);
 
-        final var build = VilkårResultat.builder().build();
-        behandlingsresultat.medOppdatertVilkårResultat(build);
-        behandlingRepository.lagre(behandling.getBehandlingsresultat().getVilkårResultat(), behandlingRepository.taSkriveLås(behandling));
+        final var build = Vilkårene.builder().build();
+        vilkårResultatRepository.lagre(behandling.getId(), build);
 
         return Optional.of(behandlingsresultat);
     }

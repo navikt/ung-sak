@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import no.nav.foreldrepenger.behandling.steg.iverksettevedtak.fp.IverksetteVedtakStegFørstegang;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
@@ -142,10 +141,8 @@ public class IverksetteVedtakStegYtelseTest {
         var scenario = TestScenarioBuilder.builderMedSøknad().medBehandlingStegStart(BehandlingStegType.IVERKSETT_VEDTAK);
 
         Behandling behandling = scenario.lagre(repositoryProvider);
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
 
         Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
         repository.lagre(behandlingsresultat);
 
         repository.flush();

@@ -15,7 +15,6 @@ import no.nav.vedtak.util.InputValideringRegex;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-/** Husk @JsonTypeName på alle sublasser!! */
 public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode, AbacDto {
 
     @JsonProperty("begrunnelse")

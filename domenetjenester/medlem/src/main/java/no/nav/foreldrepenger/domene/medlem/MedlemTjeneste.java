@@ -19,21 +19,17 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.aktør.AdresseType;
 import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapsvilkårPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
@@ -67,12 +63,11 @@ public class MedlemTjeneste {
 
     private MedlemskapRepository medlemskapRepository;
     private HentMedlemskapFraRegister hentMedlemskapFraRegister;
-    private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private PersonopplysningTjeneste personopplysningTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
     private UtledVurderingsdatoerForMedlemskapTjeneste utledVurderingsdatoerTjeneste;
     private VurderMedlemskapTjeneste vurderMedlemskapTjeneste;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     MedlemTjeneste() {
         // CDI
@@ -81,17 +76,15 @@ public class MedlemTjeneste {
     @Inject
     public MedlemTjeneste(BehandlingRepositoryProvider repositoryProvider,
                           HentMedlemskapFraRegister hentMedlemskapFraRegister,
-                          MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository,
                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                           PersonopplysningTjeneste personopplysningTjeneste,
                           UtledVurderingsdatoerForMedlemskapTjeneste utledVurderingsdatoerForMedlemskapTjeneste,
                           VurderMedlemskapTjeneste vurderMedlemskapTjeneste) {
         this.hentMedlemskapFraRegister = hentMedlemskapFraRegister;
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
-        this.medlemskapVilkårPeriodeRepository = medlemskapVilkårPeriodeRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.utledVurderingsdatoerTjeneste = utledVurderingsdatoerForMedlemskapTjeneste;
         this.vurderMedlemskapTjeneste = vurderMedlemskapTjeneste;
     }
@@ -187,15 +180,15 @@ public class MedlemTjeneste {
      * @return opphørsdato
      */
     public Optional<LocalDate> hentOpphørsdatoHvisEksisterer(Behandling behandling) {
-        Optional<Behandlingsresultat> behandlingsresultatOpt = behandlingsresultatRepository.hentHvisEksisterer(behandling.getId());
-        if (behandlingsresultatOpt.isEmpty() || behandlingsresultatOpt.get().getVilkårResultat() == null) {
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        if (vilkårene.isEmpty()) {
             return Optional.empty();
         }
-        Behandlingsresultat behandlingsresultat = behandlingsresultatOpt.get();
-        Optional<Vilkår> medlemskapsvilkåret = behandlingsresultat.getVilkårResultat()
+        Optional<Vilkår> medlemskapsvilkåret = vilkårene.get()
             .getVilkårene()
             .stream()
-            .filter(vilkårType -> vilkårType.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET)).findFirst();
+            .filter(vilkårType -> vilkårType.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET))
+            .findFirst();
 
         if (medlemskapsvilkåret.isPresent()) {
             Vilkår medlem = medlemskapsvilkåret.get();
@@ -235,19 +228,26 @@ public class MedlemTjeneste {
         }
     }
 
-    private LocalDate finnStartdato(Behandling revurderingBehandling) {
+    private LocalDate finnStartdato(Behandling behandling) {
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        if (vilkårene.isEmpty()) {
+            return LocalDate.now();
+        }
+        Optional<Vilkår> medlemskapsvilkåret = vilkårene.get()
+            .getVilkårene()
+            .stream()
+            .filter(vilkårType -> vilkårType.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET))
+            .findFirst();
 
-        Optional<MedlemskapVilkårPeriodeGrunnlagEntitet> medlemskapsvilkårPeriodeGrunnlag = medlemskapVilkårPeriodeRepository
-            .hentAggregatHvisEksisterer(revurderingBehandling.getOriginalBehandling().get());
-
-        LocalDate startDato = skjæringstidspunktTjeneste.getSkjæringstidspunkter(revurderingBehandling.getId()).getUtledetSkjæringstidspunkt();
-        if (medlemskapsvilkårPeriodeGrunnlag.isPresent()) {
-            LocalDate date = medlemskapsvilkårPeriodeGrunnlag.get()
-                .getMedlemskapsvilkårPeriode()
+        LocalDate startDato = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
+        if (medlemskapsvilkåret.isPresent()) {
+            LocalDate date = medlemskapsvilkåret.get()
                 .getPerioder()
-                .stream().map(MedlemskapsvilkårPerioderEntitet::getFom)
+                .stream()
+                .map(VilkårPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getFomDato)
                 .max(LocalDate::compareTo)
-                .get();
+                .orElse(startDato);
 
             if (startDato.isBefore(date)) {
                 startDato = date;
@@ -258,8 +258,8 @@ public class MedlemTjeneste {
     }
 
     public Tuple<Utfall, Avslagsårsak> utledVilkårUtfall(Behandling revurdering) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.hent(revurdering.getId());
-        Optional<Vilkår> medlemOpt = behandlingsresultat.getVilkårResultat()
+        final var vilkårene = vilkårResultatRepository.hent(revurdering.getId());
+        Optional<Vilkår> medlemOpt = vilkårene
             .getVilkårene()
             .stream()
             .filter(vilkårType -> vilkårType.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET))

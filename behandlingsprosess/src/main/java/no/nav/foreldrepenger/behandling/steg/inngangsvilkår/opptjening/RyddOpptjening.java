@@ -7,11 +7,11 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.vedtak.konfig.Tid;
@@ -21,10 +21,12 @@ public class RyddOpptjening {
     private final OpptjeningRepository opptjeningRepository;
     private final BehandlingskontrollKontekst kontekst;
     private final BehandlingRepository behandlingRepository;
+    private final VilkårResultatRepository vilkårResultatRepository;
 
-    public RyddOpptjening(BehandlingRepository behandlingRepository, OpptjeningRepository opptjeningRepository, BehandlingskontrollKontekst kontekst) {
+    public RyddOpptjening(BehandlingRepository behandlingRepository, OpptjeningRepository opptjeningRepository, VilkårResultatRepository vilkårResultatRepository, BehandlingskontrollKontekst kontekst) {
         this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = behandlingRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.kontekst = kontekst;
     }
 
@@ -43,50 +45,47 @@ public class RyddOpptjening {
     }
 
     private Optional<Vilkår> ryddOppVilkårsvurderinger(Behandling behandling, LocalDate fom, LocalDate tom) {
-        VilkårResultat vilkårResultat = hentVilkårResultat(behandling);
-        if (vilkårResultat == null) {
+        Vilkårene vilkårene = hentVilkårResultat(behandling.getId());
+        if (vilkårene == null) {
             return Optional.empty();
         }
-        Optional<Vilkår> opptjeningVilkår = vilkårResultat.getVilkårene().stream()
+        Optional<Vilkår> opptjeningVilkår = vilkårene.getVilkårene().stream()
             .filter(vilkåret -> vilkåret.getVilkårType().equals(VilkårType.OPPTJENINGSVILKÅRET))
             .findFirst();
 
         if (opptjeningVilkår.isPresent()) {
-            VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+            VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
             final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
                 .medUtfall(IKKE_VURDERT));
             builder.leggTil(vilkårBuilder);
             final var nyttResultat = builder.build();
-            behandling.getBehandlingsresultat().medOppdatertVilkårResultat(nyttResultat);
-            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
         }
         return opptjeningVilkår;
     }
 
-    private VilkårResultat hentVilkårResultat(Behandling behandling) {
-        Optional<VilkårResultat> vilkårResultatOpt = Optional.ofNullable(behandling.getBehandlingsresultat())
-            .map(Behandlingsresultat::getVilkårResultat);
+    private Vilkårene hentVilkårResultat(Long behandlingId) {
+        Optional<Vilkårene> vilkårResultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         return vilkårResultatOpt.orElse(null);
     }
 
     private void tilbakestillOpptjenigsperiodevilkår(Behandling behandling) {
-        VilkårResultat vilkårResultat = hentVilkårResultat(behandling);
-        if (vilkårResultat == null) {
+        Vilkårene vilkårene = hentVilkårResultat(behandling.getId());
+        if (vilkårene == null) {
             return;
         }
-        Optional<Vilkår> opptjeningPeriodeVilkår = vilkårResultat.getVilkårene().stream()
+        Optional<Vilkår> opptjeningPeriodeVilkår = vilkårene.getVilkårene().stream()
             .filter(vilkåret -> vilkåret.getVilkårType().equals(VilkårType.OPPTJENINGSPERIODEVILKÅR))
             .findFirst();
         if (opptjeningPeriodeVilkår.isPresent()) {
-            VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+            VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
             final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSPERIODEVILKÅR);
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) må stille tilbake de periodene under vurdering
                 .medUtfall(IKKE_VURDERT));
             builder.leggTil(vilkårBuilder);
             final var nyttResultat = builder.build();
-            behandling.getBehandlingsresultat().medOppdatertVilkårResultat(nyttResultat);
-            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
         }
     }
 }

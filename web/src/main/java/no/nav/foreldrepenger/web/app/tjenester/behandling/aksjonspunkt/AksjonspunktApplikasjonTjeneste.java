@@ -4,7 +4,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonFeil.FACTORY;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,8 +50,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Skjermlenk
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -81,6 +81,7 @@ public class AksjonspunktApplikasjonTjeneste {
     private EndringsresultatSjekker endringsresultatSjekker;
 
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     public AksjonspunktApplikasjonTjeneste() {
         // CDI proxy
@@ -100,6 +101,7 @@ public class AksjonspunktApplikasjonTjeneste {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.endringsresultatSjekker = endringsresultatSjekker;
@@ -120,7 +122,6 @@ public class AksjonspunktApplikasjonTjeneste {
 
         historikkTjenesteAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
 
-        behandlingRepository.lagre(getBehandlingsresultat(behandling).getVilkårResultat(), kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
 
         håndterOverhopp(overhoppResultat, kontekst);
@@ -200,10 +201,6 @@ public class AksjonspunktApplikasjonTjeneste {
         } else {
             behandlingsprosessApplikasjonTjeneste.asynkKjørProsess(behandling);
         }
-    }
-
-    private boolean harVilkårResultat(Behandling behandling) {
-        return behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).map(Behandlingsresultat::getVilkårResultat).isPresent();
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
@@ -293,7 +290,7 @@ public class AksjonspunktApplikasjonTjeneste {
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(apDef);
         Aksjonspunkt aksjonspunkt = eksisterendeAksjonspunkt.orElseGet(() -> behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(apDef)).get(0));
 
-        if (totrinn && !AksjonspunktStatus.AVBRUTT.equals(nyStatus)  && aksjonspunktStøtterTotrinn(aksjonspunkt)) {
+        if (totrinn && !AksjonspunktStatus.AVBRUTT.equals(nyStatus) && aksjonspunktStøtterTotrinn(aksjonspunkt)) {
             aksjonspunktRepository.setToTrinnsBehandlingKreves(aksjonspunkt);
         }
         if (nyStatus.equals(aksjonspunkt.getStatus())) {
@@ -340,18 +337,15 @@ public class AksjonspunktApplikasjonTjeneste {
 
         OverhoppResultat overhoppResultat = OverhoppResultat.tomtResultat();
 
-        final var behandlingsresultat = getBehandlingsresultat(behandling);
-        VilkårResultatBuilder vilkårBuilder = harVilkårResultat(behandling)
-            ? VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat())
-            : VilkårResultat.builder();
+        final var vilkåreneOptional = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        VilkårResultatBuilder vilkårBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
 
         bekreftedeAksjonspunktDtoer
             .forEach(dto -> bekreftAksjonspunkt(kontekst, behandling, skjæringstidspunkter, vilkårBuilder, overhoppResultat, dto));
 
-        VilkårResultat vilkårResultat = vilkårBuilder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, kontekst.getSkriveLås());
+        Vilkårene vilkårene = vilkårBuilder.build();
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårene);
 
         boolean totrinn = overhoppResultat.finnTotrinn();
         overhoppResultat.finnEkstraAksjonspunktResultat().forEach(res -> håndterEkstraAksjonspunktResultat(kontekst, behandling, totrinn, res.getElement1(), res.getElement2()));

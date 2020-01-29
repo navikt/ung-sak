@@ -48,7 +48,7 @@ public class VilkårBuilderTest {
         assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getUtfall)).containsExactly(Utfall.IKKE_OPPFYLT, Utfall.IKKE_VURDERT);
         assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getGjeldendeUtfall)).containsExactly(Utfall.OPPFYLT, Utfall.IKKE_VURDERT);
 
-        final var oppdatertVilkårBuilder2 = new VilkårBuilder(vilkår);
+        final var oppdatertVilkårBuilder2 = new VilkårBuilder(oppdatertVilkår);
         final var oppdatertFørstePeriodeBuilder2 = oppdatertVilkårBuilder2.hentBuilderFor(førsteSkjæringstidspunkt, sluttFørstePeriode)
             .medUtfall(Utfall.OPPFYLT);
         oppdatertVilkårBuilder2.leggTil(oppdatertFørstePeriodeBuilder2);
@@ -59,7 +59,7 @@ public class VilkårBuilderTest {
         assertThat(oppdatertVilkår2.getPerioder()).hasSize(2);
 
         assertThat(oppdatertVilkår2.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getUtfall)).containsExactly(Utfall.OPPFYLT, Utfall.IKKE_VURDERT);
-        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getGjeldendeUtfall)).containsExactly(Utfall.OPPFYLT, Utfall.IKKE_VURDERT);
+        assertThat(oppdatertVilkår2.getPerioder().stream().map(VilkårPeriode::getUtfall)).containsExactly(Utfall.OPPFYLT, Utfall.IKKE_VURDERT);
+        assertThat(oppdatertVilkår2.getPerioder().stream().map(VilkårPeriode::getGjeldendeUtfall)).containsExactly(Utfall.OPPFYLT, Utfall.IKKE_VURDERT);
     }
 }

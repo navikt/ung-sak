@@ -78,7 +78,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     }
 
     private boolean vilkårErVurdert(RegelResultat regelResultat, LocalDate fom, LocalDate tom) {
-        final var berørtePerioder = regelResultat.getVilkårResultat()
+        final var berørtePerioder = regelResultat.getVilkårene()
             .getVilkårene()
             .stream()
             .filter(v -> v.getVilkårType().equals(OPPTJENINGSVILKÅRET))
@@ -93,7 +93,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType hoppesTilSteg, BehandlingStegType hoppesFraSteg) {
         super.vedHoppOverBakover(kontekst, modell, hoppesTilSteg, hoppesFraSteg);
         if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
-            new RyddOpptjening(behandlingRepository, opptjeningRepository, kontekst).ryddOppAktiviteter();
+            new RyddOpptjening(behandlingRepository, opptjeningRepository, repositoryProvider.getVilkårResultatRepository(), kontekst).ryddOppAktiviteter();
         }
     }
 
@@ -103,7 +103,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
         super.vedHoppOverFramover(kontekst, modell, hoppesFraSteg, hoppesTilSteg);
         if (!repositoryProvider.getBehandlingRepository().hentBehandling(kontekst.getBehandlingId()).erRevurdering()) {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
-                new RyddOpptjening(behandlingRepository, opptjeningRepository, kontekst).ryddOppAktiviteter();
+                new RyddOpptjening(behandlingRepository, opptjeningRepository, repositoryProvider.getVilkårResultatRepository(), kontekst).ryddOppAktiviteter();
             }
         }
     }

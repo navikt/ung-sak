@@ -29,6 +29,7 @@ import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("")
@@ -42,6 +43,7 @@ public class VilkårRestTjeneste {
     public static final String V2_PATH = "/behandling/vilkar-v2";
     public static final String FULL_V2_PATH = "/behandling/vilkar/full-v2";
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     public VilkårRestTjeneste() {
         // for CDI proxy
@@ -50,6 +52,7 @@ public class VilkårRestTjeneste {
     @Inject
     public VilkårRestTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.vilkårResultatRepository = behandlingRepositoryProvider.getVilkårResultatRepository();
     }
 
     @GET
@@ -74,7 +77,8 @@ public class VilkårRestTjeneste {
             ? behandlingRepository.hentBehandling(behandlingId)
             : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, false);
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+        List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, false, vilkårene);
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
         cc.setNoStore(true);
@@ -105,7 +109,8 @@ public class VilkårRestTjeneste {
             ? behandlingRepository.hentBehandling(behandlingId)
             : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, true);
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+        List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, true, vilkårene);
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
         cc.setNoStore(true);

@@ -9,22 +9,18 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
  */
 public class VilkårResultatBuilder {
 
-    private VilkårResultat kladd = new VilkårResultat();
+    private Vilkårene kladd = new Vilkårene();
     private boolean built;
 
     VilkårResultatBuilder() {
         super();
     }
 
-    VilkårResultatBuilder(VilkårResultat eksisterendeResultat) {
+    VilkårResultatBuilder(Vilkårene eksisterendeResultat) {
         super();
         if (eksisterendeResultat != null) {
             this.kladd = eksisterendeResultat;
         }
-    }
-
-    public static VilkårResultatBuilder kopi(VilkårResultat origVilkårResultat) {
-        return new VilkårResultatBuilder(new VilkårResultat(origVilkårResultat));
     }
 
     public VilkårResultatBuilder leggTilIkkeVurderteVilkår(List<DatoIntervallEntitet> intervaller, VilkårType... vilkår) {
@@ -46,10 +42,10 @@ public class VilkårResultatBuilder {
     /**
      * OBS: Returnerer alltid nytt vilkårresultat.
      */
-    public VilkårResultat build() {
+    public Vilkårene build() {
         if (built) throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
         built = true;
-        return kladd;
+        return new Vilkårene(kladd);
     }
 
     public VilkårResultatBuilder fjernVilkår(VilkårType vilkårType) {

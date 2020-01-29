@@ -333,7 +333,7 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
             iayScenario.lagreOpptjening(repositoryProvider, behandling);
         }
         // opprett og lagre resulater på behandling
-        lagreBehandlingsresultatOgVilkårResultat(repositoryProvider, lås);
+        lagreBehandlingsresultatOgVilkårResultat();
 
         repositoryProvider.getBehandlingRepository().lagre(behandling, lås);
     }
@@ -388,15 +388,13 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
     private NavBrukerKjønn getKjønnFraFagsak() {
         return fagsakBuilder.getBrukerBuilder().getKjønn() != null ? fagsakBuilder.getBrukerBuilder().getKjønn()
             : (RelasjonsRolleType.erMor(fagsakBuilder.getRolle()) || RelasjonsRolleType.erMedmor(fagsakBuilder.getRolle()) ? NavBrukerKjønn.KVINNE
-                : NavBrukerKjønn.MANN);
+            : NavBrukerKjønn.MANN);
     }
 
-    private void lagreBehandlingsresultatOgVilkårResultat(IAYRepositoryProvider repoProvider, BehandlingLås lås) {
+    private void lagreBehandlingsresultatOgVilkårResultat() {
         // opprett og lagre behandlingsresultat med VilkårResultat og BehandlingVedtak
-        Behandlingsresultat behandlingsresultat = (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
+        (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
             : behandlingresultatBuilder).buildFor(behandling);
-
-        repoProvider.getBehandlingRepository().lagre(behandlingsresultat.getVilkårResultat(), lås);
 
     }
 
@@ -431,7 +429,9 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
         return (S) this;
     }
 
-    /** @deprecated Skal ikke ha kjennskap til steg tilstand i denne modulen. */
+    /**
+     * @deprecated Skal ikke ha kjennskap til steg tilstand i denne modulen.
+     */
     @Deprecated
     @SuppressWarnings("unchecked")
     public S medBehandlingStegStart(BehandlingStegType startSteg) {

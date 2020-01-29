@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.inngangsvilkaar;
 
-import java.time.LocalDate;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -18,7 +16,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -27,7 +26,7 @@ import no.nav.vedtak.konfig.Tid;
 
 /**
  * Denne angir implementasjon som skal brukes for en gitt {@link VilkårType} slik at {@link Vilkår} og
- * {@link VilkårResultat} kan fastsettes.
+ * {@link Vilkårene} kan fastsettes.
  */
 @ApplicationScoped
 public class InngangsvilkårTjeneste {
@@ -35,6 +34,7 @@ public class InngangsvilkårTjeneste {
     private Instance<Inngangsvilkår> alleInngangsvilkår;
     private BehandlingRepository behandlingRepository;
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     InngangsvilkårTjeneste() {
         // for CDI proxy
@@ -45,6 +45,7 @@ public class InngangsvilkårTjeneste {
         this.alleInngangsvilkår = alleInngangsvilkår;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
     /**
@@ -86,9 +87,8 @@ public class InngangsvilkårTjeneste {
 
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        final var behandlingsresultat = getBehandlingsresultat(behandlingId);
-        VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
-        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
 
         final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
         builder.leggTil(vilkårBuilder
@@ -98,9 +98,8 @@ public class InngangsvilkårTjeneste {
             )
         );
         final var oppdatertVikårResultat = builder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(oppdatertVikårResultat);
-        behandlingRepository.lagre(oppdatertVikårResultat, kontekst.getSkriveLås());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        vilkårResultatRepository.lagre(behandlingId, oppdatertVikårResultat);
     }
 
     /**
@@ -110,9 +109,8 @@ public class InngangsvilkårTjeneste {
                                      BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        final var behandlingsresultat = getBehandlingsresultat(behandlingId);
-        VilkårResultat vilkårResultat = behandlingsresultat.getVilkårResultat();
-        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(vilkårResultat);
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
 
         Avslagsårsak avslagsårsak = finnAvslagsårsak(avslagsårsakKode, utfall);
         final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
@@ -120,14 +118,9 @@ public class InngangsvilkårTjeneste {
             .medUtfallOverstyrt(utfall)
             .medAvslagsårsak(avslagsårsak)));
 
-        VilkårResultat resultat = builder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(resultat);
-        behandlingRepository.lagre(resultat, kontekst.getSkriveLås());
+        Vilkårene oppdatertVikårResultat = builder.build();
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-    }
-
-    public Behandlingsresultat getBehandlingsresultat(Long behandlingId) {
-        return behandlingsresultatRepository.hent(behandlingId);
+        vilkårResultatRepository.lagre(behandlingId, oppdatertVikårResultat);
     }
 
     private Avslagsårsak finnAvslagsårsak(String avslagsÅrsakKode, Utfall utfall) {

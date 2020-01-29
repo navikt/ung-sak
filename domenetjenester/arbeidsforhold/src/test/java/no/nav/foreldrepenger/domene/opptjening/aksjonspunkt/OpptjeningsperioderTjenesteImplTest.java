@@ -21,7 +21,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
@@ -71,27 +72,22 @@ public class OpptjeningsperioderTjenesteImplTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
-    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
-
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
-
-    private OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-
     private final InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+    private final LocalDate skjæringstidspunkt = LocalDate.now();
+    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
+    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private final VirksomhetTjeneste virksomhetTjeneste = new VirksomhetTjeneste(null, repositoryProvider.getVirksomhetRepository());
+    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
+    private OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
     private final AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(
         opptjeningRepository, iayTjeneste, virksomhetTjeneste);
+    private VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(repoRule.getEntityManager());
     private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(
         repositoryProvider.getOpptjeningRepository(), iayTjeneste);
     private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(),
         aksjonspunktutlederForVurderOpptjening, apbOpptjening);
-
     private InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
     private AktørId AKTØRID = AktørId.dummy();
-    private final LocalDate skjæringstidspunkt = LocalDate.now();
 
     @Test
     public void skal_utlede_opptjening_aktivitet_periode_uten_overstyrt() {
@@ -409,11 +405,11 @@ public class OpptjeningsperioderTjenesteImplTest {
     private ArbeidsforholdInformasjonBuilder lagFiktivtArbeidsforholdOverstyring(LocalDate fraOgMed, LocalDate tilOgMed) {
         Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(OrgNummer.KUNSTIG_ORG);
         return ArbeidsforholdInformasjonBuilder.oppdatere(Optional.empty())
-                .leggTil(ArbeidsforholdOverstyringBuilder.oppdatere(Optional.empty())
-                    .medArbeidsgiver(arbeidsgiver)
-                    .medHandling(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER)
-                    .leggTilOverstyrtPeriode(fraOgMed, tilOgMed)
-                    .medAngittStillingsprosent(new Stillingsprosent(BigDecimal.valueOf(100))));
+            .leggTil(ArbeidsforholdOverstyringBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(arbeidsgiver)
+                .medHandling(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER)
+                .leggTilOverstyrtPeriode(fraOgMed, tilOgMed)
+                .medAngittStillingsprosent(new Stillingsprosent(BigDecimal.valueOf(100))));
     }
 
     private InntektArbeidYtelseAggregatBuilder lagFiktivtArbeidsforholdSaksbehandlet(DatoIntervallEntitet periode) {
@@ -482,11 +478,11 @@ public class OpptjeningsperioderTjenesteImplTest {
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         final Behandling behandling = builder.build();
-        final var behandlingsresultat = Behandlingsresultat.opprettFor(behandling);
-        final VilkårResultat nyttResultat = VilkårResultat.builder().build();
-        behandlingsresultat.medOppdatertVilkårResultat(nyttResultat);
+        Behandlingsresultat.opprettFor(behandling);
+        final Vilkårene nyttResultat = Vilkårene.builder().build();
+
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        behandlingRepository.lagre(nyttResultat, behandlingRepository.taSkriveLås(behandling));
+        vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
         return behandling;
     }
 

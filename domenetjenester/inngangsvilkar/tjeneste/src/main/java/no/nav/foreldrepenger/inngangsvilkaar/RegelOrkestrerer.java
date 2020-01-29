@@ -23,9 +23,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
@@ -33,20 +34,22 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 public class RegelOrkestrerer {
 
     private InngangsvilkårTjeneste inngangsvilkårTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     protected RegelOrkestrerer() {
         // For CDI
     }
 
     @Inject
-    public RegelOrkestrerer(InngangsvilkårTjeneste inngangsvilkårTjeneste) {
+    public RegelOrkestrerer(InngangsvilkårTjeneste inngangsvilkårTjeneste, VilkårResultatRepository vilkårResultatRepository) {
         this.inngangsvilkårTjeneste = inngangsvilkårTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, List<DatoIntervallEntitet> perioder) {
         Objects.requireNonNull(perioder, "Perioden som skal vurderes må være satt");
-        VilkårResultat vilkårResultat = inngangsvilkårTjeneste.getBehandlingsresultat(ref.getBehandlingId()).getVilkårResultat();
-        List<Vilkår> matchendeVilkårPåBehandling = vilkårResultat.getVilkårene().stream()
+        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        List<Vilkår> matchendeVilkårPåBehandling = vilkårene.getVilkårene().stream()
             .filter(v -> vilkårHåndtertAvSteg.contains(v.getVilkårType()))
             .collect(toList());
         validerMaksEttVilkår(matchendeVilkårPåBehandling);
@@ -54,7 +57,7 @@ public class RegelOrkestrerer {
         Vilkår vilkår = matchendeVilkårPåBehandling.isEmpty() ? null : matchendeVilkårPåBehandling.get(0);
         if (vilkår == null) {
             // Intet vilkår skal eksekveres i regelmotor
-            return new RegelResultat(vilkårResultat, emptyList(), emptyMap());
+            return new RegelResultat(vilkårene, emptyList(), emptyMap());
         }
 
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
@@ -71,14 +74,14 @@ public class RegelOrkestrerer {
             }
 
             // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
-            oppdaterBehandlingMedVilkårresultat(behandling, vilkårDataResultat);
+            vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårDataResultat, vilkårene);
             // Aksjonspunkter
             if (!erPeriodenOverstyrt(vilkår, periode)) {
                 aksjonspunktDefinisjoner.addAll(vilkårDataResultat.getApDefinisjoner());
             }
         }
 
-        return new RegelResultat(vilkårResultat, aksjonspunktDefinisjoner, ekstraResultater);
+        return new RegelResultat(vilkårene, aksjonspunktDefinisjoner, ekstraResultater);
     }
 
     private boolean erPeriodenOverstyrt(Vilkår vilkår, DatoIntervallEntitet periode) {
@@ -129,10 +132,8 @@ public class RegelOrkestrerer {
         return resultatType;
     }
 
-    private void oppdaterBehandlingMedVilkårresultat(Behandling behandling, VilkårData vilkårData) {
-        final var behandlingsresultat = inngangsvilkårTjeneste.getBehandlingsresultat(behandling.getId());
-
-        VilkårResultatBuilder builder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+    private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
 
         final var vilkårBuilder = builder.hentBuilderFor(vilkårData.getVilkårType());
         final var periode = vilkårData.getPeriode();
@@ -145,7 +146,6 @@ public class RegelOrkestrerer {
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
         builder.leggTil(vilkårBuilder);
 
-        final var resultat = builder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(resultat);
+        return builder.build();
     }
 }

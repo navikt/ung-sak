@@ -67,12 +67,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -92,7 +94,6 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
-import no.nav.vedtak.konfig.Tid;
 
 /**
  * Default test scenario builder for å definere opp testdata med enkle defaults.
@@ -182,6 +183,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         SøknadRepository søknadRepository = mockSøknadRepository();
         FagsakLåsRepository fagsakLåsRepository = mockFagsakLåsRepository();
         BehandlingsresultatRepository resultatRepository = mockBehandlingresultatRepository();
+        VilkårResultatRepository vilkårResultatRepository = mockVilkårResultatRepository();
 
         BehandlingLåsRepository behandlingLåsReposiory = mockBehandlingLåsRepository();
 
@@ -198,8 +200,35 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         when(repositoryProvider.getFagsakLåsRepository()).thenReturn(fagsakLåsRepository);
         when(repositoryProvider.getBehandlingLåsRepository()).thenReturn(behandlingLåsReposiory);
         when(repositoryProvider.getBehandlingsresultatRepository()).thenReturn(resultatRepository);
+        when(repositoryProvider.getVilkårResultatRepository()).thenReturn(vilkårResultatRepository);
 
         return behandlingRepository;
+    }
+
+    private VilkårResultatRepository mockVilkårResultatRepository() {
+        return new VilkårResultatRepository() {
+            private Map<Long, VilkårsResultat> entiteter = new HashMap<>();
+
+            @Override
+            public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
+                return Optional.ofNullable(entiteter.get(behandlingId)).map(VilkårsResultat::getVilkårene);
+            }
+
+            @Override
+            public void lagre(Long behandlingId, Vilkårene resultat) {
+                entiteter.put(behandlingId, new VilkårsResultat(behandlingId, resultat));
+            }
+
+            @Override
+            public Vilkårene hent(Long behandlingId) {
+                return Optional.ofNullable(entiteter.get(behandlingId)).map(VilkårsResultat::getVilkårene).orElseThrow();
+            }
+
+            @Override
+            public void kopier(Long fraBehandlingId, Long tilBehandlingId) {
+                entiteter.put(fraBehandlingId, new VilkårsResultat(tilBehandlingId, hent(tilBehandlingId)));
+            }
+        };
     }
 
     private BehandlingsresultatRepository mockBehandlingresultatRepository() {
@@ -745,8 +774,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             : behandlingresultatBuilder).buildFor(behandling);
         behandlingresultatBuilder = null; // resett
 
-        VilkårResultatBuilder inngangsvilkårBuilder = VilkårResultat
-            .builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+        VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
         vilkårTyper.forEach((vilkårType, vilkårUtfallType) -> {
             inngangsvilkårBuilder.leggTil(new VilkårBuilder().medType(vilkårType).leggTil(new VilkårPeriodeBuilder()
@@ -755,9 +783,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         });
 
         final var build = inngangsvilkårBuilder.build();
-        behandlingsresultat.medOppdatertVilkårResultat(build);
 
-        repoProvider.getBehandlingRepository().lagre(build, lås);
+        repoProvider.getVilkårResultatRepository().lagre(behandling.getId(), build);
 
         if (behandlingVedtakBuilder != null) {
             // Må lagre Behandling for at Behandlingsresultat ikke skal være transient når BehandlingVedtak blir lagret:

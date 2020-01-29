@@ -57,8 +57,8 @@ public class VurderOpptjeningsvilkårStegTest {
 
         // Act
         // opprett opptjening
-        new FastsettOpptjeningsperiodeSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste,
-            repositoryProvider.getBehandlingsresultatRepository())
+        new FastsettOpptjeningsperiodeSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste
+        )
                 .utførSteg(kontekst);
 
         // vurder vilkåret

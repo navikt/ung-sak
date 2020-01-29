@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,7 +38,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
@@ -51,7 +50,6 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
@@ -218,7 +216,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private void inngangsvilkårOgUttak(Behandling behandling, Utfall utfall) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
 
-        var vilkårsresultatBuilder = VilkårResultat.builder();
+        var vilkårsresultatBuilder = Vilkårene.builder();
         if (utfall.equals(Utfall.OPPFYLT)) {
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.OPPTJENINGSVILKÅRET, null);
             leggTilVilkårMedUtfall(utfall, vilkårsresultatBuilder, VilkårType.MEDLEMSKAPSVILKÅRET, null);
@@ -227,9 +225,8 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
         }
         final var vilkårResultat = vilkårsresultatBuilder.build();
-        behandling.getBehandlingsresultat().medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, lås);
         behandlingRepository.lagre(behandling, lås);
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårResultat);
         if (utfall.equals(Utfall.OPPFYLT)) {
             lagreUttak(behandling);
         }
@@ -259,11 +256,10 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
         final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
-        final var vilkårResultat = VilkårResultat.builder()
+        final var vilkårResultat = Vilkårene.builder()
             .leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(Utfall.IKKE_OPPFYLT)))
             .build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        behandlingRepository.lagre(vilkårResultat, behandlingRepository.taSkriveLås(behandling));
+        repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårResultat);
     }
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {

@@ -16,18 +16,14 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapsvilkårPeriodeEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapsvilkårPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.vedtak.konfig.Tid;
@@ -38,18 +34,16 @@ import no.nav.vedtak.konfig.Tid;
 @ApplicationScoped
 public class VurderLøpendeMedlemskapSteg implements BehandlingSteg {
 
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private VurderLøpendeMedlemskap vurderLøpendeMedlemskap;
-    private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository;
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     @Inject
     public VurderLøpendeMedlemskapSteg(VurderLøpendeMedlemskap vurderLøpendeMedlemskap,
                                        BehandlingRepositoryProvider provider) {
         this.vurderLøpendeMedlemskap = vurderLøpendeMedlemskap;
-        this.medlemskapVilkårPeriodeRepository = provider.getMedlemskapVilkårPeriodeRepository();
         this.behandlingRepository = provider.getBehandlingRepository();
-        this.behandlingsresultatRepository = provider.getBehandlingsresultatRepository();
+        this.vilkårResultatRepository = provider.getVilkårResultatRepository();
     }
 
     VurderLøpendeMedlemskapSteg() {
@@ -63,28 +57,15 @@ public class VurderLøpendeMedlemskapSteg implements BehandlingSteg {
         Map<LocalDate, VilkårData> vurderingsTilDataMap = vurderLøpendeMedlemskap.vurderLøpendeMedlemskap(behandlingId);
         if (!vurderingsTilDataMap.isEmpty()) {
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-            final var behandlingsresultat = behandling.getBehandlingsresultat();
-            VilkårResultatBuilder vilkårResultatBuilder = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+            final var vilkåreneFørVurdering = vilkårResultatRepository.hent(behandlingId);
+            VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkåreneFørVurdering);
 
             final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
             mapPerioderTilVilkårsPerioder(vilkårBuilder, vurderingsTilDataMap);
             vilkårResultatBuilder.leggTil(vilkårBuilder);
             BehandlingLås lås = kontekst.getSkriveLås();
             final var nyttResultat = vilkårResultatBuilder.build();
-            behandlingsresultat.medOppdatertVilkårResultat(nyttResultat);
-            behandlingRepository.lagre(nyttResultat, lås);
-
-            MedlemskapVilkårPeriodeGrunnlagEntitet.Builder builder = medlemskapVilkårPeriodeRepository.hentBuilderFor(behandling);
-            MedlemskapsvilkårPeriodeEntitet.Builder perioderBuilder = builder.getPeriodeBuilder();
-            vurderingsTilDataMap.forEach((vurderingsdato, vilkårData) -> {
-                MedlemskapsvilkårPerioderEntitet.Builder periodeBuilder = perioderBuilder.getBuilderForVurderingsdato(vurderingsdato);
-                periodeBuilder.medVurderingsdato(vurderingsdato);
-                periodeBuilder.medVilkårUtfall(vilkårData.getUtfallType());
-                Optional.ofNullable(vilkårData.getVilkårUtfallMerknad()).ifPresent(periodeBuilder::medVilkårUtfallMerknad);
-                perioderBuilder.leggTil(periodeBuilder);
-            });
-            builder.medMedlemskapsvilkårPeriode(perioderBuilder);
-            medlemskapVilkårPeriodeRepository.lagreMedlemskapsvilkår(behandling, builder);
+            vilkårResultatRepository.lagre(behandlingId, nyttResultat);
 
             behandlingRepository.lagre(behandling, lås);
         }

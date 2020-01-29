@@ -17,15 +17,11 @@ import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapVilkårPeriodeRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapsvilkårPeriodeEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapsvilkårPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
@@ -39,6 +35,7 @@ import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
 @RunWith(CdiRunner.class)
@@ -47,9 +44,9 @@ public class MedlemskapTjenesteImplTest {
     @Rule
     public UnittestRepositoryRule rule = new UnittestRepositoryRule();
     private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(rule.getEntityManager());
-    private MedlemskapVilkårPeriodeRepository medlemskapVilkårPeriodeRepository = provider.getMedlemskapVilkårPeriodeRepository();
     private FagsakRepository fagsakRepository = new FagsakRepository(rule.getEntityManager());
     private BehandlingRepository behandlingRepository = provider.getBehandlingRepository();
+    private VilkårResultatRepository vilkårResultatRepository = provider.getVilkårResultatRepository();
 
     @Inject
     private MedlemTjeneste tjeneste;
@@ -61,24 +58,13 @@ public class MedlemskapTjenesteImplTest {
         Tuple<Behandling, Behandlingsresultat> tuple = lagBehandling();
         LocalDate now = LocalDate.now();
         Behandling behandling = tuple.getElement1();
-        Behandlingsresultat behandlingsresultat = tuple.getElement2();
 
-        VilkårResultatBuilder vilkår = VilkårResultat.builderFraEksisterende(behandlingsresultat.getVilkårResultat());
+        VilkårResultatBuilder vilkår = Vilkårene.builder();
         final var vilkårBuilder = vilkår.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(now, LocalDate.MAX).medUtfall(Utfall.IKKE_OPPFYLT).medUtfallOverstyrt(Utfall.OPPFYLT));
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(now, Tid.TIDENES_ENDE).medUtfall(Utfall.IKKE_OPPFYLT));
 
-        VilkårResultat vilkårResultat = vilkår.build();
-        behandlingsresultat.medOppdatertVilkårResultat(vilkårResultat);
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(vilkårResultat, lås);
-
-        MedlemskapVilkårPeriodeGrunnlagEntitet.Builder grBuilder = medlemskapVilkårPeriodeRepository.hentBuilderFor(behandling);
-        MedlemskapsvilkårPeriodeEntitet.Builder builder = grBuilder.getPeriodeBuilder();
-        MedlemskapsvilkårPerioderEntitet.Builder periode = builder.getBuilderForVurderingsdato(now);
-        periode.medVilkårUtfall(Utfall.IKKE_OPPFYLT);
-        builder.leggTil(periode);
-        grBuilder.medMedlemskapsvilkårPeriode(builder);
-        medlemskapVilkårPeriodeRepository.lagreMedlemskapsvilkår(behandling, grBuilder);
+        Vilkårene vilkårene = vilkår.build();
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårene);
 
         // Act
         Optional<LocalDate> localDate = tjeneste.hentOpphørsdatoHvisEksisterer(behandling);
@@ -106,7 +92,6 @@ public class MedlemskapTjenesteImplTest {
         behandlingRepository.lagre(behandling, lås);
         Behandlingsresultat.Builder behandlingsresultatBuilder = Behandlingsresultat.builderForInngangsvilkår();
         Behandlingsresultat behandlingsresultat = behandlingsresultatBuilder.buildFor(behandling);
-        behandlingRepository.lagre(behandlingsresultat.getVilkårResultat(), lås);
         behandlingRepository.lagre(behandling, lås);
         return new Tuple<>(behandling, behandlingsresultat);
     }
