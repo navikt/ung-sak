@@ -1,0 +1,191 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: k9-sak
+  namespace: default
+  labels:
+    team: k9saksbehandling
+spec:
+  image: {{ image }}
+  port: 8080
+  liveness:
+    path: /sak/internal/health/isAlive
+    initialDelay: 30
+    timeout: 5
+    periodSeconds: 10
+    failureThreshold: 27
+    # nais will try failureThreshold times before giving up and restarting the Pod
+    # Defaults to 3
+  readiness:
+    path: /sak/internal/health/isReady
+    initialDelay: 30
+    timeout: 5
+    periodSeconds: 10
+    failureThreshold: 27
+  replicas:
+    min: 2
+    max: 3
+    cpuThresholdPercentage: 80
+  prometheus:
+    enabled: true
+    path: /sak/internal/metrics/prometheus
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "2048Mi"
+    requests:
+      cpu: "200m"
+      memory: "1024Mi"
+  ingresses:
+    - "https://k9-sak.nais.preprod.local/"
+  vault:
+    enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/serviceuser
+        kvPath: /serviceuser/data/dev/srvk9sak
+  sidecar: true
+  env:
+    - name: TZ
+      value: "Europe/Oslo"
+    - name: APP_NAME
+      value: "K9SAK"
+    
+    - name: DEFAULTDS_USERNAME
+      value: k9-sak
+    - name: DEFAULTDS_URL
+      value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-sak
+
+    # Appdynamics
+#    - name: APPDYNAMICS_CONTROLLER_HOST_NAME
+#      value: appdynamics.adeo.no
+#    - name: APPDYNAMICS_CONTROLLER_PORT
+#      value: "443"
+#    - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
+#      value: "true"
+#    - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
+#      value: NON-PROD
+
+    #LOADBALANCER_URL=http://localhost:9000
+
+    - name: OPENIDCONNECT_ISSOHOST
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OPENIDCONNECT_ISSOISSUER
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OPENIDCONNECT_ISSOJWKS
+      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
+    - name: OPENIDCONNECT_USERNAME
+      value: k9-sak-q1
+
+    # Integrasjoner (Kafka)
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
+      value: privat-k9-aksjonspunkthendelse-q1
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_CLIENT_ID
+      value: KP-privat-k9-aksjonspunkthendelse-q1
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais.preprod.local
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_GROUP_ID
+      value: KC-privat-k9-aksjonspunkthendelse-q1
+    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
+      value: privat-k9-historikkinnslag-q1
+    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
+      value: privat-k9-risk-utfor-q1
+    - name: KAFKA_RISIKOKLASSIFISERING_CLIENT_ID
+      value: KP-privat-k9-risk-utfor-q1
+    - name: KAFKA_RISIKOKLASSIFISERING_SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais.preprod.local
+    - name: KAFKA_RISIKOKLASSIFISERING_GROUP_ID
+      value: KC-privat-k9-risk-utfor-q1
+    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
+      value: privat-k9-kontroll-resultat-q1
+    - name: KAFKA_KONTROLL_RESULTAT_CLIENT_ID
+      value: KP-privat-k9-kontroll-resultat-q1
+    - name: KAFKA_KONTROLL_RESULTAT_SCHEMA_REGISTRY_URL
+      value: https://kafka-test-schema-registry.nais.preprod.local
+    - name: KAFKA_KONTROLL_RESULTAT_GROUP_ID
+      value: KC-privat-k9-kontroll-resultat-q1
+    - name: KAFKA_DOKUMENTBESTILLING_TOPIC
+      value: privat-k9-dokumenthendelse-q1
+    - name: KAFKA_DOKUMENTBESTILLING_CLIENT_ID
+      value: KP-privat-k9-dokumenthendelse-q1
+    - name: SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais.preprod.local
+
+    # Baseurl
+    - name: BOOTSTRAP_SERVERS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    - name: FP_TILKJENTYTELSE_V1_TOPIC_URL
+      value: privat-k9-tilkjentytelse-v1-q1
+
+    # Loadbalancerconfig
+    - name: LOADBALANCER_FQDN
+      value: k9-sak.nais.preprod.local
+
+    # LDAP
+    - name: LDAP_URL
+      value: ldaps://ldapgw.preprod.local
+    - name: LDAP_BASEDN
+      value: "dc=preprod,dc=local"
+    - name: LDAP_DOMAIN
+      value: "PREPROD.LOCAL"
+    - name: LDAP_USER_BASEDN
+      value: "ou=NAV,ou=BusinessUnits,dc=preprod,dc=local"
+    - name: LDAP_SERVICEUSER_BASEDN
+      value: "ou=ServiceAccounts,dc=preprod,dc=local"
+
+    # Restservice
+    - name: INFOTRYGD_HENDELSER_API_URL
+      value: https://infotrygd-hendelser-api-q1.nais.preprod.local/infotrygd/hendelser
+    - name: FPABAKUS_URL
+      value: http://fpabakus/fpabakus
+    - name: ABAC_PDP_ENDPOINT_URL
+      value: https://wasapp-q1.adeo.no/asm-pdp/authorize
+    - name: FPFORMIDLING_ERDOKUMENTPRODUSERT_URL
+      value: http://k9-formidling/k9-formidling/api/brev/dokument-sendt
+    - name: FPFORMIDLING_BESTILLBREV_URL
+      value: http://k9-formidling/k9-formidling/api/brev/bestill
+    - name: FPFORMIDLING_HENTBREVMALER_URL
+      value: http://k9-formidling/k9-formidling/api/brev/maler
+    - name: FPFORMIDLING_LAGRESAKSBEHANDLERTEKST_URL
+      value: http://k9-formidling/k9-formidling/api/saksbehandlertekst/lagre-saksbehandler-tekst
+    - name: FPFORMIDLING_HENTSAKSBEHANDLERTEKST_URL
+      value: http://k9-formidling/k9-formidling/api/saksbehandlertekst/hent-saksbehandler-tekst
+    - name: FPOPPDRAG_SIMULERINGRESULTAT_URL
+      value: https://k9-oppdrag.nais.preprod.local/oppdrag/api/simulering/resultat
+
+    # Web services
+    - name: AKTOER_V2_URL
+      value: https://app-q1.adeo.no/aktoerregister/ws/Aktoer/v2
+    - name: PERSON_V3_URL
+      value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
+    - name: JOURNAL_V3_URL
+      value: https://dokarkiv-q1.nais.preprod.local/services/journal/v3
+    - name: INNGAAENDEJOURNAL_V1_URL
+      value: https://dokarkiv-q1.nais.preprod.local/services/inngaaendejournal/v1
+    - name: DOKUMENTPRODUKSJON_V2_URL
+      value: https://dokprod-q1.nais.preprod.local/dokprod/ws/dokumentproduksjon/v2
+    - name: BEHANDLESAK_V2_URL
+      value: https://wasapp-q1.adeo.no/nav-gsak-ws/BehandleSakV2
+    - name: SAK_V1_URL
+      value: https://wasapp-q1.adeo.no/nav-gsak-ws/SakV1
+    - name: BEHANDLEOPPGAVE_V1_URL
+      value: https://wasapp-q1.adeo.no/nav-gsak-ws/BehandleOppgaveV1
+    - name: OPPGAVE_V3_URL
+      value: https://wasapp-q1.adeo.no/nav-gsak-ws/OppgaveV3    
+    - name: ORGANISASJON_V4_URL
+      value: https://modapp-q1.adeo.no/ereg/ws/OrganisasjonService/v4
+    - name: MEDLEM_V2_URL
+      value: https://app-q1.adeo.no/medl2/ws/Medlemskap/v2
+    - name: ARBEIDSFORDELING_V1_URL
+      value: https://app-q1.adeo.no/norg2/ws/Arbeidsfordeling/v1
+    - name: KODEVERK_V2_URL
+      value: https://kodeverk.nais.preprod.local/ws/kodeverk/v2
+
+
+    # Sikkerhet:
+    - name: OIDC_STS_ISSUER_URL
+      value: https://security-token-service.nais.preprod.local
+    - name: OIDC_STS_JWKS_URL
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/jwks
+    - name: SECURITYTOKENSERVICE_URL
+      value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
+
