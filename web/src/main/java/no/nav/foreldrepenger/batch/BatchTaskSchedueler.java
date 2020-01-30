@@ -41,7 +41,7 @@ public class BatchTaskSchedueler implements AppServiceHandler {
         Map<ProsessTaskType, ProsessTaskEntitet> statusForBatchTasks = taskRepository.finnStatusForBatchTasks();
         statusForBatchTasks.entrySet()
             .stream()
-            .filter(entry -> entry.getValue() == null)
+            .filter(entry -> (entry.getValue() == null) || ProsessTaskStatus.FERDIG.equals(entry.getValue().getStatus()))
             .forEach(this::opprettTaskForType);
 
         statusForBatchTasks.entrySet()
