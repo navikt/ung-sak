@@ -8,7 +8,7 @@ env:
   IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/k9-sak
 jobs:
   build:
-
+    name: Bygg & deploy
     runs-on: ubuntu-latest
 
     services:
