@@ -45,6 +45,9 @@ class VilkårDtoMapper {
 
     // Angir om vilkåret kan overstyres (forutsetter at bruker har tilgang til å overstyre)
     private static boolean erOverstyrbar(@SuppressWarnings("unused") Vilkår vilkår, Behandling behandling) {
-        return behandling.erÅpnetForEndring();
+        if (behandling.erÅpnetForEndring()) {
+            return true;
+        }
+        return !behandling.erAvsluttet();
     }
 }
