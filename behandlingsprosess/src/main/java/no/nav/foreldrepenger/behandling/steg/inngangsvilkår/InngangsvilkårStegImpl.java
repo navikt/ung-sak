@@ -16,34 +16,29 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
-import no.nav.vedtak.konfig.Tid;
 
 public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
-    private InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
+    protected InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
     private BehandlingRepositoryProvider repositoryProvider;
     private BehandlingStegType behandlingStegType;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     public InngangsvilkårStegImpl(BehandlingRepositoryProvider repositoryProvider, InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste, BehandlingStegType behandlingStegType) {
         this.repositoryProvider = repositoryProvider;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.inngangsvilkårFellesTjeneste = inngangsvilkårFellesTjeneste;
         this.behandlingStegType = behandlingStegType;
@@ -128,12 +123,16 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType hoppesTilSteg,
                                    BehandlingStegType hoppesFraSteg) {
-        if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) { // Fixme (k9) - Periodene som er knyttet til søknaden
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
-            ryddVilkårTyper.ryddVedTilbakeføring(vilkårHåndtertAvSteg());
-            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        }
+        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(kontekst.getBehandlingId());
+        perioder.forEach(periode -> {
+            if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
+                Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+                RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
+                ryddVilkårTyper.ryddVedTilbakeføring(vilkårHåndtertAvSteg());
+                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            }
+        });
+
     }
 
     @Override
@@ -151,7 +150,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
                 .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
                 .map(Vilkår::getPerioder)
                 .flatMap(Collection::stream)
-                .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))) // FIXME (k9) : Er det rett med overlapper her? Bør kanskje hente ut perioden direkte med fom tom som key
+                .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
                 .anyMatch(VilkårPeriode::getErOverstyrt);
         }
         return false;
@@ -159,20 +158,8 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
     @Override
     public List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
-        Optional<Vilkårene> resultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        if (resultatOpt.isPresent()) {
-            Vilkårene vilkårene = resultatOpt.get();
-            return vilkårene.getVilkårene()
-                .stream()
-                .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
-                .map(Vilkår::getPerioder)
-                .flatMap(Collection::stream)
-                .filter(vp -> Utfall.IKKE_VURDERT.equals(vp.getGjeldendeUtfall()))
-                .filter(vp -> !erVilkårOverstyrt(behandlingId, vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()))
-                .map(VilkårPeriode::getPeriode)
-                .collect(Collectors.toList());
-        }
-        return List.of();
+        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(behandlingId);
+        return new ArrayList<>(perioder);
     }
 
 }

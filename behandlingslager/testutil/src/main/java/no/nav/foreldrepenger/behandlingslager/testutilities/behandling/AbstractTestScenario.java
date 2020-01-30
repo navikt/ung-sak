@@ -326,11 +326,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             }
 
             @Override
-            public SøknadEntitet hentFørstegangsSøknad(Behandling behandling) {
-                return søknad;
-            }
-
-            @Override
             public SøknadEntitet hentSøknad(Long behandlingId) {
                 return søknad;
             }

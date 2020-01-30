@@ -26,9 +26,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadVedleggE
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
-import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
-import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.MottattDokumentOversetter;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.NamespaceRef;
@@ -59,10 +56,7 @@ public class MottattDokumentOversetterSøknad implements MottattDokumentOversett
     }
 
     @Inject
-    public MottattDokumentOversetterSøknad(BehandlingRepositoryProvider repositoryProvider,
-                                           VirksomhetTjeneste virksomhetTjeneste,
-                                           InntektArbeidYtelseTjeneste iayTjeneste,
-                                           TpsTjeneste tpsTjeneste) {
+    public MottattDokumentOversetterSøknad(BehandlingRepositoryProvider repositoryProvider) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();

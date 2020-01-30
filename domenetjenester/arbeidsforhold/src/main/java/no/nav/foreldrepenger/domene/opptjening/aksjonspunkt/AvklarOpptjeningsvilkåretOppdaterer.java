@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.domene.opptjening.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -70,24 +71,25 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
+        final var fom = Tid.TIDENES_BEGYNNELSE; // FIXME (k9) : legge inn faktiske perioder fra dto
+        final var tom = Tid.TIDENES_ENDE;
         if (nyttUtfall.equals(Utfall.OPPFYLT)) {
             sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId());
-            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås());
+            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), fom, tom);
 
             return OppdateringResultat.utenOveropp();
         } else {
 
-            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås());
+            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), fom, tom);
 
             return OppdateringResultat.medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR);
         }
     }
 
-    private void oppdaterUtfallOgLagre(Behandling behandling, Vilkårene vilkårene, Utfall utfallType, BehandlingLås skriveLås) {
+    private void oppdaterUtfallOgLagre(Behandling behandling, Vilkårene vilkårene, Utfall utfallType, BehandlingLås skriveLås, LocalDate fom, LocalDate tom) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
-        // FIXME (k9) : legge inn faktiske perioder fra dto
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfall(utfallType)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
         builder.leggTil(vilkårBuilder);

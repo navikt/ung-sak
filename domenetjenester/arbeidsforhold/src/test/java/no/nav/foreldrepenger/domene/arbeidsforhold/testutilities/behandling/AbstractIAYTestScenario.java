@@ -160,11 +160,6 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
             }
 
             @Override
-            public SøknadEntitet hentFørstegangsSøknad(Behandling behandling) {
-                return søknad;
-            }
-
-            @Override
             public SøknadEntitet hentSøknad(Long behandlingId) {
                 return søknad;
             }

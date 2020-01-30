@@ -1,5 +1,10 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
+import java.util.Optional;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.behandlingslager.aktør.BrukerTjeneste;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
@@ -13,11 +18,8 @@ import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad.PleiepengerBarnSoknadPersister;
 import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import java.util.Optional;
 
 @Dependent
 public class DokumentmottakerPleiepengerBarnSoknad {

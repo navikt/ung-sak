@@ -10,7 +10,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingSteg;
@@ -35,8 +34,8 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.historikk.OppgaveÅrsak;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.DefaultVilkårUtleder;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.UtledeteVilkår;
+import no.nav.foreldrepenger.inngangsvilkaar.perioder.PerioderTilVurderingTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(kode = "VURDER_UTLAND")
 @BehandlingTypeRef
@@ -46,9 +45,9 @@ public class VurderUtlandSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private OppgaveTjeneste oppgaveTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
+    private PerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     VurderUtlandSteg() {
         // for CDI proxy
@@ -56,14 +55,14 @@ public class VurderUtlandSteg implements BehandlingSteg {
 
     @Inject
     public VurderUtlandSteg(BehandlingRepositoryProvider provider, // NOSONAR
+                            PerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                             OppgaveTjeneste oppgaveTjeneste,
-                            InntektArbeidYtelseTjeneste iayTjeneste,
-                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {// NOSONAR
+                            InntektArbeidYtelseTjeneste iayTjeneste) {
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     @Override
@@ -109,8 +108,8 @@ public class VurderUtlandSteg implements BehandlingSteg {
     }
 
     private List<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId) {
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        return List.of(DatoIntervallEntitet.fraOgMed(skjæringstidspunkter.getUtledetSkjæringstidspunkt())); // FIXME (k9) - Søknadsperioder som skal vurderes
+        final var perioder = perioderTilVurderingTjeneste.utled(behandlingId);
+        return new ArrayList<>(perioder);
     }
 
     private boolean harOppgittUtenlandskInntekt(Long behandlingId) {

@@ -1,48 +1,63 @@
-package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
+package no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
-import no.nav.foreldrepenger.domene.iay.modell.*;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
-import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.søknad.v3.MottattDokumentWrapperSøknad;
-import no.nav.k9.soknad.felles.Spraak;
-import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.xml.soeknad.felles.v3.Periode;
-import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.*;
-import no.nav.vedtak.felles.xml.soeknad.kodeverk.v3.AnnenOpptjeningTyper;
-import no.nav.vedtak.felles.xml.soeknad.kodeverk.v3.Virksomhetstyper;
-import no.nav.vedtak.felles.xml.soeknad.svangerskapspenger.v1.Svangerskapspenger;
-import no.nav.vedtak.felles.xml.soeknad.uttak.v3.Person;
-import no.nav.vedtak.konfig.Tid;
+import static java.util.Objects.nonNull;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
+import no.nav.foreldrepenger.domene.iay.modell.OppgittAnnenAktivitet;
+import no.nav.foreldrepenger.domene.iay.modell.OppgittFrilans;
+import no.nav.foreldrepenger.domene.iay.modell.OppgittFrilansoppdrag;
+import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.foreldrepenger.domene.iay.modell.OppgittUtenlandskVirksomhet;
+import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
+import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
+import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.søknad.v3.MottattDokumentWrapperSøknad;
+import no.nav.k9.soknad.felles.Spraak;
+import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
+import no.nav.vedtak.felles.xml.soeknad.felles.v3.Periode;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.AnnenOpptjening;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.EgenNaering;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.Foreldrepenger;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.Frilans;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.NorskOrganisasjon;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.Opptjening;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.Regnskapsfoerer;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.UtenlandskArbeidsforhold;
+import no.nav.vedtak.felles.xml.soeknad.foreldrepenger.v3.UtenlandskOrganisasjon;
+import no.nav.vedtak.felles.xml.soeknad.kodeverk.v3.AnnenOpptjeningTyper;
+import no.nav.vedtak.felles.xml.soeknad.kodeverk.v3.Virksomhetstyper;
+import no.nav.vedtak.felles.xml.soeknad.svangerskapspenger.v1.Svangerskapspenger;
+import no.nav.vedtak.felles.xml.soeknad.uttak.v3.Person;
+import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 public class PleiepengerBarnSoknadPersister {
@@ -50,9 +65,9 @@ public class PleiepengerBarnSoknadPersister {
     private VirksomhetTjeneste virksomhetTjeneste;
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
+    private FordelingRepository fordelingRepository;
     private TpsTjeneste tpsTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private FagsakRepository fagsakRepository;
 
     PleiepengerBarnSoknadPersister() {
         // for CDI proxy
@@ -62,13 +77,14 @@ public class PleiepengerBarnSoknadPersister {
     public PleiepengerBarnSoknadPersister(BehandlingRepositoryProvider repositoryProvider,
                                           VirksomhetTjeneste virksomhetTjeneste,
                                           InntektArbeidYtelseTjeneste iayTjeneste,
+                                          FordelingRepository fordelingRepository,
                                           TpsTjeneste tpsTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.virksomhetTjeneste = virksomhetTjeneste;
+        this.fordelingRepository = fordelingRepository;
         this.tpsTjeneste = tpsTjeneste;
-        this.fagsakRepository = repositoryProvider.getFagsakRepository();
     }
 
     //@Override
@@ -82,9 +98,9 @@ public class PleiepengerBarnSoknadPersister {
             .medSøknadsdato(soknad.getMottattDato().toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
             .medSpråkkode(getSpraakValg(soknad.getSoker().getSpraakValg()));
 
-            // Utgår for K9-ytelsene?
-            //.medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
-            //.medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
+        // Utgår for K9-ytelsene?
+        //.medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
+        //.medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
 
         final Long behandlingId = behandling.getId();
 
@@ -100,20 +116,19 @@ public class PleiepengerBarnSoknadPersister {
         // TODO:
         //byggOpptjeningsspesifikkeFelter(wrapper, behandlingId);
 
+        final Set<FordelingPeriode> perioder = mapTilPerioder(soknad);
+        final var fordeling = new Fordeling(perioder);
+        fordelingRepository.lagreOgFlush(behandling, fordeling);
+
         //final RelasjonsRolleType relasjonsRolleType = utledRolle(wrapper.getBruker(), behandlingId,  behandling.getAktørId());
         final SøknadEntitet søknadEntitet = søknadBuilder
-            //.medRelasjonsRolleType(relasjonsRolleType)
             .build();
         søknadRepository.lagreOgFlush(behandling, søknadEntitet);
         //fagsakRepository.oppdaterRelasjonsRolle(behandling.getFagsakId(), søknadEntitet.getRelasjonsRolleType());
     }
 
-    private boolean erKvinne(NavBrukerKjønn kjønn) {
-        return NavBrukerKjønn.KVINNE.equals(kjønn);
-    }
-
-    private boolean erMann(NavBrukerKjønn kjønn) {
-        return NavBrukerKjønn.MANN.equals(kjønn);
+    private Set<FordelingPeriode> mapTilPerioder(PleiepengerBarnSoknad soknad) {
+        return Set.of(new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(soknad.getPeriode().getFraOgMed(), soknad.getPeriode().getTilOgMed())));
     }
 
     private void byggOpptjeningsspesifikkeFelter(MottattDokumentWrapperSøknad skjemaWrapper, Long behandlingId) {

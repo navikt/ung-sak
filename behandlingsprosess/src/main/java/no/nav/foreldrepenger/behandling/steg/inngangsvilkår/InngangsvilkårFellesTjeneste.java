@@ -13,11 +13,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelOrkestrerer;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
+import no.nav.foreldrepenger.inngangsvilkaar.perioder.PerioderTilVurderingTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @ApplicationScoped
 public class InngangsvilkårFellesTjeneste  {
     private RegelOrkestrerer regelOrkestrerer;
+    private PerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     InngangsvilkårFellesTjeneste() {
@@ -25,9 +27,10 @@ public class InngangsvilkårFellesTjeneste  {
     }
 
     @Inject
-    public InngangsvilkårFellesTjeneste(RegelOrkestrerer regelOrkestrerer, SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+    public InngangsvilkårFellesTjeneste(RegelOrkestrerer regelOrkestrerer, SkjæringstidspunktTjeneste skjæringstidspunktTjeneste, PerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.regelOrkestrerer = regelOrkestrerer;
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
     RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, List<DatoIntervallEntitet> intervaller) {
@@ -36,5 +39,9 @@ public class InngangsvilkårFellesTjeneste  {
 
     Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId) {
         return skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+    }
+
+    public Set<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId) {
+        return perioderTilVurderingTjeneste.utled(behandlingId);
     }
 }

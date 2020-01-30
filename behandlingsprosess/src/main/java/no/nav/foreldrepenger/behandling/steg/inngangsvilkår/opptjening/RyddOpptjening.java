@@ -10,10 +10,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.vedtak.konfig.Tid;
 
 public class RyddOpptjening {
@@ -39,9 +39,9 @@ public class RyddOpptjening {
         }
     }
 
-    public void ryddOppAktiviteter() {
+    public void ryddOppAktiviteter(LocalDate fomDato, LocalDate tomDato) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        ryddOppVilkårsvurderinger(behandling, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+        ryddOppVilkårsvurderinger(behandling, fomDato, tomDato);
     }
 
     private Optional<Vilkår> ryddOppVilkårsvurderinger(Behandling behandling, LocalDate fom, LocalDate tom) {
