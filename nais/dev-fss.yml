@@ -23,19 +23,19 @@ spec:
     periodSeconds: 10
     failureThreshold: 27
   replicas:
-    min: 4
-    max: 6
+    min: 2
+    max: 3
     cpuThresholdPercentage: 80
   prometheus:
     enabled: true
     path: /sak/internal/metrics/prometheus
   resources:
     limits:
-      cpu: "4000m"
-      memory: "3072Mi"
-    requests:
       cpu: "500m"
       memory: "2048Mi"
+    requests:
+      cpu: "200m"
+      memory: "1024Mi"
   ingresses:
     - "https://k9-sak.nais.preprod.local/"
   vault:
