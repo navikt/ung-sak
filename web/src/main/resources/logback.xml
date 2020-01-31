@@ -55,6 +55,7 @@
     <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
     <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}" />
+    <logger name="no.nav.vault.jdbc.hikaricp" level="${no.nav.vault.jdbc.hikaricp:-WARN}" />
     <logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}" />
     <logger name="org.apache" level="${log.level.org.apache:-ERROR}" />
         <!-- ESSV: genererer en del støy for webservice -->
