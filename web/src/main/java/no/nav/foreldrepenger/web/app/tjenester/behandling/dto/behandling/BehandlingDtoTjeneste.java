@@ -326,7 +326,7 @@ public class BehandlingDtoTjeneste {
         // fpoppdrag.override.proxy.url brukes ved testing lokalt
         BehandlingIdDto idDto = new BehandlingIdDto(behandling.getId());
         String fpoppdragOverrideUrl = PropertyUtil.getProperty("fpoppdrag.override.proxy.url");
-        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/k9-oppdrag/api";
+        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/oppdrag/api";
         return Optional.of(ResourceLink.post(baseUurl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", idDto));
     }
 
