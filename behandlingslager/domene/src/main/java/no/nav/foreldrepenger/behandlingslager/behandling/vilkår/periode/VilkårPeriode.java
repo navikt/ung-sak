@@ -230,14 +230,17 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         if (o == null || getClass() != o.getClass()) return false;
         VilkårPeriode that = (VilkårPeriode) o;
         return manueltVurdert == that.manueltVurdert &&
-            Objects.equals(periode, that.periode) &&
             utfall == that.utfall &&
+            Objects.equals(begrunnelse, that.begrunnelse) &&
+            avslagsårsak == that.avslagsårsak &&
+            utfallMerknad == that.utfallMerknad &&
+            merknadParametere == that.merknadParametere &&
             overstyrtUtfall == that.overstyrtUtfall;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(manueltVurdert, periode, utfall, overstyrtUtfall);
+        return Objects.hash(manueltVurdert, utfall, begrunnelse, avslagsårsak, utfallMerknad, merknadParametere, overstyrtUtfall);
     }
 
     @Override

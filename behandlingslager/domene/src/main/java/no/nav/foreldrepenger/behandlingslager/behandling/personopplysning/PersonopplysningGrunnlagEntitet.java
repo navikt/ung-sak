@@ -11,12 +11,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 
 @Entity(name = "PersonopplysningGrunnlagEntitet")
 @Table(name = "GR_PERSONOPPLYSNING")
@@ -46,9 +44,6 @@ public class PersonopplysningGrunnlagEntitet extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    @Transient
-    private AktørId aktørId;
-
     PersonopplysningGrunnlagEntitet() {
     }
 
@@ -68,10 +63,6 @@ public class PersonopplysningGrunnlagEntitet extends BaseEntitet {
 
     public Long getId() {
         return id;
-    }
-
-    Long getBehandlingId() {
-        return behandlingId;
     }
 
     void setAktiv(final boolean aktiv) {
@@ -138,9 +129,5 @@ public class PersonopplysningGrunnlagEntitet extends BaseEntitet {
         sb.append(", overstyrtePersonopplysninger=").append(overstyrtePersonopplysninger);
         sb.append('}');
         return sb.toString();
-    }
-
-    void setAktørId(AktørId aktørId) {
-        this.aktørId = aktørId;
     }
 }

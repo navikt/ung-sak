@@ -48,7 +48,6 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -61,6 +60,7 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.validering.ValidKodeverk;
 import no.nav.foreldrepenger.web.app.IndexClasses;
+import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @RunWith(Parameterized.class)
 public class RestApiInputValideringDtoTest extends RestApiTester {
@@ -107,7 +107,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             put(UUID.class, singletonList(emptyList()));
 
             // Sjekkes av separat validator
-            put(PleiepengerBarnSoknad.class, singletonList(emptyList()));
+            put(PleiepengerBarnSøknad.class, singletonList(emptyList()));
         }
     };
 

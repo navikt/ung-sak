@@ -81,10 +81,16 @@ public class VilkårBuilder {
         final var collect = vilkårTidslinje.compress()
             .toSegments()
             .stream()
-            .map(LocalDateSegment::getValue)
+            .map(this::opprettHoldKonsistens)
             .collect(Collectors.toList());
         vilkåret.setPerioder(collect);
         return vilkåret;
+    }
+
+    private VilkårPeriode opprettHoldKonsistens(LocalDateSegment<VilkårPeriode> segment) {
+        return new VilkårPeriodeBuilder(segment.getValue())
+            .medPeriode(segment.getFom(), segment.getTom())
+            .build();
     }
 
     private void validerBuilder() {

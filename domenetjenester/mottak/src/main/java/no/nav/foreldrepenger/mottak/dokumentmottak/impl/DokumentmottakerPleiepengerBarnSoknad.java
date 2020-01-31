@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad.PleiepengerBarnSoknadPersister;
-import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
+import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @Dependent
 public class DokumentmottakerPleiepengerBarnSoknad {
@@ -54,7 +54,7 @@ public class DokumentmottakerPleiepengerBarnSoknad {
     }
 
 
-    public Behandling mottaSoknad(PleiepengerBarnSoknad soknad) {
+    public Behandling mottaSoknad(PleiepengerBarnSøknad soknad) {
         if (soknad == null) {
             throw new IllegalArgumentException("soknad == null");
         }
@@ -66,7 +66,7 @@ public class DokumentmottakerPleiepengerBarnSoknad {
         return behandling;
     }
 
-    private Behandling tilknyttBehandling(PleiepengerBarnSoknad soknad) {
+    private Behandling tilknyttBehandling(PleiepengerBarnSøknad soknad) {
         // FIXME K9 Legg til logikk for valg av fagsak
         final Fagsak fagsak = createNyFagsakFor(soknad);
 
@@ -74,9 +74,9 @@ public class DokumentmottakerPleiepengerBarnSoknad {
         return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
     }
 
-    private Fagsak createNyFagsakFor(PleiepengerBarnSoknad soknad) {
+    private Fagsak createNyFagsakFor(PleiepengerBarnSøknad soknad) {
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        final Optional<Personinfo> optionalBruker = tpsTjeneste.hentBrukerForFnr(PersonIdent.fra(soknad.getSoker().getNorskIdentitetsnummer().getVerdi()));
+        final Optional<Personinfo> optionalBruker = tpsTjeneste.hentBrukerForFnr(PersonIdent.fra(soknad.søker.norskIdentitetsnummer.verdi));
         // FIXME K9 Håndter feilsituasjonen når man ikke finner brukeren.
         final Personinfo bruker = optionalBruker.get();
         final FagsakYtelseType ytelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;

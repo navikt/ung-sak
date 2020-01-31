@@ -5,9 +5,7 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -55,8 +53,7 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjenest
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
-import no.nav.k9.soknad.pleiepengerbarn.InnsendingValidator;
-import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
+import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
@@ -93,7 +90,6 @@ public class FordelRestTjeneste {
     private OpprettSakTjeneste opprettSakTjeneste;
     private VurderFagsystemFellesTjeneste vurderFagsystemTjeneste;
     private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
-    private InnsendingValidator innsendingValidator = new InnsendingValidator();
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -183,33 +179,11 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSoknad pleiepengerBarnSoknad) {
-        final List<no.nav.k9.soknad.felles.Feil> valideringsfeil = innsendingValidator.validate(pleiepengerBarnSoknad);
-        if (!valideringsfeil.isEmpty()) {
-            throw new IllegalArgumentException("Minst én valideringsfeil på innsendt søknad for pleiepenger barn: " + Arrays.toString(valideringsfeil.toArray()));
-        }
+    public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknad pleiepengerBarnSoknad) {
+
         // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
         final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
         return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer().getVerdi());
-    }
-
-    public static class PleiepengerBarnSoknadMottatt {
-        private final String saksnummer;
-
-        public PleiepengerBarnSoknadMottatt(String saksnummer) {
-            this.saksnummer = saksnummer;
-        }
-
-        public String getSaksnummer() {
-            return saksnummer;
-        }
-    }
-
-    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
-        @Override
-        public AbacDataAttributter apply(Object obj) {
-            return AbacDataAttributter.opprett();
-        }
     }
 
     @POST
@@ -341,6 +315,25 @@ public class FordelRestTjeneste {
         return journalPost != null ? journalPost.getKanalreferanse() : null;
     }
 
+    public static class PleiepengerBarnSoknadMottatt {
+        private final String saksnummer;
+
+        public PleiepengerBarnSoknadMottatt(String saksnummer) {
+            this.saksnummer = saksnummer;
+        }
+
+        public String getSaksnummer() {
+            return saksnummer;
+        }
+    }
+
+    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
+    }
+
     public static class AbacJournalpostMottakDto extends JournalpostMottakDto implements AbacDto {
         public AbacJournalpostMottakDto() {
             super();
@@ -464,7 +457,7 @@ public class FordelRestTjeneste {
         )
         private String journalpostId;
 
-        private PleiepengerBarnSoknad soknad;
+        private PleiepengerBarnSøknad soknad;
 
         public PleiepengerBarnSoknadMelding() {
 
@@ -478,11 +471,11 @@ public class FordelRestTjeneste {
             this.journalpostId = journalpostId;
         }
 
-        public PleiepengerBarnSoknad getSoknad() {
+        public PleiepengerBarnSøknad getSoknad() {
             return soknad;
         }
 
-        public void setSoknad(PleiepengerBarnSoknad soknad) {
+        public void setSoknad(PleiepengerBarnSøknad soknad) {
             this.soknad = soknad;
         }
     }

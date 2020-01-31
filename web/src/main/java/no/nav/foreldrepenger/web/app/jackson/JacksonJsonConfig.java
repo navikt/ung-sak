@@ -23,8 +23,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderFaktaOmB
 import no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt.AvklarArbeidsforholdDto;
 import no.nav.foreldrepenger.web.app.IndexClasses;
 import no.nav.foreldrepenger.web.app.tjenester.RestImplementationClasses;
-import no.nav.k9.soknad.JsonUtils;
-import no.nav.k9.soknad.pleiepengerbarn.PleiepengerBarnSoknad;
+import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @Provider
 public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
@@ -101,7 +101,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     @Override
     public ObjectMapper getContext(Class<?> type) {
         // TODO Dette bør gjøres bedre slik at registrering av ObjectMapper gjøres lokalt i Rest-tjenesten.
-        if (type.isAssignableFrom(PleiepengerBarnSoknad.class)) {
+        if (type.isAssignableFrom(PleiepengerBarnSøknad.class)) {
             return JsonUtils.getObjectMapper();
         }
         return objectMapper;

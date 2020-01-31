@@ -24,7 +24,7 @@
 	<properties>
 		<java.version>11</java.version> <!--Brukes av jenkins -->
 		<argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine> <!-- default argLine for surefire-plugin -->
-		
+
 		<revision>3.1.0</revision>
 		<sha1></sha1>
 		<changelist>-SNAPSHOT</changelist>
@@ -60,7 +60,7 @@
 			    <artifactId>prosesstask-root</artifactId>
 			    <version>2.0.0-20191216124556-a028808</version>
                 <scope>import</scope>
-				<type>pom</type>			    
+				<type>pom</type>
 			</dependency>
 
 			<dependency>
@@ -145,7 +145,7 @@
                 <artifactId>abakus-kontrakt</artifactId>
                 <version>1.1-20191210172638-09a46f3</version>
             </dependency>
-			
+
 			<dependency>
   			    <groupId>no.nav.folketrygdloven</groupId>
 			    <artifactId>beregningsgrunnlag-regelmodell</artifactId>
@@ -309,11 +309,11 @@
 				<version>2.0_20181105115918_47dcace</version>
 			</dependency>
 
-			<dependency>
-				<groupId>no.nav.modig</groupId>
-				<artifactId>modig-testcertificates</artifactId>
-				<version>1.2.6-SNAPSHOT</version>
-			</dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-pleiepenger-barn</artifactId>
+                <version>1.0.0.0356f75</version>
+            </dependency>
 
 			<!-- Prosjektets egne TEST AVHENGIGHETER -->
 			<!-- NB: Definer scope der det brukes, ikke her. -->

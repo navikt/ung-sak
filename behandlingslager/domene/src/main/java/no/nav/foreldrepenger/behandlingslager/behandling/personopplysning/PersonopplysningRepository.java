@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
@@ -16,7 +15,6 @@ import no.nav.foreldrepenger.behandlingslager.diff.DiffEntity;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 /**
@@ -103,19 +101,7 @@ public class PersonopplysningRepository {
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = HibernateVerktøy.hentUniktResultat(query);
 
-        populerAktørIdFraBehandling(resultat);
         return resultat;
-    }
-
-    private void populerAktørIdFraBehandling(Optional<PersonopplysningGrunnlagEntitet> resultat) {
-        resultat.ifPresent(r -> {
-            Query aktørQuery = entityManager.createNativeQuery("select br.aktoer_id from bruker br"
-                    + " inner join fagsak f on f.bruker_id=br.id"
-                    + " inner join behandling be on be.fagsak_id = f.id"
-                    + " where be.id = :behandling_id")
-                    .setParameter("behandling_id", r.getBehandlingId()); // NOSONAR
-            r.setAktørId(new AktørId((String) aktørQuery.getSingleResult()));
-        });
     }
 
     private void lagreOgFlush(Long behandlingId, PersonopplysningGrunnlagBuilder grunnlagBuilder) {
@@ -207,11 +193,10 @@ public class PersonopplysningRepository {
             "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id order by pbg.opprettetTidspunkt, pbg.id", //$NON-NLS-1$
             PersonopplysningGrunnlagEntitet.class)
                 .setParameter("behandling_id", behandlingId) // NOSONAR
-                .setMaxResults(1); 
+                .setMaxResults(1);
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = query.getResultStream().findFirst();
 
-        populerAktørIdFraBehandling(resultat);
         return resultat;
     }
 
@@ -238,7 +223,6 @@ public class PersonopplysningRepository {
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = query.getResultStream().findFirst();
 
-        populerAktørIdFraBehandling(resultat);
         return resultat;
     }
 }
