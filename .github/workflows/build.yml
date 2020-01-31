@@ -71,14 +71,6 @@ jobs:
                       "version": "${{ env.TAG }}",
                       "image": "${{ env.IMAGE }}"
                   }}'
-
-  deploy:
-    needs: build
-    name: Deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2.0.0
       - name: Deploy til testmiljø
         uses: nais/deploy/actions/deploy@v1
         env:
