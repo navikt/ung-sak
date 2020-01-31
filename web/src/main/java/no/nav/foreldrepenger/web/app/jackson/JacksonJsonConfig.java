@@ -81,7 +81,6 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     }
 
     private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn) {
-        module.addSerializer(new KodeverdiMedNavnSerializer(serialiserKodelisteNavn));
         module.addSerializer(new KodelisteSerializer(serialiserKodelisteNavn));
     }
 
