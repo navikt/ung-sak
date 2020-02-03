@@ -33,7 +33,7 @@
 
 		<felles.version>1.5-20200129145325-846bbaf</felles.version>
 
-        <metrics.version>3.2.5</metrics.version>
+        <metrics.version>4.1.2</metrics.version>
 		<fp-kontrakter.version>5.1_20191210141010_6a7f399</fp-kontrakter.version>
 	</properties>
 
