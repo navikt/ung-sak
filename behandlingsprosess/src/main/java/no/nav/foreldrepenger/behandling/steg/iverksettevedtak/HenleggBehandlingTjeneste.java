@@ -53,11 +53,11 @@ public class HenleggBehandlingTjeneste {
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
     }
 
-    public void henleggBehandling(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+    public void henleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
         doHenleggBehandling(behandlingId, årsakKode, begrunnelse, false);
     }
 
-    private void doHenleggBehandling(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse, boolean avbrytVentendeAutopunkt) {
+    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, boolean avbrytVentendeAutopunkt) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         if (avbrytVentendeAutopunkt && behandling.isBehandlingPåVent()) {
@@ -68,20 +68,16 @@ public class HenleggBehandlingTjeneste {
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
-            sendHenleggelsesbrev(behandlingId, HistorikkAktør.VEDTAKSLØSNINGEN);
+            sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
         } else if (BehandlingResultatType.MANGLER_BEREGNINGSREGLER.equals(årsakKode)) {
             fagsakRepository.fagsakSkalBehandlesAvInfotrygd(behandling.getFagsakId());
             opprettOppgaveTilInfotrygd(behandling);
         }
-        lagHistorikkinnslagForHenleggelse(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+        lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
     }
 
-    public void henleggBehandlingAvbrytAutopunkter(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+    public void henleggBehandlingAvbrytAutopunkter(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
         doHenleggBehandling(behandlingId, årsakKode, begrunnelse, true);
-    }
-
-    public void lagHistorikkInnslagForHenleggelseFraSteg(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        lagHistorikkinnslagForHenleggelse(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     private void opprettOppgaveTilInfotrygd(Behandling behandling) {

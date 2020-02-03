@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.repository;
 
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -15,6 +16,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
  */
 @ApplicationScoped
 public class BehandlingLåsRepository {
+    
+    private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
     private EntityManager entityManager;
 
     protected BehandlingLåsRepository() {
@@ -36,6 +39,15 @@ public class BehandlingLåsRepository {
             return new BehandlingLås(null);
         }
 
+    }
+
+    /** Initialiser lås og ta lock på tilhørende database rader. */
+    public BehandlingLås taLås(final String behandlingId) {
+        if(DIGITS_PATTERN.matcher(behandlingId).matches()) {
+            return taLås(Long.parseLong(behandlingId));
+        } else {
+            return taLås(UUID.fromString(behandlingId));
+        }
     }
 
     public BehandlingLås taLås(final UUID eksternBehandlingRef) {

@@ -52,15 +52,17 @@ public class PubliserPersistertDokumentHendelseTaskImpl implements PubliserPersi
 
     @Override
     public void doTask(ProsessTaskData data) {
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(data.getFagsakId());
-        Optional<MottattDokument> dokumentOptional = mottatteDokumentTjeneste.hentMottattDokument(Long.valueOf(data.getPropertyValue(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY)));
+        Long mottattDokumentId = Long.valueOf(data.getPropertyValue(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY));
+
+        Optional<MottattDokument> dokumentOptional = mottatteDokumentTjeneste.hentMottattDokument(mottattDokumentId);
         dokumentOptional.ifPresent(dokument -> {
-            inntektsmeldingTjeneste.hentInntektsMeldingFor(data.getBehandlingId(), dokument.getJournalpostId()).ifPresent(inntektsmelding -> {
+            inntektsmeldingTjeneste.hentInntektsMeldingFor(dokument.getBehandlingId(), dokument.getJournalpostId()).ifPresent(inntektsmelding -> {
                 log.info("[DIALOG-HENDELSE] Inntektsmelding persistert : {}", inntektsmelding.getKanalreferanse());
                 InntektsmeldingInnsendingsårsak årsak = inntektsmelding.getInntektsmeldingInnsendingsårsak();
                 if (årsak == null || InntektsmeldingInnsendingsårsak.UDEFINERT.equals(årsak)) {
                     årsak = InntektsmeldingInnsendingsårsak.NY;
                 }
+                Fagsak fagsak = fagsakRepository.finnEksaktFagsak(data.getFagsakId());
                 final InntektsmeldingV1 hendelse = new InntektsmeldingV1.Builder()
                     .medAktørId(data.getAktørId())
                     .medArbeidsgiverId(inntektsmelding.getArbeidsgiver().getIdentifikator())

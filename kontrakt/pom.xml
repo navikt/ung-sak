@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>kontrakt</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>K9SAK :: Kontrakter</name>
 	<description>Kontrakter for tjenester eksponert / topics publisert av K9SAK</description>
 	
@@ -70,6 +70,8 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>false</skip>
+					<installAtEnd>false</installAtEnd>
+					<deployAtEnd>false</deployAtEnd>
 				</configuration>
 			</plugin>
 		</plugins>

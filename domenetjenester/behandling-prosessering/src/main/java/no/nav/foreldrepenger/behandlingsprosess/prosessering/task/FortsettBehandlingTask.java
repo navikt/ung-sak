@@ -47,7 +47,7 @@ public class FortsettBehandlingTask implements ProsessTaskHandler {
         BehandlingskontrollTjeneste behandlingskontrollTjeneste = cdi.select(BehandlingskontrollTjeneste.class).get();
 
         try {
-            Long behandlingId = data.getBehandlingId();
+            var behandlingId = data.getBehandlingId();
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
             Boolean manuellFortsettelse = Optional.ofNullable(data.getPropertyValue(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE))

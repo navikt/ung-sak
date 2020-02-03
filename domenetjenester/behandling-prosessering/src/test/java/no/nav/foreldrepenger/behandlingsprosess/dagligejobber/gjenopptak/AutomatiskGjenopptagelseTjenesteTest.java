@@ -89,7 +89,7 @@ public class AutomatiskGjenopptagelseTjenesteTest {
         ProsessTaskData faktiskProsessTaskData1 = faktiskeProsessTaskDataListe.get(0);
         assertThat(faktiskProsessTaskData1.getAktørId()).isEqualTo(aktørId1.getId());
         assertThat(faktiskProsessTaskData1.getFagsakId()).isEqualTo(fagsakId1);
-        assertThat(faktiskProsessTaskData1.getBehandlingId()).isEqualTo(behandlingId1);
+        assertThat(faktiskProsessTaskData1.getBehandlingId()).isEqualTo(String.valueOf(behandlingId1));
         assertThat(faktiskProsessTaskData1.getGruppe()).isEqualTo(gruppe);
         assertThat(faktiskProsessTaskData1.getSekvens()).isEqualTo("1");
         assertThat(faktiskProsessTaskData1.getPriority()).isEqualTo(100);
@@ -97,7 +97,7 @@ public class AutomatiskGjenopptagelseTjenesteTest {
         ProsessTaskData faktiskProsessTaskData2 = faktiskeProsessTaskDataListe.get(1);
         assertThat(faktiskProsessTaskData2.getAktørId()).isEqualTo(aktørId2.getId());
         assertThat(faktiskProsessTaskData2.getFagsakId()).isEqualTo(fagsakId2);
-        assertThat(faktiskProsessTaskData2.getBehandlingId()).isEqualTo(behandlingId2);
+        assertThat(faktiskProsessTaskData2.getBehandlingId()).isEqualTo(String.valueOf(behandlingId2));
         assertThat(faktiskProsessTaskData2.getGruppe()).isEqualTo(gruppe);
         assertThat(faktiskProsessTaskData2.getSekvens()).isEqualTo("1");
         assertThat(faktiskProsessTaskData2.getPriority()).isEqualTo(100);
@@ -145,7 +145,7 @@ public class AutomatiskGjenopptagelseTjenesteTest {
         ProsessTaskData faktiskProsessTaskData1 = faktiskeProsessTaskDataListe.get(0);
         assertThat(faktiskProsessTaskData1.getAktørId()).isEqualTo(aktørId1.getId());
         assertThat(faktiskProsessTaskData1.getFagsakId()).isEqualTo(fagsakId1);
-        assertThat(faktiskProsessTaskData1.getBehandlingId()).isEqualTo(behandlingId1);
+        assertThat(faktiskProsessTaskData1.getBehandlingId()).isEqualTo(String.valueOf(behandlingId1));
         assertThat(faktiskProsessTaskData1.getGruppe()).isEqualTo(gruppe);
         assertThat(faktiskProsessTaskData1.getSekvens()).isEqualTo("1");
         assertThat(faktiskProsessTaskData1.getPriority()).isEqualTo(100);
@@ -153,7 +153,7 @@ public class AutomatiskGjenopptagelseTjenesteTest {
         ProsessTaskData faktiskProsessTaskData2 = faktiskeProsessTaskDataListe.get(1);
         assertThat(faktiskProsessTaskData2.getAktørId()).isEqualTo(aktørId2.getId());
         assertThat(faktiskProsessTaskData2.getFagsakId()).isEqualTo(fagsakId2);
-        assertThat(faktiskProsessTaskData2.getBehandlingId()).isEqualTo(behandlingId2);
+        assertThat(faktiskProsessTaskData2.getBehandlingId()).isEqualTo(String.valueOf(behandlingId2));
         assertThat(faktiskProsessTaskData2.getGruppe()).isEqualTo(gruppe);
         assertThat(faktiskProsessTaskData2.getSekvens()).isEqualTo("1");
         assertThat(faktiskProsessTaskData2.getPriority()).isEqualTo(100);

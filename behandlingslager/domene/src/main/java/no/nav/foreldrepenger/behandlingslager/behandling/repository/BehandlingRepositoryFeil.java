@@ -13,6 +13,6 @@ public interface BehandlingRepositoryFeil extends DeklarerteFeil {
     Feil fantIkkeEntitetForLåsing(String entityClassName, long id);
 
     @TekniskFeil(feilkode = "FP-131240", feilmelding = "Fant ikke BehandlingVedtak, behandlingId=%s.", logLevel = LogLevel.ERROR)
-    Feil fantIkkeBehandlingVedtak(long behandlingId);
+    Feil fantIkkeBehandlingVedtak(Object behandlingId);
 
 }

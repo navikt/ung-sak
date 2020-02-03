@@ -30,7 +30,7 @@ public class SendTilkjentYtelseTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        Long behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = prosessTaskData.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         meldingProducer.sendTilkjentYtelse(behandling);

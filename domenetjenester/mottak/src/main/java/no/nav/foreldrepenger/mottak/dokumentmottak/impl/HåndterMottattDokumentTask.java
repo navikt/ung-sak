@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -64,7 +65,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     }
 
     @Override
-    protected List<Long> identifiserBehandling(ProsessTaskData prosessTaskData) {
-        return behandlingRepository.hentÅpneBehandlingerIdForFagsakId(prosessTaskData.getFagsakId());
+    protected List<String> identifiserBehandling(ProsessTaskData prosessTaskData) {
+        return behandlingRepository.hentÅpneBehandlingerIdForFagsakId(prosessTaskData.getFagsakId()).stream().map(String::valueOf).collect(Collectors.toList());
     }
 }

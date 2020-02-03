@@ -33,7 +33,7 @@ public class AvsluttBehandlingTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        Long behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = prosessTaskData.getBehandlingId();
         tjeneste.avsluttBehandling(behandlingId);
         log.info("Utført for behandling: {}", behandlingId);
     }

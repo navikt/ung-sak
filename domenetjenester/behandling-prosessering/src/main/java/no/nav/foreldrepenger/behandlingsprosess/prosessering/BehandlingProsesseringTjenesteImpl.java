@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingsprosess.prosessering.tjeneste;
+package no.nav.foreldrepenger.behandlingsprosess.prosessering;
 
 import static no.nav.foreldrepenger.behandlingsprosess.prosessering.task.FortsettBehandlingTaskProperties.GJENOPPTA_STEG;
 
@@ -16,7 +16,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.FortsettBehandlingTaskProperties;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.StartBehandlingTask;

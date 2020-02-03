@@ -22,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
@@ -261,11 +262,11 @@ public class OppgaveTjenesteTest {
         List<ProsessTaskGruppe.Entry> tasks = gruppe.getTasks();
         assertThat(tasks.get(0).getTask().getTaskType()).isEqualTo(AvsluttOppgaveTaskProperties.TASKTYPE);
         assertThat(tasks.get(0).getTask().getFagsakId()).isEqualTo(behandling.getFagsakId());
-        assertThat(tasks.get(0).getTask().getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(tasks.get(0).getTask().getBehandlingId()).isEqualTo(String.valueOf(behandling.getId()));
         assertThat(String.valueOf(tasks.get(0).getTask().getAktørId())).isEqualTo(behandling.getAktørId().getId());
         assertThat(tasks.get(1).getTask().getTaskType()).isEqualTo(OpprettOppgaveGodkjennVedtakTask.TASKTYPE);
         assertThat(tasks.get(1).getTask().getFagsakId()).isEqualTo(behandling.getFagsakId());
-        assertThat(tasks.get(1).getTask().getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(tasks.get(1).getTask().getBehandlingId()).isEqualTo(String.valueOf(behandling.getId()));
         assertThat(String.valueOf(tasks.get(1).getTask().getAktørId())).isEqualTo(behandling.getAktørId().getId());
     }
 
@@ -348,7 +349,7 @@ public class OppgaveTjenesteTest {
         when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
 
         // Act
-        String oppgaveId = tjeneste.opprettOppgaveSakSkalTilInfotrygd(behandling.getId());
+        String oppgaveId = tjeneste.opprettOppgaveSakSkalTilInfotrygd(String.valueOf(behandling.getId()));
 
         // Assert
         OpprettOppgaveRequest request = captor.getValue();
@@ -466,7 +467,8 @@ public class OppgaveTjenesteTest {
         when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
 
         // Act
-        String oppgaveId = tjeneste.opprettOppgaveFeilutbetaling(behandling.getId(), beskrivelse);
+        var ref = BehandlingReferanse.fra(behandling);
+        String oppgaveId = tjeneste.opprettOppgaveFeilutbetaling(ref, beskrivelse);
 
         // Assert
         assertThat(oppgaveId).isEqualTo(gsakOppgaveId);

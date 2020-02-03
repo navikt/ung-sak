@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -54,13 +55,22 @@ public class AvsluttBehandling {
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
-    void avsluttBehandling(Long behandlingId) {
-        log.info("Avslutter behandling: {}", behandlingId); //$NON-NLS-1$
+    void avsluttBehandling(String behandlingId) {
+        // init kontekst alltid før vi henter opp behandling (sikrer lås på Behandling)
+        behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling);
+        avsluttBehandling(ref);
+    }
+    
+    void avsluttBehandling(BehandlingReferanse ref) {
+        log.info("Avslutter behandling: {}", ref); //$NON-NLS-1$
+        var behandlingId = ref.getBehandlingId();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-
-        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId())
-            .orElseThrow(() -> BehandlingRepositoryFeil.FACTORY.fantIkkeBehandlingVedtak(behandlingId).toException());
+        
+        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId)
+            .orElseThrow(() -> BehandlingRepositoryFeil.FACTORY.fantIkkeBehandlingVedtak(ref).toException());
         vedtak.setIverksettingStatus(IverksettingStatus.IVERKSATT);
 
         behandlingVedtakRepository.lagre(vedtak, kontekst.getSkriveLås());
@@ -68,7 +78,7 @@ public class AvsluttBehandling {
 
         behandlingskontrollTjeneste.prosesserBehandlingGjenopptaHvisStegVenter(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
 
-        log.info("Har avsluttet behandling: {}", behandlingId); //$NON-NLS-1$
+        log.info("Har avsluttet behandling: {}", ref); //$NON-NLS-1$
 
         // TODO (Fluoritt): Kunne vi flyttet dette ut i en Event observer (ref BehandlingStatusEvent) Hilsen FC.
         Optional<Behandling> ventendeBehandlingOpt = vurderBehandlingerUnderIverksettelse.finnBehandlingSomVenterIverksetting(behandling);

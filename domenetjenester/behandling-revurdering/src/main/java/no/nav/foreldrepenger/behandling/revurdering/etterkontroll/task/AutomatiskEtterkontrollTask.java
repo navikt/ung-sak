@@ -45,9 +45,9 @@ public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        final Long fagsakId = prosessTaskData.getFagsakId();
+        var fagsakId = prosessTaskData.getFagsakId();
         log.info("Etterkontrollerer fagsak med fagsakId = {}", fagsakId);
-        final Long behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = prosessTaskData.getBehandlingId();
 
         Behandling behandlingForRevurdering = behandlingRepository.hentBehandling(behandlingId);
 

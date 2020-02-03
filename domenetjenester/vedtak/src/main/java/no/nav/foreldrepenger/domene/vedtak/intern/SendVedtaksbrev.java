@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -44,30 +45,37 @@ public class SendVedtaksbrev {
         this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
     }
 
-    void sendVedtaksbrev(Long behandlingId) {
-        Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId);
+    void sendVedtaksbrev(String behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        sendVedtaksbrev(BehandlingReferanse.fra(behandling));
+    }
+
+    void sendVedtaksbrev(BehandlingReferanse ref) {
+        
+        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId());
         if (!behandlingVedtakOpt.isPresent()) {
-            log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", behandlingId); //$NON-NLS-1$
+            log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", ref); //$NON-NLS-1$
             return;
         }
         BehandlingVedtak behandlingVedtak = behandlingVedtakOpt.get();
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandlingVedtak.getBehandlingsresultat().getVedtaksbrev());
         if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde()) && !fritekstVedtaksbrev) {
-            log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", behandling.getId());
+            log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", ref);
             return;
         }
 
         if (behandlingVedtak.isBeslutningsvedtak()) {
-            if (harSendtVarselOmRevurdering(behandlingId)) {
-                log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", behandlingId); //$NON-NLS-1$
+            if (harSendtVarselOmRevurdering(behandling.getId())) {
+                log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", ref); //$NON-NLS-1$
             } else {
-                log.info("Uendret utfall av revurdering og har ikke sendt varsel om revurdering. Sender ikke brev for behandling: {}", behandlingId); //$NON-NLS-1$
+                log.info("Uendret utfall av revurdering og har ikke sendt varsel om revurdering. Sender ikke brev for behandling: {}", ref); //$NON-NLS-1$
                 return;
             }
         } else {
-            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType().getKode(), behandlingId); //$NON-NLS-1
+            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType().getKode(), ref); //$NON-NLS-1
         }
         dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(behandlingVedtak);
     }

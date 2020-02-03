@@ -51,7 +51,7 @@ public class GjenopptaBehandlingTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
 
-        Long behandlingsId = prosessTaskData.getBehandlingId();
+        var behandlingsId = prosessTaskData.getBehandlingId();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingsId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
 

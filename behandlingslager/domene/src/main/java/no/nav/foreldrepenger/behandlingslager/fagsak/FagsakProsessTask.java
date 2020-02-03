@@ -27,7 +27,7 @@ public class FagsakProsessTask extends BaseEntitet {
     private Long prosessTaskId;
 
     @Column(name = "behandling_id", updatable = false)
-    private Long behandlingId;
+    private String behandlingId;
 
     @Column(name = "gruppe_sekvensnr", updatable = false)
     private Long gruppeSekvensNr;
@@ -40,19 +40,11 @@ public class FagsakProsessTask extends BaseEntitet {
         // Hibernate trenger en
     }
 
-    public FagsakProsessTask(Long fagsakId, Long prosessTaskId, Long behandlingId) {
-        this(fagsakId, prosessTaskId, behandlingId, null);
-    }
-
-    public FagsakProsessTask(Long fagsakId, Long prosessTaskId, Long behandlingId, Long gruppeSekvensNr) {
+    public FagsakProsessTask(Long fagsakId, Long prosessTaskId, String behandlingId, Long gruppeSekvensNr) {
         this.fagsakId = fagsakId;
         this.prosessTaskId = prosessTaskId;
         this.behandlingId = behandlingId;
         this.gruppeSekvensNr = gruppeSekvensNr;
-    }
-
-    public FagsakProsessTask(Long fagsakId, Long prosessTaskId) {
-        this(fagsakId, prosessTaskId, null);
     }
 
     public Long getFagsakId() {
@@ -61,10 +53,6 @@ public class FagsakProsessTask extends BaseEntitet {
 
     public Long getProsessTaskId() {
         return prosessTaskId;
-    }
-
-    public Long getBehandlingId() {
-        return behandlingId;
     }
 
     public Long getGruppeSekvensNr() {

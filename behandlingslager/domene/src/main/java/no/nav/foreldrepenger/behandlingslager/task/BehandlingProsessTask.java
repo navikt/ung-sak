@@ -23,7 +23,7 @@ public abstract class BehandlingProsessTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        Long behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = prosessTaskData.getBehandlingId();
         behandlingLåsRepository.taLås(behandlingId);
         prosesser(prosessTaskData);
     }

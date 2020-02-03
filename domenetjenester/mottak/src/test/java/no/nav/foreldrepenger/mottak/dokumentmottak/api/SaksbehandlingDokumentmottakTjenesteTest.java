@@ -145,7 +145,7 @@ public class SaksbehandlingDokumentmottakTjenesteTest {
         verify(prosessTaskRepository).lagre(captor.capture());
         ProsessTaskData data = captor.getValue();
         assertThat(data.getFagsakId()).isEqualTo(456L);
-        assertThat(data.getBehandlingId()).isEqualTo(789L);
+        assertThat(data.getBehandlingId()).isEqualTo("789");
         assertThat(data.getPropertyValue(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY)).isEqualTo("1");
         assertThat(data.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY)).isEqualToIgnoringCase(BehandlingÅrsakType.ETTER_KLAGE.getKode());
     }

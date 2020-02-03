@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent.BehandlingAvsluttetEvent;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -86,15 +87,19 @@ public class OppgaveTjeneste {
     }
 
     public String opprettBasertPåBehandlingId(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
+        return opprettBasertPåBehandlingId(String.valueOf(behandlingId), oppgaveÅrsak);
+    }
+    
+    public String opprettBasertPåBehandlingId(String behandlingId, OppgaveÅrsak oppgaveÅrsak) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return opprettOppgave(behandling, oppgaveÅrsak, DEFAULT_OPPGAVEBESKRIVELSE, PrioritetKode.NORM_FOR, DEFAULT_OPPGAVEFRIST_DAGER);
     }
 
-    public String opprettBehandleOppgaveForBehandling(Long behandlingId) {
+    public String opprettBehandleOppgaveForBehandling(String behandlingId) {
         return opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(behandlingId, DEFAULT_OPPGAVEBESKRIVELSE, false, DEFAULT_OPPGAVEFRIST_DAGER);
     }
 
-    public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(Long behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
+    public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(String behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
         return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, hentPrioritetKode(høyPrioritet), fristDager);
@@ -124,8 +129,8 @@ public class OppgaveTjeneste {
         opprettTaskAvsluttOppgave(behandling);
     }
 
-    public String opprettOppgaveFeilutbetaling(Long behandlingId, String beskrivelse) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+    public String opprettOppgaveFeilutbetaling(BehandlingReferanse ref, String beskrivelse) {
+        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         Fagsak fagsak = behandling.getFagsak();
         Personinfo personSomBehandles = hentPersonInfo(behandling.getAktørId());
         OpprettOppgaveRequest request = createRequest(fagsak, personSomBehandles, OppgaveÅrsak.VURDER_KONS_FOR_YTELSE, behandling.getBehandlendeEnhet(),
@@ -202,7 +207,7 @@ public class OppgaveTjeneste {
         return response.getOppgaveId();
     }
 
-    public String opprettOppgaveSakSkalTilInfotrygd(Long behandlingId) {
+    public String opprettOppgaveSakSkalTilInfotrygd(String behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
         OpprettOppgaveRequest request = OpprettOppgaveRequest.builder()
@@ -238,7 +243,7 @@ public class OppgaveTjeneste {
         }
     }
 
-    public void avslutt(Long behandlingId, String oppgaveId) {
+    public void avslutt(String behandlingId, String oppgaveId) {
         Optional<OppgaveBehandlingKobling> oppgave = oppgaveBehandlingKoblingRepository.hentOppgaveBehandlingKobling(oppgaveId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         if (oppgave.isPresent()) {

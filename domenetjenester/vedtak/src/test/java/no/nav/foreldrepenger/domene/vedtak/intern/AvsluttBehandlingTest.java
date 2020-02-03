@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -68,10 +69,13 @@ public class AvsluttBehandlingTest {
 
     private Fagsak fagsak;
 
+    private BehandlingReferanse behandlingReferanse;
+
     @Before
     public void setUp() {
         behandling = lagBehandling(LocalDateTime.now().minusHours(1), LocalDateTime.now());
         fagsak = behandling.getFagsak();
+        behandlingReferanse = BehandlingReferanse.fra(behandling);
 
         vurderBehandlingerUnderIverksettelse = new VurderBehandlingerUnderIverksettelse(repositoryProvider);
 
@@ -99,7 +103,7 @@ public class AvsluttBehandlingTest {
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId())).thenReturn(Collections.singletonList(behandling));
 
         // Act
-        avsluttBehandling.avsluttBehandling(behandling.getId());
+        avsluttBehandling();
 
         // Assert
         verifiserIverksatt(behandling);
@@ -119,7 +123,7 @@ public class AvsluttBehandlingTest {
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId())).thenReturn(List.of(behandling, behandling2));
 
         // Act
-        avsluttBehandling.avsluttBehandling(behandling.getId());
+        avsluttBehandling();
 
         verifiserIverksatt(behandling);
         verifiserKallTilProsesserBehandling(behandling);
@@ -136,7 +140,7 @@ public class AvsluttBehandlingTest {
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId())).thenReturn(List.of(behandling, annenBehandling));
 
         // Act
-        avsluttBehandling.avsluttBehandling(behandling.getId());
+        avsluttBehandling();
 
         verifiserIverksatt(behandling);
         verifiserKallTilProsesserBehandling(behandling);
@@ -153,7 +157,7 @@ public class AvsluttBehandlingTest {
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId())).thenReturn(List.of(behandling, annenBehandling));
 
         // Act
-        avsluttBehandling.avsluttBehandling(behandling.getId());
+        avsluttBehandling();
 
         verifiserIverksatt(behandling);
         verifiserKallTilProsesserBehandling(behandling);
@@ -170,7 +174,7 @@ public class AvsluttBehandlingTest {
             .thenReturn(List.of(behandling, annenBehandling, tredjeBehandling));
 
         // Act
-        avsluttBehandling.avsluttBehandling(behandling.getId());
+        avsluttBehandling();
 
         verifiserIverksatt(behandling);
         verifiserKallTilProsesserBehandling(behandling);
@@ -202,7 +206,7 @@ public class AvsluttBehandlingTest {
     private boolean inneholderFortsettBehandlingTaskForBehandling(List<ProsessTaskData> arguments, Behandling behandling) {
         return arguments.stream()
             .anyMatch(argument -> argument.getTaskType().equals(FortsettBehandlingTaskProperties.TASKTYPE)
-                && argument.getBehandlingId().equals(behandling.getId()));
+                && argument.getBehandlingId().equals(String.valueOf(behandling.getId())));
     }
 
     @Test
@@ -215,12 +219,16 @@ public class AvsluttBehandlingTest {
             .thenReturn(List.of(behandling, annenBehandling, tredjeBehandling));
 
         // Act
-        avsluttBehandling.avsluttBehandling(behandling.getId());
+        avsluttBehandling();
 
         verifiserIverksatt(behandling);
         verifiserKallTilProsesserBehandling(behandling);
         verifiserKallTilFortsettBehandling(tredjeBehandling);
         verifiserIkkeKallTilFortsettBehandling(annenBehandling);
+    }
+
+    private void avsluttBehandling() {
+        avsluttBehandling.avsluttBehandling(behandlingReferanse);
     }
 
     private Behandling lagBehandling(LocalDateTime opprettet, LocalDateTime vedtaksdato) {

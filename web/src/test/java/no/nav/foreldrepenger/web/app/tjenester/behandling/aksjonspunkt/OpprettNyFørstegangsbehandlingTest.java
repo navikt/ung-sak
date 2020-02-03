@@ -223,7 +223,7 @@ public class OpprettNyFørstegangsbehandlingTest {
         assertThat(prosessTaskData.getTaskType()).isEqualTo(HåndterMottattDokumentTaskProperties.TASKTYPE);
         assertThat(prosessTaskData.getFagsakId()).isEqualTo(behandling.getFagsakId());
         if (skalhabehandling) {
-            assertThat(prosessTaskData.getBehandlingId()).isEqualTo(behandling.getId());
+            assertThat(prosessTaskData.getBehandlingId()).isEqualTo(String.valueOf(behandling.getId()));
         } else {
             assertThat(prosessTaskData.getBehandlingId()).isNull();
         }

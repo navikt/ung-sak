@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -49,13 +50,14 @@ public class VurderOppgaveTilbakekrevingTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        Long behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = prosessTaskData.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling);
         if (skalOppretteOppgaveTilbakekreving(behandling)) {
             FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
             String beskrivelse = "Feilutbetaling " + fagsakYtelseType + ". Opprett en tilbakekrevingsbehandling i Infotrygd.";
 
-            String oppgaveId = oppgaveTjeneste.opprettOppgaveFeilutbetaling(behandlingId, beskrivelse);
+            String oppgaveId = oppgaveTjeneste.opprettOppgaveFeilutbetaling(ref, beskrivelse);
             log.info("Opprettet oppgave i GSAK for tilbakebetaling. BehandlingId: {}. OppgaveId: {}.", behandlingId, oppgaveId);
         }
     }
