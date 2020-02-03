@@ -21,8 +21,8 @@ public class UtledBekreftetPermisjonTest {
     @Test
     public void skal_utlede_bekreftet_permisjon_med_status_UGYLDIGE_PERIODER_og_periode_lik_null(){
         // Arrange
-        PermisjonDto permisjonDto1 = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
-        PermisjonDto permisjonDto2 = new PermisjonDto(DAGENS_DATO, null, BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
+        var permisjonDto1 = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
+        var permisjonDto2 = new PermisjonDto(DAGENS_DATO, null, BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
         ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(false);
         arbeidsforholdDto.setPermisjoner(List.of(permisjonDto1, permisjonDto2));
@@ -36,7 +36,7 @@ public class UtledBekreftetPermisjonTest {
     @Test
     public void skal_utlede_bekreftet_permisjon_med_status_BRUK_PERMISJON_og_periode_med_tom_definert(){
         // Arrange
-        PermisjonDto permisjonDto = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
+        var permisjonDto = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
         ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(true);
         arbeidsforholdDto.setPermisjoner(List.of(permisjonDto));
@@ -51,7 +51,7 @@ public class UtledBekreftetPermisjonTest {
     @Test
     public void skal_utlede_bekreftet_permisjon_med_status_BRUK_PERMISJON_og_periode_med_tom_lik_null(){
         // Arrange
-        PermisjonDto permisjonDto = new PermisjonDto(DAGENS_DATO, null, BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
+        var permisjonDto = new PermisjonDto(DAGENS_DATO, null, BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
         ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(true);
         arbeidsforholdDto.setPermisjoner(List.of(permisjonDto));

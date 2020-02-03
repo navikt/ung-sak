@@ -9,8 +9,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.behandling.fp.UtledVedtakResultatType;
-import no.nav.foreldrepenger.behandling.impl.FinnAnsvarligSaksbehandler;
+import no.nav.foreldrepenger.behandling.hendelse.FinnAnsvarligSaksbehandler;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;

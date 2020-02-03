@@ -9,33 +9,25 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
-import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.impl.FatterVedtakAksjonspunkt;
-import no.nav.foreldrepenger.domene.vedtak.repo.LagretVedtakRepository;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnRepository;
-import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AksjonspunktGodkjenningDto;
@@ -50,41 +42,20 @@ public class AksjonspunktOppdatererTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
 
-    private LagretVedtakRepository lagretVedtakRepository = new LagretVedtakRepository(entityManager);
-
-    private FatterVedtakAksjonspunkt fatterVedtakAksjonspunkt;
-    private HistorikkRepository historikkRepository = new HistorikkRepository(entityManager);
+    @Inject
     private TotrinnRepository totrinnRepository;
 
     @Inject
-    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private FatterVedtakAksjonspunkt fatterVedtakAksjonspunkt;
 
     @Inject
     private VedtakTjeneste vedtakTjeneste;
-
+    
     @Inject
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-
     private OpprettToTrinnsgrunnlag opprettTotrinnsgrunnlag;
-
-    @Before
-    public void setup() {
-        totrinnRepository = new TotrinnRepository(entityManager);
-        var beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(entityManager);
-        var totrinnTjeneste = new TotrinnTjeneste(totrinnRepository);
-        opprettTotrinnsgrunnlag = new OpprettToTrinnsgrunnlag(
-            beregningsgrunnlagTjeneste,
-            totrinnTjeneste,
-            iayTjeneste
-            );
-
-        var vedtakTjeneste = new VedtakTjeneste(lagretVedtakRepository, historikkRepository, totrinnTjeneste);
-        fatterVedtakAksjonspunkt = new FatterVedtakAksjonspunkt(behandlingskontrollTjeneste, vedtakTjeneste, totrinnTjeneste);
-    }
 
     @Test
     public void bekreft_foreslå_vedtak_aksjonspkt_setter_ansvarlig_saksbehandler() {

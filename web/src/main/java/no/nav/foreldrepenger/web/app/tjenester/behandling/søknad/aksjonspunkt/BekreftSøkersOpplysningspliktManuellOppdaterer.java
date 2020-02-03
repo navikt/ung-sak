@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.aksjonspunkt;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 

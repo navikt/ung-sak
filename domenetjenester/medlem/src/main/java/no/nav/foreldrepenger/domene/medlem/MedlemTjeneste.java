@@ -35,12 +35,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.Vilkår
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
-import no.nav.foreldrepenger.domene.medlem.api.EndringsresultatPersonopplysningerForMedlemskap;
-import no.nav.foreldrepenger.domene.medlem.api.EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt;
 import no.nav.foreldrepenger.domene.medlem.api.FinnMedlemRequest;
 import no.nav.foreldrepenger.domene.medlem.api.Medlemskapsperiode;
-import no.nav.foreldrepenger.domene.medlem.api.VurderMedlemskap;
-import no.nav.foreldrepenger.domene.medlem.api.VurderingsÅrsak;
+import no.nav.foreldrepenger.domene.medlem.dto.EndringsresultatPersonopplysningerForMedlemskap;
+import no.nav.foreldrepenger.domene.medlem.dto.VurderMedlemskap;
+import no.nav.foreldrepenger.domene.medlem.dto.VurderingsÅrsak;
+import no.nav.foreldrepenger.domene.medlem.dto.EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt;
 import no.nav.foreldrepenger.domene.medlem.impl.HentMedlemskapFraRegister;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemResultat;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;

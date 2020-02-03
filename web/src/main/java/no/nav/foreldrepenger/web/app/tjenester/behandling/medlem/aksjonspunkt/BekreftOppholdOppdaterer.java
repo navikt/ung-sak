@@ -17,7 +17,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAg
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
-import no.nav.foreldrepenger.domene.medlem.api.BekreftOppholdVurderingAksjonspunktDto;
+import no.nav.foreldrepenger.domene.medlem.dto.BekreftOppholdVurderingAksjonspunktDto;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 
 public abstract class BekreftOppholdOppdaterer implements AksjonspunktOppdaterer<BekreftedePerioderMalDto> {

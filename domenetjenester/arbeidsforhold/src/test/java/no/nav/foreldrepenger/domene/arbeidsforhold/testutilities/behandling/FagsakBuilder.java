@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.testutilities.behandling;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
@@ -17,19 +16,12 @@ class FagsakBuilder {
 
     private NavBrukerBuilder brukerBuilder = new NavBrukerBuilder();
 
-    private RelasjonsRolleType rolle;
-
     private Fagsak fagsak;
 
     private FagsakYtelseType fagsakYtelseType;
 
-    private FagsakBuilder(RelasjonsRolleType rolle, FagsakYtelseType fagsakYtelseType) {
-        this.rolle = rolle;
+    private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;
-    }
-
-    private FagsakBuilder(Fagsak fagsak) {
-        this.fagsak = fagsak;
     }
 
     FagsakBuilder medSaksnummer(Saksnummer saksnummer) {
@@ -50,18 +42,8 @@ class FagsakBuilder {
         return this;
     }
 
-    FagsakBuilder medBrukerKjønn(NavBrukerKjønn kjønn) {
-        validerFagsakIkkeSatt();
-        brukerBuilder.medKjønn(kjønn);
-        return this;
-    }
-
     NavBrukerBuilder getBrukerBuilder() {
         return brukerBuilder;
-    }
-
-    RelasjonsRolleType getRolle() {
-        return rolle;
     }
 
     FagsakBuilder medBruker(NavBruker bruker) {
@@ -70,8 +52,8 @@ class FagsakBuilder {
         return this;
     }
 
-    static FagsakBuilder nyFagsak(FagsakYtelseType fagsakYtelseType, RelasjonsRolleType rolle) {
-        return new FagsakBuilder(rolle, fagsakYtelseType);
+    static FagsakBuilder nyFagsak(FagsakYtelseType fagsakYtelseType) {
+        return new FagsakBuilder(fagsakYtelseType);
     }
 
     Fagsak build() {

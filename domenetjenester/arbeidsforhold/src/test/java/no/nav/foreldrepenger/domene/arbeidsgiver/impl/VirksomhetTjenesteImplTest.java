@@ -42,7 +42,7 @@ public class VirksomhetTjenesteImplTest {
     @Test
     public void skal_kalle_consumer_og_oversette_response() throws Exception {
         // Arrange
-        IAYScenarioBuilder  scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.ENGANGSTØNAD);
+        IAYScenarioBuilder  scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.ENGANGSTØNAD);
         scenario.lagre(repositoryProvider);
 
         HentOrganisasjonResponse response = opprettResponse();
@@ -69,7 +69,7 @@ public class VirksomhetTjenesteImplTest {
     @Test
     public void skal_håndtere_exceptions_fra_consumer() throws Exception {
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.ENGANGSTØNAD);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.ENGANGSTØNAD);
         scenario.lagre(repositoryProvider);
 
         HentOrganisasjonResponse response = opprettResponse();

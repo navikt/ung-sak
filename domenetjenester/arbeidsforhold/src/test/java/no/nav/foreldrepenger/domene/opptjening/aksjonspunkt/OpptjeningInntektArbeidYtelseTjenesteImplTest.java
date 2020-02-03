@@ -183,7 +183,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     @Test
     public void skal_hente_ytelse_før_stp() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
 
@@ -215,7 +215,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     @Test
     public void skal_lage_sammehengende_liste() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
         final Behandling behandling = scenario.lagre(repositoryProvider);
@@ -251,7 +251,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     @Test
     public void skal_lage_sammehengende_liste_med_overlappende_ytelser() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
         final Behandling behandling = scenario.lagre(repositoryProvider);
@@ -287,7 +287,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     @Test
     public void skal_lage_sammehengende_liste_med_delvis_overlappende_ytelser() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
 
@@ -319,7 +319,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     @Test
     public void skal_ikke_lage_sammehengende_liste_med_1_dag_mellom_ytelser() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
         final Behandling behandling = scenario.lagre(repositoryProvider);
@@ -349,7 +349,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     @Test
     public void skal_lage_tom_sammehengende_liste_uten_ytelser() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
         var sisteLønnsendringsdato = skjæringstidspunkt;
         Behandling behandling = scenario.lagre(repositoryProvider);

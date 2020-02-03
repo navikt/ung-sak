@@ -38,8 +38,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.IverksettingStat
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
+import no.nav.foreldrepenger.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.foreldrepenger.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
-import no.nav.foreldrepenger.domene.vedtak.fp.OpprettProsessTaskIverksettImpl;
 import no.nav.foreldrepenger.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 

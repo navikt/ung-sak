@@ -520,26 +520,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandling;
     }
 
-    public void buildAvsluttet(BehandlingRepository behandlingRepo, BehandlingRepositoryProvider repositoryProvider) {
-        Builder behandlingBuilder = grunnBuild(repositoryProvider);
-
-        behandling = behandlingBuilder.medAvsluttetDato(LocalDateTime.now()).build();
-        BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
-        behandlingRepo.lagre(behandling, lås);
-
-        lagrePersonopplysning(repositoryProvider, behandling);
-        Whitebox.setInternalState(behandling, "status", BehandlingStatus.AVSLUTTET);
-
-        Behandlingsresultat.Builder builder = Behandlingsresultat.builder();
-
-        // opprett og lagre resulater på behandling
-        lagreBehandlingsresultatOgVilkårResultat(repositoryProvider, lås);
-        builder.medBehandlingResultatType(BehandlingResultatType.AVSLÅTT).medAvslagarsakFritekst("Testavslag")
-            .medAvslagsårsak(Avslagsårsak.SØKER_ER_UTVANDRET).buildFor(behandling);
-
-        behandlingRepo.lagre(behandling, lås);
-    }
-
     private void lagrePersonopplysning(BehandlingRepositoryProvider repositoryProvider, Behandling behandling) {
         PersonopplysningRepository personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         Long behandlingId = behandling.getId();
@@ -924,12 +904,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     @SuppressWarnings("unchecked")
     public S medBehandlingStegStart(BehandlingStegType startSteg) {
         this.startSteg = startSteg;
-        return (S) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public S medTilleggsopplysninger(String tilleggsopplysninger) {
-        medSøknad().medTilleggsopplysninger(tilleggsopplysninger);
         return (S) this;
     }
 

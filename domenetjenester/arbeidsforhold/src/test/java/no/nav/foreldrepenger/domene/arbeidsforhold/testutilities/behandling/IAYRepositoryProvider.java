@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
@@ -20,7 +19,6 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 public class IAYRepositoryProvider {
 
     private FagsakRepository fagsakRepository;
-    private PersonopplysningRepository personopplysningRepository;
     private SøknadRepository søknadRepository;
     private VirksomhetRepository virksomhetRepository;
     private OpptjeningRepository opptjeningRepository;
@@ -37,7 +35,6 @@ public class IAYRepositoryProvider {
 
         // behandling aggregater
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
-        this.personopplysningRepository = new PersonopplysningRepository(entityManager);
         this.søknadRepository = new SøknadRepository(entityManager, this.behandlingRepository);
 
         // inntekt arbeid ytelser
@@ -77,7 +74,4 @@ public class IAYRepositoryProvider {
         return new AbakusInMemoryInntektArbeidYtelseTjeneste();
     }
 
-    PersonopplysningRepository getPersonopplysningRepository() {
-        return personopplysningRepository;
-    }
 }

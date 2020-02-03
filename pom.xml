@@ -85,6 +85,12 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+			<dependency>
+				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
+				<artifactId>oppdrag-kontrakter</artifactId>
+				<version>1.0-20200131154110-bf58e40</version>
+			</dependency>
+			
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
                 <artifactId>fp-topics-manifest</artifactId>
@@ -336,21 +342,6 @@
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>okonomistotte</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-            <dependency>
-                <groupId>no.nav.k9.sak</groupId>
-                <artifactId>tilbakekreving</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>opptjeningsvilkar</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>opptjeningsvilkar-regelmodell</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

@@ -210,8 +210,7 @@ public class TraverseEntityGraphTest {
 
     private TestScenarioBuilder lagTestScenario() {
         var scenario = TestScenarioBuilder
-            .builderMedSøknad()
-            .medTilleggsopplysninger("hello");
+            .builderMedSøknad();
         return scenario;
     }
 

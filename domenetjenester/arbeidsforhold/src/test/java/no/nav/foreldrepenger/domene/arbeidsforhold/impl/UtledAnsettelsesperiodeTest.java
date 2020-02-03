@@ -206,7 +206,7 @@ public class UtledAnsettelsesperiodeTest {
     public void skal_finne_overstyrt_ansettelsesperiode_når_perioden_overlapper_stp(){
         // Arrange
 
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagMocked();
         Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet("1");
         InternArbeidsforholdRef ref = InternArbeidsforholdRef.nyRef();
@@ -243,7 +243,7 @@ public class UtledAnsettelsesperiodeTest {
     public void skal_finne_overstyrt_ansettelsesperiode_når_perioden_har_tom_dato_før_stp(){
         // Arrange
 
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagMocked();
         Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet("1");
         InternArbeidsforholdRef ref = InternArbeidsforholdRef.nyRef();

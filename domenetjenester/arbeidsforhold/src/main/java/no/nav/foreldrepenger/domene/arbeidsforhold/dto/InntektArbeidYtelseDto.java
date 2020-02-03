@@ -21,7 +21,7 @@ public class InntektArbeidYtelseDto {
         return inntektsmeldinger;
     }
 
-    void setRelatertTilgrensendeYtelserForSoker(List<RelaterteYtelserDto> relatertTilgrensendeYtelserForSoker) {
+    public void setRelatertTilgrensendeYtelserForSoker(List<RelaterteYtelserDto> relatertTilgrensendeYtelserForSoker) {
         this.relatertTilgrensendeYtelserForSoker = relatertTilgrensendeYtelserForSoker;
     }
 
