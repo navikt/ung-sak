@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening.felles;
 
 import static java.util.Collections.singletonList;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.foreldrepenger.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
@@ -17,7 +16,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
-import no.nav.vedtak.konfig.Tid;
 
 public abstract class FastsettOpptjeningsperiodeStegFelles extends InngangsvilkårStegImpl {
 

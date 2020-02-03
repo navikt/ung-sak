@@ -44,7 +44,7 @@ public class VurderOppgaveArenaTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        Long behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = Long.parseLong(prosessTaskData.getBehandlingId());
         AktørId aktørId = new AktørId(prosessTaskData.getAktørId());
         LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
         vurdereOmArenaYtelseSkalOpphøre.opprettOppgaveHvisArenaytelseSkalOpphøre(behandlingId, aktørId, skjæringstidspunkt);

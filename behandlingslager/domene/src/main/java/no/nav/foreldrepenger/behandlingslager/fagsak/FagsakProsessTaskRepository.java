@@ -21,7 +21,6 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +83,7 @@ public class FagsakProsessTaskRepository {
         em.flush();
     }
 
-    public List<ProsessTaskData> finnAlleForAngittSøk(Long fagsakId, Long behandlingId, String gruppeId, Collection<ProsessTaskStatus> statuser,
+    public List<ProsessTaskData> finnAlleForAngittSøk(Long fagsakId, String behandlingId, String gruppeId, Collection<ProsessTaskStatus> statuser,
                                                       LocalDateTime nesteKjoeringFraOgMed,
                                                       LocalDateTime nesteKjoeringTilOgMed) {
 
@@ -111,7 +110,7 @@ public class FagsakProsessTaskRepository {
             .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_etter er sekunder
             .setParameter("nesteKjoeringTilOgMed", nesteKjoeringTilOgMed)
             .setParameter("fagsakId", fagsakId) // NOSONAR
-            .setParameter("behandlingId", behandlingId, LongType.INSTANCE) // NOSONAR
+            .setParameter("behandlingId", behandlingId, StringType.INSTANCE) // NOSONAR
             .setHint(QueryHints.HINT_READONLY, "true");
 
         List<ProsessTaskEntitet> resultList = query.getResultList();
@@ -119,7 +118,7 @@ public class FagsakProsessTaskRepository {
     }
 
     
-    public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
+    public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, String behandlingId, ProsessTaskGruppe gruppe) {
         // oppretter nye tasks hvis gamle har feilet og matcher angitt gruppe, eller tidligere er FERDIG. Ignorerer hvis tidligere gruppe fortsatt
         // er KLAR
         List<Entry> nyeTasks = gruppe.getTasks();
@@ -154,7 +153,7 @@ public class FagsakProsessTaskRepository {
     }
 
     
-    public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, Long behandlingId, String gruppe) {
+    public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, String behandlingId, String gruppe) {
         Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR
 
         LocalDateTime now = LocalDateTime.now().withNano(0).withSecond(0);

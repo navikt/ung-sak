@@ -1,56 +1,47 @@
 package no.nav.foreldrepenger.behandling.steg.avklarfakta;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtlederInput;
-import no.nav.foreldrepenger.behandling.steg.avklarfakta.AksjonspunktUtlederForTilleggsopplysninger;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 
 public class AksjonspunktUtlederForTilleggsopplysningerTest {
 
-
     @Test
     public void skal_returnere_aksjonspunkt_for_tilleggsopplysninger_dersom_det_er_oppgitt_i_søknad() {
-        // Arrange
-        var scenarioMedTillegsopplysningerPåSøknad = TestScenarioBuilder
-            .builderMedSøknad()
-            .medTilleggsopplysninger("Tillegsopplysninger");
-        // Trenger bare behandling. Andre fakta settes til null
-        Behandling behandling = scenarioMedTillegsopplysningerPåSøknad.lagMocked();
+        List<AksjonspunktResultat> apResultater = utledAksjonspunktResultater("tillegg");
 
-        // Act
-        AksjonspunktUtlederForTilleggsopplysninger aksjonspunktUtleder = new AksjonspunktUtlederForTilleggsopplysninger(scenarioMedTillegsopplysningerPåSøknad.mockBehandlingRepositoryProvider());
-        List<AksjonspunktResultat> apResultater = aksjonspunktUtleder.utledAksjonspunkterFor(lagInput(behandling));
-
-        // Assert
         assertThat(apResultater).hasSize(1);
         assertThat(apResultater.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER);
     }
 
     @Test
     public void skal_returnere_ingen_aksjonspunkt_for_tilleggsopplysninger_dersom_det_ikke_er_oppgitt_i_søknad() {
-        // Arrange
-        var scenarioUtenTillegsopplysningerPåSøknad = TestScenarioBuilder
-            .builderMedSøknad();
-        // Trenger bare behandling. Andre fakta settes til null
-        Behandling behandling = scenarioUtenTillegsopplysningerPåSøknad.lagMocked();
-
-        // Act
-        AksjonspunktUtlederForTilleggsopplysninger aksjonspunktUtleder = new AksjonspunktUtlederForTilleggsopplysninger(scenarioUtenTillegsopplysningerPåSøknad.mockBehandlingRepositoryProvider());
-        List<AksjonspunktResultat> apResultater = aksjonspunktUtleder.utledAksjonspunkterFor(lagInput(behandling));
-
-        // Assert
+        List<AksjonspunktResultat> apResultater = utledAksjonspunktResultater(null);
         assertThat(apResultater).isEmpty();
     }
 
-    private AksjonspunktUtlederInput lagInput(Behandling behandling) {
-        return new AksjonspunktUtlederInput(behandling);
+    private List<AksjonspunktResultat> utledAksjonspunktResultater(String tilleggsopplysninger) {
+        // Arrange
+        var ref = mock(BehandlingReferanse.class);
+        var søknadRepository = mock(SøknadRepository.class);
+        var søknad = new SøknadEntitet.Builder().medTilleggsopplysninger(tilleggsopplysninger).build();
+
+        Mockito.when(søknadRepository.hentSøknadHvisEksisterer(Mockito.any())).thenReturn(Optional.of(søknad));
+
+        // Act
+        AksjonspunktUtlederForTilleggsopplysninger aksjonspunktUtleder = new AksjonspunktUtlederForTilleggsopplysninger(søknadRepository);
+        return aksjonspunktUtleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
     }
 }

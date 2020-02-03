@@ -32,8 +32,6 @@ import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling.Builder;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
@@ -66,7 +64,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
@@ -520,26 +517,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandling;
     }
 
-    public void buildAvsluttet(BehandlingRepository behandlingRepo, BehandlingRepositoryProvider repositoryProvider) {
-        Builder behandlingBuilder = grunnBuild(repositoryProvider);
-
-        behandling = behandlingBuilder.medAvsluttetDato(LocalDateTime.now()).build();
-        BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
-        behandlingRepo.lagre(behandling, lås);
-
-        lagrePersonopplysning(repositoryProvider, behandling);
-        Whitebox.setInternalState(behandling, "status", BehandlingStatus.AVSLUTTET);
-
-        Behandlingsresultat.Builder builder = Behandlingsresultat.builder();
-
-        // opprett og lagre resulater på behandling
-        lagreBehandlingsresultatOgVilkårResultat(repositoryProvider, lås);
-        builder.medBehandlingResultatType(BehandlingResultatType.AVSLÅTT).medAvslagarsakFritekst("Testavslag")
-            .medAvslagsårsak(Avslagsårsak.SØKER_ER_UTVANDRET).buildFor(behandling);
-
-        behandlingRepo.lagre(behandling, lås);
-    }
-
     private void lagrePersonopplysning(BehandlingRepositoryProvider repositoryProvider, Behandling behandling) {
         PersonopplysningRepository personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         Long behandlingId = behandling.getId();
@@ -924,12 +901,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     @SuppressWarnings("unchecked")
     public S medBehandlingStegStart(BehandlingStegType startSteg) {
         this.startSteg = startSteg;
-        return (S) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public S medTilleggsopplysninger(String tilleggsopplysninger) {
-        medSøknad().medTilleggsopplysninger(tilleggsopplysninger);
         return (S) this;
     }
 

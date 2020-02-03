@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandling.FagsakStatusEvent;
-import no.nav.foreldrepenger.behandling.impl.BehandlingEnhetEvent;
+import no.nav.foreldrepenger.behandling.hendelse.BehandlingEnhetEvent;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent;

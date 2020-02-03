@@ -51,7 +51,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
     public void skal_returne_tomt_result_hvis_endringssøknad(){
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         lagreSøknad(behandling, true);
 
@@ -73,7 +73,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
     public void skal_legge_til_arbeidsforhold_for_virksomhet(){
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         lagreSøknad(behandling, false);
 
@@ -96,7 +96,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
     public void skal_legge_til_arbeidsforhold_for_personlig_foretak(){
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         lagreSøknad(behandling, false);
 

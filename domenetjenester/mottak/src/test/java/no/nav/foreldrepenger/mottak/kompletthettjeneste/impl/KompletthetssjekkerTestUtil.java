@@ -32,7 +32,7 @@ public class KompletthetssjekkerTestUtil {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
     }
 
-    public TestScenarioBuilder opprettRevurderingsscenarioForMor() {
+    public TestScenarioBuilder opprettRevurderingsscenario() {
         var scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
         Behandling førstegangsbehandling = opprettOgAvsluttFørstegangsbehandling(scenario);
 

@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.impl;
 
 import static no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType.AA_REGISTER_TYPER;
-import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
 import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
@@ -28,11 +26,11 @@ final class UtledPermisjonSomFørerTilAksjonspunkt {
         // Skjul default constructor
     }
 
-    static List<PermisjonDto> utled(YrkesaktivitetFilter filter, Yrkesaktivitet yrkesaktiviteter, LocalDate stp){
+    static List<Permisjon> utled(YrkesaktivitetFilter filter, Yrkesaktivitet yrkesaktiviteter, LocalDate stp){
         return utled(filter, List.of(yrkesaktiviteter), stp);
     }
 
-    static List<PermisjonDto> utled(YrkesaktivitetFilter filter, Collection<Yrkesaktivitet> yrkesaktiviteter, LocalDate stp){
+    static List<Permisjon> utled(YrkesaktivitetFilter filter, Collection<Yrkesaktivitet> yrkesaktiviteter, LocalDate stp){
         return yrkesaktiviteter.stream()
             .filter(ya -> AA_REGISTER_TYPER.contains(ya.getArbeidType()))
             .filter(ya -> harAnsettelsesPerioderSomInkludererStp(filter, stp, ya))
@@ -41,7 +39,6 @@ final class UtledPermisjonSomFørerTilAksjonspunkt {
             .filter(UtledPermisjonSomFørerTilAksjonspunkt::har100ProsentPermisjonEllerMer)
             .filter(p -> fomErFørStp(stp, p) && tomErLikEllerEtterStp(stp, p))
             .filter(p -> !PERMISJONTYPER_SOM_ER_URELEVANT_FOR_5080.contains(p.getPermisjonsbeskrivelseType()))
-            .map(UtledPermisjonSomFørerTilAksjonspunkt::byggPermisjonDto)
             .collect(Collectors.toList());
     }
 
@@ -61,12 +58,4 @@ final class UtledPermisjonSomFørerTilAksjonspunkt {
         return filter.getAnsettelsesPerioder(ya).stream().anyMatch(avtale -> avtale.getPeriode().inkluderer(stp));
     }
 
-    private static PermisjonDto byggPermisjonDto(Permisjon permisjon) {
-        return new PermisjonDto(
-            permisjon.getFraOgMed(),
-            permisjon.getTilOgMed() == null || TIDENES_ENDE.equals(permisjon.getTilOgMed()) ? null : permisjon.getTilOgMed(),
-            permisjon.getProsentsats().getVerdi(),
-            permisjon.getPermisjonsbeskrivelseType()
-        );
-    }
 }

@@ -36,7 +36,6 @@
 
         <module>behandlingskontroll</module>
         <module>risikoklassifisering</module>
-        <module>tilbakekreving</module>
     </modules>
 
 </project>

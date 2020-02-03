@@ -58,7 +58,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_legge_til_arbeidsforhold_når_ingen_bekreftet_permisjon_eksisterer() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -97,7 +97,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_ikke_legge_til_arbeidsforhold_når_det_ikke_finnes_yrkesaktivteter_før_stp() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -134,7 +134,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_ikke_legge_til_arbeidsforhold_når_det_ikke_finnes_yrkesaktivteter_med_permisjon() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -170,7 +170,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_ikke_legge_til_arbeidsforhold_når_bekreftet_permisjon_inneholder_UGYLDIGE_PERIODER_og_man_utledere_flere_overlappende_permisjoner() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -208,7 +208,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_legge_til_arbeidsforhold_når_bekreftet_permisjon_inneholder_UGYLDIGE_PERIODER_og_man_utledere_kun_en_permisjon() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -248,7 +248,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_ikke_legge_til_arbeidsforhold_når_bekreftet_permisjon_inneholder_samme_fom_og_tom_som_utledet_permisjon() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -285,7 +285,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_legge_til_arbeidsforhold_når_bekreftet_permisjon_ikke_inneholder_samme_fom_som_utledet_permisjon() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -325,7 +325,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_legge_til_arbeidsforhold_når_bekreftet_permisjon_ikke_inneholder_samme_tom_som_utledet_permisjon() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -365,7 +365,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_legge_til_to_arbeidsforhold_når_begge_har_relevant_permisjon_og_hvor_den_ene_har_bekreftet_permisjon_med_ulik_tom() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
@@ -416,7 +416,7 @@ public class VurderPermisjonTjenesteTest {
     public void skal_legge_til_en_av_to_arbeidsforhold_hvor_det_ene_fortsatt_har_ugyldige_perioder() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 

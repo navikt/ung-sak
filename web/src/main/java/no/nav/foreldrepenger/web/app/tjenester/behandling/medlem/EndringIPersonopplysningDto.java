@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.medlem;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.medlem.api.EndringsresultatPersonopplysningerForMedlemskap;
+import no.nav.foreldrepenger.domene.medlem.dto.EndringsresultatPersonopplysningerForMedlemskap;
 
 public class EndringIPersonopplysningDto {
     private boolean erEndret;

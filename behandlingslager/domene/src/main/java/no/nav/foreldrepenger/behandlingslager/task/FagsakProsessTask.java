@@ -34,7 +34,7 @@ public abstract class FagsakProsessTask implements ProsessTaskHandler {
         identifiserBehandling(prosessTaskData)
             .stream()
             .sorted(Comparator.naturalOrder())
-            .forEach(behandling -> behandlingLåsRepository.taLås(behandling));
+            .forEach(behandlingId -> behandlingLåsRepository.taLås(behandlingId));
 
         fagsakLåsRepository.taLås(fagsakId);
         prosesser(prosessTaskData);
@@ -51,8 +51,8 @@ public abstract class FagsakProsessTask implements ProsessTaskHandler {
      * @param prosessTaskData prosesstaskdata
      * @return behandlingId
      */
-    protected List<Long> identifiserBehandling(ProsessTaskData prosessTaskData) {
-        Long behandlingId = prosessTaskData.getBehandlingId();
+    protected List<String> identifiserBehandling(ProsessTaskData prosessTaskData) {
+        var behandlingId = prosessTaskData.getBehandlingId();
         if (behandlingId != null) {
             return List.of(behandlingId);
         }

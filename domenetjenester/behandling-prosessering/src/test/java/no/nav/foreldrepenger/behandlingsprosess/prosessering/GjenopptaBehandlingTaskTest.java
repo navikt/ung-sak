@@ -54,7 +54,7 @@ public class GjenopptaBehandlingTaskTest {
             .builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
         behandling.setBehandlendeEnhet(organisasjonsEnhet);
-        when(mockBehandlingRepository.hentBehandling(any(Long.class))).thenReturn(behandling);
+        when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockEnhetsTjeneste.sjekkEnhetVedGjenopptak(any())).thenReturn(Optional.empty());
 
         ProsessTaskData prosessTaskData = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
@@ -62,7 +62,6 @@ public class GjenopptaBehandlingTaskTest {
 
         task.doTask(prosessTaskData);
 
-        verify(mockBehandlingskontrollTjeneste).initBehandlingskontroll(Mockito.anyLong());
         verify(mockBehandlingskontrollTjeneste).prosesserBehandling(any());
     }
 
@@ -78,7 +77,7 @@ public class GjenopptaBehandlingTaskTest {
         Behandling behandling = scenario.lagMocked();
 
         behandling.setBehandlendeEnhet(organisasjonsEnhet);
-        when(mockBehandlingRepository.hentBehandling(any(Long.class))).thenReturn(behandling);
+        when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockBehandlingRepository.lagre(any(Behandling.class), any())).thenReturn(0L);
         when(mockBehandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenReturn(kontekst);
         when(kontekst.getSkriveLås()).thenReturn(lås);
@@ -89,7 +88,6 @@ public class GjenopptaBehandlingTaskTest {
 
         task.doTask(prosessTaskData);
 
-        verify(mockBehandlingskontrollTjeneste).initBehandlingskontroll(Mockito.anyLong());
         verify(mockBehandlingskontrollTjeneste).prosesserBehandling(any());
         ArgumentCaptor<OrganisasjonsEnhet> enhetArgumentCaptor = ArgumentCaptor.forClass(OrganisasjonsEnhet.class);
         verify(mockEnhetsTjeneste).oppdaterBehandlendeEnhet(any(), enhetArgumentCaptor.capture(), any(), any());

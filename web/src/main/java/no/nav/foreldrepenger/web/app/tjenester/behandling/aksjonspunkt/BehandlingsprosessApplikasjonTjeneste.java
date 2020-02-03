@@ -127,7 +127,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
      */
     private String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
         ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling);
-        String gruppeNavn = prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), behandling.getId(),
+        String gruppeNavn = prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
             gruppe);
         return gruppeNavn;
     }
@@ -187,7 +187,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
 
         opprettHistorikkinnslagForBehandlingStartetPåNytt(behandling);
 
-        return prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), behandlingsId, gruppe);
+        return prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandlingsId), gruppe);
     }
 
     /**

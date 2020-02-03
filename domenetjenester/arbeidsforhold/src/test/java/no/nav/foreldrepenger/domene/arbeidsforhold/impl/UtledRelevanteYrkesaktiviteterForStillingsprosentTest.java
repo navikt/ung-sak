@@ -191,7 +191,7 @@ public class UtledRelevanteYrkesaktiviteterForStillingsprosentTest {
     public void skal_returnere_en_liste_med_relevante_yrkesaktiviteter_som_har_en_overstyrt_periode_eller_overlapper_stp() {
 
         // Arrange
-        IAYScenarioBuilder scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagMocked();
 
         LocalDate fom1 = SKJÆRINGSTIDSPUNKT.minusYears(2);

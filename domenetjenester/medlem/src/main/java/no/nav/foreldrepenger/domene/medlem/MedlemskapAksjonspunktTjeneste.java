@@ -4,10 +4,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.domene.medlem.api.AvklarFortsattMedlemskapAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.api.BekreftBosattVurderingAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.api.BekreftErMedlemVurderingAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.api.BekreftOppholdVurderingAksjonspunktDto;
+import no.nav.foreldrepenger.domene.medlem.dto.AvklarFortsattMedlemskapAksjonspunktDto;
+import no.nav.foreldrepenger.domene.medlem.dto.BekreftBosattVurderingAksjonspunktDto;
+import no.nav.foreldrepenger.domene.medlem.dto.BekreftErMedlemVurderingAksjonspunktDto;
+import no.nav.foreldrepenger.domene.medlem.dto.BekreftOppholdVurderingAksjonspunktDto;
 import no.nav.foreldrepenger.domene.medlem.impl.AvklarFortsattMedlemskapAksjonspunkt;
 import no.nav.foreldrepenger.domene.medlem.impl.BekreftBosattVurderingAksjonspunkt;
 import no.nav.foreldrepenger.domene.medlem.impl.BekreftErMedlemVurderingAksjonspunkt;

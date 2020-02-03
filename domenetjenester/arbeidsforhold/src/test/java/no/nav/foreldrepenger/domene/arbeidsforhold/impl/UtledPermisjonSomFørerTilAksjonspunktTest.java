@@ -15,7 +15,6 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
@@ -78,7 +77,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         yrkesaktiviteter.add(yrkesaktivitet_3);
 
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
 
         // Assert
         assertThat(permisjoner).hasSize(3);
@@ -94,7 +93,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.FRILANSER);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }
@@ -108,7 +107,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }
@@ -122,7 +121,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }
@@ -136,7 +135,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }
@@ -149,7 +148,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, DAGENS_DATO);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, DAGENS_DATO);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }
@@ -163,7 +162,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(1);
     }
@@ -177,7 +176,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }
@@ -191,7 +190,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesaktiviteter.add(yrkesaktivitet);
         // Act
-        List<PermisjonDto> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
+        List<Permisjon> permisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(new YrkesaktivitetFilter(null, yrkesaktiviteter), yrkesaktiviteter, stp);
         // Assert
         assertThat(permisjoner).hasSize(0);
     }

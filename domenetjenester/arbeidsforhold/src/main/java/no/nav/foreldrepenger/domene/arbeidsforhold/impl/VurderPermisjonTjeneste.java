@@ -9,7 +9,6 @@ import java.util.Set;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -34,15 +33,15 @@ public final class VurderPermisjonTjeneste {
      * @param grunnlag Inntekt, arbeids, og ytelse grunnlaget
      */
     public static void leggTilArbeidsforholdMedRelevantPermisjon(BehandlingReferanse behandlingReferanse,
-                                                          Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
-                                                          InntektArbeidYtelseGrunnlag grunnlag) {
+                                                                 Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
+                                                                 InntektArbeidYtelseGrunnlag grunnlag) {
         LocalDate stp = behandlingReferanse.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
         AktørId aktørId = behandlingReferanse.getAktørId();
 
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)) .før(stp);
+        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(stp);
 
         for (Yrkesaktivitet ya : filter.getYrkesaktiviteter()) {
-            Collection<PermisjonDto> utledetPermisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(filter, ya, stp);
+            Collection<Permisjon> utledetPermisjoner = UtledPermisjonSomFørerTilAksjonspunkt.utled(filter, ya, stp);
             if (utledetPermisjoner.isEmpty()) {
                 continue;
             }
@@ -55,13 +54,13 @@ public final class VurderPermisjonTjeneste {
 
     private static boolean harAlleredeTattStillingTilPermisjon(InntektArbeidYtelseGrunnlag grunnlag,
                                                                Yrkesaktivitet ya,
-                                                               Collection<PermisjonDto> utledetPermisjoner) {
+                                                               Collection<Permisjon> utledetPermisjoner) {
         return grunnlag.getArbeidsforholdOverstyringer().stream()
-                .filter(ov -> gjelderSammeArbeidsforhold(ya, ov))
-                .anyMatch(ov -> harFortsattUgyldigePerioder(ov, utledetPermisjoner) || harSammePermisjonsperiode(ya, ov));
+            .filter(ov -> gjelderSammeArbeidsforhold(ya, ov))
+            .anyMatch(ov -> harFortsattUgyldigePerioder(ov, utledetPermisjoner) || harSammePermisjonsperiode(ya, ov));
     }
 
-    private static boolean harFortsattUgyldigePerioder(ArbeidsforholdOverstyring ov, Collection<PermisjonDto> utledetPermisjoner) {
+    private static boolean harFortsattUgyldigePerioder(ArbeidsforholdOverstyring ov, Collection<Permisjon> utledetPermisjoner) {
         Optional<BekreftetPermisjon> bekreftetPermisjonOpt = ov.getBekreftetPermisjon();
         if (bekreftetPermisjonOpt.isPresent()) {
             BekreftetPermisjon bekreftetPermisjon = bekreftetPermisjonOpt.get();

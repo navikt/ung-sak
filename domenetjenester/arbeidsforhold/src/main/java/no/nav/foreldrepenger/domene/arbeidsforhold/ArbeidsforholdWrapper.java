@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
+import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
 import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 
@@ -41,7 +41,7 @@ public class ArbeidsforholdWrapper {
     private LocalDate skjaeringstidspunkt;
     private LocalDate overstyrtTom;
     private ArbeidsforholdHandlingType handlingType;
-    private List<PermisjonDto> permisjoner;
+    private List<Permisjon> permisjoner;
 
     public boolean isHarAksjonspunkt() {
         return harAksjonspunkt;
@@ -253,11 +253,11 @@ public class ArbeidsforholdWrapper {
         this.brukPermisjon = brukPermisjon;
     }
 
-    public void setPermisjoner(List<PermisjonDto> permisjoner) {
+    public void setPermisjoner(List<Permisjon> permisjoner) {
         this.permisjoner = permisjoner;
     }
 
-    public List<PermisjonDto> getPermisjoner() {
+    public List<Permisjon> getPermisjoner() {
         return permisjoner;
     }
 

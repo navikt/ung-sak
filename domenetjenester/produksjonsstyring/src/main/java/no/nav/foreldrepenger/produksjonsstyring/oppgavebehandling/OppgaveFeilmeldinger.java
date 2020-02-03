@@ -15,10 +15,10 @@ public interface OppgaveFeilmeldinger extends DeklarerteFeil { // NOSONAR
     Feil identIkkeFunnet(AktørId aktoerId);
 
     @TekniskFeil(feilkode = "FP-395338", feilmelding = "Fant ikke oppgave med årsak=%s, som skulle vært avsluttet på behandlingId=%s.", logLevel = LogLevel.WARN)
-    Feil oppgaveMedÅrsakIkkeFunnet(String navn, Long behandlingId);
+    Feil oppgaveMedÅrsakIkkeFunnet(String navn, Object behandlingId);
 
     @TekniskFeil(feilkode = "FP-395339", feilmelding = "Fant ikke oppgave med id=%s, som skulle vært avsluttet på behandlingId=%s.", logLevel = LogLevel.WARN)
-    Feil oppgaveMedIdIkkeFunnet(String oppgaveId, Long behandlingId);
+    Feil oppgaveMedIdIkkeFunnet(String oppgaveId, Object behandlingId);
 
     @TekniskFeil(feilkode = "FP-395340", feilmelding = "Fant ingen underkategori for fagsakYtelseType=%s.", logLevel = LogLevel.WARN)
     Feil underkategoriIkkeFunnetForFagsakYtelseType(FagsakYtelseType fagsakYtelseType);

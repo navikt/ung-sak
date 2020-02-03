@@ -12,6 +12,7 @@
 	<modules>
 		<module>migreringer</module>
 
+		<module>kontrakt</module>
 		<module>behandlingslager</module>
 		<module>domenetjenester</module>
 		<module>behandlingsprosess</module>
@@ -58,7 +59,7 @@
 			<dependency>
 			    <groupId>no.nav.vedtak.prosesstask</groupId>
 			    <artifactId>prosesstask-root</artifactId>
-			    <version>2.0.0-20191216124556-a028808</version>
+			    <version>2.1.0-20200131125706-62fdd0f</version>
                 <scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -85,6 +86,12 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+			<dependency>
+				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
+				<artifactId>oppdrag-kontrakter</artifactId>
+				<version>1.0-20200131154110-bf58e40</version>
+			</dependency>
+			
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
                 <artifactId>fp-topics-manifest</artifactId>
@@ -179,6 +186,11 @@
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>domenetjenester-bom</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.sak</groupId>
+				<artifactId>kontrakt</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -338,21 +350,6 @@
 				<artifactId>okonomistotte</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-            <dependency>
-                <groupId>no.nav.k9.sak</groupId>
-                <artifactId>tilbakekreving</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>opptjeningsvilkar</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>opptjeningsvilkar-regelmodell</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>behandlingslager-testutilities</artifactId>
@@ -381,11 +378,6 @@
 			</dependency>
 
             <!-- kafka -->
-            <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
-                <version>2.4.0</version>
-            </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-streams</artifactId>
@@ -449,8 +441,8 @@
 			<!-- bean validation -->
             <dependency>
                 <groupId>org.glassfish</groupId>
-                <artifactId>javax.el</artifactId>
-                <version>3.0.1-b11</version>
+                <artifactId>jakarta.el</artifactId>
+                <version>3.0.3</version>
             </dependency>
 
 			 <!-- Database -->

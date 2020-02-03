@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -51,10 +52,13 @@ public class SendVedtaksbrevTest {
 
     private BehandlingRepositoryProvider repositoryProvider;
 
+    private BehandlingReferanse ref;
+
     @Before
     public void oppsett() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
+        ref = BehandlingReferanse.fra(behandling);
         behandlingRepository = scenario.mockBehandlingRepository();
         repositoryProvider = scenario.mockBehandlingRepositoryProvider();
         behandlingVedtak = scenario.mockBehandlingVedtak();
@@ -68,7 +72,7 @@ public class SendVedtaksbrevTest {
     @Test
     public void testSendVedtaksbrevVedtakInnvilget() {
         // Act
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId());
+        sendVedtaksbrev.sendVedtaksbrev(ref);
 
         // Assert
         verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(behandlingVedtak);
@@ -80,7 +84,7 @@ public class SendVedtaksbrevTest {
         when(behandlingVedtak.getVedtakResultatType()).thenReturn(VedtakResultatType.AVSLAG);
 
         // Act
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId());
+        sendVedtaksbrev.sendVedtaksbrev(ref);
 
         // Assert
         verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(behandlingVedtak);
@@ -92,7 +96,7 @@ public class SendVedtaksbrevTest {
         when(dokumentBehandlingTjeneste.erDokumentProdusert(behandling.getId(), DokumentMalType.REVURDERING_DOK))
             .thenReturn(true);
 
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId());
+        sendVedtaksbrev.sendVedtaksbrev(ref);
 
         verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(behandlingVedtak);
     }
@@ -103,7 +107,7 @@ public class SendVedtaksbrevTest {
         when(dokumentBehandlingTjeneste.erDokumentProdusert(behandling.getId(), DokumentMalType.REVURDERING_DOK))
             .thenReturn(false);
 
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId());
+        sendVedtaksbrev.sendVedtaksbrev(ref);
 
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(behandlingVedtak);
     }
@@ -112,7 +116,7 @@ public class SendVedtaksbrevTest {
     public void sender_ikke_brev_dersom_førstegangsøknad_som_er_migrert_fra_infotrygd() {
         behandling.setMigrertKilde(Fagsystem.INFOTRYGD);
 
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId());
+        sendVedtaksbrev.sendVedtaksbrev(ref);
 
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(behandlingVedtak);
     }
@@ -122,7 +126,7 @@ public class SendVedtaksbrevTest {
         behandling.setMigrertKilde(Fagsystem.INFOTRYGD);
         when(behandlingsresultat.getVedtaksbrev()).thenReturn(Vedtaksbrev.FRITEKST);
 
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId());
+        sendVedtaksbrev.sendVedtaksbrev(ref);
 
         verify(dokumentBestillerApplikasjonTjeneste, times(1)).produserVedtaksbrev(behandlingVedtak);
     }

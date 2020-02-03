@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -66,6 +67,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 @RequestScoped // må være RequestScoped sålenge ikke nøstet prosessering støttes.
 public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjeneste {
 
+    private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
@@ -261,6 +263,17 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         return new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), lås);
     }
 
+    @Override
+    public BehandlingskontrollKontekst initBehandlingskontroll(String behandlingId) {
+        // sjekk om Long eller UUID (støtter ikke vilkårlig string p.t.)
+        Objects.requireNonNull(behandlingId, "behandlingId"); //$NON-NLS-1$
+        if(DIGITS_PATTERN.matcher(behandlingId).matches()) {
+            return initBehandlingskontroll(Long.parseLong(behandlingId));
+        } else {
+            return initBehandlingskontroll(UUID.fromString(behandlingId));
+        }
+    }
+    
     @Override
     public BehandlingskontrollKontekst initBehandlingskontroll(UUID behandlingUuid) {
         Objects.requireNonNull(behandlingUuid, "behandlingUuid"); //$NON-NLS-1$

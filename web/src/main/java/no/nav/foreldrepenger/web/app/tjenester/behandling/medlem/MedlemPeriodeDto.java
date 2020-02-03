@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
-import no.nav.foreldrepenger.domene.medlem.api.VurderingsÅrsak;
+import no.nav.foreldrepenger.domene.medlem.dto.VurderingsÅrsak;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.PersonopplysningDto;
 
 public class MedlemPeriodeDto {

@@ -72,7 +72,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt() {
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
         final Behandling behandling = scenario.lagre(repositoryProvider);
 
@@ -115,7 +115,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt_2() {
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
         final Behandling behandling = scenario.lagre(repositoryProvider);
 
@@ -163,7 +163,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt_3() {
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
 
         final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
@@ -210,7 +210,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_ikke_gi_autopunkt_når_inntektsmelding_og_aareg_matcher() {
         //Arrange
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
         final Behandling behandling = scenario.lagre(repositoryProvider);
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
@@ -227,7 +227,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_ikke_gi_autopunkt_når_inntektsmelding_uten_arbeidsforholdId() {
         //Arrange
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         var ref = EksternArbeidsforholdRef.ref("ref");
@@ -243,7 +243,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_ikke_gi_autopunkt_når_arbeidforholdId_mangler_fra_aareg() {
         //Arrange
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
@@ -259,7 +259,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding_uten_arbId() {
         //Arrange
-        final var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
         var ukjentRef = EksternArbeidsforholdRef.ref("ukjentRef");
@@ -281,7 +281,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding() {
         //Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         var behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
         var ukjentRef = EksternArbeidsforholdRef.ref("ukjentRef");

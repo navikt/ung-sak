@@ -108,7 +108,7 @@ public class AvklarArbeidsforholdOppdatererTest {
     public void skal_kreve_totrinn_hvis_saksbehandler_har_tatt_stilling_til_aksjonspunktet() {
 
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         opprettIAYAggregat(behandling, false, LocalDate.of(2018, 1, 1));
 
@@ -131,7 +131,7 @@ public class AvklarArbeidsforholdOppdatererTest {
     @Test
     public void skal_kunne_legge_til_nytt_arbeidsforhold() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         //simulere at 5080 har oppstått
@@ -184,7 +184,7 @@ public class AvklarArbeidsforholdOppdatererTest {
     @Test
     public void skal_kunne_legge_til_arbeidsforhold_basert_på_inntektsmelding() {
         // Arrange
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         //simulere at 5080 har oppstått
@@ -247,7 +247,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         BigDecimal stillingsprosent = BigDecimal.valueOf(100);
         opprettVirksomhetAG();
 
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         opprettIAYAggregat(behandling, false, fomDato);
 
@@ -299,7 +299,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         BigDecimal stillingsprosent = BigDecimal.valueOf(100);
         opprettVirksomhetAG();
 
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         opprettIAYAggregat(behandling, true, LocalDate.of(2018, 1, 1));
 
@@ -368,7 +368,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         BigDecimal stillingsprosent = BigDecimal.valueOf(100);
         opprettVirksomhetAG();
 
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         opprettIAYAggregat(behandling, false, LocalDate.of(2018, 1, 1));
 
@@ -417,7 +417,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         LocalDate fomDato = stpDato.minusYears(3);
         BigDecimal stillingsprosent = BigDecimal.valueOf(100);
 
-        var scenario = IAYScenarioBuilder.morSøker(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
         opprettIAYAggregat(behandling, false, LocalDate.of(2018, 1, 1));
 

@@ -86,6 +86,17 @@ public interface BehandlingskontrollTjeneste {
      */
     BehandlingskontrollKontekst initBehandlingskontroll(Behandling behandling);
 
+
+    /**
+     * Initierer ny behandlingskontroll for en ny behandling, som ikke er lagret i behandlingsRepository
+     * og derfor ikke har fått tildelt behandlingId
+     *
+     * @param behandlingId
+     *            - må være med.
+     */
+    BehandlingskontrollKontekst initBehandlingskontroll(String behandlingd);
+
+    
     /**
      * Initier ny Behandlingskontroll, oppretter kontekst som brukes til sikre at parallle behandlinger og kjøringer går
      * i tur og orden. Dette skjer gjennom å opprette en {@link BehandlingLås} som legges ved ved lagring.
