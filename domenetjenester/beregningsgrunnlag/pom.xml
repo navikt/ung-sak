@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<artifactId>domenetjenester-pom</artifactId>
-        <groupId>no.nav.k9.sak</groupId>
-        <version>${revision}${sha1}${changelist}</version>
+		<groupId>no.nav.k9.sak</groupId>
+		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<name>K9SAK :: Domenetjenester - Beregningsgrunnlag Regelmodell Tjeneste</name>
@@ -24,24 +25,28 @@
 
 		<!-- Domenetjenester avhengigheter -->
 		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>kontrakt</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>no.nav.folketrygdloven</groupId>
 			<artifactId>beregningsgrunnlag-regelmodell</artifactId>
 		</dependency>
 
 		<!-- Prosjekt avhengigheter -->
-       <dependency>
+		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>arbeidsforhold</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>no.nav.k9.sak</groupId>
-                    <artifactId>behandlingslager-domene</artifactId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<groupId>no.nav.k9.sak</groupId>
+					<artifactId>behandlingslager-domene</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- NARE: Java regelmodell -->
@@ -56,8 +61,8 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-core</artifactId>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -89,7 +94,7 @@
 			<scope>test</scope>
 		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 
 </project>

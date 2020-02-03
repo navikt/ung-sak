@@ -12,6 +12,7 @@
 	<modules>
 		<module>migreringer</module>
 
+		<module>kontrakt</module>
 		<module>behandlingslager</module>
 		<module>domenetjenester</module>
 		<module>behandlingsprosess</module>
@@ -185,6 +186,11 @@
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>domenetjenester-bom</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.sak</groupId>
+				<artifactId>kontrakt</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -440,8 +446,8 @@
 			<!-- bean validation -->
             <dependency>
                 <groupId>org.glassfish</groupId>
-                <artifactId>javax.el</artifactId>
-                <version>3.0.1-b11</version>
+                <artifactId>jakarta.el</artifactId>
+                <version>3.0.3</version>
             </dependency>
 
 			 <!-- Database -->
