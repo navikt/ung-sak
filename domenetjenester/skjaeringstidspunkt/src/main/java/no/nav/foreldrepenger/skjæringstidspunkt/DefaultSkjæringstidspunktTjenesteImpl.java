@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.skjæringstidspunkt;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,10 +10,14 @@ import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt.Builder;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -20,17 +25,17 @@ public class DefaultSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
 
     private BehandlingRepository behandlingRepository;
     private OpptjeningRepository opptjeningRepository;
-    private SøknadRepository søknadRepository;
+    private FordelingRepository fordelingRepository;
 
     DefaultSkjæringstidspunktTjenesteImpl() {
         // CDI
     }
 
     @Inject
-    public DefaultSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, OpptjeningRepository opptjeningRepository, SøknadRepository søknadRepository) {
+    public DefaultSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, OpptjeningRepository opptjeningRepository, FordelingRepository fordelingRepository) {
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
-        this.søknadRepository = søknadRepository;
+        this.fordelingRepository = fordelingRepository;
     }
 
     @Override
@@ -58,10 +63,16 @@ public class DefaultSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
-        // TODO K9: Endre
-        final var mottattDato = søknadRepository.hentSøknadHvisEksisterer(behandlingId).map(SøknadEntitet::getMottattDato);
-        if (mottattDato.isPresent()) {
-            return mottattDato.get();
+        final var fordeling = fordelingRepository.hentHvisEksisterer(behandlingId);
+
+        if(fordeling.isPresent()) {
+            final var oppgittFordeling = fordeling.get();
+            return oppgittFordeling.getPerioder()
+                .stream()
+                .map(FordelingPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getFomDato)
+                .min(LocalDate::compareTo)
+                .orElse(LocalDate.now());
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
