@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import javax.validation.ConstraintValidatorContext;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 public class KodeverdiValidator extends KodeverkValidator<Kodeverdi> {
 

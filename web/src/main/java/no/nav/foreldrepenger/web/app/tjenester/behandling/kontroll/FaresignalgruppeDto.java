@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.kontroll;
 
 import java.util.List;
 
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 
 public class FaresignalgruppeDto {
     private Kontrollresultat kontrollresultat;

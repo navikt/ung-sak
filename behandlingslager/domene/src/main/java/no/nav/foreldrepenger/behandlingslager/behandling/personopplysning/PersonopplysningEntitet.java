@@ -17,12 +17,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.KjønnKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.RegionKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.SivilstandTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.SivilstandType;
 
 @Entity(name = "Personopplysning")
 @Table(name = "PO_PERSONOPPLYSNING")
@@ -37,12 +42,12 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     private AktørId aktørId;
 
     @ChangeTracked
-    @Convert(converter = NavBrukerKjønn.KodeverdiConverter.class)
+    @Convert(converter = KjønnKodeverdiConverter.class)
     @Column(name = "bruker_kjoenn")
     private NavBrukerKjønn brukerKjønn = NavBrukerKjønn.UDEFINERT;
 
     @ChangeTracked
-    @Convert(converter = SivilstandType.KodeverdiConverter.class)
+    @Convert(converter = SivilstandTypeKodeverdiConverter.class)
     @Column(name = "sivilstand_type", nullable = false)
     private SivilstandType sivilstand = SivilstandType.UOPPGITT;
 
@@ -59,7 +64,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     private LocalDate fødselsdato;
 
     @ChangeTracked
-    @Convert(converter = Region.KodeverdiConverter.class)
+    @Convert(converter = RegionKodeverdiConverter.class)
     @Column(name="region", nullable = false)
     private Region region = Region.UDEFINERT;
 
@@ -96,7 +101,8 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(getAktørId());
+        Object[] keyParts = { getAktørId() };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     @Override

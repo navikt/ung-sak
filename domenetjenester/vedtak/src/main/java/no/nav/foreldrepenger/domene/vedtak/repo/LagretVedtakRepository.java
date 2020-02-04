@@ -16,9 +16,9 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.lagretvedtak.LagretVedtak;
 import no.nav.foreldrepenger.behandlingslager.lagretvedtak.LagretVedtakMedBehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @ApplicationScoped
 public class LagretVedtakRepository {

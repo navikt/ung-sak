@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Aktivitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class MapOpptjeningAktivitetTypeFraVLTilRegel {
     private static final Map<OpptjeningAktivitetType, Aktivitet> MAP_OPPTJENINGAKTIVITETTYPE_TIL_AKTIVITET;

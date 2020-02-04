@@ -4,8 +4,8 @@ import static java.util.Objects.isNull;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimuleringResultatDto;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public class SimulerOppdragAksjonspunktUtleder {
 

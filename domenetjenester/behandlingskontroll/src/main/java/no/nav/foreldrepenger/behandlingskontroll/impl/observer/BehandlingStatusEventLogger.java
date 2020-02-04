@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStatusEvent;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 
 @ApplicationScoped
 public class BehandlingStatusEventLogger {

@@ -56,10 +56,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.validering.ValidKodeverk;
 import no.nav.foreldrepenger.web.app.IndexClasses;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @RunWith(Parameterized.class)

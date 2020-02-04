@@ -8,6 +8,9 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
+import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
+
 public class UttakResultatPerioderEntitetTest {
 
     private LocalDate start;

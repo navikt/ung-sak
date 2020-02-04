@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.StegTransisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 /**
  * Hopper fremover fra steg A til steg B slik at stegene besøkes.

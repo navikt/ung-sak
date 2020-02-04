@@ -18,6 +18,8 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingÅrsakKodeverdiConverter;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 
 @Entity(name = "BehandlingÅrsak")
 @Table(name = "BEHANDLING_ARSAK")
@@ -35,7 +37,7 @@ public class BehandlingÅrsak extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @Convert(converter = BehandlingÅrsakType.KodeverdiConverter.class)
+    @Convert(converter = BehandlingÅrsakKodeverdiConverter.class)
     @Column(name="behandling_arsak_type", nullable = false)
     private BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
 

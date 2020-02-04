@@ -17,7 +17,9 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.BeregningsgrunnlagTilstandKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 
 
 @Entity(name = "BeregningsgrunnlagGrunnlagEntitet")
@@ -58,7 +60,7 @@ public class BeregningsgrunnlagGrunnlagEntitet extends BaseEntitet {
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
-    @Convert(converter=BeregningsgrunnlagTilstand.KodeverdiConverter.class)
+    @Convert(converter=BeregningsgrunnlagTilstandKodeverdiConverter.class)
     @Column(name="steg_opprettet", nullable = false)
     private BeregningsgrunnlagTilstand beregningsgrunnlagTilstand;
 

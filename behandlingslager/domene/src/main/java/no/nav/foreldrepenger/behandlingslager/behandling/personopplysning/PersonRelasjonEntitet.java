@@ -17,9 +17,12 @@ import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 
 @Entity(name = "PersonopplysningRelasjon")
 @Table(name = "PO_RELASJON")
@@ -39,7 +42,7 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     @ChangeTracked
     private AktørId tilAktørId;
 
-    @Convert(converter = RelasjonsRolleType.KodeverdiConverter.class)
+    @Convert(converter = RelasjonsRolleTypeKodeverdiConverter.class)
     @Column(name="relasjonsrolle", nullable = false)
     @ChangeTracked
     private RelasjonsRolleType relasjonsrolle;
@@ -66,7 +69,8 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(fraAktørId, this.relasjonsrolle, this.tilAktørId);
+        Object[] keyParts = { fraAktørId, this.relasjonsrolle, this.tilAktørId };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     void setFraAktørId(AktørId fraAktørId) {

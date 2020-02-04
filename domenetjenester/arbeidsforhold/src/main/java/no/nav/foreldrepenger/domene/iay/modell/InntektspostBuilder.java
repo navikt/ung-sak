@@ -3,10 +3,10 @@ package no.nav.foreldrepenger.domene.iay.modell;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.SkatteOgAvgiftsregelType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
 import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.iay.SkatteOgAvgiftsregelType;
+import no.nav.k9.kodeverk.iay.YtelseType;
 
 public class InntektspostBuilder {
     private Inntektspost inntektspost;

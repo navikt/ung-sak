@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.behandlingslager.aktør;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 
 public class Adresseinfo {
 

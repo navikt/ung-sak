@@ -2,10 +2,10 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling;
 
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.KonsekvensForYtelsen;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 public class BehandlingsresultatDto {
 

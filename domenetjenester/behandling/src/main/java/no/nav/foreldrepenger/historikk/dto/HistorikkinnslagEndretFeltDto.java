@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.historikk.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 
 public class HistorikkinnslagEndretFeltDto {
 

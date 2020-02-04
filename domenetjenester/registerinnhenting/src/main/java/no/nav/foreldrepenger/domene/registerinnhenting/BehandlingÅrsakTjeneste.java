@@ -11,11 +11,11 @@ import javax.inject.Inject;
 import javax.persistence.Entity;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.foreldrepenger.behandlingslager.behandling.GrunnlagRef;
 import no.nav.foreldrepenger.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 
 @Dependent
 public class BehandlingÅrsakTjeneste {

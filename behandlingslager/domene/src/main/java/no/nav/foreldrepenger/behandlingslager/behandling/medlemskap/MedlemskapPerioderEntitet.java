@@ -14,9 +14,17 @@ import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.LandkoderKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapDekningTypeKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapKildeTypeKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
 
 /**
  * Entitetsklasse for medlemskap perioder.
@@ -50,26 +58,26 @@ public class MedlemskapPerioderEntitet extends BaseEntitet implements Comparable
     private boolean erMedlem;
 
     @ChangeTracked
-    @Convert(converter = Landkoder.KodeverdiConverter.class)
+    @Convert(converter = LandkoderKodeverdiConverter.class)
     @Column(name="lovvalg_land", nullable = false)
     private Landkoder lovvalgLand = Landkoder.UDEFINERT;
 
     @ChangeTracked
-    @Convert(converter = Landkoder.KodeverdiConverter.class)
+    @Convert(converter = LandkoderKodeverdiConverter.class)
     @Column(name="studie_land", nullable = false)
     private Landkoder studieLand = Landkoder.UDEFINERT;
 
-    @Convert(converter = MedlemskapType.KodeverdiConverter.class)
+    @Convert(converter = MedlemskapTypeKodeverdiConverter.class)
     @Column(name="medlemskap_type", nullable = false)
     private MedlemskapType medlemskapType = MedlemskapType.UDEFINERT;
 
     @ChangeTracked
-    @Convert(converter = MedlemskapDekningType.KodeverdiConverter.class)
+    @Convert(converter = MedlemskapDekningTypeKodeverdiConverter.class)
     @Column(name="dekning_type", nullable = false)
     private MedlemskapDekningType dekningType = MedlemskapDekningType.UDEFINERT;
 
     @ChangeTracked
-    @Convert(converter = MedlemskapKildeType.KodeverdiConverter.class)
+    @Convert(converter = MedlemskapKildeTypeKodeverdiConverter.class)
     @Column(name="kilde_type", nullable = false)
     private MedlemskapKildeType kildeType = MedlemskapKildeType.UDEFINERT;
 
@@ -99,7 +107,8 @@ public class MedlemskapPerioderEntitet extends BaseEntitet implements Comparable
     @Override
     public String getIndexKey() {
         //redusert fra equals
-        return IndexKey.createKey(periode, medlId, dekningType, kildeType);
+        Object[] keyParts = { periode, medlId, dekningType, kildeType };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
 

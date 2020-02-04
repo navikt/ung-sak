@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public class RisikoklassifiseringEvent implements BehandlingEvent {
     private Behandling behandling;

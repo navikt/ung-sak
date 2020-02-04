@@ -21,11 +21,14 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @Entity(name = "BeregningAktivitet")
 @Table(name = "BG_AKTIVITET")
@@ -55,7 +58,7 @@ public class BeregningAktivitetEntitet extends BaseEntitet implements IndexKey {
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    @Convert(converter = OpptjeningAktivitetType.KodeverdiConverter.class)
+    @Convert(converter = OpptjeningAktivitetTypeKodeverdiConverter.class)
     @Column(name="opptjening_aktivitet_type", nullable = false)
     private OpptjeningAktivitetType opptjeningAktivitetType = OpptjeningAktivitetType.UDEFINERT;
 
@@ -160,7 +163,8 @@ public class BeregningAktivitetEntitet extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(arbeidsgiver, arbeidsforholdRef);
+        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public static class Builder {

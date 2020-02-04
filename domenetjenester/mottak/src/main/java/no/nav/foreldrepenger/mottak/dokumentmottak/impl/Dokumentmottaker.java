@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 public interface Dokumentmottaker {
 

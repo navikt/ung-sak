@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.inngangsvilkaar.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 public class UtledeteVilkår {
 

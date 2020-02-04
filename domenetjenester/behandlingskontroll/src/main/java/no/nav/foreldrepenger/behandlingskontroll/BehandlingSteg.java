@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandlingskontroll;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 public interface BehandlingSteg {
 

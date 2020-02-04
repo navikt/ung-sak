@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 
 public class ArbeidsforholdDto {
 

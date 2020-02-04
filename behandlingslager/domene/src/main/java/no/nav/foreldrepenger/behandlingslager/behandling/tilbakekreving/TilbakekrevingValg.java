@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving;
 
+import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+
 public class TilbakekrevingValg {
 
     private final Boolean erTilbakekrevingVilkårOppfylt;

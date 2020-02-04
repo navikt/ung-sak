@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.historikk.VurderArbeidsforholdHistorikkinnslag;
+import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
 
 final class UtledKoderForHistorikkinnslagdelerForArbeidsforholdUtenInnteksmelding {
 

@@ -7,9 +7,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraphConfig;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseJpaEntityGraphConfig;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 public final class TraverseEntityGraphFactory {
     private TraverseEntityGraphFactory() {

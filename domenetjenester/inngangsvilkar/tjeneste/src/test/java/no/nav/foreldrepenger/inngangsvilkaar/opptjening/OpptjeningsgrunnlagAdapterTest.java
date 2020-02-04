@@ -9,11 +9,9 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
 import no.nav.foreldrepenger.domene.iay.modell.InntektspostBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.foreldrepenger.domene.opptjening.VurderingsStatus;
@@ -22,6 +20,8 @@ import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsgrunnlagAdapt
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.AktivitetPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class OpptjeningsgrunnlagAdapterTest {

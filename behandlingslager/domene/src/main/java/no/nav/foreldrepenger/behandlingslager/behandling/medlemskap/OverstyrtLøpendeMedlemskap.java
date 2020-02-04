@@ -7,9 +7,11 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.UtfallKodeverdiConverter;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 
 @Embeddable
 public class OverstyrtLøpendeMedlemskap {
@@ -18,12 +20,12 @@ public class OverstyrtLøpendeMedlemskap {
     @Column(name = "overstyringsdato")
     private LocalDate overstyringsdato;
 
-    @Convert(converter = Utfall.KodeverdiConverter.class)
+    @Convert(converter = UtfallKodeverdiConverter.class)
     @Column(name="overstyrt_utfall", nullable = false)
     private Utfall vilkårUtfall = Utfall.UDEFINERT;
 
     @ChangeTracked
-    @Convert(converter = Avslagsårsak.KodeverdiConverter.class)
+    @Convert(converter = AvslagsårsakKodeverdiConverter.class)
     @Column(name="avslagsarsak", nullable = false)
     private Avslagsårsak avslagsårsak = Avslagsårsak.UDEFINERT;
 

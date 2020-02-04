@@ -19,10 +19,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrSt
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.EgenNæringDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.PgiDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 class LagTilpassetDtoTjeneste  {
 

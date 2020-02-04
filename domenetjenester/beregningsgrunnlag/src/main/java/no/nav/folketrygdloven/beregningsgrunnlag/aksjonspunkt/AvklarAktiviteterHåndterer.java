@@ -9,16 +9,16 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.AvklarteAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.BeregningsaktivitetLagreDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.OverstyrBeregningsaktiviteterDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetHandlingType;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyringEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyringerEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 
 @ApplicationScoped
 public class AvklarAktiviteterHåndterer {

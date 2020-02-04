@@ -16,7 +16,9 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.PeriodeÅrsakKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
 @Entity(name = "BeregningsgrunnlagPeriodeÅrsak")
 @Table(name = "BG_PERIODE_AARSAK")
@@ -35,7 +37,7 @@ public class BeregningsgrunnlagPeriodeÅrsak extends BaseEntitet {
     @JoinColumn(name = "bg_periode_id", nullable = false, updatable = false)
     private BeregningsgrunnlagPeriode beregningsgrunnlagPeriode;
 
-    @Convert(converter = PeriodeÅrsak.KodeverdiConverter.class)
+    @Convert(converter = PeriodeÅrsakKodeverdiConverter.class)
     @Column(name="periode_aarsak", nullable = false)
     private PeriodeÅrsak periodeÅrsak = PeriodeÅrsak.UDEFINERT;
 

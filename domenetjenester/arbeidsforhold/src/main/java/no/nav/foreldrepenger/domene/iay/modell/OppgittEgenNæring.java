@@ -5,10 +5,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 public class OppgittEgenNæring implements IndexKey {
 
@@ -44,7 +45,8 @@ public class OppgittEgenNæring implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(periode, virksomhetOrgnr, utenlandskVirksomhet);
+        Object[] keyParts = { periode, virksomhetOrgnr, utenlandskVirksomhet };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public LocalDate getFraOgMed() {

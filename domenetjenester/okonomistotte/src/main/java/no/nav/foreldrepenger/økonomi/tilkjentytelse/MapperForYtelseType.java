@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.økonomi.tilkjentytelse;
 
 import java.util.Map;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 class MapperForYtelseType {
 

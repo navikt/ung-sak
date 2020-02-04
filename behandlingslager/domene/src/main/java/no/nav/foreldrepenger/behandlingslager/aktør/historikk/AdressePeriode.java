@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandlingslager.aktør.historikk;
 
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.AdresseType;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
 
 public class AdressePeriode {
 

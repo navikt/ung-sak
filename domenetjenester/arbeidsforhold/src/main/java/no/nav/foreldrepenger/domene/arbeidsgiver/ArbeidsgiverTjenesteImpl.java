@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
@@ -50,13 +49,13 @@ public class ArbeidsgiverTjenesteImpl implements ArbeidsgiverTjeneste {
         if (arbeidsgiverOpplysninger != null) {
             return arbeidsgiverOpplysninger;
         }
-        if (arbeidsgiver.getErVirksomhet() && !Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr())) {
+        if (arbeidsgiver.getErVirksomhet() && !OrgNummer.erKunstig(arbeidsgiver.getOrgnr())) {
             String orgnr = arbeidsgiver.getOrgnr();
             var virksomhet = virksomhetTjeneste.hentOgLagreOrganisasjon(orgnr);
             ArbeidsgiverOpplysninger nyOpplysninger = new ArbeidsgiverOpplysninger(orgnr, virksomhet.getNavn());
             cache.put(arbeidsgiver.getIdentifikator(), nyOpplysninger);
             return nyOpplysninger;
-        } else if (arbeidsgiver.getErVirksomhet() && Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr())) {
+        } else if (arbeidsgiver.getErVirksomhet() && OrgNummer.erKunstig(arbeidsgiver.getOrgnr())) {
             return new ArbeidsgiverOpplysninger(OrgNummer.KUNSTIG_ORG, "Kunstig(Lagt til av saksbehandling)");
         } else if (arbeidsgiver.erAktørId()) {
             Optional<Personinfo> personinfo = hentInformasjonFraTps(arbeidsgiver);

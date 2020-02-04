@@ -22,9 +22,16 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalUtil;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AksjonspunktDefinisjonKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AksjonspunktStatusKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.VenteårsakKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 @Entity(name = "Aksjonspunkt")
 @Table(name = "AKSJONSPUNKT")
@@ -37,11 +44,11 @@ public class Aksjonspunkt extends BaseEntitet {
     @Column(name = "frist_tid")
     private LocalDateTime fristTid;
 
-    @Convert(converter = AksjonspunktDefinisjon.KodeverdiConverter.class)
+    @Convert(converter = AksjonspunktDefinisjonKodeverdiConverter.class)
     @Column(name = "aksjonspunkt_def", nullable = false, updatable = false)
     private AksjonspunktDefinisjon aksjonspunktDefinisjon;
 
-    @Convert(converter = BehandlingStegType.KodeverdiConverter.class)
+    @Convert(converter = BehandlingStegTypeKodeverdiConverter.class)
     @Column(name = "behandling_steg_funnet")
     private BehandlingStegType behandlingSteg;
 
@@ -49,11 +56,11 @@ public class Aksjonspunkt extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @Convert(converter = AksjonspunktStatus.KodeverdiConverter.class)
+    @Convert(converter = AksjonspunktStatusKodeverdiConverter.class)
     @Column(name = "aksjonspunkt_status", nullable = false)
     private AksjonspunktStatus status;
 
-    @Convert(converter = Venteårsak.KodeverdiConverter.class)
+    @Convert(converter = VenteårsakKodeverdiConverter.class)
     @Column(name="vent_aarsak", nullable = false)
     private Venteårsak venteårsak = Venteårsak.UDEFINERT;
 

@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 public class ManglendeVedleggDto {
     private DokumentTypeId dokumentType;

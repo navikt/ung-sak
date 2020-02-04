@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.historikk.dto;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 
 class HistorikkInnslagTemaDto {
     private HistorikkEndretFeltType endretFeltNavn;

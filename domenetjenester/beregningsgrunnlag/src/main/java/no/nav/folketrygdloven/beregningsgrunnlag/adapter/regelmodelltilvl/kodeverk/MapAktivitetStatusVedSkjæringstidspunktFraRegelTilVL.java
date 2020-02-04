@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Arbeidsforhold;
 import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 public class MapAktivitetStatusVedSkjæringstidspunktFraRegelTilVL {
     private static final Map<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus, AktivitetStatus> AKTIVITET_STATUS_MAP = new EnumMap<>(

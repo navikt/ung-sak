@@ -2,7 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.kodev
 
 import java.util.EnumMap;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.PeriodeÅrsak;
+import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
 public class MapPeriodeÅrsakFraRegelTilVL {
 

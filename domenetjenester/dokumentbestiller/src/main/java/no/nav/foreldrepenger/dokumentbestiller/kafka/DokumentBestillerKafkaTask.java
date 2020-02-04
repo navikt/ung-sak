@@ -52,7 +52,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         this.behandlingRepository = behandlingRepository;
     }
 
-    private static FagsakYtelseType mapYtelse(no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType fpsakYtelseKode) {
+    private static FagsakYtelseType mapYtelse(no.nav.k9.kodeverk.behandling.FagsakYtelseType fpsakYtelseKode) {
         return new FagsakYtelseType(fpsakYtelseKode.getKode());
     }
 

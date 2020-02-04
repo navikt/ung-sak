@@ -4,7 +4,7 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.binding.FinnAlleBehandlendeEnheterListeUgyldigInput;
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.binding.FinnBehandlendeEnhetListeUgyldigInput;
 import no.nav.vedtak.feil.Feil;

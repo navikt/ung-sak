@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.impl;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
 
 final class UtledBrukAvPermisjonForWrapper {
 

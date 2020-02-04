@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.brev;
 
-import static no.nav.foreldrepenger.dokumentbestiller.DokumentMalType.INNHENT_DOK;
+import static no.nav.k9.kodeverk.dokument.DokumentMalType.INNHENT_DOK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -18,13 +18,13 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerApplikasjonTjeneste;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentMalRestriksjon;
 import no.nav.foreldrepenger.dokumentbestiller.dto.BestillBrevDto;
 import no.nav.foreldrepenger.dokumentbestiller.dto.BrevmalDto;
+import no.nav.k9.kodeverk.dokument.DokumentMalRestriksjon;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 
 public class BrevRestTjenesteTest {
 

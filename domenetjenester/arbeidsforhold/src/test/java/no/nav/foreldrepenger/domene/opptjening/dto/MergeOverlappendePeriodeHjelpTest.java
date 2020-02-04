@@ -9,10 +9,10 @@ import java.util.List;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetKlassifisering;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.opptjening.dto.FastsattOpptjeningAktivitetDto;
 import no.nav.foreldrepenger.domene.opptjening.dto.MergeOverlappendePeriodeHjelp;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class MergeOverlappendePeriodeHjelpTest {
 

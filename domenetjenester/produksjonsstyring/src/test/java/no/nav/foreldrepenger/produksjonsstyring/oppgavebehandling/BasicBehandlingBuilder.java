@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling;
 
 import static java.time.Month.JANUARY;
-import static no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn.KVINNE;
+import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -16,11 +16,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
 
 /** Enkel builder for å lage en enkel behandling for internt bruk her. */
 public class BasicBehandlingBuilder {

@@ -16,12 +16,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.aktør.AdresseType;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AdresseTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
 
 @Entity(name = "PersonopplysningAdresse")
 @Table(name = "PO_ADRESSE")
@@ -38,7 +40,7 @@ public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, In
     @Embedded
     private DatoIntervallEntitet periode;
 
-    @Convert(converter = AdresseType.KodeverdiConverter.class)
+    @Convert(converter = AdresseTypeKodeverdiConverter.class)
     @Column(name = "adresse_type", nullable = false)
     private AdresseType adresseType;
 
@@ -93,7 +95,8 @@ public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, In
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(aktørId, adresseType, land, periode);
+        Object[] keyParts = { aktørId, adresseType, land, periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     void setPersonopplysningInformasjon(PersonInformasjonEntitet personopplysningInformasjon) {

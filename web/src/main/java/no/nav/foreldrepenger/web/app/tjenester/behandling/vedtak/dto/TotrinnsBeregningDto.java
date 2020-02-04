@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto;
 
 import java.util.List;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 public class TotrinnsBeregningDto {
 

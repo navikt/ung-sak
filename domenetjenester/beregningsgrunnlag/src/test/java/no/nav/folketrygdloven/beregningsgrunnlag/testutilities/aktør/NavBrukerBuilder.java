@@ -1,14 +1,14 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.testutilities.aktør;
 
-import static no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn.KVINNE;
+import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 
 public class NavBrukerBuilder {
 

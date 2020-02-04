@@ -1,8 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRegelType.BRUKERS_STATUS;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRegelType.PERIODISERING;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRegelType.SKJÆRINGSTIDSPUNKT;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagRegelType.BRUKERS_STATUS;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagRegelType.PERIODISERING;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagRegelType.SKJÆRINGSTIDSPUNKT;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,9 +35,12 @@ import javax.persistence.Version;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagRegelType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 @Entity(name = "Beregningsgrunnlag")
 @Table(name = "BEREGNINGSGRUNNLAG")

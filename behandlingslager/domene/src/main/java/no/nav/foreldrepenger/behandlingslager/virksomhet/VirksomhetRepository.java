@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.vedtak.util.LRUCache;
 
 /** Cacher oppslag på virksomhet i minne nå (istdf. å lagre i database.) */

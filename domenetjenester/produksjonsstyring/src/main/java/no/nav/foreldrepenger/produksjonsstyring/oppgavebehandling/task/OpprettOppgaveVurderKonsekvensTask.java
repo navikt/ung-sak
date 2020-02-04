@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.foreldrepenger.historikk.OppgaveÅrsak.VURDER_KONS_FOR_YTELSE;
 import static no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderKonsekvensTask.TASKTYPE;
+import static no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak.VURDER_KONS_FOR_YTELSE;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

@@ -23,19 +23,19 @@ import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.Familierelasjon;
 import no.nav.foreldrepenger.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.GeografiskTilknytning;
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Gyldighetsperiode;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.PersonstatusPeriode;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.SivilstandType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Aktoer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder;
@@ -68,8 +68,8 @@ public class TpsOversetter {
         this.tpsAdresseOversetter = tpsAdresseOversetter;
     }
 
-    private no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder utledLandkode(Statsborgerskap statsborgerskap) {
-        no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder landkode = no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder.UDEFINERT;
+    private no.nav.k9.kodeverk.geografisk.Landkoder utledLandkode(Statsborgerskap statsborgerskap) {
+        no.nav.k9.kodeverk.geografisk.Landkoder landkode = no.nav.k9.kodeverk.geografisk.Landkoder.UDEFINERT;
         if (Optional.ofNullable(statsborgerskap).isPresent()) {
             landkode = Landkoder.fraKode(statsborgerskap.getLand().getValue());
         }
@@ -94,7 +94,7 @@ public class TpsOversetter {
             .map(this::tilRelasjon)
             .collect(toSet());
 
-        no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder landkoder = utledLandkode(bruker.getStatsborgerskap());
+        no.nav.k9.kodeverk.geografisk.Landkoder landkoder = utledLandkode(bruker.getStatsborgerskap());
         Region region = Region.finnHøyestRangertRegion(Collections.singletonList(landkoder.getKode()));
 
         String diskresjonskode = bruker.getDiskresjonskode() == null ? null : bruker.getDiskresjonskode().getValue();
@@ -169,7 +169,7 @@ public class TpsOversetter {
                     DateUtil.convertToLocalDate(e.getPeriode().getFom()),
                     DateUtil.convertToLocalDate(e.getPeriode().getTom()));
 
-                no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder landkoder = Landkoder.fraKode(e.getStatsborgerskap().getLand().getValue());
+                no.nav.k9.kodeverk.geografisk.Landkoder landkoder = Landkoder.fraKode(e.getStatsborgerskap().getLand().getValue());
                 StatsborgerskapPeriode element = new StatsborgerskapPeriode(gyldighetsperiode,
                     new no.nav.foreldrepenger.behandlingslager.aktør.Statsborgerskap(landkoder.getKode()));
                 builder.leggTil(element);

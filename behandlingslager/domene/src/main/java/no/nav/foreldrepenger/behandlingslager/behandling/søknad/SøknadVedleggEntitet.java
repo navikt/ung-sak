@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.InnsendingsvalgKodeverdiConverter;
 
 /**
  * Entitetsklasse for vedlegg.
@@ -42,7 +43,7 @@ public class SøknadVedleggEntitet extends BaseEntitet {
     
     private boolean erVedleggPåkrevdISøknadsdialog;
 
-    @Convert(converter = Innsendingsvalg.KodeverdiConverter.class)
+    @Convert(converter = InnsendingsvalgKodeverdiConverter.class)
     @Column(name = "innsendingsvalg", nullable = false)
     private Innsendingsvalg innsendingsvalg = Innsendingsvalg.IKKE_VALGT;
 

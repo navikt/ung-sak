@@ -13,8 +13,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.VurderÅrsakKodeverdiConverter;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 
 
 /**
@@ -28,7 +30,7 @@ public class VurderÅrsakTotrinnsvurdering extends BaseEntitet implements IndexK
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VURDER_AARSAK_TTVURDERING")
     private Long id;
 
-    @Convert(converter = VurderÅrsak.KodeverdiConverter.class)
+    @Convert(converter = VurderÅrsakKodeverdiConverter.class)
     @Column(name="aarsak_type", nullable=false, updatable=false)
     private VurderÅrsak årsaksType;
 
@@ -47,7 +49,8 @@ public class VurderÅrsakTotrinnsvurdering extends BaseEntitet implements IndexK
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(årsaksType);
+        Object[] keyParts = { årsaksType };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public VurderÅrsak getÅrsaksType() {

@@ -13,6 +13,8 @@ import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapManuellVurderingTypeKodeverdiConverter;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 
 /**
  * Entitetsklasse for medlemskap.
@@ -52,7 +54,7 @@ public class VurdertMedlemskapEntitet extends BaseEntitet implements VurdertMedl
     @Column(name = "begrunnelse")
     private String begrunnelse;
 
-    @Convert(converter = MedlemskapManuellVurderingType.KodeverdiConverter.class)
+    @Convert(converter = MedlemskapManuellVurderingTypeKodeverdiConverter.class)
     @Column(name="medlemsperiode_manuell_vurd", nullable = false)
     private MedlemskapManuellVurderingType medlemsperiodeManuellVurdering = MedlemskapManuellVurderingType.UDEFINERT;
 

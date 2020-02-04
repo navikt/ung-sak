@@ -18,8 +18,10 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.SpråkKodeverdiConverter;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 
 @Entity(name = "Søknad")
 @Table(name = "SO_SOEKNAD")
@@ -45,7 +47,7 @@ public class SøknadEntitet extends BaseEntitet {
     @Column(name = "tilleggsopplysninger")
     private String tilleggsopplysninger;
 
-    @Convert(converter = Språkkode.KodeverdiConverter.class)
+    @Convert(converter = SpråkKodeverdiConverter.class)
     @Column(name = "sprak_kode", nullable = false)
     private Språkkode språkkode = Språkkode.UDEFINERT;
 
@@ -60,7 +62,7 @@ public class SøknadEntitet extends BaseEntitet {
     private boolean erEndringssøknad;
 
 
-    @Convert(converter = RelasjonsRolleType.KodeverdiConverter.class)
+    @Convert(converter = RelasjonsRolleTypeKodeverdiConverter.class)
     @Column(name="bruker_rolle", nullable = false)
     private RelasjonsRolleType brukerRolle = RelasjonsRolleType.UDEFINERT;
 

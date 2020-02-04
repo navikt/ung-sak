@@ -1,29 +1,50 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.impl;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
-import no.nav.foreldrepenger.domene.arbeidsforhold.*;
-import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
-import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.foreldrepenger.domene.iay.modell.*;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import static java.util.Collections.emptyList;
+import static no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde.INNTEKTSKOMPONENTEN;
+import static no.nav.k9.kodeverk.iay.ArbeidType.AA_REGISTER_TYPER;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType.AA_REGISTER_TYPER;
-import static no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde.INNTEKTSKOMPONENTEN;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
+import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdWrapper;
+import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.foreldrepenger.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
+import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
+import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
+import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
+import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyrtePerioder;
+import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
+import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
+import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
+import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 
 /**
  * Håndterer administrasjon(saksbehandlers input) vedrørende arbeidsforhold.
@@ -441,7 +462,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             wrapper.setNavn("N/A");
             wrapper.setArbeidsgiverIdentifikator(arbeidsgiver.getIdentifikator());
         } else {
-            if (Organisasjonstype.erKunstig(opplysninger.getIdentifikator())) {
+            if (OrgNummer.erKunstig(opplysninger.getIdentifikator())) {
                 Optional<String> navnOpt = overstyringer.stream()
                     .filter(o -> o.getArbeidsgiver().equals(arbeidsgiver) && o.getArbeidsgiverNavn() != null)
                     .map(ArbeidsforholdOverstyring::getArbeidsgiverNavn)

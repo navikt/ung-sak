@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
+
 public class BeregningAksjonspunktResultat {
 
     private BeregningAksjonspunktDefinisjon beregningAksjonspunktDefinisjon;

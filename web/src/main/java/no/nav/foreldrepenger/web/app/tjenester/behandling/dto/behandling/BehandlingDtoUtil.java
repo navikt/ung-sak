@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.web.app.rest.ResourceLink;
 import no.nav.foreldrepenger.web.app.util.RestUtils;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 public class BehandlingDtoUtil {
 

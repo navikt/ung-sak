@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.historikk.VurderArbeidsforholdHistorikkinnslag;
+import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
 
 public class UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforholdTest {
 

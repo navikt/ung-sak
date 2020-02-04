@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 
 public class FødtBarnInfo {
     public static final String UTEN_NAVN = "UTEN NAVN";

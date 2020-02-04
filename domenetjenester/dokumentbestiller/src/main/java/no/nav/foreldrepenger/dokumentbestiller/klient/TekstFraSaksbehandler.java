@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.dokumentbestiller.klient;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 
 public class TekstFraSaksbehandler {
     private Vedtaksbrev vedtaksbrev = Vedtaksbrev.UDEFINERT;

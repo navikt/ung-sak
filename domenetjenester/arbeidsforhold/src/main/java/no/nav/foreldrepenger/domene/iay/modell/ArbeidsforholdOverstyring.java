@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.domene.iay.modell;
 
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,13 +13,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.BekreftetPermisjonStatus;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
 
 public class ArbeidsforholdOverstyring implements IndexKey {
 
@@ -139,7 +140,8 @@ public class ArbeidsforholdOverstyring implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(arbeidsgiver, arbeidsforholdRef);
+        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     @Override

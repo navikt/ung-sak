@@ -4,8 +4,9 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 public class ArbeidsforholdOverstyrtePerioder implements IndexKey {
 
@@ -23,7 +24,8 @@ public class ArbeidsforholdOverstyrtePerioder implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(getOverstyrtePeriode());
+        Object[] keyParts = { getOverstyrtePeriode() };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     void setPeriode(DatoIntervallEntitet periode) {

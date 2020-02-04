@@ -7,7 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -15,6 +14,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDoku
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseIdDto;
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatus;
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatusDataDTO;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 
 @ApplicationScoped
 public class ForsendelseStatusTjeneste {

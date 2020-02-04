@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.domene.risikoklassifisering.konsument;
 
 import no.nav.foreldrepenger.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.json.KontrollresultatMapper;
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;

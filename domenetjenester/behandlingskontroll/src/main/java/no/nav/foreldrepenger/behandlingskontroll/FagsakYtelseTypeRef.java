@@ -22,7 +22,7 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef.ContainerOfFagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 /**
  * Marker type som implementerer interface {@link BehandlingSteg} for å skille ulike implementasjoner av samme steg for ulike ytelser (eks.
@@ -44,7 +44,7 @@ public @interface FagsakYtelseTypeRef {
      * <p>
      * Må matche ett innslag i <code>FAGSAK_YTELSE_TYPE</code> tabell for å kunne kjøres.
      *
-     * @see no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType
+     * @see no.nav.k9.kodeverk.behandling.FagsakYtelseType
      */
     String value() default "*";
 

@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
 import no.nav.foreldrepenger.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.AktoerIdDto;
@@ -66,7 +65,7 @@ public class Risikoklassifisering {
     }
 
     private String hentBehandlingTema(Behandling behandling) {
-        BehandlingTema behandlingTema = BehandlingTema.fraFagsak(behandling.getFagsak());
+        var behandlingTema = behandling.getFagsak().getBehandlingTema();
         return behandlingTema.getOffisiellKode();
     }
 

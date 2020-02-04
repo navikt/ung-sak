@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
+import no.nav.k9.kodeverk.iay.Arbeidskategori;
 
 public class YtelseGrunnlag extends BaseEntitet {
 

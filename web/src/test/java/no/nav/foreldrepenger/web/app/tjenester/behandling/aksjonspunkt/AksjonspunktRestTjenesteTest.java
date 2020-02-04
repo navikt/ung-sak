@@ -18,12 +18,12 @@ import org.mockito.ArgumentMatchers;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.AvklarFortsattMedlemskapDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AksjonspunktGodkjenningDto;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.vedtak.exception.FunksjonellException;
 
 public class AksjonspunktRestTjenesteTest {
@@ -43,7 +43,7 @@ public class AksjonspunktRestTjenesteTest {
         when(behandling.getUuid()).thenReturn(UUID.randomUUID());
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(behandling);
         when(behandlingRepository.hentBehandling(any(UUID.class))).thenReturn(behandling);
-        when(behandling.getStatus()).thenReturn(no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus.OPPRETTET);
+        when(behandling.getStatus()).thenReturn(no.nav.k9.kodeverk.behandling.BehandlingStatus.OPPRETTET);
         doNothing().when(behandlingsutredningApplikasjonTjenesteMock).kanEndreBehandling(anyLong(), anyLong());
         aksjonspunktRestTjeneste = new AksjonspunktRestTjeneste(aksjonspunktApplikasjonTjenesteMock, behandlingRepository,
             behandlingsutredningApplikasjonTjenesteMock, totrinnTjeneste);

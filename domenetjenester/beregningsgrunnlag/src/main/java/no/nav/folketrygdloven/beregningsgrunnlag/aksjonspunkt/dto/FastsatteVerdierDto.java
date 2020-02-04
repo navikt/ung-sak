@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.validering.ValidKodeverk;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class FastsatteVerdierDto {
 

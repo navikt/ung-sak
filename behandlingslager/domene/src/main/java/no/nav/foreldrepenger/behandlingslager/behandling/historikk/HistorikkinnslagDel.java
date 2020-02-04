@@ -23,7 +23,10 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkOpplysningType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
 
 @Entity(name = "HistorikkinnslagDel")
 @Table(name = "HISTORIKKINNSLAG_DEL")

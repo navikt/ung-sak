@@ -12,6 +12,7 @@
 	<modules>
 		<module>migreringer</module>
 
+		<module>kodeverk</module>
 		<module>kontrakt</module>
 		<module>behandlingslager</module>
 		<module>domenetjenester</module>
@@ -186,6 +187,11 @@
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>domenetjenester-bom</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.sak</groupId>
+				<artifactId>kodeverk</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

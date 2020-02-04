@@ -21,12 +21,16 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.UtfallKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.vedtak.felles.jpa.converters.PropertiesToStringConverter;
 
 @Entity
@@ -51,15 +55,15 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     })
     private DatoIntervallEntitet periode;
 
-    @Convert(converter = Utfall.KodeverdiConverter.class)
+    @Convert(converter = UtfallKodeverdiConverter.class)
     @Column(name = "utfall", nullable = false)
     private Utfall utfall = Utfall.UDEFINERT;
 
-    @Convert(converter = Utfall.KodeverdiConverter.class)
+    @Convert(converter = UtfallKodeverdiConverter.class)
     @Column(name = "overstyrt_utfall", nullable = false)
     private Utfall overstyrtUtfall = Utfall.UDEFINERT;
 
-    @Convert(converter = VilkårUtfallMerknad.KodeverdiConverter.class)
+    @Convert(converter = VurderUtfallMerknadKodeverdiConverter.class)
     @Column(name = "merknad", nullable = false)
     private VilkårUtfallMerknad utfallMerknad = VilkårUtfallMerknad.UDEFINERT;
 
@@ -67,7 +71,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "merknad_parametere")
     private Properties merknadParametere = new Properties();
 
-    @Convert(converter = Avslagsårsak.KodeverdiConverter.class)
+    @Convert(converter = AvslagsårsakKodeverdiConverter.class)
     @Column(name = "avslag_kode", nullable = false)
     private Avslagsårsak avslagsårsak = Avslagsårsak.UDEFINERT;
 
@@ -106,7 +110,8 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(periode);
+        Object[] keyParts = { periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     /**

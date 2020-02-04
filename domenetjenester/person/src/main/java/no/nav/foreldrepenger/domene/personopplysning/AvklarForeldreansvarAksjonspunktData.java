@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.personopplysning;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public class AvklarForeldreansvarAksjonspunktData {
     private LocalDate omsorgsovertakelseDato;

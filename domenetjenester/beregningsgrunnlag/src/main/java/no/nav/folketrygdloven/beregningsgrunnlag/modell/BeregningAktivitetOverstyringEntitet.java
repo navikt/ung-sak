@@ -18,11 +18,14 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.BeregningAktivitetHandlingTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @Entity(name = "BeregningAktivitetOverstyring")
 @Table(name = "BG_AKTIVITET_OVERSTYRING")
@@ -46,11 +49,11 @@ public class BeregningAktivitetOverstyringEntitet extends BaseEntitet {
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    @Convert(converter=BeregningAktivitetHandlingType.KodeverdiConverter.class)
+    @Convert(converter=BeregningAktivitetHandlingTypeKodeverdiConverter.class)
     @Column(name="handling_type", nullable = false)
     private BeregningAktivitetHandlingType handlingType;
 
-    @Convert(converter = OpptjeningAktivitetType.KodeverdiConverter.class)
+    @Convert(converter = OpptjeningAktivitetTypeKodeverdiConverter.class)
     @Column(name="opptjening_aktivitet_type", nullable = false)
     private OpptjeningAktivitetType opptjeningAktivitetType;
 

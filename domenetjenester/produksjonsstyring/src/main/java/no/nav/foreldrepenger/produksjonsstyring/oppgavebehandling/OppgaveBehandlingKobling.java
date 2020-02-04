@@ -22,7 +22,7 @@ import javax.persistence.Version;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.foreldrepenger.historikk.OppgaveÅrsak;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
 @Entity(name = "OppgaveBehandlingKobling")
 @Table(name = "OPPGAVE_BEHANDLING_KOBLING")
@@ -32,7 +32,7 @@ public class OppgaveBehandlingKobling extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OPPGAVE_BEHANDLING_KOBLING")
     private Long id;
 
-    @Convert(converter = OppgaveÅrsak.KodeverdiConverter.class)
+    @Convert(converter = OppgaveÅrsakKodeverdiConverter.class)
     @Column(name="oppgave_aarsak", nullable = false)
     private OppgaveÅrsak oppgaveÅrsak;
 

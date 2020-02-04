@@ -14,7 +14,12 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingStegStatusKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 @Entity(name = "BehandlingStegTilstand")
 @Table(name = "BEHANDLING_STEG_TILSTAND")
@@ -24,7 +29,7 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_STEG_TILSTAND")
     private Long id;
 
-    @Convert(converter = BehandlingStegType.KodeverdiConverter.class)
+    @Convert(converter = BehandlingStegTypeKodeverdiConverter.class)
     @Column(name = "behandling_steg", nullable = false, updatable = false)
     private BehandlingStegType behandlingSteg;
 
@@ -32,7 +37,7 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @Convert(converter = BehandlingStegStatus.KodeverdiConverter.class)
+    @Convert(converter = BehandlingStegStatusKodeverdiConverter.class)
     @Column(name = "behandling_steg_status", nullable = false)
     private BehandlingStegStatus behandlingStegStatus = BehandlingStegStatus.UDEFINERT;
 
@@ -60,7 +65,8 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
     
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(behandlingSteg, behandlingStegStatus);
+        Object[] keyParts = { behandlingSteg, behandlingStegStatus };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public Behandling getBehandling() {

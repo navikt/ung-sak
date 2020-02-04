@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 
 @Entity(name = "RisikoklassifiseringEntitet")
 @Table(name = "RISIKOKLASSIFISERING")
@@ -23,11 +25,11 @@ public class RisikoklassifiseringEntitet extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
-    @Convert(converter = Kontrollresultat.KodeverdiConverter.class)
+    @Convert(converter = KontrollresultatKodeverdiConverter.class)
     @Column(name = "kontroll_resultat", nullable = false)
     private Kontrollresultat kontrollresultat = Kontrollresultat.UDEFINERT;
 
-    @Convert(converter = FaresignalVurdering.KodeverdiConverter.class)
+    @Convert(converter = FaresignalKodeverdiConverter.class)
     @Column(name = "faresignal_vurdering", nullable = false)
     private FaresignalVurdering faresignalVurdering = FaresignalVurdering.UDEFINERT;
 

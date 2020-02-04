@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat;
 
-import no.nav.foreldrepenger.behandlingslager.uttak.PeriodeResultatType;
+import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 
 public class UttakDto {
     private final String periodeResultatType;

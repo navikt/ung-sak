@@ -18,7 +18,12 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.UttakPeriodeResultatKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
+import no.nav.k9.kodeverk.uttak.InnvilgetÅrsak;
+import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
+import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
 
 @Entity
 @Table(name = "UTTAK_RESULTAT_PERIODE")
@@ -46,7 +51,7 @@ public class UttakResultatPeriodeEntitet extends BaseEntitet {
     @Column(name = "begrunnelse")
     private String begrunnelse;
 
-    @Convert(converter = PeriodeResultatType.KodeverdiConverter.class)
+    @Convert(converter = UttakPeriodeResultatKodeverdiConverter.class)
     @Column(name="periode_resultat_type", nullable = false)
     private PeriodeResultatType periodeResultatType;
 

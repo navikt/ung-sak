@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningInntektPeriode;
@@ -22,6 +21,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsg
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef

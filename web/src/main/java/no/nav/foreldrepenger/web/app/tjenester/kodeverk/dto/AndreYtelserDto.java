@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.web.app.tjenester.kodeverk.dto;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.validering.ValidKodeverk;
+import no.nav.k9.kodeverk.iay.ArbeidType;
 
 public class AndreYtelserDto {
 

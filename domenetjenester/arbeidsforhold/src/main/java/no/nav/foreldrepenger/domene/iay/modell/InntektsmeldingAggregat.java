@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.domene.iay.modell;
 
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.IKKE_BRUK;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.IKKE_BRUK;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 
 import java.util.ArrayList;
 import java.util.Collection;

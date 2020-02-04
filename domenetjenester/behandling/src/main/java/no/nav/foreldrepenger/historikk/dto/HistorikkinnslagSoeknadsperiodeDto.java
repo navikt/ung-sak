@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.historikk.dto;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.foreldrepenger.historikk.HistorikkAvklartSoeknadsperiodeType;
+import no.nav.k9.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
 
 public class HistorikkinnslagSoeknadsperiodeDto {
 

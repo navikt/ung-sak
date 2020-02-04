@@ -3,8 +3,9 @@ package no.nav.foreldrepenger.domene.iay.modell;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 
 public class OppgittFrilansoppdrag implements IndexKey {
@@ -27,7 +28,8 @@ public class OppgittFrilansoppdrag implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(periode, oppdragsgiver);
+        Object[] keyParts = { periode, oppdragsgiver };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     void setOppgittOpptjening(OppgittFrilans frilans) {

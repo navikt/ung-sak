@@ -1,7 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.testutilities;
 
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype.KUNSTIG;
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype.VIRKSOMHET;
+import static no.nav.k9.kodeverk.organisasjon.Organisasjonstype.KUNSTIG;
+import static no.nav.k9.kodeverk.organisasjon.Organisasjonstype.VIRKSOMHET;
 
 import java.util.Optional;
 

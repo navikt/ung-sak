@@ -1,11 +1,11 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelType.FASTSETT;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelType.FINN_GRENSEVERDI;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelType.FORDEL;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelType.FORESLÅ;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelType.OPPDATER_GRUNNLAG_SVP;
-import static no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeRegelType.VILKÅR_VURDERING;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType.FASTSETT;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType.FINN_GRENSEVERDI;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType.FORDEL;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType.FORESLÅ;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType.OPPDATER_GRUNNLAG_SVP;
+import static no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType.VILKÅR_VURDERING;
 import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 
 import java.math.BigDecimal;
@@ -44,6 +44,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
 @Entity(name = "BeregningsgrunnlagPeriode")
 @Table(name = "BEREGNINGSGRUNNLAG_PERIODE")

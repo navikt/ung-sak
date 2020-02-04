@@ -2,7 +2,10 @@ package no.nav.foreldrepenger.behandlingslager.behandling.medlemskap;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
 import no.nav.vedtak.konfig.Tid;
 
 public class MedlemskapPerioderBuilder {

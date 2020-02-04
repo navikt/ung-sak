@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 
 public class FaresignalGruppeWrapper {
     private Kontrollresultat kontrollresultat;

@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.varselrevurdering.fp;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 
 /** For å få tak i riktig status konfigurasjon. */
 public class BehandlingStegKonfigurasjon {

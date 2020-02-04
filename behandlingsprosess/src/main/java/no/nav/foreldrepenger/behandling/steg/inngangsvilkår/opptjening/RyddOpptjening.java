@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall.IKKE_VURDERT;
+import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -12,8 +12,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.konfig.Tid;
 
 public class RyddOpptjening {

@@ -14,7 +14,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingskontrollEventPubliserer;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 
 /**
  * Observerer og propagerer / håndterer events internt i Behandlingskontroll

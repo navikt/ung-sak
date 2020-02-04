@@ -10,14 +10,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektsmeldingInnsendingsårsak;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
 
 public class Inntektsmelding implements IndexKey {
 
@@ -112,7 +113,8 @@ public class Inntektsmelding implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(arbeidsgiver, arbeidsforholdRef);
+        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     /**

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 
 /**
  * Signaliserer status på resultat av å kjøre et {@link BehandlingSteg}.

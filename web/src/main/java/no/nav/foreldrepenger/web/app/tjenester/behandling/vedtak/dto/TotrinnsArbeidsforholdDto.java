@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto;
 
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 
 public class TotrinnsArbeidsforholdDto {
 

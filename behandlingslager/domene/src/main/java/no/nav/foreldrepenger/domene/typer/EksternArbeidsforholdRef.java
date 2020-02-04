@@ -6,8 +6,9 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseValue;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
  * Ekstern arbeidsforhold referanse.
@@ -45,7 +46,8 @@ public class EksternArbeidsforholdRef implements IndexKey, TraverseValue, Serial
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(referanse);
+        Object[] keyParts = { referanse };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public boolean gjelderForSpesifiktArbeidsforhold() {

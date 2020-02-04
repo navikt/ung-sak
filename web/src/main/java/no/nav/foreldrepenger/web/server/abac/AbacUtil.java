@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.web.server.abac;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
 
 public final class AbacUtil {
 

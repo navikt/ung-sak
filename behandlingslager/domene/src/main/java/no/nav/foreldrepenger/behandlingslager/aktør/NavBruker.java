@@ -9,8 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.SpråkKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
 
 @Entity(name = "Bruker")
 @Table(name = "BRUKER")
@@ -24,7 +25,7 @@ public class NavBruker extends Person {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    @Convert(converter = Språkkode.KodeverdiConverter.class)
+    @Convert(converter = SpråkKodeverdiConverter.class)
     @Column(name = "sprak_kode")
     private Språkkode språkkode = Språkkode.UDEFINERT;
 

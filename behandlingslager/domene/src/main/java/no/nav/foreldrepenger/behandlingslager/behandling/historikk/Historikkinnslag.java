@@ -21,6 +21,10 @@ import org.hibernate.annotations.NaturalId;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.HistorikkAktørKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.HistorikkinnslagTypeKodeverdiConverter;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 
 @Entity(name = "Historikkinnslag")
 @Table(name = "HISTORIKKINNSLAG")
@@ -44,11 +48,11 @@ public class Historikkinnslag extends BaseEntitet {
     @Column(name = "fagsak_id", nullable = false, updatable = false)
     private Long fagsakId;
 
-    @Convert(converter = HistorikkAktør.KodeverdiConverter.class)
+    @Convert(converter = HistorikkAktørKodeverdiConverter.class)
     @Column(name="historikk_aktoer_id", nullable = false)
     private HistorikkAktør aktør = HistorikkAktør.UDEFINERT;
 
-    @Convert(converter = HistorikkinnslagType.KodeverdiConverter.class)
+    @Convert(converter = HistorikkinnslagTypeKodeverdiConverter.class)
     @Column(name="historikkinnslag_type", nullable = false)
     private HistorikkinnslagType type = HistorikkinnslagType.UDEFINERT;
 

@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandlingslager.aktør;
 
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import static java.time.Month.JANUARY;
-import static no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn.KVINNE;
+import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;

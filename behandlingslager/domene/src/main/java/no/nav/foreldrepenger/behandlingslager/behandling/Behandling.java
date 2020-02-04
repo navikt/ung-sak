@@ -41,17 +41,26 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsystemKodeverkConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.vedtak.feil.FeilFactory;
 
 @SqlResultSetMappings(value = {
@@ -113,14 +122,14 @@ public class Behandling extends BaseEntitet {
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @Convert(converter = BehandlingStatus.KodeverdiConverter.class)
+    @Convert(converter = BehandlingStatusKodeverdiConverter.class)
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
     @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true, mappedBy = "behandling")
     private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(1);
 
-    @Convert(converter = BehandlingType.KodeverdiConverter.class)
+    @Convert(converter = BehandlingTypeKodeverdiConverter.class)
     @Column(name = "behandling_type", nullable = false)
     private BehandlingType behandlingType = BehandlingType.UDEFINERT;
 
@@ -141,7 +150,7 @@ public class Behandling extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    @Convert(converter = StartpunktType.KodeverdiConverter.class)
+    @Convert(converter = StartpunktTypeKodeverdiConverter.class)
     @Column(name = "startpunkt_type", nullable = false)
     private StartpunktType startpunkt = StartpunktType.UDEFINERT;
 
@@ -183,7 +192,7 @@ public class Behandling extends BaseEntitet {
     private boolean åpnetForEndring = false;
 
     @ChangeTracked
-    @Convert(converter = Fagsystem.KodeverdiConverter.class)
+    @Convert(converter = FagsystemKodeverkConverter.class)
     @Column(name = "migrert_kilde", nullable = false)
     private Fagsystem migrertKilde = Fagsystem.UDEFINERT;
 

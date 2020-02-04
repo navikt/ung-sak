@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.domene.medlem.api;
 
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapDekningType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapKildeType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
 
 import java.time.LocalDate;
 import java.util.Objects;

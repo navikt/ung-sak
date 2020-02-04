@@ -18,6 +18,10 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.IverksettingStatusKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.VedtakResultatTypeKodeverdiConverter;
+import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 
 @Entity(name = "BehandlingVedtak")
 @Table(name = "BEHANDLING_VEDTAK")
@@ -37,7 +41,7 @@ public class BehandlingVedtak extends BaseEntitet {
     @Column(name = "ANSVARLIG_SAKSBEHANDLER", nullable = false)
     private String ansvarligSaksbehandler;
 
-    @Convert(converter = VedtakResultatType.KodeverdiConverter.class)
+    @Convert(converter = VedtakResultatTypeKodeverdiConverter.class)
     @Column(name="vedtak_resultat_type", nullable = false)
     private VedtakResultatType vedtakResultatType = VedtakResultatType.UDEFINERT;
 
@@ -54,7 +58,7 @@ public class BehandlingVedtak extends BaseEntitet {
     @Column(name = "BESLUTNING", nullable = false)
     private boolean beslutningsvedtak;
 
-    @Convert(converter=IverksettingStatus.KodeverdiConverter.class)
+    @Convert(converter=IverksettingStatusKodeverdiConverter.class)
     @Column(name="iverksetting_status", nullable = false)
     private IverksettingStatus iverksettingStatus = IverksettingStatus.UDEFINERT;
 

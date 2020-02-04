@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.behandling;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakEvent;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
 
 /**
  * Event publiseres når Fagsak endrer status

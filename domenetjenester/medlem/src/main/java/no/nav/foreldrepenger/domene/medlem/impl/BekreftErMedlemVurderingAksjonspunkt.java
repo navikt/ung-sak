@@ -2,12 +2,12 @@ package no.nav.foreldrepenger.domene.medlem.impl;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.domene.medlem.dto.BekreftErMedlemVurderingAksjonspunktDto;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 
 public class BekreftErMedlemVurderingAksjonspunkt {
 

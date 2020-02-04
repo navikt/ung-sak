@@ -6,9 +6,9 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.BehandlingUuidDto;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.TekstFraSaksbehandlerDto;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.vedtak.util.StringUtils;
 
 @ApplicationScoped

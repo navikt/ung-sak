@@ -2,8 +2,9 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.io.Serializable;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 
 /**
  * Hibernate entitet som modellerer en utenlandsk virksomhet.
@@ -23,7 +24,8 @@ public class OppgittUtenlandskVirksomhet implements IndexKey, Serializable {
     }
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(utenlandskVirksomhetNavn, landkode);
+        Object[] keyParts = { utenlandskVirksomhetNavn, landkode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public Landkoder getLandkode() {

@@ -23,8 +23,8 @@ import javax.inject.Qualifier;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef.ContainerOfBehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 /**
  * Marker type som implementerer interface {@link BehandlingSteg} for å skille ulike implementasjoner av samme steg for ulike
@@ -46,7 +46,7 @@ public @interface BehandlingTypeRef {
      * <p>
      * Må matche ett innslag i <code>BEHANDling_TYPE</code> tabell for å kunne kjøres.
      *
-     * @see no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType
+     * @see no.nav.k9.kodeverk.behandling.BehandlingType
      */
     String value() default "*";
 

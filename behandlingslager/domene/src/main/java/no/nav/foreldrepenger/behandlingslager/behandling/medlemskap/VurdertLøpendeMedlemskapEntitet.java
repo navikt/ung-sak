@@ -15,7 +15,10 @@ import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapManuellVurderingTypeKodeverdiConverter;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 
 /**
  * Entitetsklasse for løpende medlemskap.
@@ -60,7 +63,7 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     @Column(name = "begrunnelse")
     private String begrunnelse;
 
-    @Convert(converter = MedlemskapManuellVurderingType.KodeverdiConverter.class)
+    @Convert(converter = MedlemskapManuellVurderingTypeKodeverdiConverter.class)
     @Column(name="manuell_vurd", nullable = false)
     private MedlemskapManuellVurderingType medlemsperiodeManuellVurdering = MedlemskapManuellVurderingType.UDEFINERT;
 
@@ -182,6 +185,7 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(vurderingsdato);
+        Object[] keyParts = { vurderingsdato };
+        return IndexKeyComposer.createKey(keyParts);
     }
 }

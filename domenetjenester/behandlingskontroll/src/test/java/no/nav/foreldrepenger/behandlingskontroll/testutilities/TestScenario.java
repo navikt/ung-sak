@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandlingskontroll.testutilities;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 /**
  * Default test scenario builder for Behandlingskontroll enhetstester.

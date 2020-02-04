@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
 
 @ApplicationScoped
 public class FagsakStatusEventPubliserer {

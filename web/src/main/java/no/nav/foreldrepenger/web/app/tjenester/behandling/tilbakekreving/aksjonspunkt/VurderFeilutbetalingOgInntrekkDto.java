@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.aksjon
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INNTREKK_KODE)
 public class VurderFeilutbetalingOgInntrekkDto extends BekreftetAksjonspunktDto {

@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import org.threeten.extra.Interval;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped

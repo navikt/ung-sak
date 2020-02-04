@@ -5,9 +5,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 public class Gradering implements IndexKey, Comparable<Gradering> {
 
@@ -40,7 +41,8 @@ public class Gradering implements IndexKey, Comparable<Gradering> {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(periode);
+        Object[] keyParts = { periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public DatoIntervallEntitet getPeriode() {
