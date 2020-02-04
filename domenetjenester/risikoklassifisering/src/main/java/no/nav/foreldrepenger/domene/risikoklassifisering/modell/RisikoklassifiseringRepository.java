@@ -4,6 +4,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+
+import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
+
 import java.util.Objects;
 import java.util.Optional;
 

@@ -3,12 +3,6 @@ package no.nav.foreldrepenger.domene.medlem.impl;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltVerdiType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
@@ -18,6 +12,12 @@ import no.nav.foreldrepenger.domene.medlem.dto.BekreftedePerioderAdapter;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 
 public class AvklarFortsattMedlemskapAksjonspunkt {
 

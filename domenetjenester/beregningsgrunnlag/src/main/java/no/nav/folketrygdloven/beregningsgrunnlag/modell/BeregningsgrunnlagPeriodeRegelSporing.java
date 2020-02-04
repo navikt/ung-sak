@@ -14,7 +14,9 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.BeregningsgrunnlagPeriodeRegelTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType;
 
 @Entity(name = "BeregningsgrunnlagPeriodeRegelSporing")
 @Table(name = "BG_PERIODE_REGEL_SPORING")
@@ -41,7 +43,7 @@ public class BeregningsgrunnlagPeriodeRegelSporing extends BaseEntitet {
     @Column(name = "regel_input")
     private String regelInput;
 
-    @Convert(converter=BeregningsgrunnlagPeriodeRegelType.KodeverdiConverter.class)
+    @Convert(converter=BeregningsgrunnlagPeriodeRegelTypeKodeverdiConverter.class)
     @Column(name="regel_type", nullable = false)
     private BeregningsgrunnlagPeriodeRegelType regelType;
 

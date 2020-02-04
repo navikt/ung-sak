@@ -13,10 +13,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class KopierBeregningsgrunnlagTest {
 

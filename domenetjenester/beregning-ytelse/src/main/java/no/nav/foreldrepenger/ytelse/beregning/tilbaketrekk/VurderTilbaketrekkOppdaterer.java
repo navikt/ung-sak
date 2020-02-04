@@ -11,12 +11,12 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderTilbaketrekkDto.class, adapter = AksjonspunktOppdaterer.class)

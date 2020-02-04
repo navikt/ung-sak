@@ -13,8 +13,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.BehandlingRelaterteYtelserMapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.TilgrensendeYtelserDto;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -22,6 +20,8 @@ import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @ApplicationScoped
 public class YtelserKonsolidertTjeneste {

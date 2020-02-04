@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.foreldrepenger.historikk.OppgaveÅrsak.VURDER_DOKUMENT;
 import static no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderDokumentTask.TASKTYPE;
+import static no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak.VURDER_DOKUMENT;
 
 import java.util.Optional;
 
@@ -11,11 +11,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.foreldrepenger.behandlingslager.task.FagsakProsessTask;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 

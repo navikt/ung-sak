@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.foreldrepenger.historikk.OppgaveÅrsak.GODKJENNE_VEDTAK;
 import static no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveGodkjennVedtakTask.TASKTYPE;
+import static no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak.GODKJENNE_VEDTAK;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

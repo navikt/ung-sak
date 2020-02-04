@@ -10,8 +10,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class BeregningsresultatAndelTest {
 

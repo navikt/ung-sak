@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public class FagsakDto {
     private String saksnummer;

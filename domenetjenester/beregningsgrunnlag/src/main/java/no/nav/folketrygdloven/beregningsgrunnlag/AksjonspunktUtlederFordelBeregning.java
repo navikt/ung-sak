@@ -13,10 +13,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.FordelBeregning
 import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.FordelBeregningsgrunnlagTjeneste.VurderManuellBehandling;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktDefinisjon;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
 
 @ApplicationScoped
 class AksjonspunktUtlederFordelBeregning {

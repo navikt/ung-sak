@@ -13,12 +13,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.OverstyrBeregn
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.RedigerbarAndelFaktaOmBeregningDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderFaktaOmBeregningDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.tilfeller.FaktaOmBeregningTilfellerOppdaterer;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
 
 @ApplicationScoped
 public class BeregningFaktaOgOverstyringHåndterer {

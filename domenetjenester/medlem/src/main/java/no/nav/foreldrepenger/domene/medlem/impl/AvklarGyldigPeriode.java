@@ -12,10 +12,10 @@ import java.util.Set;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapDekningType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
 
 public class AvklarGyldigPeriode {
 

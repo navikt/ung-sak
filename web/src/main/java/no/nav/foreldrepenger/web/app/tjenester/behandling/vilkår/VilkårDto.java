@@ -4,10 +4,11 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
 public class VilkårDto {
 

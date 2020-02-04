@@ -1,6 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.tilfeller;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus.BRUKERS_ANDEL;
+import static no.nav.k9.kodeverk.iay.AktivitetStatus.BRUKERS_ANDEL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -22,12 +22,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBgKunY
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class FastsettBgKunYtelseOppdatererTest {
 

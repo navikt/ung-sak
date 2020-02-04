@@ -8,9 +8,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektsKilde;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.iay.InntektsKilde;
 
 public class Inntekt implements IndexKey {
 
@@ -42,7 +43,8 @@ public class Inntekt implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(getArbeidsgiver(), getInntektsKilde());
+        Object[] keyParts = { getArbeidsgiver(), getInntektsKilde() };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     @Override

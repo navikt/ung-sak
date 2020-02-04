@@ -13,7 +13,9 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BeregningSatsTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
 
 @Entity(name = "BeregningSats")
 @Table(name = "BR_SATS")
@@ -32,7 +34,7 @@ public class BeregningSats extends BaseEntitet {
     @Embedded
     DatoIntervallEntitet periode;
 
-    @Convert(converter= BeregningSatsType.KodeverdiConverter.class)
+    @Convert(converter= BeregningSatsTypeKodeverdiConverter.class)
     @Column(name="sats_type", nullable = false)
     private BeregningSatsType satsType = BeregningSatsType.UDEFINERT;
 

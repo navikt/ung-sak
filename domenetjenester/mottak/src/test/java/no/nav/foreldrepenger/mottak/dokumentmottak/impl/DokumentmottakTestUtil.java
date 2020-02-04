@@ -10,11 +10,8 @@ import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingskontrollTjenest
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.aktør.NavBrukerBuilder;
@@ -22,6 +19,9 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 
 public class DokumentmottakTestUtil {
 

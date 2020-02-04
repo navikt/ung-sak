@@ -15,8 +15,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 
 @Entity(name = "HistorikkinnslagDokumentLink")
 @Table(name = "HISTORIKKINNSLAG_DOK_LINK")
@@ -42,7 +43,8 @@ public class HistorikkinnslagDokumentLink extends BaseEntitet implements IndexKe
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(journalpostId, dokumentId, linkTekst);
+        Object[] keyParts = { journalpostId, dokumentId, linkTekst };
+        return IndexKeyComposer.createKey(keyParts);
     }
     
     public String getLinkTekst() {

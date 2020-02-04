@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 import javax.persistence.NoResultException;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -21,6 +19,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.foreldrepenger.mottak.kompletthettjeneste.KompletthetssjekkerSøknad;
+import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 public abstract class KompletthetssjekkerSøknadImpl implements KompletthetssjekkerSøknad {
 

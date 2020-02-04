@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 
 public class BekreftedePerioderAdapter {
 

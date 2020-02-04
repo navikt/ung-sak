@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.behandling.revurdering;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 
 public interface RevurderingEndring {
 

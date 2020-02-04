@@ -1,13 +1,13 @@
 package no.nav.foreldrepenger.inngangsvilkaar.impl;
 
 import static java.util.Arrays.asList;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.MEDISINSKEVILKÅR;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType.SØKERSOPPLYSNINGSPLIKT;
 import static no.nav.foreldrepenger.inngangsvilkaar.impl.UtledeteVilkår.forVilkår;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.SØKERSOPPLYSNINGSPLIKT;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef

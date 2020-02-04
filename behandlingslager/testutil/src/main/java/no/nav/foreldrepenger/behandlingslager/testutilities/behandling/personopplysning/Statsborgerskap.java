@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personop
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 
 
 public final class Statsborgerskap {

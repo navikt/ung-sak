@@ -44,12 +44,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.Abstra
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSatsType;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -60,13 +55,18 @@ import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelseBuilder;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektPeriodeType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.iay.Arbeidskategori;
+import no.nav.k9.kodeverk.iay.InntektPeriodeType;
+import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 public class FastsettBeregningAktiviteterOgStatuserTest {
 

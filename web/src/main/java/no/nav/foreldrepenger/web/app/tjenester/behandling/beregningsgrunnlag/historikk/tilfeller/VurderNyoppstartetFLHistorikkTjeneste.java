@@ -10,10 +10,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderNyoppsta
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_NYOPPSTARTET_FL")

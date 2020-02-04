@@ -25,16 +25,16 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygd;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygdRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.Meldingstype;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @ApplicationScoped

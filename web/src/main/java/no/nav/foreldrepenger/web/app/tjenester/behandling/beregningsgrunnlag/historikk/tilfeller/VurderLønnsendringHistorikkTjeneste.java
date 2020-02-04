@@ -11,10 +11,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_LØNNSENDRING")

@@ -14,15 +14,15 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 @ApplicationScoped
 public class VurderFagsystemFellesUtils {
@@ -81,7 +81,7 @@ public class VurderFagsystemFellesUtils {
             return true;
         }
 
-        BehandlingTema bhTemaFagsak = BehandlingTema.fraFagsakHendelse(fagsak.getYtelseType());
+        BehandlingTema bhTemaFagsak = Fagsak.fraFagsakHendelse(fagsak.getYtelseType());
         if (!vurderFagsystem.getBehandlingTema().erKompatibelMed(bhTemaFagsak)) {
             return false;
         }
@@ -127,8 +127,8 @@ public class VurderFagsystemFellesUtils {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(s.getId());
         // FIXME K9 kodeverk/logikk
         if (behandling.isEmpty()) {
-            return BehandlingTema.fraFagsakHendelse(s.getYtelseType());
+            return Fagsak.fraFagsakHendelse(s.getYtelseType());
         }
-        return BehandlingTema.fraFagsakHendelse(s.getYtelseType());
+        return Fagsak.fraFagsakHendelse(s.getYtelseType());
     }
 }

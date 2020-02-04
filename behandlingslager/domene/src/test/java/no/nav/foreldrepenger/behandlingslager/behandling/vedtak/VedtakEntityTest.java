@@ -14,6 +14,8 @@ import java.time.temporal.ChronoUnit;
 import org.junit.Before;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+
 public class VedtakEntityTest {
 
     private BehandlingVedtak.Builder vedtakBuilder;

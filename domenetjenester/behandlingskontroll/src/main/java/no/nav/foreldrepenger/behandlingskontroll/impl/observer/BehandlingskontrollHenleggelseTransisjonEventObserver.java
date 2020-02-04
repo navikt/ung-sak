@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 
 @ApplicationScoped
 class BehandlingskontrollHenleggelseTransisjonEventObserver {

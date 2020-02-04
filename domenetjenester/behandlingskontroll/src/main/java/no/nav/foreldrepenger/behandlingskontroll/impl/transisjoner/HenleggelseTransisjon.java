@@ -5,7 +5,7 @@ import java.util.Optional;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.StegTransisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 class HenleggelseTransisjon implements StegTransisjon {
 

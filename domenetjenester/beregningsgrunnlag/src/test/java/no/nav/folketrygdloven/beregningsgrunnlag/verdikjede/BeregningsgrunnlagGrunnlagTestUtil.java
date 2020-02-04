@@ -5,7 +5,7 @@ import java.util.Optional;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 
 class BeregningsgrunnlagGrunnlagTestUtil {
     static BeregningsgrunnlagGrunnlagEntitet nyttGrunnlag(BeregningsgrunnlagGrunnlagEntitet grunnlag, BeregningsgrunnlagEntitet beregningsgrunnlag, BeregningsgrunnlagTilstand tilstand) {

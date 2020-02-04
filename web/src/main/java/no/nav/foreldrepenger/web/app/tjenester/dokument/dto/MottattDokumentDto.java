@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.web.app.tjenester.dokument.dto;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 public class MottattDokumentDto {
 

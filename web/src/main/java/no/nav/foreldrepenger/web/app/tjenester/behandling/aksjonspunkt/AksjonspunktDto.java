@@ -3,11 +3,11 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 public class AksjonspunktDto {
     private AksjonspunktDefinisjon definisjon;

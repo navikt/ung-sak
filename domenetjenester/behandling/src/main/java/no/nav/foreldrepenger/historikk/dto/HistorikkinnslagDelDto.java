@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 
 public class HistorikkinnslagDelDto {
 

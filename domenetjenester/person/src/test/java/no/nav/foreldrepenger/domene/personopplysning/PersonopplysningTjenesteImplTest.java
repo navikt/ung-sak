@@ -8,16 +8,16 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.SivilstandType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopplysning.PersonInformasjon;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 
 public class PersonopplysningTjenesteImplTest {
 

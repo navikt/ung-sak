@@ -15,7 +15,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -23,6 +22,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 /** Felles steg for å beregne tilkjent ytelse for foreldrepenger og svangerskapspenger (ikke engangsstønad) */
 

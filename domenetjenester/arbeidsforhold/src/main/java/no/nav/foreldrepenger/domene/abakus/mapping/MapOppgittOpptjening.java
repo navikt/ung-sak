@@ -8,7 +8,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittArbeidsforhold;
@@ -30,6 +29,7 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 
 class MapOppgittOpptjening {
 

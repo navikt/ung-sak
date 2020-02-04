@@ -13,7 +13,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettEtterl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("FASTSETT_ETTERLØNN_SLUTTPAKKE")

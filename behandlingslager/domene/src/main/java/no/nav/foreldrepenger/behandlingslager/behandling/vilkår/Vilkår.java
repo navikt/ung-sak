@@ -21,7 +21,9 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @Entity(name = "Vilkar")
 @Table(name = "VR_VILKAR")
@@ -35,7 +37,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     @JoinColumn(name = "vilkar_resultat_id", nullable = false, updatable = false)
     private Vilkårene vilkårene;
 
-    @Convert(converter = VilkårType.KodeverdiConverter.class)
+    @Convert(converter = VilkårTypeKodeverdiConverter.class)
     @Column(name = "vilkar_type", nullable = false, updatable = false)
     private VilkårType vilkårType;
 
@@ -57,7 +59,8 @@ public class Vilkår extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(getVilkårType());
+        Object[] keyParts = { getVilkårType() };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public Long getId() {

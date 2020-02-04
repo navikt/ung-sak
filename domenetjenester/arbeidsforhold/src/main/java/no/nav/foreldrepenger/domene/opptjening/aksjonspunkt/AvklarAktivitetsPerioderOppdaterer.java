@@ -17,14 +17,10 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrganisasjonsNummerValidator;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
@@ -37,10 +33,14 @@ import no.nav.foreldrepenger.domene.opptjening.dto.AvklarAktivitetsPerioderDto;
 import no.nav.foreldrepenger.domene.opptjening.dto.AvklarOpptjeningAktivitetDto;
 import no.nav.foreldrepenger.domene.opptjening.dto.BekreftOpptjeningPeriodeDto;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
@@ -187,7 +187,7 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
                 .orElseThrow(IllegalArgumentException::new); // Utvikler feil hvis exception
             String arbeidTypeNavn = oaDto.getAktivitetType().getNavn();
             return String.format("%s for %s (%s)", arbeidTypeNavn, virksomhet.getNavn(), arbeidsgiverIdentifikator);
-        } else if (Organisasjonstype.erKunstig(arbeidsgiverIdentifikator)) {
+        } else if (OrgNummer.erKunstig(arbeidsgiverIdentifikator)) {
             return hentNavnTilManueltArbeidsforhold(overstyringer);
         } else if (arbeidsgiverIdentifikator != null && AKTØRID_VALIDATOR.matcher(arbeidsgiverIdentifikator).matches()) {
             final Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(new AktørId(arbeidsgiverIdentifikator));
@@ -282,7 +282,7 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
             if (virksomhet.getNavn() != null) {
                 adapter.setArbeidsgiverNavn(virksomhet.getNavn());
             }
-        } else if (Organisasjonstype.erKunstig(arbeidsgiverIdentifikator)) {
+        } else if (OrgNummer.erKunstig(arbeidsgiverIdentifikator)) {
             adapter.setArbeidsgiverNavn(hentNavnTilManueltArbeidsforhold(overstyringer));
         } else if (arbeidsgiverIdentifikator != null && AKTØRID_VALIDATOR.matcher(arbeidsgiverIdentifikator).matches()) {
             final Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(new AktørId(arbeidsgiverIdentifikator));

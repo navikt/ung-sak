@@ -13,8 +13,9 @@ import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class TilbakekrevingRepositoryImplTest {

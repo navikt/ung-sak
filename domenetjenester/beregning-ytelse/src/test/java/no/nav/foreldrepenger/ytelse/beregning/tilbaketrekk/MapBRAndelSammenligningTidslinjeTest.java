@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -19,6 +18,7 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class MapBRAndelSammenligningTidslinjeTest {
 

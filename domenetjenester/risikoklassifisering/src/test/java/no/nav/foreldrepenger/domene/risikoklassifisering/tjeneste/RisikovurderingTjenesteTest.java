@@ -5,10 +5,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.domene.risikoklassifisering.json.KontrollresultatMapper;
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
 import no.nav.foreldrepenger.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.foreldrepenger.domene.risikoklassifisering.modell.RisikoklassifiseringRepository;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 
 import org.junit.Before;
 import org.junit.Test;

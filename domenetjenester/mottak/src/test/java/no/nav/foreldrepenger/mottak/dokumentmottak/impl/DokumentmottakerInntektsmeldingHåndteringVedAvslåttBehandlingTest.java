@@ -7,16 +7,16 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerFelles;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerInntektsmelding;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest extends DokumentmottakerTestsupport {
 

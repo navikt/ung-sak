@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 
 @Entity(name = "BehandlingsresultatKonsekvensForYtelsen")
 @Table(name = "BEHANDLING_RESULTAT_YT_KONSEK")
@@ -32,7 +33,7 @@ public class BehandlingsresultatKonsekvensForYtelsen extends BaseEntitet {
     @JoinColumn(name = "BEHANDLING_RESULTAT_ID", nullable = false, updatable = false, unique = true)
     private Behandlingsresultat behandlingsresultat;
 
-    @Convert(converter = KonsekvensForYtelsen.KodeverdiConverter.class)
+    @Convert(converter = KonsekvensForYtelsenKodeverdiConverter.class)
     @Column(name = "konsekvens_ytelse", nullable = false)
     private KonsekvensForYtelsen konsekvensForYtelsen = KonsekvensForYtelsen.UDEFINERT;
 

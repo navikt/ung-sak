@@ -8,8 +8,8 @@ import java.util.Optional;
 
 import javax.xml.bind.JAXBElement;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.MottattDokumentWrapper;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.seres.xsd.nav.inntektsmelding_m._201809.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsgiver;

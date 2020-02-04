@@ -21,14 +21,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagArbeidsforholdDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningAndelDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagArbeidsforholdDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
@@ -37,6 +35,9 @@ import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 
 @ApplicationScoped
 public class BeregningsgrunnlagDtoUtil {
@@ -152,7 +153,7 @@ public class BeregningsgrunnlagDtoUtil {
         ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arbeidsgiver);
         if (opplysninger != null) {
             if (arbeidsgiver.getErVirksomhet()) {
-                if (Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr())) {
+                if (OrgNummer.erKunstig(arbeidsgiver.getOrgnr())) {
                     arbeidsforhold.setArbeidsgiverNavn(hentNavnTilManueltArbeidsforhold(overstyringer));
                     arbeidsforhold.setArbeidsgiverId(arbeidsgiver.getOrgnr());
                     arbeidsforhold.setOrganisasjonstype(Organisasjonstype.KUNSTIG);

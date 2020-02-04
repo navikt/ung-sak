@@ -17,10 +17,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
 import no.nav.foreldrepenger.domene.uttak.OpphørUttakTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 
 @ApplicationScoped
 public class BehandlingVedtakTjeneste {

@@ -7,10 +7,10 @@ import javax.enterprise.context.ApplicationScoped;
 import no.nav.foreldrepenger.behandling.revurdering.felles.HarEtablertYtelse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.KonsekvensForYtelsen;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef

@@ -1,12 +1,12 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.kontroll;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.FaresignalVurdering;
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
 import no.nav.foreldrepenger.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalGruppeWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
+import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 
 import org.junit.Before;

@@ -16,8 +16,11 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.HjemmelKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
+import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 @Entity(name = "BeregningsgrunnlagAktivitetStatus")
 @Table(name = "BG_AKTIVITET_STATUS")
@@ -36,11 +39,11 @@ public class BeregningsgrunnlagAktivitetStatus extends BaseEntitet {
     @JoinColumn(name = "beregningsgrunnlag_id", nullable = false, updatable = false)
     private BeregningsgrunnlagEntitet beregningsgrunnlag;
 
-    @Convert(converter=AktivitetStatus.KodeverdiConverter.class)
+    @Convert(converter=AktivitetStatusKodeverdiConverter.class)
     @Column(name="aktivitet_status", nullable = false)
     private AktivitetStatus aktivitetStatus;
     
-    @Convert(converter=Hjemmel.KodeverdiConverter.class)
+    @Convert(converter=HjemmelKodeverdiConverter.class)
     @Column(name="hjemmel", nullable = false)
     private Hjemmel hjemmel;
 

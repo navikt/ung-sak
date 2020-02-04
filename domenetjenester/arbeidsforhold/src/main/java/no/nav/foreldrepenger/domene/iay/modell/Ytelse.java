@@ -9,13 +9,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
-import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.iay.TemaUnderkategori;
 
 public class Ytelse implements IndexKey {
 
@@ -63,7 +64,8 @@ public class Ytelse implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(periode, relatertYtelseType, saksnummer);
+        Object[] keyParts = { periode, relatertYtelseType, saksnummer };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public FagsakYtelseType getYtelseType() {

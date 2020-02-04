@@ -12,12 +12,12 @@ import no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening.felles.V
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 
 @BehandlingStegRef(kode = "VURDER_OPPTJ")
 @BehandlingTypeRef

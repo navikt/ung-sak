@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personop
 
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 
 public final class PersonRelasjon implements HarAktørId {
 

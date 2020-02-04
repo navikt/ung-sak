@@ -7,15 +7,16 @@ import java.util.Map;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.NæringsinntektType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.OffentligYtelseType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PensjonTrygdType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.SkatteOgAvgiftsregelType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.iay.NæringsinntektType;
+import no.nav.k9.kodeverk.iay.OffentligYtelseType;
+import no.nav.k9.kodeverk.iay.PensjonTrygdType;
+import no.nav.k9.kodeverk.iay.SkatteOgAvgiftsregelType;
+import no.nav.k9.kodeverk.iay.YtelseType;
 
 public class Inntektspost implements IndexKey {
 
@@ -60,7 +61,8 @@ public class Inntektspost implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(getInntektspostType(), getYtelseType().getKodeverk(), getYtelseType().getKode(), getSkatteOgAvgiftsregelType(), periode);
+        Object[] keyParts = { getInntektspostType(), getYtelseType().getKodeverk(), getYtelseType().getKode(), getSkatteOgAvgiftsregelType(), periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     /**

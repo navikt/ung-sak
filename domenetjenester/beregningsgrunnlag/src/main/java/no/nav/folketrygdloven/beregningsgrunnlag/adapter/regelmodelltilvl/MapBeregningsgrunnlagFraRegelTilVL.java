@@ -20,10 +20,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.PeriodeÅrsak;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagType;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregningsgrunnlag;
@@ -32,6 +30,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregnings
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.SammenligningsGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
+import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
 
 @Dependent
 public class MapBeregningsgrunnlagFraRegelTilVL {

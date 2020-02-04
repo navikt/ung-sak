@@ -3,8 +3,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling;
 import no.nav.folketrygdloven.beregningsgrunnlag.RepositoryProvider;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 
 public class BeregningsgrunnlagScenario implements TestScenarioTillegg {
 

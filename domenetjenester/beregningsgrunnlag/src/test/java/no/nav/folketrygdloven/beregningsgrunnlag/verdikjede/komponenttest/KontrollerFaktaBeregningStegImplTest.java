@@ -24,9 +24,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.input.K9BeregningsgrunnlagInput
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
 import no.nav.folketrygdloven.beregningsgrunnlag.opptjening.OpptjeningAktiviteter;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktDefinisjon;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.BeregningIAYTestUtil;
@@ -34,12 +32,14 @@ import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestSc
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

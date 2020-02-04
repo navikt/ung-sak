@@ -22,17 +22,17 @@ import javax.persistence.TypedQuery;
 import org.hibernate.jpa.QueryHints;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 
 @ApplicationScoped
 public class BehandlingRepository {

@@ -12,10 +12,10 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.domene.medlem.VurderMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemResultat;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 //FIXME K9 Erstatt eller fjern
 @ApplicationScoped

@@ -10,12 +10,8 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -24,6 +20,10 @@ import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 
 @ApplicationScoped
 public class BehandlendeEnhetTjeneste {
@@ -51,7 +51,7 @@ public class BehandlendeEnhetTjeneste {
     }
 
     private BehandlingTema behandlingTemaFra(Behandling sisteBehandling) {
-        return BehandlingTema.fraFagsak(sisteBehandling.getFagsak());
+        return sisteBehandling.getFagsak().getBehandlingTema();
     }
 
     // Alle aktuelle enheter
@@ -61,7 +61,7 @@ public class BehandlendeEnhetTjeneste {
 
     // Brukes ved opprettelse av oppgaver før behandling har startet
     public OrganisasjonsEnhet finnBehandlendeEnhetFraSøker(Fagsak fagsak) {
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(fagsak.getAktørId(), BehandlingTema.fraFagsak(fagsak));
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(fagsak.getAktørId(), fagsak.getBehandlingTema());
         return enhet;
     }
 

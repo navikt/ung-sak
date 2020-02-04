@@ -24,10 +24,8 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
@@ -39,9 +37,11 @@ import no.nav.foreldrepenger.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.iay.InntektspostType;
 
 @ApplicationScoped
 public class AksjonspunktutlederForVurderOppgittOpptjening implements AksjonspunktUtleder {

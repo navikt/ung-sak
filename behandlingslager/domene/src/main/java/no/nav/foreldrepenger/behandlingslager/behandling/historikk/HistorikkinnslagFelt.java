@@ -16,8 +16,11 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.HistorikkInnslagFeltTypeKodeverdiConverter;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
 
 @Entity(name = "HistorikkinnslagFelt")
 @Table(name = "HISTORIKKINNSLAG_FELT")
@@ -36,7 +39,7 @@ public class HistorikkinnslagFelt extends BaseEntitet implements IndexKey {
     @JsonBackReference
     private HistorikkinnslagDel historikkinnslagDel;
 
-    @Convert(converter = HistorikkinnslagFeltType.KodeverdiConverter.class)
+    @Convert(converter = HistorikkInnslagFeltTypeKodeverdiConverter.class)
     @Column(name="historikkinnslag_felt_type", nullable = false)
     private HistorikkinnslagFeltType feltType;
 
@@ -76,7 +79,8 @@ public class HistorikkinnslagFelt extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(this.sekvensNr, this.feltType, this.navn, this.navnVerdi);
+        Object[] keyParts = { this.sekvensNr, this.feltType, this.navn, this.navnVerdi };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public static Builder builder() {

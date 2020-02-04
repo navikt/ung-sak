@@ -11,9 +11,6 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
@@ -21,6 +18,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.foreldrepenger.domene.medlem.dto.BekreftBosattVurderingAksjonspunktDto;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftBosattVurderingDto.class, adapter = AksjonspunktOppdaterer.class)

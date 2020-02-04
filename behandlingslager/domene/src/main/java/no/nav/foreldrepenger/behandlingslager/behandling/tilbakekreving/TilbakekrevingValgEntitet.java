@@ -13,6 +13,8 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.TilbakekrevingVidereBehandlingKodeverdiConverter;
+import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 
 @Table(name = "TILBAKEKREVING_VALG")
 @Entity(name = "TilbakekrevingValgEntitet")
@@ -42,7 +44,7 @@ class TilbakekrevingValgEntitet extends BaseEntitet {
     @Column(name = "varseltekst")
     private String varseltekst;
 
-    @Convert(converter = TilbakekrevingVidereBehandling.KodeverdiConverter.class)
+    @Convert(converter = TilbakekrevingVidereBehandlingKodeverdiConverter.class)
     @Column(name="videre_behandling")
     private TilbakekrevingVidereBehandling tilbakekrevningsVidereBehandling;
 

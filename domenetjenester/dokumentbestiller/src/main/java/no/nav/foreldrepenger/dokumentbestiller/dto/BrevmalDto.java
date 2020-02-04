@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.dokumentbestiller.dto;
 
-import no.nav.foreldrepenger.dokumentbestiller.DokumentMalRestriksjon;
+import no.nav.k9.kodeverk.dokument.DokumentMalRestriksjon;
 
 public class BrevmalDto {
     private String kode;

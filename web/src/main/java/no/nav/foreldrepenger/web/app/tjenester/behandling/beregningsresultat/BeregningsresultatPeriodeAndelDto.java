@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class BeregningsresultatPeriodeAndelDto {
     private final String arbeidsgiverNavn;

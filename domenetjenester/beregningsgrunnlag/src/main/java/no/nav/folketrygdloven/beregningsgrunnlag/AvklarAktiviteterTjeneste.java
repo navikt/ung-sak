@@ -14,14 +14,14 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggreg
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @ApplicationScoped
 public class AvklarAktiviteterTjeneste {

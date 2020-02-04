@@ -8,10 +8,10 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 public class OppgittOpptjeningBuilder {
 

@@ -20,7 +20,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.BeregningIAYTestUtil;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -30,9 +29,10 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilde
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

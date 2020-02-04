@@ -15,8 +15,14 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetKlassifiseringKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningReferanseTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @Entity(name = "OpptjeningAktivitet")
 @Table(name = "OPPTJENING_AKTIVITET")
@@ -35,12 +41,12 @@ public class OpptjeningAktivitet extends BaseEntitet implements IndexKey {
     private DatoIntervallEntitet periode;
 
     @ChangeTracked
-    @Convert(converter = OpptjeningAktivitetType.KodeverdiConverter.class)
+    @Convert(converter = OpptjeningAktivitetTypeKodeverdiConverter.class)
     @Column(name = "aktivitet_type", nullable = false)
     private OpptjeningAktivitetType aktivitetType;
 
     @ChangeTracked
-    @Convert(converter = ReferanseType.KodeverdiConverter.class)
+    @Convert(converter = OpptjeningReferanseTypeKodeverdiConverter.class)
     @Column(name="referanse_type")
     private ReferanseType aktivitetReferanseType = ReferanseType.UDEFINERT;
 
@@ -50,7 +56,7 @@ public class OpptjeningAktivitet extends BaseEntitet implements IndexKey {
     private String aktivitetReferanse;
 
     @ChangeTracked
-    @Convert(converter = OpptjeningAktivitetKlassifisering.KodeverdiConverter.class)
+    @Convert(converter = OpptjeningAktivitetKlassifiseringKodeverdiConverter.class)
     @Column(name = "klassifisering", nullable = false)
     private OpptjeningAktivitetKlassifisering klassifisering;
 
@@ -141,7 +147,8 @@ public class OpptjeningAktivitet extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(periode, aktivitetType, aktivitetReferanse, aktivitetReferanseType);
+        Object[] keyParts = { periode, aktivitetType, aktivitetReferanse, aktivitetReferanseType };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     @Override

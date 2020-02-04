@@ -5,10 +5,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.NaturalYtelseType;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.iay.NaturalYtelseType;
 
 public class NaturalYtelse implements IndexKey {
 
@@ -43,7 +44,8 @@ public class NaturalYtelse implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(type, periode);
+        Object[] keyParts = { type, periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public DatoIntervallEntitet getPeriode() {

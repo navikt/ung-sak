@@ -4,11 +4,11 @@ import java.util.List;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Hjemmel;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatusMedHjemmel;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
+import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 public class MapAktivitetStatusMedHjemmel {
 

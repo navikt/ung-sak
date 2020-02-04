@@ -20,9 +20,9 @@ import org.junit.runners.Parameterized;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @RunWith(Parameterized.class)
 public class InngangsvilkårAutoTest {

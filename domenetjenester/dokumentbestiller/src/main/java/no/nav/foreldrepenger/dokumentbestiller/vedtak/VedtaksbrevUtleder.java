@@ -3,10 +3,10 @@ package no.nav.foreldrepenger.dokumentbestiller.vedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakResultatType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
 import no.nav.foreldrepenger.dokumentbestiller.BrevFeil;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentMalType;
+import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 
 public class VedtaksbrevUtleder {
 

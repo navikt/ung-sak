@@ -17,7 +17,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsakType;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -31,6 +30,7 @@ import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDif
 import no.nav.foreldrepenger.domene.uttak.input.BeregningsgrunnlagStatusPeriode;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 
 @ApplicationScoped
 public class UttakInputTjeneste {

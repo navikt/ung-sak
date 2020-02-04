@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class BeregningAktivitetTestUtil {
 

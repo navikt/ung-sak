@@ -7,7 +7,7 @@ import java.util.List;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.folketrygdloven.beregningsgrunnlag.Grunnbeløp;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSats;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSatsType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
 
 public abstract class GrunnbeløpTjeneste {
 

@@ -26,15 +26,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerApplikasjonTjeneste;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentMalType;
 import no.nav.foreldrepenger.dokumentbestiller.dto.BestillBrevDto;
 import no.nav.foreldrepenger.dokumentbestiller.dto.BrevmalDto;
 import no.nav.foreldrepenger.web.app.tjenester.dokument.dto.DokumentProdusertDto;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("")

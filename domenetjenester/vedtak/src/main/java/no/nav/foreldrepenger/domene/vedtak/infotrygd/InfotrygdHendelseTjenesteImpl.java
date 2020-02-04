@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedDto;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
 

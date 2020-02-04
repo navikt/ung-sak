@@ -5,6 +5,9 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+
 /**
  * Kun for invortes bruk (Behandlingskontroll). Evt. tester. Skal ikke aksesseres direkte av andre under normal
  * operasjon.

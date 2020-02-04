@@ -2,12 +2,12 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.iay.TemaUnderkategori;
 
 public class YtelseBuilder {
 

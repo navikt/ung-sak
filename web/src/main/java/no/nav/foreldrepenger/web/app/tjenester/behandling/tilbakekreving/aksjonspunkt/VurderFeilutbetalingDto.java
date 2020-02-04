@@ -7,8 +7,8 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.vedtak.util.InputValideringRegex;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE)

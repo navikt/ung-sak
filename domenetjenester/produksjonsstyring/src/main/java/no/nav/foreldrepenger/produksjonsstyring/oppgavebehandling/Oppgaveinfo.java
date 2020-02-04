@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling;
 
 import java.util.Objects;
 
-import no.nav.foreldrepenger.historikk.OppgaveÅrsak;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
 public class Oppgaveinfo{
 

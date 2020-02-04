@@ -18,9 +18,9 @@ import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceP
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 /**
  * Håndtere opprydding i Aksjonspunkt og Vilkår ved overhopp framover

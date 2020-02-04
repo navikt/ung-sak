@@ -22,18 +22,18 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagType;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPeriodeDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.SammenligningsgrunnlagDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 @ApplicationScoped
 public class BeregningsgrunnlagDtoTjeneste {

@@ -7,13 +7,12 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.*;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.ArbeidType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ import static java.util.Collections.emptyList;
 import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.JA;
 import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.NEI;
 import static no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING;
 
 @ApplicationScoped
 public class AksjonspunktutlederForVurderBekreftetOpptjening implements AksjonspunktUtleder {
@@ -92,7 +91,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening implements Aksjonsp
                 .stream()
                 .anyMatch(ya -> {
                     var arbeidsgiver = ya.getArbeidsgiver();
-                    return arbeidsgiver.getErVirksomhet() && Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr());
+                    return arbeidsgiver.getErVirksomhet() && OrgNummer.erKunstig(arbeidsgiver.getOrgnr());
                 })
                     ? JA
                     : NEI;
@@ -128,7 +127,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening implements Aksjonsp
                 return true;
             }
         }
-        return yrkesaktivitet.getArbeidsgiver().getErVirksomhet() && Organisasjonstype.erKunstig(yrkesaktivitet.getArbeidsgiver().getOrgnr());
+        return yrkesaktivitet.getArbeidsgiver().getErVirksomhet() && OrgNummer.erKunstig(yrkesaktivitet.getArbeidsgiver().getOrgnr());
     }
 
     private Utfall finnesDetBekreftetFrilans(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet opptjeningPeriode,

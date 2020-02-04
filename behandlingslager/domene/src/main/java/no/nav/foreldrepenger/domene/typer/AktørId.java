@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
  * Id som genereres fra NAV Aktør Register. Denne iden benyttes til interne forhold i Nav og vil ikke endres f.eks. dersom bruker går fra

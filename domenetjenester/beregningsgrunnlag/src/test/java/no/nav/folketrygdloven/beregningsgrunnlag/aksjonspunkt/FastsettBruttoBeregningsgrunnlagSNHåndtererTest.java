@@ -19,9 +19,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public class FastsettBruttoBeregningsgrunnlagSNHåndtererTest {
 
@@ -89,7 +89,7 @@ public class FastsettBruttoBeregningsgrunnlagSNHåndtererTest {
 
     private void buildBgPrStatusOgAndel(no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode beregningsgrunnlagPeriode) {
         BeregningsgrunnlagPrStatusOgAndel.builder()
-            .medAktivitetStatus(no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE)
+            .medAktivitetStatus(no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE)
             .build(beregningsgrunnlagPeriode);
     }
 

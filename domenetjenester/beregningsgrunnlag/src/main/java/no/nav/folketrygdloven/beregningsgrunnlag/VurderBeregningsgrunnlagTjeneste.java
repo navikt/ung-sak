@@ -18,8 +18,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelMerknad;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.RegelResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.vurder.RegelVurderBeregningsgrunnlag;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 @ApplicationScoped
 public class VurderBeregningsgrunnlagTjeneste {

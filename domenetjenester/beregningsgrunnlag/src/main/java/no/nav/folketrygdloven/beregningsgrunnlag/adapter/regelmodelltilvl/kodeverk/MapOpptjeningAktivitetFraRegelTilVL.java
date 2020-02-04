@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Aktivitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class MapOpptjeningAktivitetFraRegelTilVL {
     private static final EnumMap<Aktivitet, OpptjeningAktivitetType> aktivitetMap =

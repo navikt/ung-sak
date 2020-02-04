@@ -7,12 +7,12 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalGruppeWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.rest.Faresignalgruppe;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;

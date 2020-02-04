@@ -1,21 +1,21 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.BRUK;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.IKKE_BRUK;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
-import static no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.IKKE_BRUK;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 
 public class ArbeidsforholdHandlingTypeUtlederTest {
 

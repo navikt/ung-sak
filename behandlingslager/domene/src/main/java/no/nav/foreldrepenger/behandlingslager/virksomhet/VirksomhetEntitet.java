@@ -16,7 +16,10 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OrganisasjonstypeKodeverdiConverter;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 
 @Entity(name = "Virksomhet")
 @Table(name = "VIRKSOMHET", uniqueConstraints = @UniqueConstraint(columnNames = {"orgnr"}))
@@ -51,7 +54,7 @@ public class VirksomhetEntitet extends BaseEntitet implements Virksomhet, IndexK
     private LocalDateTime opplysningerOppdatertTidspunkt = LocalDateTime.now();
 
     @ChangeTracked
-    @Convert(converter = Organisasjonstype.KodeverdiConverter.class)
+    @Convert(converter = OrganisasjonstypeKodeverdiConverter.class)
     @Column(name="organisasjonstype", nullable = false)
     private Organisasjonstype organisasjonstype = Organisasjonstype.UDEFINERT;
 
@@ -64,7 +67,8 @@ public class VirksomhetEntitet extends BaseEntitet implements Virksomhet, IndexK
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(orgnr);
+        Object[] keyParts = { orgnr };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     @Override

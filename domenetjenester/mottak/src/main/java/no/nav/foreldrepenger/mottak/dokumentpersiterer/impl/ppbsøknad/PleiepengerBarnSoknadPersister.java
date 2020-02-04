@@ -17,12 +17,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.søknad.felles.Språk;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 import no.nav.k9.søknad.pleiepengerbarn.Utland;

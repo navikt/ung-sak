@@ -28,14 +28,17 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @Entity(name = "BeregningsgrunnlagPrStatusOgAndel")
 @Table(name = "BG_PR_STATUS_OG_ANDEL")
@@ -57,7 +60,7 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
     @JoinColumn(name = "bg_periode_id", nullable = false, updatable = false)
     private BeregningsgrunnlagPeriode beregningsgrunnlagPeriode;
 
-    @Convert(converter=AktivitetStatus.KodeverdiConverter.class)
+    @Convert(converter=AktivitetStatusKodeverdiConverter.class)
     @Column(name="aktivitet_status", nullable = false)
     private AktivitetStatus aktivitetStatus;
 
@@ -68,7 +71,7 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
     })
     private ÅpenDatoIntervallEntitet beregningsperiode;
 
-    @Convert(converter = OpptjeningAktivitetType.KodeverdiConverter.class)
+    @Convert(converter = OpptjeningAktivitetTypeKodeverdiConverter.class)
     @Column(name="arbeidsforhold_type", nullable = false)
     private OpptjeningAktivitetType arbeidsforholdType;
 
@@ -137,7 +140,7 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
     @Column(name = "besteberegning_pr_aar")
     private BigDecimal besteberegningPrÅr;
 
-    @Convert(converter=Inntektskategori.KodeverdiConverter.class)
+    @Convert(converter=InntektskategoriKodeverdiConverter.class)
     @Column(name="inntektskategori", nullable = false)
     private Inntektskategori inntektskategori = Inntektskategori.UDEFINERT;
 

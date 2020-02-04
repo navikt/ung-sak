@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 
 //NOSONAR
 public class ArbeidsforholdWrapper {

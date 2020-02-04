@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk;
 
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus.BRUKERS_ANDEL;
+import static no.nav.k9.kodeverk.iay.AktivitetStatus.BRUKERS_ANDEL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -27,10 +27,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkEndretFeltType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
@@ -45,6 +41,10 @@ import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.historikk.dto.HistorikkInnslagKonverter;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.tilfeller.KunYtelseHistorikkTjeneste;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 import no.nav.vedtak.felles.integrasjon.journal.v3.JournalConsumerImpl;
 
 public class KunYtelseHistorikkTjenesteTest {

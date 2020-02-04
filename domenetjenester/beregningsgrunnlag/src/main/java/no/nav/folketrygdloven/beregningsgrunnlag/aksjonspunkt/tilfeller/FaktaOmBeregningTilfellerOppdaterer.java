@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 @ApplicationScoped
 public class FaktaOmBeregningTilfellerOppdaterer {

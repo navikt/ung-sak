@@ -15,11 +15,11 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingTema;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Journalpost;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @ApplicationScoped
 public class VurderFagsystemFellesTjeneste {

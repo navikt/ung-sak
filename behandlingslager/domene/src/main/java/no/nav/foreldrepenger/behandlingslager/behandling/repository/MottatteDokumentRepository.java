@@ -11,9 +11,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped

@@ -26,10 +26,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriod
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagArbeidsforholdDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.BeregningArbeidsgiverTestUtil;
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.person.PersonIdentTjeneste;
@@ -40,6 +37,9 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonConsumer;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 
 public class BeregningsgrunnlagDtoUtilTest {
 

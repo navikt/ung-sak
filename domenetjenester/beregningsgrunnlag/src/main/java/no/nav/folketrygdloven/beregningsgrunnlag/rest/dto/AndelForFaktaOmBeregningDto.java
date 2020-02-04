@@ -2,8 +2,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import java.math.BigDecimal;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class AndelForFaktaOmBeregningDto {
 

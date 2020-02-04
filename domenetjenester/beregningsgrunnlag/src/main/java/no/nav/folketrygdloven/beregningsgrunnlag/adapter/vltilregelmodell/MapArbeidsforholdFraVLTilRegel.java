@@ -27,8 +27,8 @@ public class MapArbeidsforholdFraVLTilRegel {
         }
     }
 
-    private static boolean erFrilanser(no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus aktivitetStatus) {
-        return no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus.FRILANSER.equals(aktivitetStatus);
+    private static boolean erFrilanser(no.nav.k9.kodeverk.iay.AktivitetStatus aktivitetStatus) {
+        return no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER.equals(aktivitetStatus);
     }
 
     private static Arbeidsforhold lagArbeidsforholdHosArbeidsgiver(Arbeidsgiver arbeidsgiver, BeregningsgrunnlagPrStatusOgAndel vlBGPStatus) {

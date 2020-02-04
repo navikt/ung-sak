@@ -12,7 +12,6 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
@@ -20,6 +19,7 @@ import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.BehandlingUuidDto;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.TekstFraSaksbehandlerDto;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped

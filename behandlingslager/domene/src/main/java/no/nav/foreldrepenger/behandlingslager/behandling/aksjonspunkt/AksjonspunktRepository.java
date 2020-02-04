@@ -5,6 +5,10 @@ import javax.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+
 /**
  * Håndter all endring av aksjonspunkt.
  */

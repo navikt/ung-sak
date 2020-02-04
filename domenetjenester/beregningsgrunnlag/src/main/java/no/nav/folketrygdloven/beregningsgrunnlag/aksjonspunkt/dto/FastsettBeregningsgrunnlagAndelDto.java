@@ -3,8 +3,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
 

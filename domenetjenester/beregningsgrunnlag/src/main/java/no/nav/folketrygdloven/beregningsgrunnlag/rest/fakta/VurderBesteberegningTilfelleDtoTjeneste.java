@@ -7,9 +7,9 @@ import javax.enterprise.context.ApplicationScoped;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.VurderBesteberegningDto;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 @ApplicationScoped
 public class VurderBesteberegningTilfelleDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste {

@@ -2,7 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

@@ -1,11 +1,11 @@
 package no.nav.foreldrepenger.domene.risikoklassifisering.json;
 
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.rest.Faresignalgruppe;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;

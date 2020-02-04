@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 
 public class BekreftedePerioderDto {
 

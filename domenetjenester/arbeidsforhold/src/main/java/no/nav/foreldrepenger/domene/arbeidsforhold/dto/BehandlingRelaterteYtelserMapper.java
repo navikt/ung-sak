@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingRelaterteYtelserMapper {

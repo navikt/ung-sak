@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 
 public class RegionTest {
 

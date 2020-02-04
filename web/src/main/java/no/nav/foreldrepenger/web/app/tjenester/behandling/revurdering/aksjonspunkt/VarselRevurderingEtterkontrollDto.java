@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.VARSEL_REVURDERING_ETTERKONTROLL_KODE)
 public class VarselRevurderingEtterkontrollDto extends VarselRevurderingDto {

@@ -7,9 +7,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.foreldrepenger.validering.ValidKodeverk;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.vedtak.util.InputValideringRegex;
 
 public class AksjonspunktGodkjenningDto {
@@ -27,7 +26,7 @@ public class AksjonspunktGodkjenningDto {
     @Valid
     @NotNull
     @Size(max = 10)
-    private Set<@ValidKodeverk VurderÅrsak> arsaker;
+    private Set<no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak> arsaker;
 
     public AksjonspunktGodkjenningDto() { // NOSONAR
         // For Jackson

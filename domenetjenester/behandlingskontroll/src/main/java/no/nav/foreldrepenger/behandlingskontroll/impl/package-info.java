@@ -6,7 +6,7 @@
  * {@link no.nav.foreldrepenger.behandlingslager.behandling.Aksjonspunkt} som oppdages.
  * <p>
  * Hvilke {@link no.nav.foreldrepenger.behandlingskontroll.BehandlingSteg} som skal prosesseres er avhengig av
- * {@link no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType}.
+ * {@link no.nav.k9.kodeverk.behandling.BehandlingType}.
  * <p>
  * I tillegg til å definere hvordan behandlingen kan prosesseres framover, er det mulig å legge på vent, henlegge,
  * avslutte (avslag), hoppe framover eller bakover i stegene.

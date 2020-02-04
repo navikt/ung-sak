@@ -15,10 +15,6 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
-import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.BehandlingRelaterteYtelserMapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.RelaterteYtelserDto;
 import no.nav.foreldrepenger.domene.arbeidsforhold.dto.TilgrensendeYtelserDto;
@@ -28,10 +24,14 @@ import no.nav.foreldrepenger.domene.iay.modell.VersjonType;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.iay.TemaUnderkategori;
 
 public class BehandlingRelaterteYtelserMapperTest {
     private static final LocalDate I_DAG = LocalDate.now();

@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.historikk.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkOpplysningType;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
+import no.nav.k9.kodeverk.historikk.HistorikkOpplysningType;
 
 public class HistorikkinnslagOpplysningDto {
 

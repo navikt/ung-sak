@@ -7,7 +7,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
 
 @ApplicationScoped
 public class BeregningRevurderingTestUtil {

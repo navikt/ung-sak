@@ -11,11 +11,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.SaksbehandletBereg
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.BeregningsaktivitetLagreDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class SaksbehandletBeregningsaktivitetTjenesteTest {
 

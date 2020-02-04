@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAktivitetsnøkkelV2;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -10,6 +9,7 @@ import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.BRNøkkelMedAndeler;
 import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.MapAndelerSortertPåNøkkel;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 import org.junit.Test;
 

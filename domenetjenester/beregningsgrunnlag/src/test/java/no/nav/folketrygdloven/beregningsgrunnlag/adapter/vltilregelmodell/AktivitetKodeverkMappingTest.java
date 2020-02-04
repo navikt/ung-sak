@@ -6,8 +6,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.kodeverk.MapOpptjeningAktivitetTypeFraVLTilRegel;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class AktivitetKodeverkMappingTest {
 

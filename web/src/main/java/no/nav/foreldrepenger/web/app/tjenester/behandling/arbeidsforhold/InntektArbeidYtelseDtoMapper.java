@@ -34,8 +34,8 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped

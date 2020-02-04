@@ -12,13 +12,13 @@ import java.time.LocalDate;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.foreldrepenger.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.feil.UgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.OrganisasjonsDetaljer;

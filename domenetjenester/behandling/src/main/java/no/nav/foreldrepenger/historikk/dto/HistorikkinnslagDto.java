@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkAktør;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 
 public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
     private Long behandlingId;

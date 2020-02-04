@@ -28,12 +28,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriodeÅrsak;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Hjemmel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.PeriodeÅrsak;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagType;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatusMedHjemmel;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.BeregningsgrunnlagHjemmel;
@@ -46,7 +42,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregnings
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.SammenligningsGrunnlag;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
+import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
+import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @ApplicationScoped
 public class MapBeregningsgrunnlagFraVLTilRegel {
@@ -165,7 +165,7 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
         return new AktivitetStatusMedHjemmel(as, hjemmel);
     }
 
-    private AktivitetStatus mapVLAktivitetStatus(no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus vlBGAktivitetStatus) {
+    private AktivitetStatus mapVLAktivitetStatus(no.nav.k9.kodeverk.iay.AktivitetStatus vlBGAktivitetStatus) {
         if (BeregningsgrunnlagUtil.erATFL(vlBGAktivitetStatus)) {
             return AktivitetStatus.ATFL;
         }

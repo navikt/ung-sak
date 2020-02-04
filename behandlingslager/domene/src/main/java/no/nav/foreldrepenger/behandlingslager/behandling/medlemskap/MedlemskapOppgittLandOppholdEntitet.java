@@ -17,9 +17,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.LandkoderKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 
 /**
  * Entitetsklasse for opphold.
@@ -38,7 +40,7 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MEDLEMSKAP_OPPG_LAND")
     private Long id;
 
-    @Convert(converter = Landkoder.KodeverdiConverter.class)
+    @Convert(converter = LandkoderKodeverdiConverter.class)
     @Column(name="land", nullable = false)
     private Landkoder land = Landkoder.UDEFINERT;
 
@@ -75,7 +77,8 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(this.land, periode);
+        Object[] keyParts = { this.land, periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
 

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 public class FaktaBeregningLagreDto {
 

@@ -19,8 +19,9 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AksjonspunktDefinisjonKodeverdiConverter;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 
 @Entity(name = "Totrinnsvurdering")
 @Table(name = "TOTRINNSVURDERING")
@@ -34,7 +35,7 @@ public class Totrinnsvurdering extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @Convert(converter = AksjonspunktDefinisjon.KodeverdiConverter.class)
+    @Convert(converter = AksjonspunktDefinisjonKodeverdiConverter.class)
     @Column(name = "aksjonspunkt_def", nullable = false, updatable = false)
     private AksjonspunktDefinisjon aksjonspunktDefinisjon;
 

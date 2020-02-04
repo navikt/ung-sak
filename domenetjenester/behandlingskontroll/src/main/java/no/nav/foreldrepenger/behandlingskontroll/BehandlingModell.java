@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.StegTransisjon;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.TransisjonIdentifikator;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 /**
  * Definerer metoder for å inspisere state-machine for en gitt behandling type.

@@ -2,7 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
+import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

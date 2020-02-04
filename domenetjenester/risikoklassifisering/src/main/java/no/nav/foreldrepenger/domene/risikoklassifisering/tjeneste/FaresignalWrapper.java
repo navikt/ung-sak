@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste;
 
 import java.util.Objects;
 
-import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Kontrollresultat;
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 
 public class FaresignalWrapper {
     private Kontrollresultat kontrollresultat;

@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
@@ -24,10 +23,11 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.BekreftetPermisjonStatus;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
 import no.nav.vedtak.konfig.Tid;
 
 public class MapAnsettelsesPeriodeOgPermisjonTest {

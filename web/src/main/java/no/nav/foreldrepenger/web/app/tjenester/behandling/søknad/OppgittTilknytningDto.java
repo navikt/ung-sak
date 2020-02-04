@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 
 public class OppgittTilknytningDto {
 

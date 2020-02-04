@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold;
 
 import static java.util.stream.Collectors.flatMapping;
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType.FORENKLET_OPPGJØRSORDNING;
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.iay.ArbeidType.FORENKLET_OPPGJØRSORDNING;
+import static no.nav.k9.kodeverk.iay.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.iay.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
@@ -42,10 +40,12 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.iay.InntektspostType;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped

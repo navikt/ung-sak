@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 
 class AvklartPersonstatus {
 

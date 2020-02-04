@@ -22,11 +22,11 @@ import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceP
 import no.nav.foreldrepenger.behandlingskontroll.testutilities.TestScenario;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 public class BehandlingskontrollTjenesteImplTest {
 

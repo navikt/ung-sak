@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseValue;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
  * Stillingsprosent slik det er oppgitt i arbeidsavtalen

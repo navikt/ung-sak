@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
 
 public class MedlemskapsperiodeKoder {
 

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class OpptjeningAktiviteter {
 

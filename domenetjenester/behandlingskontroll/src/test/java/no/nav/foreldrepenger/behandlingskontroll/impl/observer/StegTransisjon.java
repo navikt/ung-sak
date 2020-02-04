@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingskontroll.impl.observer;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingSteg;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 public class StegTransisjon {
     private BehandlingSteg.TransisjonType transisjonType;

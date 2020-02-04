@@ -3,9 +3,9 @@ package no.nav.foreldrepenger.behandlingskontroll.impl;
 import static no.nav.vedtak.feil.LogLevel.ERROR;
 import static no.nav.vedtak.feil.LogLevel.WARN;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;

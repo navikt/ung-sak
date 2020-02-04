@@ -11,16 +11,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.AdresseType;
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapDekningType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapKildeType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapType;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
@@ -28,7 +22,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.SivilstandType;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -36,12 +29,19 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class BehandlingsgrunnlagEntitetTest {

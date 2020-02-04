@@ -10,8 +10,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.RedigerbarAnde
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.Inntektskategori;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.Inntektskategori;
 
 public class FastsettBeregningVerdierTjeneste {
 

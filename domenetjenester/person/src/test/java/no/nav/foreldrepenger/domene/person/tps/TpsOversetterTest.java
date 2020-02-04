@@ -24,13 +24,13 @@ import org.mockito.junit.MockitoRule;
 import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
@@ -318,7 +318,7 @@ public class TpsOversetterTest {
     @Test
     public void skal_oversette_statsborgerskap() throws Exception {
         // Arrange
-        no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder norge = no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder.NOR;
+        no.nav.k9.kodeverk.geografisk.Landkoder norge = no.nav.k9.kodeverk.geografisk.Landkoder.NOR;
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
 
         // Act

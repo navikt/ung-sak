@@ -3,7 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class BeregningAktivitetNøkkel {
     private OpptjeningAktivitetType opptjeningAktivitetType;

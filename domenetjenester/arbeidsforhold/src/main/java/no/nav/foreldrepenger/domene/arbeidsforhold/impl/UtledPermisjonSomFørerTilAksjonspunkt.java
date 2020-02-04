@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.impl;
 
-import static no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType.AA_REGISTER_TYPER;
+import static no.nav.k9.kodeverk.iay.ArbeidType.AA_REGISTER_TYPER;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
 
 final class UtledPermisjonSomFørerTilAksjonspunkt {
 

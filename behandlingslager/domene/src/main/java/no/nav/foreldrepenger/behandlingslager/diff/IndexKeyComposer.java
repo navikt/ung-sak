@@ -5,19 +5,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
  * Hjelpemetoder for å raskere sette sammen en IndexKey fra flere deler.
  * Må være String, CharSequence, Number eller implementere IndexKey for hver key part.
  */
-final class IndexKeyComposer {
+public final class IndexKeyComposer {
 
     private IndexKeyComposer() {
         // hidden
     }
 
     /** Hjelpe metode for å effektivt generere keys. */
-    static String createKey(Object... keyParts) {
+    public static String createKey(Object... keyParts) {
         StringBuilder sb = new StringBuilder(keyParts.length * 10);
         int max = keyParts.length;
         for (int i = 0; i < max; i++) {

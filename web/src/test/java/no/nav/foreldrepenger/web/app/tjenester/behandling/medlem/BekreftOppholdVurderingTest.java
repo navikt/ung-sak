@@ -16,9 +16,7 @@ import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -37,6 +35,8 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.Be
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftOppholdOppdaterer;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftOppholdsrettVurderingDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftedePerioderDto;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

@@ -1,27 +1,27 @@
 package no.nav.foreldrepenger.domene.abakus.mapping;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Fagsystem;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
-import no.nav.foreldrepenger.behandlingslager.ytelse.TemaUnderkategori;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.ArbeidsforholdHandlingType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.Arbeidskategori;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.BekreftetPermisjonStatus;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektPeriodeType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektsKilde;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektsmeldingInnsendingsårsak;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.NaturalYtelseType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.NæringsinntektType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.OffentligYtelseType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PensjonTrygdType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.SkatteOgAvgiftsregelType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.UtsettelseÅrsak;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.VirksomhetType;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.iay.Arbeidskategori;
+import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.iay.InntektPeriodeType;
+import no.nav.k9.kodeverk.iay.InntektsKilde;
+import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
+import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.iay.NaturalYtelseType;
+import no.nav.k9.kodeverk.iay.NæringsinntektType;
+import no.nav.k9.kodeverk.iay.OffentligYtelseType;
+import no.nav.k9.kodeverk.iay.PensjonTrygdType;
+import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.iay.SkatteOgAvgiftsregelType;
+import no.nav.k9.kodeverk.iay.TemaUnderkategori;
+import no.nav.k9.kodeverk.iay.UtsettelseÅrsak;
+import no.nav.k9.kodeverk.iay.YtelseType;
+import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 public final class KodeverkMapper {
 
@@ -40,7 +40,7 @@ public final class KodeverkMapper {
         return FagsakYtelseType.fraKode(kode).getKode();
     }
 
-    static no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.foreldrepenger.domene.iay.modell.kodeverk.YtelseType ytelseType) {
+    static no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.k9.kodeverk.iay.YtelseType ytelseType) {
         if (ytelseType == null || "-".equals(ytelseType.getKode())) {
             return null;
         }

@@ -12,11 +12,9 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
-
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum ForretningshendelseType implements Kodeverdi {
+public enum ForretningshendelseType {
     
     INGEN_HENDELSE("INGEN_HENDELSE", "Ingen hendelse"),
     FØDSEL("FØDSEL", "Fødsel"),
@@ -32,8 +30,6 @@ public enum ForretningshendelseType implements Kodeverdi {
 
     private static final Map<String, ForretningshendelseType> KODER = new LinkedHashMap<>();
     
-    public static final String KODEVERK = "FORRETNINGSHENDELSE_TYPE";
-
     @JsonIgnore
     private String navn;
 
@@ -67,30 +63,9 @@ public enum ForretningshendelseType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
     
-    @Override
-    public String getNavn() {
-        return navn;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
-    
     @JsonProperty
-    @Override
-    public String getKodeverk() {
-        return KODEVERK;
-    }
-
-    @JsonProperty
-    @Override
     public String getKode() {
         return kode;
-    }
-    
-    @Override
-    public String getOffisiellKode() {
-        return getKode();
     }
     
     static {

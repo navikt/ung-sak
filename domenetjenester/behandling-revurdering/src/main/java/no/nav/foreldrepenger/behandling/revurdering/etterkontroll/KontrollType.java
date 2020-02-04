@@ -4,9 +4,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,17 +12,14 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
-
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum KontrollType implements Kodeverdi {
+public enum KontrollType {
 
     MANGLENDE_FØDSEL("MANGLENDE_FØDSEL", "Kontroll manglende fødsel"),
 
     ;
 
-    private static final String KODEVERK = "ETTERKONTROLL_TYPE";
     private static final Map<String, KontrollType> KODER = new LinkedHashMap<>();
 
     @JsonIgnore
@@ -58,50 +52,20 @@ public enum KontrollType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    @Override
     public String getNavn() {
         return navn;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
-
     @JsonProperty
-    @Override
-    public String getKodeverk() {
-        return KODEVERK;
-    }
-
-    @JsonProperty
-    @Override
     public String getKode() {
         return kode;
     }
     
-    @Override
-    public String getOffisiellKode() {
-        return getKode();
-    }
-
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
-        }
-    }
-
-    @Converter(autoApply = true)
-    public static class KodeverdiConverter implements AttributeConverter<KontrollType, String> {
-        @Override
-        public String convertToDatabaseColumn(KontrollType attribute) {
-            return attribute == null ? null : attribute.getKode();
-        }
-
-        @Override
-        public KontrollType convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : fraKode(dbData);
         }
     }
 

@@ -24,10 +24,15 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.Vedtaksbrev;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.VedtakKodeverdiConverter;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 @Entity(name = "Behandlingsresultat")
 @Table(name = "BEHANDLING_RESULTAT")
@@ -49,18 +54,18 @@ public class Behandlingsresultat extends BaseEntitet {
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "behandlingsresultat")
     private BehandlingVedtak behandlingVedtak;
 
-    @Convert(converter = BehandlingResultatType.KodeverdiConverter.class)
+    @Convert(converter = BehandlingResultatKodeverdiConverter.class)
     @Column(name = "behandling_resultat_type", nullable = false)
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
 
-    @Convert(converter = Avslagsårsak.KodeverdiConverter.class)
+    @Convert(converter = AvslagsårsakKodeverdiConverter.class)
     @Column(name = "avslag_arsak", nullable = false)
     private Avslagsårsak avslagsårsak = Avslagsårsak.UDEFINERT;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BehandlingsresultatKonsekvensForYtelsen> konsekvenserForYtelsen = new ArrayList<>();
 
-    @Convert(converter = Vedtaksbrev.KodeverdiConverter.class)
+    @Convert(converter = VedtakKodeverdiConverter.class)
     @Column(name = "vedtaksbrev", nullable = false)
     private Vedtaksbrev vedtaksbrev = Vedtaksbrev.UDEFINERT;
 

@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.behandlingslager.aktør;
 
 import static java.time.Month.JANUARY;
-import static no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn.KVINNE;
+import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -11,10 +11,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class NavBrukerEntityTest {

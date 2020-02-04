@@ -2,7 +2,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
+
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class FordelBeregningsgrunnlagAndelDto extends FaktaOmBeregningAndelDto {
 

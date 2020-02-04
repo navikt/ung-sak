@@ -6,10 +6,11 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 public class YtelseAnvist extends BaseEntitet implements IndexKey {
 
@@ -38,7 +39,8 @@ public class YtelseAnvist extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(this.anvistPeriode);
+        Object[] keyParts = { this.anvistPeriode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public LocalDate getAnvistFOM() {

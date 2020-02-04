@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandling.aksjonspunkt;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public interface Overstyringshåndterer<T extends OverstyringAksjonspunkt> {
 

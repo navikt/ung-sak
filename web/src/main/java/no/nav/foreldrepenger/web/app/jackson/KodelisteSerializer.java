@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import no.nav.foreldrepenger.behandlingslager.kodeverk.Kodeverdi;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
  * Enkel serialisering av KodeverkTabell klasser, uten at disse trenger @JsonIgnore eller lignende. Deserialisering går

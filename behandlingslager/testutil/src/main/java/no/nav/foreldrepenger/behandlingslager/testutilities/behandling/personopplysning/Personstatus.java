@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personop
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 
 public final class Personstatus {
 

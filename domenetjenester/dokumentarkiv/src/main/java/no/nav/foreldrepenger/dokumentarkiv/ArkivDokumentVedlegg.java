@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.dokumentarkiv;
 
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 /*
  * Til bruk for journalposter der hoveddokument er ett scannet dokument som inneholder både hoveddokument og vedlegg

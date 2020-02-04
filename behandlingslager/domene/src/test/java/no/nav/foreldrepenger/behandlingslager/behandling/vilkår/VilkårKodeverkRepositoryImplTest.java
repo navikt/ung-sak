@@ -9,6 +9,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 public class VilkårKodeverkRepositoryImplTest {
 

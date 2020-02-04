@@ -17,6 +17,7 @@ import org.hibernate.jpa.QueryHints;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
 
 @ApplicationScoped
 public class BeregningsresultatRepository {

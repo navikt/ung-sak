@@ -9,11 +9,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrganisasjonsNummerValidator;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -27,6 +25,8 @@ import no.nav.foreldrepenger.domene.opptjening.dto.BekreftOpptjeningPeriodeDto;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.vedtak.konfig.Tid;
 
 class BekreftOpptjeningPeriodeAksjonspunkt {
@@ -141,7 +141,7 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
             .anyMatch(it -> {
                 boolean erNullProsent = filter.getAktivitetsAvtalerForArbeid(it).stream()
                     .anyMatch(aa -> aa.getProsentsats() == null || aa.getProsentsats().erNulltall());
-                boolean erKunstig = it.getArbeidsgiver().getErVirksomhet() && Organisasjonstype.erKunstig(it.getArbeidsgiver().getOrgnr());
+                boolean erKunstig = it.getArbeidsgiver().getErVirksomhet() && OrgNummer.erKunstig(it.getArbeidsgiver().getOrgnr());
                 return arbeidTypes.contains(it.getArbeidType())
                     && it.getArbeidsgiver().getIdentifikator().equals(periode.getArbeidsgiverIdentifikator())
                     && (erNullProsent
@@ -175,7 +175,7 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
             String id = periodeDto.getArbeidsforholdRef();
             InternArbeidsforholdRef ref = id == null ? null : InternArbeidsforholdRef.ref(id);
             if (OrganisasjonsNummerValidator.erGyldig(periodeDto.getArbeidsgiverIdentifikator())
-                || Organisasjonstype.erKunstig(periodeDto.getArbeidsgiverIdentifikator())) {
+                || OrgNummer.erKunstig(periodeDto.getArbeidsgiverIdentifikator())) {
                 nøkkel = new Opptjeningsnøkkel(ref, periodeDto.getArbeidsgiverIdentifikator(), null);
             } else {
                 nøkkel = new Opptjeningsnøkkel(ref, null, periodeDto.getArbeidsgiverIdentifikator());
@@ -183,7 +183,7 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
             builder = overstyrtBuilder.getYrkesaktivitetBuilderForNøkkelAvType(nøkkel, arbeidType);
 
             if (!builder.getErOppdatering()) {
-                if (Organisasjonstype.erKunstig(periodeDto.getArbeidsgiverIdentifikator())) {
+                if (OrgNummer.erKunstig(periodeDto.getArbeidsgiverIdentifikator())) {
                     builder = kopierVerdierForFiktivtArbeidsforhold(iayGrunnlag, builder);
                 } else {
                     // Bør få med all informasjon om arbeidsforholdet over i overstyrt slik at ingenting blir mistet.

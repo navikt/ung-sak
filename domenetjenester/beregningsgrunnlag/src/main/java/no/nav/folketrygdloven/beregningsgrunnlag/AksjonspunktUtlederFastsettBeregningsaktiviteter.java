@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktDefinisjon;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningVenteårsak;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 
 public abstract class AksjonspunktUtlederFastsettBeregningsaktiviteter {
 

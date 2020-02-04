@@ -8,8 +8,8 @@ import javax.persistence.Embeddable;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseValue;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 
 /**

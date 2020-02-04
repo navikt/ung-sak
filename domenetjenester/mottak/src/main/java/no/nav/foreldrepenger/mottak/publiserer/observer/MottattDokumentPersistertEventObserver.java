@@ -4,9 +4,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokumentPersistertEvent;
 import no.nav.foreldrepenger.mottak.publiserer.task.PubliserPersistertDokumentHendelseTask;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 

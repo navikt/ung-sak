@@ -11,7 +11,6 @@ import java.util.stream.IntStream;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.AdresseType;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
@@ -21,6 +20,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
 
 public class PersonAdresseEndringIdentifisererTest {
 

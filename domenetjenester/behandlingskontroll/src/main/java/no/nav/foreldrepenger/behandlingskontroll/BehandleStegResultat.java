@@ -8,7 +8,7 @@ import java.util.List;
 
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.TransisjonIdentifikator;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public class BehandleStegResultat {
     private final List<AksjonspunktResultat> aksjonspunktListe;

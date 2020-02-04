@@ -29,9 +29,9 @@ import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.Beregningsgrunnl
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 /**

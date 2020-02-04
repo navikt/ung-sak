@@ -9,9 +9,9 @@ import org.junit.Test;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingSteg;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingModellImpl.TriFunction;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 public class BehandlingModellEnkelTest {
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;

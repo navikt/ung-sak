@@ -5,10 +5,11 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektPeriodeType;
 import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.iay.InntektPeriodeType;
 
 public class YtelseStørrelse extends BaseEntitet implements IndexKey {
 
@@ -33,7 +34,8 @@ public class YtelseStørrelse extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(virksomhetOrgnr);
+        Object[] keyParts = { virksomhetOrgnr };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     public Optional<String> getOrgnr() {

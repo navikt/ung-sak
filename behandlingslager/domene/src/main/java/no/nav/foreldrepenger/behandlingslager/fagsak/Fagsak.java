@@ -19,8 +19,13 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
@@ -31,7 +36,7 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "id")
     private Long id;
 
-    @Convert(converter = FagsakYtelseType.KodeverdiConverter.class)
+    @Convert(converter = FagsakYtelseTypeKodeverdiConverter.class)
     @Column(name = "ytelse_type", nullable = false, updatable = false)
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
@@ -39,7 +44,7 @@ public class Fagsak extends BaseEntitet {
     @JoinColumn(name = "bruker_id", nullable = false)
     private NavBruker navBruker;
 
-    @Convert(converter = FagsakStatus.KodeverdiConverter.class)
+    @Convert(converter = FagsakStatusKodeverdiConverter.class)
     @Column(name="fagsak_status", nullable = false)
     private FagsakStatus fagsakStatus = FagsakStatus.DEFAULT;
 
@@ -182,5 +187,18 @@ public class Fagsak extends BaseEntitet {
     protected void onDelete() {
         // FIXME: FPFEIL-2799 (FrodeC): Fjern denne når FPFEIL-2799 er godkjent
         throw new IllegalStateException("Skal aldri kunne slette fagsak. [id=" + id + ", status=" + getFagsakStatus() + ", type=" + ytelseType + "]");
+    }
+
+    public BehandlingTema getBehandlingTema() {
+        // FIXME K9 kodeverk/logikk
+        return fraFagsakHendelse(this.getYtelseType());
+    }
+
+    public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
+        // FIXME K9 kodeverk/logikk
+        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelseType)) {
+            return BehandlingTema.PLEIEPENGER_SYKT_BARN;
+        }
+        return BehandlingTema.UDEFINERT;
     }
 }

@@ -10,8 +10,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -23,6 +21,8 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandli
 import no.nav.foreldrepenger.domene.opptjening.VurderingsStatus;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 

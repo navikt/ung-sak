@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
  * Denne mapper p.t Norsk person ident (fødselsnummer, inkl F-nr, D-nr eller FDAT)

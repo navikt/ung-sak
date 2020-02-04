@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.ytelse.beregning.adapter;
 
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakArbeidType;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 
 public class MapUttakArbeidTypeTilAktivitetStatus {
     private MapUttakArbeidTypeTilAktivitetStatus() {

@@ -13,8 +13,8 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrganisasjonsNummerValidator;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Organisasjonstype;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
@@ -150,7 +150,7 @@ public class OpptjeningDtoTjeneste {
     private boolean erKunstig(OpptjeningsperiodeForSaksbehandling oap) {
         Arbeidsgiver arbeidsgiver = oap.getArbeidsgiver();
         if (arbeidsgiver != null && arbeidsgiver.getErVirksomhet()) {
-            return Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr());
+            return OrgNummer.erKunstig(arbeidsgiver.getOrgnr());
         }
         return false;
     }

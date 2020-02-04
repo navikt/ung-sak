@@ -1,8 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagTilstand;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 
 public class RyddBeregningsgrunnlag {
 

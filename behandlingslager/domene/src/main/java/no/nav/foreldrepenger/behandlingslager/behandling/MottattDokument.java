@@ -19,7 +19,11 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentKategoriKodeverdiConverter;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentTypeIdKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 /**
  * Entitetsklasse for mottatte dokument.
@@ -49,11 +53,11 @@ public class MottattDokument extends BaseEntitet {
     @Column(name = "journal_enhet")
     private String journalEnhet;
 
-    @Convert(converter = DokumentTypeId.KodeverdiConverter.class)
+    @Convert(converter = DokumentTypeIdKodeverdiConverter.class)
     @Column(name="type", nullable = false)
     private DokumentTypeId dokumentTypeId = DokumentTypeId.UDEFINERT;
 
-    @Convert(converter = DokumentKategori.KodeverdiConverter.class)
+    @Convert(converter = DokumentKategoriKodeverdiConverter.class)
     @Column(name="dokument_kategori", nullable = false)
     private DokumentKategori dokumentKategori = DokumentKategori.UDEFINERT;
 

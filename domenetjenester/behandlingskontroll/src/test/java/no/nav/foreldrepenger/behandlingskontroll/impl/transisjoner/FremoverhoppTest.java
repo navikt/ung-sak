@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.behandlingskontroll.impl.transisjoner;
 
 import static no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus.AVBRUTT;
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus.UTFØRT;
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderingspunktType.INN;
-import static no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderingspunktType.UT;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.AVBRUTT;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.UTFØRT;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.INN;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.UT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -29,19 +29,19 @@ import no.nav.foreldrepenger.behandlingskontroll.impl.observer.Behandlingskontro
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.foreldrepenger.behandlingskontroll.testutilities.TestScenario;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegStatus;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 
 public class FremoverhoppTest {
 

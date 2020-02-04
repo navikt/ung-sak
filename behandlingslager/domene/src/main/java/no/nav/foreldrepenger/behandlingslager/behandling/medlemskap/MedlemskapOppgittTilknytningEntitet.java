@@ -19,7 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 
 /**
  * Entitetsklasse for oppgitt tilknytning.

@@ -15,6 +15,7 @@ import javax.persistence.TypedQuery;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped

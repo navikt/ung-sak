@@ -10,7 +10,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettMånedsinntektFLDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.tilfeller.FaktaOmBeregningTilfelleOppdaterer;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;

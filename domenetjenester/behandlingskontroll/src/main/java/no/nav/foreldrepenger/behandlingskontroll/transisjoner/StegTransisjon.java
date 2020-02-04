@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingskontroll.transisjoner;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
 public interface StegTransisjon {
     String getId();

@@ -9,7 +9,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.PeriodeÅrsak;
+import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

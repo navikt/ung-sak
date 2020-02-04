@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.historikk.dto;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 
 public class HistorikkinnslagHendelseDto {
     private HistorikkinnslagType navn;

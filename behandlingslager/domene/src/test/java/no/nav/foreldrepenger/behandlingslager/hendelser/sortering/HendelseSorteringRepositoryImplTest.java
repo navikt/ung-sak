@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandlingslager.hendelser.sortering;
 
 import static java.time.Month.JANUARY;
 import static java.util.Collections.singletonList;
-import static no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn.KVINNE;
+import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -14,20 +14,20 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.RelasjonsRolleType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.behandlingslager.hendelser.HendelseSorteringRepository;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class HendelseSorteringRepositoryImplTest {

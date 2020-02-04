@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScena
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.typer.Saksnummer;
-import no.nav.foreldrepenger.historikk.OppgaveÅrsak;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class OppgaveBehandlingKoblingTest {

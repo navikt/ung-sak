@@ -24,8 +24,6 @@ import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStatus;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingType;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -33,7 +31,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Språkkode;
 import no.nav.foreldrepenger.dokumentbestiller.dto.BestillBrevDto;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingDataTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.klient.TekstFraSaksbehandler;
@@ -62,6 +59,9 @@ import no.nav.foreldrepenger.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.vedtak.konfig.PropertyUtil;
 
 /**

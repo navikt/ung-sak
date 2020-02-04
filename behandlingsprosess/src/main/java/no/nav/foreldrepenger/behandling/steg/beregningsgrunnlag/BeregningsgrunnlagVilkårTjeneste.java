@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall.IKKE_VURDERT;
+import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -11,18 +11,18 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagRegelResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Avslagsårsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Utfall;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårUtfallMerknad;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped

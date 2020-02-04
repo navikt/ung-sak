@@ -9,8 +9,10 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public class BeregningsgrunnlagGrunnlagEntitetTest {
 

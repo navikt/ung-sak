@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.impl.InntektsmeldingFilterYte
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.InntektspostType;
+import no.nav.k9.kodeverk.iay.InntektspostType;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped

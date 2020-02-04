@@ -6,13 +6,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapDekningType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapKildeType;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Landkoder;
 import no.nav.foreldrepenger.domene.medlem.api.FinnMedlemRequest;
 import no.nav.foreldrepenger.domene.medlem.api.Medlemskapsperiode;
 import no.nav.foreldrepenger.domene.medlem.api.MedlemskapsperiodeKoder;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;

@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentKategori;
-import no.nav.foreldrepenger.behandlingslager.behandling.DokumentTypeId;
-import no.nav.foreldrepenger.behandlingslager.behandling.VariantFormat;
-import no.nav.foreldrepenger.dokumentarkiv.ArkivFilType;
 import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.dokument.ArkivFilType;
+import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.VariantFormat;
 
 public class JournalMetadata {
 

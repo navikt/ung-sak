@@ -4,7 +4,7 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
 
 public class PermisjonDto {
 

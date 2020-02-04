@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.kompletthet;
 
 import java.time.LocalDateTime;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 public class KompletthetResultat {
 

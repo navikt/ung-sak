@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.opptjening.aksjonspunkt;
 
-import static no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType.NÆRING;
+import static no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType.NÆRING;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,9 +18,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.ArbeidType;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.AktørArbeid;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -38,6 +36,8 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandli
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @Dependent
 public class OpptjeningsperioderUtenOverstyringTjeneste {

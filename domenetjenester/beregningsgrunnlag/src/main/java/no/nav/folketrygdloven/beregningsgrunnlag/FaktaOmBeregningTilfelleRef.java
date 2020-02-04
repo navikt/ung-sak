@@ -20,7 +20,7 @@ import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.FaktaOmBeregningTilfelle;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 /**
  * Marker tilfelle av fakta om beregning for å skille ulike implementasjoner for f.eks. oppdaterere og historikk.

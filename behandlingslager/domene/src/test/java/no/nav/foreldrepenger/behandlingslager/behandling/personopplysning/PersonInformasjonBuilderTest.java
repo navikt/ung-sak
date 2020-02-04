@@ -7,10 +7,12 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 
 public class PersonInformasjonBuilderTest {
 

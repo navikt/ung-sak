@@ -11,13 +11,13 @@ import java.util.Set;
 import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.felles.BeregningUtils;
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakYtelseType;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
-import no.nav.foreldrepenger.domene.iay.modell.kodeverk.RelatertYtelseTilstand;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
 
 public class BeregningUtilsTest {
 

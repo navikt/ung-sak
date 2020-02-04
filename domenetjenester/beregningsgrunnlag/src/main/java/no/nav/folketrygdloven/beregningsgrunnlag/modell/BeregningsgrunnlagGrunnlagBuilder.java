@@ -3,6 +3,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 import java.util.Objects;
 import java.util.Optional;
 
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+
 public class BeregningsgrunnlagGrunnlagBuilder {
     private BeregningsgrunnlagGrunnlagEntitet kladd;
     private boolean built;

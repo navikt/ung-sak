@@ -16,12 +16,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKey;
+import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.PersonstatusKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 
 @Entity(name = "PersonopplysningPersonstatus")
 @Table(name = "PO_PERSONSTATUS")
@@ -39,7 +41,7 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
     private DatoIntervallEntitet periode;
 
     @ChangeTracked
-    @Convert(converter = PersonstatusType.KodeverdiConverter.class)
+    @Convert(converter = PersonstatusKodeverdiConverter.class)
     @Column(name="personstatus", nullable = false)
     private PersonstatusType personstatus = PersonstatusType.UDEFINERT;
 
@@ -59,7 +61,8 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
 
     @Override
     public String getIndexKey() {
-        return IndexKey.createKey(aktørId, personstatus, periode);
+        Object[] keyParts = { aktørId, personstatus, periode };
+        return IndexKeyComposer.createKey(keyParts);
     }
 
     void setPersonInformasjon(PersonInformasjonEntitet personInformasjon) {

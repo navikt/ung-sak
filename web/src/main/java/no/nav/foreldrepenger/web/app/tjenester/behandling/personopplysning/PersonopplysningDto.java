@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerKjønn;
-import no.nav.foreldrepenger.behandlingslager.aktør.PersonstatusType;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.SivilstandType;
-import no.nav.foreldrepenger.behandlingslager.geografisk.Region;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 
 public class PersonopplysningDto extends PersonIdentDto {
 

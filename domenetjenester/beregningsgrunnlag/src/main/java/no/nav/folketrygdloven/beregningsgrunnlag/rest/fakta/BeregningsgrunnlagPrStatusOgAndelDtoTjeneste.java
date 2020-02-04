@@ -20,11 +20,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.FordelBeregning
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagType;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelDto;
-import no.nav.foreldrepenger.behandlingslager.behandling.aktivitet.AktivitetStatus;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
+import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 
 @ApplicationScoped

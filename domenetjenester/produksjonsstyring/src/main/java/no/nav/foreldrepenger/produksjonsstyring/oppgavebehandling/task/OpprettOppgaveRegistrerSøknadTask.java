@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.foreldrepenger.historikk.OppgaveÅrsak.REGISTRER_SØKNAD;
 import static no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveRegistrerSøknadTask.TASKTYPE;
+import static no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak.REGISTRER_SØKNAD;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
