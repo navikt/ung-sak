@@ -8,10 +8,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.DefaultVilkårUtleder;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.UtledeteVilkår;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @ApplicationScoped
 public class VilkårsPerioderTilVurderingTjeneste {

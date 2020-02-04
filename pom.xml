@@ -36,7 +36,7 @@
 		<felles.version>1.5-20200129145325-846bbaf</felles.version>
 
         <metrics.version>4.1.2</metrics.version>
-		<fp-kontrakter.version>5.1_20191210141010_6a7f399</fp-kontrakter.version>
+		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
 	</properties>
 
 	<prerequisites>
@@ -92,7 +92,7 @@
 				<artifactId>oppdrag-kontrakter</artifactId>
 				<version>1.0-20200131154110-bf58e40</version>
 			</dependency>
-			
+
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
                 <artifactId>fp-topics-manifest</artifactId>
