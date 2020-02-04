@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v2.0.0
       - name: Hent maven version    
         run: |
-          echo "::set-env name=MVN_VERSION::$(mvn -pl . help:evaluate -Dexpression=project.version -Dsha1= -Dchangelog= -q -DforceStdout)"
+          echo "::set-env name=MVN_VERSION::$(mvn -o -pl . help:evaluate -Dexpression=project.version -Dsha1= -Dchangelog= -q -DforceStdout)"
       - uses: actions/cache@v1.1.0
         with:
           path: ~/.m2/repository
