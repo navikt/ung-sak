@@ -20,11 +20,14 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
+      - name: Hent maven version    
+        run: |
+          echo "::set-env name=MVN_VERSION::$(mvn help:evaluate -Dsha1=${TAG} -Dexpression=project.version -q -DforceStdout)"
       - uses: actions/checkout@v2.0.0
       - uses: actions/cache@v1.1.0
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${MVN_VERSION}
       - uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.11
