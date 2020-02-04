@@ -9,7 +9,7 @@ spec:
   image: {{ image }}
   port: 8080
   liveness:
-    path: /sak/internal/health/isAlive
+    path: /k9/sak/internal/health/isAlive
     initialDelay: 30
     timeout: 5
     periodSeconds: 10
@@ -17,7 +17,7 @@ spec:
     # nais will try failureThreshold times before giving up and restarting the Pod
     # Defaults to 3
   readiness:
-    path: /sak/internal/health/isReady
+    path: /k9/sak/internal/health/isReady
     initialDelay: 30
     timeout: 5
     periodSeconds: 10
@@ -28,7 +28,7 @@ spec:
     cpuThresholdPercentage: 80
   prometheus:
     enabled: true
-    path: /sak/internal/metrics/prometheus
+    path: /k9/sak/internal/metrics/prometheus
   resources:
     limits:
       cpu: "500m"
