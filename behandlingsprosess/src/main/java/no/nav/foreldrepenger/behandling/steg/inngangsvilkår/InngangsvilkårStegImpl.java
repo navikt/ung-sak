@@ -30,9 +30,9 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
+    protected InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
-    protected InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
     private BehandlingRepositoryProvider repositoryProvider;
     private BehandlingStegType behandlingStegType;
 
@@ -72,7 +72,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     }
 
     private List<AksjonspunktDefinisjon> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        final var intervaller = perioderTilVurdering(kontekst.getBehandlingId());
+        final var intervaller = perioderTilVurdering(kontekst.getBehandlingId(), vilkår);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(behandling.getId()));
         RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), behandling, ref, intervaller);
 
@@ -123,16 +123,19 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType hoppesTilSteg,
                                    BehandlingStegType hoppesFraSteg) {
-        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(kontekst.getBehandlingId());
+        vilkårHåndtertAvSteg().forEach(vilkår -> håndterHoppOverBakoverFor(vilkår, kontekst, modell));
+    }
+
+    private void håndterHoppOverBakoverFor(VilkårType vilkår, BehandlingskontrollKontekst kontekst, BehandlingStegModell modell) {
+        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(kontekst.getBehandlingId(), vilkår);
         perioder.forEach(periode -> {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
                 Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
                 RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
-                ryddVilkårTyper.ryddVedTilbakeføring(vilkårHåndtertAvSteg());
+                ryddVilkårTyper.ryddVedTilbakeføring(List.of(vilkår));
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
         });
-
     }
 
     @Override
@@ -157,8 +160,8 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     }
 
     @Override
-    public List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
-        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(behandlingId);
+    public List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
+        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(behandlingId, vilkårType);
         return new ArrayList<>(perioder);
     }
 

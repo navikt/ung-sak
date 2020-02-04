@@ -4,30 +4,23 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-@ApplicationScoped
-public class PerioderTilVurderingTjeneste {
+class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
 
     private FordelingRepository fordelingRepository;
 
-    PerioderTilVurderingTjeneste() {
-        // CDI
-    }
-
-    @Inject
-    public PerioderTilVurderingTjeneste(FordelingRepository fordelingRepository) {
+    MaksSøktePeriode(FordelingRepository fordelingRepository) {
         this.fordelingRepository = fordelingRepository;
     }
 
-    public Set<DatoIntervallEntitet> utled(Long behandlingId) {
+    @Override
+    public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         final var fordeling = fordelingRepository.hentHvisEksisterer(behandlingId);
+
 
         if (fordeling.isEmpty()) {
             return Set.of();

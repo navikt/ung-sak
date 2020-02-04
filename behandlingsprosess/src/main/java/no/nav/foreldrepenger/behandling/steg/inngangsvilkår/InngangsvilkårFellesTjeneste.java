@@ -12,14 +12,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelOrkestrerer;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
-import no.nav.foreldrepenger.inngangsvilkaar.perioder.PerioderTilVurderingTjeneste;
+import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @ApplicationScoped
 public class InngangsvilkårFellesTjeneste  {
     private RegelOrkestrerer regelOrkestrerer;
-    private PerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     InngangsvilkårFellesTjeneste() {
@@ -27,7 +27,7 @@ public class InngangsvilkårFellesTjeneste  {
     }
 
     @Inject
-    public InngangsvilkårFellesTjeneste(RegelOrkestrerer regelOrkestrerer, SkjæringstidspunktTjeneste skjæringstidspunktTjeneste, PerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+    public InngangsvilkårFellesTjeneste(RegelOrkestrerer regelOrkestrerer, SkjæringstidspunktTjeneste skjæringstidspunktTjeneste, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.regelOrkestrerer = regelOrkestrerer;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
@@ -41,7 +41,7 @@ public class InngangsvilkårFellesTjeneste  {
         return skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
     }
 
-    public Set<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId) {
-        return perioderTilVurderingTjeneste.utled(behandlingId);
+    public Set<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
+        return perioderTilVurderingTjeneste.utled(behandlingId, vilkårType);
     }
 }

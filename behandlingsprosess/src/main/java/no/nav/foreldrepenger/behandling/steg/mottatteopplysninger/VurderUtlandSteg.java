@@ -29,10 +29,9 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.DefaultVilkårUtleder;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.UtledeteVilkår;
-import no.nav.foreldrepenger.inngangsvilkaar.perioder.PerioderTilVurderingTjeneste;
+import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
@@ -47,7 +46,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
     private OppgaveTjeneste oppgaveTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private PerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     VurderUtlandSteg() {
         // for CDI proxy
@@ -55,7 +54,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
 
     @Inject
     public VurderUtlandSteg(BehandlingRepositoryProvider provider, // NOSONAR
-                            PerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                            VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                             OppgaveTjeneste oppgaveTjeneste,
                             InntektArbeidYtelseTjeneste iayTjeneste) {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
@@ -96,7 +95,9 @@ public class VurderUtlandSteg implements BehandlingSteg {
         opprettBehandlingsresultatHvisIkkeEksisterende(behandling);
         final var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
-        final var vilkårResultat = vilkårBuilder.leggTilIkkeVurderteVilkår(utledPerioderTilVurdering(behandling.getId()), utledeteVilkår.getAlleAvklarte()).build();
+        final var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
+        vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder.leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
+        final var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 
@@ -105,11 +106,6 @@ public class VurderUtlandSteg implements BehandlingSteg {
         if (behandlingsresultat == null) {
             Behandlingsresultat.builder().buildFor(behandling);
         }
-    }
-
-    private List<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId) {
-        final var perioder = perioderTilVurderingTjeneste.utled(behandlingId);
-        return new ArrayList<>(perioder);
     }
 
     private boolean harOppgittUtenlandskInntekt(Long behandlingId) {
