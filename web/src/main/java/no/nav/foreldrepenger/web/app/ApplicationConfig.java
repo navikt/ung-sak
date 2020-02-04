@@ -38,7 +38,7 @@ public class ApplicationConfig extends Application {
 
         oas.info(info)
             .addServersItem(new Server()
-                .url("/sak"));
+                .url("/k9/sak"));
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)
