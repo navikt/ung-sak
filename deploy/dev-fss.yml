@@ -138,8 +138,7 @@ spec:
     - name: INFOTRYGD_HENDELSER_API_URL
       value: https://infotrygd-hendelser-api-q1.nais.preprod.local/infotrygd/hendelser
     - name: FPABAKUS_URL
-      value: https://fpabakus-q1.nais.preprod.local
-      # value: http://fpabakus/fpabakus
+      value: http://fpabakus.q1/fpabakus
     - name: ABAC_PDP_ENDPOINT_URL
       value: https://wasapp-q1.adeo.no/asm-pdp/authorize
     - name: FPFORMIDLING_ERDOKUMENTPRODUSERT_URL
