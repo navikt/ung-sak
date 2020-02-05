@@ -80,6 +80,16 @@ spec:
     - name: OPENIDCONNECT_USERNAME
       value: k9-sak-q1
 
+    # Gjentatt grunnet felles-sikkerhet
+    - name: OIDC_OPENAM_HOSTURL
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OIDC_OPENAM_ISSUERURL
+      value: https://isso-q.adeo.no:443/isso/oauth2
+    - name: OIDC_OPENAM_JWKSURL
+      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
+    - name: OIDC_OPENAM_AGENTNAME
+      value: k9-sak-q1
+
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse-q1
