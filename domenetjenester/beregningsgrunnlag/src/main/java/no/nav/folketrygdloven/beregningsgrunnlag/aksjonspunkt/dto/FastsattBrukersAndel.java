@@ -4,8 +4,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import no.nav.foreldrepenger.validering.ValidKodeverk;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class FastsattBrukersAndel {
 
@@ -20,7 +19,6 @@ public class FastsattBrukersAndel {
     @Max(Integer.MAX_VALUE)
     private Integer fastsattBeløp;
     @NotNull
-    @ValidKodeverk
     private Inntektskategori inntektskategori;
 
     FastsattBrukersAndel() {

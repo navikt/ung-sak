@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingskontroll;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Container som holder kontekst under prosessering av {@link BehandlingSteg}.

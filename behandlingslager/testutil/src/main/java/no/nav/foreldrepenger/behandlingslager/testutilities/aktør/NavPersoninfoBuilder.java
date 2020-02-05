@@ -1,16 +1,16 @@
 package no.nav.foreldrepenger.behandlingslager.testutilities.aktør;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import static java.time.Month.OCTOBER;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class NavPersoninfoBuilder {
 

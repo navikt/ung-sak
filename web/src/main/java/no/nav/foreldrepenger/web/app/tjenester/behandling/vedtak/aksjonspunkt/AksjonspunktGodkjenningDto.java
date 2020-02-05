@@ -9,18 +9,17 @@ import javax.validation.constraints.Size;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.vedtak.util.InputValideringRegex;
 
 public class AksjonspunktGodkjenningDto {
 
     private boolean godkjent;
 
     @Size(max = 4000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
     @Size(min = 4, max = 10)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String aksjonspunktKode;
 
     @Valid

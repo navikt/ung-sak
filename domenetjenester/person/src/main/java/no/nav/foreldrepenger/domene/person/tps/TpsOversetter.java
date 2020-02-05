@@ -28,7 +28,6 @@ import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Gyldighetsperiode
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.PersonstatusPeriode;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -36,6 +35,7 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Aktoer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder;
@@ -105,7 +105,7 @@ public class TpsOversetter {
 
         return new Personinfo.Builder()
             .medAktørId(aktørId)
-            .medPersonIdent(no.nav.foreldrepenger.domene.typer.PersonIdent.fra(ident))
+            .medPersonIdent(no.nav.k9.sak.typer.PersonIdent.fra(ident))
             .medNavn(navn)
             .medAdresse(adresse)
             .medAdresseLandkode(adresseLandkode)
@@ -242,7 +242,7 @@ public class TpsOversetter {
         RelasjonsRolleType relasjonsrolle = RelasjonsRolleType.fraKode(rollekode);
         String adresse = tpsAdresseOversetter.finnAdresseFor(familierelasjon.getTilPerson());
         PersonIdent personIdent = (PersonIdent) familierelasjon.getTilPerson().getAktoer();
-        no.nav.foreldrepenger.domene.typer.PersonIdent ident = no.nav.foreldrepenger.domene.typer.PersonIdent.fra(personIdent.getIdent().getIdent());
+        no.nav.k9.sak.typer.PersonIdent ident = no.nav.k9.sak.typer.PersonIdent.fra(personIdent.getIdent().getIdent());
         Boolean harSammeBosted = familierelasjon.isHarSammeBosted();
 
         return new Familierelasjon(ident, relasjonsrolle,
@@ -287,7 +287,7 @@ public class TpsOversetter {
         Person person = familierelasjon.getTilPerson();
 
         String identNr = ((PersonIdent) person.getAktoer()).getIdent().getIdent();
-        no.nav.foreldrepenger.domene.typer.PersonIdent ident = no.nav.foreldrepenger.domene.typer.PersonIdent.fra(identNr);
+        no.nav.k9.sak.typer.PersonIdent ident = no.nav.k9.sak.typer.PersonIdent.fra(identNr);
         Foedselsdato foedselsdato = person.getFoedselsdato();
         LocalDate fødselLocalDate;
         if (foedselsdato == null) {
@@ -315,7 +315,7 @@ public class TpsOversetter {
             .build();
     }
 
-    private LocalDate utledFødselsDatoFraIdent(no.nav.foreldrepenger.domene.typer.PersonIdent ident) {
+    private LocalDate utledFødselsDatoFraIdent(no.nav.k9.sak.typer.PersonIdent ident) {
         if (ident.erFdatNummer()) {
             DateTimeFormatter identFormatter = DateTimeFormatter.ofPattern("ddMMyy");
 

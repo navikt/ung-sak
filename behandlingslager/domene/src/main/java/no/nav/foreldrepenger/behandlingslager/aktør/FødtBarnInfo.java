@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.behandlingslager.aktør;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class FødtBarnInfo {
     public static final String UTEN_NAVN = "UTEN NAVN";

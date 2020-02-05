@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.sak.typer.JournalpostId;
 
 public class InngåendeSaksdokument {
 

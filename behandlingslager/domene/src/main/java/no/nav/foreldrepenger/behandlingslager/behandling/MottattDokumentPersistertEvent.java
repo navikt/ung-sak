@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.sak.typer.AktørId;
 
 public class MottattDokumentPersistertEvent implements BehandlingEvent {
     private MottattDokument mottattDokument;

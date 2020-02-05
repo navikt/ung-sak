@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.kodeverk;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 
 @Converter(autoApply = true)
 public class ArbeidTypeKodeverdiConverter implements AttributeConverter<ArbeidType, String> {

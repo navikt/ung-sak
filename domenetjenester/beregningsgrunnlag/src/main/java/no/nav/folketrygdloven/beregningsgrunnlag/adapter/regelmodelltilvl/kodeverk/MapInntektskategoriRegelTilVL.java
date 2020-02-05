@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class MapInntektskategoriRegelTilVL {
     private static final Map<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori, Inntektskategori> INNTEKTSKATEGORI_MAP;
@@ -12,7 +12,7 @@ public class MapInntektskategoriRegelTilVL {
     private MapInntektskategoriRegelTilVL() {}
 
     static {
-        Map<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori, no.nav.k9.kodeverk.iay.Inntektskategori> map = new EnumMap<>(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.class);
+        Map<no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori, no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori> map = new EnumMap<>(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.class);
         map.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.ARBEIDSTAKER, Inntektskategori.ARBEIDSTAKER);
         map.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.FRILANSER, Inntektskategori.FRILANSER);
         map.put(no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE);

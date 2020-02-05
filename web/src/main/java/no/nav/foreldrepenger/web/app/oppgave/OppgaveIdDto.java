@@ -6,11 +6,10 @@ import javax.validation.constraints.Size;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.util.InputValideringRegex;
 
 public class OppgaveIdDto implements AbacDto {
 
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     @Size(min = 1, max = 50)
     private String verdi;
 

@@ -49,17 +49,17 @@ public final class TpsUtil {
         return førsteTegn >= '4' && førsteTegn <= '7';
     }
 
-    static no.nav.foreldrepenger.domene.typer.PersonIdent getPersonIdent(Bruker bruker) {
+    static no.nav.k9.sak.typer.PersonIdent getPersonIdent(Bruker bruker) {
         return getPersonIdent(bruker.getAktoer());
     }
 
-    static no.nav.foreldrepenger.domene.typer.PersonIdent getPersonIdent(Aktoer aktor) {
+    static no.nav.k9.sak.typer.PersonIdent getPersonIdent(Aktoer aktor) {
         if (!(aktor instanceof PersonIdent)) {
             throw new IllegalArgumentException("Krever at person inneholder en " + PersonIdent.class + " men fikk " + (aktor != null ? aktor.getClass().getName() : null));
         }
         PersonIdent pi = (PersonIdent) aktor;
         String fnr = pi.getIdent().getIdent();
-        return no.nav.foreldrepenger.domene.typer.PersonIdent.fra(fnr);
+        return no.nav.k9.sak.typer.PersonIdent.fra(fnr);
     }
 
     public static String getPersonnavn(Person person) {

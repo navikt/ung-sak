@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.TilgrensendeYtelserDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
 
 public class TilgrensendeYtelserDtoTest {
     private static final LocalDate I_DAG = LocalDate.now();

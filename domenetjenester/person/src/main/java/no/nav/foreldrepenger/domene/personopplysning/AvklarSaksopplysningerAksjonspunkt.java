@@ -6,9 +6,9 @@ import java.util.Set;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.typer.AktørId;
 
 class AvklarSaksopplysningerAksjonspunkt {
     private PersonopplysningRepository personopplysningRepository;

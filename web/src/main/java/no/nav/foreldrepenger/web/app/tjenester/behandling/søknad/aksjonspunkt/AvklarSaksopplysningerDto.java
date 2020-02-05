@@ -5,16 +5,15 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.vedtak.util.InputValideringRegex;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS_KODE)
 public class AvklarSaksopplysningerDto extends BekreftetAksjonspunktDto {
 
 
     @Size(min = 1, max = 100)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String personstatus;
 
     private boolean fortsettBehandling;

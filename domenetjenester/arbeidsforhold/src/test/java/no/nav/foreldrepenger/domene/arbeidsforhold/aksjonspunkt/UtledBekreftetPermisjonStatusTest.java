@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
-import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 public class UtledBekreftetPermisjonStatusTest {
 

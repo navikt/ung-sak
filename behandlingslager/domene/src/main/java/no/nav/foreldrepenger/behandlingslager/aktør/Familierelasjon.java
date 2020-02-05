@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.behandlingslager.aktør;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class Familierelasjon {
     private PersonIdent personIdent;

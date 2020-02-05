@@ -14,9 +14,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningAktivitetDto;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.AktørId;
 
 public class MapBeregningAktivitetDtoTest {
     private static final AktørId AKTØRID_1 = AktørId.dummy();

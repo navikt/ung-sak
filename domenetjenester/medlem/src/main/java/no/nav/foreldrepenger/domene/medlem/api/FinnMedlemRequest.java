@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.domene.medlem.api;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class FinnMedlemRequest {
 

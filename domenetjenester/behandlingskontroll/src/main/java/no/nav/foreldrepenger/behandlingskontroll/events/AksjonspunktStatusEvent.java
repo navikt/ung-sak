@@ -6,8 +6,8 @@ import java.util.List;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.sak.typer.AktørId;
 
 public class AksjonspunktStatusEvent implements BehandlingEvent {
     private final BehandlingskontrollKontekst kontekst;

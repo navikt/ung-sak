@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.journal.InngåendeJournalAdapter;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalMetadata;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
 public class JournalTjenesteImpl implements JournalTjeneste {

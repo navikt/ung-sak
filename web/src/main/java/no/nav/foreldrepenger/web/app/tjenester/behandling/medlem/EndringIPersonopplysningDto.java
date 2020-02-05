@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.medlem;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.medlem.dto.EndringsresultatPersonopplysningerForMedlemskap;
+import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlemskap;
 
 public class EndringIPersonopplysningDto {
     private boolean erEndret;
@@ -16,8 +16,8 @@ public class EndringIPersonopplysningDto {
     public EndringIPersonopplysningDto(EndringsresultatPersonopplysningerForMedlemskap.Endring endring) {
         erEndret = endring.isErEndret();
         endretAttributt = endring.getEndretAttributt();
-        fom = endring.getPeriode().getFomDato();
-        tom = endring.getPeriode().getTomDato();
+        fom = endring.getPeriode().getFom();
+        tom = endring.getPeriode().getTom();
     }
 
     public boolean isErEndret() {

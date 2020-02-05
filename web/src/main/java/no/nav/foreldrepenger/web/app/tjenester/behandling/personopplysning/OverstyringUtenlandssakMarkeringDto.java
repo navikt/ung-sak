@@ -10,9 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OverstyringAksjonspunktDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.vedtak.util.InputValideringRegex;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 
 @JsonAutoDetect(getterVisibility=Visibility.NONE, setterVisibility=Visibility.NONE, fieldVisibility=Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE)
@@ -21,7 +20,7 @@ public class OverstyringUtenlandssakMarkeringDto extends OverstyringAksjonspunkt
 
     @JsonProperty("gammelVerdi")
     @Size(max = 20)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String gammelVerdi;
 
     OverstyringUtenlandssakMarkeringDto() {

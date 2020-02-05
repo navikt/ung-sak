@@ -20,7 +20,6 @@ import org.mockito.junit.MockitoRule;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdAnnulert;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjenesteImpl;
@@ -29,6 +28,7 @@ import no.nav.foreldrepenger.domene.vedtak.infotrygd.Innhold;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedDto;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 
 public class InfotrygdHendelseTjenesteImplTest {

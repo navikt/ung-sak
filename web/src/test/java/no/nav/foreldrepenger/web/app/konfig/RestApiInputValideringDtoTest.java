@@ -5,8 +5,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedParameterizedType;
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -28,13 +26,11 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.JsonValue;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.validation.Valid;
@@ -43,8 +39,6 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -53,13 +47,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
-import no.nav.foreldrepenger.validering.ValidKodeverk;
 import no.nav.foreldrepenger.web.app.IndexClasses;
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @RunWith(Parameterized.class)
@@ -86,9 +78,6 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         Set<Class<?>> validerteKlasser = new HashSet<>(); // trengs for å unngå løkker og unngå å validere samme klasse flere multipliser dobbelt
         validerRekursivt(validerteKlasser, dto, null);
     }
-
-    private static final Set<Class<? extends Object>> ALLOWED_ENUM_ANNOTATIONS = Set.of(JsonProperty.class, JsonValue.class, JsonIgnore.class,
-        Valid.class, Null.class, NotNull.class, ValidKodeverk.class);
 
     @SuppressWarnings("rawtypes")
     private static final Map<Class, List<List<Class<? extends Annotation>>>> UNNTATT_FRA_VALIDERING = new HashMap<Class, List<List<Class<? extends Annotation>>>>() {
@@ -200,6 +189,8 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         if (codeSource == null) {
             // system klasse
             return;
+        } else if (codeSource.getLocation().toExternalForm().endsWith(".jar")) {
+            // skip importerte biblioteker for nå
         }
 
         besøkteKlasser.add(klasse);
@@ -216,18 +207,15 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
                 continue; // feltet blir hverken serialisert elle deserialisert, unntas fra sjekk
             }
             if (field.getType().isEnum()) {
-                validerEnum(field);
                 continue; // enum er OK
             }
+            if (field.getType().isPrimitive()) {
+                continue; // primitiv OK
+            }
             if (erKodeverk(field.getType())) {
-                validerHarValidkodeverkAnnotering(field);
-            } else if (getVurderingsalternativer(field) != null) {
-                validerRiktigAnnotert(field); // har konfigurert opp spesifikk validering
-            } else if (field.getType().getName().startsWith("java")) {
-                throw new AssertionError(
-                    "Feltet " + field + " har ikke påkrevde annoteringer. Trenger evt. utvidelse av denne testen for å akseptere denne typen.");
+                continue; // antatt OK
             } else {
-                validerHarValidAnnotering(field);
+                validerRiktigAnnotert(field);
                 validerRekursivt(besøkteKlasser, field.getType(), forrigeKlasse);
             }
             if (brukerGenerics(field)) {
@@ -239,32 +227,8 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         }
     }
 
-    private static void validerEnum(Field field) {
-        if(!erKodeverk(field.getType())) {
-            validerRiktigAnnotert(field);
-        }
-        List<Annotation> illegal = List.of(field.getAnnotations()).stream().filter(a -> !ALLOWED_ENUM_ANNOTATIONS.contains(a.annotationType()))
-            .collect(Collectors.toList());
-        if (!illegal.isEmpty()) {
-            throw new AssertionError("Ugyldige annotasjoner funnet på [" + field + "]: " + illegal);
-        }
-
-    }
-
     private static boolean erKodeverk(Class<?> klasse) {
         return Kodeverdi.class.isAssignableFrom(klasse);
-    }
-
-    private static void validerHarValidAnnotering(Field field) {
-        if (field.getAnnotation(Valid.class) == null) {
-            throw new AssertionError("Feltet " + field + " må ha @Valid-annotering.");
-        }
-    }
-
-    private static void validerHarValidkodeverkAnnotering(Field field) {
-        if (field.getAnnotation(ValidKodeverk.class) == null) {
-            throw new AssertionError("Feltet " + field + " er et kodeverk, og må ha @ValidKodeverk-annotering");
-        }
     }
 
     private static Set<Class<?>> genericTypes(Field field) {
@@ -294,8 +258,11 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     }
 
     private static void validerRiktigAnnotert(Field field) {
-        List<List<Class<? extends Annotation>>> alternativer = getVurderingsalternativer(field);
-        for (List<Class<? extends Annotation>> alternativ : alternativer) {
+        var alternativer = getVurderingsalternativer(field);
+        if (alternativer == null) {
+            alternativer = List.of(List.of(Valid.class));
+        }
+        for (var alternativ : alternativer) {
             boolean harAlleAnnoteringerForAlternativet = true;
             for (Class<? extends Annotation> annotering : alternativ) {
                 if (field.getAnnotation(annotering) == null) {
@@ -303,27 +270,10 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
                 }
             }
             if (harAlleAnnoteringerForAlternativet) {
-                validerRiktigAnnotertForCollectionsAndMaps(field);
                 return;
             }
         }
         throw new IllegalArgumentException("Feltet " + field + " har ikke påkrevde annoteringer: " + alternativer);
-    }
-
-    private static void validerRiktigAnnotertForCollectionsAndMaps(Field field) {
-        if (!Properties.class.isAssignableFrom(field.getType())
-            && (Collection.class.isAssignableFrom(field.getType()) || Map.class.isAssignableFrom(field.getType()))) {
-            AnnotatedParameterizedType annType = (AnnotatedParameterizedType) field.getAnnotatedType();
-            AnnotatedType[] annotatedTypes = annType.getAnnotatedActualTypeArguments();
-            for (AnnotatedType at : List.of(annotatedTypes)) {
-                if (erKodeverk(at.getType())) {
-                    if (!at.isAnnotationPresent(ValidKodeverk.class)) {
-                        throw new IllegalArgumentException(
-                            "Feltet " + field + " har ikke påkrevd annotering for kodeverk: @" + ValidKodeverk.class.getSimpleName());
-                    }
-                }
-            }
-        }
     }
 
 }

@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.økonomi.tilbakekreving.klient;
 
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public interface FptilbakeRestKlient {
 

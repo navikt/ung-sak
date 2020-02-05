@@ -3,18 +3,18 @@ package no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.kodev
 import java.util.Map;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.AktivitetStatusV2;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class MapAktivitetStatusV2FraVLTilRegel {
-    private static final Map<no.nav.k9.kodeverk.iay.AktivitetStatus, AktivitetStatusV2> MAP_AKTIVITETSTATUS =
+    private static final Map<no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus, AktivitetStatusV2> MAP_AKTIVITETSTATUS =
         Map.of(
-            no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER, AktivitetStatusV2.AT,
-            no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER, AktivitetStatusV2.FL,
-            no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE, AktivitetStatusV2.SN,
+            no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER, AktivitetStatusV2.AT,
+            no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.FRILANSER, AktivitetStatusV2.FL,
+            no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE, AktivitetStatusV2.SN,
             AktivitetStatus.MILITÆR_ELLER_SIVIL, AktivitetStatusV2.MS,
-            no.nav.k9.kodeverk.iay.AktivitetStatus.DAGPENGER, AktivitetStatusV2.DP,
-            no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSAVKLARINGSPENGER, AktivitetStatusV2.AAP
+            no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.DAGPENGER, AktivitetStatusV2.DP,
+            no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSAVKLARINGSPENGER, AktivitetStatusV2.AAP
         );
 
     private static final Map<Inntektskategori, AktivitetStatusV2> MAP_INNTEKTSKATEGORI = Map.of(

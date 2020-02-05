@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.k9.sak.typer.AktørId;
 
 public abstract class PersonIdentDto {
 

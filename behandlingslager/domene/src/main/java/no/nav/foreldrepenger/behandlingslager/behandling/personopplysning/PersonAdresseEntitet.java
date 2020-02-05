@@ -19,11 +19,11 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.AdresseTypeKodeverdiConverter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.HarAktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.sak.typer.AktørId;
 
 @Entity(name = "PersonopplysningAdresse")
 @Table(name = "PO_ADRESSE")

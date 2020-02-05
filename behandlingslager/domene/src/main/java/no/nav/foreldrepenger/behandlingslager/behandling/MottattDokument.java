@@ -21,9 +21,9 @@ import javax.persistence.Table;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentKategoriKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentTypeIdKodeverdiConverter;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 /**
  * Entitetsklasse for mottatte dokument.

@@ -33,12 +33,12 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.AktivitetStatusKodeverdiC
 import no.nav.foreldrepenger.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.Beløp;
 
 @Entity(name = "BeregningsgrunnlagPrStatusOgAndel")
 @Table(name = "BG_PR_STATUS_OG_ANDEL")

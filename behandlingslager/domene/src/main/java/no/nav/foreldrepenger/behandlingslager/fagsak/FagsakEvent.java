@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.fagsak;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Marker interface for events fyrt på en Fagsak.

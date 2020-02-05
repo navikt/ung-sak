@@ -25,15 +25,15 @@ public class BestillBrevDto implements AbacDto {
 
     @NotNull
     @Size(min = 1, max = 100)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String brevmalkode;
 
     @Size(max = 4000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     public String fritekst;
 
     @Size(min = 1, max = 100)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     public String arsakskode;
 
     public BestillBrevDto() { // NOSONAR

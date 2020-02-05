@@ -2,7 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto;
 
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 
 /**
  * For å kunne identifisere andeler i fakta om beregning.

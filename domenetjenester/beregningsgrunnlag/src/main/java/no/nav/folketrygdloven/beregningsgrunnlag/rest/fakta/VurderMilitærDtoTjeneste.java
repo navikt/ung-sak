@@ -11,7 +11,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.VurderMilitærDto;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 
 @ApplicationScoped
 public class VurderMilitærDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste {

@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
+import no.nav.k9.sak.typer.Beløp;
+
 public class BeløpTest {
 
     @Test

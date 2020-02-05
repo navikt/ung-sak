@@ -49,8 +49,6 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingTypeKodeverdiCo
 import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsystemKodeverkConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
@@ -61,6 +59,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.FeilFactory;
 
 @SqlResultSetMappings(value = {

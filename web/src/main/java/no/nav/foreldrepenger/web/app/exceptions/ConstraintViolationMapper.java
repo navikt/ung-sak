@@ -18,8 +18,7 @@ import org.jboss.resteasy.api.validation.ResteasyViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktKode;
-import no.nav.foreldrepenger.validering.FeltFeilDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
 import no.nav.vedtak.feil.Feil;
 
 public class ConstraintViolationMapper implements ExceptionMapper<ConstraintViolationException> {

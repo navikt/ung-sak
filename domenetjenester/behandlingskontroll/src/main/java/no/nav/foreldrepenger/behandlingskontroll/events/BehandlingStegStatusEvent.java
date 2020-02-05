@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.behandlingskontroll.events;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Event publiseres av {@link BehandlingskontrollTjeneste} når en {@link Behandling} endrer steg.

@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 
 final class UtledBekreftetPermisjonStatus {
 

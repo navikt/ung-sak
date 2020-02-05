@@ -3,8 +3,6 @@ package no.nav.foreldrepenger.web.app.exceptions;
 import java.io.Serializable;
 import java.util.Collection;
 
-import no.nav.foreldrepenger.validering.FeltFeilDto;
-
 public class FeilDto implements Serializable {
 
     private String feilmelding;

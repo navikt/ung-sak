@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold;
 
 import static java.util.stream.Collectors.flatMapping;
-import static no.nav.k9.kodeverk.iay.ArbeidType.FORENKLET_OPPGJØRSORDNING;
-import static no.nav.k9.kodeverk.iay.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
-import static no.nav.k9.kodeverk.iay.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.FORENKLET_OPPGJØRSORDNING;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -40,12 +40,12 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped

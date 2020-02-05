@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopplysning;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import java.time.LocalDate;
 
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.typer.AktørId;
 
 public final class Personstatus {
 

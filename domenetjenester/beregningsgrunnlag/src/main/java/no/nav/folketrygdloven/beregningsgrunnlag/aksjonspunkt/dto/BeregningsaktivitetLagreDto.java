@@ -7,13 +7,10 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetNøkkel;
-import no.nav.foreldrepenger.validering.ValidKodeverk;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.vedtak.util.InputValideringRegex;
 
 public class BeregningsaktivitetLagreDto {
     @NotNull
-    @ValidKodeverk
     private OpptjeningAktivitetType opptjeningAktivitetType;
 
     @NotNull
@@ -27,7 +24,7 @@ public class BeregningsaktivitetLagreDto {
     private String arbeidsgiverIdentifikator;
 
     @Size(max = 100)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsforholdRef;
 
     private boolean skalBrukes;

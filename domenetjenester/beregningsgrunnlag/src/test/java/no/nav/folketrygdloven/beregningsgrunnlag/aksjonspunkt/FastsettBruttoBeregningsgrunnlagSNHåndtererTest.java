@@ -89,7 +89,7 @@ public class FastsettBruttoBeregningsgrunnlagSNHåndtererTest {
 
     private void buildBgPrStatusOgAndel(no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode beregningsgrunnlagPeriode) {
         BeregningsgrunnlagPrStatusOgAndel.builder()
-            .medAktivitetStatus(no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE)
+            .medAktivitetStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE)
             .build(beregningsgrunnlagPeriode);
     }
 

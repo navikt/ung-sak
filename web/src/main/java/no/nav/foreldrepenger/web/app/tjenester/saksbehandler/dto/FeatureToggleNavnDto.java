@@ -5,7 +5,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class FeatureToggleNavnDto {
-    @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9.]*$") ///samme som InputValideringRegex.KODEVERK men i tillegg punktum
+    @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9.]*$") ///samme som "^[\\p{L}\\p{N}_\\.\\-/]+$" men i tillegg punktum
     @Size(min = 1, max = 100)
     @NotNull
     private String navn;

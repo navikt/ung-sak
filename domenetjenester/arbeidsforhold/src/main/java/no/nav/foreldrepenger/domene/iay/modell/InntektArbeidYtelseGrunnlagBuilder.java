@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.util.Tuple;
 
 public class InntektArbeidYtelseGrunnlagBuilder {

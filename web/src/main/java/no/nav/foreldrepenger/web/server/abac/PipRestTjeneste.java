@@ -22,8 +22,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import no.nav.foreldrepenger.behandling.BehandlingIdDto;
 import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
 import no.nav.foreldrepenger.behandlingslager.pip.PipRepository;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("/pip")

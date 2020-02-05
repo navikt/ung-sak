@@ -20,8 +20,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.VurderMottarYtelseDto;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class VurderMottarYtelseDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste {

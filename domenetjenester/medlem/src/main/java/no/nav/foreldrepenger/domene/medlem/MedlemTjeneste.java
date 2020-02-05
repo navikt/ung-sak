@@ -29,14 +29,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.Vilkår
 import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.domene.medlem.api.FinnMedlemRequest;
 import no.nav.foreldrepenger.domene.medlem.api.Medlemskapsperiode;
-import no.nav.foreldrepenger.domene.medlem.dto.EndringsresultatPersonopplysningerForMedlemskap;
-import no.nav.foreldrepenger.domene.medlem.dto.VurderMedlemskap;
-import no.nav.foreldrepenger.domene.medlem.dto.VurderingsÅrsak;
-import no.nav.foreldrepenger.domene.medlem.dto.EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt;
 import no.nav.foreldrepenger.domene.medlem.impl.HentMedlemskapFraRegister;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemResultat;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.api.Kodeverdi;
@@ -47,6 +42,12 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlemskap;
+import no.nav.k9.sak.kontrakt.medlem.VurderMedlemskap;
+import no.nav.k9.sak.kontrakt.medlem.VurderingsÅrsak;
+import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -122,7 +123,7 @@ public class MedlemTjeneste {
     public EndringsresultatPersonopplysningerForMedlemskap søkerHarEndringerIPersonopplysninger(Behandling revurderingBehandling) {
 
         EndringsresultatPersonopplysningerForMedlemskap.Builder builder = EndringsresultatPersonopplysningerForMedlemskap.builder();
-        if (revurderingBehandling.erRevurdering() && revurderingBehandling.getFagsakYtelseType().gjelderForeldrepenger()) {
+        if (revurderingBehandling.erRevurdering()) {
             AktørId aktørId = revurderingBehandling.getAktørId();
             Long behandlingId = revurderingBehandling.getId();
             DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMedTilOgMed(finnStartdato(revurderingBehandling), LocalDate.now());
@@ -223,7 +224,7 @@ public class MedlemTjeneste {
                 String endretFra = endringer.get(i).element.getNavn();
                 String endretTil = endringer.get(i + 1).element.getNavn();
                 DatoIntervallEntitet periode = endringer.get(i + 1).gylidghetsintervall;
-                builder.leggTilEndring(endretAttributt, periode, endretFra, endretTil);
+                builder.leggTilEndring(endretAttributt, new Periode(periode.getFomDato(), periode.getTomDato()), endretFra, endretTil);
             }
         }
     }

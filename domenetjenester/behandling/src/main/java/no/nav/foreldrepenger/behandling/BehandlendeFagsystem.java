@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandling;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class BehandlendeFagsystem {
     private BehandlendeSystem behandlendeSystem;
