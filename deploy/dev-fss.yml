@@ -69,8 +69,6 @@ spec:
 #    - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
 #      value: NON-PROD
 
-    #LOADBALANCER_URL=http://localhost:9000
-
     - name: OPENIDCONNECT_ISSOHOST
       value: https://isso-q.adeo.no:443/isso/oauth2
     - name: OPENIDCONNECT_ISSOISSUER
@@ -132,7 +130,7 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_FQDN
-      value: k9-sak.nais.preprod.local
+      value: app-q1.adeo.no
 
     # LDAP
     - name: LDAP_URL
