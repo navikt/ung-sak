@@ -11,8 +11,8 @@ import org.threeten.extra.Interval;
 import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersoninfoAdapter {

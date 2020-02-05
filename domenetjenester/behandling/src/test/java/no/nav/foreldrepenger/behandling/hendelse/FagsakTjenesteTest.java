@@ -23,12 +23,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 
 @SuppressWarnings("deprecation")

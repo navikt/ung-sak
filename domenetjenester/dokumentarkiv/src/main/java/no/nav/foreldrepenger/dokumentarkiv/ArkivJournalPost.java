@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class ArkivJournalPost {
     private JournalpostId journalpostId;

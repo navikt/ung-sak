@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.foreldrepenger.behandlingslager.hendelser.Forretningshendelse;
 import no.nav.foreldrepenger.behandlingslager.hendelser.ForretningshendelseType;
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.sak.typer.AktørId;
 
 public class YtelseForretningshendelse extends Forretningshendelse {
     private AktørId aktørId;

@@ -36,14 +36,14 @@ import no.nav.foreldrepenger.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.foreldrepenger.domene.iay.modell.VersjonType;
 import no.nav.foreldrepenger.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
-import no.nav.k9.kodeverk.iay.InntektspostType;
 import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
+import no.nav.k9.sak.typer.AktørId;
 
 public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
     @Rule

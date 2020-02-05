@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Builder for å håndtere en gitt versjon {@link VersjonType} av grunnlaget.

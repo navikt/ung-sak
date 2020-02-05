@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.behandling.beregning;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 
 /**
  * Nøkkel som brukes av VurderBehovForÅHindreTilbaketrekkV2 for å unikt identifisere andeler uten å skille på ulike andeler hos samme arbeidsgiver

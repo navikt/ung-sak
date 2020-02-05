@@ -21,9 +21,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AndelMedBeløpDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.KunYtelseDto;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 @ApplicationScoped
 public class KunYtelseDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste {

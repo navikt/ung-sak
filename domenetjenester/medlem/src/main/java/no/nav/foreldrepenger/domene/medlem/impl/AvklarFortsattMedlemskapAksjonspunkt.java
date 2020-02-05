@@ -7,8 +7,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRe
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.domene.medlem.dto.AvklarFortsattMedlemskapAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftedePerioderAdapter;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -18,6 +16,8 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderAdapter;
 
 public class AvklarFortsattMedlemskapAksjonspunkt {
 

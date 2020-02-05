@@ -5,7 +5,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class BesteberegningFødendeKvinneAndelDto {
 

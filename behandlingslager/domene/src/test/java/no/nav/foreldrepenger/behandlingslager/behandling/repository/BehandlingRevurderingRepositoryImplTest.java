@@ -22,8 +22,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.Vilkår
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -34,6 +32,8 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class BehandlingRevurderingRepositoryImplTest {

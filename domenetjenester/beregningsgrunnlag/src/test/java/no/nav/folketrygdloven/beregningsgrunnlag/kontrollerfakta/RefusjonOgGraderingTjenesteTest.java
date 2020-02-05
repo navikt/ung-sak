@@ -45,9 +45,9 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 

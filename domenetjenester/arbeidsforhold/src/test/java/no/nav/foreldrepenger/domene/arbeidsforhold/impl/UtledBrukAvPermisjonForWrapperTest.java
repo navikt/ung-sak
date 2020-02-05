@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 
 public class UtledBrukAvPermisjonForWrapperTest {
 

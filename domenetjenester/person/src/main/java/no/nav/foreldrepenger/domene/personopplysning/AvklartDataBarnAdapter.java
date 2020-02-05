@@ -1,7 +1,8 @@
 package no.nav.foreldrepenger.domene.personopplysning;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import java.time.LocalDate;
+
+import no.nav.k9.sak.typer.AktørId;
 
 public class AvklartDataBarnAdapter {
 

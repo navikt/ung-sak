@@ -5,8 +5,7 @@ import java.math.BigDecimal;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import no.nav.foreldrepenger.validering.ValidKodeverk;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class FastsatteVerdierDto {
 
@@ -26,7 +25,6 @@ public class FastsatteVerdierDto {
     @Max(Integer.MAX_VALUE)
     private Integer fastsattÅrsbeløp;
 
-    @ValidKodeverk
     private Inntektskategori inntektskategori;
 
     private Boolean skalHaBesteberegning;

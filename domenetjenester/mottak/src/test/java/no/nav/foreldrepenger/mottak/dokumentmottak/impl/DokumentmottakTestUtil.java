@@ -16,12 +16,12 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.aktør.NavBrukerBuilder;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class DokumentmottakTestUtil {
 

@@ -35,10 +35,10 @@ import no.nav.foreldrepenger.domene.iay.modell.VersjonType;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
-import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
 
 public class VurderPermisjonTjenesteTest {
 

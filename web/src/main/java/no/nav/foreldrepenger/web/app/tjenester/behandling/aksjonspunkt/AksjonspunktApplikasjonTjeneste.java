@@ -21,15 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktKode;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OverhoppResultat;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OverstyringAksjonspunkt;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OverstyringAksjonspunktDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.foreldrepenger.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
@@ -57,6 +53,10 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped

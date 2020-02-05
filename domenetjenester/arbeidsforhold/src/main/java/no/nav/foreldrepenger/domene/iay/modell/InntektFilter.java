@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
-import no.nav.k9.kodeverk.iay.InntektspostType;
-import no.nav.k9.kodeverk.iay.YtelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 
 /**
  * Filter for å hente inntekter og inntektsposter fra grunnlag. Tilbyr håndtering av skjæringstidspunkt og filtereing på inntektskilder slik

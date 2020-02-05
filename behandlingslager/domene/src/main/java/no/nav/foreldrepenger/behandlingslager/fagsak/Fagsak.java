@@ -21,11 +21,11 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")

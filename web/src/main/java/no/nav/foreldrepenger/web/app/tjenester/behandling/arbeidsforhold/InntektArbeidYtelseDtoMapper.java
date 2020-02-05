@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.arbeidsforhold;
 
-import static no.nav.foreldrepenger.domene.arbeidsforhold.dto.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_SØKER;
+import static no.nav.foreldrepenger.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_SØKER;
 import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 
 import java.time.LocalDate;
@@ -15,27 +15,33 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
-import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdWrapper;
+import no.nav.foreldrepenger.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.YtelserKonsolidertTjeneste;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.ArbeidsforholdDto;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.BehandlingRelaterteYtelserMapper;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.InntektArbeidYtelseDto;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.InntektsmeldingDto;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.RelaterteYtelserDto;
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.TilgrensendeYtelserDto;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
+import no.nav.foreldrepenger.domene.iay.modell.Gradering;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.foreldrepenger.domene.iay.modell.UtsettelsePeriode;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.GraderingPeriodeDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektsmeldingDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.RelaterteYtelserDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.UtsettelsePeriodeDto;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
@@ -152,9 +158,43 @@ public class InntektArbeidYtelseDtoMapper {
         return inntektsmeldinger.stream()
             .map(inntektsmelding -> {
                 Optional<Virksomhet> virksomhet = virksomhetTjeneste.hentVirksomhet(inntektsmelding.getArbeidsgiver().getOrgnr());
-                return new InntektsmeldingDto(inntektsmelding, virksomhet);
+                return mapInntektsmelding(inntektsmelding, virksomhet);
             })
             .collect(Collectors.toList());
+    }
+
+    private InntektsmeldingDto mapInntektsmelding(Inntektsmelding inntektsmelding, Optional<Virksomhet> virksomhet) {
+        var dto = new InntektsmeldingDto();
+        Arbeidsgiver arb = inntektsmelding.getArbeidsgiver();
+        dto.setArbeidsgiver(arb.getErVirksomhet()
+            ? virksomhet.orElseThrow(() -> {
+                return new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + arb.getOrgnr());
+            }).getNavn()
+            : "Privatperson"); // TODO skal navn på privatperson som arbeidsgiver hentes fra et register?
+
+        dto.setArbeidsgiverOrgnr(arb.getIdentifikator());
+        dto.setArbeidsgiverStartdato(inntektsmelding.getStartDatoPermisjon().orElse(null));
+        dto.setInnsendingstidspunkt(inntektsmelding.getInnsendingstidspunkt());
+
+        List<UtsettelsePeriode> utsettelser = inntektsmelding.getUtsettelsePerioder();
+        if (utsettelser != null) {
+            dto.setUtsettelsePerioder(utsettelser
+                .stream()
+                .map(p -> new UtsettelsePeriodeDto(new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()), p.getÅrsak()))
+                .collect(Collectors.toList()));
+        }
+
+        List<Gradering> graderinger = inntektsmelding.getGraderinger();
+        if (graderinger != null) {
+            dto.setGraderingPerioder(graderinger
+                .stream()
+                .map(p -> new GraderingPeriodeDto(new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()), p.getArbeidstidProsent().getVerdi()))
+                .collect(Collectors.toList()));
+        }
+
+        dto.setGetRefusjonBeløpPerMnd(inntektsmelding.getRefusjonBeløpPerMnd());
+        
+        return dto;
     }
 
     private void mapRelaterteYtelser(InntektArbeidYtelseDto dto, BehandlingReferanse ref, InntektArbeidYtelseGrunnlag grunnlag) {
@@ -182,7 +222,6 @@ public class InntektArbeidYtelseDtoMapper {
             permisjon.getFraOgMed(),
             permisjon.getTilOgMed() == null || TIDENES_ENDE.equals(permisjon.getTilOgMed()) ? null : permisjon.getTilOgMed(),
             permisjon.getProsentsats().getVerdi(),
-            permisjon.getPermisjonsbeskrivelseType()
-        );
+            permisjon.getPermisjonsbeskrivelseType());
     }
 }

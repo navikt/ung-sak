@@ -11,7 +11,7 @@ import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 
 public class Inntekt implements IndexKey {
 

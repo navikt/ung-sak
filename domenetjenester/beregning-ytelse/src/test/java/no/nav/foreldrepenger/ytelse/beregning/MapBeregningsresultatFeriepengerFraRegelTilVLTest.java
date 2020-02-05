@@ -85,9 +85,9 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
             .medBrukerErMottaker(true)
             .medDagsats((int) DAGSATS)
             .medDagsatsFraBg((int) DAGSATS_FRA_BG)
-            .medInntektskategori(no.nav.k9.kodeverk.iay.Inntektskategori.ARBEIDSTAKER)
+            .medInntektskategori(no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori.ARBEIDSTAKER)
             .medUtbetalingsgrad(UTBETALINGSGRAD)
-            .medAktivitetStatus(no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER)
+            .medAktivitetStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER)
             .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
             .medStillingsprosent(BigDecimal.valueOf(100)).build(vlBeregningsresultatPeriode);
         return beregningsresultat;

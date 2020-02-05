@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.behandlingslager.aktør;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import static java.time.Month.JANUARY;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +13,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class BrukerTjenesteTest {
 

@@ -57,18 +57,18 @@ import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.foreldrepenger.domene.iay.modell.VersjonType;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
-import no.nav.k9.kodeverk.iay.NaturalYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.konfig.Tid;
 
 public class ForeslåBeregningsgrunnlagTest {

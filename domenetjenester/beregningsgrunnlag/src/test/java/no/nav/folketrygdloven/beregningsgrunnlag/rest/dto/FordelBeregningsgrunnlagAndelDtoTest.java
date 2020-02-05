@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningAndelDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagAndelDto;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class FordelBeregningsgrunnlagAndelDtoTest {
 

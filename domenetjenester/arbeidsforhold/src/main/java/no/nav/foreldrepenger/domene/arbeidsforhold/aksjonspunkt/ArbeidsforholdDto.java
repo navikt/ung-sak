@@ -11,8 +11,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
-import no.nav.vedtak.util.InputValideringRegex;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 public class ArbeidsforholdDto {
 
@@ -31,7 +30,7 @@ public class ArbeidsforholdDto {
     private String erstatterArbeidsforholdId;
 
     @Size(max = 4000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
     @Min(0)

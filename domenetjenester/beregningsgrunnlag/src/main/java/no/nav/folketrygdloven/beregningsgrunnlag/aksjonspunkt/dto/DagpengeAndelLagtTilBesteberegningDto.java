@@ -3,7 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class DagpengeAndelLagtTilBesteberegningDto {
 

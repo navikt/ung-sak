@@ -35,18 +35,18 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektspostBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
-import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class AksjonspunktUtlederForVurderArbeidsforholdTest {

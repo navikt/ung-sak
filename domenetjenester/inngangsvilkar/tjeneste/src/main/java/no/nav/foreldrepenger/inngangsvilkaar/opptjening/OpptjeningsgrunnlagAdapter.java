@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsv
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.vedtak.util.Tuple;
 
 class OpptjeningsgrunnlagAdapter {

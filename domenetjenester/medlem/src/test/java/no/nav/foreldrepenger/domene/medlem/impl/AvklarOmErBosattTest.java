@@ -28,7 +28,6 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopp
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
@@ -36,6 +35,7 @@ import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

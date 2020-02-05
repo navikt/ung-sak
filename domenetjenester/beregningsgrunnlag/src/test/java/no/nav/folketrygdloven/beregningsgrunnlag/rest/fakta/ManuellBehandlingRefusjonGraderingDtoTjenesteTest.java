@@ -23,12 +23,12 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
-import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.Beløp;
 
 public class ManuellBehandlingRefusjonGraderingDtoTjenesteTest {
 

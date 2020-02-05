@@ -33,13 +33,13 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
 import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonConsumer;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class BeregningsgrunnlagDtoUtilTest {
 

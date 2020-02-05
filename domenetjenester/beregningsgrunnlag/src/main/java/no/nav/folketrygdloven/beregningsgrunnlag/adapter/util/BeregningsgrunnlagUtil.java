@@ -1,15 +1,15 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.adapter.util;
 
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER;
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER;
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.KOMBINERT_AT_FL;
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.KOMBINERT_AT_FL_SN;
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.KOMBINERT_AT_SN;
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.KOMBINERT_FL_SN;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.FRILANSER;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.KOMBINERT_AT_FL;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.KOMBINERT_AT_FL_SN;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.KOMBINERT_AT_SN;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.KOMBINERT_FL_SN;
 
 import java.util.Set;
 
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 
 public final class BeregningsgrunnlagUtil {
     private static final Set<AktivitetStatus> ATFL_STATUSER = Set.of(ARBEIDSTAKER, FRILANSER, KOMBINERT_AT_FL);

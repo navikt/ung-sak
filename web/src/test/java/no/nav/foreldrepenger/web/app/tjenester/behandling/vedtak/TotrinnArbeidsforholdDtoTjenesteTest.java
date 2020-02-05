@@ -34,14 +34,14 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.app.TotrinnArbeidsforholdDtoTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnsArbeidsforholdDto;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 

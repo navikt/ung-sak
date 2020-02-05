@@ -26,10 +26,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentarkiv.DokumentArkivTjeneste;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.foreldrepenger.mottak.kompletthettjeneste.impl.KompletthetssjekkerTestUtil;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class KompletthetssjekkerSøknadRevurderingTest {
 

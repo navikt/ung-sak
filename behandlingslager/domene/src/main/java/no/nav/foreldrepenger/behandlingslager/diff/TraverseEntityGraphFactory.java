@@ -4,12 +4,14 @@ import java.util.function.Function;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraphConfig;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseJpaEntityGraphConfig;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public final class TraverseEntityGraphFactory {
     private TraverseEntityGraphFactory() {
@@ -28,6 +30,12 @@ public final class TraverseEntityGraphFactory {
         config.setOnlyCheckTrackedFields(medChangedTrackedOnly);
         config.addRootClasses(Behandling.class, SøknadEntitet.class);
         config.setInclusionFilter(inclusionFilter);
+        
+        config.addLeafClasses(Beløp.class);
+        config.addLeafClasses(AktørId.class);
+        config.addLeafClasses(Saksnummer.class);
+        config.addLeafClasses(JournalpostId.class);
+        config.addLeafClasses(PersonIdent.class);
         
         config.addLeafClasses(DatoIntervallEntitet.class, ÅpenDatoIntervallEntitet.class);
         config.addLeafClasses(Kodeverdi.class);

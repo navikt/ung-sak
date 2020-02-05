@@ -23,11 +23,11 @@ import javax.ws.rs.core.UriBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.historikk.dto.HistorikkInnslagDokumentLinkDto;
 import no.nav.foreldrepenger.historikk.dto.HistorikkinnslagDto;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @Path("/historikk")

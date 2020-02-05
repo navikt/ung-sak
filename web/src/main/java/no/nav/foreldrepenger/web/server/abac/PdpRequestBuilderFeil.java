@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.web.server.abac;
 import java.util.Collection;
 import java.util.List;
 
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;

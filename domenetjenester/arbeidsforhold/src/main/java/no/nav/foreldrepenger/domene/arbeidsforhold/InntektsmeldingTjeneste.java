@@ -26,9 +26,9 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingSomIkkeKommer;
 import no.nav.foreldrepenger.domene.iay.modell.RefusjonskravDato;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class InntektsmeldingTjeneste {

@@ -5,8 +5,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.vedtak.util.InputValideringRegex;
-
 public class NaringsvirksomhetTypeDto {
 
     @JsonProperty(value = "ANNEN")
@@ -23,7 +21,7 @@ public class NaringsvirksomhetTypeDto {
 
     @JsonProperty("typeFiske")
     @Size(max = 100)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String typeFiske;
 
     public boolean getAnnen() {

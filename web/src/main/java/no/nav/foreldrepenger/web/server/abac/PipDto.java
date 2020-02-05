@@ -4,7 +4,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.sak.typer.AktørId;
 
 public class PipDto {
 

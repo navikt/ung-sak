@@ -10,9 +10,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRe
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.*;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.sak.typer.AktørId;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

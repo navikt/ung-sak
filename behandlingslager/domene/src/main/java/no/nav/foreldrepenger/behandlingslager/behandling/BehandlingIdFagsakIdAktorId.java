@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.behandling;
 import java.util.Objects;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class BehandlingIdFagsakIdAktorId {
 

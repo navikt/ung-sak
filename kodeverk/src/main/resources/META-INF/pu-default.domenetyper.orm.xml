@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings
+	xmlns="http://java.sun.com/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
+    http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
+	version="2.0">
+
+	<!-- mapping av domene typer til JPA (optional) -->
+
+	<embeddable class="no.nav.k9.sak.typer.Saksnummer"
+		access="FIELD">
+		<attributes>
+			<basic name="saksnummer" access="FIELD">
+				<column name="saksnummer" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+	<embeddable class="no.nav.k9.sak.typer.AktørId"
+		access="FIELD">
+		<attributes>
+			<basic name="aktørId" access="FIELD">
+				<column name="aktoer_id" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+	<embeddable class="no.nav.k9.sak.typer.JournalpostId"
+		access="FIELD">
+		<attributes>
+			<basic name="journalpostId" access="FIELD">
+				<column name="journalpost_id" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+	<embeddable class="no.nav.k9.sak.typer.PersonIdent"
+		access="FIELD">
+		<attributes>
+			<basic name="ident" access="FIELD">
+				<column name="ident" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+</entity-mappings>

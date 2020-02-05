@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -24,6 +23,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.Av
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AksjonspunktGodkjenningDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.vedtak.exception.FunksjonellException;
 
 public class AksjonspunktRestTjenesteTest {

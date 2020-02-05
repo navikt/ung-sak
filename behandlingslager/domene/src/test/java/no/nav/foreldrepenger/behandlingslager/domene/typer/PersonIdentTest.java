@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class PersonIdentTest {
 

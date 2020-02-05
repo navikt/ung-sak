@@ -8,7 +8,7 @@ import java.util.Objects;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivDokument;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.Kommunikasjonsretning;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 public class DokumentDto {
     private JournalpostId journalpostId;

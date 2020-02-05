@@ -26,18 +26,18 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.foreldrepenger.mottak.publiserer.producer.DialogHendelseProducer;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 public class PubliserPersistertDokumentHendelseTaskImplTest {

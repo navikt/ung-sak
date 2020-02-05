@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class BehandlingslagerTestUtil {
 

@@ -7,9 +7,10 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.typer.AktørId;
 
 /** Input data til AksjonspunktOppdaterere. */
 public final class AksjonspunktOppdaterParameter {

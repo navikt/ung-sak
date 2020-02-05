@@ -165,7 +165,7 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
         return new AktivitetStatusMedHjemmel(as, hjemmel);
     }
 
-    private AktivitetStatus mapVLAktivitetStatus(no.nav.k9.kodeverk.iay.AktivitetStatus vlBGAktivitetStatus) {
+    private AktivitetStatus mapVLAktivitetStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus vlBGAktivitetStatus) {
         if (BeregningsgrunnlagUtil.erATFL(vlBGAktivitetStatus)) {
             return AktivitetStatus.ATFL;
         }

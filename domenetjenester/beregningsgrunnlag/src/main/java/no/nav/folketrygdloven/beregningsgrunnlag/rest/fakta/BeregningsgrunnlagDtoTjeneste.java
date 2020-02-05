@@ -29,11 +29,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPeri
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.SammenligningsgrunnlagDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
 public class BeregningsgrunnlagDtoTjeneste {

@@ -15,10 +15,10 @@ import javax.persistence.EntityManager;
 
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
-import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
 
 import org.junit.Before;
 import org.junit.Rule;

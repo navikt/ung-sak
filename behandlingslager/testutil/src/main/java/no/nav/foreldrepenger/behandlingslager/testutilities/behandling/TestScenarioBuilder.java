@@ -3,9 +3,9 @@ package no.nav.foreldrepenger.behandlingslager.testutilities.behandling;
 import java.time.LocalDate;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Default test scenario builder.

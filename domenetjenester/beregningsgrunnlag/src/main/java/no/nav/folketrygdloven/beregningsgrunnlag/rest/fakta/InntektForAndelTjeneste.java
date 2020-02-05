@@ -19,9 +19,9 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.Beløp;
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Beløp;
 
 class InntektForAndelTjeneste {
 

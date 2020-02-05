@@ -8,8 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.typer.AktørId;
 
 @MappedSuperclass
 public abstract class Aktør extends BaseEntitet {

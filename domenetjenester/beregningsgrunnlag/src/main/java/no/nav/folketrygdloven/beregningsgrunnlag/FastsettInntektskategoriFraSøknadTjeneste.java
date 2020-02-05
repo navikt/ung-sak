@@ -1,6 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag;
 
-import static no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE;
+import static no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +14,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 @ApplicationScoped

@@ -26,9 +26,9 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.domene.opptjening.dto.OpptjeningDto;
-import no.nav.foreldrepenger.domene.opptjening.dto.OpptjeningDtoTjeneste;
+import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningDtoTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 @ApplicationScoped

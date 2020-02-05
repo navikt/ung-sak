@@ -33,11 +33,11 @@ import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.AktørId;
 
 @Dependent
 public class OpptjeningsperioderUtenOverstyringTjeneste {

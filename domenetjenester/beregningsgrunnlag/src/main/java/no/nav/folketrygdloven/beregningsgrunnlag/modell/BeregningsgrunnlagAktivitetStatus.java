@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.HjemmelKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 @Entity(name = "BeregningsgrunnlagAktivitetStatus")
 @Table(name = "BG_AKTIVITET_STATUS")

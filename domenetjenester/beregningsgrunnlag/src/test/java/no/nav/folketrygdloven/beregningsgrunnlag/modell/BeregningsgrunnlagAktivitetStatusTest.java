@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
 
 public class BeregningsgrunnlagAktivitetStatusTest {
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();

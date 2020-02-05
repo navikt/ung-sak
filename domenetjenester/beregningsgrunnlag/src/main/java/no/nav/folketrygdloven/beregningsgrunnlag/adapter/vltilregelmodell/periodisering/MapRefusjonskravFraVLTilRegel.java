@@ -13,7 +13,7 @@ import java.util.TreeMap;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Refusjonskrav;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
-import no.nav.foreldrepenger.domene.typer.Beløp;
+import no.nav.k9.sak.typer.Beløp;
 
 class MapRefusjonskravFraVLTilRegel {
     private MapRefusjonskravFraVLTilRegel() {

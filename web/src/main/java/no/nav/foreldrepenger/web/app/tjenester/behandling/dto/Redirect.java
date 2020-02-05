@@ -11,12 +11,12 @@ import javax.ws.rs.core.UriBuilder;
 import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
+import no.nav.k9.sak.typer.Saksnummer;
+
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 
 public final class Redirect {
     private static final Logger log = LoggerFactory.getLogger(Redirect.class);

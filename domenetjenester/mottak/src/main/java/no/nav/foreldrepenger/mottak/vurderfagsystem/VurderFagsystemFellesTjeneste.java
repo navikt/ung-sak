@@ -17,9 +17,9 @@ import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Journalpost;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class VurderFagsystemFellesTjeneste {

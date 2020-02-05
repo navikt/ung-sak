@@ -17,7 +17,7 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 
 public class Yrkesaktivitet implements IndexKey {
 

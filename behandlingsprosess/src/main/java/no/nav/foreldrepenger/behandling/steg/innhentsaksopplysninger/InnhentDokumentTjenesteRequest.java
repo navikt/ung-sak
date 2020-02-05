@@ -4,9 +4,9 @@ import java.sql.Clob;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 public class InnhentDokumentTjenesteRequest {
     private Long fagsakId;

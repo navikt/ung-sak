@@ -31,8 +31,8 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.NaturalYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Refusjon;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
 import no.nav.vedtak.konfig.Tid;
 
 @Dependent

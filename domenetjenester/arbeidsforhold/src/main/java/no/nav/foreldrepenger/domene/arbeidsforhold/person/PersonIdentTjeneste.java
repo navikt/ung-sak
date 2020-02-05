@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.person;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public interface PersonIdentTjeneste {
 

@@ -5,21 +5,18 @@ import java.time.LocalDate;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.foreldrepenger.validering.ValidKodeverk;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.vedtak.util.InputValideringRegex;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
     private boolean sendVarsel;
 
     @Size(max = 4000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String fritekst;
 
     private LocalDate frist;
 
-    @ValidKodeverk
     private Venteårsak ventearsak;
 
     public VarselRevurderingDto(String begrunnelse, boolean sendVarsel,

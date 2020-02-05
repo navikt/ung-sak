@@ -21,8 +21,8 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Entity(name = "OppgaveBehandlingKobling")
 @Table(name = "OPPGAVE_BEHANDLING_KOBLING")

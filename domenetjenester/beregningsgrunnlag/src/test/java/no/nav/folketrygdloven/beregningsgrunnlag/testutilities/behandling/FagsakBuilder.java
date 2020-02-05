@@ -3,11 +3,11 @@ package no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.aktør.NavBrukerBuilder;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 /**
  * Builder for å bygge enkle fagsaker. Primært for test.

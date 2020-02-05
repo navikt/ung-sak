@@ -6,8 +6,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRe
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftErMedlemVurderingAksjonspunktDto;
 import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.sak.kontrakt.medlem.BekreftErMedlemVurderingAksjonspunktDto;
 
 public class BekreftErMedlemVurderingAksjonspunkt {
 

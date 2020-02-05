@@ -6,10 +6,9 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.vedtak.util.InputValideringRegex;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE)
 public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
@@ -19,7 +18,7 @@ public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
     private TilbakekrevingVidereBehandling videreBehandling;
 
     @Size(max = 3000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String varseltekst;
 
     VurderFeilutbetalingDto() {

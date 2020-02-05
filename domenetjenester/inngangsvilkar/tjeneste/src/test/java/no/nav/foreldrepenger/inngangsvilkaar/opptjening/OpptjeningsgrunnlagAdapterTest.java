@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.opptjening.OpptjeningsgrunnlagAdapt
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.AktivitetPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 

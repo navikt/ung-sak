@@ -24,8 +24,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregnings
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class ForeslåBeregningsgrunnlag {

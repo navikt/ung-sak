@@ -14,8 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 

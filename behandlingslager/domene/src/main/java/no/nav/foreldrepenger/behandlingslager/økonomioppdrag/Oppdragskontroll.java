@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Entity(name = "Oppdragskontroll")
 @Table(name = "OPPDRAG_KONTROLL")

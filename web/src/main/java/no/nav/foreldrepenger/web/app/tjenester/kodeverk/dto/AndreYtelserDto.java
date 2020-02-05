@@ -2,12 +2,10 @@ package no.nav.foreldrepenger.web.app.tjenester.kodeverk.dto;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.validering.ValidKodeverk;
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 
 public class AndreYtelserDto {
 
-    @ValidKodeverk
     private ArbeidType ytelseType;
     private LocalDate periodeFom;
     private LocalDate periodeTom;

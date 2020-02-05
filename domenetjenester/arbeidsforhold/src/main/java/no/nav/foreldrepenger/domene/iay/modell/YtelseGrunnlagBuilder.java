@@ -3,9 +3,9 @@ package no.nav.foreldrepenger.domene.iay.modell;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
-import no.nav.k9.kodeverk.iay.Arbeidskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.k9.sak.typer.Beløp;
 
 public class YtelseGrunnlagBuilder {
     private final YtelseGrunnlag ytelseGrunnlag;

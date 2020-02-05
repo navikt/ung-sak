@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.iay.TemaUnderkategori;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class Ytelse implements IndexKey {
 

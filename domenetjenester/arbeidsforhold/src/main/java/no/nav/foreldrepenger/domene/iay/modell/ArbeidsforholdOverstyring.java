@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.domene.iay.modell;
 
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,8 +19,8 @@ import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 
 public class ArbeidsforholdOverstyring implements IndexKey {
 

@@ -14,7 +14,6 @@
 
     <!-- Eksterne -->
     <dependencies>
-        <!-- Modul interne avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
@@ -23,8 +22,12 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>dokumentarkiv</artifactId>
         </dependency>
-
-        <!-- Prosjektinterne avhengigheter -->
+		<dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+            <scope>provided</scope> <!-- ikke trekk med transitivt for andre moduler -->
+        </dependency>
+        
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>

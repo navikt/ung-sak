@@ -27,12 +27,12 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped

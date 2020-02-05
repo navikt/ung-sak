@@ -5,9 +5,9 @@ import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.dto.PermisjonDto;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 final class UtledBekreftetPermisjon {
 

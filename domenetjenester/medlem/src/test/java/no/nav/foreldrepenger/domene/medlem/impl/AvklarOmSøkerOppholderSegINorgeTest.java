@@ -29,15 +29,15 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektspostBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.VersjonType;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
-import no.nav.k9.kodeverk.iay.InntektspostType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

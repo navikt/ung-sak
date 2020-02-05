@@ -3,8 +3,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.AktørId;
 
 public class BeregningAktivitetDto {
 

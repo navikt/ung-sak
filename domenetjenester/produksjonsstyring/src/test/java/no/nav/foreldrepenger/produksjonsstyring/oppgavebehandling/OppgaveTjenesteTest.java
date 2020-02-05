@@ -30,14 +30,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveGodkjennVedtakTask;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.tjeneste.virksomhet.behandleoppgave.v1.meldinger.WSOpprettOppgaveResponse;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgave;
 import no.nav.tjeneste.virksomhet.oppgave.v3.informasjon.oppgave.Oppgavetype;

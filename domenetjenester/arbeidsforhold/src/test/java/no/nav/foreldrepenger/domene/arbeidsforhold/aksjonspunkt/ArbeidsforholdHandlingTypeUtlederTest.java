@@ -1,21 +1,21 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.IKKE_BRUK;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_BRUK;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
 import org.junit.Test;
 
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 
 public class ArbeidsforholdHandlingTypeUtlederTest {
 

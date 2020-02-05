@@ -9,12 +9,12 @@ import java.util.Optional;
 import org.jboss.weld.exceptions.IllegalArgumentException;
 
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
+import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.konfig.Tid;
 
 public class InntektsmeldingBuilder {

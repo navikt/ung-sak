@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
-import no.nav.foreldrepenger.domene.typer.JournalpostId;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
 public class HistorikkInnslagKonverter {

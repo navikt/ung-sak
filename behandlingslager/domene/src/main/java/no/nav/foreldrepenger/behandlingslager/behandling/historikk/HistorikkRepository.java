@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class HistorikkRepository {

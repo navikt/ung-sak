@@ -12,8 +12,8 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
-import no.nav.foreldrepenger.domene.medlem.dto.AvklarFortsattMedlemskapAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftedePerioderAdapter;
+import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderAdapter;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarFortsattMedlemskapDto.class, adapter = AksjonspunktOppdaterer.class)

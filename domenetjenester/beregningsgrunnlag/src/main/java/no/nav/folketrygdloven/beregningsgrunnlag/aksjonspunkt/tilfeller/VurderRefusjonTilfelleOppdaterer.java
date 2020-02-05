@@ -18,7 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.refusjon.InntektsmeldingMedRefu
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.domene.typer.AktørId;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT")

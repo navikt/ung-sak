@@ -7,7 +7,12 @@ import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraphConfig;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.historikk.Saksnummer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 public class IAYDiffsjekker {
     private DiffEntity diffEntity;
@@ -23,6 +28,12 @@ public class IAYDiffsjekker {
         config.setIgnoreNulls(true);
         config.setOnlyCheckTrackedFields(onlyCheckTrackedFields);
         config.setInclusionFilter(TraverseGraphConfig.NO_FILTER);
+        
+        config.addLeafClasses(Beløp.class);
+        config.addLeafClasses(AktørId.class);
+        config.addLeafClasses(Saksnummer.class);
+        config.addLeafClasses(JournalpostId.class);
+        config.addLeafClasses(PersonIdent.class);
         
         config.addLeafClasses(DatoIntervallEntitet.class);
         config.addLeafClasses(Kodeverdi.class);

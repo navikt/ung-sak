@@ -21,8 +21,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AndelForFaktaOmBeregni
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
-import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
 public class AndelerForFaktaOmBeregningTjeneste {

@@ -37,11 +37,11 @@ import no.nav.foreldrepenger.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class AksjonspunktutlederForVurderOppgittOpptjening implements AksjonspunktUtleder {

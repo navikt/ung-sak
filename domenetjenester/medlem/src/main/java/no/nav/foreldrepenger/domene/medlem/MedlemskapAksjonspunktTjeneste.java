@@ -4,16 +4,16 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.domene.medlem.dto.AvklarFortsattMedlemskapAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftBosattVurderingAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftErMedlemVurderingAksjonspunktDto;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftOppholdVurderingAksjonspunktDto;
 import no.nav.foreldrepenger.domene.medlem.impl.AvklarFortsattMedlemskapAksjonspunkt;
 import no.nav.foreldrepenger.domene.medlem.impl.BekreftBosattVurderingAksjonspunkt;
 import no.nav.foreldrepenger.domene.medlem.impl.BekreftErMedlemVurderingAksjonspunkt;
 import no.nav.foreldrepenger.domene.medlem.impl.BekreftOppholdsrettVurderingAksjonspunkt;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftBosattVurderingAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftErMedlemVurderingAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftOppholdVurderingAksjonspunktDto;
 
 @ApplicationScoped
 public class MedlemskapAksjonspunktTjeneste {

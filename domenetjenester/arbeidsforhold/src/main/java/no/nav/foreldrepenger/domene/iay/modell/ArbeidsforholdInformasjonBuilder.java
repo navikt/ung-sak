@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.vedtak.util.Tuple;
 
 public class ArbeidsforholdInformasjonBuilder {

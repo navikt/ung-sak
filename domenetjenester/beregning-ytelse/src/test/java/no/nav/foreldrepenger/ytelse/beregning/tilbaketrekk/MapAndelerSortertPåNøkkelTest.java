@@ -5,11 +5,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.BRNøkkelMedAndeler;
 import no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk.MapAndelerSortertPåNøkkel;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.sak.typer.AktørId;
 
 import org.junit.Test;
 

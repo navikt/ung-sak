@@ -42,10 +42,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.Beløp;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagPeriodeRegelType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
+import no.nav.k9.sak.typer.Beløp;
 
 @Entity(name = "BeregningsgrunnlagPeriode")
 @Table(name = "BEREGNINGSGRUNNLAG_PERIODE")

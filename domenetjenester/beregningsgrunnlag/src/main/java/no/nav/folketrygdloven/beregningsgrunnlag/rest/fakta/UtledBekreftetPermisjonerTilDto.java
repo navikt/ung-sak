@@ -10,7 +10,7 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.impl.HentBekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.k9.kodeverk.iay.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 
 class UtledBekreftetPermisjonerTilDto {
 

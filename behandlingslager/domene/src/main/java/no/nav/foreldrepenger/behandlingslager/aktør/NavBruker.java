@@ -10,8 +10,8 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.kodeverk.SpråkKodeverdiConverter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.typer.AktørId;
 
 @Entity(name = "Bruker")
 @Table(name = "BRUKER")

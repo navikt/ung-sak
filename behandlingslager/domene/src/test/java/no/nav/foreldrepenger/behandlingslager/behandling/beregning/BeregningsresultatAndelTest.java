@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class BeregningsresultatAndelTest {
 

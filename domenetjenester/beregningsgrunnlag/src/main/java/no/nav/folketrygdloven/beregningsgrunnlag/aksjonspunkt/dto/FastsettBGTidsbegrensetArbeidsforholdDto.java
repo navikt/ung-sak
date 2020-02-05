@@ -10,8 +10,8 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE)
 public class FastsettBGTidsbegrensetArbeidsforholdDto extends BekreftetAksjonspunktDto {

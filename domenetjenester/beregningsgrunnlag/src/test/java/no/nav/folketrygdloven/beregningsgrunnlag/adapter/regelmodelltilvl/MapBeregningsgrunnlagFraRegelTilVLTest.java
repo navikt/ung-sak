@@ -52,11 +52,11 @@ import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
-import no.nav.k9.kodeverk.iay.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -100,7 +100,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         assertThat(vlBGP.getBeregningsgrunnlagPrStatusOgAndelList()).hasSize(1);
         final BeregningsgrunnlagPrStatusOgAndel vlBGPStatus = vlBGP.getBeregningsgrunnlagPrStatusOgAndelList().get(0);
         assertThat(vlBGPStatus.getAktivitetStatus())
-            .isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
+            .isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
         assertVLBGPStatusSN(vlBGPStatus);
     }
 
@@ -137,14 +137,14 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         assertThat(vlBGP.getBeregningsgrunnlagPrStatusOgAndelList()).hasSize(3);
         final BeregningsgrunnlagPrStatusOgAndel vlBGPStatus = vlBGP.getBeregningsgrunnlagPrStatusOgAndelList().get(0);
         assertThat(vlBGPStatus.getAktivitetStatus())
-            .isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
+            .isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
         assertVLBGPStatusSN(vlBGPStatus);
         final BeregningsgrunnlagPrStatusOgAndel vlBGPStatus1 = vlBGP.getBeregningsgrunnlagPrStatusOgAndelList().get(1);
         assertThat(vlBGPStatus1.getAktivitetStatus())
-            .isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER);
+            .isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER);
         assertVLBGPStatusAT(vlBGPStatus1);
         final BeregningsgrunnlagPrStatusOgAndel vlBGPStatus2 = vlBGP.getBeregningsgrunnlagPrStatusOgAndelList().get(2);
-        assertThat(vlBGPStatus2.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER);
+        assertThat(vlBGPStatus2.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.FRILANSER);
         assertVLBGPStatusFL(vlBGPStatus2);
     }
 
@@ -170,7 +170,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         assertThat(beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList()).hasSize(1);
         BeregningsgrunnlagPrStatusOgAndel andel = beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList().get(0);
         // Andel asserts
-        assertThat(andel.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER);
+        assertThat(andel.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER);
         // Arbeidsforhold asserts
         assertThat(andel.getBgAndelArbeidsforhold()).isPresent();
         BGAndelArbeidsforhold bga = andel.getBgAndelArbeidsforhold().get();
@@ -198,7 +198,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         assertThat(beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList()).hasSize(1);
         BeregningsgrunnlagPrStatusOgAndel andel = beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList().get(0);
         // Andel asserts
-        assertThat(andel.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER);
+        assertThat(andel.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER);
         // Arbeidsforhold asserts
         assertThat(andel.getBgAndelArbeidsforhold()).isPresent();
         BGAndelArbeidsforhold bga = andel.getBgAndelArbeidsforhold().get();
@@ -223,7 +223,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         assertThat(beregningsgrunnlag.getBeregningsgrunnlagPerioder()).hasSize(1);
         assertThat(beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList()).hasSize(1);
         BeregningsgrunnlagPrStatusOgAndel andel = beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList().get(0);
-        assertThat(andel.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
+        assertThat(andel.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
         assertThat(andel.getArbeidsforholdType()).isEqualTo(OpptjeningAktivitetType.NÆRING);
     }
 
@@ -279,7 +279,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
 
     private void assertVLBGPStatusSN(BeregningsgrunnlagPrStatusOgAndel vlBGPStatus) {
         assertThat(vlBGPStatus.getAktivitetStatus())
-            .isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
+            .isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
         assertThat(vlBGPStatus.getInntektskategori()).isEqualTo(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE);
         assertThat(vlBGPStatus.getBeregnetPrÅr().doubleValue()).isEqualTo(400000.42, within(0.01));
         assertThat(vlBGPStatus.getBruttoPrÅr().doubleValue()).isEqualTo(400000.42, within(0.01));
@@ -291,7 +291,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     }
 
     private void assertVLBGPStatusFL(BeregningsgrunnlagPrStatusOgAndel bgpsa) {
-        assertThat(bgpsa.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER);
+        assertThat(bgpsa.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.FRILANSER);
         assertThat(bgpsa.getInntektskategori()).isEqualTo(Inntektskategori.FRILANSER);
         assertThat(bgpsa.getBgAndelArbeidsforhold().map(BGAndelArbeidsforhold::getArbeidsgiver)).isEmpty();
         assertThat(bgpsa.getBgAndelArbeidsforhold()
@@ -308,7 +308,7 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     }
 
     private void assertVLBGPStatusAT(BeregningsgrunnlagPrStatusOgAndel bgpsa) {
-        assertThat(bgpsa.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER);
+        assertThat(bgpsa.getAktivitetStatus()).isEqualTo(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER);
         assertThat(bgpsa.getInntektskategori()).isEqualTo(Inntektskategori.ARBEIDSTAKER);
         assertThat(bgpsa.getBgAndelArbeidsforhold().map(BGAndelArbeidsforhold::getArbeidsgiver))
             .hasValueSatisfying(arbeidsgiver -> assertThat(arbeidsgiver.getOrgnr()).isEqualTo(ORGNR));
@@ -340,10 +340,10 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
             .buildVLBeregningsgrunnlag();
         buildVLBGAktivitetStatus(vlBG);
         final no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode vlBGPeriode = buildVLBGPeriode(vlBG);
-        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER,
+        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER,
             Inntektskategori.ARBEIDSTAKER, MINUS_YEARS_2,
             MINUS_YEARS_1, Arbeidsgiver.virksomhet(ORGNR), OpptjeningAktivitetType.ARBEID);
-        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER,
+        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.FRILANSER,
             Inntektskategori.FRILANSER, MINUS_YEARS_3, MINUS_YEARS_2);
         return vlBG;
     }
@@ -354,10 +354,10 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
         buildVLBGAktivitetStatus(vlBG);
         final no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode vlBGPeriode = buildVLBGPeriode(vlBG);
         buildVLBGPStatusForSN(vlBGPeriode);
-        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.iay.AktivitetStatus.ARBEIDSTAKER,
+        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER,
             Inntektskategori.ARBEIDSTAKER, MINUS_YEARS_2,
             MINUS_YEARS_1, Arbeidsgiver.virksomhet(ORGNR), OpptjeningAktivitetType.ARBEID);
-        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.iay.AktivitetStatus.FRILANSER,
+        buildVLBGPStatus(vlBGPeriode, no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.FRILANSER,
             Inntektskategori.FRILANSER, MINUS_YEARS_3, MINUS_YEARS_2);
         return vlBG;
     }

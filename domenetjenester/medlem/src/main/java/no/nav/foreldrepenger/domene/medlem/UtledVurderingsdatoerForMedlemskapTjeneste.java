@@ -29,7 +29,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.domene.medlem.dto.VurderingsÅrsak;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemEndringssjekker;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -37,6 +36,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.kontrakt.medlem.VurderingsÅrsak;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped

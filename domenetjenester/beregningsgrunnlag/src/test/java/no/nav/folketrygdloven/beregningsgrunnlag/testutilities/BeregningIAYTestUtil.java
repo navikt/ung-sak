@@ -38,21 +38,21 @@ import no.nav.foreldrepenger.domene.iay.modell.YtelseAnvist;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelse;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.iay.ArbeidType;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.iay.Arbeidskategori;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
-import no.nav.k9.kodeverk.iay.InntektspostType;
-import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
-import no.nav.k9.kodeverk.iay.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent // La stå @Dependent så lenge #oppgittOpptjeningBuilder er et felt her
 public class BeregningIAYTestUtil {
@@ -296,7 +296,7 @@ public class BeregningIAYTestUtil {
         YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
                 .medKilde(Fagsystem.INFOTRYGD)
                 .medYtelseType(ytelseType)
-                .medSaksnummer(Saksnummer.infotrygd(saksnummer));
+                .medSaksnummer(new Saksnummer(saksnummer));
         
         ytelseBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         ytelseBuilder.medStatus(relatertYtelseTilstand);

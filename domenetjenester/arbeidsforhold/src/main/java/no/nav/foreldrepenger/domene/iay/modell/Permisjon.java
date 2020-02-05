@@ -8,7 +8,7 @@ import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.iay.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 
 public class Permisjon implements IndexKey {
 

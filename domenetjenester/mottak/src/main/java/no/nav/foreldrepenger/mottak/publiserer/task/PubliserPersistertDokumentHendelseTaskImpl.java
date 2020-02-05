@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.mottak.dokumentmottak.impl.HåndterMottattDokumentT
 import no.nav.foreldrepenger.mottak.publiserer.producer.DialogHendelseProducer;
 import no.nav.foreldrepenger.mottak.publiserer.producer.DialogJsonConfig;
 import no.nav.foreldrepenger.mottak.publiserer.producer.PubliserPersistertDokumentHendelseFeil;
-import no.nav.k9.kodeverk.iay.InntektsmeldingInnsendingsårsak;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.hendelser.inntektsmelding.v1.InntektsmeldingV1;

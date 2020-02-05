@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
 import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 
 public class OpptjeningInntektPeriode {
 

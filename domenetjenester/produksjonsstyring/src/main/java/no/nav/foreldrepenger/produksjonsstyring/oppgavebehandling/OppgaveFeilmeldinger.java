@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;

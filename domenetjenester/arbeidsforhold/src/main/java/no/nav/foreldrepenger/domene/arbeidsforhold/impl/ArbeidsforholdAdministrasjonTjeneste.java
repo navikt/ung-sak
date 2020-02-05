@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.impl;
 
 import static java.util.Collections.emptyList;
-import static no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde.INNTEKTSKOMPONENTEN;
-import static no.nav.k9.kodeverk.iay.ArbeidType.AA_REGISTER_TYPER;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
-import static no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.AA_REGISTER_TYPER;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
+import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde.INNTEKTSKOMPONENTEN;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;
@@ -40,11 +39,12 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.iay.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.typer.AktørId;
 
 /**
  * Håndterer administrasjon(saksbehandlers input) vedrørende arbeidsforhold.

@@ -14,11 +14,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAg
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
-import no.nav.foreldrepenger.domene.medlem.dto.BekreftOppholdVurderingAksjonspunktDto;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.k9.sak.kontrakt.medlem.BekreftOppholdVurderingAksjonspunktDto;
 
 public abstract class BekreftOppholdOppdaterer implements AksjonspunktOppdaterer<BekreftedePerioderMalDto> {
 

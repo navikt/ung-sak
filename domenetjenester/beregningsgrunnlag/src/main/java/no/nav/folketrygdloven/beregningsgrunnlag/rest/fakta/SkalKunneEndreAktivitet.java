@@ -1,7 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 
 class SkalKunneEndreAktivitet {
 

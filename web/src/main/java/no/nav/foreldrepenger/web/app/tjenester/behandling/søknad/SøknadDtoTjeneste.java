@@ -17,12 +17,12 @@ import no.nav.foreldrepenger.behandlingslager.virksomhet.OrganisasjonsNummerVali
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
 import no.nav.foreldrepenger.kompletthet.KompletthetsjekkerProvider;
 import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class SøknadDtoTjeneste {

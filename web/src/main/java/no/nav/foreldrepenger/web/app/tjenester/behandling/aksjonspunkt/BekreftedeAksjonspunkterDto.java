@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import no.nav.foreldrepenger.behandling.BehandlingIdDto;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
 
@@ -59,7 +59,7 @@ public class BekreftedeAksjonspunkterDto implements AbacDto {
             abac.leggTil(AppAbacAttributtType.BEHANDLING_UUID, getBehandlingId().getBehandlingUuid());
         }
         
-        bekreftedeAksjonspunktDtoer.forEach(apDto -> abac.leggTil(apDto.abacAttributter()));
+        bekreftedeAksjonspunktDtoer.forEach(apDto -> abac.leggTil(AppAbacAttributtType.AKSJONSPUNKT_KODE, apDto.getKode()));
         return abac;
     }
 }

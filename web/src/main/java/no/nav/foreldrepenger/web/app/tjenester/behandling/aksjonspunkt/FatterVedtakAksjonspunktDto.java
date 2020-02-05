@@ -7,9 +7,9 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AksjonspunktGodkjenningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonTypeName(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE)
 public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {

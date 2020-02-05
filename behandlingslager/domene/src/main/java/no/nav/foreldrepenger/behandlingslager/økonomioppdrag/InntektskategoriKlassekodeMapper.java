@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandlingslager.økonomioppdrag;
 
 import java.util.Map;
 
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 public class InntektskategoriKlassekodeMapper {
 

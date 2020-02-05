@@ -16,12 +16,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningAksjonspunktDto;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarSaksopplysningerDto.class, adapter = AksjonspunktOppdaterer.class)

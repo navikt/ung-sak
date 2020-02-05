@@ -21,7 +21,7 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperiodeForSaksbehandli
 import no.nav.foreldrepenger.domene.opptjening.VurderingsStatus;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.kodeverk.iay.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {

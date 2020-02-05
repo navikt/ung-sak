@@ -15,12 +15,12 @@ import java.util.stream.Stream;
 
 import org.threeten.extra.Interval;
 
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.typer.AktørId;
 
 public class PersonopplysningerAggregat {
 

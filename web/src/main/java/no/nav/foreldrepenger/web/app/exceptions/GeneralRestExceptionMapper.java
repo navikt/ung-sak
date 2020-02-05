@@ -1,9 +1,5 @@
 package no.nav.foreldrepenger.web.app.exceptions;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -14,8 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import no.nav.foreldrepenger.validering.FeltFeilDto;
-import no.nav.foreldrepenger.validering.Valideringsfeil;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.BehandlingEndretKonfliktException;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.feil.Feil;
@@ -29,19 +24,11 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationEx
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralRestExceptionMapper.class);
 
-    //FIXME Humle, ikke bruk feilkoder her, håndter som valideringsfeil, eller legg til egen samtidig-oppdatering-feil Feil-rammeverket
-    static final String BEHANDLING_ENDRET_FEIL = "FP-837578";
-
-    //FIXME Humle, dette er Valideringsfeil, bruk valideringsfeil.
-    static final String FRITEKST_TOM_FEIL = "FP-290952";
-
     @Override
     public Response toResponse(ApplicationException exception) {
         Throwable cause = exception.getCause();
 
-        if (cause instanceof Valideringsfeil) {
-            return handleValideringsfeil((Valideringsfeil) cause);
-        } else if (cause instanceof TomtResultatException) {
+        if (cause instanceof TomtResultatException) {
             return handleTomtResultatFeil((TomtResultatException) cause);
         }
 
@@ -63,25 +50,11 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationEx
             .build();
     }
 
-    private Response handleValideringsfeil(Valideringsfeil valideringsfeil) {
-        List<String> feltNavn = valideringsfeil.getFeltFeil().stream().map(felt -> felt.getNavn()).collect(Collectors.toList());
-        return Response
-            .status(Response.Status.BAD_REQUEST)
-            .entity(new FeilDto(
-                FeltValideringFeil.FACTORY.feltverdiKanIkkeValideres(feltNavn).getFeilmelding(),
-                valideringsfeil.getFeltFeil()))
-            .type(MediaType.APPLICATION_JSON)
-            .build();
-    }
-
     private Response handleVLException(VLException vlException, String callId) {
         Feil feil = vlException.getFeil();
         if (vlException instanceof ManglerTilgangException) {
             return ikkeTilgang(feil);
-        } else if (FRITEKST_TOM_FEIL.equals(feil.getKode())) {
-            return handleValideringsfeil(new Valideringsfeil(Collections.singleton(new FeltFeilDto("fritekst",
-                feil.getKode() + " " + feil.getFeilmelding()))));
-        } else if (BEHANDLING_ENDRET_FEIL.equals(feil.getKode())) {
+        } else if (vlException instanceof BehandlingEndretKonfliktException) {
             return behandlingEndret(feil);
         } else {
             return serverError(callId, feil);

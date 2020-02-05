@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.k9.kodeverk.iay.Inntektskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 final class InntektskategoriMapper {
 

@@ -20,9 +20,6 @@ import no.nav.foreldrepenger.domene.iay.modell.YtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelseBuilder;
-import no.nav.foreldrepenger.domene.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.Beløp;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Organisasjon;
@@ -34,6 +31,9 @@ import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class MapAktørYtelse {
     

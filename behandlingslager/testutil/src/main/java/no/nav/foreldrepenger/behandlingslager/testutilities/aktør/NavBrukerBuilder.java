@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.behandlingslager.testutilities.aktør;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.typer.AktørId;
 
 public class NavBrukerBuilder {
 

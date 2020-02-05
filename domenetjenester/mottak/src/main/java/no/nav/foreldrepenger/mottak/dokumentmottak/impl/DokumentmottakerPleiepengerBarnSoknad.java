@@ -13,12 +13,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad.PleiepengerBarnSoknadPersister;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @Dependent

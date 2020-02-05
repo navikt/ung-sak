@@ -9,7 +9,7 @@ import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import no.nav.foreldrepenger.domene.typer.PersonIdent;
+import no.nav.k9.sak.typer.PersonIdent;
 
 /**
  * Hent et tilfeldig gyldig men fiktivt Fødselsnummer.

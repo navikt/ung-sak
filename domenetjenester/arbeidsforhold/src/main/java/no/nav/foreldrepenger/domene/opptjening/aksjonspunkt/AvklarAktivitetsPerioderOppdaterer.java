@@ -29,10 +29,6 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
-import no.nav.foreldrepenger.domene.opptjening.dto.AvklarAktivitetsPerioderDto;
-import no.nav.foreldrepenger.domene.opptjening.dto.AvklarOpptjeningAktivitetDto;
-import no.nav.foreldrepenger.domene.opptjening.dto.BekreftOpptjeningPeriodeDto;
-import no.nav.foreldrepenger.domene.typer.AktørId;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -41,6 +37,10 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.kontrakt.opptjening.AvklarAktivitetsPerioderDto;
+import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningAktivitetDto;
+import no.nav.k9.sak.kontrakt.opptjening.BekreftOpptjeningPeriodeDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped

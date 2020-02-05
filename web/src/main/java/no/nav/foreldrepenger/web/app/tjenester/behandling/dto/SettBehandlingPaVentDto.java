@@ -7,7 +7,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
-import no.nav.foreldrepenger.validering.ValidKodeverk;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
@@ -26,7 +25,6 @@ public class SettBehandlingPaVentDto implements AbacDto {
 
     private LocalDate frist;
     
-    @ValidKodeverk
     private Venteårsak ventearsak;
 
     public Long getBehandlingId() {

@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SokefeltDto;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 
 public class SokefeltDtoTest {

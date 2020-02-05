@@ -27,7 +27,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
 import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragApplikasjonTjeneste;
 import no.nav.foreldrepenger.økonomi.simulering.klient.FpOppdragRestKlient;
 import no.nav.foreldrepenger.økonomi.simulering.klient.FpoppdragSystembrukerRestKlient;
@@ -35,6 +34,7 @@ import no.nav.foreldrepenger.økonomi.simulering.tjeneste.SimuleringIntegrasjonT
 import no.nav.foreldrepenger.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class SimulerOppdragStegTest {
 

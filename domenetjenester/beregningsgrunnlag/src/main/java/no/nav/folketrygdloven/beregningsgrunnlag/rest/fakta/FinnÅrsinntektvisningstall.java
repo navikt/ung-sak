@@ -6,8 +6,8 @@ import java.util.Optional;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.k9.kodeverk.iay.AktivitetStatus;
 /**
  Hjelpeklasse som utleder hvilket tall som best representerer årsinntekt for beregningsgrunnlaget da GUI idag kun støtter visning for et slikt tall selv om grunnlaget er periodisert
  */

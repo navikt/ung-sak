@@ -1,64 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>domenetjenester-pom</artifactId>
-        <groupId>no.nav.k9.sak</groupId>
-        <version>${revision}${sha1}${changelist}</version>
-    </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>domenetjenester-pom</artifactId>
+		<groupId>no.nav.k9.sak</groupId>
+		<version>${revision}${sha1}${changelist}</version>
+	</parent>
 
-    <name>K9SAK :: Domenetjenester - Beregning Ytelse </name>
-    <artifactId>beregning-ytelse</artifactId>
-    <packaging>jar</packaging>
+	<name>K9SAK :: Domenetjenester - Beregning Ytelse </name>
+	<artifactId>beregning-ytelse</artifactId>
+	<packaging>jar</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-db</artifactId>
-        </dependency>
+	<dependencies>
 
-        <!-- Domenetjenester avhengigheter -->
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>uttak</artifactId>
-        </dependency>
-        <!-- Prosjekt avhengigheter -->
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingslager-domene</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.folketrygdloven</groupId>
-            <artifactId>folketrygdloven-beregningsgrunnlag</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>kontrakt</artifactId>
+			<scope>provided</scope><!-- ikke trekk med transitivt til andre moduler -->
+		</dependency>
 
-        <!-- NARE: Java regelmodell -->
-        <dependency>
-            <groupId>no.nav.fpsak.nare</groupId>
-            <artifactId>fpsak-nare-core</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles</groupId>
+			<artifactId>felles-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles</groupId>
+			<artifactId>felles-db</artifactId>
+		</dependency>
 
-        <!-- Test avhengigheter -->
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingslager-testutilities</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+		<!-- Domenetjenester avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>uttak</artifactId>
+		</dependency>
+		<!-- Prosjekt avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-domene</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.folketrygdloven</groupId>
+			<artifactId>folketrygdloven-beregningsgrunnlag</artifactId>
+		</dependency>
+
+		<!-- NARE: Java regelmodell -->
+		<dependency>
+			<groupId>no.nav.fpsak.nare</groupId>
+			<artifactId>fpsak-nare-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Test avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-testutilities</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 </project>

@@ -10,7 +10,6 @@ import javax.validation.constraints.Size;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.util.InputValideringRegex;
 
 public class DokumentProdusertDto implements AbacDto {
 
@@ -20,7 +19,7 @@ public class DokumentProdusertDto implements AbacDto {
 
     @NotNull
     @Size(min = 1, max = 100)
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String dokumentMal;
 
     public DokumentProdusertDto() {

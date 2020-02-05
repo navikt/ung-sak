@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import org.apache.http.client.utils.URIBuilder;
 
-import no.nav.foreldrepenger.domene.typer.Saksnummer;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 
 @ApplicationScoped

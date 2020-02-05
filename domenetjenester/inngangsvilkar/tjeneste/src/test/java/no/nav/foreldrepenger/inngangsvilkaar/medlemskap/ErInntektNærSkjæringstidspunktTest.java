@@ -15,8 +15,8 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntekt;
 import no.nav.foreldrepenger.domene.iay.modell.InntektBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektspostBuilder;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.ErInntektNærSkjæringstidspunkt;
-import no.nav.k9.kodeverk.iay.InntektsKilde;
-import no.nav.k9.kodeverk.iay.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 
 public class ErInntektNærSkjæringstidspunktTest {
 
