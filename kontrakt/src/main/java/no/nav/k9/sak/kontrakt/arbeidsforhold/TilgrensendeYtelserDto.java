@@ -4,13 +4,45 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Objects;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.sak.typer.Saksnummer;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TilgrensendeYtelserDto implements Comparable<TilgrensendeYtelserDto> {
+
+    @JsonProperty(value = "relatertYtelseType")
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String relatertYtelseType;
+
+    @JsonProperty(value = "periodeFraDato")
+    @NotNull
     private LocalDate periodeFraDato;
+
+    @JsonProperty(value = "periodeTilDato")
+    @NotNull
     private LocalDate periodeTilDato;
+
+    @JsonProperty(value = "status")
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String status;
+
+    @JsonProperty(value = "saksNummer")
+    @JsonAlias(value = "saksnummer")
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}\\-_/:\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String saksNummer;
 
     public TilgrensendeYtelserDto() {
@@ -57,7 +89,7 @@ public class TilgrensendeYtelserDto implements Comparable<TilgrensendeYtelserDto
     }
 
     public void setSaksNummer(Saksnummer saksNummer) {
-        if(saksNummer != null) {
+        if (saksNummer != null) {
             this.saksNummer = saksNummer.getVerdi();
         }
     }

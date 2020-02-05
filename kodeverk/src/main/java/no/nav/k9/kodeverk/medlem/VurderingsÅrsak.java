@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.medlem;
+package no.nav.k9.kodeverk.medlem;
 
 public enum VurderingsÅrsak {
     SKJÆRINGSTIDSPUNKT, STATSBORGERSKAP, ADRESSE, PERSONSTATUS, MEDL_PERIODE, BORTFALL_INNTEKT, ENDRING_I_REGISTERDATA

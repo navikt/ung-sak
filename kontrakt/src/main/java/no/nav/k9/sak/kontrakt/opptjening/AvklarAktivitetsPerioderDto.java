@@ -21,9 +21,9 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_PERIODER_MED_OPPTJENING_KODE)
 public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="opptjeningAktivitetList")
+    @JsonProperty(value = "opptjeningAktivitetList")
     @Valid
-    @Size(max = 1000)
+    @Size(max = 100)
     private List<AvklarOpptjeningAktivitetDto> opptjeningAktivitetList;
 
     @SuppressWarnings("unused") // NOSONAR
@@ -36,7 +36,6 @@ public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
         super(begrunnelse);
         this.opptjeningAktivitetList = opptjeningAktivitetList;
     }
-
 
     public List<AvklarOpptjeningAktivitetDto> getOpptjeningAktivitetList() {
         return opptjeningAktivitetList;

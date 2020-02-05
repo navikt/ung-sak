@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 public class BekreftedePerioderDto {
 
@@ -19,7 +19,7 @@ public class BekreftedePerioderDto {
     private Boolean lovligOppholdVurdering;
     private LocalDate fodselsdato;
     private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
-    private String omsorgsovertakelseDato;
+    private LocalDate omsorgsovertakelseDato;
     private String begrunnelse;
 
     public BekreftedePerioderDto() {
@@ -97,11 +97,11 @@ public class BekreftedePerioderDto {
         this.medlemskapManuellVurderingType = medlemskapManuellVurderingType;
     }
 
-    public String getOmsorgsovertakelseDato() {
+    public LocalDate getOmsorgsovertakelseDato() {
         return omsorgsovertakelseDato;
     }
 
-    public void setOmsorgsovertakelseDato(String omsorgsovertakelseDato) {
+    public void setOmsorgsovertakelseDato(LocalDate omsorgsovertakelseDato) {
         this.omsorgsovertakelseDato = omsorgsovertakelseDato;
     }
 }

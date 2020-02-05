@@ -31,7 +31,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.Be
 import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftedePerioderDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

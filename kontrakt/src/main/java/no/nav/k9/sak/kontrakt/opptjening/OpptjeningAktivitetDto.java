@@ -3,36 +3,91 @@ package no.nav.k9.sak.kontrakt.opptjening;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class OpptjeningAktivitetDto {
 
+    @JsonProperty(value = "aktivitetType")
     private OpptjeningAktivitetType aktivitetType;
+
+    @JsonProperty(value = "originalFom")
     private LocalDate originalFom;
+
+    @JsonProperty(value = "originalTom")
     private LocalDate originalTom;
+
+    @JsonProperty(value = "opptjeningFom")
     private LocalDate opptjeningFom;
+
+    @JsonProperty(value = "opptjeningTom")
     private LocalDate opptjeningTom;
+
+    @JsonProperty(value = "arbeidsgiver")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiver;
+
+    @JsonProperty(value = "arbeidsgiverNavn")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverNavn;
+
+    @JsonProperty(value = "oppdragsgiverOrg")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String oppdragsgiverOrg;
+
+    @JsonProperty(value = "arbeidsgiverIdentifikator")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverIdentifikator;
+
+    @JsonProperty(value = "privatpersonNavn")
+    @Pattern(regexp = "^[\\p{Alnum}.\\-\\p{Space}\\p{Sc}\\p{M}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String privatpersonNavn;
+
+    @JsonProperty(value = "privatpersonFødselsdato")
     private LocalDate privatpersonFødselsdato;
+
+    @JsonProperty(value = "arbeidsforholdRef")
+    @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsforholdRef;
+
+    @JsonProperty(value = "stillingsandel")
     private BigDecimal stillingsandel;
+
+    @JsonProperty(value = "naringRegistreringsdato")
     private LocalDate naringRegistreringsdato;
+
+    @JsonProperty(value = "erManueltOpprettet")
     private Boolean erManueltOpprettet;
+
+    @JsonProperty(value = "erGodkjent")
     private Boolean erGodkjent;
+
+    @JsonProperty(value = "erEndret")
     private Boolean erEndret;
+
+    @JsonProperty(value = "begrunnelse")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
+
+    @JsonProperty(value = "erPeriodeEndret")
     private Boolean erPeriodeEndret;
 
-    public OpptjeningAktivitetDto() {//NOSONAR
-        // trengs for deserialisering av JSON
+    public OpptjeningAktivitetDto() {// NOSONAR
+        //
     }
 
     public OpptjeningAktivitetDto(OpptjeningAktivitetType aktivitetType, LocalDate opptjeningFom,
-                           LocalDate opptjeningTom) {
+                                  LocalDate opptjeningTom) {
         this.aktivitetType = aktivitetType;
         this.opptjeningFom = opptjeningFom;
         this.opptjeningTom = opptjeningTom;

@@ -4,7 +4,6 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
 
 import java.util.Collections;
-import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,8 +23,6 @@ import javax.ws.rs.core.UriBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
-import no.nav.foreldrepenger.historikk.dto.HistorikkInnslagDokumentLinkDto;
-import no.nav.foreldrepenger.historikk.dto.HistorikkinnslagDto;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
@@ -57,11 +54,11 @@ public class HistorikkRestTjeneste {
         String requestURL = getRequestPath(request);
         String url = requestURL + "/dokument/hent-dokument";
 
-        List<HistorikkinnslagDto> historikkInnslagDtoList = historikkTjeneste.hentAlleHistorikkInnslagForSak(new Saksnummer(saksnummerDto.getVerdi()));
+        var historikkInnslagDtoList = historikkTjeneste.hentAlleHistorikkInnslagForSak(new Saksnummer(saksnummerDto.getVerdi()));
         if (historikkInnslagDtoList != null && historikkInnslagDtoList.size() > 0) {
             responseBuilder.entity(historikkInnslagDtoList);
-            for (HistorikkinnslagDto dto : historikkInnslagDtoList) {
-                for (HistorikkInnslagDokumentLinkDto linkDto : dto.getDokumentLinks()) {
+            for (var dto : historikkInnslagDtoList) {
+                for (var linkDto : dto.getDokumentLinks()) {
                     String journalpostId = linkDto.getJournalpostId();
                     String dokumentId = linkDto.getDokumentId();
                     UriBuilder uriBuilder = UriBuilder.fromPath(url);

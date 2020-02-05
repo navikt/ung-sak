@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.sak.kontrakt.medlem.BekreftErMedlemVurderingAksjonspunktDto;
 
 @ApplicationScoped
@@ -67,7 +67,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
             historikkAdapter.tekstBuilder().medEndretFelt(HistorikkEndretFeltType.GYLDIG_MEDLEM_FOLKETRYGDEN, originalVurdering, bekreftetVurdering);
         }
 
-        final BekreftErMedlemVurderingAksjonspunktDto adapter = new BekreftErMedlemVurderingAksjonspunktDto(bekreftet.getMedlemskapManuellVurderingType().getKode(), bekreftet.getBegrunnelse());
+        var adapter = new BekreftErMedlemVurderingAksjonspunktDto(bekreftet.getMedlemskapManuellVurderingType(), bekreftet.getBegrunnelse());
         medlemTjeneste.aksjonspunktBekreftMeldlemVurdering(behandlingId, adapter);
 
         return OppdateringResultat.utenTransisjon().medTotrinnHvis(erEndret).build();

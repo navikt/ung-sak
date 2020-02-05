@@ -1,5 +1,6 @@
-package no.nav.k9.sak.kontrakt.medlem;
+package no.nav.k9.sak.kontrakt.historikk;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -9,29 +10,40 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.historikk.HistorikkOpplysningType;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class BekreftBosattVurderingAksjonspunktDto {
+public class HistorikkinnslagOpplysningDto {
 
-    @JsonProperty(value = "bosattVurdering")
-    private Boolean bosattVurdering;
-
-    @JsonProperty(value = "begrunnelse")
+    @JsonProperty(value="opplysningType")
+    @Valid
+    private HistorikkOpplysningType opplysningType;
+    
+    @JsonProperty(value="tilVerdi")
     @Size(max = 5000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String begrunnelse;
+    private String tilVerdi;
 
-    public BekreftBosattVurderingAksjonspunktDto(Boolean bosattVurdering, String begrunnelse) {
-        this.bosattVurdering = bosattVurdering;
-        this.begrunnelse = begrunnelse;
+    public HistorikkinnslagOpplysningDto(){
     }
 
-    public String getBegrunnelse() {
-        return begrunnelse;
+    public HistorikkOpplysningType getOpplysningType() {
+        return opplysningType;
     }
 
-    public Boolean getBosattVurdering() {
-        return bosattVurdering;
+    public void setOpplysningType(HistorikkOpplysningType opplysningType) {
+        this.opplysningType = opplysningType;
     }
+
+    public String getTilVerdi() {
+        return tilVerdi;
+    }
+
+    public void setTilVerdi(String tilVerdi) {
+        this.tilVerdi = tilVerdi;
+    }
+
+   
 }

@@ -45,9 +45,9 @@ import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
+import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;

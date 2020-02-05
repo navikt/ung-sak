@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.PersonopplysningDto;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
-import no.nav.k9.sak.kontrakt.medlem.VurderingsÅrsak;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 
 public class MedlemPeriodeDto {
 

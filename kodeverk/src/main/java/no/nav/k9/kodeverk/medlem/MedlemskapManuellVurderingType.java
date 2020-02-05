@@ -1,4 +1,4 @@
-package no.nav.k9.kodeverk.medlemskap;
+package no.nav.k9.kodeverk.medlem;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

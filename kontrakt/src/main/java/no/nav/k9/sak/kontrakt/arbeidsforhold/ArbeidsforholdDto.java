@@ -4,47 +4,135 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class ArbeidsforholdDto {
 
-    //NOSONAR
+    @JsonProperty(value = "id")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String id;
+
+    @JsonProperty(value = "navn")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String navn;
+
     // For mottak fra GUI (orgnr for virksomhet, og aktørId for person-arbeidsgiver)
+    @JsonProperty(value = "arbeidsgiverIdentifikator")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverIdentifikator;
+
     // For visning i GUI (orgnr for virksomhet, og fødselsdato formatert dd.MM.yyyy for person-arbeidsgiver)
+    @JsonProperty(value = "arbeidsgiverIdentifiktorGUI")
+    @JsonAlias(value = "arbeidsgiverIdentifikatorForVisning")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverIdentifiktorGUI;
+
+    @JsonProperty(value = "arbeidsforholdId")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsforholdId;
+
+    @JsonProperty(value = "eksternArbeidsforholdId")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String eksternArbeidsforholdId;
+
+    @JsonProperty(value = "begrunnelse")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
+
+    @JsonProperty(value = "erstatterArbeidsforholdId")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String erstatterArbeidsforholdId;
 
+    @JsonProperty(value = "handlingType")
+    @NotNull
+    @Valid
     private ArbeidsforholdHandlingType handlingType;
+
+    @JsonProperty(value = "kilde")
+    @Valid
     private ArbeidsforholdKildeDto kilde;
+
+    @JsonProperty(value = "stillingsprosent")
+    @DecimalMin(value = "0.00")
+    @DecimalMax(value = "500.00")
     private BigDecimal stillingsprosent;
 
+    @JsonProperty(value = "skjaeringstidspunkt")
     private LocalDate skjaeringstidspunkt;
+
+    @JsonProperty(value = "mottattDatoInntektsmelding")
     private LocalDate mottattDatoInntektsmelding;
+
+    @JsonProperty(value = "fomDato")
     private LocalDate fomDato;
+
+    @JsonProperty(value = "tomDato")
     private LocalDate tomDato;
 
+    @JsonProperty(value = "harErstattetEttEllerFlere")
     private Boolean harErstattetEttEllerFlere;
+
+    @JsonProperty(value = "ikkeRegistrertIAaRegister")
     private Boolean ikkeRegistrertIAaRegister;
+
+    @JsonProperty(value = "tilVurdering")
     private Boolean tilVurdering;
+
+    @JsonProperty(value = "vurderOmSkalErstattes")
     private Boolean vurderOmSkalErstattes;
+
+    @JsonProperty(value = "brukArbeidsforholdet")
     private Boolean brukArbeidsforholdet;
+
+    @JsonProperty(value = "fortsetBehandlingUtenInntektsmelding")
     private Boolean fortsettBehandlingUtenInntektsmelding;
+
+    @JsonProperty(value = "erNyttArbeidsforhold")
     private Boolean erNyttArbeidsforhold;
+
+    @JsonProperty(value = "erEndret")
     private Boolean erEndret;
+
+    @JsonProperty(value = "erSlettet")
     private Boolean erSlettet;
+
+    @JsonProperty(value = "brukMedJustertPeriode")
     private boolean brukMedJustertPeriode;
+
+    @JsonProperty(value = "lagtTilAvSaksbehandler")
     private boolean lagtTilAvSaksbehandler;
+
+    @JsonProperty(value = "basertPaInntektsmelding")
     private boolean basertPaInntektsmelding;
+
+    @JsonProperty(value = "brukPermisjon")
     private Boolean brukPermisjon;
+
+    @JsonProperty(value = "inntektMedTilBeregningsgrunnlag")
     private Boolean inntektMedTilBeregningsgrunnlag;
+
+    @JsonProperty(value = "permisjoner")
+    @Valid
     private List<PermisjonDto> permisjoner;
+
+    @JsonProperty(value = "overstyrtTom")
     private LocalDate overstyrtTom;
 
     public String getNavn() {

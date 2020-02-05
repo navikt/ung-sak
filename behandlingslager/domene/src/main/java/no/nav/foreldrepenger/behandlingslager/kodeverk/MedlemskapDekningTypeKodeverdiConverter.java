@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.kodeverk;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 
 @Converter(autoApply = true)
 public class MedlemskapDekningTypeKodeverdiConverter implements AttributeConverter<MedlemskapDekningType, String> {

@@ -1,13 +1,15 @@
-package no.nav.k9.sak.kontrakt.medlem;
+package no.nav.foreldrepenger.domene.medlem;
 
 import java.util.Set;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 
 public class VurderMedlemskap {
 
-    private final Set<AksjonspunktDefinisjon> aksjonspunkter;
-    private final Set<VurderingsÅrsak> årsaker;
+    
+    private Set<AksjonspunktDefinisjon> aksjonspunkter;
+    private Set<VurderingsÅrsak> årsaker;
 
     public VurderMedlemskap(Set<AksjonspunktDefinisjon> aksjonspunkter, Set<VurderingsÅrsak> årsaker) {
         this.aksjonspunkter = aksjonspunkter;

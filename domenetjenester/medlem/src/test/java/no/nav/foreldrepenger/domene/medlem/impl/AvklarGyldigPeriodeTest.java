@@ -24,8 +24,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
+import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 

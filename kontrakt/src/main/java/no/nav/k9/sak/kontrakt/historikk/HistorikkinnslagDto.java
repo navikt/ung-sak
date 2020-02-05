@@ -1,21 +1,47 @@
-package no.nav.foreldrepenger.historikk.dto;
+package no.nav.k9.sak.kontrakt.historikk;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
+    
+    @JsonProperty(value="behandlingId")
     private Long behandlingId;
+    
+    @JsonProperty(value="type")
     private HistorikkinnslagType type;
+    
+    @JsonProperty(value="aktoer")
     private HistorikkAktør aktoer;
-    private NavBrukerKjønn kjoenn;
+    
+    @JsonProperty(value="opprettetAv")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String opprettetAv;
+    
+    @JsonProperty(value="opprettetTidspunkt")
     private LocalDateTime opprettetTidspunkt;
+    
+    @JsonProperty(value="dokumentLinks")
     private List<HistorikkInnslagDokumentLinkDto> dokumentLinks;
+    
+    @JsonProperty(value="historikkinnslagDeler")
     private List<HistorikkinnslagDelDto> historikkinnslagDeler;
 
     public Long getBehandlingId() {
@@ -66,14 +92,6 @@ public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
         this.aktoer = aktoer;
     }
 
-    public NavBrukerKjønn getKjoenn() {
-        return kjoenn;
-    }
-
-    public void setKjoenn(NavBrukerKjønn kjoenn) {
-        this.kjoenn = kjoenn;
-    }
-
     public List<HistorikkinnslagDelDto> getHistorikkinnslagDeler() {
         return historikkinnslagDeler;
     }
@@ -103,7 +121,6 @@ public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
         return Objects.equals(getBehandlingId(), that.getBehandlingId()) &&
             Objects.equals(getType(), that.getType()) &&
             Objects.equals(getAktoer(), that.getAktoer()) &&
-            Objects.equals(getKjoenn(), that.getKjoenn()) &&
             Objects.equals(getOpprettetAv(), that.getOpprettetAv()) &&
             Objects.equals(getOpprettetTidspunkt(), that.getOpprettetTidspunkt()) &&
             Objects.equals(getDokumentLinks(), that.getDokumentLinks());
@@ -111,6 +128,6 @@ public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBehandlingId(), getType(), getAktoer(), getKjoenn(), getOpprettetAv(), getOpprettetTidspunkt(), getDokumentLinks());
+        return Objects.hash(getBehandlingId(), getType(), getAktoer(), getOpprettetAv(), getOpprettetTidspunkt(), getDokumentLinks());
     }
 }

@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.behandling.medlemskap;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 public class VurdertMedlemskapBuilder {
     private VurdertMedlemskapEntitet medlemskapMal;

@@ -3,6 +3,8 @@ package no.nav.k9.sak.kontrakt.opptjening;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -17,6 +19,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 public class BekreftOpptjeningPeriodeDto {
     
     @JsonProperty(value="aktivitetType")
+    @Valid
     private OpptjeningAktivitetType aktivitetType;
     
     @JsonProperty(value="originalFom")

@@ -44,7 +44,7 @@ public class AvklarFortsattMedlemskapOppdaterer implements AksjonspunktOppdatere
         dto.getBekreftedePerioder().forEach(periode -> {
             BekreftedePerioderAdapter adapter = new BekreftedePerioderAdapter();
             if (periode.getMedlemskapManuellVurderingType() != null) {
-            adapter.setMedlemskapManuellVurderingType(periode.getMedlemskapManuellVurderingType());
+                adapter.setMedlemskapManuellVurderingType(periode.getMedlemskapManuellVurderingType());
             }
             adapter.setAksjonspunkter(periode.getAksjonspunkter());
             adapter.setBosattVurdering(periode.getBosattVurdering());

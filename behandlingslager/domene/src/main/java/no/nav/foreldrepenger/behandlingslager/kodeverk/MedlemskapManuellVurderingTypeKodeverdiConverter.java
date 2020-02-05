@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandlingslager.kodeverk;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 @Converter(autoApply = true)
 public class MedlemskapManuellVurderingTypeKodeverdiConverter implements AttributeConverter<MedlemskapManuellVurderingType, String> {

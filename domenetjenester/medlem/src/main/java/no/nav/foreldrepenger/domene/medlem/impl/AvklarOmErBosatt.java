@@ -26,7 +26,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 
 public class AvklarOmErBosatt {
     //Setter den til 364 for å unngå skuddårproblemer, (365 og 366 blir da "større" enn et år)
