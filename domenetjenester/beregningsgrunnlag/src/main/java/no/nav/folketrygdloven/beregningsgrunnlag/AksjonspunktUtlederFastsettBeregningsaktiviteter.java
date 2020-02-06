@@ -15,11 +15,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggreg
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public abstract class AksjonspunktUtlederFastsettBeregningsaktiviteter {
 

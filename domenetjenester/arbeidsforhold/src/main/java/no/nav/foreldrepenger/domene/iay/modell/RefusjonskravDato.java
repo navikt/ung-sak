@@ -1,8 +1,9 @@
 package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.time.LocalDate;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class RefusjonskravDato {
 

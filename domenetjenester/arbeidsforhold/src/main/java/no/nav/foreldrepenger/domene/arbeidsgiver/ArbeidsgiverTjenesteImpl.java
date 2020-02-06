@@ -8,11 +8,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.util.LRUCache;
 
@@ -83,7 +83,7 @@ public class ArbeidsgiverTjenesteImpl implements ArbeidsgiverTjeneste {
     @Override
     public Arbeidsgiver hentArbeidsgiver(String orgnr, String arbeidsgiverIdentifikator) {
         if (orgnr != null) {
-            return Arbeidsgiver.fra(hentVirksomhet(orgnr));
+            return fra(hentVirksomhet(orgnr));
         }
         if (arbeidsgiverIdentifikator != null) {
             return Arbeidsgiver.fra(new AktørId(arbeidsgiverIdentifikator));
@@ -91,6 +91,11 @@ public class ArbeidsgiverTjenesteImpl implements ArbeidsgiverTjeneste {
         return null;
     }
 
+    public static Arbeidsgiver fra(Virksomhet virksomhet) {
+        return Arbeidsgiver.virksomhet(virksomhet.getOrgnr());
+    }
+
+    
     private Optional<Personinfo> hentInformasjonFraTps(Arbeidsgiver arbeidsgiver) {
         try {
             return tpsTjeneste.hentBrukerForAktør(arbeidsgiver.getAktørId());

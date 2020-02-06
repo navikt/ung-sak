@@ -43,7 +43,7 @@ public class Saksnummer implements IndexKey {
     public String getVerdi() {
         return saksnummer;
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

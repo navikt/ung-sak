@@ -6,7 +6,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AndelGradering.Grader
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -15,7 +15,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.foreldrepenger.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper;
@@ -41,6 +40,7 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.RelaterteYtelserDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.UtsettelsePeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.konfig.Tid;
 

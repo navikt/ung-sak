@@ -2,9 +2,9 @@ package no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.tilfeller;
 
 import java.util.Optional;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
 
 /**
  * Interface for oppdaterere for fakta om beregning tilfeller.

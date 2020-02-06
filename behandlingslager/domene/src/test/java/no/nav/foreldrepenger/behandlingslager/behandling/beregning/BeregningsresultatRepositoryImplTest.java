@@ -16,13 +16,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
@@ -58,9 +58,9 @@ public class BeregningsresultatRepositoryImplTest {
     }
     
     @Test
-    public void lagreOgHentBeregningsresultatFPAggregat() {
+    public void lagreOgHentBeregningsresultatAggregat() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -68,46 +68,46 @@ public class BeregningsresultatRepositoryImplTest {
         // Assert
         Optional<BehandlingBeregningsresultatEntitet> brKoblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
         assertThat(brKoblingOpt).hasValueSatisfying(brKobling ->
-            assertThat(brKobling.getBgBeregningsresultatFP()).isSameAs(beregningsresultat)
+            assertThat(brKobling.getBgBeregningsresultat()).isSameAs(beregningsresultat)
         );
     }
 
     @Test
-    public void lagreOgHentUtbetBeregningsresultatFPAggregatNårUTBETIkkeEksisterer() {
+    public void lagreOgHentUtbetBeregningsresultatAggregatNårUTBETIkkeEksisterer() {
         // Arrange
-        BeregningsresultatEntitet bgBeregningsresultatFP = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
-        beregningsresultatRepository.lagre(behandling, bgBeregningsresultatFP);
+        beregningsresultatRepository.lagre(behandling, bgBeregningsresultat);
 
         // Assert
         var utbetBROpt = beregningsresultatRepository.hentUtbetBeregningsresultat(behandling.getId());
         assertThat(utbetBROpt).hasValueSatisfying(beregningsresultat ->
-            assertThat(beregningsresultat).isSameAs(bgBeregningsresultatFP)
+            assertThat(beregningsresultat).isSameAs(bgBeregningsresultat)
         );
     }
 
     @Test
-    public void lagreOgHentUtbetBeregningsresultatFPAggregatNårUTBETEksisterer() {
+    public void lagreOgHentUtbetBeregningsresultatAggregatNårUTBETEksisterer() {
         // Arrange
-        BeregningsresultatEntitet bgBeregningsresultatFP = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
-        BeregningsresultatEntitet utbetBeregningsresultatFP = buildBeregningsresultatFP(Optional.of(DAGENSDATO.plusDays(1)), false);
+        BeregningsresultatEntitet bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
 
         // Act
-        beregningsresultatRepository.lagre(behandling, bgBeregningsresultatFP);
-        beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBeregningsresultatFP);
+        beregningsresultatRepository.lagre(behandling, bgBeregningsresultat);
+        beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBeregningsresultat);
 
         // Assert
         Optional<BehandlingBeregningsresultatEntitet> brKoblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
         assertThat(brKoblingOpt).hasValueSatisfying(brKobling ->
-            assertThat(brKobling.getUtbetBeregningsresultatFP()).isSameAs(utbetBeregningsresultatFP)
+            assertThat(brKobling.getUtbetBeregningsresultat()).isSameAs(utbetBeregningsresultat)
         );
     }
 
     @Test
-    public void lagreOgHenteBeregningsresultatFP() {
+    public void lagreOgHenteBeregningsresultat() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -117,35 +117,35 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(id).isNotNull();
 
         repository.flushAndClear();
-        Optional<BeregningsresultatEntitet> beregningsresultatFPLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
 
-        assertThat(beregningsresultatFPLest).isEqualTo(Optional.of(beregningsresultat));
+        assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
     }
 
     @Test
-    public void lagreOgHenteUtbetBeregningsresultatFP() {
+    public void lagreOgHenteUtbetBeregningsresultat() {
         // Arrange
-        BeregningsresultatEntitet bgBeregningsresultatFP = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
-        BeregningsresultatEntitet utbetBeregningsresultatFP = buildBeregningsresultatFP(Optional.of(DAGENSDATO.plusDays(1)), false);
+        BeregningsresultatEntitet bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
 
         // Act
-        beregningsresultatRepository.lagre(behandling, bgBeregningsresultatFP);
-        beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBeregningsresultatFP);
+        beregningsresultatRepository.lagre(behandling, bgBeregningsresultat);
+        beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBeregningsresultat);
 
         // Assert
-        Long id = utbetBeregningsresultatFP.getId();
+        Long id = utbetBeregningsresultat.getId();
         assertThat(id).isNotNull();
 
         repository.flushAndClear();
-        Optional<BeregningsresultatEntitet> utbetBeregningsresultatFPLest = beregningsresultatRepository.hentUtbetBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> utbetBeregningsresultatLest = beregningsresultatRepository.hentUtbetBeregningsresultat(behandling.getId());
 
-        assertThat(utbetBeregningsresultatFPLest).isEqualTo(Optional.of(utbetBeregningsresultatFP));
+        assertThat(utbetBeregningsresultatLest).isEqualTo(Optional.of(utbetBeregningsresultat));
     }
 
     @Test
-    public void lagreOgHenteBeregningsresultatFPMedPrivatpersonSomArbeidsgiver() {
+    public void lagreOgHenteBeregningsresultatMedPrivatpersonSomArbeidsgiver() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), true);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), true);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -155,18 +155,18 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(id).isNotNull();
 
         repository.flushAndClear();
-        Optional<BeregningsresultatEntitet> beregningsresultatFPLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
-        assertThat(beregningsresultatFPLest).isEqualTo(Optional.of(beregningsresultat));
-        assertThat(beregningsresultatFPLest).isPresent();
-        Arbeidsgiver arbeidsgiver = beregningsresultatFPLest.get().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0).getArbeidsgiver().get();//NOSONAR
+        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
+        assertThat(beregningsresultatLest).isPresent();
+        Arbeidsgiver arbeidsgiver = beregningsresultatLest.get().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0).getArbeidsgiver().get();//NOSONAR
         assertThat(arbeidsgiver.getAktørId()).isEqualTo(aktørId);
         assertThat(arbeidsgiver.getIdentifikator()).isEqualTo(aktørId.getId());
     }
 
     @Test
-    public void lagreBeregningsresultatFPOgUnderliggendeTabellerMedEndringsdatoLikDagensDato() {
+    public void lagreBeregningsresultatOgUnderliggendeTabellerMedEndringsdatoLikDagensDato() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -180,22 +180,22 @@ public class BeregningsresultatRepositoryImplTest {
         Long brAndelId = brPeriode.getBeregningsresultatAndelList().get(0).getId();
 
         repository.flushAndClear();
-        BeregningsresultatEntitet beregningsresultatFPLest = repository.hent(BeregningsresultatEntitet.class, brId);
+        BeregningsresultatEntitet beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
         BeregningsresultatPeriode brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
         BeregningsresultatAndel brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
 
-        assertThat(beregningsresultatFPLest.getId()).isNotNull();
-        assertThat(beregningsresultatFPLest.getBeregningsresultatPerioder()).hasSize(1);
-        assertThat(beregningsresultatFPLest.getRegelInput()).isEqualTo(beregningsresultat.getRegelInput());
-        assertThat(beregningsresultatFPLest.getRegelSporing()).isEqualTo(beregningsresultat.getRegelSporing());
-        assertThat(beregningsresultatFPLest.getEndringsdato()).isEqualTo(Optional.of(DAGENSDATO));
+        assertThat(beregningsresultatLest.getId()).isNotNull();
+        assertThat(beregningsresultatLest.getBeregningsresultatPerioder()).hasSize(1);
+        assertThat(beregningsresultatLest.getRegelInput()).isEqualTo(beregningsresultat.getRegelInput());
+        assertThat(beregningsresultatLest.getRegelSporing()).isEqualTo(beregningsresultat.getRegelSporing());
+        assertThat(beregningsresultatLest.getEndringsdato()).isEqualTo(Optional.of(DAGENSDATO));
         assertBeregningsresultatPeriode(brPeriodeLest, brAndelLest, brPeriode);
     }
 
     @Test
-    public void lagreBeregningsresultatFPOgUnderliggendeTabellerMedTomEndringsdato() {
+    public void lagreBeregningsresultatOgUnderliggendeTabellerMedTomEndringsdato() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.empty(), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.empty(), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -209,22 +209,22 @@ public class BeregningsresultatRepositoryImplTest {
         Long brAndelId = brPeriode.getBeregningsresultatAndelList().get(0).getId();
 
         repository.flushAndClear();
-        BeregningsresultatEntitet beregningsresultatFPLest = repository.hent(BeregningsresultatEntitet.class, brId);
+        BeregningsresultatEntitet beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
         BeregningsresultatPeriode brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
         BeregningsresultatAndel brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
 
-        assertThat(beregningsresultatFPLest.getId()).isNotNull();
-        assertThat(beregningsresultatFPLest.getBeregningsresultatPerioder()).hasSize(1);
-        assertThat(beregningsresultatFPLest.getRegelInput()).isEqualTo(beregningsresultat.getRegelInput());
-        assertThat(beregningsresultatFPLest.getRegelSporing()).isEqualTo(beregningsresultat.getRegelSporing());
-        assertThat(beregningsresultatFPLest.getEndringsdato()).isEmpty();
+        assertThat(beregningsresultatLest.getId()).isNotNull();
+        assertThat(beregningsresultatLest.getBeregningsresultatPerioder()).hasSize(1);
+        assertThat(beregningsresultatLest.getRegelInput()).isEqualTo(beregningsresultat.getRegelInput());
+        assertThat(beregningsresultatLest.getRegelSporing()).isEqualTo(beregningsresultat.getRegelSporing());
+        assertThat(beregningsresultatLest.getEndringsdato()).isEmpty();
         assertBeregningsresultatPeriode(brPeriodeLest, brAndelLest, brPeriode);
     }
 
     @Test
-    public void lagreBeregningsresultatFPOgFeriepenger() {
+    public void lagreBeregningsresultatOgFeriepenger() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
         BeregningsresultatFeriepenger feriepenger = BeregningsresultatFeriepenger.builder()
             .medFeriepengerPeriodeFom(LocalDate.now())
             .medFeriepengerPeriodeTom(LocalDate.now())
@@ -267,27 +267,27 @@ public class BeregningsresultatRepositoryImplTest {
     }
 
     @Test
-    public void toBehandlingerKanHaSammeBeregningsresultatFP() {
+    public void toBehandlingerKanHaSammeBeregningsresultat() {
         // Arrange
         Behandling behandling2 = opprettBehandling();
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
         beregningsresultatRepository.lagre(behandling2, beregningsresultat);
 
         // Assert
-        Optional<BeregningsresultatEntitet> beregningsresultatFP1 = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
-        Optional<BeregningsresultatEntitet> beregningsresultatFP2 = beregningsresultatRepository.hentBeregningsresultat(behandling2.getId());
-        assertThat(beregningsresultatFP1).isPresent();
-        assertThat(beregningsresultatFP2).isPresent();
-        assertThat(beregningsresultatFP1).hasValueSatisfying(b -> assertThat(b).isSameAs(beregningsresultatFP2.get())); //NOSONAR
+        Optional<BeregningsresultatEntitet> beregningsresultat1 = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultat2 = beregningsresultatRepository.hentBeregningsresultat(behandling2.getId());
+        assertThat(beregningsresultat1).isPresent();
+        assertThat(beregningsresultat2).isPresent();
+        assertThat(beregningsresultat1).hasValueSatisfying(b -> assertThat(b).isSameAs(beregningsresultat2.get())); //NOSONAR
     }
 
     @Test
-    public void slettBeregningsresultatFPOgKobling() {
+    public void slettBeregningsresultatOgKobling() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultatFP(Optional.of(DAGENSDATO), false);
+        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         Optional<BehandlingBeregningsresultatEntitet> koblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
@@ -307,9 +307,9 @@ public class BeregningsresultatRepositoryImplTest {
         BeregningsresultatAndel hentetBRAndel = repoRule.getEntityManager().find(BeregningsresultatAndel.class, beregningsresultatAndel.getId());
         assertThat(hentetBRAndel).isNotNull();
 
-        Optional<BeregningsresultatEntitet> deaktivertBeregningsresultatFP = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> deaktivertBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
         Optional<BehandlingBeregningsresultatEntitet> deaktivertKobling = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
-        assertThat(deaktivertBeregningsresultatFP).isNotPresent();
+        assertThat(deaktivertBeregningsresultat).isNotPresent();
         assertThat(deaktivertKobling).isNotPresent();
         assertThat(koblingOpt).hasValueSatisfying(kobling ->
             assertThat(kobling.erAktivt()).isFalse());
@@ -335,7 +335,7 @@ public class BeregningsresultatRepositoryImplTest {
             .build(beregningsresultat);
     }
 
-    private BeregningsresultatEntitet buildBeregningsresultatFP(Optional<LocalDate> endringsdato, boolean medPrivatpersonArbeidsgiver) {
+    private BeregningsresultatEntitet buildBeregningsresultat(Optional<LocalDate> endringsdato, boolean medPrivatpersonArbeidsgiver) {
         BeregningsresultatEntitet.Builder builder = BeregningsresultatEntitet.builder()
             .medRegelInput("clob1")
             .medRegelSporing("clob2");

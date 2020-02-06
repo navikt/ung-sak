@@ -23,11 +23,13 @@ import javax.ws.rs.core.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.UnleashContext;
-import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto.FeatureToggleDto;
-import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto.FeatureToggleNavnDto;
-import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto.FeatureToggleNavnListeDto;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.toggle.FeatureToggleDto;
+import no.nav.k9.sak.kontrakt.toggle.FeatureToggleNavnDto;
+import no.nav.k9.sak.kontrakt.toggle.FeatureToggleNavnListeDto;
 import no.nav.vedtak.felles.integrasjon.unleash.strategier.ByAnsvarligSaksbehandlerStrategy;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Path("/feature-toggle")
@@ -50,7 +52,7 @@ public class FeatureToggleRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Svarer på om feature-toggles er skrudd på", tags = "feature-toggle")
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
-    public FeatureToggleDto featureToggles(@Valid @NotNull FeatureToggleNavnListeDto featureToggleNavn) {
+    public FeatureToggleDto featureToggles(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FeatureToggleNavnListeDto featureToggleNavn) {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         UnleashContext unleashContext = UnleashContext.builder()
             .addProperty(ByAnsvarligSaksbehandlerStrategy.SAKSBEHANDLER_IDENT, ident)

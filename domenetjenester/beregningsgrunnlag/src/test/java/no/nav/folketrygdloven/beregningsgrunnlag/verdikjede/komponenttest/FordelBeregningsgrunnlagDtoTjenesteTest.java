@@ -28,10 +28,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.RepositoryProvider;
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.util.BeregningsgrunnlagTestUtil;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.FordelBeregningsgrunnlagHåndterer;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.FordelRefusjonTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsatteVerdierDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBeregningsgrunnlagAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBeregningsgrunnlagPeriodeDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.RedigerbarAndelDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AktivitetGradering;
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AndelGradering;
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
@@ -64,12 +60,9 @@ import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -78,6 +71,13 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.RedigerbarAndelDto;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -545,7 +545,7 @@ public class FordelBeregningsgrunnlagDtoTjenesteTest {
 
     private Optional<FordelingDto> bekreftFordelBeregningsgrunnlag(FordelingDto fordelingDto, BeregningsgrunnlagInput input) {
         var ref = input.getBehandlingReferanse();
-        no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FordelBeregningsgrunnlagDto dto = lagOppdatererDto(fordelingDto);
+        no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto dto = lagOppdatererDto(fordelingDto);
         fordelBeregningsgrunnlagHåndterer.håndter(dto, behandlingReferanse.getId());
         Optional<BeregningsgrunnlagGrunnlagEntitet> grunnlag = beregningsgrunnlagRepository.hentBeregningsgrunnlagGrunnlagEntitet(ref.getBehandlingId());
         var newInput = input.medBeregningsgrunnlagGrunnlag(grunnlag.orElseThrow());
@@ -570,9 +570,9 @@ public class FordelBeregningsgrunnlagDtoTjenesteTest {
         assertThat(andel.getInntektskategori()).isEqualTo(FASTSATT_INNTEKTSKATEGORI);
     }
 
-    private no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FordelBeregningsgrunnlagDto lagOppdatererDto(FordelingDto fordelingDto) {
+    private no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto lagOppdatererDto(FordelingDto fordelingDto) {
         List<FastsettBeregningsgrunnlagPeriodeDto> perioder = lagFastsettBeregningsgrunnlag(fordelingDto);
-        return new no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FordelBeregningsgrunnlagDto(perioder, "begrunnelse");
+        return new no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto(perioder, "begrunnelse");
     }
 
     private List<FastsettBeregningsgrunnlagPeriodeDto> lagFastsettBeregningsgrunnlag(FordelingDto dto) {

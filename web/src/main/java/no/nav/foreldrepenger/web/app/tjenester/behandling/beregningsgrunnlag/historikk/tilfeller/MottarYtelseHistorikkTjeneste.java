@@ -8,9 +8,6 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.ArbeidstakerandelUtenIMMottarYtelseDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.MottarYtelseDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.ArbeidstakerUtenInntektsmeldingTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.VurderMottarYtelseTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
@@ -20,6 +17,9 @@ import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.ArbeidstakerandelUtenIMMottarYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.MottarYtelseDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_MOTTAR_YTELSE")

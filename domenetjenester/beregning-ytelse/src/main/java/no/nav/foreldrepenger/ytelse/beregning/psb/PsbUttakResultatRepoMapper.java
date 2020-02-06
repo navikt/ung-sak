@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.uttak.input.BeregningsgrunnlagStatusPeriode;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
@@ -23,6 +22,7 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped

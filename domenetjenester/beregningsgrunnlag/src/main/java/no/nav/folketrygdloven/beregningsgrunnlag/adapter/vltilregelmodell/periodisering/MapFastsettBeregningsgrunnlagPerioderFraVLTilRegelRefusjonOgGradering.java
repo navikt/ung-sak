@@ -24,9 +24,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.PeriodisertBruttoBe
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.SplittetPeriode;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 /** Default mapper for alle ytelser. */
 @FagsakYtelseTypeRef()

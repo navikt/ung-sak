@@ -48,7 +48,7 @@ public class JournalpostId implements Serializable, IndexKey {
     public String getIndexKey() {
         return journalpostId;
     }
-
+    
     public String getVerdi() {
         return journalpostId;
     }

@@ -5,13 +5,13 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.ArbeidstakerandelUtenIMMottarYtelseDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.MottarYtelseDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.VurderMottarYtelseTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.ArbeidstakerandelUtenIMMottarYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.MottarYtelseDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_MOTTAR_YTELSE")

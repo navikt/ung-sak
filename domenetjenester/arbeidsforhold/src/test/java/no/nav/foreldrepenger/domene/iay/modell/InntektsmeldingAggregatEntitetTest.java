@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektsmeldingAggregatEntitetTest {
 

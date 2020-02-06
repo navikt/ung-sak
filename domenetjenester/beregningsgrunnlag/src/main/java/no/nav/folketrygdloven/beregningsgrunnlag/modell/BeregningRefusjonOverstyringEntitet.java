@@ -18,7 +18,7 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @Entity(name = "BeregningRefusjonOverstyring")
 @Table(name = "BG_REFUSJON_OVERSTYRING")

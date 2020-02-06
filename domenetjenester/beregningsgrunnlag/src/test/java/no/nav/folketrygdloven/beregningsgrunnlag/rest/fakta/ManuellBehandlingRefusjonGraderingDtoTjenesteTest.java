@@ -19,8 +19,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -28,15 +28,16 @@ import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 
 public class ManuellBehandlingRefusjonGraderingDtoTjenesteTest {
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT_OPPTJENING = LocalDate.now();
     private final static String ORGNR = "123456780";
-    private static final Arbeidsgiver ARBEIDSGIVER = Arbeidsgiver.fra(new VirksomhetEntitet.Builder().medOrgnr(ORGNR).build());
+    private static final Arbeidsgiver ARBEIDSGIVER = ArbeidsgiverTjenesteImpl.fra(new VirksomhetEntitet.Builder().medOrgnr(ORGNR).build());
     private final static String ORGNR2 = "123456781";
-    private static final Arbeidsgiver ARBEIDSGIVER2 = Arbeidsgiver.fra(new VirksomhetEntitet.Builder().medOrgnr(ORGNR2).build());
+    private static final Arbeidsgiver ARBEIDSGIVER2 = ArbeidsgiverTjenesteImpl.fra(new VirksomhetEntitet.Builder().medOrgnr(ORGNR2).build());
     public static final int GRUNNBELØP = 90_000;
     private static final long ANDELSNR2 = 2L;
 

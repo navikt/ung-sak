@@ -65,7 +65,7 @@ public class HindreTilbaketrekkSteg implements BehandlingSteg {
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Mangler beregningsresultat for behandling " + behandlingId));
 
         if (aggregatTY.skalHindreTilbaketrekk().orElse(false)) {
-            BeregningsresultatEntitet revurderingTY = aggregatTY.getBgBeregningsresultatFP();
+            BeregningsresultatEntitet revurderingTY = aggregatTY.getBgBeregningsresultat();
             LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = beregningsresultatTidslinjetjeneste.lagTidslinjeForRevurdering(BehandlingReferanse.fra(behandling));
             BeregningsresultatEntitet utbetBR = hindreTilbaketrekkNårAlleredeUtbetalt.reberegn(revurderingTY, brAndelTidslinje);
 

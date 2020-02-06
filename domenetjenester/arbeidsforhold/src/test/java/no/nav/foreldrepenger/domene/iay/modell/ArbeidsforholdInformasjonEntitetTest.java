@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
-import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
-import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 
 public class ArbeidsforholdInformasjonEntitetTest {
 
@@ -16,8 +15,8 @@ public class ArbeidsforholdInformasjonEntitetTest {
     public void skal_beholde_referanse_til() {
         var virksomhet1 = new VirksomhetEntitet.Builder().medOrgnr("1234").build();
         var virksomhet2 = new VirksomhetEntitet.Builder().medOrgnr("5678").build();
-        var arbeidsgiver1 = Arbeidsgiver.fra(virksomhet1);
-        var arbeidsgiver2 = Arbeidsgiver.fra(virksomhet2);
+        var arbeidsgiver1 = ArbeidsgiverTjenesteImpl.fra(virksomhet1);
+        var arbeidsgiver2 = ArbeidsgiverTjenesteImpl.fra(virksomhet2);
         var entitet = new ArbeidsforholdInformasjon();
 
         var ref1 = EksternArbeidsforholdRef.ref("1234");

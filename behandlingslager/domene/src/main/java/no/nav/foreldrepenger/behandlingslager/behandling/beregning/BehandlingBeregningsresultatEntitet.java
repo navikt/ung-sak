@@ -36,11 +36,11 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "bg_beregningsresultat_fp_id", nullable = false, updatable = false, unique = true)
-    private BeregningsresultatEntitet bgBeregningsresultatFP;
+    private BeregningsresultatEntitet bgBeregningsresultat;
 
     @OneToOne
     @JoinColumn(name = "utbet_beregningsresultat_fp_id", updatable = false, unique = true)
-    private BeregningsresultatEntitet utbetBeregningsresultatFP;
+    private BeregningsresultatEntitet utbetBeregningsresultat;
 
     @Column(name = "hindre_tilbaketrekk")
     private Boolean skalHindreTilbaketrekk = Boolean.FALSE;
@@ -51,7 +51,7 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
 
     public BehandlingBeregningsresultatEntitet(BehandlingBeregningsresultatEntitet kladd) {
         this.behandlingId = kladd.behandlingId;
-        this.bgBeregningsresultatFP = kladd.bgBeregningsresultatFP;
+        this.bgBeregningsresultat = kladd.bgBeregningsresultat;
         this.skalHindreTilbaketrekk = kladd.skalHindreTilbaketrekk;
     }
 
@@ -59,12 +59,12 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
         return id;
     }
 
-    public BeregningsresultatEntitet getBgBeregningsresultatFP() {
-        return bgBeregningsresultatFP;
+    public BeregningsresultatEntitet getBgBeregningsresultat() {
+        return bgBeregningsresultat;
     }
 
-    public BeregningsresultatEntitet getUtbetBeregningsresultatFP() {
-        return utbetBeregningsresultatFP;
+    public BeregningsresultatEntitet getUtbetBeregningsresultat() {
+        return utbetBeregningsresultat;
     }
 
     public Optional<Boolean> skalHindreTilbaketrekk() {
@@ -84,11 +84,11 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
     }
 
     void setBgBeregningsresultatFP(BeregningsresultatEntitet bgBeregningsresultatFP) {
-        this.bgBeregningsresultatFP = bgBeregningsresultatFP;
+        this.bgBeregningsresultat = bgBeregningsresultatFP;
     }
 
     void setUtbetBeregningsresultatFP(BeregningsresultatEntitet utbetBeregningsresultatFP) {
-        this.utbetBeregningsresultatFP = utbetBeregningsresultatFP;
+        this.utbetBeregningsresultat = utbetBeregningsresultatFP;
     }
 
     void setSkalHindreTilbaketrekk(Boolean skalHindreTilbaketrekk) {

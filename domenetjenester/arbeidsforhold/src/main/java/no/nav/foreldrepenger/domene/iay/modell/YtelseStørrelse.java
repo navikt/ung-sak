@@ -6,10 +6,10 @@ import java.util.Optional;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.OrgNummer;
 
 public class YtelseStørrelse extends BaseEntitet implements IndexKey {
 

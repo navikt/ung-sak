@@ -19,10 +19,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderFaktaOmBeregningDto;
 import no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt.AvklarArbeidsforholdDto;
 import no.nav.foreldrepenger.web.app.IndexClasses;
 import no.nav.foreldrepenger.web.app.tjenester.RestImplementationClasses;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderFaktaOmBeregningDto;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 

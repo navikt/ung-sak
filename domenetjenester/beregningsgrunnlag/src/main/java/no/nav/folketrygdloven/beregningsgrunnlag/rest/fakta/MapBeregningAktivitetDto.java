@@ -5,10 +5,10 @@ import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningAktivitetDto;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 class MapBeregningAktivitetDto {
 

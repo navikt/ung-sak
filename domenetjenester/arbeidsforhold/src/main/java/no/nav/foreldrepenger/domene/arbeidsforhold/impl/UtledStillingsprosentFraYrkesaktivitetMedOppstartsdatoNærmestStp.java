@@ -10,7 +10,7 @@ import java.util.Optional;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 final class UtledStillingsprosentFraYrkesaktivitetMedOppstartsdatoNærmestStp {
 

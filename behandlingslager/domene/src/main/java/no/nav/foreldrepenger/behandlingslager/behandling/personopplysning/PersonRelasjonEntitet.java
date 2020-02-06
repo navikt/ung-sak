@@ -19,7 +19,6 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
-import no.nav.foreldrepenger.domene.typer.HarAktørId;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.typer.AktørId;

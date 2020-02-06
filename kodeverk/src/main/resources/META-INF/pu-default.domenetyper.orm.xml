@@ -8,7 +8,7 @@
 
 	<!-- mapping av domene typer til JPA (optional) -->
 
-	<embeddable class="no.nav.k9.sak.typer.Saksnummer"
+	<embeddable class="no.nav.k9.sak.typer.Saksnummer" 
 		access="FIELD">
 		<attributes>
 			<basic name="saksnummer" access="FIELD">
@@ -44,4 +44,55 @@
 		</attributes>
 	</embeddable>
 
+	<embeddable class="no.nav.k9.sak.typer.Stillingsprosent"
+		access="FIELD">
+		<attributes>
+			<basic name="verdi" access="FIELD">
+				<column name="verdi" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+	<embeddable
+		class="no.nav.k9.sak.typer.EksternArbeidsforholdRef" access="FIELD">
+		<attributes>
+			<basic name="referanse" access="FIELD">
+				<column name="arbeidsforhold_id" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+
+	<embeddable
+		class="no.nav.k9.sak.typer.InternArbeidsforholdRef" access="FIELD">
+		<attributes>
+			<basic name="referanse" access="FIELD">
+				<column name="arbeidsforhold_intern_id" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+	<embeddable class="no.nav.k9.sak.typer.OrgNummer"
+		access="FIELD">
+		<attributes>
+			<basic name="orgNummer" access="FIELD">
+				<column name="org_nummer" updatable="false" length="50" />
+			</basic>
+		</attributes>
+	</embeddable>
+
+
+	<embeddable class="no.nav.k9.sak.typer.Arbeidsgiver" access="FIELD">
+		<attributes>
+			<basic name="arbeidsgiverOrgnr" access="FIELD">
+				<column name="arbeidsgiver_orgnr" updatable="false" length="50" />
+			</basic>
+			<embedded name="arbeidsgiverAktørId" access="FIELD">
+				<attribute-override name="aktørId">
+					<column name="arbeidsgiver_aktor_id" updatable="false" length="50" />
+				</attribute-override>
+			</embedded>
+		</attributes>
+	</embeddable>
+	
 </entity-mappings>

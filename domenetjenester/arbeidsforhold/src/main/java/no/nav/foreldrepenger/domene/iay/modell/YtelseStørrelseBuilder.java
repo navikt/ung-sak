@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.math.BigDecimal;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.OrgNummer;
 
 public class YtelseStørrelseBuilder {
     private final YtelseStørrelse ytelseStørrelse;

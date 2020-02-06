@@ -59,6 +59,7 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
                     } else {
                         abac.leggTil(new MyAbac(key), resultat);
                     }
+                    erLagtTil = true;
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new IllegalStateException("Kunne ikke hente ut abac attributter fra " + obj, e);

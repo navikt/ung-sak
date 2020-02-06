@@ -15,8 +15,8 @@ import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class UttakYrkesaktiviteter {
     private UttakInput input;

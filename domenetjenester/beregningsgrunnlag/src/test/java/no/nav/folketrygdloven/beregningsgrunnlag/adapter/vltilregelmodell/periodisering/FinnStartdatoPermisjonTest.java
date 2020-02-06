@@ -10,22 +10,22 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.periodisering.FinnStartdatoPermisjon;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class FinnStartdatoPermisjonTest {
 
     private final static String ORGNR = "123456780";
-    private static final Arbeidsgiver ARBEIDSGIVER = Arbeidsgiver.fra(new VirksomhetEntitet.Builder().medOrgnr(ORGNR).build());
+    private static final Arbeidsgiver ARBEIDSGIVER = ArbeidsgiverTjenesteImpl.fra(new VirksomhetEntitet.Builder().medOrgnr(ORGNR).build());
     private InternArbeidsforholdRef ref = InternArbeidsforholdRef.nyRef();
     private LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now().minusMonths(1);
 

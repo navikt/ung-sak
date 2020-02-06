@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.domene.iay.modell.AktørYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder;
@@ -20,7 +19,6 @@ import no.nav.foreldrepenger.domene.iay.modell.YtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseStørrelseBuilder;
-import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
@@ -33,7 +31,9 @@ import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class MapAktørYtelse {
     

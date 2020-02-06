@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.domene.iay.modell;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class PermisjonBuilder {
     private final Permisjon permisjon;

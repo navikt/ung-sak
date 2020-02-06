@@ -6,12 +6,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 
@@ -22,10 +23,11 @@ import no.nav.k9.kodeverk.api.IndexKey;
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
-    
+
     @JsonValue
     @NotNull
-    @Pattern(regexp = "^\\d{13}$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 20)
+    @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String aktørId; // NOSONAR
 
     protected AktørId() {
@@ -38,7 +40,7 @@ public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
     }
 
     @JsonCreator
-    public AktørId(@NotNull @Pattern(regexp = "^\\d{13}$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String aktørId) {
+    public AktørId(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String aktørId) {
         this.aktørId = Objects.requireNonNull(aktørId, "aktørId");
     }
 

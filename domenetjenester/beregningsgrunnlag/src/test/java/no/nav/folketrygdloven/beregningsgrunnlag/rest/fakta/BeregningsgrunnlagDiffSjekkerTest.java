@@ -13,18 +13,19 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class BeregningsgrunnlagDiffSjekkerTest {
 
     public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
-    private static final Arbeidsgiver ARBEIDSGIVER1 = Arbeidsgiver.fra(new VirksomhetEntitet.Builder().medOrgnr("238201321").build());
-    private static final Arbeidsgiver ARBEIDSGIVER2 = Arbeidsgiver.fra(new VirksomhetEntitet.Builder().medOrgnr("490830958").build());
+    private static final Arbeidsgiver ARBEIDSGIVER1 = ArbeidsgiverTjenesteImpl.fra(new VirksomhetEntitet.Builder().medOrgnr("238201321").build());
+    private static final Arbeidsgiver ARBEIDSGIVER2 = ArbeidsgiverTjenesteImpl.fra(new VirksomhetEntitet.Builder().medOrgnr("490830958").build());
 
     @Test
     public void skalReturnereTrueOmUlikeAktivitetstatuser() {
