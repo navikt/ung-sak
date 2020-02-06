@@ -8,7 +8,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import io.swagger.v3.oas.annotations.Operation;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 
 /**
  * DummyRestTjeneste returnerer alltid tomt resultat. Klienten for tilbakekreving krever at det retureres en verdi,

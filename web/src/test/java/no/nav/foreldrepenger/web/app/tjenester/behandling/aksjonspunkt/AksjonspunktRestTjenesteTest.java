@@ -19,11 +19,13 @@ import org.mockito.ArgumentMatchers;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.AvklarFortsattMedlemskapDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AksjonspunktGodkjenningDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
+import no.nav.k9.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
+import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.vedtak.exception.FunksjonellException;
 
 public class AksjonspunktRestTjenesteTest {

@@ -26,9 +26,7 @@ public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
     @Size(max = 100)
     private List<AvklarOpptjeningAktivitetDto> opptjeningAktivitetList;
 
-    @SuppressWarnings("unused") // NOSONAR
-    private AvklarAktivitetsPerioderDto() {
-        super();
+    protected AvklarAktivitetsPerioderDto() {
         // For Jackson
     }
 

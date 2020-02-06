@@ -6,13 +6,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
+import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
 import no.nav.vedtak.util.InputValideringRegex;
 
-public class BestillBrevDto implements AbacDto {
+public class BestillBrevDto {
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -55,6 +53,7 @@ public class BestillBrevDto implements AbacDto {
         this(behandlingId, dokumentMalType, fritekst, null);
     }
 
+    @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;
     }
@@ -95,8 +94,4 @@ public class BestillBrevDto implements AbacDto {
         this.fritekst = fritekst;
     }
 
-    @Override
-    public AbacDataAttributter abacAttributter() {
-        return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, behandlingId);
-    }
 }

@@ -4,12 +4,11 @@ import no.nav.vedtak.sikkerhet.abac.AbacAttributtType;
 import no.nav.vedtak.sikkerhet.abac.StandardAbacAttributtType;
 
 /**
- * AbacAttributtTyper som er i bruk i FPSAK.
+ * AbacAttributtTyper som er i bruk for sporingslogg / PDP (Policy Decision Point)
  */
 public enum AppAbacAttributtType implements AbacAttributtType {
 
     DOKUMENT_ID("dokumentId"),
-    EKSISTERENDE_JOURNALPOST_ID("journalpostId", false),
     /**
      * egen-definert oppgaveId i Gsak.
      */

@@ -8,9 +8,10 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import org.jboss.resteasy.spi.HttpRequest;
@@ -27,7 +28,7 @@ public final class Redirect {
 
     public static Response tilBehandlingPollStatus(UUID behandlingUuid, Optional<String> gruppeOpt) {
         UriBuilder uriBuilder = UriBuilder.fromPath(BehandlingRestTjeneste.STATUS_PATH);
-        uriBuilder.queryParam(UuidDto.NAME, behandlingUuid);
+        uriBuilder.queryParam(BehandlingUuidDto.NAME, behandlingUuid);
         gruppeOpt.ifPresent(s -> uriBuilder.queryParam("gruppe", s));
         return Response.accepted().location(honorXForwardedProto(uriBuilder.build())).build();
     }
@@ -38,7 +39,7 @@ public final class Redirect {
 
     public static Response tilBehandlingEllerPollStatus(UUID behandlingUuid, AsyncPollingStatus status) throws URISyntaxException {
         UriBuilder uriBuilder = UriBuilder.fromPath(BehandlingRestTjeneste.BEHANDLING_PATH);
-        uriBuilder.queryParam(UuidDto.NAME, behandlingUuid);
+        uriBuilder.queryParam(BehandlingUuidDto.NAME, behandlingUuid);
         return buildResponse(status, uriBuilder.build());
     }
 

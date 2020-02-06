@@ -5,6 +5,8 @@ import no.nav.foreldrepenger.domene.risikoklassifisering.modell.Risikoklassifise
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalGruppeWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
+import no.nav.k9.sak.kontrakt.kontroll.FaresignalgruppeDto;
+import no.nav.k9.sak.kontrakt.kontroll.KontrollresultatDto;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

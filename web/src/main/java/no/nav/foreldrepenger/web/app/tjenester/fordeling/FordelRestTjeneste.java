@@ -33,10 +33,8 @@ import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.foreldrepenger.kontrakter.fordel.BehandlendeFagsystemDto;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
-import no.nav.foreldrepenger.kontrakter.fordel.JournalpostIdDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
 import no.nav.foreldrepenger.kontrakter.fordel.OpprettSakDto;
-import no.nav.foreldrepenger.kontrakter.fordel.SaksnummerDto;
 import no.nav.foreldrepenger.kontrakter.fordel.VurderFagsystemDto;
 import no.nav.foreldrepenger.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.foreldrepenger.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
@@ -46,10 +44,12 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjenest
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -97,9 +97,9 @@ public class FordelRestTjeneste {
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               JournalTjeneste journalTjeneste, FagsakTjeneste fagsakTjeneste,
-                              OpprettSakOrchestrator opprettSakOrchestrator, OpprettSakTjeneste opprettSakTjeneste, VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste,
-                              DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad
-    ) { // NOSONAR
+                              OpprettSakOrchestrator opprettSakOrchestrator, OpprettSakTjeneste opprettSakTjeneste,
+                              VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste,
+                              DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.journalTjeneste = journalTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -128,8 +128,8 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Informasjon om en fagsak", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public FagsakInfomasjonDto fagsak(@Parameter(description = "Saksnummeret det skal hentes saksinformasjon om") @Valid AbacSaksnummerDto saksnummerDto) {
-        Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummerDto.getSaksnummer()), false);
+    public FagsakInfomasjonDto fagsak(@Parameter(description = "Saksnummeret det skal hentes saksinformasjon om") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
+        Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummerDto.getVerdi()), false);
         if (!optFagsak.isPresent() || optFagsak.get().getSkalTilInfotrygd()) {
             return null;
         }
@@ -386,10 +386,6 @@ public class FordelRestTjeneste {
             super();
         }
 
-        public AbacJournalpostKnyttningDto(SaksnummerDto saksnummerDto, JournalpostIdDto journalpostIdDto) {
-            super(saksnummerDto, journalpostIdDto);
-        }
-
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett()
@@ -433,28 +429,9 @@ public class FordelRestTjeneste {
         }
     }
 
-    public static class AbacSaksnummerDto extends SaksnummerDto implements AbacDto {
-        public AbacSaksnummerDto() {
-            // for Jackson
-        }
-
-        public AbacSaksnummerDto(String saksnummer) {
-            super(saksnummer);
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
-        }
-
-    }
-
     public static class PleiepengerBarnSoknadMelding {
         @NotNull
-        @Digits(
-            integer = 18,
-            fraction = 0
-        )
+        @Digits(integer = 18, fraction = 0)
         private String journalpostId;
 
         private PleiepengerBarnSøknad soknad;

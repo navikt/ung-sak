@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -27,6 +26,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.økonomi.TilbakekrevingValgDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -49,7 +50,7 @@ public class TilbakekrevingRestTjenesteTest {
     @Test
     public void skal_hentTilbakekrevingValg_når_tilbakekrevingsvalg_finnes() {
         when(tilbakekrevingRepository.hent(Mockito.any())).thenReturn(Optional.of(TilbakekrevingValg.medMulighetForInntrekk(true, true, TilbakekrevingVidereBehandling.INNTREKK)));
-        TilbakekrevingValgDto tilbakekrevingValgDto = tilbakekrevingRestTjeneste.hentTilbakekrevingValg(new UuidDto("1098c6f4-4ae2-4794-8a23-9224675a1f99"));
+        TilbakekrevingValgDto tilbakekrevingValgDto = tilbakekrevingRestTjeneste.hentTilbakekrevingValg(new BehandlingUuidDto("1098c6f4-4ae2-4794-8a23-9224675a1f99"));
         assertThat(tilbakekrevingValgDto).isNotNull();
         assertThat(tilbakekrevingValgDto.erTilbakekrevingVilkårOppfylt()).isTrue();
     }
@@ -57,7 +58,7 @@ public class TilbakekrevingRestTjenesteTest {
     @Test
     public void skal_feil_hentTilbakekrevingValg_når_tilbakekrevingsvalg_ikke_finnes() {
         when(tilbakekrevingRepository.hent(Mockito.any())).thenReturn(Optional.empty());
-        TilbakekrevingValgDto tilbakekrevingValgDto = tilbakekrevingRestTjeneste.hentTilbakekrevingValg(new UuidDto("1098c6f4-4ae2-4794-8a23-9224675a1f99"));
+        TilbakekrevingValgDto tilbakekrevingValgDto = tilbakekrevingRestTjeneste.hentTilbakekrevingValg(new BehandlingUuidDto("1098c6f4-4ae2-4794-8a23-9224675a1f99"));
         assertThat(tilbakekrevingValgDto).isNull();
     }
 
@@ -65,7 +66,7 @@ public class TilbakekrevingRestTjenesteTest {
     public void skal_hente_varseltekst_ved_henting_av_tilbakekrevingsvalg() {
         String forventetVarselTekst = "varseltekst her";
         when(tilbakekrevingRepository.hent(Mockito.any())).thenReturn(Optional.of(TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.INNTREKK, forventetVarselTekst)));
-        TilbakekrevingValgDto tilbakekrevingValgDto = tilbakekrevingRestTjeneste.hentTilbakekrevingValg(new UuidDto("1098c6f4-4ae2-4794-8a23-9224675a1f99"));
+        TilbakekrevingValgDto tilbakekrevingValgDto = tilbakekrevingRestTjeneste.hentTilbakekrevingValg(new BehandlingUuidDto("1098c6f4-4ae2-4794-8a23-9224675a1f99"));
         assertThat(tilbakekrevingValgDto.getVarseltekst()).isEqualTo(forventetVarselTekst);
 
     }

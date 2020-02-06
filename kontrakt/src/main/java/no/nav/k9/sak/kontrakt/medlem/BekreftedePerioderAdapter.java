@@ -24,6 +24,7 @@ public class BekreftedePerioderAdapter {
     private LocalDate vurderingsdato;
 
     @JsonProperty(value = "aksjonspunkter")
+    @Size(max=100)
     private List<String> aksjonspunkter = new ArrayList<>();
 
     @JsonProperty(value = "bosattVurdering")

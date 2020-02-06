@@ -22,6 +22,10 @@ import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.SøknadDtoFeil;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.kontrakt.person.AvklartPersonstatus;
+import no.nav.k9.sak.kontrakt.person.LandkoderDto;
+import no.nav.k9.sak.kontrakt.person.PersonadresseDto;
+import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 
 @ApplicationScoped
 public class PersonopplysningDtoTjeneste {

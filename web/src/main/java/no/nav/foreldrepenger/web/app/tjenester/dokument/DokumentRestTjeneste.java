@@ -30,8 +30,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.behandling.BehandlingIdDto;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -45,17 +43,21 @@ import no.nav.foreldrepenger.dokumentarkiv.DokumentArkivTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
-import no.nav.foreldrepenger.web.app.tjenester.dokument.dto.DokumentDto;
-import no.nav.foreldrepenger.web.app.tjenester.dokument.dto.DokumentIdDto;
-import no.nav.foreldrepenger.web.app.tjenester.dokument.dto.JournalpostIdDto;
-import no.nav.foreldrepenger.web.app.tjenester.dokument.dto.MottattDokumentDto;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.dokument.DokumentDto;
+import no.nav.k9.sak.kontrakt.dokument.DokumentIdDto;
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
+import no.nav.k9.sak.kontrakt.dokument.MottattDokumentDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @ApplicationScoped
@@ -99,12 +101,22 @@ public class DokumentRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Deprecated
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid BehandlingIdDto behandlingIdDto) {
+    public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Long behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingId != null
             ? behandlingRepository.hentBehandling(behandlingId)
             : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
-        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId()).stream().map(MottattDokumentDto::new).collect(Collectors.toList());
+            
+        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .map(m -> {
+                var dto = new MottattDokumentDto();
+                dto.setMottattDato(m.getMottattDato());
+                dto.setDokumentTypeId(m.getDokumentType());
+                dto.setDokumentKategori(m.getDokumentKategori());
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
     @GET
@@ -113,7 +125,7 @@ public class DokumentRestTjeneste {
     @Operation(description = "Henter listen av mottatte dokumenter knyttet til en fagsak", tags = "dokument")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         return hentAlleMottatteDokumenterForBehandling(new BehandlingIdDto(uuidDto));
     }
 
@@ -123,7 +135,7 @@ public class DokumentRestTjeneste {
     @Operation(description = "Henter dokumentlisten knyttet til en sak", summary = ("Oversikt over alle pdf dokumenter fra dokumentarkiv registrert for saksnummer."), tags = "dokument")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Collection<DokumentDto> hentAlleDokumenterForSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid SaksnummerDto saksnummerDto) {
+    public Collection<DokumentDto> hentAlleDokumenterForSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         try {
             Saksnummer saksnummer = new Saksnummer(saksnummerDto.getVerdi());
             final Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
@@ -132,7 +144,8 @@ public class DokumentRestTjeneste {
                 return new ArrayList<>();
             }
 
-            Set<Long> åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsakId).stream().map(Behandling::getId).collect(Collectors.toSet());
+            Set<Long> åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsakId).stream().map(Behandling::getId)
+                .collect(Collectors.toSet());
 
             Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger = inntektsmeldingTjeneste
                 .hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
@@ -155,15 +168,14 @@ public class DokumentRestTjeneste {
         }
     }
 
-
     @GET
     @Path(DOKUMENT_PATH)
     @Operation(description = "Søk etter dokument på JOARK-identifikatorene journalpostId og dokumentId", summary = ("Retunerer dokument som er tilknyttet saksnummer, journalpostId og dokumentId."), tags = "dokument")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentDokument(@SuppressWarnings("unused") @NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid SaksnummerDto saksnummer,
-                                 @NotNull @QueryParam("journalpostId") @Parameter(description = "Unik identifikator av journalposten (forsendelsenivå)") @Valid JournalpostIdDto journalpostId,
-                                 @NotNull @QueryParam("dokumentId") @Parameter(description = "Unik identifikator av DokumentInfo/Dokumentbeskrivelse (dokumentnivå)") @Valid DokumentIdDto dokumentId) {
+    public Response hentDokument(@SuppressWarnings("unused") @NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
+                                 @NotNull @QueryParam("journalpostId") @Parameter(description = "Unik identifikator av journalposten (forsendelsenivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostId,
+                                 @NotNull @QueryParam("dokumentId") @Parameter(description = "Unik identifikator av DokumentInfo/Dokumentbeskrivelse (dokumentnivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) DokumentIdDto dokumentId) {
         try {
             ResponseBuilder responseBuilder = Response.ok(
                 new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(new JournalpostId(journalpostId.getJournalpostId()), dokumentId.getDokumentId())));
@@ -194,7 +206,13 @@ public class DokumentRestTjeneste {
     private DokumentDto mapFraArkivDokument(ArkivJournalPost arkivJournalPost, ArkivDokument arkivDokument,
                                             Map<JournalpostId, List<MottattDokument>> mottatteIMDokument,
                                             Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger) {
-        DokumentDto dto = new DokumentDto(arkivJournalPost, arkivDokument);
+        var dto = new DokumentDto();
+        dto.setJournalpostId(arkivJournalPost.getJournalpostId());
+        dto.setDokumentId(arkivDokument.getDokumentId());
+        dto.setTittel(arkivDokument.getTittel());
+        dto.setKommunikasjonsretning(arkivJournalPost.getKommunikasjonsretning());
+        dto.setTidspunkt(arkivJournalPost.getTidspunkt());
+
         if (DokumentTypeId.INNTEKTSMELDING.equals(arkivDokument.getDokumentType()) && mottatteIMDokument.containsKey(arkivJournalPost.getJournalpostId())) {
             List<Long> behandlinger = mottatteIMDokument.get(dto.getJournalpostId()).stream()
                 .filter(imdok -> inntektsMeldinger.containsKey(dto.getJournalpostId()))
@@ -208,7 +226,8 @@ public class DokumentRestTjeneste {
                     var t = inn.getArbeidsgiver();
                     if (t.getErVirksomhet()) {
                         Optional<Virksomhet> virksomhet = virksomhetTjeneste.hentVirksomhet(t.getOrgnr());
-                        return virksomhet.orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + t.getOrgnr())).getNavn();
+                        return virksomhet.orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + t.getOrgnr()))
+                            .getNavn();
                     } else {
                         return "Privatperson";
                     }

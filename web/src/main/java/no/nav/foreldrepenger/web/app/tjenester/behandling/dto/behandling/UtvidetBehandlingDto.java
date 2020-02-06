@@ -2,9 +2,10 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class UtvidetBehandlingDto extends BehandlingDto {

@@ -16,7 +16,6 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
@@ -25,6 +24,7 @@ import no.nav.foreldrepenger.dokumentbestiller.dto.BestillBrevDto;
 import no.nav.foreldrepenger.dokumentbestiller.dto.BrevmalDto;
 import no.nav.k9.kodeverk.dokument.DokumentMalRestriksjon;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 
 public class BrevRestTjenesteTest {
 
@@ -67,7 +67,7 @@ public class BrevRestTjenesteTest {
         when(behandlingRepository.hentBehandling(any(UUID.class))).thenReturn(behandling);
 
         // Act
-        List<BrevmalDto> brevmaler = brevRestTjeneste.hentMaler(new UuidDto(UUID.randomUUID()));
+        List<BrevmalDto> brevmaler = brevRestTjeneste.hentMaler(new BehandlingUuidDto(UUID.randomUUID()));
 
         // Assert
         verify(dokumentBehandlingTjenesteMock).hentBrevmalerFor(behandlingId);
@@ -82,7 +82,7 @@ public class BrevRestTjenesteTest {
         when(behandlingRepository.hentBehandling(any(UUID.class))).thenReturn(mock(Behandling.class));
 
         // Act
-        Boolean harSendt = brevRestTjeneste.harSendtVarselOmRevurdering(new UuidDto(UUID.randomUUID()));
+        Boolean harSendt = brevRestTjeneste.harSendtVarselOmRevurdering(new BehandlingUuidDto(UUID.randomUUID()));
 
         // Assert
         verify(dokumentBehandlingTjenesteMock).erDokumentProdusert(any(), any());

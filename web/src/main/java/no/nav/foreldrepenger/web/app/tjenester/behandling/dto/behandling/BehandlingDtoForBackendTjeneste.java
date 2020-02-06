@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -16,13 +15,14 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.AsyncPollingStatus;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 
 /**
  * Returnerer behandlingsinformasjon og lenker for en behandling.
@@ -61,7 +61,7 @@ public class BehandlingDtoForBackendTjeneste {
             dto.setAsyncStatus(asyncStatus);
         }
 
-        UuidDto uuidDto = new UuidDto(behandling.getUuid());
+        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
         dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidDto));
@@ -71,7 +71,7 @@ public class BehandlingDtoForBackendTjeneste {
         dto.leggTil(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", uuidDto));
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
-            UuidDto orginalBehandlingUuid = new UuidDto(originalBehandling.getUuid());
+            BehandlingUuidDto orginalBehandlingUuid = new BehandlingUuidDto(originalBehandling.getUuid());
             dto.leggTil(get(BehandlingBackendRestTjeneste.BEHANDLINGER_BACKEND_ROOT_PATH, "original-behandling", orginalBehandlingUuid));
         });
 

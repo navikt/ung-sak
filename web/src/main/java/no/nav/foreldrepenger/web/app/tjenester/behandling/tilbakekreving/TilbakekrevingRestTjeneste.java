@@ -20,13 +20,16 @@ import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.VarseltekstDto;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.økonomi.TilbakekrevingValgDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path(BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -61,7 +64,7 @@ public class TilbakekrevingRestTjeneste {
     @Operation(description = "Hent tilbakekrevingsvalg for behandlingen", tags = "tilbakekrevingsvalg")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path(POSTPATH_VALG)
-    public TilbakekrevingValgDto hentTilbakekrevingValg(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public TilbakekrevingValgDto hentTilbakekrevingValg(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         UUID behandlingId = uuidDto.getBehandlingUuid();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
@@ -76,7 +79,7 @@ public class TilbakekrevingRestTjeneste {
     @Operation(description = "Henter varseltekst for tilbakekreving", tags = "tilbakekrevingsvalg")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path(POSTPATH_VARSELTEKST)
-    public VarseltekstDto hentVarseltekst(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public VarseltekstDto hentVarseltekst(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
 
         Optional<TilbakekrevingValg> valgOpt = tilbakekrevingRepository.hent(behandling.getId());

@@ -12,8 +12,8 @@ import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagDelDto;
 import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagDto;
 import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagHendelseDto;

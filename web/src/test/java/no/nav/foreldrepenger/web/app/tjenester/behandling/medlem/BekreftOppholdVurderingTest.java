@@ -31,12 +31,11 @@ import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjenesteImpl;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftLovligOppholdVurderingDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftOppholdOppdaterer;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftOppholdsrettVurderingDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.medlem.aksjonspunkt.BekreftedePerioderDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.kontrakt.medlem.BekreftLovligOppholdVurderingDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftOppholdsrettVurderingDto;
+import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

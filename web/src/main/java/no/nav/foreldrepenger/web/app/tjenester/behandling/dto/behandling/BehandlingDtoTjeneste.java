@@ -19,8 +19,6 @@ import no.finn.unleash.Unleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
-import no.nav.foreldrepenger.behandling.BehandlingIdDto;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -38,16 +36,9 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.web.app.rest.ResourceLink;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.AsyncPollingStatus;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.ByttBehandlendeEnhetDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.GjenopptaBehandlingDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.HenleggBehandlingDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.ReåpneBehandlingDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.SettBehandlingPaVentDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
@@ -58,10 +49,19 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.vilkår.VilkårRestTje
 import no.nav.foreldrepenger.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
+import no.nav.k9.sak.kontrakt.behandling.GjenopptaBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.HenleggBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.vedtak.konfig.PropertyUtil;
 
 /**
@@ -108,7 +108,7 @@ public class BehandlingDtoTjeneste {
                                                   boolean erBehandlingMedGjeldendeVedtak,
                                                   SøknadRepository søknadRepository) {
         BehandlingDto dto = new BehandlingDto();
-        UuidDto uuidDto = new UuidDto(behandling.getUuid());
+        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
         BehandlingIdDto idDto = new BehandlingIdDto(behandling.getId());
         setStandardfelter(behandling, dto, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
@@ -188,7 +188,7 @@ public class BehandlingDtoTjeneste {
     }
 
     public UtvidetBehandlingDto lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(Behandling originalBehandling) {
-        UuidDto uuidDto = new UuidDto(originalBehandling.getUuid());
+        BehandlingUuidDto uuidDto = new BehandlingUuidDto(originalBehandling.getUuid());
         UtvidetBehandlingDto dto = new UtvidetBehandlingDto();
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
@@ -224,7 +224,7 @@ public class BehandlingDtoTjeneste {
         SaksnummerDto saksnummerDto = new SaksnummerDto(behandling.getFagsak().getSaksnummer());
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", saksnummerDto));
 
-        UuidDto uuidDto = new UuidDto(behandling.getUuid());
+        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
         dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidDto));
         if (!dto.isErAktivPapirsoknad()) {
             dto.leggTil(get(VilkårRestTjeneste.V2_PATH, "vilkar", uuidDto));
@@ -234,7 +234,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private UtvidetBehandlingDto utvideBehandlingDto(Behandling behandling, UtvidetBehandlingDto dto) {
-        UuidDto uuidDto = new UuidDto(behandling.getUuid());
+        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
         // mapping ved hjelp av tjenester
         dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidDto));
         dto.leggTil(get(DokumentRestTjeneste.MOTTATT_DOKUMENTER_PATH, "mottattdokument", uuidDto));
@@ -267,7 +267,7 @@ public class BehandlingDtoTjeneste {
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
-            dto.leggTil(get(BehandlingRestTjeneste.REVURDERING_ORGINAL_PATH, "original-behandling", new UuidDto(originalBehandling.getUuid())));
+            dto.leggTil(get(BehandlingRestTjeneste.REVURDERING_ORGINAL_PATH, "original-behandling", new BehandlingUuidDto(originalBehandling.getUuid())));
         });
 
         return dto;
@@ -331,7 +331,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
-        var uuidDto = new UuidDto(behandling.getUuid());
+        var uuidDto = new BehandlingUuidDto(behandling.getUuid());
         // FIXME (BehandlingIdDto): bør kunne støtte behandlingUuid også
         return tilbakekrevingRepository.hent(behandling.getId()).isPresent()
             ? Optional.of(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekrevingvalg", uuidDto))

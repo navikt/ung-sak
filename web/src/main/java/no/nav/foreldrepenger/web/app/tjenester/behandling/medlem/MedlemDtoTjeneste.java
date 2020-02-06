@@ -50,7 +50,13 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.kontrakt.medlem.EndringIPersonopplysningDto;
 import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlemskap;
+import no.nav.k9.sak.kontrakt.medlem.InntektDto;
+import no.nav.k9.sak.kontrakt.medlem.MedlemDto;
+import no.nav.k9.sak.kontrakt.medlem.MedlemPeriodeDto;
+import no.nav.k9.sak.kontrakt.medlem.MedlemV2Dto;
+import no.nav.k9.sak.kontrakt.medlem.MedlemskapPerioderDto;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
@@ -256,7 +262,7 @@ public class MedlemDtoTjeneste {
     }
 
     private MedlemPeriodeDto mapTilPeriodeDtoSkjæringstidspunkt(Long behandlingId, Optional<VurdertMedlemskap> vurdertMedlemskapOpt, LocalDate vurderingsdato, Set<VurderingsÅrsak> årsaker, Set<Aksjonspunkt> aksjonspunkter) {
-        final MedlemPeriodeDto periodeDto = new MedlemPeriodeDto();
+        var periodeDto = new MedlemPeriodeDto();
         periodeDto.setÅrsaker(årsaker);
         personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, vurderingsdato).ifPresent(periodeDto::setPersonopplysninger);
         periodeDto.setVurderingsdato(vurderingsdato);
@@ -274,21 +280,21 @@ public class MedlemDtoTjeneste {
     }
 
     private MedlemPeriodeDto mapTilPeriodeDto(Long behandlingId, Optional<VurdertMedlemskap> vurdertMedlemskapOpt, LocalDate vurderingsdato, Set<VurderingsÅrsak> årsaker) {
-        final MedlemPeriodeDto periodeDto = new MedlemPeriodeDto();
-        periodeDto.setÅrsaker(årsaker);
-        personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, vurderingsdato).ifPresent(periodeDto::setPersonopplysninger);
-        periodeDto.setVurderingsdato(vurderingsdato);
+        var dto = new MedlemPeriodeDto();
+        dto.setÅrsaker(årsaker);
+        personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, vurderingsdato).ifPresent(dto::setPersonopplysninger);
+        dto.setVurderingsdato(vurderingsdato);
 
         if (vurdertMedlemskapOpt.isPresent()) {
             final VurdertMedlemskap vurdertMedlemskap = vurdertMedlemskapOpt.get();
-            periodeDto.setBosattVurdering(vurdertMedlemskap.getBosattVurdering());
-            periodeDto.setOppholdsrettVurdering(vurdertMedlemskap.getOppholdsrettVurdering());
-            periodeDto.setLovligOppholdVurdering(vurdertMedlemskap.getLovligOppholdVurdering());
-            periodeDto.setErEosBorger(vurdertMedlemskap.getErEøsBorger());
-            periodeDto.setMedlemskapManuellVurderingType(vurdertMedlemskap.getMedlemsperiodeManuellVurdering());
-            periodeDto.setBegrunnelse(vurdertMedlemskap.getBegrunnelse());
+            dto.setBosattVurdering(vurdertMedlemskap.getBosattVurdering());
+            dto.setOppholdsrettVurdering(vurdertMedlemskap.getOppholdsrettVurdering());
+            dto.setLovligOppholdVurdering(vurdertMedlemskap.getLovligOppholdVurdering());
+            dto.setErEosBorger(vurdertMedlemskap.getErEøsBorger());
+            dto.setMedlemskapManuellVurderingType(vurdertMedlemskap.getMedlemsperiodeManuellVurdering());
+            dto.setBegrunnelse(vurdertMedlemskap.getBegrunnelse());
         }
-        return periodeDto;
+        return dto;
     }
 
     public Optional<MedlemDto> lagMedlemDto(Behandling behandling) {

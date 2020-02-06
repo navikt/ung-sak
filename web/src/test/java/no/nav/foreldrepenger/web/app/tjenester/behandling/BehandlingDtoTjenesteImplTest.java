@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
@@ -32,6 +31,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.Utvidet
 import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.foreldrepenger.web.app.util.RestUtils;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -82,7 +82,7 @@ public class BehandlingDtoTjenesteImplTest {
 
         UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
         var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);
-        var link = ResourceLink.get(href, "", new UuidDto(dto.getUuid()));
+        var link = ResourceLink.get(href, "", new BehandlingUuidDto(dto.getUuid()));
         assertThat(getLinkRel(dto)).contains("tilbakekrevingvalg");
         assertThat(getLinkHref(dto)).contains(link.getHref());
     }
@@ -93,7 +93,7 @@ public class BehandlingDtoTjenesteImplTest {
 
         UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
         var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);
-        var link = ResourceLink.get(href, "", new UuidDto(dto.getUuid()));
+        var link = ResourceLink.get(href, "", new BehandlingUuidDto(dto.getUuid()));
         assertThat(getLinkRel(dto)).doesNotContain("tilbakekrevingvalg");
         assertThat(getLinkHref(dto)).doesNotContain(link.getHref());
     }
