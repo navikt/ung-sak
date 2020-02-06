@@ -13,12 +13,12 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AktivitetTomDatoMappingDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AvklarAktiviteterDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningAktivitetDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AktivitetTomDatoMappingDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AvklarAktiviteterDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningAktivitetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
 
 @ApplicationScoped
 public class AvklarAktiviteterDtoTjeneste {

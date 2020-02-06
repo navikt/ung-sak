@@ -17,13 +17,13 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AndelMedBeløpDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.KunYtelseDto;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AndelMedBeløpDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.KunYtelseDto;
 
 @ApplicationScoped
 public class KunYtelseDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste {
@@ -77,18 +77,23 @@ public class KunYtelseDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste
         };
     }
 
-    private void settVerdier(KunYtelseDto dto, BeregningsgrunnlagEntitet beregningsgrunnlag, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
+    private void settVerdier(KunYtelseDto kunYtelseDto, BeregningsgrunnlagEntitet beregningsgrunnlag, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
         BeregningsgrunnlagPeriode periode = beregningsgrunnlag.getBeregningsgrunnlagPerioder().get(0);
         periode.getBeregningsgrunnlagPrStatusOgAndelList().forEach(andel -> {
-            AndelMedBeløpDto brukersAndel = new AndelMedBeløpDto();
-            brukersAndel.initialiserStandardAndelProperties(andel, dtoUtil, inntektArbeidYtelseGrunnlag);
-            brukersAndel.setFastsattBelopPrMnd(finnFastsattMånedsbeløp(andel));
-            dto.leggTilAndel(brukersAndel);
+            var dto = new AndelMedBeløpDto();
+            dto.setAndelsnr(andel.getAndelsnr());
+            dto.setLagtTilAvSaksbehandler(andel.getLagtTilAvSaksbehandler());
+            dto.setFastsattAvSaksbehandler(Boolean.TRUE.equals(andel.getFastsattAvSaksbehandler()));
+            dto.setAktivitetStatus(andel.getAktivitetStatus());
+            dto.setInntektskategori(andel.getInntektskategori());
+            dto.setFastsattBelopPrMnd(finnFastsattMånedsbeløp(andel));
+            dtoUtil.lagArbeidsforholdDto(andel, Optional.empty(), inntektArbeidYtelseGrunnlag)
+                .ifPresent(dto::setArbeidsforhold);
+            kunYtelseDto.leggTilAndel(dto);
         });
     }
 
     private BigDecimal finnFastsattMånedsbeløp(BeregningsgrunnlagPrStatusOgAndel andel) {
-        return andel.getBeregnetPrÅr() != null ?
-            andel.getBeregnetPrÅr().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP) : null;
+        return andel.getBeregnetPrÅr() != null ? andel.getBeregnetPrÅr().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP) : null;
     }
 }

@@ -1,9 +1,9 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.EgenNæringDto;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.EgenNæringDto;
 
 import org.junit.Test;
 

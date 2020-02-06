@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
+package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -8,8 +8,6 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagAndelDto;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 

@@ -10,10 +10,10 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelBeregningsgrunnlagPeriodeDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FordelingDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelingDto;
 
 @ApplicationScoped
 public class FordelBeregningsgrunnlagDtoTjeneste {

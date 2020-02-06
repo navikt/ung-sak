@@ -15,12 +15,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.ArbeidstakerUtenInntektsmeldingAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.VurderMottarYtelseDto;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.ArbeidstakerUtenInntektsmeldingAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderMottarYtelseDto;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped

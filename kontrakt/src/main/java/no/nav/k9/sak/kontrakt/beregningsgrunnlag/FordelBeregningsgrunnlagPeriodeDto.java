@@ -1,6 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
-
-import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
+package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.uttak.Tid;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -64,7 +64,7 @@ public class FordelBeregningsgrunnlagPeriodeDto {
     }
 
     public void setTom(LocalDate tom) {
-        if (!TIDENES_ENDE.equals(tom)) {
+        if (!Tid.TIDENES_ENDE.equals(tom)) {
             this.tom = tom;
         }
     }

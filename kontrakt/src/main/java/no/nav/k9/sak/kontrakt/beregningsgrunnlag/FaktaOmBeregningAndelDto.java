@@ -1,10 +1,9 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
+package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
@@ -19,9 +18,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta.BeregningsgrunnlagDtoUtil;
-import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
@@ -35,7 +31,8 @@ public class FaktaOmBeregningAndelDto {
     @Min(0)
     private Long andelsnr;
 
-    @JsonProperty("arbeidsforhold") @Valid
+    @JsonProperty("arbeidsforhold")
+    @Valid
     private BeregningsgrunnlagArbeidsforholdDto arbeidsforhold;
 
     @JsonProperty("inntektskategori")
@@ -150,17 +147,6 @@ public class FaktaOmBeregningAndelDto {
 
     public void leggTilAndelIArbeid(BigDecimal andelIArbeid) {
         this.andelIArbeid.add(andelIArbeid);
-    }
-
-    public void initialiserStandardAndelProperties(BeregningsgrunnlagPrStatusOgAndel andel, BeregningsgrunnlagDtoUtil dtoUtil,
-                                                   InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
-        setAndelsnr(andel.getAndelsnr());
-        dtoUtil.lagArbeidsforholdDto(andel, Optional.empty(), inntektArbeidYtelseGrunnlag)
-            .ifPresent(this::setArbeidsforhold);
-        setLagtTilAvSaksbehandler(andel.getLagtTilAvSaksbehandler());
-        setFastsattAvSaksbehandler(Boolean.TRUE.equals(andel.getFastsattAvSaksbehandler()));
-        setAktivitetStatus(andel.getAktivitetStatus());
-        setInntektskategori(andel.getInntektskategori());
     }
 
 }

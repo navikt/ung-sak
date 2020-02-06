@@ -11,10 +11,10 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningAktivitetDto;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningAktivitetDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 

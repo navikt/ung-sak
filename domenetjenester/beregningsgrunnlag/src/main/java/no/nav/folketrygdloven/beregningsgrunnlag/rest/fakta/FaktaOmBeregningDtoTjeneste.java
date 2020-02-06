@@ -14,10 +14,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggreg
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
 
 @ApplicationScoped
 public class FaktaOmBeregningDtoTjeneste {

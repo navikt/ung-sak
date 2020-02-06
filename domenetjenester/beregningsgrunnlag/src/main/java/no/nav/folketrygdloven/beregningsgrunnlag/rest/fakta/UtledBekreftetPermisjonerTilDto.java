@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.PermisjonDto;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.HentBekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.PermisjonDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

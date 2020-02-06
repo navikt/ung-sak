@@ -9,8 +9,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderMilitærDto;
 
 @ApplicationScoped

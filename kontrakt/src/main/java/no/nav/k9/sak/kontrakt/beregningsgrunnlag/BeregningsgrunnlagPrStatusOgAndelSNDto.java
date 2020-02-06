@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
+package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.math.BigDecimal;
 import java.util.List;

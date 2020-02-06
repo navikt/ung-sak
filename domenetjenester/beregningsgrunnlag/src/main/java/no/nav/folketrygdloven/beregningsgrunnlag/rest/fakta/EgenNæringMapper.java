@@ -1,7 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.EgenNæringDto;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.EgenNæringDto;
 
 public final class EgenNæringMapper {
 
