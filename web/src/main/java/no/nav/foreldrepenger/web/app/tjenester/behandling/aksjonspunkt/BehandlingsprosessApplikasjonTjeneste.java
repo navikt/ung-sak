@@ -19,12 +19,12 @@ import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.FortsettBehand
 import no.nav.foreldrepenger.domene.registerinnhenting.impl.ÅpneBehandlingForEndringerTask;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.AsyncPollingStatus;
 import no.nav.foreldrepenger.web.app.util.LdapUtil;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;

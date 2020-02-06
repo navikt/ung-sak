@@ -15,11 +15,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @DoNotCache
@@ -45,7 +47,7 @@ public class OppgaveRedirectTjeneste {
     @Operation(description = "redirect til oppgave", tags = "redirect")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
     public Response doRedirect(@QueryParam("oppgaveId") @Valid OppgaveIdDto oppgaveId,
-                               @QueryParam("sakId") @Valid SaksnummerDto saksnummerDto) {
+                               @QueryParam("sakId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         OppgaveRedirectData data = OppgaveRedirectData.hent(oppgaveBehandlingKoblingRepository, fagsakRepository, oppgaveId, saksnummerDto);
         String url = redirectFactory.lagRedirect(data);
         Response.ResponseBuilder responser = Response.temporaryRedirect(URI.create(url));

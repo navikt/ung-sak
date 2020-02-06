@@ -12,8 +12,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinns
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
-import no.nav.foreldrepenger.historikk.dto.HistorikkInnslagKonverter;
-import no.nav.foreldrepenger.historikk.dto.HistorikkinnslagDto;
+import no.nav.foreldrepenger.historikk.HistorikkInnslagKonverter;
+import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagDto;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class HistorikkInnslagKonverterTest {

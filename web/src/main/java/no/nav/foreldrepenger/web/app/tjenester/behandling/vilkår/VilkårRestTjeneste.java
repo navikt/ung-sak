@@ -24,13 +24,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.foreldrepenger.behandling.BehandlingIdDto;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,20 +60,12 @@ public class VilkårRestTjeneste {
     @GET
     @Path(PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Hent informasjon om vilkår for en behandling",
-        tags = "vilkår",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = VilkårDto.class)
-                )
-            )
-        })
+    @Operation(description = "Hent informasjon om vilkår for en behandling", tags = "vilkår", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårDto.class)))
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkår(@NotNull @QueryParam("behandlingId") @Valid BehandlingIdDto behandlingIdDto) {
+    public Response getVilkår(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Long behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingId != null
             ? behandlingRepository.hentBehandling(behandlingId)
@@ -89,21 +83,12 @@ public class VilkårRestTjeneste {
     @GET
     @Path(FULL_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Hent informasjon om vilkår for en behandling",
-        summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering)."),
-        tags = "vilkår",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = VilkårDto.class)
-                )
-            )
-        })
+    @Operation(description = "Hent informasjon om vilkår for en behandling", summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering)."), tags = "vilkår", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårDto.class)))
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkårFull(@NotNull @QueryParam("behandlingId") @Valid BehandlingIdDto behandlingIdDto) {
+    public Response getVilkårFull(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Long behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingId != null
             ? behandlingRepository.hentBehandling(behandlingId)
@@ -120,40 +105,23 @@ public class VilkårRestTjeneste {
 
     @GET
     @Path(V2_PATH)
-    @Operation(description = "Hent informasjon om vilkår for en behandling",
-        tags = "vilkår",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = VilkårDto.class)
-                )
-            )
-        })
+    @Operation(description = "Hent informasjon om vilkår for en behandling", tags = "vilkår", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårDto.class)))
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkår(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public Response getVilkår(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         return getVilkår(new BehandlingIdDto(uuidDto));
     }
 
     @GET
     @Path(FULL_V2_PATH)
-    @Operation(description = "Hent informasjon om vilkår for en behandling",
-        summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering)."),
-        tags = "vilkår",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = VilkårDto.class)
-                )
-            )
-        })
+    @Operation(description = "Hent informasjon om vilkår for en behandling", summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering)."), tags = "vilkår", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårDto.class)))
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkårFull(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public Response getVilkårFull(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         return getVilkårFull(new BehandlingIdDto(uuidDto));
     }
 

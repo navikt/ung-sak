@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.medlemskap;
 
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 public interface VurdertMedlemskap {
 

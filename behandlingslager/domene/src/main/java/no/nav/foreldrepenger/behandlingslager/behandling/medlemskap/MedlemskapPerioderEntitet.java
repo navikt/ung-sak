@@ -22,9 +22,9 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapTypeKodeverdiCo
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
+import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlem.MedlemskapType;
 
 /**
  * Entitetsklasse for medlemskap perioder.

@@ -14,6 +14,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.økonomi.VurderFeilutbetalingDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderFeilutbetalingDto.class, adapter = AksjonspunktOppdaterer.class)

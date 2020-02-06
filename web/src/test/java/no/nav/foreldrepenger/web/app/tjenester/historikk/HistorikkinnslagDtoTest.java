@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.historikk.dto.HistorikkinnslagDto;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagDto;
 
 public class HistorikkinnslagDtoTest {
     private static final LocalDateTime NOW = LocalDateTime.now();

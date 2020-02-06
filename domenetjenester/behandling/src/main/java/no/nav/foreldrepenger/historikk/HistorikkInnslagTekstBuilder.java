@@ -37,7 +37,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagMal;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;

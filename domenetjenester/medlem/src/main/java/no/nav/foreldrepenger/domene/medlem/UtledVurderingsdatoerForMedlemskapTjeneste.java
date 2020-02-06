@@ -35,8 +35,8 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.sak.kontrakt.medlem.VurderingsÅrsak;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped

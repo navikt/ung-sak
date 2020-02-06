@@ -5,44 +5,82 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FaktaBeregningLagreDto {
 
+    @JsonProperty(value = "vurderNyoppstartetFL")
     @Valid
     private VurderNyoppstartetFLDto vurderNyoppstartetFL;
+
+    @JsonProperty(value = "vurderTidsbegrensetArbeidsforhold")
     @Valid
     private VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold;
+
+    @JsonProperty(value = "vurderNyIArbeidslivet")
     @Valid
     private VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto vurderNyIArbeidslivet;
+
+    @JsonProperty(value = "fastsettMaanedsinntektFL")
     @Valid
     private FastsettMånedsinntektFLDto fastsettMaanedsinntektFL;
+
+    @JsonProperty(value = "vurdertLonnsendring")
     @Valid
     private VurderLønnsendringDto vurdertLonnsendring;
+
+    @JsonProperty(value = "fastsattUtenInntektsmelding")
     @Valid
     private FastsettMånedsinntektUtenInntektsmeldingDto fastsattUtenInntektsmelding;
+
+    @JsonProperty(value = "vurderATogFLiSammeOrganisasjon")
     @Valid
     private VurderATogFLiSammeOrganisasjonDto vurderATogFLiSammeOrganisasjon;
+
+    @JsonProperty(value = "besteberegningAndeler")
     @Valid
     private BesteberegningFødendeKvinneDto besteberegningAndeler;
+
+    @JsonProperty(value = "faktaOmBeregningTilfeller")
     @Valid
     private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller;
+
+    @JsonProperty(value = "kunYtelseFordeling")
     @Valid
     private FastsettBgKunYtelseDto kunYtelseFordeling;
+
+    @JsonProperty(value = "vurderEtterlønnSluttpakke")
     @Valid
     private VurderEtterlønnSluttpakkeDto vurderEtterlønnSluttpakke;
+
+    @JsonProperty(value = "fastsettEtterlønnSluttpakke")
     @Valid
     private FastsettEtterlønnSluttpakkeDto fastsettEtterlønnSluttpakke;
+
+    @JsonProperty(value = "mottarYtelse")
     @Valid
     private MottarYtelseDto mottarYtelse;
+
+    @JsonProperty(value = "vurderMilitaer")
     @Valid
     private VurderMilitærDto vurderMilitaer;
+
+    @JsonProperty(value = "refusjonskravGyldighet")
     @Valid
     @Size(max = 100)
     private List<RefusjonskravPrArbeidsgiverVurderingDto> refusjonskravGyldighet;
 
-    FaktaBeregningLagreDto() {
-        // For Jackson
+    protected FaktaBeregningLagreDto() {
+        //
     }
 
     public FaktaBeregningLagreDto(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
@@ -54,7 +92,8 @@ public class FaktaBeregningLagreDto {
         this.kunYtelseFordeling = kunYtelseFordeling;
     }
 
-    public FaktaBeregningLagreDto(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller, VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold) { // NOSONAR
+    public FaktaBeregningLagreDto(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller,
+                                  VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold) { // NOSONAR
         this.faktaOmBeregningTilfeller = faktaOmBeregningTilfeller;
         this.vurderTidsbegrensetArbeidsforhold = vurderTidsbegrensetArbeidsforhold;
     }

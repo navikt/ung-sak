@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktDto;
 
 class AksjonspunktDtoMapper {
 

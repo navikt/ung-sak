@@ -12,11 +12,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
-import no.nav.k9.kodeverk.api.Kodeverdi;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -81,7 +80,7 @@ public enum DokumentKategori implements Kodeverdi {
     public static void main(String[] args) {
         System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
     }
-    
+
     @JsonProperty
     @Override
     public String getKodeverk() {
@@ -93,7 +92,7 @@ public enum DokumentKategori implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
@@ -110,5 +109,5 @@ public enum DokumentKategori implements Kodeverdi {
     public static DokumentKategori finnForKodeverkEiersKode(String offisiellDokumentType) {
         return List.of(values()).stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst().orElse(UDEFINERT);
     }
-    
+
 }

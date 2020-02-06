@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapManuellVurderingTypeKodeverdiConverter;
 import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 /**
  * Entitetsklasse for løpende medlemskap.

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -18,12 +20,15 @@ import no.nav.k9.sak.typer.Periode;
 public class GraderingPeriodeDto {
 
     @JsonProperty(value = "fom", required = true)
+    @NotNull
     private LocalDate fom;
 
     @JsonProperty(value = "tom", required = true)
+    @NotNull
     private LocalDate tom;
 
     @JsonProperty(value = "arbeidsprosent", required = true)
+    @NotNull
     private BigDecimal arbeidsprosent;
 
     GraderingPeriodeDto() {

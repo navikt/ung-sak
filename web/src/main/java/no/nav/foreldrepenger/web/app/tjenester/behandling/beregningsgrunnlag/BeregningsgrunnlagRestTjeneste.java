@@ -22,8 +22,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta.BeregningsgrunnlagDtoTjeneste;
-import no.nav.foreldrepenger.behandling.BehandlingIdDto;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagInputFelles;
 import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagInputProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -31,8 +29,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 /**
  * Beregningsgrunnlag knyttet til en behandling.
@@ -74,7 +76,7 @@ public class BeregningsgrunnlagRestTjeneste {
     @Path(PATH)
     @Deprecated
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid BehandlingIdDto behandlingId) {
+    public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingId) {
         Long id = behandlingId.getBehandlingId();
         var behandling = id != null
             ? behandlingRepository.hentBehandling(id)
@@ -100,7 +102,7 @@ public class BeregningsgrunnlagRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path(PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
         final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
         if (opptjening.isEmpty()) {

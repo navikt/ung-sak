@@ -20,13 +20,15 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.foreldrepenger.domene.risikoklassifisering.modell.RisikoklassifiseringRepository;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
+import no.nav.foreldrepenger.historikk.HistorikkInnslagKonverter;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
-import no.nav.foreldrepenger.historikk.dto.HistorikkInnslagKonverter;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.kontroll.VurderFaresignalerOppdaterer;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
+import no.nav.k9.sak.kontrakt.kontroll.VurderFaresignalerDto;
 
 public class VurderFaresignalerOppdatererTest {
     @Rule

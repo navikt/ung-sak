@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapManuellVurderingTypeKodeverdiConverter;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 /**
  * Entitetsklasse for medlemskap.

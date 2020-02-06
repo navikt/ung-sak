@@ -4,7 +4,6 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
 
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,19 +33,18 @@ import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.AsyncPollingStatus;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.Redirect;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.ProsessTaskGruppeIdDto;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.app.FagsakApplikasjonTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.app.FagsakSamlingForBruker;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.FagsakDto;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.PersonDto;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SaksnummerDto;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.SokefeltDto;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @ApplicationScoped
@@ -69,35 +67,16 @@ public class FagsakRestTjeneste {
 
     @GET
     @Path(STATUS_PATH)
-    @Operation(description = "Url for å polle på fagsak mens behandlingprosessen pågår i bakgrunnen(asynkront)",
-        summary = "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /fagsak dersom asynkrone operasjoner er ferdig.",
-        tags = "fagsak",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "Returnerer Status",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = AsyncPollingStatus.class)
-                )
-            ),
-            @ApiResponse(responseCode = "303",
-                description = "Pågående prosesstasks avsluttet",
-                headers = @Header(name = HttpHeaders.LOCATION)
-            ),
-            @ApiResponse(responseCode = "418",
-                description = "ProsessTasks har feilet",
-                headers = @Header(name = HttpHeaders.LOCATION),
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = AsyncPollingStatus.class)
-                )
-            )
-        })
+    @Operation(description = "Url for å polle på fagsak mens behandlingprosessen pågår i bakgrunnen(asynkront)", summary = "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /fagsak dersom asynkrone operasjoner er ferdig.", tags = "fagsak", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
+            @ApiResponse(responseCode = "303", description = "Pågående prosesstasks avsluttet", headers = @Header(name = HttpHeaders.LOCATION)),
+            @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentFagsakMidlertidigStatus(@NotNull @QueryParam("saksnummer") @Valid SaksnummerDto idDto,
-                                                @QueryParam("gruppe") @Valid ProsessTaskGruppeIdDto gruppeDto)
-        throws URISyntaxException {
+    public Response hentFagsakMidlertidigStatus(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto idDto,
+                                                @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ProsessTaskGruppeIdDto gruppeDto)
+            throws URISyntaxException {
         Saksnummer saksnummer = new Saksnummer(idDto.getVerdi());
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
         Optional<AsyncPollingStatus> prosessTaskGruppePågår = fagsakApplikasjonTjeneste.sjekkProsessTaskPågår(saksnummer, gruppe);
@@ -107,25 +86,13 @@ public class FagsakRestTjeneste {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path(PATH)
-    @Operation(description = "Hent fagsak for saksnummer",
-        tags = "fagsak",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Returnerer fagsak",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = FagsakDto.class)
-                )
-            ),
-            @ApiResponse(
-                responseCode = "404",
-                description = "Fagsak ikke tilgjengelig"
-            )
-        })
+    @Operation(description = "Hent fagsak for saksnummer", tags = "fagsak", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer fagsak", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FagsakDto.class))),
+            @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentFagsak(@NotNull @QueryParam("saksnummer") @Valid SaksnummerDto s) {
+    public Response hentFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
 
         Saksnummer saksnummer = new Saksnummer(s.getVerdi());
         FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentFagsakForSaksnummer(saksnummer);
@@ -144,11 +111,8 @@ public class FagsakRestTjeneste {
     @POST
     @Path(SOK_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(
-        description = "Søk etter saker på saksnummer eller fødselsnummer",
-        tags = "fagsak",
-        summary = ("Spesifikke saker kan søkes via saksnummer. " +
-            "Oversikt over saker knyttet til en bruker kan søkes via fødselsnummer eller d-nummer."))
+    @Operation(description = "Søk etter saker på saksnummer eller fødselsnummer", tags = "fagsak", summary = ("Spesifikke saker kan søkes via saksnummer. " +
+        "Oversikt over saker knyttet til en bruker kan søkes via fødselsnummer eller d-nummer."))
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid SokefeltDto søkestreng) {
@@ -166,13 +130,13 @@ public class FagsakRestTjeneste {
             brukerInfo.erKvinne(), brukerInfo.getPersonstatus(), brukerInfo.getDiskresjonskode(), brukerInfo.getDødsdato());
 
         List<FagsakDto> dtoer = new ArrayList<>();
-        List<FagsakSamlingForBruker.FagsakRad> fagsakInfoer = view.getFagsakInfoer();
-        for (FagsakSamlingForBruker.FagsakRad info : fagsakInfoer) {
+        for (var info : view.getFagsakInfoer()) {
             Fagsak fagsak = info.getFagsak();
-            Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow().kanRevurderingOpprettes(fagsak);
-            LocalDate fødselsdato = info.getFødselsdato();
-            Integer antallBarn = info.getAntallBarn();
-            dtoer.add(new FagsakDto(fagsak, personDto, fødselsdato, antallBarn, kanRevurderingOpprettes, fagsak.getSkalTilInfotrygd()));
+            Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
+                .kanRevurderingOpprettes(fagsak);
+            dtoer.add(new FagsakDto(fagsak.getSaksnummer(), fagsak.getYtelseType(), fagsak.getStatus(), personDto,
+                kanRevurderingOpprettes, fagsak.getSkalTilInfotrygd(),
+                fagsak.getOpprettetTidspunkt(), fagsak.getEndretTidspunkt()));
         }
         return dtoer;
     }

@@ -19,6 +19,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.kontrakt.person.OverstyringUtenlandssakMarkeringDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyringUtenlandssakMarkeringDto.class, adapter = Overstyringshåndterer.class)

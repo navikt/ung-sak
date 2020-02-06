@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapType;
+import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;

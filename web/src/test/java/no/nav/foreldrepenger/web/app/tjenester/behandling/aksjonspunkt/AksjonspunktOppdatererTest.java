@@ -27,14 +27,15 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnRepository;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AksjonspunktGodkjenningDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.FatterVedtakAksjonspunktOppdaterer;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslaVedtakAksjonspunktDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakAksjonspunktOppdaterer;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.OpprettToTrinnsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.k9.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
+import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -64,8 +65,7 @@ public class AksjonspunktOppdatererTest {
 
         Behandling behandling = scenario.lagre(repositoryProvider);
 
-        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false) {
-        };
+        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false);
         ForeslåVedtakAksjonspunktOppdaterer foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,

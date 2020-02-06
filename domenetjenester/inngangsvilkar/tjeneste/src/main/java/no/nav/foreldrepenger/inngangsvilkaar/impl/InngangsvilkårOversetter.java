@@ -30,7 +30,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsv
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.PersonStatusType;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 

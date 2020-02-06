@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPe
 import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph.TraverseResult;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapKildeType;
+import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 
 public class TraverseEntityGraphTest {
 

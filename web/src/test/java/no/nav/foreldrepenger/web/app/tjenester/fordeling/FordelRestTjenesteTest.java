@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerPleiepengerBarnSoknad;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,13 +19,14 @@ import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.foreldrepenger.kontrakter.fordel.BehandlendeFagsystemDto;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
+import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerPleiepengerBarnSoknad;
 import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystem;
 import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjeneste;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.fordeling.FordelRestTjeneste.AbacSaksnummerDto;
 import no.nav.foreldrepenger.web.app.tjenester.fordeling.FordelRestTjeneste.AbacVurderFagsystemDto;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -109,7 +109,7 @@ public class FordelRestTjenesteTest {
         scenario.medSaksnummer(saknr);
         Behandling behandling = scenario.lagre(repositoryProvider);
         repositoryProvider.getFagsakRepository().fagsakSkalBehandlesAvInfotrygd(behandling.getFagsakId());
-        FagsakInfomasjonDto result = fordelRestTjeneste.fagsak(new AbacSaksnummerDto("1"));
+        FagsakInfomasjonDto result = fordelRestTjeneste.fagsak(new SaksnummerDto("1"));
 
         assertThat(result).isNull();
     }

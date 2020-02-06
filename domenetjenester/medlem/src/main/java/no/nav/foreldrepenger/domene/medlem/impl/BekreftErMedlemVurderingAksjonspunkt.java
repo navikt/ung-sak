@@ -6,7 +6,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRe
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
 import no.nav.k9.sak.kontrakt.medlem.BekreftErMedlemVurderingAksjonspunktDto;
 
 public class BekreftErMedlemVurderingAksjonspunkt {
@@ -19,11 +18,11 @@ public class BekreftErMedlemVurderingAksjonspunkt {
 
     public void oppdater(Long behandlingId, BekreftErMedlemVurderingAksjonspunktDto adapter) {
 
-        MedlemskapManuellVurderingType medlemskapManuellVurderingType = MedlemskapManuellVurderingType.fraKode(adapter.getManuellVurderingTypeKode());
+        var medlemskapManuellVurderingType = adapter.getManuellVurderingTypeKode();
 
         Optional<VurdertMedlemskap> vurdertMedlemskap = medlemskapRepository.hentVurdertMedlemskap(behandlingId);
 
-        VurdertMedlemskap nytt = new VurdertMedlemskapBuilder(vurdertMedlemskap)
+        var nytt = new VurdertMedlemskapBuilder(vurdertMedlemskap)
             .medMedlemsperiodeManuellVurdering(medlemskapManuellVurderingType)
             .medBegrunnelse(adapter.getBegrunnelse())
             .build();

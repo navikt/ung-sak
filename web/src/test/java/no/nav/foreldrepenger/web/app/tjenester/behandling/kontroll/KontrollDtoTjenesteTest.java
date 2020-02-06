@@ -7,6 +7,7 @@ import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.FaresignalWrap
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
+import no.nav.k9.sak.kontrakt.kontroll.KontrollresultatDto;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 
 import org.junit.Before;

@@ -21,12 +21,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.foreldrepenger.behandling.UuidDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.BehandlingsprosessApplikasjonTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.AsyncPollingStatus;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.BehandlingDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.BehandlingDtoForBackendTjeneste;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
@@ -54,18 +56,14 @@ public class BehandlingBackendRestTjeneste {
 
     @GET
     @Path(BEHANDLINGER_BACKEND_ROOT_PATH)
-    @Operation(description = "Hent behandling gitt id for backend",
-        summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."),
-        tags = "behandlinger",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer behandling",
-                content = {
+    @Operation(description = "Hent behandling gitt id for backend", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer behandling", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BehandlingDto.class))
-                }),
-        })
+            }),
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentBehandlingResultatForBackend(@NotNull @QueryParam(UuidDto.NAME) @Parameter(description = UuidDto.DESC) @Valid UuidDto uuidDto) {
+    public Response hentBehandlingResultatForBackend(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         var behandling = behandlingsprosessTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
         AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
         BehandlingDto dto = behandlingDtoForBackendTjeneste.lagBehandlingDto(behandling, taskStatus);

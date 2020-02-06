@@ -29,10 +29,14 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.web.app.exceptions.FeilDto;
 import no.nav.foreldrepenger.web.app.exceptions.FeilType;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.FagsakDto;
-import no.nav.foreldrepenger.web.app.tjenester.fagsak.dto.PersonDto;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
+import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
+import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
@@ -54,25 +58,18 @@ public class AktoerRestTjeneste {
     }
 
     @GET
-    @Operation(description = "Henter informasjon om en aktøer",
-        tags = "aktoer",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i fpsak.",
-                content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = AktoerInfoDto.class)
-                )
-            )
-        })
+    @Operation(description = "Henter informasjon om en aktøer", tags = "aktoer", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i fpsak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
+    })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path("/aktoer-info")
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid AktoerIdDto aktoerIdDto) {
-        Optional<AktørId> aktoerId = aktoerIdDto.get();
-        AktoerInfoDto aktoerInfoDto = new AktoerInfoDto();
-        if (aktoerId.isPresent()) {
-            Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(aktoerId.get());
+    public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktoerIdDto) {
+        var aktoerId = aktoerIdDto.getAktørId();
+        AktørInfoDto aktoerInfoDto = new AktørInfoDto();
+        if (aktoerId != null) {
+            AktørId aktørId = new AktørId(aktoerId);
+            Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(aktørId);
             if (personinfo.isPresent()) {
                 Personinfo pi = personinfo.get();
                 PersonDto personDto = new PersonDto(
@@ -82,20 +79,15 @@ public class AktoerRestTjeneste {
                     pi.erKvinne(),
                     pi.getPersonstatus(),
                     pi.getDiskresjonskode(),
-                    pi.getDødsdato()
-                );
+                    pi.getDødsdato());
                 aktoerInfoDto.setPerson(personDto);
                 aktoerInfoDto.setAktoerId(pi.getAktørId().getId());
                 List<FagsakDto> fagsakDtoer = new ArrayList<>();
-                List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktoerId.get());
-                for (Fagsak fagsak : fagsaker) {
-                    fagsakDtoer.add(new FagsakDto(
-                        fagsak,
-                        null,
-                        null,
-                        null,
-                        null,
-                        fagsak.getSkalTilInfotrygd()));
+                List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
+                for (var f : fagsaker) {
+                    fagsakDtoer.add(new FagsakDto(f.getSaksnummer(), f.getYtelseType(), f.getStatus(), personDto,
+                        null, f.getSkalTilInfotrygd(),
+                        f.getOpprettetTidspunkt(), f.getEndretTidspunkt()));
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);
                 return Response.ok(aktoerInfoDto).build();

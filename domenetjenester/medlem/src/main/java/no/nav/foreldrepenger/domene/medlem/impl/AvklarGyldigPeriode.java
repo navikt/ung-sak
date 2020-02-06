@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAg
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
-import no.nav.k9.kodeverk.medlemskap.MedlemskapDekningType;
+import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 
 public class AvklarGyldigPeriode {
 

@@ -1,13 +1,27 @@
 package no.nav.k9.sak.kontrakt.opptjening;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class OpptjeningPeriodeDto {
 
     @JsonProperty(value = "måneder")
+    @Min(value = 0)
+    @Max(value = 12 * 3)
     private int måneder;
 
     @JsonProperty(value = "dager")
+    @Min(value = 0)
+    @Max(value = 31)
     private int dager;
 
     public OpptjeningPeriodeDto() {

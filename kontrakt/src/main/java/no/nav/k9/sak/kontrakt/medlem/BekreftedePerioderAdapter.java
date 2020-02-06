@@ -4,19 +4,53 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.k9.kodeverk.medlemskap.MedlemskapManuellVurderingType;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BekreftedePerioderAdapter {
 
+    @JsonProperty(value = "vurderingdato")
     private LocalDate vurderingsdato;
+
+    @JsonProperty(value = "aksjonspunkter")
+    @Size(max=100)
     private List<String> aksjonspunkter = new ArrayList<>();
+
+    @JsonProperty(value = "bosattVurdering")
     private Boolean bosattVurdering;
+
+    @JsonProperty(value = "erEosBorger")
     private Boolean erEosBorger;
+
+    @JsonProperty(value = "oppholdsrettVurdering")
     private Boolean oppholdsrettVurdering;
+
+    @JsonProperty(value = "lovligOppholdVurdering")
     private Boolean lovligOppholdVurdering;
+
+    @JsonProperty(value = "fodselsdato")
     private LocalDate fodselsdato;
+
+    @JsonProperty(value = "medlemskapManuellVurderingType")
     private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
-    private String omsorgsovertakelseDato;
+
+    @JsonProperty(value = "omsorgsovertakelseDato")
+    private LocalDate omsorgsovertakelseDato;
+
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 5000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
     public BekreftedePerioderAdapter() {
@@ -86,11 +120,11 @@ public class BekreftedePerioderAdapter {
         this.medlemskapManuellVurderingType = medlemskapManuellVurderingType;
     }
 
-    public String getOmsorgsovertakelseDato() {
+    public LocalDate getOmsorgsovertakelseDato() {
         return omsorgsovertakelseDato;
     }
 
-    public void setOmsorgsovertakelseDato(String omsorgsovertakelseDato) {
+    public void setOmsorgsovertakelseDato(LocalDate omsorgsovertakelseDato) {
         this.omsorgsovertakelseDato = omsorgsovertakelseDato;
     }
 

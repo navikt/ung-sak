@@ -20,6 +20,7 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.BehandlingUuidDto;
 import no.nav.foreldrepenger.kontrakter.formidling.v1.TekstFraSaksbehandlerDto;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
