@@ -58,6 +58,15 @@ public class Legeerklæringer extends BaseEntitet {
         return legeerklæringer;
     }
 
+    public void leggTilLegeerklæring(Legeerklæring legeerklæring) {
+        if (id != null) {
+            throw new IllegalStateException("Utvikler feil: Kan ikke manipulere persistert parent entitet");
+        } else {
+            legeerklæringer.removeIf(it -> it.getUuid().equals(legeerklæring.getUuid()));
+            legeerklæringer.add(legeerklæring);
+        }
+    }
+
     @Override
     public String toString() {
         return "Legeerklæringer{" +
