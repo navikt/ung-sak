@@ -8,7 +8,7 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderVarigEndringEllerNyoppstartetSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDto;
 
 @ApplicationScoped
 public class VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste {

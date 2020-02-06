@@ -11,18 +11,18 @@ import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelATDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelFLDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelSNDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelYtelseDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.EgenNæringDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.PgiDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittEgenNæring;
 import no.nav.foreldrepenger.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAndelATDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAndelFLDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAndelSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAndelYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.EgenNæringDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.PgiDto;
 
 class LagTilpassetDtoTjeneste  {
 

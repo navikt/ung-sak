@@ -24,15 +24,15 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPeriodeDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.BeregningsgrunnlagPrStatusOgAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.SammenligningsgrunnlagDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.SammenligningsgrunnlagDto;
 import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
@@ -157,7 +157,7 @@ public class BeregningsgrunnlagDtoTjeneste {
         var beregningsgrunnlag = input.getBeregningsgrunnlag();
         Beløp grunnbeløp = Optional.ofNullable(beregningsgrunnlag.getGrunnbeløp()).orElse(Beløp.ZERO);
         long seksG = Math.round(grunnbeløp.getVerdi().multiply(BigDecimal.valueOf(6)).doubleValue());
-        double halvG = grunnbeløp.getVerdi().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP).doubleValue();
+        BigDecimal halvG = grunnbeløp.getVerdi().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
         dto.setHalvG(halvG);
         dto.setGrunnbeløp(grunnbeløp.getVerdi());
         dto.setHjemmel(beregningsgrunnlag.getHjemmel());

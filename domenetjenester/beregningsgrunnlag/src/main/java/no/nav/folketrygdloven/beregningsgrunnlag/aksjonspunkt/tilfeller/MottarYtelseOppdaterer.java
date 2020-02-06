@@ -9,9 +9,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.VurderMottarYte
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.ArbeidstakerandelUtenIMMottarYtelseDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.MottarYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.ArbeidstakerandelUtenIMMottarYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.MottarYtelseDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_MOTTAR_YTELSE")

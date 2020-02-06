@@ -26,10 +26,10 @@ import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettMånedsinntektUtenInntektsmeldingAndelDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettMånedsinntektUtenInntektsmeldingDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettMånedsinntektUtenInntektsmeldingAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettMånedsinntektUtenInntektsmeldingDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class FastsettMånedsinntektUtenInntektsmeldingOppdatererTest {

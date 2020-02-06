@@ -23,9 +23,9 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteAndelerTidsbegrensetDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsattePerioderTidsbegrensetDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBGTidsbegrensetArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteAndelerTidsbegrensetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsattePerioderTidsbegrensetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
 
 @ApplicationScoped
 public class FastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste {

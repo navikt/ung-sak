@@ -15,10 +15,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningRefusjonOversty
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.refusjon.InntektsmeldingMedRefusjonTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.RefusjonskravSomKommerForSentDto;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.RefusjonskravSomKommerForSentDto;
 
 @ApplicationScoped
 class VurderRefusjonTilfelleDtoTjeneste implements FaktaOmBeregningTilfelleDtoTjeneste {

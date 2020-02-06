@@ -26,16 +26,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggreg
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.ATogFLISammeOrganisasjonDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AktivitetTomDatoMappingDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AndelMedBeløpDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.AvklarAktiviteterDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.FaktaOmBeregningDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.KortvarigeArbeidsforholdDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.KunYtelseDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.TilstøtendeYtelseAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.dto.VurderBesteberegningDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -43,6 +33,16 @@ import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.ATogFLISammeOrganisasjonDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AktivitetTomDatoMappingDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AndelMedBeløpDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AvklarAktiviteterDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.KortvarigeArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.KunYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.TilstøtendeYtelseAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderBesteberegningDto;
 
 @SuppressWarnings("unchecked")
 public class FaktaOmBeregningDtoTjenesteImplTest {

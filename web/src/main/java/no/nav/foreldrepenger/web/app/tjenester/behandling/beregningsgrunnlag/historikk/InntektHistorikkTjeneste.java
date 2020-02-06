@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.Lønnsendring;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.Lønnsendring;
 
 @ApplicationScoped
 public class InntektHistorikkTjeneste {
