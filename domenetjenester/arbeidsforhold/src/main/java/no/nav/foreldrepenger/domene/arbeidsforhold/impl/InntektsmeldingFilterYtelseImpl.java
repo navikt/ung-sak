@@ -14,11 +14,11 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped

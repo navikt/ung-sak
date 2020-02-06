@@ -5,11 +5,11 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.util.BeregningsgrunnlagUtil;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.ReferanseType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @ApplicationScoped
 public class MapBeregningsresultatFraRegelTilVL {

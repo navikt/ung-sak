@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
 import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.AktørArbeid;
@@ -25,8 +23,6 @@ import no.nav.foreldrepenger.domene.iay.modell.PermisjonBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder;
-import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.abakus.iaygrunnlag.Aktør;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
@@ -39,6 +35,10 @@ import no.nav.abakus.iaygrunnlag.arbeid.v1.PermisjonDto;
 import no.nav.abakus.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.OrgNummer;
 
 public class MapAktørArbeid {
 

@@ -10,13 +10,13 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.Inntekt;
 import no.nav.foreldrepenger.domene.iay.modell.InntektBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektspostBuilder;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.ErInntektNærSkjæringstidspunkt;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class ErInntektNærSkjæringstidspunktTest {
 

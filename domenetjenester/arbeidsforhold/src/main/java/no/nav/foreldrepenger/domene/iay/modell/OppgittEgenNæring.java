@@ -6,10 +6,10 @@ import java.util.Objects;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
+import no.nav.k9.sak.typer.OrgNummer;
 
 public class OppgittEgenNæring implements IndexKey {
 

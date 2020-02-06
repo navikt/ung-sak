@@ -16,9 +16,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.RepositoryProvider;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsattBrukersAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBgKunYtelseDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
@@ -27,6 +24,9 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsattBrukersAndel;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBgKunYtelseDto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class FastsettBgKunYtelseOppdatererTest {

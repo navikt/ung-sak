@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.util.Tuple;
 
 public class ArbeidsforholdInformasjonBuilder {

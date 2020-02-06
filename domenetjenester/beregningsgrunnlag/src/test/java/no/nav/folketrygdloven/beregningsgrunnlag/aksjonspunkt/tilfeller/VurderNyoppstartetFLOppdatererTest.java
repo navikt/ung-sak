@@ -8,8 +8,7 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderNyoppstartetFLDto;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.tilfeller.VurderNyoppstartetFLOppdaterer;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
@@ -17,6 +16,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderNyoppstartetFLDto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class VurderNyoppstartetFLOppdatererTest {

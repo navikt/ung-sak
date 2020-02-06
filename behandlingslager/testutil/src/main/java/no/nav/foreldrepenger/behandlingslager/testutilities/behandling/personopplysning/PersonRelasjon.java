@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopplysning;
 
-import no.nav.foreldrepenger.domene.typer.HarAktørId;
+import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.HarAktørId;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.typer.AktørId;
 

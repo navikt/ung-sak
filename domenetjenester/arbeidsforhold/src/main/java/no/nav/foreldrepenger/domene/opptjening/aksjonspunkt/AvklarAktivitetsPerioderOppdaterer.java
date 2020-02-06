@@ -19,8 +19,6 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrganisasjonsNummerValidator;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
@@ -41,6 +39,8 @@ import no.nav.k9.sak.kontrakt.opptjening.AvklarAktivitetsPerioderDto;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningAktivitetDto;
 import no.nav.k9.sak.kontrakt.opptjening.BekreftOpptjeningPeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped

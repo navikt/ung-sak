@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class AktivitetsAvtaleBuilder {
     private final AktivitetsAvtale aktivitetsAvtale;

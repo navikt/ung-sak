@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -37,7 +38,8 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
 
     @JsonValue
     @NotNull
-    @Pattern(regexp = "^\\d{11}+$", message = "ident '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 20)
+    @Pattern(regexp = "^\\d+$", message = "ident '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String ident;
 
     PersonIdent() {
@@ -45,7 +47,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
     }
 
     @JsonCreator
-    public PersonIdent(@NotNull @Pattern(regexp = "^\\d{11}+$", message = "ident '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String ident) {
+    public PersonIdent(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "ident '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String ident) {
         Objects.requireNonNull(ident, "ident kan ikke være null");
         this.ident = ident;
     }

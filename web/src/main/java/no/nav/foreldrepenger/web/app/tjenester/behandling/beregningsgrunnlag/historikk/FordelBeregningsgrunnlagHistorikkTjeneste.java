@@ -8,18 +8,11 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsatteVerdierDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBeregningsgrunnlagAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettBeregningsgrunnlagPeriodeDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FordelBeregningsgrunnlagDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.tilfeller.Lønnsendring;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDel;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
@@ -27,7 +20,14 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.Lønnsendring;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.OrgNummer;
 
 @ApplicationScoped
 public class FordelBeregningsgrunnlagHistorikkTjeneste {

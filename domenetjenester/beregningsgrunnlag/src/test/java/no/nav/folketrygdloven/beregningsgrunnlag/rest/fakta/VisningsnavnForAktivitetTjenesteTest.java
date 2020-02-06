@@ -19,17 +19,18 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.OrgNummer;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
+import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.OrgNummer;
 
 public class VisningsnavnForAktivitetTjenesteTest {
 
@@ -84,7 +85,7 @@ public class VisningsnavnForAktivitetTjenesteTest {
         // Arrange
         when(arbeidsgiverTjeneste.hentVirksomhet(ORGNR)).thenReturn(VIRKSOMHETEN);
         BeregningsgrunnlagPrStatusOgAndel andel = BeregningsgrunnlagPrStatusOgAndel.builder()
-            .medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(Arbeidsgiver.fra(VIRKSOMHETEN)))
+            .medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(ArbeidsgiverTjenesteImpl.fra(VIRKSOMHETEN)))
             .medArbforholdType(OpptjeningAktivitetType.ARBEID)
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .build(periode);
@@ -101,7 +102,7 @@ public class VisningsnavnForAktivitetTjenesteTest {
         // Arrange
         when(arbeidsgiverTjeneste.hentVirksomhet(ORGNR)).thenReturn(VIRKSOMHETEN);
         BeregningsgrunnlagPrStatusOgAndel andel = BeregningsgrunnlagPrStatusOgAndel.builder()
-            .medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(Arbeidsgiver.fra(VIRKSOMHETEN))
+            .medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(ArbeidsgiverTjenesteImpl.fra(VIRKSOMHETEN))
                 .medArbeidsforholdRef("123-234-345-456-6556"))
             .medArbforholdType(OpptjeningAktivitetType.ARBEID)
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
@@ -120,7 +121,7 @@ public class VisningsnavnForAktivitetTjenesteTest {
         // Arrange
         when(arbeidsgiverTjeneste.hentVirksomhet(OrgNummer.KUNSTIG_ORG)).thenReturn(KUNSTIG_VIRKSOMHET);
         BeregningsgrunnlagPrStatusOgAndel andel = BeregningsgrunnlagPrStatusOgAndel.builder()
-            .medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(Arbeidsgiver.fra(KUNSTIG_VIRKSOMHET)))
+            .medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(ArbeidsgiverTjenesteImpl.fra(KUNSTIG_VIRKSOMHET)))
             .medArbforholdType(OpptjeningAktivitetType.ARBEID)
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .build(periode);
@@ -136,7 +137,7 @@ public class VisningsnavnForAktivitetTjenesteTest {
         InntektArbeidYtelseGrunnlag iayGrunnlag = mock(InntektArbeidYtelseGrunnlag.class);
         ArbeidsforholdOverstyring overstyring = mock(ArbeidsforholdOverstyring.class);
         when(overstyring.getArbeidsgiverNavn()).thenReturn(KUNSTIG_VIRKSOMHET_NAVN);
-        when(overstyring.getArbeidsgiver()).thenReturn(Arbeidsgiver.fra(KUNSTIG_VIRKSOMHET));
+        when(overstyring.getArbeidsgiver()).thenReturn(ArbeidsgiverTjenesteImpl.fra(KUNSTIG_VIRKSOMHET));
         when(iayGrunnlag.getArbeidsforholdOverstyringer()).thenReturn(List.of(overstyring));
         return iayGrunnlag;
     }

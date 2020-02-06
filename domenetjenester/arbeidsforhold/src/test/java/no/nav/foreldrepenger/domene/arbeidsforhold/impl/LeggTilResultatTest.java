@@ -9,8 +9,8 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class LeggTilResultatTest {
 

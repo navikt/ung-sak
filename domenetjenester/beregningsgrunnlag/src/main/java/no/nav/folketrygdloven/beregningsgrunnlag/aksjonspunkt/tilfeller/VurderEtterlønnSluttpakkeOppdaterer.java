@@ -8,12 +8,12 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderEtterlønnSluttpakkeDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderEtterlønnSluttpakkeDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_ETTERLØNN_SLUTTPAKKE")

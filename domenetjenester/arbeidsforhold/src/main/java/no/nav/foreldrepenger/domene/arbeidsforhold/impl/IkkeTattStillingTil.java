@@ -2,10 +2,10 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.impl;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class IkkeTattStillingTil {
     private IkkeTattStillingTil() {

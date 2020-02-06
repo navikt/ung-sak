@@ -17,16 +17,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.RepositoryProvider;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderFaktaOmBeregningDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderTidsbegrensetArbeidsforholdDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderteArbeidsforholdDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -34,6 +29,11 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderFaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderTidsbegrensetArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderteArbeidsforholdDto;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

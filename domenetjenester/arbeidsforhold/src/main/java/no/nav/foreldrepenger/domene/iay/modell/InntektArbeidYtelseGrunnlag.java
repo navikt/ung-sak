@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
-import no.nav.foreldrepenger.domene.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 
 public class InntektArbeidYtelseGrunnlag {
 

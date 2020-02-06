@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektBuilder {
     private final boolean oppdaterer;

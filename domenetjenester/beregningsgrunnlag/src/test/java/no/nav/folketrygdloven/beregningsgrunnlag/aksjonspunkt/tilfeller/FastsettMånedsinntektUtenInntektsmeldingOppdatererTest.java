@@ -14,16 +14,11 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsatteVerdierDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettMånedsinntektUtenInntektsmeldingAndelDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FastsettMånedsinntektUtenInntektsmeldingDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Arbeidsgiver;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
@@ -31,6 +26,11 @@ import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettMånedsinntektUtenInntektsmeldingAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettMånedsinntektUtenInntektsmeldingDto;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class FastsettMånedsinntektUtenInntektsmeldingOppdatererTest {
 

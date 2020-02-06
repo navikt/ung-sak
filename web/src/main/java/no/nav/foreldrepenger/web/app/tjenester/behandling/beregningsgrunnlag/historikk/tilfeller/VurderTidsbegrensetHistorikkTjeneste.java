@@ -8,9 +8,6 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.FaktaBeregningLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderTidsbegrensetArbeidsforholdDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.VurderteArbeidsforholdDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
@@ -20,6 +17,9 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderTidsbegrensetArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderteArbeidsforholdDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD")

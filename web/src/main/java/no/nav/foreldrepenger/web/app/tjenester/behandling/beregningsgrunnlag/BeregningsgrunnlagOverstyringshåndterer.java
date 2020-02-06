@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.BeregningFaktaOgOverstyringHåndterer;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.OverstyrBeregningsgrunnlagDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
@@ -23,6 +22,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.his
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.OverstyrBeregningsgrunnlagDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrBeregningsgrunnlagDto.class, adapter = Overstyringshåndterer.class)

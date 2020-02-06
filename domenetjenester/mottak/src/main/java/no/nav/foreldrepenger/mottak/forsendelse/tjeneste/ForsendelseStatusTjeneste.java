@@ -11,10 +11,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
-import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseIdDto;
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatus;
 import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatusDataDTO;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.sak.kontrakt.mottak.ForsendelseIdDto;
 
 @ApplicationScoped
 public class ForsendelseStatusTjeneste {

@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.domene.iay.modell;
 
 import java.math.BigDecimal;
 
-import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class YtelseAnvistBuilder {
     private final YtelseAnvist ytelseAnvist;

@@ -7,10 +7,10 @@ import java.util.Optional;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.domene.typer.Stillingsprosent;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class YtelseAnvist extends BaseEntitet implements IndexKey {
 

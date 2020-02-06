@@ -5,9 +5,6 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.AvklarteAktiviteterDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.BeregningsaktivitetLagreDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.dto.OverstyrBeregningsaktiviteterDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyringEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyringerEntitet;
@@ -15,10 +12,13 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.foreldrepenger.domene.typer.InternArbeidsforholdRef;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.AvklarteAktiviteterDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsaktivitetLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.OverstyrBeregningsaktiviteterDto;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ApplicationScoped
 public class AvklarAktiviteterHåndterer {

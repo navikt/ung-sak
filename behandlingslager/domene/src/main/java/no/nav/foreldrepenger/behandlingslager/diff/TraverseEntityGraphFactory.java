@@ -8,10 +8,15 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.typer.Stillingsprosent;
 
 public final class TraverseEntityGraphFactory {
     private TraverseEntityGraphFactory() {
@@ -36,6 +41,11 @@ public final class TraverseEntityGraphFactory {
         config.addLeafClasses(Saksnummer.class);
         config.addLeafClasses(JournalpostId.class);
         config.addLeafClasses(PersonIdent.class);
+        config.addLeafClasses(OrgNummer.class);
+        config.addLeafClasses(EksternArbeidsforholdRef.class);
+        config.addLeafClasses(InternArbeidsforholdRef.class);
+        config.addLeafClasses(Stillingsprosent.class);
+        config.addLeafClasses(Arbeidsgiver.class);
         
         config.addLeafClasses(DatoIntervallEntitet.class, ÅpenDatoIntervallEntitet.class);
         config.addLeafClasses(Kodeverdi.class);

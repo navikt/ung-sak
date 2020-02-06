@@ -22,7 +22,6 @@ import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.KjønnKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.RegionKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.SivilstandTypeKodeverdiConverter;
-import no.nav.foreldrepenger.domene.typer.HarAktørId;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
