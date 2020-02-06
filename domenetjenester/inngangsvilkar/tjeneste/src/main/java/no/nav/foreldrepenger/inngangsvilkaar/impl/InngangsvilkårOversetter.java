@@ -1,14 +1,21 @@
 package no.nav.foreldrepenger.inngangsvilkaar.impl;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -25,11 +32,16 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.FinnOmSøkerHarArbeidsforholdOgInntekt;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.VilkårGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.DiagnoseKilde;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.InnleggelsesPeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.MedisinskvilkårGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.PeriodeMedKontinuerligTilsyn;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.PeriodeMedUtvidetBehov;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.PersonStatusType;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -40,6 +52,7 @@ public class InngangsvilkårOversetter {
     private MedlemskapRepository medlemskapRepository;
     private MedlemskapPerioderTjeneste medlemskapPerioderTjeneste;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     InngangsvilkårOversetter() {
@@ -48,9 +61,11 @@ public class InngangsvilkårOversetter {
 
     @Inject
     public InngangsvilkårOversetter(BehandlingRepositoryProvider repositoryProvider,
+                                    MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                     BasisPersonopplysningTjeneste personopplysningTjeneste,
                                     InntektArbeidYtelseTjeneste iayTjeneste) {
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.iayTjeneste = iayTjeneste;
         this.medlemskapPerioderTjeneste = new MedlemskapPerioderTjeneste();
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -169,7 +184,78 @@ public class InngangsvilkårOversetter {
         return new VilkårUtfallOversetter().oversett(vilkårType, evaluation, grunnlag, periode);
     }
 
-    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(BehandlingReferanse ref, DatoIntervallEntitet periode) {
-        return new MedisinskvilkårGrunnlag(true); // FIXME (k9) : Map reele data inn
+    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(Long behandlingId, DatoIntervallEntitet periode) {
+        final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
+
+        final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
+        if (medisinskGrunnlag.isPresent()) {
+            final var grunnlag = medisinskGrunnlag.get();
+            final var relevanteLegeerklæringer = grunnlag.getLegeerklæringer()
+                .getLegeerklæringer()
+                .stream()
+                .filter(it -> it.getPeriode().overlapper(periode))
+                .collect(Collectors.toList());
+            final var relevantKontinuerligTilsyn = grunnlag.getKontinuerligTilsyn()
+                .getPerioder()
+                .stream()
+                .filter(it -> it.getPeriode().overlapper(periode))
+                .collect(Collectors.toList());
+
+            vilkårsGrunnlag.medDiagnoseKilde(utledKildeFraLegeerklæringer(relevanteLegeerklæringer))
+                .medDiagnoseKode(utledDiagnose(relevanteLegeerklæringer))
+                .medInnleggelsesPerioder(mapInnleggelsesPerioder(relevanteLegeerklæringer))
+                .medKontinuerligTilsyn(mapKontinuerligTilsyn(relevantKontinuerligTilsyn))
+                .medUtvidetBehov(mapUtvidetTilsyn(relevantKontinuerligTilsyn));
+        }
+        return vilkårsGrunnlag;
+    }
+
+    private List<PeriodeMedUtvidetBehov> mapUtvidetTilsyn(List<KontinuerligTilsynPeriode> relevantKontinuerligTilsyn) {
+        return relevantKontinuerligTilsyn.stream()
+            .filter(it -> it.getGrad() == 200)
+            .map(it -> new PeriodeMedUtvidetBehov(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
+            .collect(Collectors.toList());
+    }
+
+    private List<PeriodeMedKontinuerligTilsyn> mapKontinuerligTilsyn(List<KontinuerligTilsynPeriode> relevantKontinuerligTilsyn) {
+        return relevantKontinuerligTilsyn.stream()
+            .filter(it -> it.getGrad() == 100)
+            .map(it -> new PeriodeMedKontinuerligTilsyn(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
+            .collect(Collectors.toList());
+    }
+
+    private List<InnleggelsesPeriode> mapInnleggelsesPerioder(List<Legeerklæring> relevanteLegeerklæringer) {
+        return relevanteLegeerklæringer.stream()
+            .map(Legeerklæring::getInnleggelsesPerioder)
+            .flatMap(Collection::stream)
+            .map(it -> new InnleggelsesPeriode(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
+            .collect(Collectors.toList());
+    }
+
+    private String utledDiagnose(List<Legeerklæring> legeerklæringer) {
+        return legeerklæringer.stream()
+            .filter(it -> it.getDiagnose() != null)
+            .filter(it -> !it.getDiagnose().isEmpty())
+            .filter(it -> !it.getDiagnose().isBlank())
+            .min(Comparator.comparing(Legeerklæring::getPeriode, Comparator.nullsLast(Comparator.reverseOrder())))
+            .map(Legeerklæring::getDiagnose)
+            .orElse(null);
+    }
+
+    private DiagnoseKilde utledKildeFraLegeerklæringer(List<Legeerklæring> legeerklæringer) {
+        final var kilder = legeerklæringer
+            .stream()
+            .map(Legeerklæring::getKilde)
+            .collect(Collectors.toSet());
+        if (kilder.contains(LegeerklæringKilde.SYKEHUSLEGE)) {
+            return DiagnoseKilde.SYKHUSLEGE;
+        }
+        if (kilder.contains(LegeerklæringKilde.SPESIALISTHELSETJENESTE)) {
+            return DiagnoseKilde.SPESIALISTHELSETJENESTEN;
+        }
+        if (kilder.contains(LegeerklæringKilde.FASTLEGE)) {
+            return DiagnoseKilde.FASTLEGE;
+        }
+        return DiagnoseKilde.ANNET;
     }
 }

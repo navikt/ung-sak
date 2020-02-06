@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -39,6 +40,7 @@ import no.nav.foreldrepenger.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.foreldrepenger.domene.iay.modell.VersjonType;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjenesteImpl;
@@ -59,7 +61,6 @@ import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -78,22 +79,22 @@ public class MedlemskapsvilkårTest {
     private InngangsvilkårOversetter oversetter;
 
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository = new MedisinskGrunnlagRepository(repoRule.getEntityManager());
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
     private InngangsvilkårMedlemskap vurderMedlemskapsvilkarEngangsstonad;
     private YrkesaktivitetBuilder yrkesaktivitetBuilder;
+    private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(SKJÆRINGSTIDSPUNKT);
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider);
     }
 
-    private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(SKJÆRINGSTIDSPUNKT);
-
     @Before
     public void before() throws Exception {
-        this.oversetter = new InngangsvilkårOversetter(repositoryProvider,
+        this.oversetter = new InngangsvilkårOversetter(repositoryProvider, medisinskGrunnlagRepository,
             personopplysningTjeneste, iayTjeneste);
-        this.vurderMedlemskapsvilkarEngangsstonad = new InngangsvilkårMedlemskap( oversetter);
+        this.vurderMedlemskapsvilkarEngangsstonad = new InngangsvilkårMedlemskap(oversetter);
     }
 
     /**
@@ -491,12 +492,12 @@ public class MedlemskapsvilkårTest {
      * Lager minimalt testscenario med en medlemsperiode som indikerer om søker er medlem eller ikke.
      */
     private AbstractTestScenario<?> lagTestScenario(MedlemskapDekningType dekningType, Landkoder statsborgerskap,
-                                                          PersonstatusType personstatusType) {
+                                                    PersonstatusType personstatusType) {
         return lagTestScenario(dekningType, statsborgerskap, personstatusType, Region.NORDEN);
     }
 
     private AbstractTestScenario<?> lagTestScenario(MedlemskapDekningType dekningType, Landkoder statsborgerskap,
-                                                          PersonstatusType personstatusType, Region region) {
+                                                    PersonstatusType personstatusType, Region region) {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad();
         if (dekningType != null) {
