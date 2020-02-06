@@ -3,21 +3,38 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningsgrunnlagPrStatusOgAndelSNDto extends BeregningsgrunnlagPrStatusOgAndelDto {
 
-    @JsonProperty("pgiSnitt")
+    @JsonProperty(value = "pgiSnitt")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal pgiSnitt;
 
-    @JsonProperty("pgiVerdier")
+    @JsonProperty(value = "pgiVerdier")
+    @Valid
+    @Size(max = 200)
     private List<PgiDto> pgiVerdier;
 
-    @JsonProperty("næringer")
+    @JsonProperty(value = "næringer")
+    @Valid
+    @Size(max = 200)
     private List<EgenNæringDto> næringer;
 
     public BeregningsgrunnlagPrStatusOgAndelSNDto() {
-        super();
         // trengs for deserialisering av JSON
     }
 

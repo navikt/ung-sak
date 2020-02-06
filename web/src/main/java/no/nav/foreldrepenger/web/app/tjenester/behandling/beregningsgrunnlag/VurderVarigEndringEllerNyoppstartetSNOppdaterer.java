@@ -17,7 +17,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderVarigEndringEllerNyoppstartetSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderVarigEndringEllerNyoppstartetSNDto.class, adapter = AksjonspunktOppdaterer.class)

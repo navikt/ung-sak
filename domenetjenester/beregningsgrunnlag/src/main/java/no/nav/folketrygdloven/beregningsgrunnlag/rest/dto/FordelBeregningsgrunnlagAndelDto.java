@@ -3,22 +3,63 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FordelBeregningsgrunnlagAndelDto extends FaktaOmBeregningAndelDto {
 
     private static final int MÅNEDER_I_1_ÅR = 12;
+
+    @JsonProperty(value="fordelingForrigeBehandlinPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal fordelingForrigeBehandlingPrAar;
+    
+    @JsonProperty(value="refusjonskravPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal refusjonskravPrAar = BigDecimal.ZERO;
+    
+    @JsonProperty(value="fordeltPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal fordeltPrAar;
+    
+    @JsonProperty(value="belopFraInntektsmeldingPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal belopFraInntektsmeldingPrAar;
+    
+    @JsonProperty(value="refusjonskravFraInntektsmeldingPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal refusjonskravFraInntektsmeldingPrAar;
+
+    @JsonProperty(value="nyttArbeidsforhold", required = true)
+    @NotNull
     private boolean nyttArbeidsforhold;
+    
+    @JsonProperty(value="arbeidsforholdType", required = true)
+    @Valid
+    @NotNull
     private OpptjeningAktivitetType arbeidsforholdType;
 
-    public FordelBeregningsgrunnlagAndelDto(FaktaOmBeregningAndelDto superDto) {
-        super(superDto.getAndelsnr(), superDto.getArbeidsforhold(), superDto.getInntektskategori(),
-            superDto.getAktivitetStatus(), superDto.getLagtTilAvSaksbehandler(), superDto.getFastsattAvSaksbehandler(), superDto.getAndelIArbeid());
+    public FordelBeregningsgrunnlagAndelDto(FaktaOmBeregningAndelDto dto) {
+        super(dto.getAndelsnr(), dto.getArbeidsforhold(), dto.getInntektskategori(),
+            dto.getAktivitetStatus(), dto.getLagtTilAvSaksbehandler(), dto.getFastsattAvSaksbehandler(), dto.getAndelIArbeid());
     }
 
     public void setBelopFraInntektsmelding(BigDecimal belopFraInntektsmelding) {

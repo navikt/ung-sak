@@ -2,10 +2,16 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TilstøtendeYtelseAndelDto extends FaktaOmBeregningAndelDto {
-
 
     @JsonProperty("fordelingForrigeYtelse")
     private BigDecimal fordelingForrigeYtelse;
@@ -16,9 +22,8 @@ public class TilstøtendeYtelseAndelDto extends FaktaOmBeregningAndelDto {
     @JsonProperty("fastsattPrAar")
     private BigDecimal fastsattPrAar;
 
-
     public TilstøtendeYtelseAndelDto () {
-        // Hibernate
+        // 
     }
 
     public BigDecimal getFordelingForrigeYtelse() {

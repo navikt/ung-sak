@@ -6,14 +6,42 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FordelBeregningsgrunnlagPeriodeDto {
 
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
     private LocalDate fom;
-    private LocalDate tom;
-    private List<FordelBeregningsgrunnlagAndelDto> fordelBeregningsgrunnlagAndeler = new ArrayList<>();
-    private boolean harPeriodeAarsakGraderingEllerRefusjon = false;
-    private boolean skalKunneEndreRefusjon = false;
 
+    @JsonProperty(value = "tom", required = true)
+    @NotNull
+    private LocalDate tom;
+
+    @JsonProperty(value = "fordelBeregningsgrunnlagAndeler", required = true)
+    @NotNull
+    @Valid
+    @Size(max = 200)
+    private List<FordelBeregningsgrunnlagAndelDto> fordelBeregningsgrunnlagAndeler = new ArrayList<>();
+    
+    @JsonProperty(value="harPeriodeAarsakGraderingEllerRefusjon", required = true)
+    @NotNull
+    private boolean harPeriodeAarsakGraderingEllerRefusjon = false;
+    
+    @JsonProperty(value="skalKunneEndreRefuson", required = true)
+    @NotNull
+    private boolean skalKunneEndreRefusjon = false;
 
     public boolean isHarPeriodeAarsakGraderingEllerRefusjon() {
         return harPeriodeAarsakGraderingEllerRefusjon;

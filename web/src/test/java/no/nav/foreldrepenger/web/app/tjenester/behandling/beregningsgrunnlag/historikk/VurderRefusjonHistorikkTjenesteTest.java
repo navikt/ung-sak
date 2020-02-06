@@ -44,8 +44,8 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.RefusjonskravPrArbeidsgiverVurderingDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.RefusjonskravPrArbeidsgiverVurderingDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 

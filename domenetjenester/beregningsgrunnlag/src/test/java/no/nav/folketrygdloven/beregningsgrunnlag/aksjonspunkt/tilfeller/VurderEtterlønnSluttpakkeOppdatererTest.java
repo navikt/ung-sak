@@ -24,8 +24,8 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderEtterlønnSluttpakkeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderEtterlønnSluttpakkeDto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class VurderEtterlønnSluttpakkeOppdatererTest {

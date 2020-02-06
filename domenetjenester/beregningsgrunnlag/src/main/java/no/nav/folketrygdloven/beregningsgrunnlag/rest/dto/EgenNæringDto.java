@@ -1,51 +1,77 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class EgenNæringDto {
 
-    @JsonProperty("utenlandskvirksomhetsnavn")
+    @JsonProperty(value = "utenlandskvirksomhetsnavn")
+    @Size(max = 200)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String utenlandskvirksomhetsnavn;
 
-    @JsonProperty("orgnr")
+    @JsonProperty(value = "orgnr")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\s]$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String orgnr;
 
-    @JsonProperty("erVarigEndret")
+    @JsonProperty(value = "erVarigEndret")
     private boolean erVarigEndret;
 
-    @JsonProperty("erNyoppstartet")
+    @JsonProperty(value = "erNyoppstartet")
     private boolean erNyoppstartet;
 
-    @JsonProperty("virksomhetType")
+    @JsonProperty(value = "virksomhetType")
+    @Valid
     private VirksomhetType virksomhetType;
 
-    @JsonProperty("begrunnelse")
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 400)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
-    @JsonProperty("endringsdato")
+    @JsonProperty(value = "endringsdato")
     private LocalDate endringsdato;
 
-    @JsonProperty("oppstartsdato")
+    @JsonProperty(value = "oppstartsdato")
     private LocalDate oppstartsdato;
 
-    @JsonProperty("regnskapsførerNavn")
+    @JsonProperty(value = "regnskapsførerNavn")
+    @Size(max = 300)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String regnskapsførerNavn;
 
-    @JsonProperty("regnskapsførerTlf")
+    @JsonProperty(value = "regnskapsførerTlf")
+    @Size(max = 300)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String regnskapsførerTlf;
 
-    @JsonProperty("kanRegnskapsførerKontaktes")
+    @JsonProperty(value = "kanRegnskapsførerKontaktes")
     private boolean kanRegnskapsførerKontaktes;
 
-    @JsonProperty("erNyIArbeidslivet")
+    @JsonProperty(value = "erNyIArbeidslivet")
     private boolean erNyIArbeidslivet;
 
-    @JsonProperty("oppgittInntekt")
+    @JsonProperty(value = "oppgittInntekt")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal oppgittInntekt;
 
     public String getUtenlandskvirksomhetsnavn() {

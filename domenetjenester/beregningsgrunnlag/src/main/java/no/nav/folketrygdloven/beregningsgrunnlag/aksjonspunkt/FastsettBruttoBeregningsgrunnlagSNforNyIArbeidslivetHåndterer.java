@@ -5,7 +5,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

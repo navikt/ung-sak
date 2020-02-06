@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.his
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBGTidsbegrensetArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettBGTidsbegrensetArbeidsforholdDto.class, adapter = AksjonspunktOppdaterer.class)

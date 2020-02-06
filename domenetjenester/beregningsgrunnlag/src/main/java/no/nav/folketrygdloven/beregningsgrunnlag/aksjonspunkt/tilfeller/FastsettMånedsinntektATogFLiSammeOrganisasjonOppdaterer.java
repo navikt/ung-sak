@@ -9,9 +9,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.FaktaOmBeregningTilfelleRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderATogFLiSammeOrganisasjonAndelDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderATogFLiSammeOrganisasjonDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderATogFLiSammeOrganisasjonAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderATogFLiSammeOrganisasjonDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_AT_OG_FL_I_SAMME_ORGANISASJON")

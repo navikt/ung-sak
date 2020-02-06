@@ -17,8 +17,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class VurderSelvstendigNæringsdrivendeNyIArbeidslivetOppdatererTest {

@@ -2,19 +2,34 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import java.time.LocalDate;
 
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class GraderingEllerRefusjonDto {
 
-    @JsonProperty("erRefusjon")
+    @JsonProperty(value = "erRefusjon", required = true)
+    @NotNull
     private boolean erRefusjon;
-    @JsonProperty("erGradering")
-    private boolean erGradering;
-    @JsonProperty("fom")
-    private LocalDate fom;
-    @JsonProperty("tom")
-    private LocalDate tom;
 
+    @JsonProperty(value = "erGradering", required = true)
+    @NotNull
+    private boolean erGradering;
+
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
+    private LocalDate fom;
+
+    @JsonProperty(value = "tom", required = true)
+    @NotNull
+    private LocalDate tom;
 
     public GraderingEllerRefusjonDto(boolean erRefusjon, boolean erGradering) {
         if ((erRefusjon && erGradering) || (!erRefusjon && !erGradering)) {

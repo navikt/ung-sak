@@ -25,9 +25,9 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteAndelerTidsbegrensetDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsattePerioderTidsbegrensetDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBGTidsbegrensetArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteAndelerTidsbegrensetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsattePerioderTidsbegrensetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class FastsettBGTidsbegrensetArbeidsforholdHåndtererTest {

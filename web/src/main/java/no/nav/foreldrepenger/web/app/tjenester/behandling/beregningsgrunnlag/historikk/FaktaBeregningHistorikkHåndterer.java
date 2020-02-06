@@ -25,9 +25,9 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.his
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.OverstyrBeregningsgrunnlagDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderFaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsgrunnlagDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
 
 @ApplicationScoped
 public class FaktaBeregningHistorikkHåndterer {

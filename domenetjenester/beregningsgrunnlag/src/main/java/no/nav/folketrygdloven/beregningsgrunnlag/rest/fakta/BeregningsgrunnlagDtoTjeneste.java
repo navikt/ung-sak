@@ -157,7 +157,7 @@ public class BeregningsgrunnlagDtoTjeneste {
         var beregningsgrunnlag = input.getBeregningsgrunnlag();
         Beløp grunnbeløp = Optional.ofNullable(beregningsgrunnlag.getGrunnbeløp()).orElse(Beløp.ZERO);
         long seksG = Math.round(grunnbeløp.getVerdi().multiply(BigDecimal.valueOf(6)).doubleValue());
-        double halvG = grunnbeløp.getVerdi().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP).doubleValue();
+        BigDecimal halvG = grunnbeløp.getVerdi().divide(BigDecimal.valueOf(2), RoundingMode.HALF_UP);
         dto.setHalvG(halvG);
         dto.setGrunnbeløp(grunnbeløp.getVerdi());
         dto.setHjemmel(beregningsgrunnlag.getHjemmel());

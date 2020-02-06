@@ -3,93 +3,132 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningsgrunnlagPrStatusOgAndelDto {
 
-    @JsonProperty("aktivitetStatus")
+    @JsonProperty(value = "aktivitetStatus")
+    @Valid
     private AktivitetStatus aktivitetStatus;
 
-    @JsonProperty("beregningsperiodeFom")
+    @JsonProperty(value = "beregningsperiodeFom")
     private LocalDate beregningsperiodeFom;
 
-    @JsonProperty("beregningsperiodeTom")
+    @JsonProperty(value = "beregningsperiodeTom")
     private LocalDate beregningsperiodeTom;
 
-    @JsonProperty("beregnetPrAar")
+    @JsonProperty(value = "beregnetPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal beregnetPrAar;
 
-    @JsonProperty("fastsattForrigePrAar")
+    @JsonProperty(value = "fastsattForrigePrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal fastsattForrigePrAar;
 
-    @JsonProperty("overstyrtPrAar")
+    @JsonProperty(value = "overstyrtPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal overstyrtPrAar;
 
-    @JsonProperty("bruttoPrAar")
+    @JsonProperty(value = "bruttoPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal bruttoPrAar;
 
-    @JsonProperty("avkortetPrAar")
+    @JsonProperty(value = "avkortetPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal avkortetPrAar;
 
-    @JsonProperty("redusertPrAar")
+    @JsonProperty(value = "redusertPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal redusertPrAar;
 
-    @JsonProperty("erTidsbegrensetArbeidsforhold")
+    @JsonProperty(value = "erTidsbegrensetArbeidsforhold")
     private Boolean erTidsbegrensetArbeidsforhold;
 
-    @JsonProperty("erNyIArbeidslivet")
+    @JsonProperty(value = "erNyIArbeidslivet")
     private Boolean erNyIArbeidslivet;
 
-    @JsonProperty("lonnsendringIBeregningsperioden")
+    @JsonProperty(value = "lonnsendringIBeregningsperioden")
     private Boolean lonnsendringIBeregningsperioden;
 
-    @JsonProperty("andelsnr")
+    @JsonProperty(value = "andelsnr", required = true)
+    @NotNull
+    @Min(0)
     private Long andelsnr;
 
-    @JsonProperty("besteberegningPrAar")
+    @JsonProperty(value = "besteberegningPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal besteberegningPrAar;
 
-    @JsonProperty("inntektskategori")
+    @JsonProperty(value = "inntektskategori", required = true)
+    @NotNull
+    @Valid
     private Inntektskategori inntektskategori;
 
-    @JsonProperty("arbeidsforhold")
+    @JsonProperty(value = "arbeidsforhold")
+    @Valid
     private BeregningsgrunnlagArbeidsforholdDto arbeidsforhold;
 
-    @JsonProperty("fastsattAvSaksbehandler")
+    @JsonProperty(value = "fastsattAvSaksbehandler")
     private Boolean fastsattAvSaksbehandler;
 
-    @JsonProperty("lagtTilAvSaksbehandler")
+    @JsonProperty(value = "lagtTilAvSaksbehandler")
     private Boolean lagtTilAvSaksbehandler;
 
-    @JsonProperty("belopPrMndEtterAOrdningen")
+    @JsonProperty(value = "belopPrMndEtterAOrdningen")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal belopPrMndEtterAOrdningen;
 
-    @JsonProperty("belopPrAarEtterAOrdningen")
+    @JsonProperty(value = "belopPrAarEtterAOrdningen")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal belopPrAarEtterAOrdningen;
 
-    @JsonProperty("dagsats")
+    @JsonProperty(value = "dagsats")
+    @Min(0L)
+    @Max(Long.MAX_VALUE)
     private Long dagsats;
 
-    @JsonProperty("originalDagsatsFraTilstøtendeYtelse")
+    @JsonProperty(value = "originalDagsatsFraTilstøtendeYtelse")
+    @Min(0L)
+    @Max(Long.MAX_VALUE)
     private Long originalDagsatsFraTilstøtendeYtelse;
 
-    @JsonProperty("fordeltPrAar")
+    @JsonProperty(value = "fordeltPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal fordeltPrAar;
 
-    @JsonProperty("erTilkommetAndel")
+    @JsonProperty(value = "erTilkommetAndel")
     private Boolean erTilkommetAndel;
 
-    @JsonProperty("skalFastsetteGrunnlag")
+    @JsonProperty(value = "skalFastsetteGrunnlag")
     private Boolean skalFastsetteGrunnlag;
-
 
     public BeregningsgrunnlagPrStatusOgAndelDto() {
         // trengs for deserialisering av JSON

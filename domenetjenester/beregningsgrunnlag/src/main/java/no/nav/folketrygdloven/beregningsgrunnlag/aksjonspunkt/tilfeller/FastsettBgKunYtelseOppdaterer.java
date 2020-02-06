@@ -17,9 +17,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsattBrukersAndel;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBgKunYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsattBrukersAndel;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBgKunYtelseDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("FASTSETT_BG_KUN_YTELSE")

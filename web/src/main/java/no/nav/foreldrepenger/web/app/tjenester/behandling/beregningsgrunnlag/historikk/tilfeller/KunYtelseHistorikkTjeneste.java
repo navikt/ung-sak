@@ -20,9 +20,9 @@ import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagAndeltype;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsattBrukersAndel;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBgKunYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsattBrukersAndel;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBgKunYtelseDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("FASTSETT_BG_KUN_YTELSE")

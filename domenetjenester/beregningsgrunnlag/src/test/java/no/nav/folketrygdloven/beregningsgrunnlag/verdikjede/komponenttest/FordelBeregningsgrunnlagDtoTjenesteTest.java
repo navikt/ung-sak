@@ -71,10 +71,10 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagAndelDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagPeriodeDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.RedigerbarAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.RedigerbarAndelDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -545,7 +545,7 @@ public class FordelBeregningsgrunnlagDtoTjenesteTest {
 
     private Optional<FordelingDto> bekreftFordelBeregningsgrunnlag(FordelingDto fordelingDto, BeregningsgrunnlagInput input) {
         var ref = input.getBehandlingReferanse();
-        no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto dto = lagOppdatererDto(fordelingDto);
+        no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FordelBeregningsgrunnlagDto dto = lagOppdatererDto(fordelingDto);
         fordelBeregningsgrunnlagHåndterer.håndter(dto, behandlingReferanse.getId());
         Optional<BeregningsgrunnlagGrunnlagEntitet> grunnlag = beregningsgrunnlagRepository.hentBeregningsgrunnlagGrunnlagEntitet(ref.getBehandlingId());
         var newInput = input.medBeregningsgrunnlagGrunnlag(grunnlag.orElseThrow());
@@ -570,9 +570,9 @@ public class FordelBeregningsgrunnlagDtoTjenesteTest {
         assertThat(andel.getInntektskategori()).isEqualTo(FASTSATT_INNTEKTSKATEGORI);
     }
 
-    private no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto lagOppdatererDto(FordelingDto fordelingDto) {
+    private no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FordelBeregningsgrunnlagDto lagOppdatererDto(FordelingDto fordelingDto) {
         List<FastsettBeregningsgrunnlagPeriodeDto> perioder = lagFastsettBeregningsgrunnlag(fordelingDto);
-        return new no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto(perioder, "begrunnelse");
+        return new no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FordelBeregningsgrunnlagDto(perioder, "begrunnelse");
     }
 
     private List<FastsettBeregningsgrunnlagPeriodeDto> lagFastsettBeregningsgrunnlag(FordelingDto dto) {

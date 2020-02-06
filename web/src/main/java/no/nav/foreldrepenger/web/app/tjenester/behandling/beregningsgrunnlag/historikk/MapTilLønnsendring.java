@@ -12,12 +12,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriod
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.DagpengeAndelLagtTilBesteberegningDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettMånedsinntektUtenInntektsmeldingAndelDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.Lønnsendring;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.RedigerbarAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.DagpengeAndelLagtTilBesteberegningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettMånedsinntektUtenInntektsmeldingAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.Lønnsendring;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.RedigerbarAndelDto;
 
 public class MapTilLønnsendring {
 

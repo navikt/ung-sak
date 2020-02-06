@@ -12,7 +12,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggreg
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsaktivitetLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BeregningsaktivitetLagreDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;

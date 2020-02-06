@@ -28,8 +28,8 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagATFLDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.InntektPrAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.InntektPrAndelDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

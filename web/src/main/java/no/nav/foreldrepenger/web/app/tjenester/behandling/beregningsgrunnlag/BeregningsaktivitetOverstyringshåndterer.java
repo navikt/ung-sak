@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.his
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.OverstyrBeregningsaktiviteterDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsaktiviteterDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrBeregningsaktiviteterDto.class, adapter = Overstyringshåndterer.class)

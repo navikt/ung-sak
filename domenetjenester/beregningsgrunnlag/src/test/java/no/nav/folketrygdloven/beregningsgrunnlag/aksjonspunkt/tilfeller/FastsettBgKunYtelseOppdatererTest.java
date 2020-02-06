@@ -24,9 +24,9 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsattBrukersAndel;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBgKunYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsattBrukersAndel;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBgKunYtelseDto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class FastsettBgKunYtelseOppdatererTest {

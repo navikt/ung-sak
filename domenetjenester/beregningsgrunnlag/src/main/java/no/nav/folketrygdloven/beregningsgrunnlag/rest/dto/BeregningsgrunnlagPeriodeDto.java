@@ -6,47 +6,78 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningsgrunnlagPeriodeDto {
 
-    @JsonProperty("beregningsgrunnlagPeriodeFom")
+    @JsonProperty(value = "beregningsgrunnlagPeriodeFom")
+    @NotNull
     private LocalDate beregningsgrunnlagPeriodeFom;
 
-    @JsonProperty("beregningsgrunnlagPeriodeTom")
+    @JsonProperty(value = "beregningsgrunnlagPeriodeTom")
+    @NotNull
     private LocalDate beregningsgrunnlagPeriodeTom;
 
-    @JsonProperty("beregnetPrAar")
+    @JsonProperty(value = "beregnetPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal beregnetPrAar;
 
-    @JsonProperty("bruttoPrAar")
+    @JsonProperty(value = "bruttoPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal bruttoPrAar;
 
-    @JsonProperty("bruttoInkludertBortfaltNaturalytelsePrAar")
+    @JsonProperty(value = "bruttoInkludertBortfaltNaturalytelsePrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal bruttoInkludertBortfaltNaturalytelsePrAar;
 
-    @JsonProperty("avkortetPrAar")
+    @JsonProperty(value = "avkortetPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal avkortetPrAar;
 
-    @JsonProperty("redusertPrAar")
+    @JsonProperty(value = "redusertPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal redusertPrAar;
 
-    @JsonProperty("periodeAarsaker")
+    @JsonProperty(value = "periodeAarsaker")
+    @Valid
+    @Size(max = 200)
     private Set<PeriodeÅrsak> periodeAarsaker = new HashSet<>();
 
-    @JsonProperty("dagsats")
+    @JsonProperty(value = "dagsats")
+    @Min(0L)
+    @Max(Long.MAX_VALUE)
     private Long dagsats;
 
-    @JsonProperty("beregningsgrunnlagPrStatusOgAndel")
+    @JsonProperty(value = "beregningsgrunnlagPrStatusOgAndel")
+    @Valid
+    @Size(max = 200)
     private List<BeregningsgrunnlagPrStatusOgAndelDto> beregningsgrunnlagPrStatusOgAndel;
 
-    @JsonProperty("andelerLagtTilManueltIForrige")
+    @JsonProperty(value = "andelerLagtTilManueltIForrige")
+    @Valid
+    @Size(max = 200)
     private List<BeregningsgrunnlagPrStatusOgAndelDto> andelerLagtTilManueltIForrige;
 
     public BeregningsgrunnlagPeriodeDto() {

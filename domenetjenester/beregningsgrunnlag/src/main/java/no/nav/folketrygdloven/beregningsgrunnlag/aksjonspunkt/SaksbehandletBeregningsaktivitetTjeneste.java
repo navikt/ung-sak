@@ -6,7 +6,7 @@ import java.util.Objects;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetNøkkel;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsaktivitetLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BeregningsaktivitetLagreDto;
 
 class SaksbehandletBeregningsaktivitetTjeneste {
     private SaksbehandletBeregningsaktivitetTjeneste() {

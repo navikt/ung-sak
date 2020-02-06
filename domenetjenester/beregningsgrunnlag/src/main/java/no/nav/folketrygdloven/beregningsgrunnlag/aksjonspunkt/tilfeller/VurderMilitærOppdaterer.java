@@ -15,8 +15,8 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderMilitærDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderMilitærDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_MILITÆR_SIVILTJENESTE")

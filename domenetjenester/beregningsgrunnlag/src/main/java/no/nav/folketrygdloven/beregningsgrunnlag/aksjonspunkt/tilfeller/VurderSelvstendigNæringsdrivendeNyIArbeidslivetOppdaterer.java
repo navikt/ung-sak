@@ -9,8 +9,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("VURDER_SN_NY_I_ARBEIDSLIVET")

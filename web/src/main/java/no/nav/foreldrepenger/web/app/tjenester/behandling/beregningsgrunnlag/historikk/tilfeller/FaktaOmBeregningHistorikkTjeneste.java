@@ -6,7 +6,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntite
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
 
 public abstract class FaktaOmBeregningHistorikkTjeneste {
 

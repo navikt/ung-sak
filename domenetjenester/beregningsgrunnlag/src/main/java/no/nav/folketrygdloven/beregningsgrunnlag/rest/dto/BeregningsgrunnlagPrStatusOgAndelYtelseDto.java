@@ -2,23 +2,35 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import java.math.BigDecimal;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility= JsonAutoDetect.Visibility.NONE, setterVisibility= JsonAutoDetect.Visibility.NONE, fieldVisibility= JsonAutoDetect.Visibility.ANY)
 public class BeregningsgrunnlagPrStatusOgAndelYtelseDto extends BeregningsgrunnlagPrStatusOgAndelDto {
 
-    @JsonProperty("belopFraMeldekortPrMnd")
+    @JsonProperty(value = "belopFraMeldekortPrMnd")
+    @DecimalMin("0.00")
+    @DecimalMax("100000000.00")
     private BigDecimal belopFraMeldekortPrMnd;
 
-    @JsonProperty("belopFraMeldekortPrAar")
+    @JsonProperty(value = "belopFraMeldekortPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("100000000.00")
     private BigDecimal belopFraMeldekortPrAar;
 
-    @JsonProperty("oppjustertGrunnlag")
+    @JsonProperty(value = "oppjustertGrunnlag")
+    @DecimalMin("0.00")
+    @DecimalMax("100000000.00")
     private BigDecimal oppjustertGrunnlag;
 
     public BeregningsgrunnlagPrStatusOgAndelYtelseDto() {
-        super();
         // trengs for deserialisering av JSON
     }
 

@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.FastsettBruttoBeregningsgrunnlagSNHistorikkTjeneste;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBruttoBeregningsgrunnlagSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettBruttoBeregningsgrunnlagSNDto.class, adapter = AksjonspunktOppdaterer.class)

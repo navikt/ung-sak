@@ -12,7 +12,7 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.InntektHistorikkTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.MapTilLønnsendring;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
 
 @ApplicationScoped
 @FaktaOmBeregningTilfelleRef("FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE")

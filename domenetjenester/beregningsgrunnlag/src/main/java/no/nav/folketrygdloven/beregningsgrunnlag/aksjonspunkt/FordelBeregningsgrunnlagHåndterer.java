@@ -18,10 +18,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStat
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagRepository;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsatteVerdierDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagAndelDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBeregningsgrunnlagPeriodeDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FordelBeregningsgrunnlagDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteVerdierDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FordelBeregningsgrunnlagDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;

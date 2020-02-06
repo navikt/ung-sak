@@ -11,10 +11,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BesteberegningFødendeKvinneAndelDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BesteberegningFødendeKvinneDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FaktaBeregningLagreDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBgKunYtelseDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BesteberegningFødendeKvinneAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BesteberegningFødendeKvinneDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FaktaBeregningLagreDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBgKunYtelseDto;
 
 
 @ApplicationScoped

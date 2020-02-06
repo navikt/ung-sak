@@ -3,15 +3,47 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class SammenligningsgrunnlagDto {
+    
+    @JsonProperty(value="sammenligningsgrunnlagFom", required = true)
+    @NotNull
     private LocalDate sammenligningsgrunnlagFom;
+    
+    @JsonProperty(value="sammenligningsgrunnlagTom", required = true)
+    @NotNull
     private LocalDate sammenligningsgrunnlagTom;
+    
+    @JsonProperty(value="rapportertPrAar", required = true)
+    @NotNull
     private BigDecimal rapportertPrAar;
+    
+    @JsonProperty(value="avvikPromille")
     private Long avvikPromille;
+    
+    @JsonProperty(value="avvikProsent")
     private BigDecimal avvikProsent;
+    
+    @JsonProperty(value="sammenligningsgrunnlagType")
+    @NotNull
+    @Valid
     private SammenligningsgrunnlagType sammenligningsgrunnlagType;
+    
+    @JsonProperty(value="differanseBeregnet", required = true)
+    @NotNull
     private BigDecimal differanseBeregnet;
 
     public SammenligningsgrunnlagDto() {

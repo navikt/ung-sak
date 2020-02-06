@@ -7,7 +7,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParamet
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.FastsettBruttoBeregningsgrunnlagSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDto;
 
 @ApplicationScoped
 public class FastsettBruttoBeregningsgrunnlagSNHistorikkTjeneste {

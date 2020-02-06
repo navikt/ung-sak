@@ -2,28 +2,86 @@ package no.nav.folketrygdloven.beregningsgrunnlag.rest.dto;
 
 import java.util.List;
 
-import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderMilitærDto;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FaktaOmBeregningDto {
 
+    @JsonProperty(value = "kortvarigeArbeidsforhold")
+    @Valid
+    @Size(max = 200)
     private List<KortvarigeArbeidsforholdDto> kortvarigeArbeidsforhold;
+
+    @JsonProperty(value = "frilansAndel")
+    @Valid
     private FaktaOmBeregningAndelDto frilansAndel;
+
+    @JsonProperty(value = "kunYtelse")
+    @Valid
     private KunYtelseDto kunYtelse;
+
+    @JsonProperty(value = "faktaOmBeregningTilfeller", required = true)
+    @NotNull
+    @Valid
+    @Size(max = 200)
     private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller;
+
+    @JsonProperty(value = "arbeidstakerOgFrilanserISammeOrganisasjonListe")
+    @Valid
+    @Size(max = 200)
     private List<ATogFLISammeOrganisasjonDto> arbeidstakerOgFrilanserISammeOrganisasjonListe;
+
+    @JsonProperty(value = "arbeidsforholdMedLønnsendringUtenIM")
+    @Valid
+    @Size(max = 200)
     private List<FaktaOmBeregningAndelDto> arbeidsforholdMedLønnsendringUtenIM;
+
+    @JsonProperty(value = "besteberegningAndeler")
+    @Valid
+    @Size(max = 200)
     private List<TilstøtendeYtelseAndelDto> besteberegningAndeler;
+
+    @JsonProperty(value = "vurderMottarYtelse")
+    @Valid
     private VurderMottarYtelseDto vurderMottarYtelse;
+
+    @JsonProperty(value = "avklarAktiviteter")
+    @Valid
     private AvklarAktiviteterDto avklarAktiviteter;
+
+    @JsonProperty(value = "vurderBesteberegning")
+    @Valid
     private VurderBesteberegningDto vurderBesteberegning;
+
+    @JsonProperty(value = "andelerForFaktaOmBeregning")
+    @Size(max = 200)
+    @Valid
     private List<AndelForFaktaOmBeregningDto> andelerForFaktaOmBeregning;
+    
+    @JsonProperty(value = "vurderMilitaer")
+    @Valid
     private VurderMilitærDto vurderMilitaer;
+
+    @JsonProperty(value = "refusjonskravSomKommerForSentListe")
+    @Size(max = 200)
+    @Valid
     private List<RefusjonskravSomKommerForSentDto> refusjonskravSomKommerForSentListe;
 
-
-
     public FaktaOmBeregningDto() {
-        // Hibernate
+        //
     }
 
     public List<RefusjonskravSomKommerForSentDto> getRefusjonskravSomKommerForSentListe() {
@@ -33,7 +91,6 @@ public class FaktaOmBeregningDto {
     public void setRefusjonskravSomKommerForSentListe(List<RefusjonskravSomKommerForSentDto> refusjonskravSomKommerForSentListe) {
         this.refusjonskravSomKommerForSentListe = refusjonskravSomKommerForSentListe;
     }
-
 
     public List<AndelForFaktaOmBeregningDto> getAndelerForFaktaOmBeregning() {
         return andelerForFaktaOmBeregning;

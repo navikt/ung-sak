@@ -6,6 +6,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
@@ -14,31 +25,43 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FaktaOmBeregningAndelDto {
 
-
     @JsonProperty("andelsnr")
+    @NotNull
+    @Min(0)
     private Long andelsnr;
 
-    @JsonProperty("arbeidsforhold")
+    @JsonProperty("arbeidsforhold") @Valid
     private BeregningsgrunnlagArbeidsforholdDto arbeidsforhold;
 
     @JsonProperty("inntektskategori")
+    @NotNull
+    @Valid
     private Inntektskategori inntektskategori;
 
     @JsonProperty("aktivitetStatus")
+    @Valid
     private AktivitetStatus aktivitetStatus;
 
-    @JsonProperty("lagtTilAvSaksbehandler")
+    @JsonProperty(value = "lagtTilAvSaksbehandler", required = true)
+    @NotNull
     private Boolean lagtTilAvSaksbehandler = false;
 
-    @JsonProperty("fastsattAvSaksbehandler")
+    @JsonProperty(value = "fastsattAvSaksbehandler", required = true)
+    @NotNull
     private Boolean fastsattAvSaksbehandler = false;
 
-    @JsonProperty("andelIArbeid")
-    private List<BigDecimal> andelIArbeid = new ArrayList<>();
+    @JsonProperty(value = "andelIArbeid")
+    @Size(max = 200)
+    @Valid
+    private List<@DecimalMin("0.00") @DecimalMax("10000000.00") @NotNull BigDecimal> andelIArbeid = new ArrayList<>();
 
-    FaktaOmBeregningAndelDto(Long andelsnr, BeregningsgrunnlagArbeidsforholdDto arbeidsforhold, Inntektskategori inntektskategori, AktivitetStatus aktivitetStatus, Boolean lagtTilAvSaksbehandler, Boolean fastsattAvSaksbehandler, List<BigDecimal> andelIArbeid) {
+    FaktaOmBeregningAndelDto(Long andelsnr, BeregningsgrunnlagArbeidsforholdDto arbeidsforhold, Inntektskategori inntektskategori,
+                             AktivitetStatus aktivitetStatus, Boolean lagtTilAvSaksbehandler, Boolean fastsattAvSaksbehandler, List<BigDecimal> andelIArbeid) {
         this.andelsnr = andelsnr;
         this.arbeidsforhold = arbeidsforhold;
         this.inntektskategori = inntektskategori;
@@ -49,13 +72,15 @@ public class FaktaOmBeregningAndelDto {
     }
 
     public FaktaOmBeregningAndelDto() {
-        // Hibernate
+        //
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         FaktaOmBeregningAndelDto that = (FaktaOmBeregningAndelDto) o;
         return Objects.equals(arbeidsforhold, that.arbeidsforhold) &&
             Objects.equals(inntektskategori, that.inntektskategori) &&
@@ -127,7 +152,8 @@ public class FaktaOmBeregningAndelDto {
         this.andelIArbeid.add(andelIArbeid);
     }
 
-    public void initialiserStandardAndelProperties(BeregningsgrunnlagPrStatusOgAndel andel, BeregningsgrunnlagDtoUtil dtoUtil, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
+    public void initialiserStandardAndelProperties(BeregningsgrunnlagPrStatusOgAndel andel, BeregningsgrunnlagDtoUtil dtoUtil,
+                                                   InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
         setAndelsnr(andel.getAndelsnr());
         dtoUtil.lagArbeidsforholdDto(andel, Optional.empty(), inntektArbeidYtelseGrunnlag)
             .ifPresent(this::setArbeidsforhold);
