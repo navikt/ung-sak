@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
@@ -18,7 +17,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
  */
 @ApplicationScoped
 public class BehandlingLåsRepository {
-    
+
     private static final Map<String, Object> BYPASS_PROPS = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
     
     private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
@@ -47,7 +46,7 @@ public class BehandlingLåsRepository {
 
     /** Initialiser lås og ta lock på tilhørende database rader. */
     public BehandlingLås taLås(final String behandlingId) {
-        if(DIGITS_PATTERN.matcher(behandlingId).matches()) {
+        if (DIGITS_PATTERN.matcher(behandlingId).matches()) {
             return taLås(Long.parseLong(behandlingId));
         } else {
             return taLås(UUID.fromString(behandlingId));
@@ -89,12 +88,11 @@ public class BehandlingLåsRepository {
      */
     public void oppdaterLåsVersjon(BehandlingLås lås) {
         if (lås.getBehandlingId() != null) {
-            oppdaterLås(lås.getBehandlingId());
+            oppdaterLåsVersjon(lås.getBehandlingId());
         } // else NO-OP (for ny behandling uten id)
     }
-
-    private Object oppdaterLås(Long id) {
-        
+  
+    private Object oppdaterLås(Long id) {      
         LockModeType lockMode = LockModeType.PESSIMISTIC_FORCE_INCREMENT;
         Object entity = entityManager.find(Behandling.class, id, BYPASS_PROPS);
         if (entity == null) {
