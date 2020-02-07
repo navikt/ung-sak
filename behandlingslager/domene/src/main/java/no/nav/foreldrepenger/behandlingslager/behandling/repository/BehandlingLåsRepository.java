@@ -1,12 +1,15 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.repository;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
@@ -15,7 +18,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
  */
 @ApplicationScoped
 public class BehandlingLåsRepository {
-
+    
+    private static final Map<String, Object> BYPASS_PROPS = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+    
     private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
     private EntityManager entityManager;
 
@@ -42,7 +47,7 @@ public class BehandlingLåsRepository {
 
     /** Initialiser lås og ta lock på tilhørende database rader. */
     public BehandlingLås taLås(final String behandlingId) {
-        if (DIGITS_PATTERN.matcher(behandlingId).matches()) {
+        if(DIGITS_PATTERN.matcher(behandlingId).matches()) {
             return taLås(Long.parseLong(behandlingId));
         } else {
             return taLås(UUID.fromString(behandlingId));
@@ -84,15 +89,20 @@ public class BehandlingLåsRepository {
      */
     public void oppdaterLåsVersjon(BehandlingLås lås) {
         if (lås.getBehandlingId() != null) {
-            oppdaterLåsVersjon(lås.getBehandlingId());
+            oppdaterLås(lås.getBehandlingId());
         } // else NO-OP (for ny behandling uten id)
     }
 
-    private void oppdaterLåsVersjon(Long behandlingId) {
-        entityManager.getEntityManagerFactory().getCache().evict(Behandling.class, behandlingId);
-        entityManager.createNativeQuery("update behandling set versjon = versjon + 1 where id=:id")
-            .setParameter("id", behandlingId)
-            .executeUpdate();
+    private Object oppdaterLås(Long id) {
+        
+        LockModeType lockMode = LockModeType.PESSIMISTIC_FORCE_INCREMENT;
+        Object entity = entityManager.find(Behandling.class, id, BYPASS_PROPS);
+        if (entity == null) {
+            throw BehandlingRepositoryFeil.FACTORY.fantIkkeEntitetForLåsing(Behandling.class.getSimpleName(), id).toException();
+        } else {
+            entityManager.lock(entity, lockMode);
+        }
+        return entity;
     }
 
 }
