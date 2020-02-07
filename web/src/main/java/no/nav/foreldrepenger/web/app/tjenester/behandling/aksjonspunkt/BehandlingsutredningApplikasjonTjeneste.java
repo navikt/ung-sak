@@ -107,9 +107,9 @@ public class BehandlingsutredningApplikasjonTjeneste {
     }
 
     public void kanEndreBehandling(Long behandlingId, Long versjon) {
-        Boolean kanEndreBehandling = behandlingRepository.erVersjonUendret(behandlingId, versjon);
-        if (!kanEndreBehandling) {
-            throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.endringerHarForekommetPåBehandlingen().toException();
+        Long eksisterendeVersjon = behandlingRepository.hentEksisterendeVersjon(behandlingId);
+        if (!Objects.equals(versjon, eksisterendeVersjon)) {
+            throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.endringerHarForekommetPåBehandlingen(behandlingId, versjon, eksisterendeVersjon).toException();
         }
     }
 
@@ -119,7 +119,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
         @FunksjonellFeil(feilkode = "FP-992332", feilmelding = "BehandlingId %s er ikke satt på vent, og ventefrist kan derfor ikke oppdateres", løsningsforslag = "Forsett saksbehandlingen", logLevel = ERROR)
         Feil kanIkkeEndreVentefristForBehandlingIkkePaVent(Long behandlingId);
 
-        @FunksjonellFeil(feilkode = "FP-837578", feilmelding = "Behandlingen er endret av en annen saksbehandler, eller har blitt oppdatert med ny informasjon av systemet.", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
-        Feil endringerHarForekommetPåBehandlingen();
+        @FunksjonellFeil(feilkode = "FP-837578", feilmelding = "Behandlingen [%s] er endret av en annen saksbehandler, eller har blitt oppdatert med ny informasjon av systemet. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
+        Feil endringerHarForekommetPåBehandlingen(Long behandlingId, Long versjonInn, Long versjonEksisterende);
     }
 }
