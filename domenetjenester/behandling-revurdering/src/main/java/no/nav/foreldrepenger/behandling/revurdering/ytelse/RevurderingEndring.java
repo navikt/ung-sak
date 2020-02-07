@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandling.revurdering.ytelse.fp;
+package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -6,7 +6,7 @@ import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndringBasertPåK
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 
 /**
- * Sjekk om revurdering endrer utfall for FP.
+ * Sjekk om revurdering endrer utfall.
  */
 @FagsakYtelseTypeRef
 @ApplicationScoped
