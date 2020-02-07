@@ -107,9 +107,10 @@ public class BehandlingsutredningApplikasjonTjeneste {
     }
 
     public void kanEndreBehandling(Long behandlingId, Long versjon) {
-        Long eksisterendeVersjon = behandlingRepository.hentEksisterendeVersjon(behandlingId);
-        if (!Objects.equals(versjon, eksisterendeVersjon)) {
-            throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.endringerHarForekommetPåBehandlingen(behandlingId, versjon, eksisterendeVersjon).toException();
+        Boolean uendret = behandlingRepository.erVersjonUendret(behandlingId, versjon);
+        if (!uendret) {
+            var beh = behandlingRepository.hentBehandling(behandlingId);
+            throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.endringerHarForekommetPåBehandlingen(behandlingId, versjon, beh.getVersjon()).toException();
         }
     }
 
