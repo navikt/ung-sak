@@ -4,15 +4,15 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-
-import no.nav.k9.kodeverk.api.Kodeverdi;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -92,7 +92,7 @@ public enum BeregningsgrunnlagTilstand implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

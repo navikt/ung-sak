@@ -13,10 +13,10 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -70,7 +70,8 @@ public class BekreftedeAksjonspunkterDto {
     
     @AbacAttributt("saksnummer")
     public String getSaksnummer() {
-        return behandlingId.getSaksnummer().getVerdi();
+        var s = behandlingId.getSaksnummer();
+        return s == null ? null : s.getVerdi();
     }
     
     public Long getBehandlingVersjon() {

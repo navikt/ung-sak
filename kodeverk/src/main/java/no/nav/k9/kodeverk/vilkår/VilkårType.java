@@ -138,7 +138,7 @@ public enum VilkårType implements Kodeverdi {
         return INDEKS_AVSLAGSÅRSAK_VILKÅR.get(avslagsårsak);
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

@@ -164,7 +164,7 @@ public enum InnvilgetÅrsak implements PeriodeResultatÅrsak {
         return navn;
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

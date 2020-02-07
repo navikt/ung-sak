@@ -10,11 +10,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
-import no.nav.k9.kodeverk.api.Kodeverdi;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
  * NB: Pass på! Ikke legg koder vilkårlig her
@@ -85,7 +84,7 @@ public enum BehandlingStatus implements Kodeverdi {
         return FERDIGBEHANDLET_STATUS.contains(this);
     }
     
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
