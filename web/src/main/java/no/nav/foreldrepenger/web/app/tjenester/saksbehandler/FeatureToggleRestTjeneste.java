@@ -23,7 +23,7 @@ import javax.ws.rs.core.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.UnleashContext;
-import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
+import no.nav.foreldrepenger.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.kontrakt.toggle.FeatureToggleDto;
 import no.nav.k9.sak.kontrakt.toggle.FeatureToggleNavnDto;
 import no.nav.k9.sak.kontrakt.toggle.FeatureToggleNavnListeDto;
@@ -52,7 +52,7 @@ public class FeatureToggleRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Svarer på om feature-toggles er skrudd på", tags = "feature-toggle")
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
-    public FeatureToggleDto featureToggles(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FeatureToggleNavnListeDto featureToggleNavn) {
+    public FeatureToggleDto featureToggles(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FeatureToggleNavnListeDto featureToggleNavn) {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         UnleashContext unleashContext = UnleashContext.builder()
             .addProperty(ByAnsvarligSaksbehandlerStrategy.SAKSBEHANDLER_IDENT, ident)
