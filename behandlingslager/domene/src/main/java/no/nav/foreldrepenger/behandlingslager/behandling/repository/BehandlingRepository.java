@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.behandlingslager.behandling.repository;
 import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentEksaktResultat;
 import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -424,7 +423,7 @@ public class BehandlingRepository {
         var query = getEntityManager().createNativeQuery(
             "SELECT behandling.versjon FROM behandling WHERE behandling.id = ?");
         query.setParameter(1, behandlingId);
-        return (Long) query.getResultStream().findFirst().map(v -> ((BigDecimal) v).longValue()).orElse(null);
+        return (Long) query.getResultStream().findFirst().map(v -> ((Number) v).longValue()).orElse(null);
     }
 
     public void oppdaterSistOppdatertTidspunkt(Behandling behandling, LocalDateTime tidspunkt) {
