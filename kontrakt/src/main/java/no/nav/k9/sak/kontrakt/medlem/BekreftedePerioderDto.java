@@ -22,8 +22,7 @@ import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BekreftedePerioderDto {
 
-    @JsonProperty(value = "vurderingdato", required = true)
-    @NotNull
+    @JsonProperty(value = "vurderingdato")
     private LocalDate vurderingsdato;
 
     @JsonProperty(value = "aksjonspunkter")
