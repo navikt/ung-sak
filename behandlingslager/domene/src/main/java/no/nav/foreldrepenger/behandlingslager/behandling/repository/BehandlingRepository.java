@@ -418,12 +418,12 @@ public class BehandlingRepository {
         return behandling.getBehandlingsresultat();
     }
 
-    public Boolean erVersjonUendret(Long behandlingId, Long versjon) {
+    @SuppressWarnings("unchecked")
+    public Long hentEksisterendeVersjon(Long behandlingId) {
         Query query = getEntityManager().createNativeQuery(
-            "SELECT 1 FROM behandling WHERE behandling.id = ? AND behandling.versjon = ?");
+            "SELECT behandling.versjon FROM behandling WHERE behandling.id = ?");
         query.setParameter(1, behandlingId);
-        query.setParameter(2, versjon);
-        return !query.getResultList().isEmpty();
+        return (Long) query.getResultStream().findFirst().orElse(null);
     }
 
     public void oppdaterSistOppdatertTidspunkt(Behandling behandling, LocalDateTime tidspunkt) {
