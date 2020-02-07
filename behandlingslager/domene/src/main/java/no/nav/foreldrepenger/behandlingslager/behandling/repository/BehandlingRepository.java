@@ -422,7 +422,7 @@ public class BehandlingRepository {
     @SuppressWarnings("unchecked")
     public Long hentEksisterendeVersjon(Long behandlingId) {
         var query = getEntityManager().createNativeQuery(
-            "SELECT behandling.versjon FROM behandling WHERE behandling.id = ?", BigDecimal.class);
+            "SELECT behandling.versjon FROM behandling WHERE behandling.id = ?");
         query.setParameter(1, behandlingId);
         return (Long) query.getResultStream().findFirst().map(v -> ((BigDecimal) v).longValue()).orElse(null);
     }
