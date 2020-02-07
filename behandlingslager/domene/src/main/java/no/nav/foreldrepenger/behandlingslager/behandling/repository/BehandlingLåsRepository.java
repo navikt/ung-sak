@@ -11,9 +11,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
 /**
@@ -22,8 +19,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 @ApplicationScoped
 public class BehandlingLåsRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(BehandlingLåsRepository.class);
-    
     private static final Map<String, Object> BYPASS_PROPS = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
     
     private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
@@ -104,7 +99,6 @@ public class BehandlingLåsRepository {
             throw BehandlingRepositoryFeil.FACTORY.fantIkkeEntitetForLåsing(Behandling.class.getSimpleName(), id).toException();
         } else {
             LockModeType lockMode = LockModeType.PESSIMISTIC_FORCE_INCREMENT;
-            log.warn("Låser behandling: {}, har versjon før lås {}", id, entity.getVersjon());
             entityManager.lock(entity, lockMode);
         }
         return entity;
