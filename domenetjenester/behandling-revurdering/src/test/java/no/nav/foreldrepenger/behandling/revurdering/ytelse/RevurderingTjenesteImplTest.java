@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandling.revurdering.ytelse.fp;
+package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import no.nav.foreldrepenger.behandling.revurdering.BeregningRevurderingTestUtil;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndring;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjenesteFelles;
+import no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingTjenesteImpl;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;

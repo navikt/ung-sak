@@ -63,7 +63,7 @@ public enum ArbeidsforholdKilde implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

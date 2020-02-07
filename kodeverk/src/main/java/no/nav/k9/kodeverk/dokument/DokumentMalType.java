@@ -60,7 +60,7 @@ public enum DokumentMalType implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return "DOKUMENT_MAL_TYPE";

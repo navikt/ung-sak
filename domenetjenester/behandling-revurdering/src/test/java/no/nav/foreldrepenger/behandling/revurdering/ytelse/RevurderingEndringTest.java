@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandling.revurdering.ytelse.fp;
+package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +32,7 @@ public class RevurderingEndringTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private RevurderingEndring revurderingEndring = new no.nav.foreldrepenger.behandling.revurdering.ytelse.fp.RevurderingEndring();
+    private RevurderingEndring revurderingEndring = new no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingEndring();
     private Behandling originalBehandling;
     private Behandling revurdering;
 

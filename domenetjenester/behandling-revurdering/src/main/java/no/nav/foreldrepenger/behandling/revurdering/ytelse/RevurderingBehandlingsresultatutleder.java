@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandling.revurdering.ytelse.fp;
+package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

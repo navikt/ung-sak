@@ -3,6 +3,7 @@ package no.nav.k9.kodeverk.arbeidsforhold;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -104,7 +105,7 @@ public enum PensjonTrygdType implements YtelseType {
         return navn;
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

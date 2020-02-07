@@ -114,7 +114,7 @@ public enum BehandlingTema implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

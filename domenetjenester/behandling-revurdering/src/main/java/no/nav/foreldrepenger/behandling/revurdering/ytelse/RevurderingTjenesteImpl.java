@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandling.revurdering.ytelse.fp;
+package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import java.util.List;
 import java.util.Optional;

@@ -94,7 +94,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
         return kode;
     }
 
-    @JsonProperty
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
