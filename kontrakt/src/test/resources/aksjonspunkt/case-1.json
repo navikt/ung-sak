@@ -1,0 +1,23 @@
+{
+  "behandlingId" : 999952,
+  "saksnummer" : "5YC36",
+  "behandlingVersjon" : 16,
+  "bekreftedeAksjonspunktDtoer" : [ {
+    "bekreftedePerioder" : [ {
+      "vurderingsdato" : null,
+      "aksjonspunkter" : [ ],
+      "bosattVurdering" : null,
+      "erEosBorger" : null,
+      "oppholdsrettVurdering" : null,
+      "lovligOppholdVurdering" : null,
+      "fodselsdato" : null,
+      "medlemskapManuellVurderingType" : {
+        "kodeverk" : null,
+        "kode" : "MEDLEM"
+      },
+      "omsorgsovertakelseDato" : null,
+      "begrunnelse" : null
+    } ],
+    "@type" : "5021"
+  } ]
+}
