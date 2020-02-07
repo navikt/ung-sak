@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.steg.inngangsvilkår.opptjening.felles.OpptjeningFaktaStegFelles;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
