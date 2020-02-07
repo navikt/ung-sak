@@ -37,6 +37,10 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
     @Override
     public AbacDataAttributter apply(Object obj) {
         var abac = AbacDataAttributter.opprett();
+        if(obj==null) {
+            return abac;
+        }
+        
         boolean erLagtTil = false;
         var cls = obj.getClass();
         for (var m : cls.getMethods()) {
