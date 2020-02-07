@@ -24,12 +24,11 @@ import no.nav.foreldrepenger.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 
-/** Felles steg for å beregne tilkjent ytelse for foreldrepenger og svangerskapspenger (ikke engangsstønad) */
+/** Felles steg for å beregne tilkjent ytelse */
 
 @BehandlingStegRef(kode = "BERYT")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
-
 @ApplicationScoped
 public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
 
