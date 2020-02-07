@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
@@ -92,7 +93,7 @@ public class BehandlingLåsRepository {
         } // else NO-OP (for ny behandling uten id)
     }
   
-    private Object oppdaterLås(Long id) {      
+    private Object oppdaterLåsVersjon(Long id) {      
         LockModeType lockMode = LockModeType.PESSIMISTIC_FORCE_INCREMENT;
         Object entity = entityManager.find(Behandling.class, id, BYPASS_PROPS);
         if (entity == null) {
