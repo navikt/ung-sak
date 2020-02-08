@@ -34,7 +34,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.Redirect;
+import no.nav.foreldrepenger.web.app.rest.Redirect;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;

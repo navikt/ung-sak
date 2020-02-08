@@ -18,6 +18,10 @@ import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
 import no.nav.foreldrepenger.kompletthet.KompletthetsjekkerProvider;
 import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.ArbeidsgiverDto;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.ManglendeVedleggDto;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.OppgittTilknytningDto;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.SøknadDto;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -50,7 +54,7 @@ public class SøknadDtoTjeneste {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
 
-    public Optional<SoknadDto> mapFra(Behandling behandling) {
+    public Optional<SøknadDto> mapFra(Behandling behandling) {
         Optional<SøknadEntitet> søknadOpt = repositoryProvider.getSøknadRepository().hentSøknadHvisEksisterer(behandling.getId());
         if (søknadOpt.isPresent()) {
             SøknadEntitet søknad = søknadOpt.get();
@@ -60,10 +64,10 @@ public class SøknadDtoTjeneste {
         return Optional.empty();
     }
 
-    private Optional<SoknadDto> lagSoknadDto(SøknadEntitet søknad, BehandlingReferanse ref) {
+    private Optional<SøknadDto> lagSoknadDto(SøknadEntitet søknad, BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
 
-        var dto = new SoknadDto();
+        var dto = new SøknadDto();
         dto.setMottattDato(søknad.getMottattDato());
         dto.setSoknadsdato(søknad.getSøknadsdato());
 

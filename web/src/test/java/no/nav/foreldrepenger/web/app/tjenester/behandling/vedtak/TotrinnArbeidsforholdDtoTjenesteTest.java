@@ -34,7 +34,6 @@ import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.app.TotrinnArbeidsforholdDtoTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnsArbeidsforholdDto;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;

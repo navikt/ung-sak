@@ -6,6 +6,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParamet
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.revurdering.dto.KontrollerRevurderingsBehandlingDto;
 
 
 @ApplicationScoped

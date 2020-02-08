@@ -8,6 +8,8 @@ import org.jboss.resteasy.spi.ApplicationException;
 import org.junit.Before;
 import org.junit.Test;
 
+import no.nav.foreldrepenger.web.app.exceptions.dto.FeilDto;
+import no.nav.foreldrepenger.web.app.exceptions.dto.FeilType;
 import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;

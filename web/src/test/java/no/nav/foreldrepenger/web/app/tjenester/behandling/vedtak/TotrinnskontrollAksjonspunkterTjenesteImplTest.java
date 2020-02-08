@@ -27,8 +27,6 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScena
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.app.TotrinnsaksjonspunktDtoTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.app.TotrinnskontrollAksjonspunkterTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnskontrollAksjonspunkterDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnskontrollSkjermlenkeContextDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;

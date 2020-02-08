@@ -8,6 +8,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.vilkår.dto.VilkårDto;
 
 
 class VilkårDtoMapper {

@@ -13,6 +13,7 @@ import com.codahale.metrics.health.HealthCheck;
 
 import no.nav.foreldrepenger.web.app.healthchecks.SelftestResultat;
 import no.nav.foreldrepenger.web.app.healthchecks.Selftests;
+import no.nav.foreldrepenger.web.app.tjenester.integrasjonstatus.dto.SystemNedeDto;
 
 public class IntegrasjonstatusTjenesteTest {
 

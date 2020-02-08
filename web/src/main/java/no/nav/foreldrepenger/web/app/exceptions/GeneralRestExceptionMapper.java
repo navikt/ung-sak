@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import no.nav.foreldrepenger.web.app.exceptions.dto.FeilDto;
+import no.nav.foreldrepenger.web.app.exceptions.dto.FeilType;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.BehandlingEndretKonfliktException;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.VLException;

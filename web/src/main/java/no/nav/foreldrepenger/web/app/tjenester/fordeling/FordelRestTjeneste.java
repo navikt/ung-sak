@@ -44,6 +44,7 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjenest
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
+import no.nav.foreldrepenger.web.app.tjenester.fordeling.dto.JournalpostMottakDto;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
