@@ -13,7 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import io.swagger.v3.oas.annotations.Operation;
-import no.nav.foreldrepenger.web.app.tjenester.konfig.dto.KonfigDto;
+import no.nav.k9.sak.kontrakt.KonfigDto;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
@@ -44,7 +44,7 @@ public class KonfigRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public KonfigDto hentRettskildeUrl() {
-        return new KonfigDto(rettskildeUrl.toString());
+        return new KonfigDto("rettskilde.url", rettskildeUrl.toString());
     }
 
     @GET
@@ -54,6 +54,6 @@ public class KonfigRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public KonfigDto hentSystemrutine() {
-        return new KonfigDto(systemrutineUrl.toString());
+        return new KonfigDto("systemrutine.url", systemrutineUrl.toString());
     }
 }

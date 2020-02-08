@@ -167,10 +167,6 @@ public class ArbeidsforholdDto {
         this.tomDato = tomDato;
     }
 
-    public ArbeidsforholdKildeDto getKilde() {
-        return kilde;
-    }
-
     public void setKilde(ArbeidsforholdKilde kilde) {
         this.kilde = new ArbeidsforholdKildeDto(kilde.getNavn());
     }
@@ -223,10 +219,6 @@ public class ArbeidsforholdDto {
         this.arbeidsforholdId = arbeidsforholdId;
     }
 
-    public String getEksternArbeidsforholdId() {
-        return eksternArbeidsforholdId;
-    }
-
     public void setEksternArbeidsforholdId(String eksternArbeidsforholdId) {
         this.eksternArbeidsforholdId = eksternArbeidsforholdId;
     }
@@ -255,16 +247,8 @@ public class ArbeidsforholdDto {
         this.erNyttArbeidsforhold = erNyttArbeidsforhold;
     }
 
-    public Boolean getErEndret() {
-        return erEndret;
-    }
-
     public void setErEndret(Boolean erEndret) {
         this.erEndret = erEndret;
-    }
-
-    public Boolean getErSlettet() {
-        return erSlettet;
     }
 
     public void setErSlettet(Boolean erSlettet) {
@@ -279,56 +263,28 @@ public class ArbeidsforholdDto {
         this.erstatterArbeidsforholdId = erstatterArbeidsforholdId;
     }
 
-    public Boolean getHarErstattetEttEllerFlere() {
-        return harErstattetEttEllerFlere;
-    }
-
     public void setHarErstattetEttEllerFlere(Boolean harErstattetEttEllerFlere) {
         this.harErstattetEttEllerFlere = harErstattetEttEllerFlere;
-    }
-
-    public Boolean getIkkeRegistrertIAaRegister() {
-        return ikkeRegistrertIAaRegister;
     }
 
     public void setIkkeRegistrertIAaRegister(Boolean ikkeRegistrertIAaRegister) {
         this.ikkeRegistrertIAaRegister = ikkeRegistrertIAaRegister;
     }
 
-    public Boolean getTilVurdering() {
-        return tilVurdering;
-    }
-
     public void setTilVurdering(Boolean tilVurdering) {
         this.tilVurdering = tilVurdering;
-    }
-
-    public Boolean getVurderOmSkalErstattes() {
-        return vurderOmSkalErstattes;
     }
 
     public void setVurderOmSkalErstattes(boolean vurderOmSkalErstattes) {
         this.vurderOmSkalErstattes = vurderOmSkalErstattes;
     }
 
-    public String getArbeidsgiverIdentifiktorGUI() {
-        return arbeidsgiverIdentifiktorGUI;
-    }
-
     public void setArbeidsgiverIdentifiktorGUI(String arbeidsgiverIdentififaktorGUI) {
         this.arbeidsgiverIdentifiktorGUI = arbeidsgiverIdentififaktorGUI;
     }
 
-    public ArbeidsforholdHandlingType getHandlingType() {
-        return handlingType;
-    }
-
     public void setHandlingType(ArbeidsforholdHandlingType handlingType) {
         this.handlingType = handlingType;
-    }
-
-    public boolean getBrukMedJustertPeriode() {
-        return brukMedJustertPeriode;
     }
 
     public void setBrukMedJustertPeriode(boolean brukMedJustertPeriode) {
@@ -349,10 +305,6 @@ public class ArbeidsforholdDto {
 
     public void setInntektMedTilBeregningsgrunnlag(Boolean inntektMedTilBeregningsgrunnlag) {
         this.inntektMedTilBeregningsgrunnlag = inntektMedTilBeregningsgrunnlag;
-    }
-
-    public LocalDate getSkjaeringstidspunkt() {
-        return skjaeringstidspunkt;
     }
 
     public void setSkjaeringstidspunkt(LocalDate skjaeringstidspunkt) {

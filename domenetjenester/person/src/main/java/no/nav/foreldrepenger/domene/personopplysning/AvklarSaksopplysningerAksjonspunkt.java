@@ -24,7 +24,7 @@ class AvklarSaksopplysningerAksjonspunkt {
         LocalDate tom = adapter.getPersonstatusTypeKode().get().getGyldigTom();
         DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
 
-        final PersonstatusType status = settPersonstatusType(adapter.getPersonstatusTypeKode().map(PersonopplysningAksjonspunktDto.PersonstatusPeriode::getPersonstatus));
+        final PersonstatusType status = setPersonstatusType(adapter.getPersonstatusTypeKode().map(PersonopplysningAksjonspunktDto.PersonstatusPeriode::getPersonstatus));
         if (status != null) {
             PersonInformasjonBuilder.PersonstatusBuilder medPersonstatus = builder.getPersonstatusBuilder(aktørId, intervall)
                 .medAktørId(aktørId)
@@ -36,12 +36,12 @@ class AvklarSaksopplysningerAksjonspunkt {
         }
     }
 
-    private PersonstatusType settPersonstatusType(Optional<String> personstatus) {
+    private PersonstatusType setPersonstatusType(Optional<PersonstatusType> personstatus) {
         if (personstatus.isPresent()) {
             Set<PersonstatusType> personstatusType = PersonstatusType.personstatusTyperFortsattBehandling();
-            final String personstatusen = personstatus.get();
+            var personstatusen = personstatus.get();
             for (PersonstatusType type : personstatusType) {
-                if (type.getKode().equals(personstatusen)) {
+                if (type.equals(personstatusen)) {
                     return type;
                 }
             }

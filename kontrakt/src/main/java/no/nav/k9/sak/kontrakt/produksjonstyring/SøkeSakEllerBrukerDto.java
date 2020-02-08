@@ -39,8 +39,8 @@ public class SøkeSakEllerBrukerDto {
     }
 
     @AbacAttributt("saksnummer")
-    public String getSaksnummer() {
-        return !antattFnr() ? searchString : null;
+    public Saksnummer getSaksnummer() {
+        return !antattFnr() ? new Saksnummer(searchString) : null;
     }
 
     @AbacAttributt("fnr")

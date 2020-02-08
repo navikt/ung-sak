@@ -1,4 +1,6 @@
-package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto;
+package no.nav.k9.sak.kontrakt.søknad;
+
+import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,6 +23,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS_KODE)
 public class AvklarSaksopplysningerDto extends BekreftetAksjonspunktDto {
 
+    /** {@link PersonstatusType#getKode()}. */
     @JsonProperty(value = "personstatus", required = true)
     @NotNull
     @Size(min = 1, max = 100)
@@ -29,19 +33,19 @@ public class AvklarSaksopplysningerDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value = "fortsettBehandling")
     private boolean fortsettBehandling;
 
-    AvklarSaksopplysningerDto() {
-        // For Jackson
+    protected AvklarSaksopplysningerDto() {
+        //
     }
 
-    public AvklarSaksopplysningerDto(String begrunnelse, String personstatus,
+    public AvklarSaksopplysningerDto(String begrunnelse, PersonstatusType personstatus,
                                      boolean fortsettBehandling) {
         super(begrunnelse);
-        this.personstatus = personstatus;
+        this.personstatus = Objects.requireNonNull(personstatus, "personstatus").getKode();
         this.fortsettBehandling = fortsettBehandling;
     }
 
-    public String getPersonstatus() {
-        return personstatus;
+    public PersonstatusType getPersonstatus() {
+        return PersonstatusType.fraKode(personstatus);
     }
 
     public boolean isFortsettBehandling() {

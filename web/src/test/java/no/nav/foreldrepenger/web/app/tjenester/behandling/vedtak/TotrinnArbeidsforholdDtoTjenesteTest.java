@@ -34,10 +34,10 @@ import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnsArbeidsforholdDto;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.kontrakt.vedtak.TotrinnsArbeidsforholdDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -95,7 +95,7 @@ public class TotrinnArbeidsforholdDtoTjenesteTest {
         // Assert
         assertThat(dtoer).hasSize(1);
         assertThat(dtoer.get(0).getNavn()).isEqualTo("Virksomheten");
-        assertThat(dtoer.get(0).getOrganisasjonsnummer()).isEqualTo(ORGNR);
+        assertThat(dtoer.get(0).getArbeidsgiverIdentifikator()).isEqualTo(ORGNR);
         assertThat(dtoer.get(0).getBrukPermisjon()).isTrue();
     }
 

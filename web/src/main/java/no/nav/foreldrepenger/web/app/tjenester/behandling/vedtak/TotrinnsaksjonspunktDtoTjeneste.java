@@ -11,8 +11,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnskontrollAksjonspunkterDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnskontrollVurderÅrsak;
+import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto;
+import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollVurderÅrsak;
 
 @ApplicationScoped
 public class TotrinnsaksjonspunktDtoTjeneste {
@@ -39,7 +39,7 @@ public class TotrinnsaksjonspunktDtoTjeneste {
                                                                                  Behandling behandling,
                                                                                  Optional<Totrinnresultatgrunnlag> totrinnresultatgrunnlag) {
         return new TotrinnskontrollAksjonspunkterDto.Builder()
-            .medAksjonspunktKode(aksjonspunkt.getAksjonspunktDefinisjon().getKode())
+            .medAksjonspunktKode(aksjonspunkt.getAksjonspunktDefinisjon())
             .medOpptjeningAktiviteter(totrinnskontrollAktivitetDtoTjeneste.hentAktiviterEndretForOpptjening(aksjonspunkt, behandling,
                 totrinnresultatgrunnlag.flatMap(Totrinnresultatgrunnlag::getGrunnlagUuid)))
             .medBeregningDto(totrinnsBeregningDtoTjeneste.hentBeregningDto(aksjonspunkt, behandling,
@@ -55,7 +55,7 @@ public class TotrinnsaksjonspunktDtoTjeneste {
     private Set<TotrinnskontrollVurderÅrsak> hentVurderPåNyttÅrsaker(Totrinnsvurdering aksjonspunkt) {
         return aksjonspunkt.getVurderPåNyttÅrsaker().stream()
             .map(VurderÅrsakTotrinnsvurdering::getÅrsaksType)
-            .map(arsakType -> new TotrinnskontrollVurderÅrsak(arsakType.getKode(), arsakType.getNavn()))
+            .map(arsakType -> new TotrinnskontrollVurderÅrsak(arsakType))
             .collect(Collectors.toSet());
     }
 }

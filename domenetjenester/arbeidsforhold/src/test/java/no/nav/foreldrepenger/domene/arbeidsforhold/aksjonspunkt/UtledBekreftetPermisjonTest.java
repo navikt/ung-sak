@@ -12,6 +12,7 @@ import org.junit.Test;
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 public class UtledBekreftetPermisjonTest {

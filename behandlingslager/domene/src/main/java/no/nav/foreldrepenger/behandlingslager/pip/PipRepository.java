@@ -20,6 +20,7 @@ import javax.persistence.TypedQuery;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class PipRepository {
@@ -112,7 +113,7 @@ public class PipRepository {
         return aktørIdList.stream().map(AktørId::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public Set<AktørId> hentAktørIdKnyttetTilSaksnummer(String saksnummer) {
+    public Set<AktørId> hentAktørIdKnyttetTilSaksnummer(Saksnummer saksnummer) {
         Objects.requireNonNull(saksnummer, SAKSNUMMER);
 
         String sql = "SELECT por.AKTOER_ID From Fagsak fag " +
@@ -127,7 +128,7 @@ public class PipRepository {
             "WHERE fag.SAKSNUMMER = (:saksnummer) AND br.AKTOER_ID IS NOT NULL ";
 
         Query query = entityManager.createNativeQuery(sql); // NOSONAR
-        query.setParameter(SAKSNUMMER, saksnummer);
+        query.setParameter(SAKSNUMMER, saksnummer.getVerdi());
 
         @SuppressWarnings("unchecked")
         List<String> aktørIdList = query.getResultList();

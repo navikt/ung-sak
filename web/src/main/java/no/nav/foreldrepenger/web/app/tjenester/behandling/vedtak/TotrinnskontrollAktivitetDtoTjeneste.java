@@ -21,9 +21,10 @@ import no.nav.foreldrepenger.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.foreldrepenger.domene.opptjening.VurderingsStatus;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto.TotrinnskontrollAktivitetDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAktivitetDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.OrgNummer;
 
 @ApplicationScoped
 public class TotrinnskontrollAktivitetDtoTjeneste {
@@ -70,7 +71,7 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
 
     private TotrinnskontrollAktivitetDto lagDtoAvPeriode(OpptjeningsperiodeForSaksbehandling periode) {
         TotrinnskontrollAktivitetDto dto = new TotrinnskontrollAktivitetDto();
-        dto.setAktivitetType(periode.getOpptjeningAktivitetType().getNavn());
+        dto.setAktivitetType(periode.getOpptjeningAktivitetType());
         dto.setErEndring(periode.getErPeriodeEndret());
         dto.setGodkjent(erPeriodeGodkjent(periode));
 
@@ -91,12 +92,13 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
         } else if (arbeidsgiver.getOrgnr() != null) {
             String arbeidsgiverNavn = hentVirksomhetNavnPåOrgnr(arbeidsgiver.getOrgnr());
             dto.setArbeidsgiverNavn(arbeidsgiverNavn);
-            dto.setOrgnr(arbeidsgiver.getOrgnr());
+            dto.setOrgnr(new OrgNummer(arbeidsgiver.getOrgnr()));
         }
     }
 
     private boolean erPeriodeGodkjent(OpptjeningsperiodeForSaksbehandling periode) {
-        return VurderingsStatus.GODKJENT.equals(periode.getVurderingsStatus()) || VurderingsStatus.FERDIG_VURDERT_GODKJENT.equals(periode.getVurderingsStatus());
+        return VurderingsStatus.GODKJENT.equals(periode.getVurderingsStatus())
+            || VurderingsStatus.FERDIG_VURDERT_GODKJENT.equals(periode.getVurderingsStatus());
     }
 
     private String hentVirksomhetNavnPåOrgnr(String orgnr) {

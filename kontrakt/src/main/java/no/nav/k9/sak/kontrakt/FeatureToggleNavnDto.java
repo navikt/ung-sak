@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.toggle;
+package no.nav.k9.sak.kontrakt;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;

@@ -15,6 +15,7 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

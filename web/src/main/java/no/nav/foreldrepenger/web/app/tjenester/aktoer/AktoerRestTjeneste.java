@@ -34,7 +34,6 @@ import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -65,10 +64,9 @@ public class AktoerRestTjeneste {
     @Path("/aktoer-info")
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktoerIdDto) {
-        var aktoerId = aktoerIdDto.getAktørId();
+        var aktørId = aktoerIdDto.getAktørId();
         AktørInfoDto aktoerInfoDto = new AktørInfoDto();
-        if (aktoerId != null) {
-            AktørId aktørId = new AktørId(aktoerId);
+        if (aktørId != null) {
             Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(aktørId);
             if (personinfo.isPresent()) {
                 Personinfo pi = personinfo.get();
@@ -81,7 +79,7 @@ public class AktoerRestTjeneste {
                     pi.getDiskresjonskode(),
                     pi.getDødsdato());
                 aktoerInfoDto.setPerson(personDto);
-                aktoerInfoDto.setAktoerId(pi.getAktørId().getId());
+                aktoerInfoDto.setAktørId(pi.getAktørId());
                 List<FagsakDto> fagsakDtoer = new ArrayList<>();
                 List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
                 for (var f : fagsaker) {

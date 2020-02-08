@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -56,7 +55,7 @@ public class HistorikkRestTjeneste {
         String requestURL = getRequestPath(request);
         String url = requestURL + "/dokument/hent-dokument";
 
-        var historikkInnslagDtoList = historikkTjeneste.hentAlleHistorikkInnslagForSak(new Saksnummer(saksnummerDto.getVerdi()));
+        var historikkInnslagDtoList = historikkTjeneste.hentAlleHistorikkInnslagForSak(saksnummerDto.getVerdi());
         if (historikkInnslagDtoList != null && historikkInnslagDtoList.size() > 0) {
             responseBuilder.entity(historikkInnslagDtoList);
             for (var dto : historikkInnslagDtoList) {

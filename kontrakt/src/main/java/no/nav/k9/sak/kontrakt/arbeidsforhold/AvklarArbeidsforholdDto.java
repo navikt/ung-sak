@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
+package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class AvklarArbeidsforholdDto extends BekreftetAksjonspunktDto {
         //For Jackson
     }
 
-    AvklarArbeidsforholdDto(String begrunnelse, List<ArbeidsforholdDto> arbeidsforhold) {
+    public AvklarArbeidsforholdDto(String begrunnelse, List<ArbeidsforholdDto> arbeidsforhold) {
         super(begrunnelse);
         this.arbeidsforhold = arbeidsforhold;
     }

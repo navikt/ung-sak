@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto;
+package no.nav.k9.sak.kontrakt.søknad;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

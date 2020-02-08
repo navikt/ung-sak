@@ -21,6 +21,7 @@ import no.nav.foreldrepenger.behandlingslager.pip.PipRepository;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
@@ -148,13 +149,12 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         fagsakIder.addAll(pipRepository.fagsakIderForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
 
         // fra saksnummer
-        Set<String> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
-        fagsakIder.addAll(pipRepository.fagsakIdForSaksnummer(saksnummere));
+        Set<Saksnummer> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
+        fagsakIder.addAll(pipRepository.fagsakIdForSaksnummer(saksnummere.stream().map(Saksnummer::getVerdi).collect(Collectors.toSet())));
 
         // journalpostIder
-        Set<String> ikkePåkrevdJournalpostIdVerdier = attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID);
-        Set<JournalpostId> ikkePåkrevdeJournalpostId = ikkePåkrevdJournalpostIdVerdier.stream().map(JournalpostId::new).collect(Collectors.toSet());
-        fagsakIder.addAll(pipRepository.fagsakIdForJournalpostId(ikkePåkrevdeJournalpostId));
+        Set<JournalpostId> journalpostIder = attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID);
+        fagsakIder.addAll(pipRepository.fagsakIdForJournalpostId(journalpostIder));
 
         return fagsakIder;
     }

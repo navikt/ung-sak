@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.toggle;
+package no.nav.k9.sak.kontrakt;
 
 import java.util.Map;
 

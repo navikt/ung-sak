@@ -18,7 +18,7 @@ public class BekreftBosattVurderingAksjonspunktDto {
     private Boolean bosattVurdering;
 
     @JsonProperty(value = "begrunnelse")
-    @Size(max = 5000)
+    @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 

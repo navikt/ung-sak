@@ -47,17 +47,17 @@ public class PersonopplysningDtoPersonIdentTjeneste {
                                   Function<String, Optional<String>> tpsKodeFinder) {
 
         // Soker
-        dto.setFnr(findFnr(dto.getAktoerId(), tpsFnrFinder)); // forelder / soeker
+        dto.setFnr(findFnr(dto.getAktørId(), tpsFnrFinder)); // forelder / soeker
         dto.setDiskresjonskode(findKode(dto.getFnr(), tpsKodeFinder));
 
         // Medsoker
         if (dto.getAnnenPart() != null) {
-            dto.getAnnenPart().setFnr(findFnr(dto.getAnnenPart().getAktoerId(), tpsFnrFinder));
+            dto.getAnnenPart().setFnr(findFnr(dto.getAnnenPart().getAktørId(), tpsFnrFinder));
             dto.getAnnenPart().setDiskresjonskode(findKode(dto.getAnnenPart().getFnr(), tpsKodeFinder));
             // Medsøkers barn
             if (!dto.getAnnenPart().getBarn().isEmpty()) {
                 for (PersonopplysningDto dtoBarn : dto.getAnnenPart().getBarn()) {
-                    dtoBarn.setFnr(findFnr(dtoBarn.getAktoerId(), tpsFnrFinder));
+                    dtoBarn.setFnr(findFnr(dtoBarn.getAktørId(), tpsFnrFinder));
                     dtoBarn.setDiskresjonskode(findKode(dtoBarn.getFnr(), tpsKodeFinder));
                 }
             }
@@ -65,13 +65,13 @@ public class PersonopplysningDtoPersonIdentTjeneste {
 
         // ektefelle
         if (dto.getEktefelle() != null) {
-            dto.getEktefelle().setFnr(findFnr(dto.getEktefelle().getAktoerId(), tpsFnrFinder));
+            dto.getEktefelle().setFnr(findFnr(dto.getEktefelle().getAktørId(), tpsFnrFinder));
             dto.getEktefelle().setDiskresjonskode(findKode(dto.getEktefelle().getFnr(), tpsKodeFinder));
         }
 
         // Barn
         for (PersonopplysningDto dtoBarn : dto.getBarn()) {
-            dtoBarn.setFnr(findFnr(dtoBarn.getAktoerId(), tpsFnrFinder));
+            dtoBarn.setFnr(findFnr(dtoBarn.getAktørId(), tpsFnrFinder));
             dtoBarn.setDiskresjonskode(findKode(dtoBarn.getFnr(), tpsKodeFinder));
         }
     }

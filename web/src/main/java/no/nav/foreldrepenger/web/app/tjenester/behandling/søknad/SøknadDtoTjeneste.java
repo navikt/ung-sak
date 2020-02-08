@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -9,6 +10,8 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
@@ -18,11 +21,13 @@ import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
 import no.nav.foreldrepenger.kompletthet.KompletthetsjekkerProvider;
 import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.ArbeidsgiverDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.ManglendeVedleggDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.OppgittTilknytningDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.SøknadDto;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.sak.kontrakt.søknad.ArbeidsgiverDto;
+import no.nav.k9.sak.kontrakt.søknad.ManglendeVedleggDto;
+import no.nav.k9.sak.kontrakt.søknad.OppgittTilknytningDto;
+import no.nav.k9.sak.kontrakt.søknad.SøknadDto;
+import no.nav.k9.sak.kontrakt.søknad.UtlandsoppholdDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -43,10 +48,10 @@ public class SøknadDtoTjeneste {
 
     @Inject
     public SøknadDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 KompletthetsjekkerProvider kompletthetsjekkerProvider,
-                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                 MedlemTjeneste medlemTjeneste) {
+                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                             KompletthetsjekkerProvider kompletthetsjekkerProvider,
+                             ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                             MedlemTjeneste medlemTjeneste) {
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.kompletthetsjekkerProvider = kompletthetsjekkerProvider;
@@ -79,7 +84,7 @@ public class SøknadDtoTjeneste {
         dto.setBegrunnelseForSenInnsending(søknad.getBegrunnelseForSenInnsending());
 
         medlemTjeneste.hentMedlemskap(behandlingId).ifPresent(ma -> {
-            dto.setOppgittTilknytning(OppgittTilknytningDto.mapFra(ma.getOppgittTilknytning().orElse(null)));
+            dto.setOppgittTilknytning(mapFra(ma.getOppgittTilknytning().orElse(null)));
         });
 
         dto.setManglendeVedlegg(genererManglendeVedlegg(ref));
@@ -111,26 +116,26 @@ public class SøknadDtoTjeneste {
 
     private ArbeidsgiverDto mapTilArbeidsgiverDto(String arbeidsgiverIdent) {
         if (OrganisasjonsNummerValidator.erGyldig(arbeidsgiverIdent) || OrgNummer.erKunstig(arbeidsgiverIdent)) {
-            return virksomhetArbeidsgiver(arbeidsgiverIdent);
+            return virksomhetArbeidsgiver(new OrgNummer(arbeidsgiverIdent));
         } else {
-            return privatpersonArbeidsgiver(arbeidsgiverIdent);
+            return privatpersonArbeidsgiver(new AktørId(arbeidsgiverIdent));
         }
     }
 
-    private ArbeidsgiverDto privatpersonArbeidsgiver(String aktørId) {
-        ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.person(new AktørId(aktørId)));
+    private ArbeidsgiverDto privatpersonArbeidsgiver(AktørId aktørId) {
+        ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.person(aktørId));
         ArbeidsgiverDto dto = new ArbeidsgiverDto();
         dto.setNavn(opplysninger.getNavn());
         dto.setFødselsdato(opplysninger.getFødselsdato());
         dto.setAktørId(aktørId);
 
         // Dette må gjøres for å ikke knekke frontend, kan fjernes når frontend er rettet.
-        dto.setOrganisasjonsnummer(opplysninger.getIdentifikator());
+        dto.setOrganisasjonsnummer(new OrgNummer(opplysninger.getIdentifikator()));
 
         return dto;
     }
 
-    private ArbeidsgiverDto virksomhetArbeidsgiver(String orgnr) {
+    private ArbeidsgiverDto virksomhetArbeidsgiver(OrgNummer orgnr) {
         ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.virksomhet(orgnr));
         ArbeidsgiverDto dto = new ArbeidsgiverDto();
         dto.setOrganisasjonsnummer(orgnr);
@@ -138,4 +143,38 @@ public class SøknadDtoTjeneste {
         return dto;
     }
 
+    private static OppgittTilknytningDto mapFra(MedlemskapOppgittTilknytningEntitet oppgittTilknytning) {
+        if (oppgittTilknytning != null) {
+            return new OppgittTilknytningDto(
+                oppgittTilknytning.isOppholdNå(),
+                oppgittTilknytning.isOppholdINorgeSistePeriode(),
+                oppgittTilknytning.isOppholdINorgeNestePeriode(),
+                mapFør(oppgittTilknytning.getOpphold()),
+                mapEtter(oppgittTilknytning.getOpphold()));
+        }
+        return null;
+    }
+
+    private static List<UtlandsoppholdDto> mapFør(Set<MedlemskapOppgittLandOppholdEntitet> opphold) {
+        return mapFraMedlemskapOppgttLandOpphold(opphold.stream()
+            .filter(o -> o.isTidligereOpphold())
+            .filter(o -> !o.getLand().equals(Landkoder.NOR))
+            .collect(Collectors.toList()));
+    }
+
+    private static List<UtlandsoppholdDto> mapEtter(Set<MedlemskapOppgittLandOppholdEntitet> utlandsopphold) {
+        return mapFraMedlemskapOppgttLandOpphold(utlandsopphold.stream()
+            .filter(o -> !o.isTidligereOpphold())
+            .filter(o -> !o.getLand().equals(Landkoder.NOR))
+            .collect(Collectors.toList()));
+    }
+
+    public static List<UtlandsoppholdDto> mapFraMedlemskapOppgttLandOpphold(List<MedlemskapOppgittLandOppholdEntitet> utlandsoppholdList) {
+        return utlandsoppholdList.stream()
+            .map(utlandsopphold -> new UtlandsoppholdDto(
+                utlandsopphold.getLand().getNavn(),
+                utlandsopphold.getPeriodeFom(),
+                utlandsopphold.getPeriodeTom()))
+            .collect(Collectors.toList());
+    }
 }

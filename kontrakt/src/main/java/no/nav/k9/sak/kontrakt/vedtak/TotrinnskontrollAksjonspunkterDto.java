@@ -1,21 +1,59 @@
-package no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.dto;
+package no.nav.k9.sak.kontrakt.vedtak;
 
 import java.util.List;
 import java.util.Set;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TotrinnskontrollAksjonspunkterDto {
 
+    @JsonProperty(value = "aksjonspunktKode")
+    @Size(max = 10)
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String aksjonspunktKode;
+
+    @JsonProperty(value = "opptjeningAktiviteter")
+    @Size(max = 200)
+    @Valid
     private List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter;
+
+    @JsonProperty(value = "beregningDto")
+    @Valid
     private TotrinnsBeregningDto beregningDto;
+
+    @JsonProperty(value = "besluttersBegrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String besluttersBegrunnelse;
+
+    @JsonProperty(value = "totrinnskontrollGodkjent")
     private Boolean totrinnskontrollGodkjent;
+
+    @JsonProperty(value = "vurderPaNyttArsaker")
+    @Size(max = 100)
+    @Valid
     private Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker;
+
+    @JsonProperty(value = "arbeidsforholdDtos")
+    @Size(max = 200)
+    @Valid
     private List<TotrinnsArbeidsforholdDto> arbeidforholdDtos;
 
-
-    public String getAksjonspunktKode() {
-        return aksjonspunktKode;
+    public AksjonspunktDefinisjon getAksjonspunktKode() {
+        return AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
     }
 
     public List<TotrinnskontrollAktivitetDto> getOpptjeningAktiviteter() {
@@ -45,8 +83,8 @@ public class TotrinnskontrollAksjonspunkterDto {
     public static class Builder {
         TotrinnskontrollAksjonspunkterDto kladd = new TotrinnskontrollAksjonspunkterDto();
 
-        public Builder medAksjonspunktKode(String aksjonspunktKode) {
-            kladd.aksjonspunktKode = aksjonspunktKode;
+        public Builder medAksjonspunktKode(AksjonspunktDefinisjon aksjonspunktKode) {
+            kladd.aksjonspunktKode = aksjonspunktKode.getKode();
             return this;
         }
 

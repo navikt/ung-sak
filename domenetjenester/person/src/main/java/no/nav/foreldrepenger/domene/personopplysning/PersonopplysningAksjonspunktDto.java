@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 
 public class PersonopplysningAksjonspunktDto {
 
@@ -35,23 +36,23 @@ public class PersonopplysningAksjonspunktDto {
 
     public static final class PersonstatusPeriode {
 
-        private String personstatus;
+        private PersonstatusType personstatus;
         private LocalDate gyldigFom;
         private LocalDate gyldigTom;
 
-        public PersonstatusPeriode(String personstatus, LocalDate gyldigFom, LocalDate gyldigTom) {
+        public PersonstatusPeriode(PersonstatusType personstatus, LocalDate gyldigFom, LocalDate gyldigTom) {
             this.personstatus = personstatus;
             this.gyldigFom = gyldigFom;
             this.gyldigTom = gyldigTom;
         }
 
-        public PersonstatusPeriode(String personstatus, DatoIntervallEntitet periode) {
+        public PersonstatusPeriode(PersonstatusType personstatus, DatoIntervallEntitet periode) {
             this.personstatus = personstatus;
             this.gyldigFom = periode.getFomDato();
             this.gyldigTom = periode.getTomDato();
         }
 
-        public String getPersonstatus() {
+        public PersonstatusType getPersonstatus() {
             return personstatus;
         }
 

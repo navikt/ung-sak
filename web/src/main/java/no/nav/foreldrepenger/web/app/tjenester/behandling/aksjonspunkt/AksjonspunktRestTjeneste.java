@@ -38,7 +38,6 @@ import no.nav.foreldrepenger.web.app.rest.Redirect;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
@@ -127,7 +126,7 @@ public class AksjonspunktRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
         AksjonspunktDto dto = AksjonspunktDtoMapper.lagAksjonspunktDto(behandling, Collections.emptyList())
             .stream()
-            .filter(ap -> AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE.equals(ap.getDefinisjon().getKode()))
+            .filter(ap -> AksjonspunktDefinisjon.VURDER_FARESIGNALER.equals(ap.getDefinisjon()))
             .findFirst()
             .orElse(null);
 

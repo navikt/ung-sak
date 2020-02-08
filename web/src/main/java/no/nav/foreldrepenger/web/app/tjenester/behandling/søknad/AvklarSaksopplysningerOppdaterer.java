@@ -17,11 +17,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Person
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningAksjonspunktDto;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.AvklarSaksopplysningerDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.kontrakt.søknad.AvklarSaksopplysningerDto;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
@@ -63,7 +63,7 @@ public class AvklarSaksopplysningerOppdaterer implements AksjonspunktOppdaterer<
 
     private boolean håndterEndringHistorikk(AvklarSaksopplysningerDto dto, AksjonspunktOppdaterParameter param, PersonopplysningerAggregat personopplysningerAggregat) {
         if (dto.isFortsettBehandling()) {
-            PersonstatusType bekreftetPersonstatus = PersonstatusType.fraKode(dto.getPersonstatus());
+            PersonstatusType bekreftetPersonstatus = dto.getPersonstatus();
             PersonstatusType forrigePersonstatus = personopplysningerAggregat.getPersonstatusFor(param.getBehandling().getAktørId()).getPersonstatus();
             boolean endretVerdi = oppdaterVedEndretVerdi(HistorikkEndretFeltType.AVKLARSAKSOPPLYSNINGER, forrigePersonstatus, bekreftetPersonstatus);
 

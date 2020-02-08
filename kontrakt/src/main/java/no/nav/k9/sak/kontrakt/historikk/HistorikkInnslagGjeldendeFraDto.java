@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class HistorikkInnslagGjeldendeFraDto {
 
     @JsonProperty(value="fra")
-    @Size(max = 5000)
+    @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String fra;
     
@@ -25,7 +25,7 @@ public class HistorikkInnslagGjeldendeFraDto {
     private String navn;
     
     @JsonProperty(value="verdi")
-    @Size(max = 5000)
+    @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String verdi;
     

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto;
+package no.nav.k9.sak.kontrakt.søknad;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE)
 public class BekreftSokersOpplysningspliktManuDto extends BekreftetAksjonspunktDto implements AvslagbartAksjonspunktDto {
 
-    @JsonProperty(value = "erVilkarOk")
+    @JsonProperty(value = "erVilkarOk", required = true)
     @NotNull
     private Boolean erVilkarOk;
 

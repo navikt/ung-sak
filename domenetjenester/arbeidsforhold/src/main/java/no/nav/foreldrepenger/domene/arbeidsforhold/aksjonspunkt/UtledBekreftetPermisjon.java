@@ -7,6 +7,7 @@ import java.util.List;
 
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 final class UtledBekreftetPermisjon {

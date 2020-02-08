@@ -363,7 +363,7 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<BehandlingDto> hentBehandlinger(@NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer må være et eksisterende saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
-        Saksnummer saksnummer = new Saksnummer(s.getVerdi());
+        Saksnummer saksnummer = s.getVerdi();
         List<Behandling> behandlinger = behandlingsutredningApplikasjonTjeneste.hentBehandlingerForSaksnummer(saksnummer);
         return behandlingDtoTjeneste.lagBehandlingDtoer(behandlinger);
     }
@@ -374,7 +374,7 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<BehandlingDto> hentAlleBehandlinger(@NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer må være et eksisterende saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
-        Saksnummer saksnummer = new Saksnummer(s.getVerdi());
+        Saksnummer saksnummer = s.getVerdi();
         List<Behandling> behandlinger = behandlingsutredningApplikasjonTjeneste.hentBehandlingerForSaksnummer(saksnummer);
         return behandlingDtoTjeneste.lagBehandlingDtoer(behandlinger);
     }

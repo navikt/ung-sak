@@ -78,7 +78,7 @@ public class FagsakRestTjeneste {
     public Response hentFagsakMidlertidigStatus(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto idDto,
                                                 @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ProsessTaskGruppeIdDto gruppeDto)
             throws URISyntaxException {
-        Saksnummer saksnummer = new Saksnummer(idDto.getVerdi());
+        Saksnummer saksnummer = idDto.getVerdi();
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
         Optional<AsyncPollingStatus> prosessTaskGruppePågår = fagsakApplikasjonTjeneste.sjekkProsessTaskPågår(saksnummer, gruppe);
         return Redirect.tilFagsakEllerPollStatus(saksnummer, prosessTaskGruppePågår.orElse(null));
@@ -95,7 +95,7 @@ public class FagsakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
 
-        Saksnummer saksnummer = new Saksnummer(s.getVerdi());
+        Saksnummer saksnummer = s.getVerdi();
         FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentFagsakForSaksnummer(saksnummer);
         List<FagsakDto> list = tilDtoer(view);
         if (list.isEmpty()) {

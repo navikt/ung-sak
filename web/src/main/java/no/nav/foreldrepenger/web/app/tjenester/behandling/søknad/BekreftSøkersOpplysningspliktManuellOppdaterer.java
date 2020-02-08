@@ -15,7 +15,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.dto.BekreftSokersOpplysningspliktManuDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -24,6 +23,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.kontrakt.søknad.BekreftSokersOpplysningspliktManuDto;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
