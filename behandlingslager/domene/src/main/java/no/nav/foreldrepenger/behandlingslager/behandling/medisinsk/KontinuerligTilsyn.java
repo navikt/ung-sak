@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.medisinsk;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
@@ -26,7 +26,7 @@ public class KontinuerligTilsyn extends BaseEntitet {
     private Long id;
 
     @OneToMany(mappedBy = "kontinuerligTilsyn", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private List<KontinuerligTilsynPeriode> perioder;
+    private List<KontinuerligTilsynPeriode> perioder = new ArrayList<>();
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -36,14 +36,7 @@ public class KontinuerligTilsyn extends BaseEntitet {
         // hibernate
     }
 
-    public KontinuerligTilsyn(Set<KontinuerligTilsynPeriode> perioder) {
-        Objects.requireNonNull(perioder);
-        this.perioder = perioder.stream()
-            .peek(it -> it.setKontinuerligTilsyn(this))
-            .collect(Collectors.toList());
-    }
-
-    public KontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
+    KontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
         Objects.requireNonNull(kontinuerligTilsyn);
 
         this.perioder = kontinuerligTilsyn.getPerioder()
@@ -61,9 +54,15 @@ public class KontinuerligTilsyn extends BaseEntitet {
         return perioder;
     }
 
+    void setPerioder(List<KontinuerligTilsynPeriode> perioder) {
+        this.perioder = perioder.stream()
+            .peek(it -> it.setKontinuerligTilsyn(this))
+            .collect(Collectors.toList());
+    }
+
     @Override
     public String toString() {
-        return "Fordeling{" +
+        return "KontinuerligTilsyn{" +
             "id=" + id +
             ", perioder=" + perioder +
             '}';

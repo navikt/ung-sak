@@ -90,12 +90,14 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         KontinuerligTilsynPeriode that = (KontinuerligTilsynPeriode) o;
-        return Objects.equals(periode, that.periode);
+        return grad == that.grad &&
+            Objects.equals(periode, that.periode) &&
+            Objects.equals(begrunnelse, that.begrunnelse);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode);
+        return Objects.hash(periode, begrunnelse, grad);
     }
 
     @Override

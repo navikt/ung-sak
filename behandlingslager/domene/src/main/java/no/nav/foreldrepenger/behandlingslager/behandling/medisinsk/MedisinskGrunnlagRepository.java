@@ -38,8 +38,9 @@ public class MedisinskGrunnlagRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagreOgFlush(Behandling behandling, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
+    public void lagreOgFlush(Behandling behandling, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
         Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
+        Objects.requireNonNull(behandling, "kontinuerligTilsyn"); // NOSONAR $NON-NLS-1$
         final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
@@ -50,8 +51,9 @@ public class MedisinskGrunnlagRepository {
             entityManager.flush();
         }
 
-        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, kontinuerligTilsyn, legeerklæringer);
-        entityManager.persist(kontinuerligTilsyn);
+        final var tilsyn = kontinuerligTilsyn.build();
+        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, tilsyn, legeerklæringer);
+        entityManager.persist(tilsyn);
         entityManager.persist(legeerklæringer);
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
@@ -72,6 +74,6 @@ public class MedisinskGrunnlagRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Behandling gammelBehandling, Behandling nyBehandling) {
         Optional<MedisinskGrunnlag> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandling.getId());
-        søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandling, entitet.getKontinuerligTilsyn(), entitet.getLegeerklæringer()));
+        søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandling, new KontinuerligTilsynBuilder(entitet.getKontinuerligTilsyn()), entitet.getLegeerklæringer()));
     }
 }
