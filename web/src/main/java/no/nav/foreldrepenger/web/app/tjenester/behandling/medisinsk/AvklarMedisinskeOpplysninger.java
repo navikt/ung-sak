@@ -90,14 +90,16 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private Legeerklæringer mapLegeerklæringer(Legeerklæringer legeerklæringer, List<Legeerklæring> dtoLegeerklæringer) {
         final var oppdatertLegeerklæringer = new Legeerklæringer(legeerklæringer);
 
-        dtoLegeerklæringer.stream().map(it -> {
-            final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom());
-            final var innleggelsePerioder = it.getInnleggelsesperioder()
-                .stream()
-                .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
-                .collect(Collectors.toSet());
-            return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(periode, innleggelsePerioder, LegeerklæringKilde.fraKode(it.getKilde()), it.getDiagnosekode());
-        }).forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
+        dtoLegeerklæringer.stream()
+            .map(it -> {
+                final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom());
+                final var innleggelsePerioder = it.getInnleggelsesperioder()
+                    .stream()
+                    .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
+                    .collect(Collectors.toSet());
+                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(periode, innleggelsePerioder, LegeerklæringKilde.fraKode(it.getKilde()), it.getDiagnosekode());
+            })
+            .forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
 
         return oppdatertLegeerklæringer;
     }
