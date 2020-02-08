@@ -150,20 +150,21 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     }
 
     private static Set<Class<?>> finnAlleDtoTyper() {
-        Set<Class<?>> parametre = new TreeSet<>(Comparator.comparing(Class::getName));
+        Set<Class<?>> klasser = new TreeSet<>(Comparator.comparing(Class::getName));
         for (Method method : finnAlleRestMetoder()) {
-            parametre.addAll(List.of(method.getParameterTypes()));
+            klasser.addAll(List.of(method.getParameterTypes())); // sjekker input parameter typer til rest tjeneste
+            klasser.add(method.getReturnType()); // sjekker return type også
             for (Type type : method.getGenericParameterTypes()) {
                 if (type instanceof ParameterizedType) {
                     ParameterizedType genericTypes = (ParameterizedType) type;
                     for (Type gen : genericTypes.getActualTypeArguments()) {
-                        parametre.add((Class<?>) gen);
+                        klasser.add((Class<?>) gen);
                     }
                 }
             }
         }
         Set<Class<?>> filtreteParametre = new TreeSet<>(Comparator.comparing(Class::getName));
-        for (Class<?> klasse : parametre) {
+        for (Class<?> klasse : klasser) {
             if (klasse.getName().startsWith("java")) {
                 // ikke sjekk nedover i innebygde klasser, det skal brukes annoteringer på tidligere tidspunkt
                 continue;
@@ -189,8 +190,12 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         if (codeSource == null) {
             // system klasse
             return;
-        } else if (codeSource.getLocation().toExternalForm().endsWith(".jar")) {
+        }
+
+        String codeSourceStr = codeSource.getLocation().toExternalForm();
+        if (codeSourceStr.endsWith(".jar")) {
             // skip importerte biblioteker for nå
+            return;
         }
 
         besøkteKlasser.add(klasse);
