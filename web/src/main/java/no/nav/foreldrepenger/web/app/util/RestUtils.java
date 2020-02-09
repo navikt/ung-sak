@@ -1,18 +1,22 @@
 package no.nav.foreldrepenger.web.app.util;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.foreldrepenger.web.app.ApplicationConfig;
-import no.nav.foreldrepenger.web.app.rest.ResourceLink;
-import no.nav.foreldrepenger.web.app.tjenester.RestImplementationClasses;
-import no.nav.foreldrepenger.web.server.jetty.JettyWebKonfigurasjon;
-import javax.ws.rs.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+
+import no.nav.foreldrepenger.web.app.ApplicationConfig;
+import no.nav.foreldrepenger.web.app.tjenester.RestImplementationClasses;
+import no.nav.foreldrepenger.web.server.jetty.JettyWebKonfigurasjon;
+import no.nav.k9.sak.kontrakt.ResourceLink;
 
 public class RestUtils {
 
@@ -84,28 +88,4 @@ public class RestUtils {
         return routes;
     }
 
-    public static String convertObjectToQueryString(Object object) {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.convertValue(object, UriFormat.class).toString();
-    }
-
-    static class UriFormat {
-
-        private StringBuilder builder = new StringBuilder();
-
-        @JsonAnySetter
-        public void addToUri(String name, Object property) {
-            if (builder.length() > 0) {
-                builder.append("&");
-            }
-            builder.append(name).append("=").append(property);
-        }
-
-        @Override
-        public String toString() {
-            return builder.toString();
-        }
-    }
-
 }
-

@@ -27,7 +27,6 @@ import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeUgyldigIn
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
@@ -46,8 +45,6 @@ public class PdpRequestBuilderTest {
     private static final Long FAGSAK_ID_2 = 10002L;
     private static final Long BEHANDLING_ID = 333L;
     private static final JournalpostId JOURNALPOST_ID = new JournalpostId("444");
-    private static final JournalpostId JOURNALPOST_ID_UGYLDIG = new JournalpostId("555");
-    private static final String SAKSNUMMER = "7777";
 
     private static final AktørId AKTØR_0 = AktørId.dummy();
     private static final AktørId AKTØR_1 = AktørId.dummy();
@@ -69,12 +66,12 @@ public class PdpRequestBuilderTest {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
             .leggTil(AppAbacAttributtType.BEHANDLING_ID, BEHANDLING_ID));
 
-        when(pipRepository.fagsakIdForJournalpostId(Collections.singleton(JOURNALPOST_ID))).thenReturn(Collections.singleton(FAGSAK_ID));
-        when(pipRepository.hentAktørIdKnyttetTilFagsaker(Collections.singleton(FAGSAK_ID))).thenReturn(Collections.singleton(AKTØR_1));
+        when(pipRepository.fagsakIdForJournalpostId(any())).thenReturn(Collections.singleton(FAGSAK_ID));
+        when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
         String behandligStatus = BehandlingStatus.OPPRETTET.getKode();
         String ansvarligSaksbehandler = "Z123456";
         String fagsakStatus = FagsakStatus.UNDER_BEHANDLING.getKode();
-        when(pipRepository.hentDataForBehandling(BEHANDLING_ID))
+        when(pipRepository.hentDataForBehandling(any()))
             .thenReturn(Optional.of(new PipBehandlingsData(behandligStatus, ansvarligSaksbehandler, BigInteger.valueOf(FAGSAK_ID), fagsakStatus)));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
@@ -91,10 +88,10 @@ public class PdpRequestBuilderTest {
             .leggTil(AppAbacAttributtType.JOURNALPOST_ID, JOURNALPOST_ID.getVerdi()));
         final HentKjerneJournalpostListeResponse mockJournalResponse = initJournalMockResponse(false);
 
-        when(pipRepository.fagsakIdForJournalpostId(Collections.singleton(JOURNALPOST_ID))).thenReturn(Collections.singleton(FAGSAK_ID));
-        when(pipRepository.fagsakIdForSaksnummer(Collections.singleton(SAKSNUMMER))).thenReturn(Collections.singleton(FAGSAK_ID));
-        when(pipRepository.hentAktørIdKnyttetTilFagsaker(Collections.singleton(FAGSAK_ID))).thenReturn(Collections.singleton(AKTØR_1));
-        when(journalConsumer.hentKjerneJournalpostListe(any(HentKjerneJournalpostListeRequest.class))).thenReturn(mockJournalResponse); // NOSONAR
+        when(pipRepository.fagsakIdForJournalpostId(any())).thenReturn(Collections.singleton(FAGSAK_ID));
+        when(pipRepository.fagsakIdForSaksnummer(any())).thenReturn(Collections.singleton(FAGSAK_ID));
+        when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
+        when(journalConsumer.hentKjerneJournalpostListe(any())).thenReturn(mockJournalResponse); // NOSONAR
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
@@ -110,12 +107,12 @@ public class PdpRequestBuilderTest {
         Set<Long> fagsakIder = new HashSet<>();
         fagsakIder.add(FAGSAK_ID);
         fagsakIder.add(FAGSAK_ID_2);
-        when(pipRepository.fagsakIderForSøker(Collections.singleton(AKTØR_0))).thenReturn(fagsakIder);
+        when(pipRepository.fagsakIderForSøker(any())).thenReturn(fagsakIder);
         Set<AktørId> aktører = new HashSet<>();
         aktører.add(AKTØR_0);
         aktører.add(AKTØR_1);
         aktører.add(AKTØR_2);
-        when(pipRepository.hentAktørIdKnyttetTilFagsaker(fagsakIder)).thenReturn(aktører);
+        when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(aktører);
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_0.getId(), AKTØR_1.getId(),

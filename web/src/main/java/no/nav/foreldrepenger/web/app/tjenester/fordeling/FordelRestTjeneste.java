@@ -42,13 +42,13 @@ import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjenest
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.fordeling.dto.JournalpostMottakDto;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
 import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSoknadMottatt;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -255,9 +255,9 @@ public class FordelRestTjeneste {
 
     private InngåendeSaksdokument map(AbacJournalpostMottakDto mottattJournalpost) {
         BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(mottattJournalpost.getBehandlingstemaOffisiellKode());
-        JournalpostId journalpostId = new JournalpostId(mottattJournalpost.getJournalpostId());
+        JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
 
-        Saksnummer saksnummer = new Saksnummer(mottattJournalpost.getSaksnummer());
+        Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
         Optional<Fagsak> fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false);
         if (!fagsak.isPresent()) {
             // FIXME (u139158): PK- hvordan skal dette håndteres?
@@ -279,7 +279,7 @@ public class FordelRestTjeneste {
             .medFagsakId(fagsak.get().getId())
             .medBehandlingTema(behandlingTema)
             .medElektroniskSøknad(payloadXml.isPresent())
-            .medJournalpostId(new JournalpostId(mottattJournalpost.getJournalpostId()))
+            .medJournalpostId(mottattJournalpost.getJournalpostId())
             .medDokumentTypeId(dokumentTypeId.getKode())
             .medDokumentKategori(dokumentKategori)
             .medJournalførendeEnhet(mottattJournalpost.getJournalForendeEnhet());
@@ -325,7 +325,9 @@ public class FordelRestTjeneste {
             super();
         }
 
-        public AbacJournalpostMottakDto(String saksnummer, String journalpostId, String behandlingstemaOffisiellKode, String dokumentTypeIdOffisiellKode,
+        public AbacJournalpostMottakDto(Saksnummer saksnummer, JournalpostId journalpostId,
+                                        String behandlingstemaOffisiellKode,
+                                        String dokumentTypeIdOffisiellKode,
                                         LocalDateTime forsendelseMottattTidspunkt, String payloadXml) {
             super(saksnummer, journalpostId, behandlingstemaOffisiellKode, dokumentTypeIdOffisiellKode, forsendelseMottattTidspunkt, payloadXml);
         }

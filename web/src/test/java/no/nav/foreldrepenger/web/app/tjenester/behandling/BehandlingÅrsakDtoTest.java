@@ -19,10 +19,9 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScena
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.skjæringstidspunkt.DefaultSkjæringstidspunktTjenesteImpl;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.BehandlingDtoTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.BehandlingÅrsakDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.UtvidetBehandlingDto;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
+import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 
 public class BehandlingÅrsakDtoTest {
 

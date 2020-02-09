@@ -150,7 +150,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
         // fra saksnummer
         Set<Saksnummer> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
-        fagsakIder.addAll(pipRepository.fagsakIdForSaksnummer(saksnummere.stream().map(Saksnummer::getVerdi).collect(Collectors.toSet())));
+        fagsakIder.addAll(pipRepository.fagsakIdForSaksnummer(saksnummere));
 
         // journalpostIder
         Set<JournalpostId> journalpostIder = attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID);

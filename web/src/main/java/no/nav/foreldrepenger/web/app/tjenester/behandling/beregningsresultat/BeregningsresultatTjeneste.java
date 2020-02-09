@@ -10,7 +10,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BehandlingBer
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.dto.BeregningsresultatDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 
 @ApplicationScoped
 public class BeregningsresultatTjeneste {

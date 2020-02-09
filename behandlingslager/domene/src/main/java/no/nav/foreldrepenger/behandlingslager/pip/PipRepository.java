@@ -186,13 +186,13 @@ public class PipRepository {
     }
 
     @SuppressWarnings({ "unchecked", "cast" })
-    public Set<Long> fagsakIdForSaksnummer(Collection<String> saksnummre) {
-        if (saksnummre.isEmpty()) {
+    public Set<Long> fagsakIdForSaksnummer(Collection<Saksnummer> saksnummere) {
+        if (saksnummere.isEmpty()) {
             return Collections.emptySet();
         }
         String sql = "SELECT id from FAGSAK where saksnummer in (:saksnummre) ";
         Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("saksnummre", saksnummre);
+        query.setParameter("saksnummre", saksnummere.stream().map(Saksnummer::getVerdi).collect(Collectors.toSet()));
         var result = (List<BigInteger>) query.getResultList();
         return result.stream().map(BigInteger::longValue).collect(Collectors.toCollection(LinkedHashSet::new));
     }

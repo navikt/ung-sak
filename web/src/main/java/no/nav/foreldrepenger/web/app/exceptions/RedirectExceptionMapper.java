@@ -9,7 +9,7 @@ import javax.ws.rs.ext.Provider;
 import org.jboss.resteasy.spi.ApplicationException;
 import org.owasp.encoder.Encode;
 
-import no.nav.foreldrepenger.web.app.exceptions.dto.FeilDto;
+import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.vedtak.sikkerhet.ContextPathHolder;
 
 

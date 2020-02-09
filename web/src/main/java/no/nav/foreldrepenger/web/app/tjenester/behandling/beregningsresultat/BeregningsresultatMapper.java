@@ -26,17 +26,17 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.dto.BeregningsresultatDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.dto.BeregningsresultatPeriodeAndelDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.dto.BeregningsresultatPeriodeDto;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.dto.UttakDto;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
-import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -131,7 +131,7 @@ public class BeregningsresultatMapper {
                     .medArbeidsforholdId(brukersAndel.getArbeidsforholdRef() != null
                         ? brukersAndel.getArbeidsforholdRef().getReferanse()
                         : null)
-                    .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).map(AktørId::getId).orElse(null))
+                    .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).orElse(null))
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
                     .medUttak(lagUttak(uttakResultat, beregningsresultatPeriode))
                     .medStillingsprosent(brukersAndel.getStillingsprosent());
@@ -154,7 +154,9 @@ public class BeregningsresultatMapper {
         ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arb);
         if (opplysninger != null) {
             dtoBuilder.medArbeidsgiverNavn(opplysninger.getNavn());
-            dtoBuilder.medArbeidsgiverOrgnr(opplysninger.getIdentifikator());
+            if (!arb.erAktørId()) {
+                dtoBuilder.medArbeidsgiverOrgnr(new OrgNummer(arb.getOrgnr()));
+            }
         } else {
             throw new IllegalStateException("Finner ikke arbeidsgivers identifikator");
         }

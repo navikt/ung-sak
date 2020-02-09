@@ -16,8 +16,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.BooleanUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
-import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.dto.InnloggetNavAnsattDto;
 import no.nav.foreldrepenger.web.app.util.LdapUtil;
+import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.vedtak.konfig.KonfigVerdi;
@@ -70,16 +70,16 @@ public class NavAnsattRestTjeneste {
         summary = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.")
     )
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
-    public InnloggetNavAnsattDto innloggetBruker() {
+    public InnloggetAnsattDto innloggetBruker() {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
         return getInnloggetBrukerDto(ident, ldapBruker);
     }
 
-    InnloggetNavAnsattDto getInnloggetBrukerDto(String ident, LdapBruker ldapBruker) {
+    InnloggetAnsattDto getInnloggetBrukerDto(String ident, LdapBruker ldapBruker) {
         String navn = ldapBruker.getDisplayName();
         Collection<String> grupper = LdapUtil.filtrerGrupper(ldapBruker.getGroups());
-        return InnloggetNavAnsattDto.builder()
+        return InnloggetAnsattDto.builder()
             .setBrukernavn(ident)
             .setNavn(navn)
             .setKanSaksbehandle(grupper.contains(gruppenavnSaksbehandler))

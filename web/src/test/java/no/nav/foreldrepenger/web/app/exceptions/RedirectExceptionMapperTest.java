@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import no.nav.foreldrepenger.web.app.exceptions.dto.FeilDto;
-import no.nav.foreldrepenger.web.app.exceptions.dto.FeilType;
+import no.nav.k9.sak.kontrakt.FeilDto;
+import no.nav.k9.sak.kontrakt.FeilType;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 import no.nav.vedtak.sikkerhet.ContextPathHolder;
 
