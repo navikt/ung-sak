@@ -15,6 +15,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -27,6 +30,8 @@ import no.nav.vedtak.konfig.Tid;
 
 @Entity(name = "PersonInformasjon")
 @Table(name = "PO_INFORMASJON")
+@DynamicInsert
+@DynamicUpdate
 public class PersonInformasjonEntitet extends BaseEntitet {
 
     private static final String REF_NAME = "personopplysningInformasjon";

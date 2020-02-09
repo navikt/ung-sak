@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
@@ -32,6 +35,8 @@ import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 @Entity(name = "VurdertLøpendeMedlemskap")
 @Table(name = "MEDLEMSKAP_VURDERING_LOPENDE")
+@DynamicInsert
+@DynamicUpdate
 public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements VurdertMedlemskap, IndexKey {
 
     @Id

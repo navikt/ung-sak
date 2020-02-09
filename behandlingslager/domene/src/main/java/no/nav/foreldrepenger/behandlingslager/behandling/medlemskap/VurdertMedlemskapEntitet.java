@@ -11,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.MedlemskapManuellVurderingTypeKodeverdiConverter;
@@ -28,6 +31,8 @@ import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 @Entity(name = "Medlemskap")
 @Table(name = "MEDLEMSKAP_VURDERING")
+@DynamicInsert
+@DynamicUpdate
 public class VurdertMedlemskapEntitet extends BaseEntitet implements VurdertMedlemskap {
 
     @Id

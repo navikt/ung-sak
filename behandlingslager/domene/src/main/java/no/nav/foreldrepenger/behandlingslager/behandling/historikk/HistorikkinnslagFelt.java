@@ -13,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
@@ -24,6 +27,8 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
 
 @Entity(name = "HistorikkinnslagFelt")
 @Table(name = "HISTORIKKINNSLAG_FELT")
+@DynamicInsert
+@DynamicUpdate
 public class HistorikkinnslagFelt extends BaseEntitet implements IndexKey {
 
     @Id

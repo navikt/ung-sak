@@ -22,6 +22,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -36,6 +39,8 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 @Entity(name = "Behandlingsresultat")
 @Table(name = "BEHANDLING_RESULTAT")
+@DynamicInsert
+@DynamicUpdate
 public class Behandlingsresultat extends BaseEntitet {
 
     @Id

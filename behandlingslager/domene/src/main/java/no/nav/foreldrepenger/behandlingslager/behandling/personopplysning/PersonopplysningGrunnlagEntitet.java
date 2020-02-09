@@ -13,11 +13,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "PersonopplysningGrunnlagEntitet")
 @Table(name = "GR_PERSONOPPLYSNING")
+@DynamicUpdate
 public class PersonopplysningGrunnlagEntitet extends BaseEntitet {
 
     @Id

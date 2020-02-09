@@ -1,9 +1,7 @@
-package no.nav.foreldrepenger.behandlingslager.kodeverk;
+package no.nav.foreldrepenger.behandlingslager.behandling.søknad;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-
-import no.nav.foreldrepenger.behandlingslager.behandling.søknad.Innsendingsvalg;
 
 @Converter(autoApply = true)
 public class InnsendingsvalgKodeverdiConverter implements AttributeConverter<Innsendingsvalg, String> {

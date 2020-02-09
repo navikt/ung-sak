@@ -12,6 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
@@ -38,6 +41,8 @@ import no.nav.k9.kodeverk.medlem.MedlemskapType;
 
 @Entity(name = "MedlemskapPerioder")
 @Table(name = "MEDLEMSKAP_PERIODER")
+@DynamicInsert
+@DynamicUpdate
 public class MedlemskapPerioderEntitet extends BaseEntitet implements Comparable<MedlemskapPerioderEntitet>, IndexKey {
 
     @Id

@@ -13,6 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
@@ -26,6 +29,8 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @Entity(name = "OpptjeningAktivitet")
 @Table(name = "OPPTJENING_AKTIVITET")
+@DynamicInsert
+@DynamicUpdate
 public class OpptjeningAktivitet extends BaseEntitet implements IndexKey {
 
     @Id

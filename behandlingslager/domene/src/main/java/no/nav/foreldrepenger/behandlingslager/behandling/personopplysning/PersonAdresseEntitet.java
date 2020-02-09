@@ -15,6 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
@@ -26,6 +29,8 @@ import no.nav.k9.sak.typer.AktørId;
 
 @Entity(name = "PersonopplysningAdresse")
 @Table(name = "PO_ADRESSE")
+@DynamicInsert
+@DynamicUpdate
 public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, IndexKey {
 
     @Id

@@ -21,10 +21,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
 @Entity(name = "BeregningsresultatFeriepenger")
 @Table(name = "BR_FERIEPENGER")
+@DynamicInsert
+@DynamicUpdate
 public class BeregningsresultatFeriepenger extends BaseEntitet {
 
     @Id
