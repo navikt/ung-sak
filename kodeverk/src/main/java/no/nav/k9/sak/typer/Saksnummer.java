@@ -41,9 +41,13 @@ public class Saksnummer implements IndexKey {
         return saksnummer;
     }
 
-    @AbacAttributt("saksnummer")
     public String getVerdi() {
         return saksnummer;
+    }
+
+    @AbacAttributt("saksnummer")
+    public Saksnummer getSaksnummer() {
+        return this;
     }
 
     @Override

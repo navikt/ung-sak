@@ -45,14 +45,22 @@ public class JournalpostId implements Serializable, IndexKey {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
     }
 
+    public static boolean erGyldig(String input) {
+        return java.util.regex.Pattern.matches(GYLDIG, input);
+    }
+
     @Override
     public String getIndexKey() {
         return journalpostId;
     }
 
-    @AbacAttributt("journalpostId")
     public String getVerdi() {
         return journalpostId;
+    }
+
+    @AbacAttributt("journalpostId")
+    public JournalpostId getJournalpostId() {
+        return this;
     }
 
     @Override
@@ -74,10 +82,6 @@ public class JournalpostId implements Serializable, IndexKey {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + journalpostId + ">";
-    }
-
-    public static boolean erGyldig(String input) {
-        return java.util.regex.Pattern.matches(GYLDIG, input);
     }
 
 }
