@@ -35,7 +35,7 @@ public class Legeerklæring extends BaseEntitet {
     private Long id;
 
     @Column(name = "referanse", nullable = false)
-    private UUID uuid;
+    private UUID uuid = UUID.randomUUID();
 
     @Embedded
     @AttributeOverrides({
@@ -87,6 +87,11 @@ public class Legeerklæring extends BaseEntitet {
             .map(InnleggelsePeriode::new)
             .peek(it -> it.setLegeerklæring(this))
             .collect(Collectors.toSet());
+    }
+
+    public Legeerklæring(UUID identifikator, DatoIntervallEntitet periode, Set<InnleggelsePeriode> innleggelsePerioder, LegeerklæringKilde kilde, String diagnosekode) {
+        this(periode, innleggelsePerioder, kilde, diagnosekode);
+        uuid = identifikator;
     }
 
     public Long getId() {

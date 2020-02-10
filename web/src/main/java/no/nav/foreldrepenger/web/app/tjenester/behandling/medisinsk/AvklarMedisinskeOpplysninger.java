@@ -97,7 +97,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                     .stream()
                     .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
                     .collect(Collectors.toSet());
-                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(periode, innleggelsePerioder, LegeerklæringKilde.fraKode(it.getKilde()), it.getDiagnosekode());
+                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), periode, innleggelsePerioder, LegeerklæringKilde.fraKode(it.getKilde()), it.getDiagnosekode());
             })
             .forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
 

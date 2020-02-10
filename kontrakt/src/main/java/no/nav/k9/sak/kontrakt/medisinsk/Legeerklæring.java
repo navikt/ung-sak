@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.medisinsk;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
@@ -23,12 +24,18 @@ public class Legeerklæring {
     @JsonProperty(value = "tom")
     private LocalDate tom;
 
+    @JsonProperty(value = "identifikator")
+    @Valid
+    private UUID identifikator;
+
     @JsonProperty("kilde")
-    @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String kilde;
 
     @JsonProperty("diagnosekode")
-    @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String diagnosekode;
 
     @JsonProperty(value = "innleggelsesperioder")
@@ -57,5 +64,9 @@ public class Legeerklæring {
 
     public List<Periode> getInnleggelsesperioder() {
         return innleggelsesperioder;
+    }
+
+    public UUID getIdentifikator() {
+        return identifikator;
     }
 }
