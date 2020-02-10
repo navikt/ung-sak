@@ -168,7 +168,7 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
     }
 
     private InternArbeidsforholdRef utledArbeidsforholdIdSomSkalErstattes(String erstatterArbeidsforhold, List<ArbeidsforholdDto> arbeidsforhold) {
-        final String arbeidsforholdId = arbeidsforhold.stream()
+        var arbeidsforholdId = arbeidsforhold.stream()
             .filter(af -> af.getId().equalsIgnoreCase(erstatterArbeidsforhold))
             .findAny()
             .map(ArbeidsforholdDto::getArbeidsforholdId)

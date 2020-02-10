@@ -3,12 +3,12 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -28,7 +28,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 public class ArbeidsforholdDto {
 
     @JsonProperty(value = "id")
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String id;
 
     @JsonProperty(value = "navn")
@@ -48,9 +48,8 @@ public class ArbeidsforholdDto {
     private String arbeidsgiverIdentifikatorGUI;
 
     @JsonProperty(value = "arbeidsforholdId")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsforholdId;
+    @Valid
+    private UUID arbeidsforholdId;
 
     @JsonProperty(value = "eksternArbeidsforholdId")
     @Size(max = 100)
@@ -68,7 +67,6 @@ public class ArbeidsforholdDto {
     private String erstatterArbeidsforholdId;
 
     @JsonProperty(value = "handlingType")
-    @NotNull
     @Valid
     private ArbeidsforholdHandlingType handlingType;
 
@@ -220,12 +218,12 @@ public class ArbeidsforholdDto {
         this.mottattDatoInntektsmelding = mottattDatoInntektsmelding;
     }
 
-    public String getArbeidsforholdId() {
+    public UUID getArbeidsforholdId() {
         return arbeidsforholdId;
     }
 
     public void setArbeidsforholdId(String arbeidsforholdId) {
-        this.arbeidsforholdId = arbeidsforholdId;
+        this.arbeidsforholdId = UUID.fromString(arbeidsforholdId);
     }
 
     public void setEksternArbeidsforholdId(String eksternArbeidsforholdId) {
