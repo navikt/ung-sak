@@ -64,8 +64,7 @@ public class AvklarArbeidsforholdDto {
     @NotNull
     private LocalDate fomDato;
 
-    @JsonProperty(value = "tomDato", required = true)
-    @NotNull
+    @JsonProperty(value = "tomDato")
     private LocalDate tomDato;
 
     @JsonProperty(value = "brukArbeidsforholdet")

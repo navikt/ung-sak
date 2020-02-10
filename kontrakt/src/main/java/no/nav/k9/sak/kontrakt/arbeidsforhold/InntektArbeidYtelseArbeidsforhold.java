@@ -89,7 +89,8 @@ public class InntektArbeidYtelseArbeidsforhold {
     @JsonProperty(value = "mottattDatoInntektsmelding")
     private LocalDate mottattDatoInntektsmelding;
 
-    @JsonProperty(value = "fomDato")
+    @JsonProperty(value = "fomDato", required = true)
+    @NotNull
     private LocalDate fomDato;
 
     @JsonProperty(value = "tomDato")
