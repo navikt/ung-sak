@@ -13,13 +13,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
+import no.nav.k9.abac.AbacAttributt;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class ByttBehandlendeEnhetDto {
-    
+
     @JsonProperty(value="behandlingId", required = true)
     @NotNull
     @Min(0)

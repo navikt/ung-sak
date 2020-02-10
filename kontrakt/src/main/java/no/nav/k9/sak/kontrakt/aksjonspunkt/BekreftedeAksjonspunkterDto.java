@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -63,18 +63,18 @@ public class BekreftedeAksjonspunkterDto {
     public UUID getBehandlingUuid() {
         return behandlingId.getBehandlingUuid();
     }
-    
+
     @AbacAttributt("aksjonspunktKode")
     public Set<String> getBekreftedeAksjonspunktKoder(){
         return bekreftedeAksjonspunktDtoer.stream().map(BekreftetAksjonspunktDto::getKode).collect(Collectors.toSet());
     }
-    
+
     @AbacAttributt("saksnummer")
     public Saksnummer getSaksnummer() {
         var s = behandlingId.getSaksnummer();
         return s == null ? null : s;
     }
-    
+
     public Long getBehandlingVersjon() {
         return behandlingVersjon;
     }

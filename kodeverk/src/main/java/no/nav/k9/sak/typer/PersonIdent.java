@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
@@ -122,6 +123,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
         return Objects.equals(ident, other.ident);
     }
 
+    @AbacAttributt(value = "fnr", masker = true)
     public String getIdent() {
         return ident;
     }

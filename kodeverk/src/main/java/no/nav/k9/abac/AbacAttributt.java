@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.abac;
+package no.nav.k9.abac;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

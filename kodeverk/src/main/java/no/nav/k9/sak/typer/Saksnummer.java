@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
@@ -40,10 +41,11 @@ public class Saksnummer implements IndexKey {
         return saksnummer;
     }
 
+    @AbacAttributt("saksnummer")
     public String getVerdi() {
         return saksnummer;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

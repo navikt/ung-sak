@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -39,7 +39,7 @@ public class NyBehandlingDto {
     public NyBehandlingDto() {
         //
     }
-    
+
     public void setSaksnummer(Saksnummer saksnummer) {
         this.saksnummer = saksnummer;
     }

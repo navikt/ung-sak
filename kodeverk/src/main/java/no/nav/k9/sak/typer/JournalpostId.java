@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
@@ -23,7 +24,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
 public class JournalpostId implements Serializable, IndexKey {
 
     private static final String GYLDIG = "^[\\p{Alnum}]+$";
-    
+
     @JsonValue
     @NotNull
     @Size(max = 50, min = 3)
@@ -48,7 +49,8 @@ public class JournalpostId implements Serializable, IndexKey {
     public String getIndexKey() {
         return journalpostId;
     }
-    
+
+    @AbacAttributt("journalpostId")
     public String getVerdi() {
         return journalpostId;
     }
