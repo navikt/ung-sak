@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.dokumentbestiller.dto;
+package no.nav.k9.sak.kontrakt.dokument;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

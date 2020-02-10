@@ -29,7 +29,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.foreldrepenger.dokumentbestiller.dto.BestillBrevDto;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingDataTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.klient.TekstFraSaksbehandler;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -65,6 +64,7 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.kontrakt.behandling.SkjæringstidspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
+import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.vedtak.konfig.PropertyUtil;
 
 /**
