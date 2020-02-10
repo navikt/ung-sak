@@ -11,10 +11,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
-import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatus;
-import no.nav.foreldrepenger.mottak.forsendelse.ForsendelseStatusDataDTO;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.kontrakt.mottak.ForsendelseIdDto;
+import no.nav.k9.sak.kontrakt.mottak.ForsendelseStatus;
+import no.nav.k9.sak.kontrakt.mottak.ForsendelseStatusData;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
 public class ForsendelseStatusTjeneste {
@@ -33,7 +34,7 @@ public class ForsendelseStatusTjeneste {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public ForsendelseStatusDataDTO getStatusInformasjon(ForsendelseIdDto forsendelseIdDto) {
+    public ForsendelseStatusData getStatusInformasjon(ForsendelseIdDto forsendelseIdDto) {
         UUID forsendelseId = forsendelseIdDto.getForsendelseId();
         List<MottattDokument> mottattDokumentList = mottatteDokumentRepository.hentMottatteDokumentMedForsendelseId(forsendelseId);
 
@@ -44,18 +45,18 @@ public class ForsendelseStatusTjeneste {
         }
         MottattDokument mottattDokument = mottattDokumentList.get(0);
         Behandling behandling = behandlingRepository.hentBehandling(mottattDokument.getBehandlingId());
-        ForsendelseStatusDataDTO forsendelseStatusDataDTO = getForsendelseStatusDataDTO(behandling, forsendelseId);
+        ForsendelseStatusData forsendelseStatusDataDTO = getForsendelseStatusDataDTO(behandling, forsendelseId, mottattDokument.getJournalpostId());
         return forsendelseStatusDataDTO;
     }
 
-    private ForsendelseStatusDataDTO getForsendelseStatusDataDTO(Behandling behandling, UUID forsendelseId) {
-        ForsendelseStatusDataDTO forsendelseStatusDataDTO;
+    private ForsendelseStatusData getForsendelseStatusDataDTO(Behandling behandling, UUID forsendelseId, JournalpostId journalpostId) {
+        ForsendelseStatusData dto;
         if (behandling.erStatusFerdigbehandlet()) {
             BehandlingResultatType resultat = behandling.getBehandlingsresultat().getBehandlingResultatType();
             if(resultat.equals(BehandlingResultatType.INNVILGET)) {
-                forsendelseStatusDataDTO = new ForsendelseStatusDataDTO(ForsendelseStatus.INNVLIGET);
+                dto = new ForsendelseStatusData(ForsendelseStatus.INNVILGET);
             } else if(resultat.equals(BehandlingResultatType.AVSLÅTT)) {
-                forsendelseStatusDataDTO = new ForsendelseStatusDataDTO(ForsendelseStatus.AVSLÅTT);
+                dto = new ForsendelseStatusData(ForsendelseStatus.AVSLÅTT);
             } else {
                 throw ForsendelseStatusFeil.FACTORY.ugyldigBehandlingResultat(forsendelseId).toException();
             }
@@ -63,12 +64,16 @@ public class ForsendelseStatusTjeneste {
         } else {
             List<Aksjonspunkt> aksjonspunkt = behandling.getÅpneAksjonspunkter();
             if (aksjonspunkt.isEmpty()) {
-                forsendelseStatusDataDTO = new ForsendelseStatusDataDTO(ForsendelseStatus.PÅGÅR);
+                dto = new ForsendelseStatusData(ForsendelseStatus.PÅGÅR);
             } else {
-                forsendelseStatusDataDTO = new ForsendelseStatusDataDTO(ForsendelseStatus.PÅ_VENT);
+                dto = new ForsendelseStatusData(ForsendelseStatus.PÅ_VENT);
             }
         }
-        return forsendelseStatusDataDTO;
+        
+        dto.setSaksnummer(behandling.getFagsak().getSaksnummer());
+        dto.setJournalpostId(journalpostId);
+        
+        return dto;
     }
 
 }

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.dokumentbestiller.dto;
+package no.nav.k9.sak.kontrakt.dokument;
 
 import no.nav.k9.kodeverk.dokument.DokumentMalRestriksjon;
 
