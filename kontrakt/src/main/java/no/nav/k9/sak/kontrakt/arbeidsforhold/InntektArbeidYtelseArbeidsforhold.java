@@ -227,7 +227,7 @@ public class InntektArbeidYtelseArbeidsforhold {
     }
 
     public void setArbeidsforholdId(String arbeidsforholdId) {
-        this.arbeidsforholdId = UUID.fromString(arbeidsforholdId);
+        this.arbeidsforholdId = arbeidsforholdId==null ? null : UUID.fromString(arbeidsforholdId);
     }
 
     public void setEksternArbeidsforholdId(String eksternArbeidsforholdId) {
