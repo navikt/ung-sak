@@ -3,7 +3,12 @@ package no.nav.k9.sak.kontrakt.opptjening;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -19,6 +24,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 public class OpptjeningAktivitetDto {
 
     @JsonProperty(value = "aktivitetType")
+    @Valid
     private OpptjeningAktivitetType aktivitetType;
 
     @JsonProperty(value = "originalFom")
@@ -34,22 +40,27 @@ public class OpptjeningAktivitetDto {
     private LocalDate opptjeningTom;
 
     @JsonProperty(value = "arbeidsgiver")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiver;
 
     @JsonProperty(value = "arbeidsgiverNavn")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverNavn;
 
     @JsonProperty(value = "oppdragsgiverOrg")
+    @Size(max = 20)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String oppdragsgiverOrg;
 
     @JsonProperty(value = "arbeidsgiverIdentifikator")
+    @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverIdentifikator;
 
     @JsonProperty(value = "privatpersonNavn")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}.\\-\\p{Space}\\p{Sc}\\p{M}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String privatpersonNavn;
 
@@ -57,10 +68,14 @@ public class OpptjeningAktivitetDto {
     private LocalDate privatpersonFødselsdato;
 
     @JsonProperty(value = "arbeidsforholdRef")
+    @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsforholdRef;
 
     @JsonProperty(value = "stillingsandel")
+    @DecimalMin("0.00")
+    @DecimalMax("500.00")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsandel;
 
     @JsonProperty(value = "naringRegistreringsdato")
@@ -76,6 +91,7 @@ public class OpptjeningAktivitetDto {
     private Boolean erEndret;
 
     @JsonProperty(value = "begrunnelse")
+    @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 

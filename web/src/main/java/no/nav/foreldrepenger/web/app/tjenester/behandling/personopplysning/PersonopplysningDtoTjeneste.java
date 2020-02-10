@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.SøknadDtoFeil
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.kontrakt.person.AvklartPersonstatus;
-import no.nav.k9.sak.kontrakt.person.LandkoderDto;
 import no.nav.k9.sak.kontrakt.person.PersonadresseDto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 
@@ -46,14 +45,6 @@ public class PersonopplysningDtoTjeneste {
     private static List<PersonadresseDto> lagAddresseDto(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {
         List<PersonAdresseEntitet> adresser = aggregat.getAdresserFor(personopplysning.getAktørId());
         return adresser.stream().map(e -> lagDto(e, personopplysning.getNavn())).collect(Collectors.toList());
-    }
-
-    private static LandkoderDto lagLandkoderDto(Landkoder landkode) {
-        LandkoderDto dto = new LandkoderDto();
-        dto.setKode(landkode.getKode());
-        dto.setKodeverk(landkode.getKodeverk());
-        dto.setNavn(formaterMedStoreOgSmåBokstaver(landkode.getNavn()));
-        return dto;
     }
 
     private static PersonadresseDto lagDto(PersonAdresseEntitet adresse, String navn) {
@@ -126,16 +117,16 @@ public class PersonopplysningDtoTjeneste {
     private PersonopplysningDto enkelMapping(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {
         PersonopplysningDto dto = new PersonopplysningDto();
         final Optional<Landkoder> landkoder = aggregat.getStatsborgerskapFor(personopplysning.getAktørId()).stream().findFirst().map(StatsborgerskapEntitet::getStatsborgerskap);
-        landkoder.ifPresent(landkoder1 -> dto.setStatsborgerskap(lagLandkoderDto(landkoder1)));
-        final PersonstatusType gjeldendePersonstatus = hentPersonstatus(personopplysning, aggregat);
+        landkoder.ifPresent(dto::setStatsborgerskap);
+        var gjeldendePersonstatus = hentPersonstatus(personopplysning, aggregat);
         dto.setPersonstatus(gjeldendePersonstatus);
-        final AvklartPersonstatus avklartPersonstatus = new AvklartPersonstatus(aggregat.getOrginalPersonstatusFor(personopplysning.getAktørId())
+        var avklartPersonstatus = new AvklartPersonstatus(aggregat.getOrginalPersonstatusFor(personopplysning.getAktørId())
             .map(PersonstatusEntitet::getPersonstatus).orElse(gjeldendePersonstatus),
             gjeldendePersonstatus);
         dto.setAvklartPersonstatus(avklartPersonstatus);
         dto.setSivilstand(personopplysning.getSivilstand());
         dto.setNavBrukerKjonn(personopplysning.getKjønn());
-        dto.setAktoerId(personopplysning.getAktørId());
+        dto.setAktørId(personopplysning.getAktørId());
         dto.setNavn(formaterMedStoreOgSmåBokstaver(personopplysning.getNavn()));
         dto.setDodsdato(personopplysning.getDødsdato());
         dto.setAdresser(lagAddresseDto(personopplysning, aggregat));

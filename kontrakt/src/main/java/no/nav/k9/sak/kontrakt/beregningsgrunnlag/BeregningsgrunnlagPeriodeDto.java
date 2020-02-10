@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -38,26 +39,31 @@ public class BeregningsgrunnlagPeriodeDto {
     @JsonProperty(value = "beregnetPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal beregnetPrAar;
 
     @JsonProperty(value = "bruttoPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal bruttoPrAar;
 
     @JsonProperty(value = "bruttoInkludertBortfaltNaturalytelsePrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal bruttoInkludertBortfaltNaturalytelsePrAar;
 
     @JsonProperty(value = "avkortetPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal avkortetPrAar;
 
     @JsonProperty(value = "redusertPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal redusertPrAar;
 
     @JsonProperty(value = "periodeAarsaker")

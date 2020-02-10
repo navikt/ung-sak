@@ -137,7 +137,7 @@ public class DokumentRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Collection<DokumentDto> hentAlleDokumenterForSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         try {
-            Saksnummer saksnummer = new Saksnummer(saksnummerDto.getVerdi());
+            Saksnummer saksnummer = saksnummerDto.getVerdi();
             final Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
             final Long fagsakId = fagsak.map(Fagsak::getId).orElse(null);
             if (fagsakId == null) {
@@ -178,7 +178,7 @@ public class DokumentRestTjeneste {
                                  @NotNull @QueryParam("dokumentId") @Parameter(description = "Unik identifikator av DokumentInfo/Dokumentbeskrivelse (dokumentnivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) DokumentIdDto dokumentId) {
         try {
             ResponseBuilder responseBuilder = Response.ok(
-                new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(new JournalpostId(journalpostId.getJournalpostId()), dokumentId.getDokumentId())));
+                new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(journalpostId.getJournalpostId(), dokumentId.getDokumentId())));
             responseBuilder.type("application/pdf");
             responseBuilder.header("Content-Disposition", "filename=dokument.pdf");
             return responseBuilder.build();

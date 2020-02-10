@@ -17,6 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
@@ -28,6 +30,8 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 
 @Entity(name = "Historikkinnslag")
 @Table(name = "HISTORIKKINNSLAG")
+@DynamicInsert
+@DynamicUpdate
 public class Historikkinnslag extends BaseEntitet {
 
     @Id

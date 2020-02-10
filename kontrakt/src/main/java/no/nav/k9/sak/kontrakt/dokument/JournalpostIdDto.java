@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -28,8 +29,8 @@ public class JournalpostIdDto {
     }
 
     @AbacAttributt("journalpostId")
-    public String getJournalpostId() {
-        return journalpostId;
+    public JournalpostId getJournalpostId() {
+        return new JournalpostId(journalpostId);
     }
 
     @Override

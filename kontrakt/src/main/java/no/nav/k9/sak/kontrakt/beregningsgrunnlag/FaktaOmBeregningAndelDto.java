@@ -8,6 +8,8 @@ import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -29,6 +31,7 @@ public class FaktaOmBeregningAndelDto {
     @JsonProperty("andelsnr")
     @NotNull
     @Min(0)
+    @Max(Long.MAX_VALUE)
     private Long andelsnr;
 
     @JsonProperty("arbeidsforhold")
@@ -55,7 +58,7 @@ public class FaktaOmBeregningAndelDto {
     @JsonProperty(value = "andelIArbeid")
     @Size(max = 200)
     @Valid
-    private List<@DecimalMin("0.00") @DecimalMax("10000000.00") @NotNull BigDecimal> andelIArbeid = new ArrayList<>();
+    private List<@DecimalMin("0.00") @DecimalMax("500.00") @Digits(integer = 3, fraction = 2) @NotNull BigDecimal> andelIArbeid = new ArrayList<>();
 
     FaktaOmBeregningAndelDto(Long andelsnr, BeregningsgrunnlagArbeidsforholdDto arbeidsforhold, Inntektskategori inntektskategori,
                              AktivitetStatus aktivitetStatus, Boolean lagtTilAvSaksbehandler, Boolean fastsattAvSaksbehandler, List<BigDecimal> andelIArbeid) {

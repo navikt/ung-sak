@@ -5,6 +5,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,9 +23,13 @@ import no.nav.k9.sak.typer.Beløp;
 public class InntektsmeldingDto {
 
     @JsonProperty(value = "arbeidsgiver")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiver;
 
     @JsonProperty(value = "arbeidsgiverOrgnr")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverOrgnr;
 
     @JsonProperty(value = "arbeidsgiverStartdato")
@@ -31,12 +39,17 @@ public class InntektsmeldingDto {
     private LocalDateTime innsendingstidspunkt;
 
     @JsonProperty(value = "utsettelsePerioder")
+    @Size(max = 100)
+    @Valid
     private List<UtsettelsePeriodeDto> utsettelsePerioder = new ArrayList<>();
 
     @JsonProperty(value = "graderingPerioder")
+    @Size(max = 100)
+    @Valid
     private List<GraderingPeriodeDto> graderingPerioder = new ArrayList<>();
 
     @JsonProperty(value = "getRefusjonBeløpPerMnd")
+    @Valid
     private Beløp getRefusjonBeløpPerMnd;
 
     public InntektsmeldingDto() {

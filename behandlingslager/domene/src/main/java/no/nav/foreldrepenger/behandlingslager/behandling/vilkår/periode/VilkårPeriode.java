@@ -20,6 +20,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
@@ -35,6 +38,8 @@ import no.nav.vedtak.felles.jpa.converters.PropertiesToStringConverter;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")
+@DynamicInsert
+@DynamicUpdate
 public class VilkårPeriode extends BaseEntitet implements IndexKey {
 
     @Id

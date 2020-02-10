@@ -13,8 +13,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -50,6 +48,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
+import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSoknadMottatt;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -129,7 +129,7 @@ public class FordelRestTjeneste {
     @Operation(description = "Informasjon om en fagsak", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
     public FagsakInfomasjonDto fagsak(@Parameter(description = "Saksnummeret det skal hentes saksinformasjon om") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
-        Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummerDto.getVerdi()), false);
+        Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummerDto.getVerdi(), false);
         if (!optFagsak.isPresent() || optFagsak.get().getSkalTilInfotrygd()) {
             return null;
         }
@@ -180,10 +180,8 @@ public class FordelRestTjeneste {
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
     public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknad pleiepengerBarnSoknad) {
-
-        // FIXME K9 Fjern "TilpassetAbacAttributt" og sett opp sikkerhet.
         final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
-        return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer().getVerdi());
+        return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer());
     }
 
     @POST
@@ -257,9 +255,9 @@ public class FordelRestTjeneste {
 
     private InngåendeSaksdokument map(AbacJournalpostMottakDto mottattJournalpost) {
         BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(mottattJournalpost.getBehandlingstemaOffisiellKode());
-        JournalpostId journalpostId = new JournalpostId(mottattJournalpost.getJournalpostId());
+        JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
 
-        Saksnummer saksnummer = new Saksnummer(mottattJournalpost.getSaksnummer());
+        Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
         Optional<Fagsak> fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false);
         if (!fagsak.isPresent()) {
             // FIXME (u139158): PK- hvordan skal dette håndteres?
@@ -281,7 +279,7 @@ public class FordelRestTjeneste {
             .medFagsakId(fagsak.get().getId())
             .medBehandlingTema(behandlingTema)
             .medElektroniskSøknad(payloadXml.isPresent())
-            .medJournalpostId(new JournalpostId(mottattJournalpost.getJournalpostId()))
+            .medJournalpostId(mottattJournalpost.getJournalpostId())
             .medDokumentTypeId(dokumentTypeId.getKode())
             .medDokumentKategori(dokumentKategori)
             .medJournalførendeEnhet(mottattJournalpost.getJournalForendeEnhet());
@@ -315,18 +313,6 @@ public class FordelRestTjeneste {
         return journalPost != null ? journalPost.getKanalreferanse() : null;
     }
 
-    public static class PleiepengerBarnSoknadMottatt {
-        private final String saksnummer;
-
-        public PleiepengerBarnSoknadMottatt(String saksnummer) {
-            this.saksnummer = saksnummer;
-        }
-
-        public String getSaksnummer() {
-            return saksnummer;
-        }
-    }
-
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
         @Override
         public AbacDataAttributter apply(Object obj) {
@@ -339,7 +325,9 @@ public class FordelRestTjeneste {
             super();
         }
 
-        public AbacJournalpostMottakDto(String saksnummer, String journalpostId, String behandlingstemaOffisiellKode, String dokumentTypeIdOffisiellKode,
+        public AbacJournalpostMottakDto(Saksnummer saksnummer, JournalpostId journalpostId,
+                                        String behandlingstemaOffisiellKode,
+                                        String dokumentTypeIdOffisiellKode,
                                         LocalDateTime forsendelseMottattTidspunkt, String payloadXml) {
             super(saksnummer, journalpostId, behandlingstemaOffisiellKode, dokumentTypeIdOffisiellKode, forsendelseMottattTidspunkt, payloadXml);
         }
@@ -426,34 +414,6 @@ public class FordelRestTjeneste {
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
-        }
-    }
-
-    public static class PleiepengerBarnSoknadMelding {
-        @NotNull
-        @Digits(integer = 18, fraction = 0)
-        private String journalpostId;
-
-        private PleiepengerBarnSøknad soknad;
-
-        public PleiepengerBarnSoknadMelding() {
-
-        }
-
-        public String getJournalpostId() {
-            return journalpostId;
-        }
-
-        public void setJournalpostId(String journalpostId) {
-            this.journalpostId = journalpostId;
-        }
-
-        public PleiepengerBarnSøknad getSoknad() {
-            return soknad;
-        }
-
-        public void setSoknad(PleiepengerBarnSøknad soknad) {
-            this.soknad = soknad;
         }
     }
 }

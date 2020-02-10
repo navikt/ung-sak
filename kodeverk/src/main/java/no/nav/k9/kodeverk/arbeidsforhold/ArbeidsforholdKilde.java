@@ -16,7 +16,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum ArbeidsforholdKilde implements Kodeverdi {
-    
+
     AAREGISTERET("AA-Registeret"),
     INNTEKTSKOMPONENTEN("A-Inntekt"),
     INNTEKTSMELDING("Inntektsmelding"),
@@ -34,13 +34,11 @@ public enum ArbeidsforholdKilde implements Kodeverdi {
         }
     }
 
-    
     private String kode;
 
     ArbeidsforholdKilde(String navn) {
         this.kode = navn;
     }
-
 
     @JsonCreator
     public static ArbeidsforholdKilde fraKode(@JsonProperty("kode") String kode) {
@@ -63,18 +61,18 @@ public enum ArbeidsforholdKilde implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonProperty(value = "kode")
     @Override
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

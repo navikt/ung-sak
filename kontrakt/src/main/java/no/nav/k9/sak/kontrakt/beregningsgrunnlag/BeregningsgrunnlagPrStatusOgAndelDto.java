@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -38,31 +39,37 @@ public class BeregningsgrunnlagPrStatusOgAndelDto {
     @JsonProperty(value = "beregnetPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal beregnetPrAar;
 
     @JsonProperty(value = "fastsattForrigePrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal fastsattForrigePrAar;
 
     @JsonProperty(value = "overstyrtPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal overstyrtPrAar;
 
     @JsonProperty(value = "bruttoPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal bruttoPrAar;
 
     @JsonProperty(value = "avkortetPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal avkortetPrAar;
 
     @JsonProperty(value = "redusertPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal redusertPrAar;
 
     @JsonProperty(value = "erTidsbegrensetArbeidsforhold")
@@ -77,11 +84,13 @@ public class BeregningsgrunnlagPrStatusOgAndelDto {
     @JsonProperty(value = "andelsnr", required = true)
     @NotNull
     @Min(0)
+    @Max(Long.MAX_VALUE)
     private Long andelsnr;
 
     @JsonProperty(value = "besteberegningPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal besteberegningPrAar;
 
     @JsonProperty(value = "inntektskategori", required = true)
@@ -102,11 +111,13 @@ public class BeregningsgrunnlagPrStatusOgAndelDto {
     @JsonProperty(value = "belopPrMndEtterAOrdningen")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal belopPrMndEtterAOrdningen;
 
     @JsonProperty(value = "belopPrAarEtterAOrdningen")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal belopPrAarEtterAOrdningen;
 
     @JsonProperty(value = "dagsats")
@@ -122,6 +133,7 @@ public class BeregningsgrunnlagPrStatusOgAndelDto {
     @JsonProperty(value = "fordeltPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal fordeltPrAar;
 
     @JsonProperty(value = "erTilkommetAndel")

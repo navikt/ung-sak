@@ -84,7 +84,7 @@ public class AvklarAktiviteterDtoTjeneste {
                                                  List<BeregningAktivitetEntitet> forrigeAktiviteter, List<BeregningAktivitetEntitet> forrigeSaksbehandletAktiviteter,
                                                  LocalDate skjæringstidspunkt, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
         Map<LocalDate, List<BeregningAktivitetDto>> collect = beregningAktiviteter.stream()
-            .map(aktivitet -> MapBeregningAktivitetDto.mapBeregningAktivitet(aktivitet, saksbehandletAktiviteter, forrigeAktiviteter, forrigeSaksbehandletAktiviteter, arbeidsforholdInformasjon, arbeidsgiverTjeneste))
+            .map(aktivitet -> MapBeregningAktivitet.mapBeregningAktivitet(aktivitet, saksbehandletAktiviteter, forrigeAktiviteter, forrigeSaksbehandletAktiviteter, arbeidsforholdInformasjon, arbeidsgiverTjeneste))
             .collect(Collectors.groupingBy(beregningAktivitetDto -> finnTidligste(beregningAktivitetDto.getTom().plusDays(1), skjæringstidspunkt), Collectors.toList()));
         return collect.entrySet().stream()
             .map(entry -> {

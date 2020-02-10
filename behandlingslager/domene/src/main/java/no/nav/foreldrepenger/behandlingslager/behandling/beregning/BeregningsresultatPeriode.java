@@ -26,6 +26,9 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
@@ -33,6 +36,8 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "BeregningsresultatPeriode")
 @Table(name = "BR_PERIODE")
+@DynamicInsert
+@DynamicUpdate
 public class BeregningsresultatPeriode extends BaseEntitet {
 
     @Id

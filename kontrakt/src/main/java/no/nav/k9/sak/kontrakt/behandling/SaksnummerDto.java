@@ -36,8 +36,8 @@ public class SaksnummerDto {
     }
 
     @AbacAttributt("saksnummer")
-    public String getVerdi() {
-        return saksnummer;
+    public Saksnummer getVerdi() {
+        return new Saksnummer(saksnummer);
     }
 
     @Override

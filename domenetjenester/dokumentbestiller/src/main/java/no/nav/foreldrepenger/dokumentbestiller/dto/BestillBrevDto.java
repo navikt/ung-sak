@@ -6,30 +6,44 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.sak.kontrakt.abac.AbacAttributt;
-import no.nav.vedtak.util.InputValideringRegex;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BestillBrevDto {
+
+    @JsonProperty(value = "behandlingId", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingId;
 
+    @JsonProperty(value = "mottaker", required = true)
     @NotNull
-    @Pattern(regexp = InputValideringRegex.NAVN)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     @Size(max = 256)
     private String mottaker;
 
+    @JsonProperty(value = "brevmalkode", required = true)
     @NotNull
     @Size(min = 1, max = 100)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String brevmalkode;
 
+    @JsonProperty(value = "fritekst")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     public String fritekst;
 
+    @JsonProperty(value = "arsakskode")
     @Size(min = 1, max = 100)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     public String arsakskode;

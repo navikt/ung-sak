@@ -5,7 +5,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import no.nav.foreldrepenger.batch.BatchTaskSchedueler;
+import no.nav.foreldrepenger.web.server.batch.BatchTaskSchedueler;
 import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
 
 /**

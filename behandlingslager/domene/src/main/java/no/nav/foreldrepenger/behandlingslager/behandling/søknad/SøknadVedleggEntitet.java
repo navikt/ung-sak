@@ -12,8 +12,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.InnsendingsvalgKodeverdiConverter;
 
 /**
  * Entitetsklasse for vedlegg.
@@ -27,6 +29,8 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.InnsendingsvalgKodeverdiC
 
 @Entity(name = "SøknadVedlegg")
 @Table(name = "SOEKNAD_VEDLEGG")
+@DynamicInsert
+@DynamicUpdate
 public class SøknadVedleggEntitet extends BaseEntitet {
 
     @Id
@@ -40,7 +44,6 @@ public class SøknadVedleggEntitet extends BaseEntitet {
     private String tilleggsinfo;
 
     @Column(name = "VEDLEGG_PAKREVD", nullable = false)
-    
     private boolean erVedleggPåkrevdISøknadsdialog;
 
     @Convert(converter = InnsendingsvalgKodeverdiConverter.class)

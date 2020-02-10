@@ -31,13 +31,13 @@ public class OppgaveRedirectData {
         if (oppgaveId == null && saksnummerDto == null) {
             return OppgaveRedirectData.medFeilmelding(logg(OppgaveRedirectServletFeil.FACTORY.sakKanIkkeÅpnesDaReferanseMangler()));
         } else if (oppgaveId == null) {
-            Saksnummer saksnummer = new Saksnummer(saksnummerDto.getVerdi());
+            Saksnummer saksnummer = saksnummerDto.getVerdi();
             return hentForFagsak(fagsakRepository,saksnummer);
         } else if (saksnummerDto == null) {
             return hentForOppgave(oppgaveBehandlingKoblingRepository, fagsakRepository, oppgaveId.getVerdi());
         }
 
-        Saksnummer saksnummer = new Saksnummer(saksnummerDto.getVerdi());
+        Saksnummer saksnummer = saksnummerDto.getVerdi();
         Optional<Fagsak> sak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
         if (!sak.isPresent()) {
             return OppgaveRedirectData.medFeilmelding(logg(OppgaveRedirectServletFeil.FACTORY.detFinnesIngenFagsak(saksnummer.getVerdi())));

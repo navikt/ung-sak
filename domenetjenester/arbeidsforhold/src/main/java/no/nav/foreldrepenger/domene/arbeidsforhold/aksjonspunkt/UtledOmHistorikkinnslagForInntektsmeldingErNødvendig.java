@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+
 final class UtledOmHistorikkinnslagForInntektsmeldingErNødvendig {
 
     private UtledOmHistorikkinnslagForInntektsmeldingErNødvendig() {

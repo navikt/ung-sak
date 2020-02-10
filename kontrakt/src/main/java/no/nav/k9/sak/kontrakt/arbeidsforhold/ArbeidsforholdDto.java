@@ -7,8 +7,10 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -41,22 +43,27 @@ public class ArbeidsforholdDto {
     // For visning i GUI (orgnr for virksomhet, og fødselsdato formatert dd.MM.yyyy for person-arbeidsgiver)
     @JsonProperty(value = "arbeidsgiverIdentifiktorGUI")
     @JsonAlias(value = "arbeidsgiverIdentifikatorForVisning")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverIdentifiktorGUI;
+    private String arbeidsgiverIdentifikatorGUI;
 
     @JsonProperty(value = "arbeidsforholdId")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsforholdId;
 
     @JsonProperty(value = "eksternArbeidsforholdId")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String eksternArbeidsforholdId;
 
     @JsonProperty(value = "begrunnelse")
+    @Size(max = 400)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
     @JsonProperty(value = "erstatterArbeidsforholdId")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String erstatterArbeidsforholdId;
 
@@ -72,6 +79,7 @@ public class ArbeidsforholdDto {
     @JsonProperty(value = "stillingsprosent")
     @DecimalMin(value = "0.00")
     @DecimalMax(value = "500.00")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsprosent;
 
     @JsonProperty(value = "skjaeringstidspunkt")
@@ -129,6 +137,7 @@ public class ArbeidsforholdDto {
     private Boolean inntektMedTilBeregningsgrunnlag;
 
     @JsonProperty(value = "permisjoner")
+    @Size(max = 100)
     @Valid
     private List<PermisjonDto> permisjoner;
 
@@ -165,10 +174,6 @@ public class ArbeidsforholdDto {
 
     public void setTomDato(LocalDate tomDato) {
         this.tomDato = tomDato;
-    }
-
-    public ArbeidsforholdKildeDto getKilde() {
-        return kilde;
     }
 
     public void setKilde(ArbeidsforholdKilde kilde) {
@@ -223,10 +228,6 @@ public class ArbeidsforholdDto {
         this.arbeidsforholdId = arbeidsforholdId;
     }
 
-    public String getEksternArbeidsforholdId() {
-        return eksternArbeidsforholdId;
-    }
-
     public void setEksternArbeidsforholdId(String eksternArbeidsforholdId) {
         this.eksternArbeidsforholdId = eksternArbeidsforholdId;
     }
@@ -255,16 +256,8 @@ public class ArbeidsforholdDto {
         this.erNyttArbeidsforhold = erNyttArbeidsforhold;
     }
 
-    public Boolean getErEndret() {
-        return erEndret;
-    }
-
     public void setErEndret(Boolean erEndret) {
         this.erEndret = erEndret;
-    }
-
-    public Boolean getErSlettet() {
-        return erSlettet;
     }
 
     public void setErSlettet(Boolean erSlettet) {
@@ -279,56 +272,28 @@ public class ArbeidsforholdDto {
         this.erstatterArbeidsforholdId = erstatterArbeidsforholdId;
     }
 
-    public Boolean getHarErstattetEttEllerFlere() {
-        return harErstattetEttEllerFlere;
-    }
-
     public void setHarErstattetEttEllerFlere(Boolean harErstattetEttEllerFlere) {
         this.harErstattetEttEllerFlere = harErstattetEttEllerFlere;
-    }
-
-    public Boolean getIkkeRegistrertIAaRegister() {
-        return ikkeRegistrertIAaRegister;
     }
 
     public void setIkkeRegistrertIAaRegister(Boolean ikkeRegistrertIAaRegister) {
         this.ikkeRegistrertIAaRegister = ikkeRegistrertIAaRegister;
     }
 
-    public Boolean getTilVurdering() {
-        return tilVurdering;
-    }
-
     public void setTilVurdering(Boolean tilVurdering) {
         this.tilVurdering = tilVurdering;
-    }
-
-    public Boolean getVurderOmSkalErstattes() {
-        return vurderOmSkalErstattes;
     }
 
     public void setVurderOmSkalErstattes(boolean vurderOmSkalErstattes) {
         this.vurderOmSkalErstattes = vurderOmSkalErstattes;
     }
 
-    public String getArbeidsgiverIdentifiktorGUI() {
-        return arbeidsgiverIdentifiktorGUI;
-    }
-
-    public void setArbeidsgiverIdentifiktorGUI(String arbeidsgiverIdentififaktorGUI) {
-        this.arbeidsgiverIdentifiktorGUI = arbeidsgiverIdentififaktorGUI;
-    }
-
-    public ArbeidsforholdHandlingType getHandlingType() {
-        return handlingType;
+    public void setArbeidsgiverIdentifikatorGUI(String arbeidsgiverIdentifikatorGUI) {
+        this.arbeidsgiverIdentifikatorGUI = arbeidsgiverIdentifikatorGUI;
     }
 
     public void setHandlingType(ArbeidsforholdHandlingType handlingType) {
         this.handlingType = handlingType;
-    }
-
-    public boolean getBrukMedJustertPeriode() {
-        return brukMedJustertPeriode;
     }
 
     public void setBrukMedJustertPeriode(boolean brukMedJustertPeriode) {
@@ -349,10 +314,6 @@ public class ArbeidsforholdDto {
 
     public void setInntektMedTilBeregningsgrunnlag(Boolean inntektMedTilBeregningsgrunnlag) {
         this.inntektMedTilBeregningsgrunnlag = inntektMedTilBeregningsgrunnlag;
-    }
-
-    public LocalDate getSkjaeringstidspunkt() {
-        return skjaeringstidspunkt;
     }
 
     public void setSkjaeringstidspunkt(LocalDate skjaeringstidspunkt) {

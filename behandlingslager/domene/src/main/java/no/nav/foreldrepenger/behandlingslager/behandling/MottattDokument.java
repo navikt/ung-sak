@@ -18,6 +18,9 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentKategoriKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentTypeIdKodeverdiConverter;
@@ -37,6 +40,8 @@ import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "MottattDokument")
 @Table(name = "MOTTATT_DOKUMENT")
+@DynamicInsert
+@DynamicUpdate
 public class MottattDokument extends BaseEntitet {
 
     @Id

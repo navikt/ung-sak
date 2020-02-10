@@ -1,5 +1,4 @@
 package no.nav.foreldrepenger.web.server.jetty.db;
-import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -47,9 +46,9 @@ public class DatasourceUtil {
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
 
-        Properties dsProperties = new Properties();
-        config.setDataSourceProperties(dsProperties);
-
+        // skrur av autocommit her, da kan vi bypasse dette senere når hibernate setter opp entitymanager for bedre conn mgmt
+        config.setAutoCommit(false);
+        
         return config;
     }
 

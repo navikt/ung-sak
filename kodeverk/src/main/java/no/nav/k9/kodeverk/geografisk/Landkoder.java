@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -21,7 +22,7 @@ public class Landkoder implements Kodeverdi {
     private static final String KODEVERK = "LANDKODER";
 
     private static final Map<String, Landkoder> KODER = initKoder();
-    
+
     public static final Landkoder NOR = fraKode("NOR");
     public static final Landkoder SWE = fraKode("SWE");
     public static final Landkoder USA = fraKode("USA");
@@ -33,36 +34,30 @@ public class Landkoder implements Kodeverdi {
 
     /** Kodeverkklient spesifikk konstant. Statsløs bruker */
     public static final Landkoder STATSLØS = fraKode("XXX");
-    
-    /** Kodeverkklient spesifikk konstant. Bruker oppgir ikke land*/
+
+    /** Kodeverkklient spesifikk konstant. Bruker oppgir ikke land */
     public static final Landkoder UOPPGITT_UKJENT = fraKode("???");
-    
+
     /** Egendefinert konstant - ikke definert (null object pattern) for bruk i modeller som krever non-null. */
-    public static final Landkoder UDEFINERT = fraKode("-"); 
-    
+    public static final Landkoder UDEFINERT = fraKode("-");
+
     /** ISO 3166 alpha 3-letter code. */
+    @JsonProperty(value = "kode")
     private String kode;
-    
-    /** ISO 3166 2-letter code. */
-    private String offisielIso2Kode;
-    
+
     Landkoder() {
     }
 
-    private Landkoder(String kode, String offisielIso2Kode) {
+    private Landkoder(String kode) {
         this.kode = kode;
-        this.offisielIso2Kode = offisielIso2Kode;
     }
 
     @Override
     public String getOffisiellKode() {
         return kode;
     }
-    
-    public String getOffisiellKodeISO2() {
-        return offisielIso2Kode;
-    }
 
+    @JsonProperty(value = "navn", access = Access.READ_ONLY)
     @Override
     public String getNavn() {
         return kode;
@@ -77,10 +72,10 @@ public class Landkoder implements Kodeverdi {
     public String getKodeverk() {
         return KODEVERK;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        if(obj==this) {
+        if (obj == this) {
             return true;
         } else if (obj == null || obj.getClass() != this.getClass()) {
             return false;
@@ -93,7 +88,7 @@ public class Landkoder implements Kodeverdi {
     public int hashCode() {
         return Objects.hash(kode);
     }
-    
+
     @JsonCreator
     public static Landkoder fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
@@ -105,7 +100,7 @@ public class Landkoder implements Kodeverdi {
         }
         return ad;
     }
-    
+
     @Override
     public String toString() {
         return kode;
@@ -113,20 +108,20 @@ public class Landkoder implements Kodeverdi {
 
     private static Map<String, Landkoder> initKoder() {
         var map = new LinkedHashMap<String, Landkoder>();
-        for(var c : Locale.getISOCountries()) {
+        for (var c : Locale.getISOCountries()) {
             Locale locale = new Locale("", c);
             String iso3cc = locale.getISO3Country().toUpperCase();
-            Landkoder landkode = new Landkoder(iso3cc, iso3cc);
+            Landkoder landkode = new Landkoder(iso3cc);
             map.put(c, landkode);
             map.put(iso3cc, landkode);
         }
-        map.put("-", new Landkoder("-", "Ikke definert"));
-        map.put("???", new Landkoder("???", "Uoppgitt/Ukjent"));
-        map.put("XXX", new Landkoder("XXX", "Statsløs"));
-        
+        map.put("-", new Landkoder("-"));
+        map.put("???", new Landkoder("???"));
+        map.put("XXX", new Landkoder("XXX"));
+
         return Collections.unmodifiableMap(map);
     }
-    
+
     public static boolean erNorge(String kode) {
         return NOR.getKode().equals(kode);
     }

@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+
 public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
 
     @Test

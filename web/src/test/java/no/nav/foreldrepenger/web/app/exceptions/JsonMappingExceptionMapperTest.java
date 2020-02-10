@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 
+import no.nav.k9.sak.kontrakt.FeilDto;
+
 public class JsonMappingExceptionMapperTest {
 
     @Test

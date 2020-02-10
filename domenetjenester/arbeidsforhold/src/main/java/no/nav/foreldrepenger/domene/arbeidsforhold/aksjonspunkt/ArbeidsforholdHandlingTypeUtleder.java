@@ -11,6 +11,7 @@ import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.NYTT_
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 import no.nav.vedtak.util.StringUtils;
 
 class ArbeidsforholdHandlingTypeUtleder {

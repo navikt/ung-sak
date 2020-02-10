@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 
 public class ArbeidsforholdHandlingTypeUtlederTest {
 

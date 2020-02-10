@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -12,14 +13,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
+import no.nav.k9.sak.typer.AktørId;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AktørInfoDto {
 
+    @JsonAlias("aktørId")
     @JsonProperty(value = "aktoerId")
-    private String aktoerId;
+    @Valid
+    private AktørId aktørId;
 
     @JsonProperty(value = "person")
     @Valid
@@ -30,12 +34,12 @@ public class AktørInfoDto {
     @Valid
     private List<FagsakDto> fagsaker;
 
-    public String getAktoerId() {
-        return aktoerId;
+    public AktørId getAktørId() {
+        return aktørId;
     }
 
-    public void setAktoerId(String aktoerId) {
-        this.aktoerId = aktoerId;
+    public void setAktørId(AktørId aktoerId) {
+        this.aktørId = aktoerId;
     }
 
     public void setFagsaker(List<FagsakDto> fagsaker) {

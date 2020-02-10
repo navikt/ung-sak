@@ -1,10 +1,12 @@
 package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -20,23 +22,26 @@ import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class PermisjonDto {
 
-    @JsonProperty(value="permisjonFom")
+    @JsonProperty(value = "permisjonFom")
     @NotNull
     private LocalDate permisjonFom;
-    
-    @JsonProperty(value="permisjonTom")
+
+    @JsonProperty(value = "permisjonTom")
     @NotNull
     private LocalDate permisjonTom;
-    
+
     @JsonProperty(value = "permisjonsprosent")
+    @DecimalMin("0.00")
+    @DecimalMax("200.00")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal permisjonsprosent;
-    
-    @JsonProperty(value="type")
+
+    @JsonProperty(value = "type")
     @Valid
     @NotNull
     private PermisjonsbeskrivelseType type;
 
-    PermisjonDto(){
+    PermisjonDto() {
         // Skjul private constructor
     }
 

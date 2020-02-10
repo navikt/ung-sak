@@ -11,7 +11,7 @@ import javax.ws.rs.core.Application;
 
 import io.prometheus.client.hotspot.DefaultExports;
 import no.nav.foreldrepenger.web.app.healthchecks.HealthCheckRestService;
-import no.nav.foreldrepenger.web.app.metrics.PrometheusRestService;
+import no.nav.foreldrepenger.web.server.metrics.PrometheusRestService;
 
 /**
  * Konfigurer Prometheus og Healthchecks (healthchecks bruker Dropwizards interface)

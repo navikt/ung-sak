@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.web.app.tjenester.dokument;
 import static no.nav.vedtak.feil.LogLevel.ERROR;
 import static no.nav.vedtak.feil.LogLevel.WARN;
 
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.feil.Feil;
@@ -21,6 +22,6 @@ public interface DokumentRestTjenesteFeil extends DeklarerteFeil {
     @ManglerTilgangFeil(feilkode = "FP-463438", feilmelding = "Applikasjon har ikke tilgang til tjeneste.", logLevel = ERROR)
     Feil applikasjonHarIkkeTilgangTilHentDokumentTjeneste(ManglerTilgangException sikkerhetsbegrensning);
 
-    @TekniskFeil(feilkode = "FP-595861", feilmelding = "Dokument Ikke Funnet for journalpostId= %s dokumentId= %s", logLevel = WARN, exceptionClass = TomtResultatException.class)
-    Feil dokumentIkkeFunnet(String journalpostId, String dokumentId, TekniskException dokumentIkkeFunnet);
+    @TekniskFeil(feilkode = "FP-595861", feilmelding = "Dokument Ikke Funnet for %s dokumentId= %s", logLevel = WARN, exceptionClass = TomtResultatException.class)
+    Feil dokumentIkkeFunnet(JournalpostId journalpostId, String dokumentId, TekniskException dokumentIkkeFunnet);
 }

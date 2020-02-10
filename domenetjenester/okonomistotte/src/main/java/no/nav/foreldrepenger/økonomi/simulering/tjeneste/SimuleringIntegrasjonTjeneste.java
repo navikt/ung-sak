@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.økonomi.simulering.klient.FpOppdragRestKlient;
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimulerOppdragDto;
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimuleringResultatDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimulerOppdragDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
 import no.nav.vedtak.exception.IntegrasjonException;
 
 @ApplicationScoped

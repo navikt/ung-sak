@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.økonomi.simulering.klient;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimulerOppdragDto;
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimuleringResultatDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimulerOppdragDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
 
 public interface FpOppdragRestKlient {
 

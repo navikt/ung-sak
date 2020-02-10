@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.foreldrepenger.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.aktoer.AktoerRestTjeneste;
+import no.nav.foreldrepenger.web.app.tjenester.aktør.AktørRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
@@ -63,7 +63,7 @@ public class RestImplementationClasses {
         classes.add(IntegrasjonstatusRestTjeneste.class);
         classes.add(PipRestTjeneste.class);
         classes.add(TilbakekrevingRestTjeneste.class);
-        classes.add(AktoerRestTjeneste.class);
+        classes.add(AktørRestTjeneste.class);
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
 

@@ -25,13 +25,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.foreldrepenger.web.app.rest.ResourceLink;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.BehandlingDtoTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.dto.behandling.UtvidetBehandlingDto;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
-import no.nav.foreldrepenger.web.app.util.RestUtils;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -42,7 +40,7 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    
+
     @Inject
     private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
 
@@ -61,7 +59,8 @@ public class BehandlingDtoTjenesteImplTest {
     @Before
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null, unleash);
+        tjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null,
+            unleash);
     }
 
     @Test
@@ -78,7 +77,8 @@ public class BehandlingDtoTjenesteImplTest {
     public void skal_ha_med_tilbakekrevings_link_når_det_finnes_et_resultat() {
         Behandling behandling = lagBehandling();
 
-        tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, "varsel"));
+        tilbakekrevingRepository.lagre(behandling,
+            TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, "varsel"));
 
         UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
         var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);

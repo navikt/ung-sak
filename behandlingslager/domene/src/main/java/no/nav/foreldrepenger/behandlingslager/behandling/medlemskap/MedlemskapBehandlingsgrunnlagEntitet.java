@@ -16,6 +16,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 
@@ -26,6 +29,8 @@ import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
  */
 @Entity(name = "MedlemskapBehandlingsgrunnlag")
 @Table(name = "GR_MEDLEMSKAP")
+@DynamicInsert
+@DynamicUpdate
 public class MedlemskapBehandlingsgrunnlagEntitet extends BaseEntitet {
 
     

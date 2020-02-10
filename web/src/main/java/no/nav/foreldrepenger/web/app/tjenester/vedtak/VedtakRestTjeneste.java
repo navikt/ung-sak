@@ -3,13 +3,9 @@ package no.nav.foreldrepenger.web.app.tjenester.vedtak;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
 
-import java.time.LocalDateTime;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,8 +20,6 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.Behandlin
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -71,58 +65,6 @@ public class VedtakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentVedtaksdokument(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
         return hentVedtaksdokument(new BehandlingIdDto(uuidDto));
-    }
-
-    public static class GenererVedtaksXmlDto implements AbacDto {
-
-        @NotNull
-        private LocalDateTime fom;
-
-        @NotNull
-        private LocalDateTime tom;
-
-        @NotNull
-        @Min(0)
-        @Max(5000L)
-        private Long maksAntall;
-
-        public GenererVedtaksXmlDto() {
-        }
-
-        public GenererVedtaksXmlDto(LocalDateTime fomTidspunkt, LocalDateTime tomTidspunkt, Long maksAntall) {
-            this.fom = fomTidspunkt;
-            this.tom = tomTidspunkt;
-            this.maksAntall = maksAntall;
-        }
-
-        public LocalDateTime getFom() {
-            return fom;
-        }
-
-        public void setFom(LocalDateTime fom) {
-            this.fom = fom;
-        }
-
-        public LocalDateTime getTom() {
-            return tom;
-        }
-
-        public void setTom(LocalDateTime tom) {
-            this.tom = tom;
-        }
-
-        public Long getMaksAntall() {
-            return maksAntall;
-        }
-
-        public void setMaksAntall(Long maksAntall) {
-            this.maksAntall = maksAntall;
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett();
-        }
     }
 
 }

@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import io.swagger.v3.oas.annotations.Operation;
+import no.nav.k9.sak.kontrakt.KonfigDto;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
@@ -42,8 +43,8 @@ public class KonfigRestTjeneste {
     @Operation(description = "Henter lenke til rettskilde.", tags = "konfig")
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Konfig hentRettskildeUrl() {
-        return new Konfig(rettskildeUrl.toString());
+    public KonfigDto hentRettskildeUrl() {
+        return new KonfigDto("rettskilde.url", rettskildeUrl.toString());
     }
 
     @GET
@@ -52,20 +53,7 @@ public class KonfigRestTjeneste {
     @Operation(description = "Henter lenge til systemrutine", tags = "konfig")
     @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Konfig hentSystemrutine() {
-        return new Konfig(systemrutineUrl.toString());
-    }
-
-    public static class Konfig {
-
-        private String verdi;
-
-        public Konfig(String verdi) {
-            this.verdi = verdi;
-        }
-
-        public String getVerdi() {
-            return verdi;
-        }
+    public KonfigDto hentSystemrutine() {
+        return new KonfigDto("systemrutine.url", systemrutineUrl.toString());
     }
 }

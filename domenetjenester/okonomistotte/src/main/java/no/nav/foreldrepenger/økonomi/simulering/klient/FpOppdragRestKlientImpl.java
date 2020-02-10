@@ -6,8 +6,9 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimulerOppdragDto;
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimuleringResultatDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimulerOppdragDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 
 @ApplicationScoped

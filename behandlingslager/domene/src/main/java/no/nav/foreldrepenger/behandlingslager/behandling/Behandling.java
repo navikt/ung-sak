@@ -35,6 +35,8 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
@@ -84,6 +86,8 @@ import no.nav.vedtak.feil.FeilFactory;
 })
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
+@DynamicInsert
+@DynamicUpdate
 public class Behandling extends BaseEntitet {
 
     // Null safe

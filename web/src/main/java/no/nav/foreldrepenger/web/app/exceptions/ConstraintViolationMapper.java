@@ -18,6 +18,9 @@ import org.jboss.resteasy.api.validation.ResteasyViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.sak.kontrakt.FeilDto;
+import no.nav.k9.sak.kontrakt.FeilType;
+import no.nav.k9.sak.kontrakt.FeltFeilDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
 import no.nav.vedtak.feil.Feil;
 

@@ -20,7 +20,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 public class AvklarOpptjeningsvilkåretDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "avslagskode")
-    @Size(min = 4, max = 4)
+    @Size(min = 4, max = 5)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String avslagskode;
 

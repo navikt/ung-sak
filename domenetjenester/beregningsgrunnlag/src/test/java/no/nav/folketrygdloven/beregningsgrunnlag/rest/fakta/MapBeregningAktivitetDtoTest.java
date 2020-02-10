@@ -33,7 +33,7 @@ public class MapBeregningAktivitetDtoTest {
         List<BeregningAktivitetEntitet> forrigeSaksbehandledeAktiviteter = List.of();
 
         // Act
-        BeregningAktivitetDto dto = MapBeregningAktivitetDto.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
+        BeregningAktivitetDto dto = MapBeregningAktivitet.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
             forrigeAktiviteter, forrigeSaksbehandledeAktiviteter, Optional.empty(), arbeidsgiverTjeneste);
 
         // Assert
@@ -49,7 +49,7 @@ public class MapBeregningAktivitetDtoTest {
         List<BeregningAktivitetEntitet> forrigeSaksbehandledeAktiviteter = List.of();
 
         // Act
-        BeregningAktivitetDto dto = MapBeregningAktivitetDto.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
+        BeregningAktivitetDto dto = MapBeregningAktivitet.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
             forrigeAktiviteter, forrigeSaksbehandledeAktiviteter, Optional.empty(), arbeidsgiverTjeneste);
 
         // Assert
@@ -66,7 +66,7 @@ public class MapBeregningAktivitetDtoTest {
         List<BeregningAktivitetEntitet> forrigeSaksbehandledeAktiviteter = List.of(lagAktivitet(AKTØRID_1));
 
         // Act
-        BeregningAktivitetDto dto = MapBeregningAktivitetDto.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
+        BeregningAktivitetDto dto = MapBeregningAktivitet.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
             forrigeAktiviteter, forrigeSaksbehandledeAktiviteter, Optional.empty(), arbeidsgiverTjeneste);
 
         // Assert
@@ -82,7 +82,7 @@ public class MapBeregningAktivitetDtoTest {
         List<BeregningAktivitetEntitet> forrigeSaksbehandledeAktiviteter = List.of(lagAktivitet(AKTØRID_2));
 
         // Act
-        BeregningAktivitetDto dto = MapBeregningAktivitetDto.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
+        BeregningAktivitetDto dto = MapBeregningAktivitet.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
             forrigeAktiviteter, forrigeSaksbehandledeAktiviteter, Optional.empty(), arbeidsgiverTjeneste);
 
         // Assert
@@ -98,7 +98,7 @@ public class MapBeregningAktivitetDtoTest {
         List<BeregningAktivitetEntitet> forrigeSaksbehandledeAktiviteter = List.of();
 
         // Act
-        BeregningAktivitetDto dto = MapBeregningAktivitetDto.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
+        BeregningAktivitetDto dto = MapBeregningAktivitet.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
             forrigeAktiviteter, forrigeSaksbehandledeAktiviteter, Optional.empty(), arbeidsgiverTjeneste);
 
         // Assert
@@ -114,7 +114,7 @@ public class MapBeregningAktivitetDtoTest {
         List<BeregningAktivitetEntitet> forrigeSaksbehandledeAktiviteter = List.of();
 
         // Act
-        BeregningAktivitetDto dto = MapBeregningAktivitetDto.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
+        BeregningAktivitetDto dto = MapBeregningAktivitet.mapBeregningAktivitet(beregningAktivitet, saksbehandledeAktiviteter,
             forrigeAktiviteter, forrigeSaksbehandledeAktiviteter, Optional.empty(), arbeidsgiverTjeneste);
 
         // Assert

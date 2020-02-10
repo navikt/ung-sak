@@ -20,6 +20,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalUtil;
@@ -35,6 +38,8 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 @Entity(name = "Aksjonspunkt")
 @Table(name = "AKSJONSPUNKT")
+@DynamicInsert
+@DynamicUpdate
 public class Aksjonspunkt extends BaseEntitet {
 
     @Id

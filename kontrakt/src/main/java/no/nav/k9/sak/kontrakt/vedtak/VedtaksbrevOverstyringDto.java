@@ -22,7 +22,7 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
     private String overskrift;
 
     @JsonProperty(value="fritekstBrev")
-    @Size(max = 5000)
+    @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String fritekstBrev;
 

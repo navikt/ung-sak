@@ -28,16 +28,17 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.aksjonspunkt.AvklarSaksopplysningerDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
+import no.nav.k9.sak.kontrakt.søknad.AvklarSaksopplysningerDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
-import no.nav.k9.sak.kontrakt.økonomi.VurderFeilutbetalingDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
@@ -129,7 +130,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
         aksjonspunktRepository.setTilUtført(førstegangsbehandling.getAksjonspunkter().iterator().next(), BEGRUNNELSE);
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        AvklarSaksopplysningerDto dto = new AvklarSaksopplysningerDto(BEGRUNNELSE, "UTVA", true);
+        AvklarSaksopplysningerDto dto = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.UTVA, true);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), revurdering.getId());
@@ -144,11 +145,11 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_totrinn_når_revurdering_ap_har_endring_i_begrunnelse() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto1 = new AvklarSaksopplysningerDto(BEGRUNNELSE, "BOSA", true);
+        var dto1 = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.BOSA, true);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto2 = new AvklarSaksopplysningerDto(BEGRUNNELSE + "2", "BOSA", true);
+        var dto2 = new AvklarSaksopplysningerDto(BEGRUNNELSE + "2", PersonstatusType.BOSA, true);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());
@@ -163,11 +164,11 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_sette_totrinn_når_revurdering_ap_verken_har_endring_i_grunnlag_eller_begrunnelse_men_et_bekreftet_ap_i_førstegangsbehandling() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto1 = new AvklarSaksopplysningerDto(BEGRUNNELSE, "BOSA", true);
+        var dto1 = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.BOSA, true);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto2 = new AvklarSaksopplysningerDto(BEGRUNNELSE, "BOSA", true);
+        var dto2 = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.BOSA, true);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());

@@ -17,6 +17,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.SpråkKodeverdiConverter;
@@ -25,6 +28,8 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 
 @Entity(name = "Søknad")
 @Table(name = "SO_SOEKNAD")
+@DynamicInsert
+@DynamicUpdate
 public class SøknadEntitet extends BaseEntitet {
 
     @Id

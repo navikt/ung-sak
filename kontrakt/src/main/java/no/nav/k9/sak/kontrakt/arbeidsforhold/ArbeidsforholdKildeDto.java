@@ -1,6 +1,8 @@
 package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -22,10 +24,12 @@ class ArbeidsforholdKildeDto {
 
     @JsonProperty(value = "navn", required = true)
     @NotNull
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String navn;
 
     @JsonCreator
-    public ArbeidsforholdKildeDto(@JsonProperty(value = "navn") @NotNull String navn) {
+    public ArbeidsforholdKildeDto(@Size(max = 50) @Pattern(regexp = "^[\\p{Alnum}\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") @JsonProperty(value = "navn") @NotNull String navn) {
         this.navn = navn;
     }
 
