@@ -24,7 +24,6 @@ public class HealthCheckRestService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HealthCheckRestService.class);
     private static CacheControl cacheControl = noCache();
-    private Boolean isReady;
 
     @Inject //NOSONAR slik at servlet container får sin 0-arg ctor
     private transient Selftests selftests; //NOSONAR
@@ -57,11 +56,7 @@ public class HealthCheckRestService {
     @Path("/isReady")
     public Response isReady() {
         Response.ResponseBuilder builder;
-        if (isReady) {
-            builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
-        } else {
-            builder = Response.status(Response.Status.SERVICE_UNAVAILABLE);
-        }
+        builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
         builder.cacheControl(cacheControl);
         return builder.build();
     }
@@ -76,15 +71,6 @@ public class HealthCheckRestService {
     @Path("/isAlive")
     public Response isAlive() {
         return isReady();
-    }
-
-    /**
-     * Settes av AppstartupServletContextListener ved contextInitialized
-     *
-     * @param isReady
-     */
-    public void setIsReady(Boolean isReady) {
-        this.isReady = isReady;
     }
 
     private String hentResultatSomHTML() {

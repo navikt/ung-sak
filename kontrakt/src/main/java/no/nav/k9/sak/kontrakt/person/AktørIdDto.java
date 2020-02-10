@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,11 +23,12 @@ public class AktørIdDto {
     @Valid
     private AktørId aktørId;
 
-    AktørIdDto() {
+    protected AktørIdDto() {
         //
     }
 
-    public AktørIdDto(AktørId aktørId) {
+    @JsonCreator
+    public AktørIdDto(@JsonProperty("aktørId") @NotNull @Valid AktørId aktørId) {
         this.aktørId = aktørId;
     }
 
@@ -34,7 +36,7 @@ public class AktørIdDto {
     public String getAktorId() {
         return aktørId.getId();
     }
-    
+
     public AktørId getAktørId() {
         return aktørId;
     }
