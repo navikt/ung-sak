@@ -57,8 +57,8 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforhold;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -116,7 +116,7 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
 
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("Har tatt stilling til dette", List.of());
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har tatt stilling til dette", List.of());
         Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.of(2019, 1, 1)).build();
 
         // Act
@@ -141,7 +141,7 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         LocalDate stp = LocalDate.of(2019, 1, 1);
 
-        ArbeidsforholdDto nyttArbeidsforhod = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto nyttArbeidsforhod = new AvklarArbeidsforholdDto();
         String navn = "Utlandet";
         nyttArbeidsforhod.setNavn(navn);
         LocalDate fomDato = stp.minusYears(3);
@@ -151,8 +151,8 @@ public class AvklarArbeidsforholdOppdatererTest {
         nyttArbeidsforhod.setLagtTilAvSaksbehandler(true);
         nyttArbeidsforhod.setBrukArbeidsforholdet(true);
 
-        List<ArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
+        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
 
         //Act
         oppdaterer.oppdater(avklarArbeidsforholdDto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(stp).build(), avklarArbeidsforholdDto.getBegrunnelse()));
@@ -194,7 +194,7 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         LocalDate stp = LocalDate.of(2019, 1, 1);
 
-        ArbeidsforholdDto nyttArbeidsforhod = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto nyttArbeidsforhod = new AvklarArbeidsforholdDto();
         String navn = "Utlandet";
         nyttArbeidsforhod.setNavn(navn);
         LocalDate fomDato = stp.minusYears(3);
@@ -206,8 +206,8 @@ public class AvklarArbeidsforholdOppdatererTest {
         nyttArbeidsforhod.setBrukArbeidsforholdet(true);
         nyttArbeidsforhod.setArbeidsgiverIdentifikator(ORGNR);
 
-        List<ArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
+        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
 
         //Act
         oppdaterer.oppdater(avklarArbeidsforholdDto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(stp).build(), avklarArbeidsforholdDto.getBegrunnelse()));
@@ -255,7 +255,7 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
 
-        ArbeidsforholdDto arbeidsforhold = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
         arbeidsforhold.setNavn(navn);
         arbeidsforhold.setFomDato(fomDato);
         arbeidsforhold.setTomDato(tomDato);
@@ -266,8 +266,8 @@ public class AvklarArbeidsforholdOppdatererTest {
         arbeidsforhold.setArbeidsgiverIdentifikator(ORGNR);
         arbeidsforhold.setBrukArbeidsforholdet(true);
 
-        List<ArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("periode overstyrt", nyeArbeidsforhold);
+        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("periode overstyrt", nyeArbeidsforhold);
 
         Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
             .medUtledetSkjæringstidspunkt(stpDato)
@@ -308,7 +308,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
         String erstatterArbeidsforholdId = ARBEIDSFORHOLD_REF.getReferanse();
 
-        ArbeidsforholdDto arbeidsforhold = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
         arbeidsforhold.setNavn(navn);
         arbeidsforhold.setFomDato(fomDato);
         arbeidsforhold.setStillingsprosent(stillingsprosent);
@@ -318,7 +318,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         arbeidsforhold.setBrukArbeidsforholdet(true);
         arbeidsforhold.setArbeidsforholdId(ARBEIDSFORHOLD_REF.getReferanse());
 
-        ArbeidsforholdDto arbeidsforhold2 = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforhold2 = new AvklarArbeidsforholdDto();
         arbeidsforhold2.setNavn(navn);
         arbeidsforhold2.setFomDato(fomDato);
         arbeidsforhold2.setStillingsprosent(stillingsprosent);
@@ -329,8 +329,8 @@ public class AvklarArbeidsforholdOppdatererTest {
         arbeidsforhold2.setErstatterArbeidsforholdId(erstatterArbeidsforholdId);
         arbeidsforhold2.setArbeidsforholdId(nyArbeidsforholdRef);
 
-        List<ArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold, arbeidsforhold2);
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
+        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold, arbeidsforhold2);
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
 
         Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
             .medUtledetSkjæringstidspunkt(stpDato)
@@ -376,7 +376,7 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
 
-        ArbeidsforholdDto arbeidsforhold = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
         arbeidsforhold.setNavn(navn);
         arbeidsforhold.setFomDato(fomDato);
         arbeidsforhold.setStillingsprosent(stillingsprosent);
@@ -386,8 +386,8 @@ public class AvklarArbeidsforholdOppdatererTest {
         arbeidsforhold.setInntektMedTilBeregningsgrunnlag(false);
         arbeidsforhold.setBrukArbeidsforholdet(true);
 
-        List<ArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("inntekt ikke med til bg", nyeArbeidsforhold);
+        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("inntekt ikke med til bg", nyeArbeidsforhold);
 
         Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
             .medUtledetSkjæringstidspunkt(stpDato)
@@ -425,7 +425,7 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
 
-        ArbeidsforholdDto arbeidsforhold = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
         arbeidsforhold.setNavn(navn);
         arbeidsforhold.setFomDato(fomDato);
         arbeidsforhold.setStillingsprosent(stillingsprosent);
@@ -434,8 +434,8 @@ public class AvklarArbeidsforholdOppdatererTest {
         arbeidsforhold.setArbeidsgiverIdentifikator(ORGNR);
         arbeidsforhold.setBrukArbeidsforholdet(true);
 
-        List<ArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
-        AvklarArbeidsforholdDto avklarArbeidsforholdDto = new AvklarArbeidsforholdDto("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
+        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
+        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
 
         Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
             .medUtledetSkjæringstidspunkt(stpDato)

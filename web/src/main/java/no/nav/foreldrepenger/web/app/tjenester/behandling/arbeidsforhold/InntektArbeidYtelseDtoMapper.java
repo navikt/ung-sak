@@ -31,8 +31,8 @@ import no.nav.foreldrepenger.domene.iay.modell.Permisjon;
 import no.nav.foreldrepenger.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.GraderingPeriodeDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektsmeldingDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
@@ -91,41 +91,41 @@ public class InntektArbeidYtelseDtoMapper {
         return !arbeidsforholdSet.isEmpty() && arbeidsforholdSet.stream().allMatch(a -> a.getKilde().equals(ArbeidsforholdKilde.INNTEKTSMELDING));
     }
 
-    private ArbeidsforholdDto mapArbeidsforhold(ArbeidsforholdWrapper wrapper) {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
-        arbeidsforholdDto.setId(lagId(wrapper));
-        arbeidsforholdDto.setFomDato(wrapper.getFomDato());
-        arbeidsforholdDto.setTomDato(wrapper.getTomDato() != null && wrapper.getTomDato().equals(Tid.TIDENES_ENDE) ? null : wrapper.getTomDato());
-        arbeidsforholdDto.setNavn(wrapper.getNavn());
-        mapArbeidsgiverIdentifikator(wrapper, arbeidsforholdDto);
-        arbeidsforholdDto.setBrukArbeidsforholdet(wrapper.getBrukArbeidsforholdet());
+    private InntektArbeidYtelseArbeidsforhold mapArbeidsforhold(ArbeidsforholdWrapper wrapper) {
+        InntektArbeidYtelseArbeidsforhold dto = new InntektArbeidYtelseArbeidsforhold();
+        dto.setId(lagId(wrapper));
+        dto.setFomDato(wrapper.getFomDato());
+        dto.setTomDato(wrapper.getTomDato() != null && wrapper.getTomDato().equals(Tid.TIDENES_ENDE) ? null : wrapper.getTomDato());
+        dto.setNavn(wrapper.getNavn());
+        mapArbeidsgiverIdentifikator(wrapper, dto);
+        dto.setBrukArbeidsforholdet(wrapper.getBrukArbeidsforholdet());
         if (wrapper.getBrukArbeidsforholdet() != null && wrapper.getBrukArbeidsforholdet()) {
-            arbeidsforholdDto.setErNyttArbeidsforhold(wrapper.getErNyttArbeidsforhold());
-            arbeidsforholdDto.setFortsettBehandlingUtenInntektsmelding(wrapper.getFortsettBehandlingUtenInntektsmelding());
+            dto.setErNyttArbeidsforhold(wrapper.getErNyttArbeidsforhold());
+            dto.setFortsettBehandlingUtenInntektsmelding(wrapper.getFortsettBehandlingUtenInntektsmelding());
         }
-        arbeidsforholdDto.setArbeidsforholdId(wrapper.getArbeidsforholdId());
-        arbeidsforholdDto.setEksternArbeidsforholdId(wrapper.getEksternArbeidsforholdId());
-        arbeidsforholdDto.setIkkeRegistrertIAaRegister(wrapper.getIkkeRegistrertIAaRegister());
-        arbeidsforholdDto.setHarErstattetEttEllerFlere(wrapper.getHarErsattetEttEllerFlere());
-        arbeidsforholdDto.setErstatterArbeidsforholdId(wrapper.getErstatterArbeidsforhold());
-        arbeidsforholdDto.setKilde(wrapper.getKilde());
-        arbeidsforholdDto.setMottattDatoInntektsmelding(wrapper.getMottattDatoInntektsmelding());
-        arbeidsforholdDto.setTilVurdering(wrapper.isHarAksjonspunkt());
-        arbeidsforholdDto.setBegrunnelse(wrapper.getBegrunnelse());
-        arbeidsforholdDto.setVurderOmSkalErstattes(wrapper.getVurderOmSkalErstattes());
-        arbeidsforholdDto.setStillingsprosent(wrapper.getStillingsprosent());
-        arbeidsforholdDto.setErSlettet(wrapper.getErSlettet());
-        arbeidsforholdDto.setErEndret(wrapper.getErEndret());
-        arbeidsforholdDto.setHandlingType(wrapper.getHandlingType());
-        arbeidsforholdDto.setBrukMedJustertPeriode(wrapper.getBrukMedJustertPeriode());
-        arbeidsforholdDto.setLagtTilAvSaksbehandler(wrapper.getLagtTilAvSaksbehandler());
-        arbeidsforholdDto.setBasertPaInntektsmelding(wrapper.getBasertPåInntektsmelding());
-        arbeidsforholdDto.setInntektMedTilBeregningsgrunnlag(wrapper.getInntektMedTilBeregningsgrunnlag());
-        arbeidsforholdDto.setSkjaeringstidspunkt(wrapper.getSkjaeringstidspunkt());
-        arbeidsforholdDto.setBrukPermisjon(wrapper.getBrukPermisjon());
-        arbeidsforholdDto.setPermisjoner(wrapper.getPermisjoner().stream().map(this::byggPermisjonDto).collect(Collectors.toList()));
-        arbeidsforholdDto.setOverstyrtTom(Tid.TIDENES_ENDE.equals(wrapper.getOverstyrtTom()) ? null : wrapper.getOverstyrtTom());
-        return arbeidsforholdDto;
+        dto.setArbeidsforholdId(wrapper.getArbeidsforholdId());
+        dto.setEksternArbeidsforholdId(wrapper.getEksternArbeidsforholdId());
+        dto.setIkkeRegistrertIAaRegister(wrapper.getIkkeRegistrertIAaRegister());
+        dto.setHarErstattetEttEllerFlere(wrapper.getHarErsattetEttEllerFlere());
+        dto.setErstatterArbeidsforholdId(wrapper.getErstatterArbeidsforhold());
+        dto.setKilde(wrapper.getKilde());
+        dto.setMottattDatoInntektsmelding(wrapper.getMottattDatoInntektsmelding());
+        dto.setTilVurdering(wrapper.isHarAksjonspunkt());
+        dto.setBegrunnelse(wrapper.getBegrunnelse());
+        dto.setVurderOmSkalErstattes(wrapper.getVurderOmSkalErstattes());
+        dto.setStillingsprosent(wrapper.getStillingsprosent());
+        dto.setErSlettet(wrapper.getErSlettet());
+        dto.setErEndret(wrapper.getErEndret());
+        dto.setHandlingType(wrapper.getHandlingType());
+        dto.setBrukMedJustertPeriode(wrapper.getBrukMedJustertPeriode());
+        dto.setLagtTilAvSaksbehandler(wrapper.getLagtTilAvSaksbehandler());
+        dto.setBasertPaInntektsmelding(wrapper.getBasertPåInntektsmelding());
+        dto.setInntektMedTilBeregningsgrunnlag(wrapper.getInntektMedTilBeregningsgrunnlag());
+        dto.setSkjaeringstidspunkt(wrapper.getSkjaeringstidspunkt());
+        dto.setBrukPermisjon(wrapper.getBrukPermisjon());
+        dto.setPermisjoner(wrapper.getPermisjoner().stream().map(this::byggPermisjonDto).collect(Collectors.toList()));
+        dto.setOverstyrtTom(Tid.TIDENES_ENDE.equals(wrapper.getOverstyrtTom()) ? null : wrapper.getOverstyrtTom());
+        return dto;
     }
 
     private boolean skalKunneLeggeTilNyeArbeidsforhold(Set<ArbeidsforholdWrapper> arbeidsforholdSet) {
@@ -135,12 +135,12 @@ public class InntektArbeidYtelseDtoMapper {
         return arbeidsforholdSet.stream().anyMatch(wrapper -> Objects.equals(wrapper.getHandlingType(), ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER));
     }
 
-    private void mapArbeidsgiverIdentifikator(ArbeidsforholdWrapper wrapper, ArbeidsforholdDto arbeidsforholdDto) {
-        arbeidsforholdDto.setArbeidsgiverIdentifikator(wrapper.getArbeidsgiverIdentifikator());
+    private void mapArbeidsgiverIdentifikator(ArbeidsforholdWrapper wrapper, InntektArbeidYtelseArbeidsforhold dto) {
+        dto.setArbeidsgiverIdentifikator(wrapper.getArbeidsgiverIdentifikator());
         if (gjelderVirksomhet(wrapper)) {
-            arbeidsforholdDto.setArbeidsgiverIdentifikatorGUI(wrapper.getArbeidsgiverIdentifikator());
+            dto.setArbeidsgiverIdentifikatorGUI(wrapper.getArbeidsgiverIdentifikator());
         } else {
-            arbeidsforholdDto.setArbeidsgiverIdentifikatorGUI(wrapper.getPersonArbeidsgiverIdentifikator());
+            dto.setArbeidsgiverIdentifikatorGUI(wrapper.getPersonArbeidsgiverIdentifikator());
         }
     }
 

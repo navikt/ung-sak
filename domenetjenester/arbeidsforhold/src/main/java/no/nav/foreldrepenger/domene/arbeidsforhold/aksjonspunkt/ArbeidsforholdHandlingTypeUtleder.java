@@ -11,7 +11,7 @@ import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.NYTT_
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.vedtak.util.StringUtils;
 
 class ArbeidsforholdHandlingTypeUtleder {
@@ -20,7 +20,7 @@ class ArbeidsforholdHandlingTypeUtleder {
         // skjul public constructor
     }
 
-    static ArbeidsforholdHandlingType utledHandling(ArbeidsforholdDto arbeidsforholdDto) {
+    static ArbeidsforholdHandlingType utledHandling(AvklarArbeidsforholdDto arbeidsforholdDto) {
 
         if (inntektSkalIkkeMedTilBeregningsgrunnlaget(arbeidsforholdDto)) {
             return INNTEKT_IKKE_MED_I_BG;
@@ -42,42 +42,42 @@ class ArbeidsforholdHandlingTypeUtleder {
         return IKKE_BRUK;
     }
 
-    private static boolean skalOverstyrePerioder(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean skalOverstyrePerioder(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return arbeidsforholdDto.getOverstyrtTom() != null
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    private static boolean inntektSkalIkkeMedTilBeregningsgrunnlaget(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean inntektSkalIkkeMedTilBeregningsgrunnlaget(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.FALSE.equals(arbeidsforholdDto.getInntektMedTilBeregningsgrunnlag())
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    private static boolean skalBrukeUtenInnteksmelding(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean skalBrukeUtenInnteksmelding(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.TRUE.equals(arbeidsforholdDto.getFortsettBehandlingUtenInntektsmelding())
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    private static boolean skalLeggeTilNyttArbeidsforhold(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean skalLeggeTilNyttArbeidsforhold(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.TRUE.equals(arbeidsforholdDto.getLagtTilAvSaksbehandler())
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    private static boolean skalLeggeTilNyttArbeidsforholdBasertPåInntektsmelding(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean skalLeggeTilNyttArbeidsforholdBasertPåInntektsmelding(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.TRUE.equals(arbeidsforholdDto.getBasertPaInntektsmelding())
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    static boolean skalErstatteAnnenInntektsmelding(ArbeidsforholdDto arbeidsforholdDto) {
+    static boolean skalErstatteAnnenInntektsmelding(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return !StringUtils.nullOrEmpty(arbeidsforholdDto.getErstatterArbeidsforholdId())
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    private static Boolean erNyttArbeidsforhold(ArbeidsforholdDto arbeidsforholdDto) {
+    private static Boolean erNyttArbeidsforhold(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.TRUE.equals(arbeidsforholdDto.getErNyttArbeidsforhold())
             && brukArbeidsforholdet(arbeidsforholdDto);
     }
 
-    private static boolean brukArbeidsforholdet(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean brukArbeidsforholdet(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.TRUE.equals(arbeidsforholdDto.getBrukArbeidsforholdet());
     }
 

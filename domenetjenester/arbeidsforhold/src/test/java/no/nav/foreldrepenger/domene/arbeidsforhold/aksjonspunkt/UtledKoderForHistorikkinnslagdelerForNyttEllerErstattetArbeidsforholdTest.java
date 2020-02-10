@@ -7,14 +7,14 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 public class UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforholdTest {
 
     @Test
     public void skal_returne_NYTT_ARBEIDSFORHOLD_når_arbeidsforholdet_har_nytt_arbeidsforhold_satt_til_true() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setErNyttArbeidsforhold(true);
         // Act
         Optional<VurderArbeidsforholdHistorikkinnslag> kodeOpt = UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforhold.utled(arbeidsforholdDto);
@@ -27,7 +27,7 @@ public class UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforho
     @Test
     public void skal_returne_SLÅTT_SAMMEN_MED_ANNET_når_arbeidsforholdet_har_en_arbeidsforhold_id_som_skal_erstattes() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setErstatterArbeidsforholdId("123");
         // Act
         Optional<VurderArbeidsforholdHistorikkinnslag> kodeOpt = UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforhold.utled(arbeidsforholdDto);
@@ -40,7 +40,7 @@ public class UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforho
     @Test
     public void skal_returne_empty_når_arbeidsforholdet_ikke_er_nytt_eller_erstattes() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         // Act
         Optional<VurderArbeidsforholdHistorikkinnslag> kodeOpt = UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforhold.utled(arbeidsforholdDto);
         // Assert

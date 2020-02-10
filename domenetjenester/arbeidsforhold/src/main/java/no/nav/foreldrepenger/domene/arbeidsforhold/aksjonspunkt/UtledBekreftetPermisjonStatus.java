@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 final class UtledBekreftetPermisjonStatus {
 
@@ -9,7 +9,7 @@ final class UtledBekreftetPermisjonStatus {
         // Skjul empty constructor
     }
 
-    static BekreftetPermisjonStatus utled(ArbeidsforholdDto arbeidsforholdDto) {
+    static BekreftetPermisjonStatus utled(AvklarArbeidsforholdDto arbeidsforholdDto) {
         BekreftetPermisjonStatus status = BekreftetPermisjonStatus.UDEFINERT;
         if (arbeidsforholdDto.getPermisjoner().size() > 1){
             return BekreftetPermisjonStatus.UGYLDIGE_PERIODER;

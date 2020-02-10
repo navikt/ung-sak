@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 import java.util.Optional;
 
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 final class UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon {
 
@@ -11,7 +11,7 @@ final class UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon {
         // Skjul default constructor
     }
 
-    static Optional<VurderArbeidsforholdHistorikkinnslag> utled(ArbeidsforholdDto arbeidsforholdDto) {
+    static Optional<VurderArbeidsforholdHistorikkinnslag> utled(AvklarArbeidsforholdDto arbeidsforholdDto) {
         if (Boolean.TRUE.equals(arbeidsforholdDto.getBrukPermisjon())) {
             return Optional.of(VurderArbeidsforholdHistorikkinnslag.SØKER_ER_I_PERMISJON);
         }

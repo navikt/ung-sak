@@ -7,14 +7,14 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
 
     @Test
     public void skal_returne_false_når_inntektsmelding_er_mottatt() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setMottattDatoInntektsmelding(LocalDate.now());
         // Act
         boolean erNødvendig = UtledOmHistorikkinnslagForInntektsmeldingErNødvendig.utled(arbeidsforholdDto, Optional.empty());
@@ -25,7 +25,7 @@ public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
     @Test
     public void skal_returne_false_når_permisjon_skal_brukes() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(true);
         // Act
         boolean erNødvendig = UtledOmHistorikkinnslagForInntektsmeldingErNødvendig.utled(arbeidsforholdDto, Optional.empty());
@@ -36,7 +36,7 @@ public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
     @Test
     public void skal_returne_false_når_arbeidsforhold_fom_dato_er_lik_stp() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setFomDato(LocalDate.now());
         // Act
         boolean erNødvendig = UtledOmHistorikkinnslagForInntektsmeldingErNødvendig.utled(arbeidsforholdDto, Optional.of(LocalDate.now()));
@@ -47,7 +47,7 @@ public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
     @Test
     public void skal_returne_false_når_arbeidsforhold_fom_dato_er_etter_stp() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setFomDato(LocalDate.now().plusDays(1));
         // Act
         boolean erNødvendig = UtledOmHistorikkinnslagForInntektsmeldingErNødvendig.utled(arbeidsforholdDto, Optional.of(LocalDate.now()));
@@ -58,7 +58,7 @@ public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
     @Test
     public void skal_returne_true_når_arbeidsforholdet_ikke_har_mottat_IM_og_arbeidsforhold_starter_før_stp_og_ingen_permisjon() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setFomDato(LocalDate.now().minusDays(1));
         arbeidsforholdDto.setMottattDatoInntektsmelding(null);
         arbeidsforholdDto.setBrukPermisjon(null);
@@ -71,7 +71,7 @@ public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {
     @Test
     public void skal_returne_true_når_IM_ikke_mottatt_og_ingen_permisjon_og_ingen_stp() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setFomDato(LocalDate.now().plusDays(1));
         arbeidsforholdDto.setMottattDatoInntektsmelding(null);
         arbeidsforholdDto.setBrukPermisjon(null);

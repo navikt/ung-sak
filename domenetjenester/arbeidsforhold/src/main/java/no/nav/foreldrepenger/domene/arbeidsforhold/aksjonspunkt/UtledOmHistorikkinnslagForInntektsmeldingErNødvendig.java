@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 final class UtledOmHistorikkinnslagForInntektsmeldingErNødvendig {
 
@@ -11,7 +11,7 @@ final class UtledOmHistorikkinnslagForInntektsmeldingErNødvendig {
         // Skjul default constructor
     }
 
-    static boolean utled(ArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
+    static boolean utled(AvklarArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
         if (harMottattInntektsmelding(arbeidsforholdDto)) {
             return false;
         }
@@ -21,15 +21,15 @@ final class UtledOmHistorikkinnslagForInntektsmeldingErNødvendig {
         return !arbeidsforholdetStarterPåEllerEtterStp(arbeidsforholdDto, stpOpt);
     }
 
-    private static boolean harMottattInntektsmelding(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean harMottattInntektsmelding(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return arbeidsforholdDto.getMottattDatoInntektsmelding() != null;
     }
 
-    private static boolean skalBrukePermisjon(ArbeidsforholdDto arbeidsforholdDto) {
+    private static boolean skalBrukePermisjon(AvklarArbeidsforholdDto arbeidsforholdDto) {
         return Boolean.TRUE.equals(arbeidsforholdDto.getBrukPermisjon());
     }
 
-    private static boolean arbeidsforholdetStarterPåEllerEtterStp(ArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
+    private static boolean arbeidsforholdetStarterPåEllerEtterStp(AvklarArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
         if (stpOpt.isPresent()) {
             final LocalDate stp = stpOpt.get();
             return arbeidsforholdDto.getFomDato().isEqual(stp) || arbeidsforholdDto.getFomDato().isAfter(stp);

@@ -7,7 +7,7 @@ import java.util.List;
 
 import no.nav.foreldrepenger.domene.iay.modell.BekreftetPermisjon;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 final class UtledBekreftetPermisjon {
@@ -16,7 +16,7 @@ final class UtledBekreftetPermisjon {
         // Skjul empty constructor
     }
 
-    static BekreftetPermisjon utled(ArbeidsforholdDto arbeidsforholdDto) {
+    static BekreftetPermisjon utled(AvklarArbeidsforholdDto arbeidsforholdDto) {
 
         List<PermisjonDto> permisjoner = arbeidsforholdDto.getPermisjoner();
         BekreftetPermisjonStatus permisjonStatus = UtledBekreftetPermisjonStatus.utled(arbeidsforholdDto);

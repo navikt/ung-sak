@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.arbeidsforhold.aksjonspunkt;
 import java.util.Optional;
 
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 final class UtledKoderForHistorikkinnslagdelerForArbeidsforholdUtenInnteksmelding {
 
@@ -11,7 +11,7 @@ final class UtledKoderForHistorikkinnslagdelerForArbeidsforholdUtenInnteksmeldin
         // Skjul default constructor
     }
 
-    static Optional<VurderArbeidsforholdHistorikkinnslag> utled(ArbeidsforholdDto arbeidsforholdDto) {
+    static Optional<VurderArbeidsforholdHistorikkinnslag> utled(AvklarArbeidsforholdDto arbeidsforholdDto) {
         if (arbeidsforholdDto.getOverstyrtTom() != null) {
             return Optional.of(VurderArbeidsforholdHistorikkinnslag.BRUK_MED_OVERSTYRTE_PERIODER);
         }

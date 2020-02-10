@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -25,7 +26,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class ArbeidsforholdDto {
+public class InntektArbeidYtelseArbeidsforhold {
 
     @JsonProperty(value = "id")
     @Pattern(regexp = "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
@@ -66,11 +67,13 @@ public class ArbeidsforholdDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String erstatterArbeidsforholdId;
 
-    @JsonProperty(value = "handlingType")
+    @JsonProperty(value = "handlingType", required = true)
+    @NotNull
     @Valid
     private ArbeidsforholdHandlingType handlingType;
 
-    @JsonProperty(value = "kilde")
+    @JsonProperty(value = "kilde", required = true)
+    @NotNull
     @Valid
     private ArbeidsforholdKildeDto kilde;
 

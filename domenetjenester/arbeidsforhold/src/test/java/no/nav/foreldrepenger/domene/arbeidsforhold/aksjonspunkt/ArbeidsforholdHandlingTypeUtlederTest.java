@@ -16,13 +16,13 @@ import java.time.LocalDate;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_INNTEKT_IKKE_MED_I_BG() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setInntektMedTilBeregningsgrunnlag(false);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
@@ -35,7 +35,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_LAGT_TIL_AV_SAKSBEHANDLER() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setLagtTilAvSaksbehandler(true);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
@@ -48,7 +48,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_BASERT_PÅ_INNTEKTSMELDING() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBasertPaInntektsmelding(true);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
@@ -61,7 +61,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_BRUK_MED_OVERSTYRT_PERIODE() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setOverstyrtTom(LocalDate.now());
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
@@ -74,7 +74,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_BRUK_UTEN_INNTEKTSMELDING() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setFortsettBehandlingUtenInntektsmelding(true);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
@@ -87,7 +87,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_SLÅTT_SAMMEN_MED_ANNET() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setErstatterArbeidsforholdId("1");
 
@@ -100,7 +100,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_NYTT_ARBEIDSFORHOLD() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setErNyttArbeidsforhold(true);
 
@@ -113,7 +113,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_BRUK() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
         // Act
@@ -125,7 +125,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_IKKE_BRUK_hvis_false() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(false);
 
         // Act
@@ -137,7 +137,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
     @Test
     public void skal_utlede_IKKE_BRUK_hvis_null() {
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
 
         // Act
         ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);

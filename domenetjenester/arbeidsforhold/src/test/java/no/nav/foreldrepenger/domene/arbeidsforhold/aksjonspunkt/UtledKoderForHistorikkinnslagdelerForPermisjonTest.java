@@ -7,14 +7,14 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 public class UtledKoderForHistorikkinnslagdelerForPermisjonTest {
 
     @Test
     public void skal_utlede_at_søker_er_i_permisjon_når_bruk_permisjon_er_true() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(true);
         // Act
         Optional<VurderArbeidsforholdHistorikkinnslag> kodeOpt = UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon.utled(arbeidsforholdDto);
@@ -28,7 +28,7 @@ public class UtledKoderForHistorikkinnslagdelerForPermisjonTest {
     @Test
     public void skal_utlede_at_søker_ikke_er_i_permisjon_når_bruk_permisjon_er_false() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(false);
         // Act
         Optional<VurderArbeidsforholdHistorikkinnslag> kodeOpt = UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon.utled(arbeidsforholdDto);
@@ -41,7 +41,7 @@ public class UtledKoderForHistorikkinnslagdelerForPermisjonTest {
     @Test
     public void skal_utlede_optional_empty_når_bruk_permisjon_er_null() {
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(null);
         // Act
         Optional<VurderArbeidsforholdHistorikkinnslag> kodeOpt = UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon.utled(arbeidsforholdDto);

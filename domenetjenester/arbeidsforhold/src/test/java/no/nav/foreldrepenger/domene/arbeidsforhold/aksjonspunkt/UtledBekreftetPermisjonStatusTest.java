@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 
 public class UtledBekreftetPermisjonStatusTest {
@@ -22,7 +22,7 @@ public class UtledBekreftetPermisjonStatusTest {
         // Arrange
         PermisjonDto permisjonDto1 = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
         PermisjonDto permisjonDto2 = new PermisjonDto(DAGENS_DATO, null, BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(false);
         arbeidsforholdDto.setPermisjoner(List.of(permisjonDto1, permisjonDto2));
         // Act
@@ -35,7 +35,7 @@ public class UtledBekreftetPermisjonStatusTest {
     public void skal_returnere_status_BRUK_PERMISJON_når_dto_inneholder_en_permisjon_og_bruk_permisjon_er_true(){
         // Arrange
         PermisjonDto permisjonDto = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(true);
         arbeidsforholdDto.setPermisjoner(List.of(permisjonDto));
         // Act
@@ -48,7 +48,7 @@ public class UtledBekreftetPermisjonStatusTest {
     public void skal_returnere_status_IKKE_BRUK_PERMISJON_når_dto_inneholder_en_permisjon_og_bruk_permisjon_er_false(){
         // Arrange
         PermisjonDto permisjonDto = new PermisjonDto(DAGENS_DATO, DAGENS_DATO.plusWeeks(1), BigDecimal.valueOf(100), PermisjonsbeskrivelseType.PERMISJON);
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(false);
         arbeidsforholdDto.setPermisjoner(List.of(permisjonDto));
         // Act
@@ -60,7 +60,7 @@ public class UtledBekreftetPermisjonStatusTest {
     @Test
     public void skal_returnere_status_UDEFINERT_når_dto_ikke_inneholder_permisjoner_og_bruk_permisjon_er_null(){
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(null);
         arbeidsforholdDto.setPermisjoner(List.of());
         // Act

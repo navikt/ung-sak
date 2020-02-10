@@ -40,7 +40,7 @@ public class InntektArbeidYtelseDto {
     @Valid
     @Size(max = 1000)
     @JsonProperty(value = "arbeidsforhold")
-    private List<ArbeidsforholdDto> arbeidsforhold = Collections.emptyList();
+    private List<InntektArbeidYtelseArbeidsforhold> arbeidsforhold = Collections.emptyList();
 
     @JsonProperty(value = "skalKunneLeggeTilNyeArbeidsforhold")
     private boolean skalKunneLeggeTilNyeArbeidsforhold = false;
@@ -80,11 +80,11 @@ public class InntektArbeidYtelseDto {
         return innvilgetRelatertTilgrensendeYtelserForAnnenForelder;
     }
 
-    public List<ArbeidsforholdDto> getArbeidsforhold() {
+    public List<InntektArbeidYtelseArbeidsforhold> getArbeidsforhold() {
         return arbeidsforhold;
     }
 
-    public void setArbeidsforhold(List<ArbeidsforholdDto> arbeidsforhold) {
+    public void setArbeidsforhold(List<InntektArbeidYtelseArbeidsforhold> arbeidsforhold) {
         this.arbeidsforhold = arbeidsforhold;
     }
 

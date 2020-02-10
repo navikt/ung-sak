@@ -29,7 +29,7 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.felles.integrasjon.journal.v3.JournalConsumer;
@@ -75,7 +75,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_ikke_opprette_noen_historikkinnslag_når_arbeidsforholdet_kun_har_null_verdier() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
 
@@ -93,7 +93,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_opprette_kun_et_historikkinnslag_når_arbeidsforholdet_skal_kun_bruke_permisjon() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(true);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
@@ -119,7 +119,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_opprette_kun_et_historikkinnslag_når_arbeidsforholdet_skal_forsette_uten_inntektsmelding() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setFortsettBehandlingUtenInntektsmelding(true);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
@@ -145,7 +145,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_opprette_to_historikkinnslag_når_arbeidsforholdet_skal_forsette_uten_inntektsmelding_og_ikke_bruke_permisjon() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukPermisjon(false);
         arbeidsforholdDto.setFortsettBehandlingUtenInntektsmelding(true);
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
@@ -178,7 +178,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_opprette_et_historikkinnslag_når_arbeidsforholdet_ikke_skal_brukes() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(false);
         arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
 
@@ -203,7 +203,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_ikke_opprette_noen_historikkinnslag_når_arbeidsforholdet_starter_på_stp() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT);
 
@@ -222,7 +222,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     public void skal_ikke_opprette_noen_historikkinnslag_når_arbeidsforholdet_starter_etter_stp() {
 
         // Arrange
-        ArbeidsforholdDto arbeidsforholdDto = new ArbeidsforholdDto();
+        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
         arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.plusDays(1));
 

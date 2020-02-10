@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -36,18 +36,18 @@ class ArbeidsforholdHistorikkinnslagTjeneste {
         this.arbeidsgiverHistorikkinnslagTjeneste = arbeidsgiverHistorikkinnslagTjeneste;
     }
 
-    public void opprettHistorikkinnslag(AksjonspunktOppdaterParameter param, ArbeidsforholdDto arbeidsforholdDto, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref, List<ArbeidsforholdOverstyring> overstyringer) {
+    public void opprettHistorikkinnslag(AksjonspunktOppdaterParameter param, AvklarArbeidsforholdDto arbeidsforholdDto, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref, List<ArbeidsforholdOverstyring> overstyringer) {
         final LocalDate stp = param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
         String arbeidsforholdNavn = arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(arbeidsgiver, ref, overstyringer);
         opprettHistorikkinnslag(arbeidsforholdDto, arbeidsforholdNavn, Optional.of(stp));
     }
 
-    public void opprettHistorikkinnslag(ArbeidsforholdDto arbeidsforholdDto, String arbeidsforholdNavn, Optional<LocalDate> stpOpt){
+    public void opprettHistorikkinnslag(AvklarArbeidsforholdDto arbeidsforholdDto, String arbeidsforholdNavn, Optional<LocalDate> stpOpt){
         List<VurderArbeidsforholdHistorikkinnslag> historikkinnslagKoder = utledKoderForHistorikkinnslagdeler(arbeidsforholdDto, stpOpt);
         historikkinnslagKoder.forEach(kode -> opprettHistorikkinnslagDel(kode, arbeidsforholdDto.getBegrunnelse(), arbeidsforholdNavn));
     }
 
-    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdeler(ArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
+    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdeler(AvklarArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
         if (Boolean.FALSE.equals(arbeidsforholdDto.getBrukArbeidsforholdet())) {
             return List.of(VurderArbeidsforholdHistorikkinnslag.IKKE_BRUK);
         }
@@ -57,7 +57,7 @@ class ArbeidsforholdHistorikkinnslagTjeneste {
         return List.of();
     }
 
-    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdelerForArbeidsforholdSomSkalBrukes(ArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
+    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdelerForArbeidsforholdSomSkalBrukes(AvklarArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
         List<VurderArbeidsforholdHistorikkinnslag> list = new ArrayList<>();
         UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon.utled(arbeidsforholdDto).ifPresent(list::add);
         UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforhold.utled(arbeidsforholdDto).ifPresent(list::add);
