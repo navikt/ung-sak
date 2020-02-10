@@ -22,11 +22,12 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AksjonspunktGodkjenningDto {
 
-    @JsonProperty(value="godkent", required = true)
+    @JsonProperty(value="godkjent", required = true)
     @NotNull
     private boolean godkjent;
 
     @JsonProperty(value="begrunnelse", required = true)
+    @NotNull
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;

@@ -23,7 +23,7 @@ public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {
     
     @JsonProperty(value="aksjonspunktGodkjenningDtos")
     @Valid
-    @Size(max = 10)
+    @Size(max = 20)
     private Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos;
 
     FatterVedtakAksjonspunktDto() {
