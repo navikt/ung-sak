@@ -1,5 +1,6 @@
-package no.nav.k9.sak.kontrakt.økonomi;
+package no.nav.k9.sak.kontrakt.økonomi.tilbakekreving;
 
+import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
@@ -27,6 +28,8 @@ public class VurderFeilutbetalingOgInntrekkDto extends BekreftetAksjonspunktDto 
     @JsonProperty(value = "grunnerTilReduksjon", required = false)
     private Boolean grunnerTilReduksjon; // null når !erTilbakekrevingVilkårOppfylt
 
+    @JsonProperty(value="videreBehandling")
+    @Valid
     private TilbakekrevingVidereBehandling videreBehandling; // null når erTilbakekrevingVilkårOppfylt
 
     protected VurderFeilutbetalingOgInntrekkDto() {

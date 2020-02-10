@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -22,10 +23,12 @@ public class MedlemDto {
 
     @JsonProperty(value = "inntekt")
     @Size(max = 100)
+    @Valid
     private List<InntektDto> inntekt;
 
     @JsonProperty(value = "medlemskapPerioder")
     @Size(max = 100)
+    @Valid
     private List<MedlemskapPerioderDto> medlemskapPerioder;
 
     @JsonProperty(value = "oppholdsrettVurdering")
@@ -41,6 +44,7 @@ public class MedlemDto {
     private Boolean bosattVurdering;
 
     @JsonProperty(value = "medlemskapManuellVurderingType")
+    @Valid
     private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
 
     @JsonProperty(value = "fom", required = true)
@@ -49,6 +53,7 @@ public class MedlemDto {
 
     @JsonProperty(value = "endringer")
     @Size(max = 100)
+    @Valid
     private List<EndringIPersonopplysningDto> endringer = new ArrayList<>();
 
     public MedlemDto() {

@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,6 +26,9 @@ public class Beløp implements IndexKey {
     private static final RoundingMode AVRUNDINGSMODUS = RoundingMode.HALF_EVEN;
 
     @JsonProperty(value = "verdi")
+    @Digits(integer = 8, fraction = 4) // litt romslig?
+    @DecimalMin("-10000000.00") // burde ikke tillate negative beløp eller null. bør ha forhold til credit/debit i stedet.
+    @DecimalMax("10000000.00")
     private BigDecimal verdi;
 
     protected Beløp() {

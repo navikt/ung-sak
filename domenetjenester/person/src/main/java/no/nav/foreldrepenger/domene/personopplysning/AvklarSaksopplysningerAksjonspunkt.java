@@ -17,14 +17,14 @@ class AvklarSaksopplysningerAksjonspunkt {
         this.personopplysningRepository = personopplysningRepository;
     }
 
-    void oppdater(Long behandlingId, AktørId aktørId, PersonopplysningAksjonspunktDto adapter) {
+    void oppdater(Long behandlingId, AktørId aktørId, PersonopplysningAksjonspunkt adapter) {
         PersonInformasjonBuilder builder = personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
 
         LocalDate fom = adapter.getPersonstatusTypeKode().get().getGyldigFom();
         LocalDate tom = adapter.getPersonstatusTypeKode().get().getGyldigTom();
         DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
 
-        final PersonstatusType status = setPersonstatusType(adapter.getPersonstatusTypeKode().map(PersonopplysningAksjonspunktDto.PersonstatusPeriode::getPersonstatus));
+        final PersonstatusType status = setPersonstatusType(adapter.getPersonstatusTypeKode().map(PersonopplysningAksjonspunkt.PersonstatusPeriode::getPersonstatus));
         if (status != null) {
             PersonInformasjonBuilder.PersonstatusBuilder medPersonstatus = builder.getPersonstatusBuilder(aktørId, intervall)
                 .medAktørId(aktørId)

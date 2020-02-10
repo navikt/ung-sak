@@ -16,7 +16,7 @@ import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
-import no.nav.k9.sak.kontrakt.økonomi.VurderTilbaketrekkDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderTilbaketrekkDto.class, adapter = AksjonspunktOppdaterer.class)

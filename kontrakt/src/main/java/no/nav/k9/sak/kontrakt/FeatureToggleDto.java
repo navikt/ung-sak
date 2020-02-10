@@ -2,6 +2,9 @@ package no.nav.k9.sak.kontrakt;
 
 import java.util.Map;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -17,7 +20,8 @@ public class FeatureToggleDto {
 
     @JsonProperty(value = "featureToggles")
     @Size(max = 50)
-    private Map<String, Boolean> featureToggles;
+    @Valid
+    private Map<@Size(max = 100) @NotNull @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}\\p{P}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String, @NotNull Boolean> featureToggles;
 
     protected FeatureToggleDto() {
         //

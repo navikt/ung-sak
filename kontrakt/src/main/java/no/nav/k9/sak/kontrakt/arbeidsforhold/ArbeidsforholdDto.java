@@ -7,8 +7,10 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -41,22 +43,27 @@ public class ArbeidsforholdDto {
     // For visning i GUI (orgnr for virksomhet, og fødselsdato formatert dd.MM.yyyy for person-arbeidsgiver)
     @JsonProperty(value = "arbeidsgiverIdentifiktorGUI")
     @JsonAlias(value = "arbeidsgiverIdentifikatorForVisning")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverIdentifiktorGUI;
+    private String arbeidsgiverIdentifikatorGUI;
 
     @JsonProperty(value = "arbeidsforholdId")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsforholdId;
 
     @JsonProperty(value = "eksternArbeidsforholdId")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String eksternArbeidsforholdId;
 
     @JsonProperty(value = "begrunnelse")
+    @Size(max = 400)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
     @JsonProperty(value = "erstatterArbeidsforholdId")
+    @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String erstatterArbeidsforholdId;
 
@@ -72,6 +79,7 @@ public class ArbeidsforholdDto {
     @JsonProperty(value = "stillingsprosent")
     @DecimalMin(value = "0.00")
     @DecimalMax(value = "500.00")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsprosent;
 
     @JsonProperty(value = "skjaeringstidspunkt")
@@ -129,6 +137,7 @@ public class ArbeidsforholdDto {
     private Boolean inntektMedTilBeregningsgrunnlag;
 
     @JsonProperty(value = "permisjoner")
+    @Size(max = 100)
     @Valid
     private List<PermisjonDto> permisjoner;
 
@@ -279,8 +288,8 @@ public class ArbeidsforholdDto {
         this.vurderOmSkalErstattes = vurderOmSkalErstattes;
     }
 
-    public void setArbeidsgiverIdentifiktorGUI(String arbeidsgiverIdentififaktorGUI) {
-        this.arbeidsgiverIdentifiktorGUI = arbeidsgiverIdentififaktorGUI;
+    public void setArbeidsgiverIdentifikatorGUI(String arbeidsgiverIdentifikatorGUI) {
+        this.arbeidsgiverIdentifikatorGUI = arbeidsgiverIdentifikatorGUI;
     }
 
     public void setHandlingType(ArbeidsforholdHandlingType handlingType) {

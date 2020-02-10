@@ -2,14 +2,14 @@ package no.nav.foreldrepenger.dokumentbestiller;
 
 import java.time.LocalDate;
 
-public class VarselRevurderingAksjonspunktDto {
+public class VarselRevurderingAksjonspunkt {
 
     private String fritekst;
     private String begrunnelse;
     private LocalDate frist;
     private String venteÅrsakKode;
 
-    public VarselRevurderingAksjonspunktDto(String fritekst, String begrunnelse, LocalDate frist, String venteÅrsakKode) {
+    public VarselRevurderingAksjonspunkt(String fritekst, String begrunnelse, LocalDate frist, String venteÅrsakKode) {
         this.fritekst = fritekst;
         this.begrunnelse = begrunnelse;
         this.frist = frist;

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -28,11 +29,13 @@ public class AndelForFaktaOmBeregningDto {
     @JsonProperty(value = "belopReadOnly")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal belopReadOnly;
 
     @JsonProperty(value = "fastsattBelop")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal fastsattBelop;
 
     @JsonProperty(value = "inntektskategori")
@@ -46,6 +49,7 @@ public class AndelForFaktaOmBeregningDto {
     @JsonProperty(value = "refusjonskrav")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal refusjonskrav;
 
     @JsonProperty(value = "visningsnavn")

@@ -11,10 +11,10 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
@@ -42,6 +42,7 @@ public class AvklarOpptjeningAktivitetDto {
     private LocalDate opptjeningTom;
 
     @JsonProperty(value = "oppdragsgiverOrg")
+    @Size(min = 11, max = 13)
     @Pattern(regexp = "\\d{9}|\\d{13}")
     private String oppdragsgiverOrg;
 

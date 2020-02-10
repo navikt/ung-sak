@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.web.app.util.RestUtils;
+import no.nav.foreldrepenger.web.app.ApplicationConfig;
+import no.nav.foreldrepenger.web.server.jetty.JettyWebKonfigurasjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
@@ -22,7 +23,7 @@ public class BehandlingDtoUtil {
 
     static void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
         setStandardfelter(behandling, dto, erBehandlingMedGjeldendeVedtak);
-              dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());
+        dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
 
@@ -48,7 +49,6 @@ public class BehandlingDtoUtil {
         }
         return Collections.emptyList();
     }
-
 
     static void setStandardfelter(Behandling behandling, BehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
         dto.setFagsakId(behandling.getFagsakId());
@@ -90,12 +90,21 @@ public class BehandlingDtoUtil {
     }
 
     static ResourceLink get(String path, String rel, Object dto) {
-        return ResourceLink.get(RestUtils.getApiPath(path), rel, dto);
+        return ResourceLink.get(getApiPath(path), rel, dto);
     }
 
     static ResourceLink post(String path, String rel, Object dto) {
-        return ResourceLink.post(RestUtils.getApiPath(path), rel, dto);
+        return ResourceLink.post(getApiPath(path), rel, dto);
     }
 
+    private static String getApiPath() {
+        String contextPath = JettyWebKonfigurasjon.CONTEXT_PATH;
+        String apiUri = ApplicationConfig.API_URI;
+        return contextPath + apiUri;
+    }
+
+    private static String getApiPath(String segment) {
+        return getApiPath() + segment;
+    }
 
 }

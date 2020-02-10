@@ -25,39 +25,40 @@ import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemPeriodeDto {
 
-    @JsonProperty(value="vurderingsdato")
+    @JsonProperty(value = "vurderingsdato")
     private LocalDate vurderingsdato;
-    
-    @JsonProperty(value="personopplysninger", required = true)
+
+    @JsonProperty(value = "personopplysninger", required = true)
     @Valid
     @NotNull
     private PersonopplysningDto personopplysninger;
-    
-    @JsonProperty(value="aksjonspunkter")
-    @Size(max=10)
+
+    @JsonProperty(value = "aksjonspunkter")
+    @Size(max = 10)
     @Valid
     private Set<String> aksjonspunkter = Collections.emptySet();
-    
-    @JsonProperty(value="årsaker")
+
+    @JsonProperty(value = "årsaker")
+    @Size(max = 10)
     @Valid
     private Set<VurderingsÅrsak> årsaker = Collections.emptySet();
-    
-    @JsonProperty(value="oppholdsrettVurdering")
+
+    @JsonProperty(value = "oppholdsrettVurdering")
     private Boolean oppholdsrettVurdering;
-    
-    @JsonProperty(value="erEosBorger")
+
+    @JsonProperty(value = "erEosBorger")
     private Boolean erEosBorger;
-    
-    @JsonProperty(value="lovligOppholdVurdering")
+
+    @JsonProperty(value = "lovligOppholdVurdering")
     private Boolean lovligOppholdVurdering;
-    
-    @JsonProperty(value="bosattVurdering")
+
+    @JsonProperty(value = "bosattVurdering")
     private Boolean bosattVurdering;
-    
-    @JsonProperty(value="medlemskapManuellVurderingType")
+
+    @JsonProperty(value = "medlemskapManuellVurderingType")
     private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
-    
-    @JsonProperty(value="begrunnelse")
+
+    @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
@@ -136,8 +137,10 @@ public class MedlemPeriodeDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         MedlemPeriodeDto that = (MedlemPeriodeDto) o;
         return Objects.equals(vurderingsdato, that.vurderingsdato);
     }

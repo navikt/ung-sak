@@ -14,7 +14,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
-import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningAksjonspunktDto;
+import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningAksjonspunkt;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -52,9 +52,9 @@ public class AvklarSaksopplysningerOppdaterer implements AksjonspunktOppdaterer<
         boolean totrinn = håndterEndringHistorikk(dto, param, personopplysningerAggregat);
 
         if (dto.isFortsettBehandling()) {
-            PersonopplysningAksjonspunktDto.PersonstatusPeriode personstatusPeriode =
-                new PersonopplysningAksjonspunktDto.PersonstatusPeriode(dto.getPersonstatus(), personopplysningerAggregat.getPersonstatusFor(aktørId).getPeriode());
-            personopplysningTjeneste.aksjonspunktAvklarSaksopplysninger(behandlingId, aktørId, new PersonopplysningAksjonspunktDto(personstatusPeriode));
+            PersonopplysningAksjonspunkt.PersonstatusPeriode personstatusPeriode =
+                new PersonopplysningAksjonspunkt.PersonstatusPeriode(dto.getPersonstatus(), personopplysningerAggregat.getPersonstatusFor(aktørId).getPeriode());
+            personopplysningTjeneste.aksjonspunktAvklarSaksopplysninger(behandlingId, aktørId, new PersonopplysningAksjonspunkt(personstatusPeriode));
             return OppdateringResultat.utenTransisjon().medTotrinnHvis(totrinn).build();
         } else {
             return OppdateringResultat.medHenleggelse(HENLAGT_FEILOPPRETTET, dto.getBegrunnelse());

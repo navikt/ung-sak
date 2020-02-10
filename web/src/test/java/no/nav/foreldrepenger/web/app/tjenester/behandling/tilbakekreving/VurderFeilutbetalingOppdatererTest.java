@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.kontrakt.økonomi.VurderFeilutbetalingDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 
 public class VurderFeilutbetalingOppdatererTest {
 

@@ -21,7 +21,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktDto {
 
     @JsonProperty("avslagskode")
-    @Size(min = 4, max = 4)
+    @Size(min = 4, max = 5)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String avslagskode;
 

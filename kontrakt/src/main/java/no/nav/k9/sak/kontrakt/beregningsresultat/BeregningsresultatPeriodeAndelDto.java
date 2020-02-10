@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
@@ -69,6 +70,7 @@ public class BeregningsresultatPeriodeAndelDto {
     @JsonProperty(value = "utbetalingsgrad")
     @DecimalMin("0.00")
     @DecimalMax("100.00")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal utbetalingsgrad;
 
     @JsonProperty(value = "sisteUtbetalingsdato")
@@ -81,10 +83,11 @@ public class BeregningsresultatPeriodeAndelDto {
     @JsonProperty(value = "arbeidsforholdType")
     @Valid
     private OpptjeningAktivitetType arbeidsforholdType;
-    
-    @JsonProperty(value="stillingsprosent")
+
+    @JsonProperty(value = "stillingsprosent")
     @DecimalMin("0.00")
     @DecimalMax("500.00")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsprosent;
 
     private BeregningsresultatPeriodeAndelDto(Builder builder) {

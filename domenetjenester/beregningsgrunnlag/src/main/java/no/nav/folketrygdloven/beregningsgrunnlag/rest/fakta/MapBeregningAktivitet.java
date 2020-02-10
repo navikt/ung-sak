@@ -10,9 +10,9 @@ import no.nav.foreldrepenger.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningAktivitetDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
-class MapBeregningAktivitetDto {
+class MapBeregningAktivitet {
 
-    private MapBeregningAktivitetDto() {
+    private MapBeregningAktivitet() {
         // skjul
     }
 

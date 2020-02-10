@@ -193,7 +193,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         }
 
         String codeSourceStr = codeSource.getLocation().toExternalForm();
-        if (codeSourceStr.endsWith(".jar")) {
+        if (!codeSourceStr.matches("^.*[/\\\\]kontrakt-[^/\\\\]+.jar$") && !codeSourceStr.matches("^.*[\\\\/]classes[\\\\/].*$")) {
             // skip importerte biblioteker for nå
             return;
         }

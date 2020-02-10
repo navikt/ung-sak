@@ -7,6 +7,7 @@ import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -65,11 +66,13 @@ public class BeregningsgrunnlagArbeidsforholdDto {
     @JsonProperty(value = "refusjonPrAar")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal refusjonPrAar;
 
     @JsonProperty(value = "belopFraInntektsmeldingPrMnd")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal belopFraInntektsmeldingPrMnd;
 
     @JsonProperty(value = "organisasjonstype")
@@ -79,11 +82,13 @@ public class BeregningsgrunnlagArbeidsforholdDto {
     @JsonProperty(value = "naturalytelsebortfaltPrÅr")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal naturalytelseBortfaltPrÅr;
 
     @JsonProperty(value = "naturalytelseTilkommetPrÅr")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal naturalytelseTilkommetPrÅr;
 
     public BeregningsgrunnlagArbeidsforholdDto() {

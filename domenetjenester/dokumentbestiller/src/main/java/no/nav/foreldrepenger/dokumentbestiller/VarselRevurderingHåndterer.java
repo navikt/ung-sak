@@ -37,7 +37,7 @@ class VarselRevurderingHåndterer {
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
-    void oppdater(Behandling behandling, VarselRevurderingAksjonspunktDto adapter) {
+    void oppdater(Behandling behandling, VarselRevurderingAksjonspunkt adapter) {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), DokumentMalType.REVURDERING_DOK, adapter.getFritekst());
         bestillBrevDto.setÅrsakskode(RevurderingVarslingÅrsak.ANNET.getKode());
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.SAKSBEHANDLER);

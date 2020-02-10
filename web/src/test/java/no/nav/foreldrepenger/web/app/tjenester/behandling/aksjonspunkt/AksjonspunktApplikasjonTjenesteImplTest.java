@@ -38,7 +38,7 @@ import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling
 import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
 import no.nav.k9.sak.kontrakt.søknad.AvklarSaksopplysningerDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
-import no.nav.k9.sak.kontrakt.økonomi.VurderFeilutbetalingDto;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 

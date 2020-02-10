@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -29,6 +32,9 @@ public class GraderingPeriodeDto {
 
     @JsonProperty(value = "arbeidsprosent", required = true)
     @NotNull
+    @Digits(integer = 3, fraction = 2)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
     private BigDecimal arbeidsprosent;
 
     GraderingPeriodeDto() {

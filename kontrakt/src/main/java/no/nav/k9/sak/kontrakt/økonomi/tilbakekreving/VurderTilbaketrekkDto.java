@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.økonomi;
+package no.nav.k9.sak.kontrakt.økonomi.tilbakekreving;
 
 import javax.validation.constraints.NotNull;
 

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -21,6 +22,7 @@ public class ATogFLISammeOrganisasjonDto extends FaktaOmBeregningAndelDto {
     @NotNull
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal inntektPrMnd;
 
     public BigDecimal getInntektPrMnd() {

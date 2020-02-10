@@ -1,24 +1,51 @@
-package no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
+package no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering;
 
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class RisikovurderingRequest {
 
-    private AktoerIdDto soekerAktoerId;
+    @JsonProperty(value = "soekerAktoerId", required = true)
+    @Valid
+    @NotNull
+    private AktoerId soekerAktoerId;
 
+    @JsonProperty(value = "skjæringstidspunkt", required = true)
+    @Valid
+    @NotNull
     private LocalDate skjæringstidspunkt;
 
+    @JsonProperty(value = "opplysningsperiode", required = true)
+    @Valid
+    @NotNull
     private Opplysningsperiode opplysningsperiode;
 
+    @JsonProperty(value = "behandlingstema", required = true)
+    @Valid
+    @NotNull
     private String behandlingstema;
 
+    @JsonProperty(value = "annenPart")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private AnnenPart annenPart;
 
+    @JsonProperty(value="konsumentId", required = true)
+    @Valid
+    @NotNull
     private UUID konsumentId;
 
     public RisikovurderingRequest() {
@@ -28,7 +55,7 @@ public class RisikovurderingRequest {
         return skjæringstidspunkt;
     }
 
-    public AktoerIdDto getSoekerAktoerId() {
+    public AktoerId getSoekerAktoerId() {
         return soekerAktoerId;
     }
 
@@ -52,44 +79,44 @@ public class RisikovurderingRequest {
         return konsumentId;
     }
 
-    public static class Builder{
+    public static class Builder {
         private RisikovurderingRequest mal;
 
-        public Builder(){
+        public Builder() {
             this.mal = new RisikovurderingRequest();
         }
 
-        public Builder medSoekerAktoerId(AktoerIdDto soekerAktoerId){
+        public Builder medSoekerAktoerId(AktoerId soekerAktoerId) {
             mal.soekerAktoerId = soekerAktoerId;
             return this;
         }
 
-        public Builder medSkjæringstidspunkt(LocalDate skjæringstidspunkt){
+        public Builder medSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
             mal.skjæringstidspunkt = skjæringstidspunkt;
             return this;
         }
 
-        public Builder medOpplysningsperiode(Opplysningsperiode opplysningsperiode){
+        public Builder medOpplysningsperiode(Opplysningsperiode opplysningsperiode) {
             mal.opplysningsperiode = opplysningsperiode;
             return this;
         }
 
-        public Builder medBehandlingstema(String behandlingstema){
+        public Builder medBehandlingstema(String behandlingstema) {
             mal.behandlingstema = behandlingstema;
             return this;
         }
 
-        public Builder medAnnenPart(AnnenPart annenPart){
+        public Builder medAnnenPart(AnnenPart annenPart) {
             mal.annenPart = annenPart;
             return this;
         }
 
-        public Builder medKonsumentId(UUID konsumentId){
+        public Builder medKonsumentId(UUID konsumentId) {
             mal.konsumentId = konsumentId;
             return this;
         }
 
-        public RisikovurderingRequest build(){
+        public RisikovurderingRequest build() {
             verifyStateForBuild();
             return mal;
         }

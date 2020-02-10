@@ -26,7 +26,7 @@ public class PersonopplysningTjeneste extends AbstractPersonopplysningTjenesteIm
         super(personopplysningRepository);
     }
 
-    public void aksjonspunktAvklarSaksopplysninger(Long behandlingId, AktørId aktørId, PersonopplysningAksjonspunktDto adapter) {
+    public void aksjonspunktAvklarSaksopplysninger(Long behandlingId, AktørId aktørId, PersonopplysningAksjonspunkt adapter) {
         new AvklarSaksopplysningerAksjonspunkt(getPersonopplysningRepository()).oppdater(behandlingId, aktørId, adapter);
     }
 

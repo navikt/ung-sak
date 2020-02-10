@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.web.app.util;
+package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;

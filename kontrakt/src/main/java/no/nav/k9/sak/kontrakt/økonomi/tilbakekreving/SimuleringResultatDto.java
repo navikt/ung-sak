@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.økonomi.simulering.kontrakt;
+package no.nav.k9.sak.kontrakt.økonomi.tilbakekreving;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -18,32 +23,43 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class SammenligningsgrunnlagDto {
-    
-    @JsonProperty(value="sammenligningsgrunnlagFom", required = true)
+
+    @JsonProperty(value = "sammenligningsgrunnlagFom", required = true)
     @NotNull
     private LocalDate sammenligningsgrunnlagFom;
-    
-    @JsonProperty(value="sammenligningsgrunnlagTom", required = true)
+
+    @JsonProperty(value = "sammenligningsgrunnlagTom", required = true)
     @NotNull
     private LocalDate sammenligningsgrunnlagTom;
-    
-    @JsonProperty(value="rapportertPrAar", required = true)
+
+    @JsonProperty(value = "rapportertPrAar", required = true)
     @NotNull
+    @Digits(integer = 8, fraction = 2)
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal rapportertPrAar;
-    
-    @JsonProperty(value="avvikPromille")
+
+    @JsonProperty(value = "avvikPromille")
+    @Min(-10000L)
+    @Max(10000L)
     private Long avvikPromille;
-    
-    @JsonProperty(value="avvikProsent")
+
+    @JsonProperty(value = "avvikProsent")
+    @Digits(integer = 4, fraction = 2)
+    @DecimalMin("-1000.00")
+    @DecimalMax("1000.00")
     private BigDecimal avvikProsent;
-    
-    @JsonProperty(value="sammenligningsgrunnlagType")
+
+    @JsonProperty(value = "sammenligningsgrunnlagType")
     @NotNull
     @Valid
     private SammenligningsgrunnlagType sammenligningsgrunnlagType;
-    
-    @JsonProperty(value="differanseBeregnet", required = true)
+
+    @JsonProperty(value = "differanseBeregnet", required = true)
     @NotNull
+    @Digits(integer = 8, fraction = 2)
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
     private BigDecimal differanseBeregnet;
 
     public SammenligningsgrunnlagDto() {

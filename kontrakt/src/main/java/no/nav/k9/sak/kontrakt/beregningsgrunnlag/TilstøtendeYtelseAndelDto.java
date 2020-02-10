@@ -2,6 +2,10 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.math.BigDecimal;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -14,12 +18,21 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 public class TilstøtendeYtelseAndelDto extends FaktaOmBeregningAndelDto {
 
     @JsonProperty("fordelingForrigeYtelse")
+    @DecimalMin("0.00")
+    @DecimalMax("1000.00")
+    @Digits(integer = 4, fraction = 2)
     private BigDecimal fordelingForrigeYtelse;
 
     @JsonProperty("refusjonskrav")
+    @DecimalMin("0.00")
+    @DecimalMax("1000000.00")
+    @Digits(integer = 7, fraction = 2)
     private BigDecimal refusjonskrav;
 
     @JsonProperty("fastsattPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("1000000.00")
+    @Digits(integer = 7, fraction = 2)
     private BigDecimal fastsattPrAar;
 
     public TilstøtendeYtelseAndelDto () {

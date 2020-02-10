@@ -1,6 +1,6 @@
-package no.nav.foreldrepenger.økonomi.simulering.klient;
+package no.nav.k9.sak.kontrakt.økonomi.tilbakekreving;
 
-class BehandlingIdDto {
+public class BehandlingIdDto {
     private Long behandlingId;
 
     public BehandlingIdDto(Long behandlingId) {

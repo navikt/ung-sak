@@ -7,6 +7,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -33,9 +34,10 @@ public class BeregningsgrunnlagDto {
     @JsonProperty(value = "skjaeringstidspunkt")
     private LocalDate skjæringstidspunkt;
 
-    @JsonProperty(value = "aktivitetStatus")
+    @JsonProperty(value = "aktivitetStatus", required = true)
     @Valid
     @NotNull
+    @Size(max = 100)
     private List<AktivitetStatus> aktivitetStatus;
 
     @JsonProperty(value = "beregningsgrunnlagPeriode")
@@ -70,11 +72,13 @@ public class BeregningsgrunnlagDto {
     @JsonProperty(value = "halvG")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal halvG;
 
     @JsonProperty(value = "grunnbeløp")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal grunnbeløp;
 
     @JsonProperty(value = "faktaOmBeregning")
@@ -97,6 +101,7 @@ public class BeregningsgrunnlagDto {
     @JsonProperty(value = "årsinntektVisningstall")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal årsinntektVisningstall;
 
     @JsonProperty(value = "dekningsgrad")

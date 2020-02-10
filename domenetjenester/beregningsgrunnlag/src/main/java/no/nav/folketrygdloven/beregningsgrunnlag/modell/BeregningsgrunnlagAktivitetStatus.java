@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -37,10 +38,12 @@ public class BeregningsgrunnlagAktivitetStatus extends BaseEntitet {
     @JsonBackReference
     @ManyToOne(cascade = {CascadeType.PERSIST}, optional = false)
     @JoinColumn(name = "beregningsgrunnlag_id", nullable = false, updatable = false)
+    @Valid
     private BeregningsgrunnlagEntitet beregningsgrunnlag;
 
     @Convert(converter=AktivitetStatusKodeverdiConverter.class)
     @Column(name="aktivitet_status", nullable = false)
+    @Valid
     private AktivitetStatus aktivitetStatus;
     
     @Convert(converter=HjemmelKodeverdiConverter.class)

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -18,16 +19,19 @@ public class BeregningsgrunnlagPrStatusOgAndelYtelseDto extends Beregningsgrunnl
     @JsonProperty(value = "belopFraMeldekortPrMnd")
     @DecimalMin("0.00")
     @DecimalMax("100000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal belopFraMeldekortPrMnd;
 
     @JsonProperty(value = "belopFraMeldekortPrAar")
     @DecimalMin("0.00")
     @DecimalMax("100000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal belopFraMeldekortPrAar;
 
     @JsonProperty(value = "oppjustertGrunnlag")
     @DecimalMin("0.00")
     @DecimalMax("100000000.00")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal oppjustertGrunnlag;
 
     public BeregningsgrunnlagPrStatusOgAndelYtelseDto() {

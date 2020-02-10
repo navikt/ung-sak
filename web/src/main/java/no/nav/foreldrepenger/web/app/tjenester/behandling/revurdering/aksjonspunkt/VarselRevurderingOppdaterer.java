@@ -11,7 +11,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerTjeneste;
-import no.nav.foreldrepenger.dokumentbestiller.VarselRevurderingAksjonspunktDto;
+import no.nav.foreldrepenger.dokumentbestiller.VarselRevurderingAksjonspunkt;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
@@ -43,7 +43,7 @@ public class VarselRevurderingOppdaterer implements AksjonspunktOppdaterer<Varse
     public OppdateringResultat oppdater(VarselRevurderingDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
         if (dto.isSendVarsel() && !harSendtVarselOmRevurdering(behandling)) {
-            final VarselRevurderingAksjonspunktDto adapter = new VarselRevurderingAksjonspunktDto(dto.getFritekst(), dto.getBegrunnelse(), dto.getFrist(), dto.getVentearsak().getKode());
+            final VarselRevurderingAksjonspunkt adapter = new VarselRevurderingAksjonspunkt(dto.getFritekst(), dto.getBegrunnelse(), dto.getFrist(), dto.getVentearsak().getKode());
             dokumentTjeneste.håndterVarselRevurdering(behandling, adapter);
         } else if (!dto.isSendVarsel()) {
             opprettHistorikkinnslagOmIkkeSendtVarselOmRevurdering(behandling, dto, HistorikkAktør.SAKSBEHANDLER);

@@ -37,7 +37,7 @@ public class DokumentBestillerTjeneste {
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
-    public void håndterVarselRevurdering(Behandling behandling, VarselRevurderingAksjonspunktDto adapter) {
+    public void håndterVarselRevurdering(Behandling behandling, VarselRevurderingAksjonspunkt adapter) {
         new VarselRevurderingHåndterer(defaultVenteFrist, oppgaveBehandlingKoblingRepository, oppgaveTjeneste, behandlingskontrollTjeneste, dokumentBestillerApplikasjonTjeneste)
             .oppdater(behandling, adapter);
     }

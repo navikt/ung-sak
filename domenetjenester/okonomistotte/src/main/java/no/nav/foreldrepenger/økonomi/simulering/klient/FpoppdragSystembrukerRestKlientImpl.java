@@ -5,6 +5,7 @@ import java.net.URI;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.BehandlingIdDto;
 import no.nav.vedtak.felles.integrasjon.rest.SystemUserOidcRestClient;
 
 @ApplicationScoped

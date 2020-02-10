@@ -14,7 +14,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
 import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragApplikasjonTjeneste;
-import no.nav.foreldrepenger.økonomi.simulering.kontrakt.SimuleringResultatDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -22,6 +21,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
 
 @ApplicationScoped
 public class SimulerInntrekkSjekkeTjeneste {

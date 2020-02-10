@@ -14,12 +14,12 @@ import org.threeten.extra.Interval;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
-import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.AktoerIdDto;
-import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.Opplysningsperiode;
-import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.RequestWrapper;
-import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.kafka.RisikovurderingRequest;
 import no.nav.foreldrepenger.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.AktoerId;
+import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.Opplysningsperiode;
+import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RequestWrapper;
+import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RisikovurderingRequest;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.log.mdc.MDCOperations;
@@ -53,7 +53,7 @@ public class Risikoklassifisering {
             LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
             Interval interval = opplysningsPeriodeTjeneste.beregn(behandling.getId(),behandling.getFagsakYtelseType());
             RisikovurderingRequest risikovurderingRequest = RisikovurderingRequest.builder()
-                .medSoekerAktoerId(new AktoerIdDto(behandling.getAktørId().getId()))
+                .medSoekerAktoerId(new AktoerId(behandling.getAktørId()))
                 .medBehandlingstema(hentBehandlingTema(behandling))
                 .medSkjæringstidspunkt(skjæringstidspunkt)
                 .medOpplysningsperiode(leggTilOpplysningsperiode(interval))

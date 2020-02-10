@@ -6,17 +6,17 @@ import java.util.Optional;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 
-public class PersonopplysningAksjonspunktDto {
+public class PersonopplysningAksjonspunkt {
 
     private PersonstatusPeriode personstatusPeriode;
     private String kjønnKode;
     private String statsborgerskapKode;
 
-    public PersonopplysningAksjonspunktDto(PersonstatusPeriode personstatusPeriode) {
+    public PersonopplysningAksjonspunkt(PersonstatusPeriode personstatusPeriode) {
         this.personstatusPeriode = personstatusPeriode;
     }
 
-    public PersonopplysningAksjonspunktDto(PersonstatusPeriode personstatusPeriode, String kjønnKode, String statsborgerskapKode) {
+    public PersonopplysningAksjonspunkt(PersonstatusPeriode personstatusPeriode, String kjønnKode, String statsborgerskapKode) {
         this.personstatusPeriode = personstatusPeriode;
         this.kjønnKode = kjønnKode;
         this.statsborgerskapKode = statsborgerskapKode;

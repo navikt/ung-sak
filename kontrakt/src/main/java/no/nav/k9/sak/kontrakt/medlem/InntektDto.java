@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.medlem;
 
 import java.time.LocalDate;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -17,35 +18,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class InntektDto {
-    
-    @JsonProperty(value="navn")
+
+    @JsonProperty(value = "navn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String navn;
-    
-    @JsonProperty(value="utbetaler")
+
+    @JsonProperty(value = "utbetaler")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String utbetaler;
-    
-    @JsonProperty(value="fom", required = true)
+
+    @JsonProperty(value = "fom", required = true)
     @NotNull
     private LocalDate fom;
-    
-    @JsonProperty(value="tom", required = true)
+
+    @JsonProperty(value = "tom", required = true)
     @NotNull
     private LocalDate tom;
-    
-    @JsonProperty(value="ytelse")
+
+    @JsonProperty(value = "ytelse")
     private Boolean ytelse;
-    
-    @JsonProperty(value="belop")
+
+    @JsonProperty(value = "belop")
     @Min(0)
+    @Max(10 * 1000 * 1000)
     private Integer belop;
 
     public InntektDto() {
         // trengs for deserialisering av JSON
     }
+
     public String getNavn() {
         return navn;
     }

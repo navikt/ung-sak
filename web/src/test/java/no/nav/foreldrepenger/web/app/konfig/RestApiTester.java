@@ -31,7 +31,7 @@ public class RestApiTester {
         return liste;
     }
 
-    static Collection<Class<?>> finnAlleRestTjenester() {
+    private static Collection<Class<?>> finnAlleRestTjenester() {
 
 
         List<Class<?>> klasser = new ArrayList<>();
@@ -42,7 +42,7 @@ public class RestApiTester {
         return klasser;
     }
 
-    static Collection<Class<?>> finnAlleRestTjenester(Application config) {
+    private static Collection<Class<?>> finnAlleRestTjenester(Application config) {
         return config.getClasses().stream()
             .filter(c -> c.getAnnotation(Path.class) != null)
             .filter(c -> !UNNTATT.contains(c))
