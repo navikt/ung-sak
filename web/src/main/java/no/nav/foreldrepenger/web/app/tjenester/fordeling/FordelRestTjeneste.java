@@ -377,8 +377,8 @@ public class FordelRestTjeneste {
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett()
-                .leggTil(AppAbacAttributtType.JOURNALPOST_ID, getJournalpostId())
-                .leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
+                .leggTil(AppAbacAttributtType.JOURNALPOST_ID, new JournalpostId(getJournalpostId()))
+                .leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer(getSaksnummer()));
         }
     }
 
@@ -396,8 +396,8 @@ public class FordelRestTjeneste {
             AbacDataAttributter abacDataAttributter = AbacDataAttributter.opprett()
                 .leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
 
-            getJournalpostId().ifPresent(id -> abacDataAttributter.leggTil(AppAbacAttributtType.JOURNALPOST_ID, id));
-            getSaksnummer().ifPresent(sn -> abacDataAttributter.leggTil(AppAbacAttributtType.SAKSNUMMER, sn));
+            getJournalpostId().ifPresent(id -> abacDataAttributter.leggTil(AppAbacAttributtType.JOURNALPOST_ID, new JournalpostId(id)));
+            getSaksnummer().ifPresent(sn -> abacDataAttributter.leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer(sn)));
             return abacDataAttributter;
         }
     }
