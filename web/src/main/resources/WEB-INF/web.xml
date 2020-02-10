@@ -23,7 +23,7 @@
     </context-param>
 
     <listener>
-        <listener-class>no.nav.foreldrepenger.web.app.startupinfo.AppStartupServletContextListener</listener-class>
+        <listener-class>no.nav.foreldrepenger.web.server.startupinfo.AppStartupServletContextListener</listener-class>
     </listener>
 
     <security-constraint>
