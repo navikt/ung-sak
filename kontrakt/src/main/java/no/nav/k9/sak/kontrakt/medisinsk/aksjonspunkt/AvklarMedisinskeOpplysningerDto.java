@@ -1,8 +1,9 @@
-package no.nav.k9.sak.kontrakt.medisinsk;
+package no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt;
 
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -21,13 +22,15 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE)
 public class AvklarMedisinskeOpplysningerDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "legeerklæring")
+    @JsonProperty(value = "legeerklæring", required = true)
     @Valid
     @Size(max = 100)
+    @NotNull
     private List<Legeerklæring> legeerklæring;
 
-    @JsonProperty(value = "pleiebehov")
+    @JsonProperty(value = "pleiebehov", required = true)
     @Valid
+    @NotNull
     private Pleiebehov pleiebehov;
 
     private AvklarMedisinskeOpplysningerDto() {

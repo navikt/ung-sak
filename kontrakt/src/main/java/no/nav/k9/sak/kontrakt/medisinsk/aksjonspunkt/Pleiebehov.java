@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.medisinsk;
+package no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt;
 
 import java.util.List;
 

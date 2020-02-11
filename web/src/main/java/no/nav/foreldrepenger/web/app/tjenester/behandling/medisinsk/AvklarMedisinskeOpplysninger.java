@@ -22,9 +22,9 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.kontrakt.medisinsk.AvklarMedisinskeOpplysningerDto;
-import no.nav.k9.sak.kontrakt.medisinsk.Legeerklæring;
-import no.nav.k9.sak.kontrakt.medisinsk.Pleiebehov;
+import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
+import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Legeerklæring;
+import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Pleiebehov;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarMedisinskeOpplysningerDto.class, adapter = AksjonspunktOppdaterer.class)
