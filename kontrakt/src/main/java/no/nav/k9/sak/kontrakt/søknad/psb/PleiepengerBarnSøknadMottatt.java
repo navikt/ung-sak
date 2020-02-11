@@ -15,14 +15,14 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class PleiepengerBarnSoknadMottatt {
+public class PleiepengerBarnSøknadMottatt {
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
     @Valid
     private final Saksnummer saksnummer;
 
-    public PleiepengerBarnSoknadMottatt(Saksnummer saksnummer) {
+    public PleiepengerBarnSøknadMottatt(Saksnummer saksnummer) {
         this.saksnummer = saksnummer;
     }
 

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -67,12 +66,6 @@ public class BekreftedeAksjonspunkterDto {
     @AbacAttributt("aksjonspunktKode")
     public Set<String> getBekreftedeAksjonspunktKoder(){
         return bekreftedeAksjonspunktDtoer.stream().map(BekreftetAksjonspunktDto::getKode).collect(Collectors.toSet());
-    }
-
-    @AbacAttributt("saksnummer")
-    public Saksnummer getSaksnummer() {
-        var s = behandlingId.getSaksnummer();
-        return s == null ? null : s;
     }
 
     public Long getBehandlingVersjon() {
