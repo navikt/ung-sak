@@ -48,6 +48,10 @@ public class BehandlingIdDto {
         this.id = Objects.requireNonNull(id, "id").toString();
     }
 
+    public BehandlingIdDto(String id) {
+        this.id = Objects.requireNonNull(id, "id");
+    }
+    
     public BehandlingIdDto() {
     }
 
