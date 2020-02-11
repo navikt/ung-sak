@@ -121,6 +121,7 @@ public class JettyServer extends AbstractJettyServer {
         WebAppContext webAppContext = super.createContext(appKonfigurasjon);
         webAppContext.setParentLoaderPriority(true);
         updateMetaData(webAppContext.getMetaData());
+        webAppContext.setThrowUnavailableOnStartupException(true);
         return webAppContext;
     }
 
