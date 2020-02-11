@@ -24,7 +24,7 @@ import no.nav.k9.abac.AbacAttributt;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.PUBLIC_ONLY, fieldVisibility = Visibility.ANY)
 @JsonInclude(Include.NON_NULL)
 public class BehandlingIdDto {
 
@@ -47,10 +47,12 @@ public class BehandlingIdDto {
     public BehandlingIdDto(UUID id) {
         this.id = Objects.requireNonNull(id, "id").toString();
     }
-
-    @JsonProperty(value = NAME)
-    @JsonSetter
-    void setBehandlingId(String behandlingId) {
+    
+    public BehandlingIdDto() {
+    }
+    
+    @JsonSetter(NAME)
+    public void setBehandlingId(String behandlingId) {
         this.id = Objects.requireNonNull(behandlingId, NAME);
         validerLongEllerUuid();
     }
