@@ -9,7 +9,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -50,11 +49,6 @@ public class BehandlingIdDto {
     }
 
     public BehandlingIdDto() {
-    }
-
-    @JsonCreator
-    public BehandlingIdDto(@Size(max = 50) @NotNull @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String id) {
-        this.id = id;
     }
 
     @JsonSetter(NAME)
