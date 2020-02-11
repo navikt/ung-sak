@@ -72,8 +72,8 @@ public class InngangsvilkårOversetterTest {
 
     @Before
     public void oppsett() {
-        oversetter = new InngangsvilkårOversetter(repositoryProvider, medisinskGrunnlagRepository, personopplysningTjeneste,
-            iayTjeneste);
+        oversetter = new InngangsvilkårOversetter(medisinskGrunnlagRepository, personopplysningTjeneste,
+            iayTjeneste, repositoryProvider.getMedlemskapRepository());
     }
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {

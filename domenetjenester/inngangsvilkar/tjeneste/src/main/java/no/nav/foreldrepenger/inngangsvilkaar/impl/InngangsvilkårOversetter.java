@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedle
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
@@ -60,11 +59,11 @@ public class InngangsvilkårOversetter {
     }
 
     @Inject
-    public InngangsvilkårOversetter(BehandlingRepositoryProvider repositoryProvider,
-                                    MedisinskGrunnlagRepository medisinskGrunnlagRepository,
+    public InngangsvilkårOversetter(MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                     BasisPersonopplysningTjeneste personopplysningTjeneste,
-                                    InntektArbeidYtelseTjeneste iayTjeneste) {
-        this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
+                                    InntektArbeidYtelseTjeneste iayTjeneste,
+                                    MedlemskapRepository medlemskapRepository) {
+        this.medlemskapRepository = medlemskapRepository;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.iayTjeneste = iayTjeneste;
         this.medlemskapPerioderTjeneste = new MedlemskapPerioderTjeneste();

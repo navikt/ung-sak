@@ -39,6 +39,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat.Ber
 import no.nav.foreldrepenger.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
@@ -246,6 +247,7 @@ public class BehandlingDtoTjeneste {
         }
 
         dto.leggTil(get(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidDto));
+        dto.leggTil(get(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", uuidDto));
 
         dto.leggTil(get(OpptjeningRestTjeneste.PATH, "opptjening", uuidDto));
 

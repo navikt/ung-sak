@@ -92,8 +92,8 @@ public class MedlemskapsvilkårTest {
 
     @Before
     public void before() throws Exception {
-        this.oversetter = new InngangsvilkårOversetter(repositoryProvider, medisinskGrunnlagRepository,
-            personopplysningTjeneste, iayTjeneste);
+        this.oversetter = new InngangsvilkårOversetter(medisinskGrunnlagRepository,
+            personopplysningTjeneste, iayTjeneste, repositoryProvider.getMedlemskapRepository());
         this.vurderMedlemskapsvilkarEngangsstonad = new InngangsvilkårMedlemskap(oversetter);
     }
 
