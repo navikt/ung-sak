@@ -175,7 +175,7 @@ public class BehandlingRestTjeneste {
                                                     @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)  BehandlingUuidDto uuidDto,
                                                     @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ProsessTaskGruppeIdDto gruppeDto)
             throws URISyntaxException {
-        return hentBehandlingMidlertidigStatus(new BehandlingIdDto(uuidDto), gruppeDto);
+        return hentBehandlingMidlertidigStatus(uuidDto, gruppeDto);
     }
 
     @GET
@@ -205,7 +205,11 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingResultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return hentBehandlingResultat(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingsprosessTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
+        AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
+        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
+        ResponseBuilder responseBuilder = Response.ok().entity(dto);
+        return responseBuilder.build();
     }
 
     @GET
@@ -234,7 +238,10 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentRevurderingensOriginalBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return hentRevurderingensOriginalBehandling(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingsprosessTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
+        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling);
+        ResponseBuilder responseBuilder = Response.ok().entity(dto);
+        return responseBuilder.build();
     }
 
     @POST

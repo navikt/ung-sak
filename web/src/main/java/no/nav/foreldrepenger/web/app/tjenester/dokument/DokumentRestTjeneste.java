@@ -126,7 +126,17 @@ public class DokumentRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return hentAlleMottatteDokumenterForBehandling(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());    
+        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .map(m -> {
+                var dto = new MottattDokumentDto();
+                dto.setMottattDato(m.getMottattDato());
+                dto.setDokumentTypeId(m.getDokumentType());
+                dto.setDokumentKategori(m.getDokumentKategori());
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
     @GET

@@ -93,6 +93,10 @@ public class AksjonspunktRestTjeneste {
         Behandling behandling = behandlingId != null
             ? behandlingRepository.hentBehandling(behandlingId)
             : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        return getAksjonspunkter(behandling);
+    }
+
+    private Response getAksjonspunkter(Behandling behandling) {
         Collection<Totrinnsvurdering> ttVurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
         Set<AksjonspunktDto> dto = AksjonspunktDtoMapper.lagAksjonspunktDto(behandling, ttVurderinger);
         CacheControl cc = new CacheControl();
@@ -111,7 +115,8 @@ public class AksjonspunktRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAksjonspunkter(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return getAksjonspunkter(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+        return getAksjonspunkter(behandling);
     }
 
     @GET

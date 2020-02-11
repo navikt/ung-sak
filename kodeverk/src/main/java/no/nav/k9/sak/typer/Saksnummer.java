@@ -26,8 +26,8 @@ public class Saksnummer implements IndexKey {
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String saksnummer; // NOSONAR
 
-    Saksnummer() {
-        // for hibernate
+    protected Saksnummer() {
+        //
     }
 
     @JsonCreator

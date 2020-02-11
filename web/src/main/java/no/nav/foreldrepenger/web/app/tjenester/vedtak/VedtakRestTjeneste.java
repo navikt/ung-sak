@@ -64,7 +64,9 @@ public class VedtakRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentVedtaksdokument(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return hentVedtaksdokument(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingsprosessTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
+        String resultat = vedtakInnsynTjeneste.hentVedtaksdokument(behandling.getId());
+        return Response.ok(resultat, "text/html").build();
     }
 
 }

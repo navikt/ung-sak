@@ -3,10 +3,9 @@ package no.nav.k9.sak.kontrakt.behandling;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.validation.Valid;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -15,13 +14,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.sak.typer.Saksnummer;
 
 /**
  * Referanse til en behandling.
- * Enten {@link #behandlingId} eller {@link #behandlingUuid} vil være satt.
+ * Enten {@link #id} eller {@link #behandlingUuid} vil være satt.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -29,82 +28,81 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonInclude(Include.NON_NULL)
 public class BehandlingIdDto {
 
-    @JsonProperty(value = "saksnummer")
-    @Valid
-    private Saksnummer saksnummer;
+    public static final String NAME = "behandlingId";
+    
+    @JsonProperty(value = NAME, required = true)
+    @Size(max = 50)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String id;
 
-    @JsonProperty(value = "behandlingId")
-    @Min(0)
-    @Max(Long.MAX_VALUE)
-    private Long behandlingId;
-
-    /**
-     * Behandling UUID (nytt alternativ til intern behandlingId. Bør brukes av eksterne systemer).
-     */
-    @JsonProperty(value = "behandlingUuid")
-    @Valid
-    private UUID behandlingUuid;
-
-    public BehandlingIdDto() {
-        //
+    public BehandlingIdDto(Integer id) {
+        this.id = Objects.requireNonNull(id, "id").toString();
     }
 
-    /**
-     * Default ctor for å instantiere med en type id. Støtter både Long id og UUID.
-     */
-    public BehandlingIdDto(String id) {
-        Objects.requireNonNull(id, "behandlingId");
-        if (id.contains("-")) {
-            this.behandlingUuid = UUID.fromString(id);
+    public BehandlingIdDto(Long id) {
+        this.id = Objects.requireNonNull(id, "id").toString();
+    }
+
+    public BehandlingIdDto(UUID id) {
+        this.id = Objects.requireNonNull(id, "id").toString();
+    }
+
+    @JsonProperty(value = NAME)
+    @JsonSetter
+    void setBehandlingId(String behandlingId) {
+        this.id = Objects.requireNonNull(behandlingId, NAME);
+        validerLongEllerUuid();
+    }
+
+    private void validerLongEllerUuid() {
+        // valider
+        if (isLong()) {
+            getBehandlingId();
         } else {
-            this.behandlingId = Long.valueOf(id);
+            getBehandlingUuid();
         }
-    }
-
-    public BehandlingIdDto(BehandlingUuidDto uuidDto) {
-        this.behandlingUuid = uuidDto.getBehandlingUuid();
-    }
-
-    public BehandlingIdDto(Saksnummer saksnummer, Long behandlingId, UUID behandlingUuid) {
-        this.saksnummer = saksnummer;
-        this.behandlingId = behandlingId;
-        this.behandlingUuid = behandlingUuid;
-    }
-
-    @AssertTrue(message = "Ikke spesifier både behandlingId og behandlingUuid")
-    private boolean ok() {
-        return (behandlingId == null || behandlingUuid == null) && !(behandlingId == null && behandlingUuid == null);
-    }
-
-    public BehandlingIdDto(Long behandlingId) {
-        this.behandlingId = behandlingId;
     }
 
     /**
      * Denne er kun intern nøkkel, bør ikke eksponeres ut men foreløpig støttes både Long id og UUID id for behandling på grensesnittene.
      */
-    @AbacAttributt("behandlingId")
+    @AbacAttributt(NAME)
     public Long getBehandlingId() {
-        return behandlingId;
+        return id != null && isLong() ? Long.parseLong(id) : null;
+    }
+
+    private boolean isLong() {
+        return id.matches("^\\d+$");
     }
 
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
-        return behandlingUuid;
+        return id != null && !isLong() ? UUID.fromString(id) : null;
     }
 
-    @AbacAttributt("saksnummer")
-    public Saksnummer getSaksnummer() {
-        return saksnummer;
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        var other = (BehandlingIdDto) obj;
+        return Objects.equals(this.id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '<' +
-            (saksnummer == null ? "" : "saksnummer=" + saksnummer + ", ") +
-            (behandlingId != null ? "behandlingId=" + behandlingId : "") +
-            (behandlingId != null && behandlingUuid != null ? ", " : "") +
-            (behandlingUuid != null ? "behandlingUuid=" + behandlingUuid : "") +
-            '>';
+        return id;
     }
 }

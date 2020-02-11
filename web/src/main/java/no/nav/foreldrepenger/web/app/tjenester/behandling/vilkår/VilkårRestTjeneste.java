@@ -112,7 +112,14 @@ public class VilkårRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getVilkår(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return getVilkår(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());        
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
+        List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, false, vilkårene);
+        CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
+        cc.setNoStore(true);
+        cc.setMaxAge(0);
+        return Response.ok(dto).cacheControl(cc).build();
     }
 
     @GET
@@ -123,7 +130,14 @@ public class VilkårRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getVilkårFull(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        return getVilkårFull(new BehandlingIdDto(uuidDto));
+        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
+        List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, true, vilkårene);
+        CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
+        cc.setNoStore(true);
+        cc.setMaxAge(0);
+        return Response.ok(dto).cacheControl(cc).build();
     }
 
 }
