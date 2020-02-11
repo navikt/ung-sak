@@ -55,8 +55,6 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>false</skip>
-					<installAtEnd>false</installAtEnd>
-					<deployAtEnd>false</deployAtEnd>
 				</configuration>
 			</plugin>
 		</plugins>
