@@ -40,7 +40,7 @@ import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
-import no.nav.k9.sak.kontrakt.produksjonstyring.SøkeSakEllerBrukerDto;
+import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;

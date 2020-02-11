@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.produksjonsstyring.arbeidsfordeling.ArbeidsfordelingTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.Enhetsstatus;
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.Organisasjonsenhet;
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.meldinger.FinnAlleBehandlendeEnheterListeRequest;

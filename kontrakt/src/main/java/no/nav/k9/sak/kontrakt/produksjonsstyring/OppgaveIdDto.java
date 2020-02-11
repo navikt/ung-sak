@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.produksjonstyring;
+package no.nav.k9.sak.kontrakt.produksjonsstyring;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;

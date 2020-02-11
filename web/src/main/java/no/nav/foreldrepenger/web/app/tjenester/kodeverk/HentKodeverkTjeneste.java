@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.OrganisasjonsEnhet;
 import no.nav.foreldrepenger.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.api.Kodeverdi;
@@ -58,6 +57,7 @@ import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
 import no.nav.k9.kodeverk.uttak.InnvilgetÅrsak;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;

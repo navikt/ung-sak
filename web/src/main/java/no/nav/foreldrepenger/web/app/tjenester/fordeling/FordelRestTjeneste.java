@@ -49,7 +49,7 @@ import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
-import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSoknadMottatt;
+import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSøknadMottatt;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -179,9 +179,9 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public PleiepengerBarnSoknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknad pleiepengerBarnSoknad) {
+    public PleiepengerBarnSøknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknad pleiepengerBarnSoknad) {
         final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
-        return new PleiepengerBarnSoknadMottatt(behandling.getFagsak().getSaksnummer());
+        return new PleiepengerBarnSøknadMottatt(behandling.getFagsak().getSaksnummer());
     }
 
     @POST
