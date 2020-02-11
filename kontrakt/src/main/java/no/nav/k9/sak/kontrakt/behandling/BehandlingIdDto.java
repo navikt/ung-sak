@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,7 +30,7 @@ import no.nav.k9.abac.AbacAttributt;
 public class BehandlingIdDto {
 
     public static final String NAME = "behandlingId";
-    
+
     @JsonProperty(value = NAME, required = true)
     @Size(max = 50)
     @NotNull
@@ -47,10 +48,15 @@ public class BehandlingIdDto {
     public BehandlingIdDto(UUID id) {
         this.id = Objects.requireNonNull(id, "id").toString();
     }
-    
+
     public BehandlingIdDto() {
     }
-    
+
+    @JsonCreator
+    public BehandlingIdDto(@Size(max = 50) @NotNull @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String id) {
+        this.id = id;
+    }
+
     @JsonSetter(NAME)
     public void setBehandlingId(String behandlingId) {
         this.id = Objects.requireNonNull(behandlingId, NAME);
