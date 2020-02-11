@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,9 +37,9 @@ public class Legeerklæring {
     private UUID identifikator;
 
     @JsonProperty(value = "kilde", required = true)
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String kilde;
+    @Valid
+    @NotNull
+    private LegeerklæringKilde kilde;
 
     @JsonProperty(value = "diagnosekode", required = true)
     @Size(max = 4000)
@@ -65,7 +66,7 @@ public class Legeerklæring {
         return diagnosekode;
     }
 
-    public String getKilde() {
+    public LegeerklæringKilde getKilde() {
         return kilde;
     }
 

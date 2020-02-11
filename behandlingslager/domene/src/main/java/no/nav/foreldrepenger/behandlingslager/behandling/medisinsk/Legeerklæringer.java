@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.medisinsk;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,11 +37,15 @@ public class Legeerklæringer extends BaseEntitet {
     }
 
     public Legeerklæringer(Legeerklæringer legeerklæringer) {
-        this.legeerklæringer = legeerklæringer.getLegeerklæringer()
-            .stream()
-            .map(Legeerklæring::new)
-            .peek(it -> it.setLegeerklæringer(this))
-            .collect(Collectors.toSet());
+        if (legeerklæringer != null) {
+            this.legeerklæringer = legeerklæringer.getLegeerklæringer()
+                .stream()
+                .map(Legeerklæring::new)
+                .peek(it -> it.setLegeerklæringer(this))
+                .collect(Collectors.toSet());
+        } else {
+            this.legeerklæringer = new HashSet<>();
+        }
     }
 
     public Legeerklæringer(Set<Legeerklæring> perioder) {
@@ -63,6 +68,7 @@ public class Legeerklæringer extends BaseEntitet {
             throw new IllegalStateException("Utvikler feil: Kan ikke manipulere persistert parent entitet");
         } else {
             legeerklæringer.removeIf(it -> it.getUuid().equals(legeerklæring.getUuid()));
+            legeerklæring.setLegeerklæringer(this);
             legeerklæringer.add(legeerklæring);
         }
     }

@@ -20,7 +20,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrun
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Legeerklæring;
@@ -71,18 +70,22 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     }
 
     private KontinuerligTilsynBuilder mapKontinuerligTilsyn(DatoIntervallEntitet periode, KontinuerligTilsyn kontinuerligTilsyn, Pleiebehov pleiebehov) {
-        final var builder = KontinuerligTilsynBuilder.builder(kontinuerligTilsyn);
+        final var builder = kontinuerligTilsyn != null ? KontinuerligTilsynBuilder.builder(kontinuerligTilsyn) : KontinuerligTilsynBuilder.builder();
         builder.tilbakeStill(periode);
 
-        pleiebehov.getPerioderMedTilsynOgPleie()
-            .stream()
-            .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()), it.getBegrunnelse(), 100))
-            .forEach(builder::leggTil);
+        if (pleiebehov.getPerioderMedTilsynOgPleie() != null) {
+            pleiebehov.getPerioderMedTilsynOgPleie()
+                .stream()
+                .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()), it.getBegrunnelse(), 100))
+                .forEach(builder::leggTil);
+        }
 
-        pleiebehov.getPerioderMedUtvidetTilsynOgPleie()
-            .stream()
-            .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()), it.getBegrunnelse(), 200))
-            .forEach(builder::leggTil);
+        if (pleiebehov.getPerioderMedUtvidetTilsynOgPleie() != null) {
+            pleiebehov.getPerioderMedUtvidetTilsynOgPleie()
+                .stream()
+                .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()), it.getBegrunnelse(), 200))
+                .forEach(builder::leggTil);
+        }
 
         return builder;
     }
@@ -97,7 +100,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                     .stream()
                     .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
                     .collect(Collectors.toSet());
-                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), periode, innleggelsePerioder, LegeerklæringKilde.fraKode(it.getKilde()), it.getDiagnosekode());
+                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), periode, innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
             })
             .forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
 
