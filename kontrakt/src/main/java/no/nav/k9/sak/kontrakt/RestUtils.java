@@ -20,6 +20,10 @@ class RestUtils {
         OM.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         OM.registerModule(new JavaTimeModule());
     }
+    
+    public static ObjectMapper getObjectMapper() {
+        return OM.copy();
+    }
 
     public static String convertObjectToQueryString(Object object) {
         return OM.convertValue(object, UriFormat.class).toString();

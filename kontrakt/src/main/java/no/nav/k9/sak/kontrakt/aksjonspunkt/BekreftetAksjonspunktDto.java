@@ -35,6 +35,10 @@ public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode {
     public String getBegrunnelse() {
         return begrunnelse;
     }
+    
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
+    }
 
     @AbacAttributt("aksjonspunktKode")
     @Override

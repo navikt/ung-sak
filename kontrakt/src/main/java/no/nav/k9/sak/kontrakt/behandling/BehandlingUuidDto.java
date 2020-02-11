@@ -35,7 +35,7 @@ public class BehandlingUuidDto {
     }
 
     @JsonCreator
-    public BehandlingUuidDto(@NotNull UUID behandlingUuid) {
+    public BehandlingUuidDto(@JsonProperty(NAME) @NotNull UUID behandlingUuid) {
         this.behandlingUuid = Objects.requireNonNull(behandlingUuid, NAME);
     }
 
