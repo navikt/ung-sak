@@ -123,8 +123,8 @@ public class PersonRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public PersonopplysningDto getPersonopplysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
+    public PersonopplysningDto getPersonopplysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         Long behandlingId = getBehandlingsId(new BehandlingIdDto(behandling.getId()));
         Optional<PersonopplysningDto> personopplysningDto = personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, LocalDate.now());
         if (personopplysningDto.isPresent()) {
@@ -143,8 +143,8 @@ public class PersonRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public MedlemDto getMedlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
+    public MedlemDto getMedlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         Long behandlingId = getBehandlingsId(new BehandlingIdDto(behandling.getId()));
         Optional<MedlemDto> medlemDto = medlemDtoTjeneste.lagMedlemDto(behandlingId);
         return medlemDto.orElse(null);
@@ -158,8 +158,8 @@ public class PersonRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Deprecated
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public MedlemV2Dto hentMedlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(uuidDto.getBehandlingUuid());
+    public MedlemV2Dto hentMedlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         Long behandlingId = getBehandlingsId(new BehandlingIdDto(behandling.getId()));
         Optional<MedlemV2Dto> medlemDto = medlemDtoTjeneste.lagMedlemPeriodisertDto(behandlingId);
         return medlemDto.orElse(null);

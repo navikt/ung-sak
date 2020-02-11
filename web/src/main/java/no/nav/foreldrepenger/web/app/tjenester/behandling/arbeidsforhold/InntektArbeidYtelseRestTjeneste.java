@@ -90,8 +90,8 @@ public class InntektArbeidYtelseRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public InntektArbeidYtelseDto getInntektArbeidYtelser(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+    public InntektArbeidYtelseDto getInntektArbeidYtelser(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return getInntektArbeidYtelserFraBehandling(behandling);
     }
 

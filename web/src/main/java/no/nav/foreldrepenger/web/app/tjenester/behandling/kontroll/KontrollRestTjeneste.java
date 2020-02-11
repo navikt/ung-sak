@@ -57,8 +57,8 @@ public class KontrollRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public KontrollresultatDto hentKontrollresultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+    public KontrollresultatDto hentKontrollresultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return kontrollDtoTjeneste.lagKontrollresultatForBehandling(behandling).orElse(null);
     }
 
@@ -87,8 +87,8 @@ public class KontrollRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path(KONTROLLRESULTAT_V2_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public KontrollresultatDto hentKontrollresultatV2(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+    public KontrollresultatDto hentKontrollresultatV2(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return kontrollDtoTjeneste.lagKontrollresultatForBehandling(behandling).orElse(null);
     }
 

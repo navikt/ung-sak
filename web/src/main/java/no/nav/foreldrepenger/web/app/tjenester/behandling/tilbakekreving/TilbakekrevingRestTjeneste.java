@@ -64,8 +64,8 @@ public class TilbakekrevingRestTjeneste {
     @Operation(description = "Hent tilbakekrevingsvalg for behandlingen", tags = "tilbakekrevingsvalg")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path(POSTPATH_VALG)
-    public TilbakekrevingValgDto hentTilbakekrevingValg(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        UUID behandlingId = uuidDto.getBehandlingUuid();
+    public TilbakekrevingValgDto hentTilbakekrevingValg(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandlingId = behandlingUuid.getBehandlingUuid();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         Optional<TilbakekrevingValg> resultat = tilbakekrevingRepository.hent(behandling.getId());
@@ -79,8 +79,8 @@ public class TilbakekrevingRestTjeneste {
     @Operation(description = "Henter varseltekst for tilbakekreving", tags = "tilbakekrevingsvalg")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path(POSTPATH_VARSELTEKST)
-    public VarseltekstDto hentVarseltekst(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        Behandling behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+    public VarseltekstDto hentVarseltekst(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
         Optional<TilbakekrevingValg> valgOpt = tilbakekrevingRepository.hent(behandling.getId());
         String varseltekst = valgOpt.map(TilbakekrevingValg::getVarseltekst).orElse(null);

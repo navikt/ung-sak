@@ -111,8 +111,8 @@ public class VilkårRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkår(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());        
+    public Response getVilkår(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());        
         final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
         List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, false, vilkårene);
         CacheControl cc = new CacheControl();
@@ -129,8 +129,8 @@ public class VilkårRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkårFull(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto uuidDto) {
-        var behandling = behandlingRepository.hentBehandling(uuidDto.getBehandlingUuid());
+    public Response getVilkårFull(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
         List<VilkårDto> dto = VilkårDtoMapper.lagVilkarDto(behandling, true, vilkårene);
         CacheControl cc = new CacheControl();

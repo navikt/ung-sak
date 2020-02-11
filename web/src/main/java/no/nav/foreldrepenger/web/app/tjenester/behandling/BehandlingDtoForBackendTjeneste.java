@@ -63,14 +63,14 @@ public class BehandlingDtoForBackendTjeneste {
             dto.setAsyncStatus(asyncStatus);
         }
 
-        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
+        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
-        dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidDto));
-        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "medlemskap-v2", uuidDto));
-        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidDto));
-        dto.leggTil(get(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", uuidDto));
-        dto.leggTil(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", uuidDto));
+        dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", behandlingUuid));
+        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "medlemskap-v2", behandlingUuid));
+        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlingUuid));
+        dto.leggTil(get(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", behandlingUuid));
+        dto.leggTil(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", behandlingUuid));
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
             BehandlingUuidDto orginalBehandlingUuid = new BehandlingUuidDto(originalBehandling.getUuid());

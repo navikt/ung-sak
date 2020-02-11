@@ -111,15 +111,15 @@ public class BehandlingDtoTjeneste {
                                                   Optional<BehandlingsresultatDto> behandlingsresultatDto,
                                                   boolean erBehandlingMedGjeldendeVedtak,
                                                   SøknadRepository søknadRepository) {
-        BehandlingDto dto = new BehandlingDto();
-        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
-        BehandlingIdDto idDto = new BehandlingIdDto(behandling.getId());
+        var dto = new BehandlingDto();
+        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
+        var idDto = new BehandlingIdDto(behandling.getId());
         setStandardfelter(behandling, dto, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
         // Behandlingsmeny-operasjoner
-        dto.leggTil(get(BehandlingRestTjeneste.HANDLING_RETTIGHETER, "handling-rettigheter", uuidDto));
+        dto.leggTil(get(BehandlingRestTjeneste.HANDLING_RETTIGHETER, "handling-rettigheter", behandlingUuid));
         dto.leggTil(post(BehandlingRestTjeneste.BYTT_ENHET_PATH, "bytt-behandlende-enhet", new ByttBehandlendeEnhetDto()));
         dto.leggTil(post(BehandlingRestTjeneste.OPNE_FOR_ENDRINGER_PATH, "opne-for-endringer", new ReåpneBehandlingDto()));
         dto.leggTil(post(BehandlingRestTjeneste.HENLEGG_PATH, "henlegg-behandling", new HenleggBehandlingDto()));
@@ -128,25 +128,25 @@ public class BehandlingDtoTjeneste {
 
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
             dto.leggTil(get(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", idDto));
-            dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_RISIKO_PATH, "risikoklassifisering-aksjonspunkt", uuidDto));
+            dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_RISIKO_PATH, "risikoklassifisering-aksjonspunkt", behandlingUuid));
             dto.leggTil(post(AksjonspunktRestTjeneste.AKSJONSPUNKT_PATH, "lagre-risikoklassifisering-aksjonspunkt", new BekreftedeAksjonspunkterDto()));
         }
 
         // Totrinnsbehandlin
         if (BehandlingStatus.FATTER_VEDTAK.equals(behandling.getStatus())) {
-            dto.leggTil(get(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", uuidDto));
-            dto.leggTil(post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", uuidDto));
+            dto.leggTil(get(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", behandlingUuid));
+            dto.leggTil(post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", behandlingUuid));
         } else if (BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
-            dto.leggTil(get(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", uuidDto));
+            dto.leggTil(get(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", behandlingUuid));
         }
 
         if (BehandlingType.REVURDERING.equals(behandling.getType())) {
-            dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH, "har-apent-kontroller-revurdering-aksjonspunkt", uuidDto));
-            dto.leggTil(get(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", uuidDto));
+            dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH, "har-apent-kontroller-revurdering-aksjonspunkt", behandlingUuid));
+            dto.leggTil(get(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", behandlingUuid));
         }
 
         // Brev
-        dto.leggTil(get(BrevRestTjeneste.MALER_PATH, "brev-maler", uuidDto));
+        dto.leggTil(get(BrevRestTjeneste.MALER_PATH, "brev-maler", behandlingUuid));
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
 
         return dto;
@@ -191,8 +191,8 @@ public class BehandlingDtoTjeneste {
     }
 
     public UtvidetBehandlingDto lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(Behandling originalBehandling) {
-        BehandlingUuidDto uuidDto = new BehandlingUuidDto(originalBehandling.getUuid());
-        UtvidetBehandlingDto dto = new UtvidetBehandlingDto();
+        var behandlingUuid = new BehandlingUuidDto(originalBehandling.getUuid());
+        var dto = new UtvidetBehandlingDto();
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
             .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
@@ -201,10 +201,10 @@ public class BehandlingDtoTjeneste {
         var behandlingsresultatDto = lagBehandlingsresultatDto(originalBehandling);
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
-        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidDto));
+        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlingUuid));
 
         // FIXME K9 urler og uttak
-        dto.leggTil(get(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidDto));
+        dto.leggTil(get(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", behandlingUuid));
 
         return dto;
     }

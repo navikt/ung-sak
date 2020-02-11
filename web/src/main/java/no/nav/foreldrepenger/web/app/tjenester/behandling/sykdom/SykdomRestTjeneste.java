@@ -65,8 +65,8 @@ public class SykdomRestTjeneste {
     public SykdomsDto getInntektArbeidYtelser(@NotNull @QueryParam(BehandlingUuidDto.NAME)
                                               @Parameter(description = BehandlingUuidDto.DESC)
                                               @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                                  BehandlingUuidDto uuidDto) {
-        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(uuidDto.getBehandlingUuid()).map(Behandling::getId);
+                                                  BehandlingUuidDto behandlingUuid) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).map(Behandling::getId);
         return behandling.map(behandlingId -> dtoMapper.map(behandlingId)).orElse(null);
     }
 }
