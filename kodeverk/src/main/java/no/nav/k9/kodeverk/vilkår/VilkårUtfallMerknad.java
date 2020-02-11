@@ -47,6 +47,10 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
 
     VM_1051("1051", "Stebarnsadopsjon ikke flere dager igjen"),
 
+    VM_1067("1067", "Ikke dokumentert sykdom, skade eller lyte."),
+    VM_1068("1068", "Ikke mottatt dokumentasjon fra rett organ."),
+    VM_1069("1069", "Ikke behov for kontinuerlig pleie."),
+
     VM_5007("5007", "søknadsfristvilkåret"),
 
     VM_7001("7001", "Søker ikke oppfylt opplysningsplikten jf folketrygdloven §§ 21-7 og 21-3"),
@@ -58,7 +62,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     UDEFINERT("-", "Ikke definert"),
 
     ;
-    
+
     private static final Map<String, VilkårUtfallMerknad> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "VILKAR_UTFALL_MERKNAD";
@@ -118,7 +122,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {

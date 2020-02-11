@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
@@ -63,14 +64,16 @@ public class InngangsvilkårOversetterTest {
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository = new MedisinskGrunnlagRepository(repoRule.getEntityManager());
+
     private YrkesaktivitetBuilder yrkesaktivitetBuilder;
 
     private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(LocalDate.now());
 
     @Before
     public void oppsett() {
-        oversetter = new InngangsvilkårOversetter(repositoryProvider, personopplysningTjeneste,
-            iayTjeneste);
+        oversetter = new InngangsvilkårOversetter(medisinskGrunnlagRepository, personopplysningTjeneste,
+            iayTjeneste, repositoryProvider.getMedlemskapRepository());
     }
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
