@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.medlem;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -22,11 +23,10 @@ public class AvklarFortsattMedlemskapAksjonspunktDto {
     private List<BekreftedePerioderAdapter> perioder;
 
     public AvklarFortsattMedlemskapAksjonspunktDto(List<BekreftedePerioderAdapter> perioder) {
-
-        this.perioder = perioder;
+        this.perioder = List.copyOf(perioder);
     }
 
     public List<BekreftedePerioderAdapter> getPerioder() {
-        return perioder;
+        return Collections.unmodifiableList(perioder);
     }
 }

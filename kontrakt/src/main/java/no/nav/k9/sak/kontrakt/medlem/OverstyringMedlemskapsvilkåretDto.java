@@ -37,6 +37,14 @@ public class OverstyringMedlemskapsvilkåretDto extends OverstyringAksjonspunktD
         this.avslagskode = avslagskode;
     }
 
+    public void setAvslagskode(String avslagskode) {
+        this.avslagskode = avslagskode;
+    }
+
+    public void setErVilkarOk(boolean erVilkarOk) {
+        this.erVilkarOk = erVilkarOk;
+    }
+
     @Override
     public String getAvslagskode() {
         return avslagskode;

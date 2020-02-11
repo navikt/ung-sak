@@ -1,6 +1,9 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
@@ -24,7 +27,7 @@ public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value="aksjonspunktGodkjenningDtos")
     @Valid
     @Size(max = 20)
-    private Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos;
+    private Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos = new ArrayList<>();
 
     FatterVedtakAksjonspunktDto() {
         // For Jackson
@@ -32,11 +35,11 @@ public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {
 
     public FatterVedtakAksjonspunktDto(String begrunnelse, Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos) {
         super(begrunnelse);
-        this.aksjonspunktGodkjenningDtos = aksjonspunktGodkjenningDtos;
+        this.aksjonspunktGodkjenningDtos = List.copyOf(aksjonspunktGodkjenningDtos);
     }
 
 
     public Collection<AksjonspunktGodkjenningDto> getAksjonspunktGodkjenningDtos() {
-        return aksjonspunktGodkjenningDtos;
+        return Collections.unmodifiableCollection(aksjonspunktGodkjenningDtos);
     }
 }

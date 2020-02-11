@@ -47,7 +47,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(param.getBehandlingId());
         final var periode = utledPerioder(param.getBehandlingId());
 
-        final var legeerklæringer = mapLegeerklæringer(medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null), dto.getLegeerklæringer());
+        final var legeerklæringer = mapLegeerklæringer(medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null), dto.getLegeerklæring());
         final var kontinuerligTilsyn = mapKontinuerligTilsyn(periode, medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null), dto.getPleiebehov());
 
         medisinskGrunnlagRepository.lagreOgFlush(param.getBehandling(), kontinuerligTilsyn, legeerklæringer);

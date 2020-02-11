@@ -1,16 +1,17 @@
 package no.nav.k9.sak.kontrakt.medlem;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
@@ -31,10 +32,10 @@ public abstract class BekreftedePerioderMalDto extends BekreftetAksjonspunktDto 
 
     public BekreftedePerioderMalDto(String begrunnelse, List<BekreftedePerioderDto> bekreftedePerioder) {
         super(begrunnelse);
-        this.bekreftedePerioder = bekreftedePerioder;
+        this.bekreftedePerioder = List.copyOf(bekreftedePerioder);
     }
 
     public List<BekreftedePerioderDto> getBekreftedePerioder() {
-        return bekreftedePerioder;
+        return Collections.unmodifiableList(bekreftedePerioder);
     }
 }

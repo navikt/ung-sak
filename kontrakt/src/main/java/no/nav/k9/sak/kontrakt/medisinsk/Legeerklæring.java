@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.medisinsk;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,34 +22,34 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Legeerklæring {
 
+    @JsonProperty(value = "diagnosekode", required = true)
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String diagnosekode;
+
     @JsonProperty(value = "fom", required = true)
     @Valid
     @NotNull
     private LocalDate fom;
 
-    // NULL i tom tilsier at den er løpende til neste legeerklæring kommer
-    @JsonProperty(value = "tom")
-    @Valid
-    private LocalDate tom;
-
     @JsonProperty(value = "identifikator")
     @Valid
     private UUID identifikator;
+
+    @JsonProperty(value = "innleggelsesperioder")
+    @Valid
+    @Size(max = 100)
+    private List<Periode> innleggelsesperioder;
 
     @JsonProperty(value = "kilde", required = true)
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String kilde;
 
-    @JsonProperty(value = "diagnosekode", required = true)
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String diagnosekode;
-
-    @JsonProperty(value = "innleggelsesperioder")
+    // NULL i tom tilsier at den er løpende til neste legeerklæring kommer
+    @JsonProperty(value = "tom")
     @Valid
-    @Size(max = 100)
-    private List<Periode> innleggelsesperioder;
+    private LocalDate tom;
 
     public Legeerklæring(LocalDate fom, LocalDate tom,
                          UUID identifikator,
@@ -61,27 +62,51 @@ public class Legeerklæring {
         this.innleggelsesperioder = innleggelsesperioder;
     }
 
+    public String getDiagnosekode() {
+        return diagnosekode;
+    }
+
     public LocalDate getFom() {
         return fom;
     }
 
-    public LocalDate getTom() {
-        return tom;
+    public UUID getIdentifikator() {
+        return identifikator;
     }
 
-    public String getDiagnosekode() {
-        return diagnosekode;
+    public List<Periode> getInnleggelsesperioder() {
+        return Collections.unmodifiableList(innleggelsesperioder);
     }
 
     public String getKilde() {
         return kilde;
     }
 
-    public List<Periode> getInnleggelsesperioder() {
-        return innleggelsesperioder;
+    public LocalDate getTom() {
+        return tom;
     }
 
-    public UUID getIdentifikator() {
-        return identifikator;
+    public void setDiagnosekode(String diagnosekode) {
+        this.diagnosekode = diagnosekode;
+    }
+
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setIdentifikator(UUID identifikator) {
+        this.identifikator = identifikator;
+    }
+
+    public void setInnleggelsesperioder(List<Periode> innleggelsesperioder) {
+        this.innleggelsesperioder = List.copyOf(innleggelsesperioder);
+    }
+
+    public void setKilde(String kilde) {
+        this.kilde = kilde;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 }

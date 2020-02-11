@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.medisinsk;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -38,15 +39,31 @@ public class SykdomsDto {
         this.perioderMedUtvidetKontinuerligTilsyn = perioderMedUtvidetKontinuerligTilsyn;
     }
 
+    public SykdomsDto() {
+        //
+    }
+    
     public List<Legeerklæring> getLegeerklæringer() {
-        return legeerklæringer;
+        return Collections.unmodifiableList(legeerklæringer);
     }
 
     public List<Periode> getPerioderMedKontinuerligTilsyn() {
-        return perioderMedKontinuerligTilsyn;
+        return Collections.unmodifiableList(perioderMedKontinuerligTilsyn);
     }
 
     public List<Periode> getPerioderMedUtvidetKontinuerligTilsyn() {
-        return perioderMedUtvidetKontinuerligTilsyn;
+        return Collections.unmodifiableList(perioderMedUtvidetKontinuerligTilsyn);
+    }
+
+    public void setLegeerklæringer(List<Legeerklæring> legeerklæringer) {
+        this.legeerklæringer = List.copyOf(legeerklæringer);
+    }
+
+    public void setPerioderMedKontinuerligTilsyn(List<Periode> perioderMedKontinuerligTilsyn) {
+        this.perioderMedKontinuerligTilsyn = List.copyOf(perioderMedKontinuerligTilsyn);
+    }
+
+    public void setPerioderMedUtvidetKontinuerligTilsyn(List<Periode> perioderMedUtvidetKontinuerligTilsyn) {
+        this.perioderMedUtvidetKontinuerligTilsyn = List.copyOf(perioderMedUtvidetKontinuerligTilsyn);
     }
 }

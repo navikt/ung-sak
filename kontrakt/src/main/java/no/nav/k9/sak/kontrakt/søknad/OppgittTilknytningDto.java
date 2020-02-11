@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.søknad;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -28,12 +30,12 @@ public class OppgittTilknytningDto {
     @JsonProperty(value = "utlandsoppholdFor")
     @Valid
     @Size(max = 50)
-    private List<UtlandsoppholdDto> utlandsoppholdFor;
+    private List<UtlandsoppholdDto> utlandsoppholdFor = new ArrayList<>();
 
     @JsonProperty(value = "utlandsoppholdEtter")
     @Valid
     @Size(max = 50)
-    private List<UtlandsoppholdDto> utlandsoppholdEtter;
+    private List<UtlandsoppholdDto> utlandsoppholdEtter = new ArrayList<>();
 
     protected OppgittTilknytningDto() {
         // trengs for deserialisering av JSON
@@ -48,8 +50,8 @@ public class OppgittTilknytningDto {
         this.oppholdNorgeNa = oppholdNorgeNa;
         this.oppholdSistePeriode = oppholdSistePeriode;
         this.oppholdNestePeriode = oppholdNestePeriode;
-        this.utlandsoppholdFor = utlandsoppholdFor;
-        this.utlandsoppholdEtter = utlandsoppholdEtter;
+        this.utlandsoppholdFor = List.copyOf(utlandsoppholdFor);
+        this.utlandsoppholdEtter = List.copyOf(utlandsoppholdEtter);
     }
 
     public boolean isOppholdNorgeNa() {
@@ -65,10 +67,10 @@ public class OppgittTilknytningDto {
     }
 
     public List<UtlandsoppholdDto> getUtlandsoppholdFor() {
-        return utlandsoppholdFor;
+        return Collections.unmodifiableList(utlandsoppholdFor);
     }
 
     public List<UtlandsoppholdDto> getUtlandsoppholdEtter() {
-        return utlandsoppholdEtter;
+        return Collections.unmodifiableList(utlandsoppholdEtter);
     }
 }

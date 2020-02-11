@@ -1,6 +1,8 @@
 package no.nav.k9.sak.kontrakt.søknad;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -53,7 +55,7 @@ public class SøknadDto {
     @JsonProperty(value = "manglendeVedlegg")
     @Valid
     @Size(max = 20)
-    private List<ManglendeVedleggDto> manglendeVedlegg;
+    private List<ManglendeVedleggDto> manglendeVedlegg = new ArrayList<>();
 
     @JsonProperty(value = "spraakkode")
     @Valid
@@ -99,7 +101,7 @@ public class SøknadDto {
     }
 
     public List<ManglendeVedleggDto> getManglendeVedlegg() {
-        return manglendeVedlegg;
+        return Collections.unmodifiableList(manglendeVedlegg);
     }
 
     public void setOppgittStartdato(LocalDate oppgittStartdato) {
@@ -111,7 +113,7 @@ public class SøknadDto {
     }
 
     public void setManglendeVedlegg(List<ManglendeVedleggDto> manglendeVedlegg) {
-        this.manglendeVedlegg = manglendeVedlegg;
+        this.manglendeVedlegg = List.copyOf(manglendeVedlegg);
     }
 
     public void setSoknadsdato(LocalDate soknadsdato) {

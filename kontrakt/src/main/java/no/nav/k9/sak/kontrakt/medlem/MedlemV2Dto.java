@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.medlem;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,26 +38,26 @@ public class MedlemV2Dto {
     }
 
     public List<InntektDto> getInntekt() {
-        return inntekt;
+        return Collections.unmodifiableList(inntekt);
     }
 
     public void setInntekt(List<InntektDto> inntekt) {
-        this.inntekt = inntekt;
+        this.inntekt = List.copyOf(inntekt);
     }
 
     public List<MedlemskapPerioderDto> getMedlemskapPerioder() {
-        return medlemskapPerioder;
+        return Collections.unmodifiableList(medlemskapPerioder);
     }
 
     public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {
-        this.medlemskapPerioder = medlemskapPerioder;
+        this.medlemskapPerioder = List.copyOf(medlemskapPerioder);
     }
 
     public Set<MedlemPeriodeDto> getPerioder() {
-        return perioder;
+        return Collections.unmodifiableSet(perioder);
     }
 
     public void setPerioder(Set<MedlemPeriodeDto> perioder) {
-        this.perioder = perioder;
+        this.perioder = Set.copyOf(perioder);
     }
 }

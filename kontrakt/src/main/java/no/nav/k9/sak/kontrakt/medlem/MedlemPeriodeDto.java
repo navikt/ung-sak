@@ -76,19 +76,19 @@ public class MedlemPeriodeDto {
     }
 
     public Set<String> getAksjonspunkter() {
-        return aksjonspunkter;
+        return Collections.unmodifiableSet(aksjonspunkter);
     }
 
     public void setAksjonspunkter(Set<String> aksjonspunkter) {
-        this.aksjonspunkter = aksjonspunkter;
+        this.aksjonspunkter = Set.copyOf(aksjonspunkter);
     }
 
     public Set<VurderingsÅrsak> getÅrsaker() {
-        return årsaker;
+        return Collections.unmodifiableSet(årsaker);
     }
 
     public void setÅrsaker(Set<VurderingsÅrsak> årsaker) {
-        this.årsaker = årsaker;
+        this.årsaker = Set.copyOf(årsaker);
     }
 
     public Boolean getOppholdsrettVurdering() {

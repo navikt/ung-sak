@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.Collections;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -41,7 +42,7 @@ public class AksjonspunktGodkjenningDto {
     @Valid
     @NotNull
     @Size(max = 20)
-    private Set<no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak> arsaker;
+    private Set<VurderÅrsak> arsaker = Collections.emptySet();
 
     public AksjonspunktGodkjenningDto() { 
         // 
@@ -64,11 +65,11 @@ public class AksjonspunktGodkjenningDto {
     }
 
     public Set<VurderÅrsak> getArsaker() {
-        return arsaker;
+        return Collections.unmodifiableSet(arsaker);
     }
 
     public void setArsaker(Set<VurderÅrsak> arsaker) {
-        this.arsaker = arsaker;
+        this.arsaker = Set.copyOf(arsaker);
     }
 
     public void setAksjonspunktKode(String aksjonspunktKode) {

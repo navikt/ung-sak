@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.søknad.psb;
 
+import java.util.Objects;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -23,7 +25,7 @@ public class PleiepengerBarnSøknadMottatt {
     private final Saksnummer saksnummer;
 
     public PleiepengerBarnSøknadMottatt(Saksnummer saksnummer) {
-        this.saksnummer = saksnummer;
+        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
     }
 
     @AbacAttributt("saksnummer")

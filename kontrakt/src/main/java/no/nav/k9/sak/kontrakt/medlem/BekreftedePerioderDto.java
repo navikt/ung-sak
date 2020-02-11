@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.medlem;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -76,11 +77,11 @@ public class BekreftedePerioderDto {
     }
 
     public List<String> getAksjonspunkter() {
-        return aksjonspunkter;
+        return Collections.unmodifiableList(aksjonspunkter);
     }
 
     public void setAksjonspunkter(List<String> aksjonspunkter) {
-        this.aksjonspunkter = aksjonspunkter;
+        this.aksjonspunkter = List.copyOf(aksjonspunkter);
     }
 
     public Boolean getBosattVurdering() {

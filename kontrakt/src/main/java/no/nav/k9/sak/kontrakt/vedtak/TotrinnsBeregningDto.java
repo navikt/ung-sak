@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -24,7 +26,7 @@ public class TotrinnsBeregningDto {
     @JsonProperty(value = "faktaOmBeregningTilfeller")
     @Size(max = 100)
     @Valid
-    private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller;
+    private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller = new ArrayList<>();
 
     public void setFastsattVarigEndringNaering(boolean fastsattVarigEndringNaering) {
         this.fastsattVarigEndringNaering = fastsattVarigEndringNaering;
@@ -35,10 +37,10 @@ public class TotrinnsBeregningDto {
     }
 
     public List<FaktaOmBeregningTilfelle> getFaktaOmBeregningTilfeller() {
-        return faktaOmBeregningTilfeller;
+        return Collections.unmodifiableList(faktaOmBeregningTilfeller);
     }
 
     public void setFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
-        this.faktaOmBeregningTilfeller = faktaOmBeregningTilfeller;
+        this.faktaOmBeregningTilfeller = List.copyOf(faktaOmBeregningTilfeller);
     }
 }

@@ -3,9 +3,9 @@ package no.nav.k9.sak.kontrakt.medlem;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 
@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE)
 public class AvklarFortsattMedlemskapDto extends BekreftedePerioderMalDto {
 
-    AvklarFortsattMedlemskapDto() { // NOSONAR
+    protected AvklarFortsattMedlemskapDto() { // NOSONAR
         // For Jackson
     }
 

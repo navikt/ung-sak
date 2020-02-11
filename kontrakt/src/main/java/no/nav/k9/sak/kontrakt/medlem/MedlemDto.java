@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.medlem;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -24,12 +25,12 @@ public class MedlemDto {
     @JsonProperty(value = "inntekt")
     @Size(max = 100)
     @Valid
-    private List<InntektDto> inntekt;
+    private List<InntektDto> inntekt = Collections.emptyList();
 
     @JsonProperty(value = "medlemskapPerioder")
     @Size(max = 100)
     @Valid
-    private List<MedlemskapPerioderDto> medlemskapPerioder;
+    private List<MedlemskapPerioderDto> medlemskapPerioder = Collections.emptyList();
 
     @JsonProperty(value = "oppholdsrettVurdering")
     private Boolean oppholdsrettVurdering;
@@ -54,18 +55,18 @@ public class MedlemDto {
     @JsonProperty(value = "endringer")
     @Size(max = 100)
     @Valid
-    private List<EndringIPersonopplysningDto> endringer = new ArrayList<>();
+    private List<EndringIPersonopplysningDto> endringer = Collections.emptyList();
 
     public MedlemDto() {
         // trengs for deserialisering av JSON
     }
 
     public List<InntektDto> getInntekt() {
-        return inntekt;
+        return Collections.unmodifiableList(inntekt);
     }
 
     public List<MedlemskapPerioderDto> getMedlemskapPerioder() {
-        return medlemskapPerioder;
+        return Collections.unmodifiableList(medlemskapPerioder);
     }
 
     public Boolean getOppholdsrettVurdering() {
@@ -93,15 +94,15 @@ public class MedlemDto {
     }
 
     public List<EndringIPersonopplysningDto> getEndringer() {
-        return endringer;
+        return Collections.unmodifiableList(endringer);
     }
 
     public void setInntekt(List<InntektDto> inntekt) {
-        this.inntekt = inntekt;
+        this.inntekt = List.copyOf(inntekt);
     }
 
     public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {
-        this.medlemskapPerioder = medlemskapPerioder;
+        this.medlemskapPerioder = List.copyOf(medlemskapPerioder);
     }
 
     public void setOppholdsrettVurdering(Boolean oppholdsrettVurdering) {
@@ -129,6 +130,6 @@ public class MedlemDto {
     }
 
     public void setEndringer(List<EndringIPersonopplysningDto> endringer) {
-        this.endringer = endringer;
+        this.endringer = List.copyOf(endringer);
     }
 }

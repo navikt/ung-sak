@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -29,15 +30,23 @@ public class Pleiebehov {
     }
 
     public Pleiebehov(List<PeriodeMedTilsyn> perioderMedTilsynOgPleie, List<PeriodeMedTilsyn> perioderMedUtvidetTilsynOgPleie) {
-        this.perioderMedTilsynOgPleie = perioderMedTilsynOgPleie;
-        this.perioderMedUtvidetTilsynOgPleie = perioderMedUtvidetTilsynOgPleie;
+        this.perioderMedTilsynOgPleie = List.copyOf(perioderMedTilsynOgPleie);
+        this.perioderMedUtvidetTilsynOgPleie = List.copyOf(perioderMedUtvidetTilsynOgPleie);
     }
 
     public List<PeriodeMedTilsyn> getPerioderMedTilsynOgPleie() {
-        return perioderMedTilsynOgPleie;
+        return Collections.unmodifiableList(perioderMedTilsynOgPleie);
     }
 
     public List<PeriodeMedTilsyn> getPerioderMedUtvidetTilsynOgPleie() {
-        return perioderMedUtvidetTilsynOgPleie;
+        return Collections.unmodifiableList(perioderMedUtvidetTilsynOgPleie);
+    }
+
+    public void setPerioderMedTilsynOgPleie(List<PeriodeMedTilsyn> perioderMedTilsynOgPleie) {
+        this.perioderMedTilsynOgPleie = List.copyOf(perioderMedTilsynOgPleie);
+    }
+
+    public void setPerioderMedUtvidetTilsynOgPleie(List<PeriodeMedTilsyn> perioderMedUtvidetTilsynOgPleie) {
+        this.perioderMedUtvidetTilsynOgPleie = List.copyOf(perioderMedUtvidetTilsynOgPleie);
     }
 }

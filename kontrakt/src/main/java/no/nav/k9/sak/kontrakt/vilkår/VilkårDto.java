@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.vilkår;
 
+import java.util.Objects;
 import java.util.Properties;
 
 import javax.validation.Valid;
@@ -72,7 +73,7 @@ public class VilkårDto {
                      Properties merknadParametere,
                      String avslagKode,
                      String lovReferanse) {
-        this.vilkarType = vilkårType;
+        this.vilkarType = Objects.requireNonNull(vilkårType, "vilkårType");
         this.vilkarStatus = utfall;
         this.merknadParametere = merknadParametere;
         this.avslagKode = avslagKode;

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.søknad;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -55,6 +56,6 @@ public class BekreftSokersOpplysningspliktManuDto extends BekreftetAksjonspunktD
     }
 
     public List<InntektsmeldingSomIkkeKommerDto> getInntektsmeldingerSomIkkeKommer() {
-        return inntektsmeldingerSomIkkeKommer;
+        return Collections.unmodifiableList(inntektsmeldingerSomIkkeKommer);
     }
 }

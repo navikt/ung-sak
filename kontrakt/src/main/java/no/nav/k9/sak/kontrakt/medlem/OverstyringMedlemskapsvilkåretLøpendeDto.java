@@ -50,6 +50,18 @@ public class OverstyringMedlemskapsvilkåretLøpendeDto extends OverstyringAksjo
         return avslagskode;
     }
 
+    public void setOverstryingsdato(LocalDate overstryingsdato) {
+        this.overstryingsdato = overstryingsdato;
+    }
+
+    public void setAvslagskode(String avslagskode) {
+        this.avslagskode = avslagskode;
+    }
+
+    public void setErVilkarOk(boolean erVilkarOk) {
+        this.erVilkarOk = erVilkarOk;
+    }
+
     @Override
     public boolean getErVilkarOk() {
         return erVilkarOk;

@@ -1,5 +1,8 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,7 +31,7 @@ public class TotrinnskontrollAksjonspunkterDto {
     @JsonProperty(value = "opptjeningAktiviteter")
     @Size(max = 200)
     @Valid
-    private List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter;
+    private List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter = new ArrayList<>();
 
     @JsonProperty(value = "beregningDto")
     @Valid
@@ -45,19 +48,19 @@ public class TotrinnskontrollAksjonspunkterDto {
     @JsonProperty(value = "vurderPaNyttArsaker")
     @Size(max = 100)
     @Valid
-    private Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker;
+    private Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker = new HashSet<>();
 
     @JsonProperty(value = "arbeidsforholdDtos")
     @Size(max = 200)
     @Valid
-    private List<TotrinnsArbeidsforholdDto> arbeidforholdDtos;
+    private List<TotrinnsArbeidsforholdDto> arbeidforholdDtos = new ArrayList<>();
 
     public AksjonspunktDefinisjon getAksjonspunktKode() {
         return AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
     }
 
     public List<TotrinnskontrollAktivitetDto> getOpptjeningAktiviteter() {
-        return opptjeningAktiviteter;
+        return Collections.unmodifiableList(opptjeningAktiviteter);
     }
 
     public String getBesluttersBegrunnelse() {
@@ -69,7 +72,7 @@ public class TotrinnskontrollAksjonspunkterDto {
     }
 
     public Set<TotrinnskontrollVurderÅrsak> getVurderPaNyttArsaker() {
-        return vurderPaNyttArsaker;
+        return Collections.unmodifiableSet(vurderPaNyttArsaker);
     }
 
     public TotrinnsBeregningDto getBeregningDto() {
@@ -77,7 +80,7 @@ public class TotrinnskontrollAksjonspunkterDto {
     }
 
     public List<TotrinnsArbeidsforholdDto> getArbeidforholdDtos() {
-        return arbeidforholdDtos;
+        return Collections.unmodifiableList(arbeidforholdDtos);
     }
 
     public static class Builder {

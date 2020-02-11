@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.søknad;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -36,9 +37,9 @@ public class UtlandsoppholdDto {
     }
 
     public UtlandsoppholdDto(String landNavn, LocalDate fom, LocalDate tom) {
-        this.landNavn = landNavn;
-        this.fom = fom;
-        this.tom = tom;
+        this.landNavn = Objects.requireNonNull(landNavn, "landNavn");
+        this.fom = Objects.requireNonNull(fom, "fom");
+        this.tom = Objects.requireNonNull(tom, "tom");
     }
 
     public String getLandNavn() {

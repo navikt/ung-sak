@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -29,7 +31,7 @@ public class TotrinnskontrollSkjermlenkeContextDto {
     @JsonProperty(value = "totrinnskontrollAksjonspunkter")
     @Size(max = 50)
     @Valid
-    private List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter;
+    private List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = new ArrayList<>();
 
     public TotrinnskontrollSkjermlenkeContextDto(SkjermlenkeType skjermlenkeType, List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter) {
         this.totrinnskontrollAksjonspunkter = totrinnskontrollAksjonspunkter;
@@ -41,6 +43,6 @@ public class TotrinnskontrollSkjermlenkeContextDto {
     }
 
     public List<TotrinnskontrollAksjonspunkterDto> getTotrinnskontrollAksjonspunkter() {
-        return totrinnskontrollAksjonspunkter;
+        return Collections.unmodifiableList(totrinnskontrollAksjonspunkter);
     }
 }

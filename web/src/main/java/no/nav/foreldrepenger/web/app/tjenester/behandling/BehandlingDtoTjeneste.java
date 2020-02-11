@@ -223,38 +223,38 @@ public class BehandlingDtoTjeneste {
         SaksnummerDto saksnummerDto = new SaksnummerDto(behandling.getFagsak().getSaksnummer());
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", saksnummerDto));
 
-        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
-        dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidDto));
-        dto.leggTil(get(VilkårRestTjeneste.V2_PATH, "vilkar", uuidDto));
+        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
+        dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", behandlingUuid));
+        dto.leggTil(get(VilkårRestTjeneste.V2_PATH, "vilkar", behandlingUuid));
 
         return utvideBehandlingDto(behandling, dto);
     }
 
     private UtvidetBehandlingDto utvideBehandlingDto(Behandling behandling, UtvidetBehandlingDto dto) {
-        BehandlingUuidDto uuidDto = new BehandlingUuidDto(behandling.getUuid());
+        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
         // mapping ved hjelp av tjenester
-        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidDto));
-        dto.leggTil(get(DokumentRestTjeneste.MOTTATT_DOKUMENTER_PATH, "mottattdokument", uuidDto));
+        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlingUuid));
+        dto.leggTil(get(DokumentRestTjeneste.MOTTATT_DOKUMENTER_PATH, "mottattdokument", behandlingUuid));
 
-        dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidDto));
+        dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", behandlingUuid));
 
-        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidDto));
+        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", behandlingUuid));
         // TODO (TOR) Legg til else her når frontend ikkje lenger feilaktig brukar både ny og gammal versjon
-        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_PATH, "soeker-medlemskap", uuidDto));
+        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_PATH, "soeker-medlemskap", behandlingUuid));
 
         if (BehandlingType.REVURDERING.equals(behandling.getType()) && BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
-            dto.leggTil(get(BrevRestTjeneste.VARSEL_REVURDERING_PATH, "sendt-varsel-om-revurdering", uuidDto));
+            dto.leggTil(get(BrevRestTjeneste.VARSEL_REVURDERING_PATH, "sendt-varsel-om-revurdering", behandlingUuid));
         }
 
-        dto.leggTil(get(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidDto));
-        dto.leggTil(get(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", uuidDto));
+        dto.leggTil(get(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", behandlingUuid));
+        dto.leggTil(get(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", behandlingUuid));
 
-        dto.leggTil(get(OpptjeningRestTjeneste.PATH, "opptjening", uuidDto));
+        dto.leggTil(get(OpptjeningRestTjeneste.PATH, "opptjening", behandlingUuid));
 
         Optional<BeregningsgrunnlagEntitet> beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagGrunnlagEntitet(behandling.getId())
             .flatMap(BeregningsgrunnlagGrunnlagEntitet::getBeregningsgrunnlag);
         if (beregningsgrunnlag.isPresent()) {
-            dto.leggTil(get(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", uuidDto));
+            dto.leggTil(get(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", behandlingUuid));
         }
 
         lagTilbakekrevingValgLink(behandling).ifPresent(dto::leggTil);
@@ -325,10 +325,10 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
-        var uuidDto = new BehandlingUuidDto(behandling.getUuid());
+        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
         // FIXME (BehandlingIdDto): bør kunne støtte behandlingUuid også
         return tilbakekrevingRepository.hent(behandling.getId()).isPresent()
-            ? Optional.of(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekrevingvalg", uuidDto))
+            ? Optional.of(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekrevingvalg", behandlingUuid))
             : Optional.empty();
     }
 

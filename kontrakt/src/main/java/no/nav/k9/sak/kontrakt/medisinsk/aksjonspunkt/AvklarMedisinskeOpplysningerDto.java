@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -33,22 +34,31 @@ public class AvklarMedisinskeOpplysningerDto extends BekreftetAksjonspunktDto {
     @NotNull
     private Pleiebehov pleiebehov;
 
-    private AvklarMedisinskeOpplysningerDto() {
-        //For Jackson
-    }
-
     public AvklarMedisinskeOpplysningerDto(List<Legeerklæring> legeerklæringer,
-                                           Pleiebehov pleiebehov, String begrunnelse) {
+                                           Pleiebehov pleiebehov,
+                                           String begrunnelse) {
         super(begrunnelse);
         this.legeerklæring = legeerklæringer;
         this.pleiebehov = pleiebehov;
     }
 
-    public List<Legeerklæring> getLegeerklæringer() {
-        return legeerklæring;
+    protected AvklarMedisinskeOpplysningerDto() {
+        //
+    }
+
+    public List<Legeerklæring> getLegeerklæring() {
+        return Collections.unmodifiableList(legeerklæring);
     }
 
     public Pleiebehov getPleiebehov() {
         return pleiebehov;
+    }
+
+    public void setLegeerklæring(List<Legeerklæring> legeerklæring) {
+        this.legeerklæring = List.copyOf(legeerklæring);
+    }
+
+    public void setPleiebehov(Pleiebehov pleiebehov) {
+        this.pleiebehov = pleiebehov;
     }
 }

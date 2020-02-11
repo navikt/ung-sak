@@ -20,7 +20,6 @@ public class BekreftErMedlemVurderingDto extends BekreftedePerioderMalDto {
 
     public BekreftErMedlemVurderingDto(String begrunnelse, List<BekreftedePerioderDto> bekreftedePerioder) { // NOSONAR
         super(begrunnelse, bekreftedePerioder);
-
     }
 
 }

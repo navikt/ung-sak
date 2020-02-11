@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.medlem;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -75,11 +76,11 @@ public class MedlemskapPerioderDto {
     }
 
     public void setFom(LocalDate fom) {
-        this.fom = fom;
+        this.fom = Objects.requireNonNull(fom, "fom");
     }
 
     public void setTom(LocalDate tom) {
-        this.tom = tom;
+        this.tom = Objects.requireNonNull(tom, "tom");
     }
 
     public void setMedlemskapType(MedlemskapType medlemskapType) {
