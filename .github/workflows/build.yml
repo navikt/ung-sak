@@ -31,13 +31,15 @@ jobs:
       - uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.11
-      - name: Hent maven version
-        run: |
-          echo "::set-env name=CACHE_KEY::$(date +%U)"
+      
+      - name: Set cache key
+        run: echo "::set-env name=CACHE_KEY::$(date +%U)"
+        
       - uses: actions/cache@v1.1.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ env.CACHE_KEY }}
+      
       - name: Build artifacts & deploy
         shell: bash
         run: |
@@ -46,8 +48,9 @@ jobs:
           # har ikke tilgang til sonarcloud sålenge dette er private repo, kommenterer derfor ut neste linje
           # mvn jacoco:report sonar:sonar -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Djacoco.dataFile=$(pwd)/target/jacoco.exec -Dsonar.projectKey="navikt_k9-sak" -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization=navit -Dsonar.login=${SONAR_TOKEN}
           echo "Deployed artifacts"
-          echo "::set-env name=TAG::$(date +"%Y%m%d%H%M%S")-$(echo $GITHUB_SHA | cut -c1-7)"
-          echo "::set-env name=IMAGE::$IMAGE_BASE:$(date +"%Y%m%d%H%M%S")-$(echo $GITHUB_SHA | cut -c1-7)"
+          echo "::set-env name=TAG::$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"  
+          echo "::set-env name=IMAGE::$IMAGE_BASE:$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)"
+          echo "::set-env name=MVN_VERSION::$(mvn help:evaluate -e --batch-mode --settings ./.github/.m2/settings.xml -Dmaven.wagon.http.pool=false --file .flattened -Dexpression=project.version -q -DforceStdout)"    
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,6 +58,7 @@ jobs:
           GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
+      
       - name: Bygg og laste opp docker-image
         run: |
           docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest .
@@ -63,6 +67,7 @@ jobs:
           docker push ${IMAGE}
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+      
       - name: Trigger verdikjede test
         if: success()
         shell: bash
@@ -106,4 +111,14 @@ jobs:
             github.issues.createComment({...issue,
                                     title: 'Deploy av ${{ env.TAG }}',
                                     body: '/promote ${{ env.CLUSTER }} ${{ env.NAMESPACE }}'})
-
+      
+      - name: Publiser Release Note
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        with:
+          tag_name: ${{ env.MVN_VERSION }}
+          release_name: Release ${{ env.MVN_VERSION }}
+          draft: false
+          prerelease: false
