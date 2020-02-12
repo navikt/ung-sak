@@ -9,6 +9,10 @@ public class UriFormat {
     public UriFormat() {
         //
     }
+    
+    public UriFormat(String name, String verdi) {
+        addToUri(name, verdi);
+    }
 
     @JsonAnySetter
     public void addToUri(String name, String verdi) {

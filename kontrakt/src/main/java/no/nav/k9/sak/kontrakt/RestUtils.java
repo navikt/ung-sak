@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -20,11 +22,17 @@ class RestUtils {
         OM.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         OM.registerModule(new JavaTimeModule());
     }
-    
+
     public static ObjectMapper getObjectMapper() {
         return OM.copy();
     }
-
+    
+    public static String convertObjectToQueryStringFraMap(Map<String, String> queryParams) {
+        var fmt = new UriFormat();
+        queryParams.entrySet().forEach(e -> fmt.addToUri(e.getKey(), String.valueOf(e.getValue())));
+        return fmt.toString();
+    }
+    
     public static String convertObjectToQueryString(Object object) {
         return OM.convertValue(object, UriFormat.class).toString();
     }

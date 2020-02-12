@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.get;
+import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.post;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.setStandardfelter;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AbstractVedtaksbrevOverstyringshåndterer.FPSAK_LAGRE_FRITEKST_INN_FORMIDLING;
@@ -8,6 +9,7 @@ import static no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonsp
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,14 +114,15 @@ public class BehandlingDtoTjeneste {
                                                   boolean erBehandlingMedGjeldendeVedtak,
                                                   SøknadRepository søknadRepository) {
         var dto = new BehandlingDto();
-        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
-        var idDto = new BehandlingIdDto(behandling.getId());
         setStandardfelter(behandling, dto, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
+        Map<String, String> behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        Map<String, String> behandlingIdQueryParams = Map.of(BehandlingIdDto.NAME, behandling.getUuid().toString()); // legacy param name
+        
         // Behandlingsmeny-operasjoner
-        dto.leggTil(get(BehandlingRestTjeneste.HANDLING_RETTIGHETER, "handling-rettigheter", behandlingUuid));
+        dto.leggTil(getFraMap(BehandlingRestTjeneste.HANDLING_RETTIGHETER, "handling-rettigheter", behandlingUuidQueryParams));
         dto.leggTil(post(BehandlingRestTjeneste.BYTT_ENHET_PATH, "bytt-behandlende-enhet", new ByttBehandlendeEnhetDto()));
         dto.leggTil(post(BehandlingRestTjeneste.OPNE_FOR_ENDRINGER_PATH, "opne-for-endringer", new ReåpneBehandlingDto()));
         dto.leggTil(post(BehandlingRestTjeneste.HENLEGG_PATH, "henlegg-behandling", new HenleggBehandlingDto()));
@@ -127,26 +130,26 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(post(BehandlingRestTjeneste.SETT_PA_VENT_PATH, "sett-behandling-pa-vent", new SettBehandlingPaVentDto()));
 
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
-            dto.leggTil(get(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", idDto));
-            dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_RISIKO_PATH, "risikoklassifisering-aksjonspunkt", behandlingUuid));
+            dto.leggTil(getFraMap(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", behandlingIdQueryParams));
+            dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_RISIKO_PATH, "risikoklassifisering-aksjonspunkt", behandlingUuidQueryParams));
             dto.leggTil(post(AksjonspunktRestTjeneste.AKSJONSPUNKT_PATH, "lagre-risikoklassifisering-aksjonspunkt", new BekreftedeAksjonspunkterDto()));
         }
 
         // Totrinnsbehandlin
         if (BehandlingStatus.FATTER_VEDTAK.equals(behandling.getStatus())) {
-            dto.leggTil(get(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", behandlingUuid));
-            dto.leggTil(post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", behandlingUuid));
+            dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", behandlingUuidQueryParams));
+            dto.leggTil(post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
         } else if (BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
-            dto.leggTil(get(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", behandlingUuid));
+            dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", behandlingUuidQueryParams));
         }
 
         if (BehandlingType.REVURDERING.equals(behandling.getType())) {
-            dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH, "har-apent-kontroller-revurdering-aksjonspunkt", behandlingUuid));
-            dto.leggTil(get(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", behandlingUuid));
+            dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH, "har-apent-kontroller-revurdering-aksjonspunkt", behandlingUuidQueryParams));
+            dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", behandlingUuidQueryParams));
         }
 
         // Brev
-        dto.leggTil(get(BrevRestTjeneste.MALER_PATH, "brev-maler", behandlingUuid));
+        dto.leggTil(getFraMap(BrevRestTjeneste.MALER_PATH, "brev-maler", behandlingUuidQueryParams));
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
 
         return dto;
@@ -191,7 +194,6 @@ public class BehandlingDtoTjeneste {
     }
 
     public UtvidetBehandlingDto lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(Behandling originalBehandling) {
-        var behandlingUuid = new BehandlingUuidDto(originalBehandling.getUuid());
         var dto = new UtvidetBehandlingDto();
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
@@ -201,10 +203,11 @@ public class BehandlingDtoTjeneste {
         var behandlingsresultatDto = lagBehandlingsresultatDto(originalBehandling);
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
-        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlingUuid));
+        var queryParams = Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString());
+        dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", queryParams));
 
         // FIXME K9 urler og uttak
-        dto.leggTil(get(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", behandlingUuid));
+        dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", queryParams));
 
         return dto;
     }
@@ -220,48 +223,48 @@ public class BehandlingDtoTjeneste {
         UtvidetBehandlingDto dto = new UtvidetBehandlingDto();
         settStandardfelterUtvidet(behandling, dto, erBehandlingMedGjeldendeVedtak);
 
-        SaksnummerDto saksnummerDto = new SaksnummerDto(behandling.getFagsak().getSaksnummer());
-        dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", saksnummerDto));
+        dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
 
-        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
-        dto.leggTil(get(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", behandlingUuid));
-        dto.leggTil(get(VilkårRestTjeneste.V2_PATH, "vilkar", behandlingUuid));
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", queryParams));
+        dto.leggTil(getFraMap(VilkårRestTjeneste.V2_PATH, "vilkar", queryParams));
 
         return utvideBehandlingDto(behandling, dto);
     }
 
     private UtvidetBehandlingDto utvideBehandlingDto(Behandling behandling, UtvidetBehandlingDto dto) {
-        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         // mapping ved hjelp av tjenester
-        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlingUuid));
-        dto.leggTil(get(DokumentRestTjeneste.MOTTATT_DOKUMENTER_PATH, "mottattdokument", behandlingUuid));
+        dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", queryParams));
+        dto.leggTil(getFraMap(DokumentRestTjeneste.MOTTATT_DOKUMENTER_PATH, "mottattdokument", queryParams));
 
-        dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", behandlingUuid));
+        dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", queryParams));
 
-        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", behandlingUuid));
+        dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", queryParams));
         // TODO (TOR) Legg til else her når frontend ikkje lenger feilaktig brukar både ny og gammal versjon
-        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_PATH, "soeker-medlemskap", behandlingUuid));
+        dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_PATH, "soeker-medlemskap", queryParams));
 
         if (BehandlingType.REVURDERING.equals(behandling.getType()) && BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
-            dto.leggTil(get(BrevRestTjeneste.VARSEL_REVURDERING_PATH, "sendt-varsel-om-revurdering", behandlingUuid));
+            dto.leggTil(getFraMap(BrevRestTjeneste.VARSEL_REVURDERING_PATH, "sendt-varsel-om-revurdering", queryParams));
         }
 
-        dto.leggTil(get(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", behandlingUuid));
-        dto.leggTil(get(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", behandlingUuid));
+        dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", queryParams));
+        dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", queryParams));
 
-        dto.leggTil(get(OpptjeningRestTjeneste.PATH, "opptjening", behandlingUuid));
+        dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH, "opptjening", queryParams));
 
         Optional<BeregningsgrunnlagEntitet> beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagGrunnlagEntitet(behandling.getId())
             .flatMap(BeregningsgrunnlagGrunnlagEntitet::getBeregningsgrunnlag);
         if (beregningsgrunnlag.isPresent()) {
-            dto.leggTil(get(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", behandlingUuid));
+            dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", queryParams));
         }
 
         lagTilbakekrevingValgLink(behandling).ifPresent(dto::leggTil);
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
-            dto.leggTil(get(BehandlingRestTjeneste.REVURDERING_ORGINAL_PATH, "original-behandling", new BehandlingUuidDto(originalBehandling.getUuid())));
+            var originalQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+            dto.leggTil(getFraMap(BehandlingRestTjeneste.REVURDERING_ORGINAL_PATH, "original-behandling", originalQueryParams));
         });
 
         return dto;
@@ -325,10 +328,9 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
-        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
-        // FIXME (BehandlingIdDto): bør kunne støtte behandlingUuid også
+        Map<String, String> queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return tilbakekrevingRepository.hent(behandling.getId()).isPresent()
-            ? Optional.of(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekrevingvalg", behandlingUuid))
+            ? Optional.of(getFraMap(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekrevingvalg", queryParams))
             : Optional.empty();
     }
 

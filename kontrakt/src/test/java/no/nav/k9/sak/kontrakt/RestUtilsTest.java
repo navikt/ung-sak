@@ -9,25 +9,10 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 
 public class RestUtilsTest {
 
     public static final ObjectMapper OM = RestUtils.getObjectMapper();
-
-    @Test
-    public void test_serialiser_BehandlingUuid_to_query_param() throws Exception {
-        var uuid = new BehandlingUuidDto(UUID.nameUUIDFromBytes("hello".getBytes()));
-        var result = RestUtils.convertObjectToQueryString(uuid);
-        assertThat(result).isNotNull();
-    }
-
-    @Test
-    public void test_serialiser_BehandlingId_to_query_param() throws Exception {
-        var uuid = new BehandlingIdDto(10L);
-        var result = RestUtils.convertObjectToQueryString(uuid);
-        assertThat(result).isNotNull();
-    }
 
     @Test
     public void test_deserialiser_BehandlingId_as_String() throws Exception {

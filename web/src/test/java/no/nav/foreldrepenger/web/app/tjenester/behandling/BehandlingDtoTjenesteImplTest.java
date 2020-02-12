@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class BehandlingDtoTjenesteImplTest {
 
         UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
         var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);
-        var link = ResourceLink.get(href, "", new BehandlingUuidDto(dto.getUuid()));
+        var link = ResourceLink.getFraMap(href, "", Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString()));
         assertThat(getLinkRel(dto)).contains("tilbakekrevingvalg");
         assertThat(getLinkHref(dto)).contains(link.getHref());
     }
@@ -93,7 +94,7 @@ public class BehandlingDtoTjenesteImplTest {
 
         UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
         var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);
-        var link = ResourceLink.get(href, "", new BehandlingUuidDto(dto.getUuid()));
+        var link = ResourceLink.getFraMap(href, "", Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString()));
         assertThat(getLinkRel(dto)).doesNotContain("tilbakekrevingvalg");
         assertThat(getLinkHref(dto)).doesNotContain(link.getHref());
     }

@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.validation.constraints.NotNull;
@@ -95,6 +96,16 @@ public class ResourceLink {
         if (queryParams != null) {
             uri.append("?");
             uri.append(RestUtils.convertObjectToQueryString(queryParams));
+        }
+        return new ResourceLink(uri.toString(), rel, HttpMethod.GET, null);
+    }
+    
+    public static ResourceLink getFraMap(String href, String rel, Map<String, String> queryParams) {
+        StringBuilder uri = new StringBuilder();
+        uri.append(href);
+        if (queryParams != null) {
+            uri.append("?");
+            uri.append(RestUtils.convertObjectToQueryStringFraMap(queryParams));
         }
         return new ResourceLink(uri.toString(), rel, HttpMethod.GET, null);
     }

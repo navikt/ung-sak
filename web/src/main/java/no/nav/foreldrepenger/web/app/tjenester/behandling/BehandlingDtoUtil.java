@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -92,11 +93,15 @@ public class BehandlingDtoUtil {
     static ResourceLink get(String path, String rel, Object dto) {
         return ResourceLink.get(getApiPath(path), rel, dto);
     }
-
+    
+    static ResourceLink getFraMap(String path, String rel, Map<String, String> queryParams) {
+        return ResourceLink.get(getApiPath(path), rel, queryParams);
+    }
+    
     static ResourceLink post(String path, String rel, Object dto) {
         return ResourceLink.post(getApiPath(path), rel, dto);
     }
-
+    
     private static String getApiPath() {
         String contextPath = JettyWebKonfigurasjon.CONTEXT_PATH;
         String apiUri = ApplicationConfig.API_URI;

@@ -1,8 +1,11 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.get;
+import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -63,18 +66,18 @@ public class BehandlingDtoForBackendTjeneste {
             dto.setAsyncStatus(asyncStatus);
         }
 
-        var behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
+        UUID behandlingUuid = behandling.getUuid();
+        Map<String, String> behandlinUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandlingUuid.toString());
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
-        dto.leggTil(get(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", behandlingUuid));
-        dto.leggTil(get(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "medlemskap-v2", behandlingUuid));
-        dto.leggTil(get(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlingUuid));
-        dto.leggTil(get(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", behandlingUuid));
-        dto.leggTil(get(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", behandlingUuid));
+        dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", behandlinUuidQueryParams));
+        dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "medlemskap-v2", behandlinUuidQueryParams));
+        dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlinUuidQueryParams));
+        dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", behandlinUuidQueryParams));
+        dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", behandlinUuidQueryParams));
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
-            BehandlingUuidDto orginalBehandlingUuid = new BehandlingUuidDto(originalBehandling.getUuid());
-            dto.leggTil(get(BehandlingBackendRestTjeneste.BEHANDLINGER_BACKEND_ROOT_PATH, "original-behandling", orginalBehandlingUuid));
+            dto.leggTil(getFraMap(BehandlingBackendRestTjeneste.BEHANDLINGER_BACKEND_ROOT_PATH, "original-behandling", Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString())));
         });
 
         setVedtakDato(dto, behandlingVedtak);
