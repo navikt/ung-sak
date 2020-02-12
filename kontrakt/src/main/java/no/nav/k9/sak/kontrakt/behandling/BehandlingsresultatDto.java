@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.behandling;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -26,6 +27,25 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BehandlingsresultatDto {
 
+    @JsonAlias("avslagsårsak")
+    @JsonProperty(value = "avslagsarsak")
+    @Valid
+    private Avslagsårsak avslagsarsak;
+
+    @JsonProperty(value = "avslagsarsakFritekst")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String avslagsarsakFritekst;
+
+    @JsonProperty(value = "erRevurderingMedUendretUtfall")
+    @Valid
+    private Boolean erRevurderingMedUendretUtfall;
+
+    @JsonProperty(value = "fritekstbrev")
+    @Size(max = 100000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String fritekstbrev;
+
     /** behandlingsresultat id */
     @JsonProperty(value = "id", required = true)
     @NotNull
@@ -33,84 +53,33 @@ public class BehandlingsresultatDto {
     @Max(Long.MAX_VALUE)
     private Long id;
 
-    /** behandlingsresultat type. */
-    @JsonAlias("behandlingResultatType")
-    @JsonProperty(value = "type")
-    @Valid
-    private BehandlingResultatType type;
-
-    @JsonAlias("avslagsårsak")
-    @JsonProperty(value = "avslagsarsak")
-    @Valid
-    private Avslagsårsak avslagsarsak;
-
     @JsonProperty(value = "konsekvenserForYtelsen")
     @Size(max = 20)
     @Valid
     private List<KonsekvensForYtelsen> konsekvenserForYtelsen;
-
-    @JsonProperty(value = "vedtaksbrev")
-    @Valid
-    private Vedtaksbrev vedtaksbrev;
-
-    @JsonProperty(value = "erRevurderingMedUendretUtfall")
-    @Valid
-    private Boolean erRevurderingMedUendretUtfall;
-
-    @JsonProperty(value = "skjæringstidspunkt", required = true)
-    @NotNull
-    @Valid
-    private SkjæringstidspunktDto skjæringstidspunkt;
 
     @JsonProperty(value = "overskrift")
     @Size(max = 1000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String overskrift;
 
-    @JsonProperty(value = "fritekstbrev")
-    @Size(max = 100000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String fritekstbrev;
+    @JsonProperty(value = "skjæringstidspunkt", required = true)
+    @NotNull
+    @Valid
+    private SkjæringstidspunktDto skjæringstidspunkt;
 
-    @JsonProperty(value = "avslagsarsakFritekst")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String avslagsarsakFritekst;
+    /** behandlingsresultat type. */
+    @JsonAlias("behandlingResultatType")
+    @JsonProperty(value = "type")
+    @Valid
+    private BehandlingResultatType type;
+
+    @JsonProperty(value = "vedtaksbrev")
+    @Valid
+    private Vedtaksbrev vedtaksbrev;
 
     public BehandlingsresultatDto() {
         // trengs for deserialisering av JSON
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setType(BehandlingResultatType type) {
-        this.type = type;
-    }
-
-    public void setAvslagsarsak(Avslagsårsak avslagsarsak) {
-        this.avslagsarsak = avslagsarsak;
-    }
-
-    public void setAvslagsarsakFritekst(String avslagsarsakFritekst) {
-        this.avslagsarsakFritekst = avslagsarsakFritekst;
-    }
-
-    public void setKonsekvenserForYtelsen(List<KonsekvensForYtelsen> konsekvenserForYtelsen) {
-        this.konsekvenserForYtelsen = konsekvenserForYtelsen;
-    }
-
-    public void setVedtaksbrev(Vedtaksbrev vedtaksbrev) {
-        this.vedtaksbrev = vedtaksbrev;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public BehandlingResultatType getType() {
-        return type;
     }
 
     public Avslagsårsak getAvslagsarsak() {
@@ -121,43 +90,75 @@ public class BehandlingsresultatDto {
         return avslagsarsakFritekst;
     }
 
-    public List<KonsekvensForYtelsen> getKonsekvenserForYtelsen() {
-        return konsekvenserForYtelsen;
-    }
-
-    public Vedtaksbrev getVedtaksbrev() {
-        return vedtaksbrev;
-    }
-
     public Boolean getErRevurderingMedUendretUtfall() {
         return Boolean.TRUE.equals(erRevurderingMedUendretUtfall);
-    }
-
-    public void setErRevurderingMedUendretUtfall(Boolean erRevurderingMedUendretUtfall) {
-        this.erRevurderingMedUendretUtfall = erRevurderingMedUendretUtfall;
-    }
-
-    public String getOverskrift() {
-        return overskrift;
-    }
-
-    public void setOverskrift(String overskrift) {
-        this.overskrift = overskrift;
     }
 
     public String getFritekstbrev() {
         return fritekstbrev;
     }
 
-    public void setFritekstbrev(String fritekstbrev) {
-        this.fritekstbrev = fritekstbrev;
+    public Long getId() {
+        return id;
+    }
+
+    public List<KonsekvensForYtelsen> getKonsekvenserForYtelsen() {
+        return Collections.unmodifiableList(konsekvenserForYtelsen);
+    }
+
+    public String getOverskrift() {
+        return overskrift;
     }
 
     public SkjæringstidspunktDto getSkjæringstidspunkt() {
         return skjæringstidspunkt;
     }
 
+    public BehandlingResultatType getType() {
+        return type;
+    }
+
+    public Vedtaksbrev getVedtaksbrev() {
+        return vedtaksbrev;
+    }
+
+    public void setAvslagsarsak(Avslagsårsak avslagsarsak) {
+        this.avslagsarsak = avslagsarsak;
+    }
+
+    public void setAvslagsarsakFritekst(String avslagsarsakFritekst) {
+        this.avslagsarsakFritekst = avslagsarsakFritekst;
+    }
+
+    public void setErRevurderingMedUendretUtfall(Boolean erRevurderingMedUendretUtfall) {
+        this.erRevurderingMedUendretUtfall = erRevurderingMedUendretUtfall;
+    }
+
+    public void setFritekstbrev(String fritekstbrev) {
+        this.fritekstbrev = fritekstbrev;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setKonsekvenserForYtelsen(List<KonsekvensForYtelsen> konsekvenserForYtelsen) {
+        this.konsekvenserForYtelsen = List.copyOf(konsekvenserForYtelsen);
+    }
+
+    public void setOverskrift(String overskrift) {
+        this.overskrift = overskrift;
+    }
+
     public void setSkjæringstidspunkt(SkjæringstidspunktDto skjæringstidspunkt) {
         this.skjæringstidspunkt = skjæringstidspunkt;
+    }
+
+    public void setType(BehandlingResultatType type) {
+        this.type = type;
+    }
+
+    public void setVedtaksbrev(Vedtaksbrev vedtaksbrev) {
+        this.vedtaksbrev = vedtaksbrev;
     }
 }

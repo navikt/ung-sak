@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -20,172 +21,172 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderMilitærDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FaktaOmBeregningDto {
 
-    @JsonProperty(value = "kortvarigeArbeidsforhold")
-    @Valid
+    @JsonProperty(value = "andelerForFaktaOmBeregning")
     @Size(max = 200)
-    private List<KortvarigeArbeidsforholdDto> kortvarigeArbeidsforhold;
-
-    @JsonProperty(value = "frilansAndel")
     @Valid
-    private FaktaOmBeregningAndelDto frilansAndel;
-
-    @JsonProperty(value = "kunYtelse")
-    @Valid
-    private KunYtelseDto kunYtelse;
-
-    @JsonProperty(value = "faktaOmBeregningTilfeller", required = true)
-    @NotNull
-    @Valid
-    @Size(max = 200)
-    private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller;
-
-    @JsonProperty(value = "arbeidstakerOgFrilanserISammeOrganisasjonListe")
-    @Valid
-    @Size(max = 200)
-    private List<ATogFLISammeOrganisasjonDto> arbeidstakerOgFrilanserISammeOrganisasjonListe;
+    private List<AndelForFaktaOmBeregningDto> andelerForFaktaOmBeregning = Collections.emptyList();
 
     @JsonProperty(value = "arbeidsforholdMedLønnsendringUtenIM")
     @Valid
     @Size(max = 200)
-    private List<FaktaOmBeregningAndelDto> arbeidsforholdMedLønnsendringUtenIM;
+    private List<FaktaOmBeregningAndelDto> arbeidsforholdMedLønnsendringUtenIM = Collections.emptyList();
 
-    @JsonProperty(value = "besteberegningAndeler")
+    @JsonProperty(value = "arbeidstakerOgFrilanserISammeOrganisasjonListe")
     @Valid
     @Size(max = 200)
-    private List<TilstøtendeYtelseAndelDto> besteberegningAndeler;
-
-    @JsonProperty(value = "vurderMottarYtelse")
-    @Valid
-    private VurderMottarYtelseDto vurderMottarYtelse;
+    private List<ATogFLISammeOrganisasjonDto> arbeidstakerOgFrilanserISammeOrganisasjonListe = Collections.emptyList();
 
     @JsonProperty(value = "avklarAktiviteter")
     @Valid
     private AvklarAktiviteterDto avklarAktiviteter;
 
-    @JsonProperty(value = "vurderBesteberegning")
+    @JsonProperty(value = "besteberegningAndeler")
     @Valid
-    private VurderBesteberegningDto vurderBesteberegning;
-
-    @JsonProperty(value = "andelerForFaktaOmBeregning")
     @Size(max = 200)
+    private List<TilstøtendeYtelseAndelDto> besteberegningAndeler = Collections.emptyList();
+
+    @JsonProperty(value = "faktaOmBeregningTilfeller", required = true)
+    @NotNull
     @Valid
-    private List<AndelForFaktaOmBeregningDto> andelerForFaktaOmBeregning;
-    
-    @JsonProperty(value = "vurderMilitaer")
+    @Size(max = 200)
+    private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller = Collections.emptyList();
+
+    @JsonProperty(value = "frilansAndel")
     @Valid
-    private VurderMilitærDto vurderMilitaer;
+    private FaktaOmBeregningAndelDto frilansAndel;
+
+    @JsonProperty(value = "kortvarigeArbeidsforhold")
+    @Valid
+    @Size(max = 200)
+    private List<KortvarigeArbeidsforholdDto> kortvarigeArbeidsforhold = Collections.emptyList();
+
+    @JsonProperty(value = "kunYtelse")
+    @Valid
+    private KunYtelseDto kunYtelse;
 
     @JsonProperty(value = "refusjonskravSomKommerForSentListe")
     @Size(max = 200)
     @Valid
-    private List<RefusjonskravSomKommerForSentDto> refusjonskravSomKommerForSentListe;
+    private List<RefusjonskravSomKommerForSentDto> refusjonskravSomKommerForSentListe = Collections.emptyList();
+
+    @JsonProperty(value = "vurderBesteberegning")
+    @Valid
+    private VurderBesteberegningDto vurderBesteberegning;
+
+    @JsonProperty(value = "vurderMilitaer")
+    @Valid
+    private VurderMilitærDto vurderMilitaer;
+
+    @JsonProperty(value = "vurderMottarYtelse")
+    @Valid
+    private VurderMottarYtelseDto vurderMottarYtelse;
 
     public FaktaOmBeregningDto() {
         //
     }
 
-    public List<RefusjonskravSomKommerForSentDto> getRefusjonskravSomKommerForSentListe() {
-        return refusjonskravSomKommerForSentListe;
-    }
-
-    public void setRefusjonskravSomKommerForSentListe(List<RefusjonskravSomKommerForSentDto> refusjonskravSomKommerForSentListe) {
-        this.refusjonskravSomKommerForSentListe = refusjonskravSomKommerForSentListe;
-    }
-
     public List<AndelForFaktaOmBeregningDto> getAndelerForFaktaOmBeregning() {
-        return andelerForFaktaOmBeregning;
-    }
-
-    public void setAndelerForFaktaOmBeregning(List<AndelForFaktaOmBeregningDto> andelerForFaktaOmBeregning) {
-        this.andelerForFaktaOmBeregning = andelerForFaktaOmBeregning;
-    }
-
-    public VurderBesteberegningDto getVurderBesteberegning() {
-        return vurderBesteberegning;
-    }
-
-    public void setVurderBesteberegning(VurderBesteberegningDto vurderBesteberegning) {
-        this.vurderBesteberegning = vurderBesteberegning;
-    }
-
-    public KunYtelseDto getKunYtelse() {
-        return kunYtelse;
-    }
-
-    public void setKunYtelse(KunYtelseDto kunYtelse) {
-        this.kunYtelse = kunYtelse;
-    }
-
-    public List<KortvarigeArbeidsforholdDto> getKortvarigeArbeidsforhold() {
-        return kortvarigeArbeidsforhold;
-    }
-
-    public void setKortvarigeArbeidsforhold(List<KortvarigeArbeidsforholdDto> kortvarigeArbeidsforhold) {
-        this.kortvarigeArbeidsforhold = kortvarigeArbeidsforhold;
-    }
-
-    public FaktaOmBeregningAndelDto getFrilansAndel() {
-        return frilansAndel;
-    }
-
-    public void setFrilansAndel(FaktaOmBeregningAndelDto frilansAndel) {
-        this.frilansAndel = frilansAndel;
+        return Collections.unmodifiableList(andelerForFaktaOmBeregning);
     }
 
     public List<FaktaOmBeregningAndelDto> getArbeidsforholdMedLønnsendringUtenIM() {
-        return arbeidsforholdMedLønnsendringUtenIM;
-    }
-
-    public void setArbeidsforholdMedLønnsendringUtenIM(List<FaktaOmBeregningAndelDto> arbeidsforholdMedLønnsendringUtenIM) {
-        this.arbeidsforholdMedLønnsendringUtenIM = arbeidsforholdMedLønnsendringUtenIM;
-    }
-
-    public List<FaktaOmBeregningTilfelle> getFaktaOmBeregningTilfeller() {
-        return faktaOmBeregningTilfeller;
-    }
-
-    public void setFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
-        this.faktaOmBeregningTilfeller = faktaOmBeregningTilfeller;
+        return Collections.unmodifiableList(arbeidsforholdMedLønnsendringUtenIM);
     }
 
     public List<ATogFLISammeOrganisasjonDto> getArbeidstakerOgFrilanserISammeOrganisasjonListe() {
-        return arbeidstakerOgFrilanserISammeOrganisasjonListe;
-    }
-
-    public void setArbeidstakerOgFrilanserISammeOrganisasjonListe(List<ATogFLISammeOrganisasjonDto> aTogFLISammeOrganisasjonListe) {
-        this.arbeidstakerOgFrilanserISammeOrganisasjonListe = aTogFLISammeOrganisasjonListe;
-    }
-
-    public List<TilstøtendeYtelseAndelDto> getBesteberegningAndeler() {
-        return besteberegningAndeler;
-    }
-
-    public void setBesteberegningAndeler(List<TilstøtendeYtelseAndelDto> besteberegningAndeler) {
-        this.besteberegningAndeler = besteberegningAndeler;
-    }
-
-    public VurderMottarYtelseDto getVurderMottarYtelse() {
-        return vurderMottarYtelse;
-    }
-
-    public void setVurderMottarYtelse(VurderMottarYtelseDto vurderMottarYtelse) {
-        this.vurderMottarYtelse = vurderMottarYtelse;
+        return Collections.unmodifiableList(arbeidstakerOgFrilanserISammeOrganisasjonListe);
     }
 
     public AvklarAktiviteterDto getAvklarAktiviteter() {
         return avklarAktiviteter;
     }
 
-    public void setAvklarAktiviteter(AvklarAktiviteterDto avklarAktiviteter) {
-        this.avklarAktiviteter = avklarAktiviteter;
+    public List<TilstøtendeYtelseAndelDto> getBesteberegningAndeler() {
+        return Collections.unmodifiableList(besteberegningAndeler);
+    }
+
+    public List<FaktaOmBeregningTilfelle> getFaktaOmBeregningTilfeller() {
+        return Collections.unmodifiableList(faktaOmBeregningTilfeller);
+    }
+
+    public FaktaOmBeregningAndelDto getFrilansAndel() {
+        return frilansAndel;
+    }
+
+    public List<KortvarigeArbeidsforholdDto> getKortvarigeArbeidsforhold() {
+        return Collections.unmodifiableList(kortvarigeArbeidsforhold);
+    }
+
+    public KunYtelseDto getKunYtelse() {
+        return kunYtelse;
+    }
+
+    public List<RefusjonskravSomKommerForSentDto> getRefusjonskravSomKommerForSentListe() {
+        return Collections.unmodifiableList(refusjonskravSomKommerForSentListe);
+    }
+
+    public VurderBesteberegningDto getVurderBesteberegning() {
+        return vurderBesteberegning;
     }
 
     public VurderMilitærDto getVurderMilitaer() {
         return vurderMilitaer;
     }
 
+    public VurderMottarYtelseDto getVurderMottarYtelse() {
+        return vurderMottarYtelse;
+    }
+
+    public void setAndelerForFaktaOmBeregning(List<AndelForFaktaOmBeregningDto> andelerForFaktaOmBeregning) {
+        this.andelerForFaktaOmBeregning = List.copyOf(andelerForFaktaOmBeregning);
+    }
+
+    public void setArbeidsforholdMedLønnsendringUtenIM(List<FaktaOmBeregningAndelDto> arbeidsforholdMedLønnsendringUtenIM) {
+        this.arbeidsforholdMedLønnsendringUtenIM = List.copyOf(arbeidsforholdMedLønnsendringUtenIM);
+    }
+
+    public void setArbeidstakerOgFrilanserISammeOrganisasjonListe(List<ATogFLISammeOrganisasjonDto> aTogFLISammeOrganisasjonListe) {
+        this.arbeidstakerOgFrilanserISammeOrganisasjonListe = List.copyOf(aTogFLISammeOrganisasjonListe);
+    }
+
+    public void setAvklarAktiviteter(AvklarAktiviteterDto avklarAktiviteter) {
+        this.avklarAktiviteter = avklarAktiviteter;
+    }
+
+    public void setBesteberegningAndeler(List<TilstøtendeYtelseAndelDto> besteberegningAndeler) {
+        this.besteberegningAndeler = List.copyOf(besteberegningAndeler);
+    }
+
+    public void setFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
+        this.faktaOmBeregningTilfeller = List.copyOf(faktaOmBeregningTilfeller);
+    }
+
+    public void setFrilansAndel(FaktaOmBeregningAndelDto frilansAndel) {
+        this.frilansAndel = frilansAndel;
+    }
+
+    public void setKortvarigeArbeidsforhold(List<KortvarigeArbeidsforholdDto> kortvarigeArbeidsforhold) {
+        this.kortvarigeArbeidsforhold = List.copyOf(kortvarigeArbeidsforhold);
+    }
+
+    public void setKunYtelse(KunYtelseDto kunYtelse) {
+        this.kunYtelse = kunYtelse;
+    }
+
+    public void setRefusjonskravSomKommerForSentListe(List<RefusjonskravSomKommerForSentDto> refusjonskravSomKommerForSentListe) {
+        this.refusjonskravSomKommerForSentListe = List.copyOf(refusjonskravSomKommerForSentListe);
+    }
+
+    public void setVurderBesteberegning(VurderBesteberegningDto vurderBesteberegning) {
+        this.vurderBesteberegning = vurderBesteberegning;
+    }
+
     public void setVurderMilitaer(VurderMilitærDto vurderMilitaer) {
         this.vurderMilitaer = vurderMilitaer;
+    }
+
+    public void setVurderMottarYtelse(VurderMottarYtelseDto vurderMottarYtelse) {
+        this.vurderMottarYtelse = vurderMottarYtelse;
     }
 
 }

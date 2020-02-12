@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -25,11 +26,11 @@ public class KunYtelseDto {
     private List<AndelMedBeløpDto> andeler = new ArrayList<>();
 
     public List<AndelMedBeløpDto> getAndeler() {
-        return andeler;
+        return Collections.unmodifiableList(andeler);
     }
 
     public void setAndeler(List<AndelMedBeløpDto> andeler) {
-        this.andeler = andeler;
+        this.andeler = List.copyOf(andeler);
     }
 
     public void leggTilAndel(AndelMedBeløpDto andel) {

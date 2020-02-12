@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.kontroll;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -28,7 +29,7 @@ public class FaresignalgruppeDto {
     @JsonProperty(value = "faresignaler")
     @Valid
     @Size(max = 50)
-    private List<@NotNull @Size(max = 5000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String> faresignaler;
+    private List<@NotNull @Size(max = 5000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String> faresignaler = Collections.emptyList();
 
     public FaresignalgruppeDto() {
         //
@@ -43,10 +44,10 @@ public class FaresignalgruppeDto {
     }
 
     public List<String> getFaresignaler() {
-        return faresignaler;
+        return Collections.unmodifiableList(faresignaler);
     }
 
     public void setFaresignaler(List<String> faresignaler) {
-        this.faresignaler = faresignaler;
+        this.faresignaler = List.copyOf(faresignaler);
     }
 }

@@ -19,38 +19,29 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class NyBehandlingDto {
 
-    @JsonProperty(value="saksnummer", required = true)
-    @NotNull
-    @Valid
-    private Saksnummer saksnummer;
-
-    @JsonProperty(value="behandlingType", required = true)
-    @NotNull
-    private BehandlingType behandlingType;
-
     @JsonProperty(value="behandlingArsakType", required = true)
     @NotNull
     @Valid
     private BehandlingÅrsakType behandlingArsakType;
 
+    @JsonProperty(value="behandlingType", required = true)
+    @NotNull
+    private BehandlingType behandlingType;
+
     @JsonProperty(value="nyBehandlingEtterKlage")
     private boolean nyBehandlingEtterKlage;
+
+    @JsonProperty(value="saksnummer", required = true)
+    @NotNull
+    @Valid
+    private Saksnummer saksnummer;
 
     public NyBehandlingDto() {
         //
     }
 
-    public void setSaksnummer(Saksnummer saksnummer) {
-        this.saksnummer = saksnummer;
-    }
-
-    @AbacAttributt("saksnummer")
-    public Saksnummer getSaksnummer() {
-        return saksnummer;
-    }
-
-    public void setBehandlingType(BehandlingType behandlingType) {
-        this.behandlingType = behandlingType;
+    public BehandlingÅrsakType getBehandlingArsakType() {
+        return behandlingArsakType;
     }
 
     public BehandlingType getBehandlingType() {
@@ -61,12 +52,25 @@ public class NyBehandlingDto {
         return nyBehandlingEtterKlage;
     }
 
+    @AbacAttributt("saksnummer")
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
+
     public void setBehandlingArsakType(BehandlingÅrsakType behandlingArsakType) {
         this.behandlingArsakType = behandlingArsakType;
     }
 
-    public BehandlingÅrsakType getBehandlingArsakType() {
-        return behandlingArsakType;
+    public void setBehandlingType(BehandlingType behandlingType) {
+        this.behandlingType = behandlingType;
+    }
+
+    public void setNyBehandlingEtterKlage(boolean nyBehandlingEtterKlage) {
+        this.nyBehandlingEtterKlage = nyBehandlingEtterKlage;
+    }
+
+    public void setSaksnummer(Saksnummer saksnummer) {
+        this.saksnummer = saksnummer;
     }
 
 }

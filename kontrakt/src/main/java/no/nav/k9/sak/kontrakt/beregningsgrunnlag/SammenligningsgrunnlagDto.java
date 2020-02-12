@@ -24,21 +24,6 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.SammenligningsgrunnlagType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class SammenligningsgrunnlagDto {
 
-    @JsonProperty(value = "sammenligningsgrunnlagFom", required = true)
-    @NotNull
-    private LocalDate sammenligningsgrunnlagFom;
-
-    @JsonProperty(value = "sammenligningsgrunnlagTom", required = true)
-    @NotNull
-    private LocalDate sammenligningsgrunnlagTom;
-
-    @JsonProperty(value = "rapportertPrAar", required = true)
-    @NotNull
-    @Digits(integer = 8, fraction = 2)
-    @DecimalMin("0.00")
-    @DecimalMax("10000000.00")
-    private BigDecimal rapportertPrAar;
-
     @JsonProperty(value = "avvikPromille")
     @Min(-10000L)
     @Max(10000L)
@@ -50,11 +35,6 @@ public class SammenligningsgrunnlagDto {
     @DecimalMax("1000.00")
     private BigDecimal avvikProsent;
 
-    @JsonProperty(value = "sammenligningsgrunnlagType")
-    @NotNull
-    @Valid
-    private SammenligningsgrunnlagType sammenligningsgrunnlagType;
-
     @JsonProperty(value = "differanseBeregnet", required = true)
     @NotNull
     @Digits(integer = 8, fraction = 2)
@@ -62,8 +42,44 @@ public class SammenligningsgrunnlagDto {
     @DecimalMax("10000000.00")
     private BigDecimal differanseBeregnet;
 
+    @JsonProperty(value = "rapportertPrAar", required = true)
+    @NotNull
+    @Digits(integer = 8, fraction = 2)
+    @DecimalMin("0.00")
+    @DecimalMax("10000000.00")
+    private BigDecimal rapportertPrAar;
+
+    @JsonProperty(value = "sammenligningsgrunnlagFom", required = true)
+    @NotNull
+    private LocalDate sammenligningsgrunnlagFom;
+
+    @JsonProperty(value = "sammenligningsgrunnlagTom", required = true)
+    @NotNull
+    private LocalDate sammenligningsgrunnlagTom;
+
+    @JsonProperty(value = "sammenligningsgrunnlagType")
+    @NotNull
+    @Valid
+    private SammenligningsgrunnlagType sammenligningsgrunnlagType;
+
     public SammenligningsgrunnlagDto() {
         // trengs for deserialisering av JSON
+    }
+
+    public Long getAvvikPromille() {
+        return avvikPromille;
+    }
+
+    public BigDecimal getAvvikProsent() {
+        return avvikProsent;
+    }
+
+    public BigDecimal getDifferanseBeregnet() {
+        return differanseBeregnet;
+    }
+
+    public BigDecimal getRapportertPrAar() {
+        return rapportertPrAar;
     }
 
     public LocalDate getSammenligningsgrunnlagFom() {
@@ -74,20 +90,24 @@ public class SammenligningsgrunnlagDto {
         return sammenligningsgrunnlagTom;
     }
 
-    public BigDecimal getRapportertPrAar() {
-        return rapportertPrAar;
-    }
-
-    public Long getAvvikPromille() {
-        return avvikPromille;
-    }
-
     public SammenligningsgrunnlagType getSammenligningsgrunnlagType() {
         return sammenligningsgrunnlagType;
     }
 
-    public BigDecimal getDifferanseBeregnet() {
-        return differanseBeregnet;
+    public void setAvvikPromille(Long avvikPromille) {
+        this.avvikPromille = avvikPromille;
+    }
+
+    public void setAvvikProsent(BigDecimal avvikProsent) {
+        this.avvikProsent = avvikProsent;
+    }
+
+    public void setDifferanseBeregnet(BigDecimal differanseBeregnet) {
+        this.differanseBeregnet = differanseBeregnet;
+    }
+
+    public void setRapportertPrAar(BigDecimal rapportertPrAar) {
+        this.rapportertPrAar = rapportertPrAar;
     }
 
     public void setSammenligningsgrunnlagFom(LocalDate sammenligningsgrunnlagFom) {
@@ -98,27 +118,7 @@ public class SammenligningsgrunnlagDto {
         this.sammenligningsgrunnlagTom = sammenligningsgrunnlagTom;
     }
 
-    public void setRapportertPrAar(BigDecimal rapportertPrAar) {
-        this.rapportertPrAar = rapportertPrAar;
-    }
-
-    public void setAvvikPromille(Long avvikPromille) {
-        this.avvikPromille = avvikPromille;
-    }
-
-    public BigDecimal getAvvikProsent() {
-        return avvikProsent;
-    }
-
-    public void setAvvikProsent(BigDecimal avvikProsent) {
-        this.avvikProsent = avvikProsent;
-    }
-
     public void setSammenligningsgrunnlagType(SammenligningsgrunnlagType sammenligningsgrunnlagType) {
         this.sammenligningsgrunnlagType = sammenligningsgrunnlagType;
-    }
-
-    public void setDifferanseBeregnet(BigDecimal differanseBeregnet) {
-        this.differanseBeregnet = differanseBeregnet;
     }
 }

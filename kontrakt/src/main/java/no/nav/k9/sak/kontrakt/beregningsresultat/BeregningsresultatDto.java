@@ -19,6 +19,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningsresultatDto {
 
+    public static class Builder {
+        private LocalDate opphoersdato;
+        private List<BeregningsresultatPeriodeDto> perioder;
+        private Boolean skalHindreTilbaketrekk;
+
+        private Builder() {
+            perioder = new ArrayList<>();
+        }
+
+        public BeregningsresultatDto create() {
+            return new BeregningsresultatDto(this);
+        }
+
+        public Builder medOpphoersdato(LocalDate opphoersdato) {
+            this.opphoersdato = opphoersdato;
+            return this;
+        }
+
+        public Builder medPerioder(List<BeregningsresultatPeriodeDto> perioder) {
+            this.perioder = perioder;
+            return this;
+        }
+
+        public Builder medSkalHindreTilbaketrekk(Boolean skalHindreTilbaketrekk) {
+            this.skalHindreTilbaketrekk = skalHindreTilbaketrekk;
+            return this;
+        }
+    }
+
     @JsonProperty(value = "opphoersdato")
     @Valid
     private LocalDate opphoersdato;
@@ -41,6 +70,10 @@ public class BeregningsresultatDto {
         //
     }
 
+    public static Builder build() {
+        return new Builder();
+    }
+
     public LocalDate getOpphoersdato() {
         return opphoersdato;
     }
@@ -53,36 +86,15 @@ public class BeregningsresultatDto {
         return skalHindreTilbaketrekk;
     }
 
-    public static Builder build() {
-        return new Builder();
+    public void setOpphoersdato(LocalDate opphoersdato) {
+        this.opphoersdato = opphoersdato;
     }
 
-    public static class Builder {
-        private LocalDate opphoersdato;
-        private List<BeregningsresultatPeriodeDto> perioder;
-        private Boolean skalHindreTilbaketrekk;
+    public void setPerioder(List<BeregningsresultatPeriodeDto> perioder) {
+        this.perioder = List.copyOf(perioder);
+    }
 
-        private Builder() {
-            perioder = new ArrayList<>();
-        }
-
-        public Builder medOpphoersdato(LocalDate opphoersdato) {
-            this.opphoersdato = opphoersdato;
-            return this;
-        }
-
-        public Builder medSkalHindreTilbaketrekk(Boolean skalHindreTilbaketrekk) {
-            this.skalHindreTilbaketrekk = skalHindreTilbaketrekk;
-            return this;
-        }
-
-        public Builder medPerioder(List<BeregningsresultatPeriodeDto> perioder) {
-            this.perioder = perioder;
-            return this;
-        }
-
-        public BeregningsresultatDto create() {
-            return new BeregningsresultatDto(this);
-        }
+    public void setSkalHindreTilbaketrekk(Boolean skalHindreTilbaketrekk) {
+        this.skalHindreTilbaketrekk = skalHindreTilbaketrekk;
     }
 }

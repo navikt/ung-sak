@@ -19,40 +19,48 @@ public class HistorikkinnslagTotrinnsVurderingDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String aksjonspunktBegrunnelse;
 
-    @JsonProperty(value = "godkjent")
-    private boolean godkjent;
-
     @JsonProperty(value = "aksjonspunktKode")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String aksjonspunktKode;
 
+    @JsonProperty(value = "godkjent")
+    private boolean godkjent;
+
     public HistorikkinnslagTotrinnsVurderingDto() {
         //
     }
 
-    public String getBegrunnelse() {
+    public String getAksjonspunktBegrunnelse() {
         return aksjonspunktBegrunnelse;
-    }
-
-    public void setBegrunnelse(String aksjonspunktBegrunnelse) {
-        this.aksjonspunktBegrunnelse = aksjonspunktBegrunnelse;
-    }
-
-    public boolean isGodkjent() {
-        return godkjent;
-    }
-
-    public void setGodkjent(boolean godkjent) {
-        this.godkjent = godkjent;
     }
 
     public String getAksjonspunktKode() {
         return aksjonspunktKode;
     }
 
+    public String getBegrunnelse() {
+        return aksjonspunktBegrunnelse;
+    }
+
+    public boolean isGodkjent() {
+        return godkjent;
+    }
+
+    public void setAksjonspunktBegrunnelse(String aksjonspunktBegrunnelse) {
+        this.aksjonspunktBegrunnelse = aksjonspunktBegrunnelse;
+    }
+
     public void setAksjonspunktKode(String aksjonspunktKode) {
         this.aksjonspunktKode = aksjonspunktKode;
+    }
+
+    public void setBegrunnelse(String aksjonspunktBegrunnelse) {
+        this.aksjonspunktBegrunnelse = aksjonspunktBegrunnelse;
+    }
+
+    public void setGodkjent(boolean godkjent) {
+        this.godkjent = godkjent;
     }
 
 }

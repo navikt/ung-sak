@@ -23,15 +23,15 @@ public class HistorikkInnslagTemaDto {
     @NotNull
     private HistorikkEndretFeltType endretFeltNavn;
 
-    @JsonProperty(value = "navnVerdi")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String navnVerdi;
-
     @JsonProperty(value = "klNavn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String klNavn;
+
+    @JsonProperty(value = "navnVerdi")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String navnVerdi;
 
     public HistorikkInnslagTemaDto() {
         //
@@ -41,24 +41,24 @@ public class HistorikkInnslagTemaDto {
         return endretFeltNavn;
     }
 
-    public void setEndretFeltNavn(HistorikkEndretFeltType endretFeltNavn) {
-        this.endretFeltNavn = endretFeltNavn;
+    public String getKlNavn() {
+        return klNavn;
     }
 
     public String getNavnVerdi() {
         return navnVerdi;
     }
 
-    public void setNavnVerdi(String navnVerdi) {
-        this.navnVerdi = navnVerdi;
-    }
-
-    public String getKlNavn() {
-        return klNavn;
+    public void setEndretFeltNavn(HistorikkEndretFeltType endretFeltNavn) {
+        this.endretFeltNavn = endretFeltNavn;
     }
 
     public void setKlNavn(String klNavn) {
         this.klNavn = klNavn;
+    }
+
+    public void setNavnVerdi(String navnVerdi) {
+        this.navnVerdi = navnVerdi;
     }
 
 }

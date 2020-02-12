@@ -26,14 +26,6 @@ public class AndelMedBeløpDto extends FaktaOmBeregningAndelDto {
     @Digits(integer = 8, fraction = 2)
     private BigDecimal fastsattBelopPrMnd;
 
-    public BigDecimal getFastsattBelopPrMnd() {
-        return fastsattBelopPrMnd;
-    }
-
-    public void setFastsattBelopPrMnd(BigDecimal fastsattBelopPrMnd) {
-        this.fastsattBelopPrMnd = fastsattBelopPrMnd;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,8 +35,16 @@ public class AndelMedBeløpDto extends FaktaOmBeregningAndelDto {
         return Objects.equals(fastsattBelopPrMnd, that.fastsattBelopPrMnd);
     }
 
+    public BigDecimal getFastsattBelopPrMnd() {
+        return fastsattBelopPrMnd;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), fastsattBelopPrMnd);
+    }
+
+    public void setFastsattBelopPrMnd(BigDecimal fastsattBelopPrMnd) {
+        this.fastsattBelopPrMnd = fastsattBelopPrMnd;
     }
 }

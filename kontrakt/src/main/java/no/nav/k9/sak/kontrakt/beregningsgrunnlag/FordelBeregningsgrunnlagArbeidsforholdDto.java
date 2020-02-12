@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,26 +28,6 @@ public class FordelBeregningsgrunnlagArbeidsforholdDto extends Beregningsgrunnla
     @Valid
     private PermisjonDto permisjon;
 
-    public void leggTilPeriodeMedGraderingEllerRefusjon(GraderingEllerRefusjonDto periodeMedGraderingEllerRefusjon) {
-        this.perioderMedGraderingEllerRefusjon.add(periodeMedGraderingEllerRefusjon);
-    }
-
-    public List<GraderingEllerRefusjonDto> getPerioderMedGraderingEllerRefusjon() {
-        return perioderMedGraderingEllerRefusjon;
-    }
-
-    public void setPerioderMedGraderingEllerRefusjon(List<GraderingEllerRefusjonDto> perioderMedGraderingEllerRefusjon) {
-        this.perioderMedGraderingEllerRefusjon = perioderMedGraderingEllerRefusjon;
-    }
-
-    public PermisjonDto getPermisjon() {
-        return permisjon;
-    }
-
-    public void setPermisjon(PermisjonDto permisjon) {
-        this.permisjon = permisjon;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -60,9 +41,28 @@ public class FordelBeregningsgrunnlagArbeidsforholdDto extends Beregningsgrunnla
             && Objects.equals(permisjon, that.permisjon);
     }
 
+    public List<GraderingEllerRefusjonDto> getPerioderMedGraderingEllerRefusjon() {
+        return Collections.unmodifiableList(perioderMedGraderingEllerRefusjon);
+    }
+
+    public PermisjonDto getPermisjon() {
+        return permisjon;
+    }
+
     @Override
     public int hashCode() {
-
         return Objects.hash(super.hashCode(), perioderMedGraderingEllerRefusjon);
+    }
+
+    public void leggTilPeriodeMedGraderingEllerRefusjon(GraderingEllerRefusjonDto periodeMedGraderingEllerRefusjon) {
+        this.perioderMedGraderingEllerRefusjon.add(periodeMedGraderingEllerRefusjon);
+    }
+
+    public void setPerioderMedGraderingEllerRefusjon(List<GraderingEllerRefusjonDto> perioderMedGraderingEllerRefusjon) {
+        this.perioderMedGraderingEllerRefusjon = List.copyOf(perioderMedGraderingEllerRefusjon);
+    }
+
+    public void setPermisjon(PermisjonDto permisjon) {
+        this.permisjon = permisjon;
     }
 }

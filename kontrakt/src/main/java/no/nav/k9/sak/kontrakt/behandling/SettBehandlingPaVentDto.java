@@ -45,28 +45,28 @@ public class SettBehandlingPaVentDto {
         return behandlingId;
     }
 
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
-    }
-
     public Long getBehandlingVersjon() {
         return behandlingVersjon;
-    }
-
-    public void setBehandlingVersjon(Long behandlingVersjon) {
-        this.behandlingVersjon = behandlingVersjon;
     }
 
     public LocalDate getFrist() {
         return frist;
     }
 
-    public void setFrist(LocalDate frist) {
-        this.frist = frist;
-    }
-
     public Venteårsak getVentearsak() {
         return ventearsak;
+    }
+
+    public void setBehandlingId(Long behandlingId) {
+        this.behandlingId = behandlingId;
+    }
+
+    public void setBehandlingVersjon(Long behandlingVersjon) {
+        this.behandlingVersjon = behandlingVersjon;
+    }
+
+    public void setFrist(LocalDate frist) {
+        this.frist = frist;
     }
 
     public void setVentearsak(Venteårsak ventearsak) {

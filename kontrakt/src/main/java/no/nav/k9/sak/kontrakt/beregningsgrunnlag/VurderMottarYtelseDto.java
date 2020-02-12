@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -21,11 +22,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class VurderMottarYtelseDto {
 
+    @JsonProperty(value = "arbeidstakerAndelerUtenIM")
+    @Valid
+    @Size(max = 50)
+    private List<ArbeidstakerUtenInntektsmeldingAndelDto> arbeidstakerAndelerUtenIM = new ArrayList<>();
+
     @JsonProperty(value = "erFrilans")
     private boolean erFrilans;
-
-    @JsonProperty(value = "frilansMottarYtelse")
-    private Boolean frilansMottarYtelse;
 
     @JsonProperty(value = "frilansInntektPrMnd")
     @DecimalMin("0.00")
@@ -33,25 +36,35 @@ public class VurderMottarYtelseDto {
     @Digits(integer = 7, fraction = 2)
     private BigDecimal frilansInntektPrMnd;
 
-    @JsonProperty(value = "arbeidstakerAndelerUtenIM")
-    @Valid
-    @Size(max = 50)
-    private List<ArbeidstakerUtenInntektsmeldingAndelDto> arbeidstakerAndelerUtenIM = new ArrayList<>();
+    @JsonProperty(value = "frilansMottarYtelse")
+    private Boolean frilansMottarYtelse;
+
+    public List<ArbeidstakerUtenInntektsmeldingAndelDto> getArbeidstakerAndelerUtenIM() {
+        return Collections.unmodifiableList(arbeidstakerAndelerUtenIM);
+    }
 
     public boolean getErFrilans() {
         return erFrilans;
     }
 
-    public void setErFrilans(boolean erFrilans) {
-        this.erFrilans = erFrilans;
+    public BigDecimal getFrilansInntektPrMnd() {
+        return frilansInntektPrMnd;
     }
 
     public Boolean getFrilansMottarYtelse() {
         return frilansMottarYtelse;
     }
 
-    public BigDecimal getFrilansInntektPrMnd() {
-        return frilansInntektPrMnd;
+    public void leggTilArbeidstakerAndelUtenInntektsmelding(ArbeidstakerUtenInntektsmeldingAndelDto arbeidstakerAndelUtenInnteksmelding) {
+        this.arbeidstakerAndelerUtenIM.add(arbeidstakerAndelUtenInnteksmelding);
+    }
+
+    public void setArbeidstakerAndelerUtenIM(List<ArbeidstakerUtenInntektsmeldingAndelDto> arbeidstakerAndelerUtenIM) {
+        this.arbeidstakerAndelerUtenIM = List.copyOf(arbeidstakerAndelerUtenIM);
+    }
+
+    public void setErFrilans(boolean erFrilans) {
+        this.erFrilans = erFrilans;
     }
 
     public void setFrilansInntektPrMnd(BigDecimal frilansInntektPrMnd) {
@@ -60,13 +73,5 @@ public class VurderMottarYtelseDto {
 
     public void setFrilansMottarYtelse(Boolean frilansMottarYtelse) {
         this.frilansMottarYtelse = frilansMottarYtelse;
-    }
-
-    public List<ArbeidstakerUtenInntektsmeldingAndelDto> getArbeidstakerAndelerUtenIM() {
-        return arbeidstakerAndelerUtenIM;
-    }
-
-    public void leggTilArbeidstakerAndelUtenInntektsmelding(ArbeidstakerUtenInntektsmeldingAndelDto arbeidstakerAndelUtenInnteksmelding) {
-        this.arbeidstakerAndelerUtenIM.add(arbeidstakerAndelUtenInnteksmelding);
     }
 }

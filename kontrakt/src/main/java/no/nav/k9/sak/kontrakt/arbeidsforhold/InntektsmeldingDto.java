@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -35,6 +36,15 @@ public class InntektsmeldingDto {
     @JsonProperty(value = "arbeidsgiverStartdato")
     private LocalDate arbeidsgiverStartdato;
 
+    @JsonProperty(value = "getRefusjonBeløpPerMnd")
+    @Valid
+    private Beløp getRefusjonBeløpPerMnd;
+
+    @JsonProperty(value = "graderingPerioder")
+    @Size(max = 100)
+    @Valid
+    private List<GraderingPeriodeDto> graderingPerioder = new ArrayList<>();
+
     @JsonProperty(value = "innsendingstidspunkt")
     private LocalDateTime innsendingstidspunkt;
 
@@ -42,15 +52,6 @@ public class InntektsmeldingDto {
     @Size(max = 100)
     @Valid
     private List<UtsettelsePeriodeDto> utsettelsePerioder = new ArrayList<>();
-
-    @JsonProperty(value = "graderingPerioder")
-    @Size(max = 100)
-    @Valid
-    private List<GraderingPeriodeDto> graderingPerioder = new ArrayList<>();
-
-    @JsonProperty(value = "getRefusjonBeløpPerMnd")
-    @Valid
-    private Beløp getRefusjonBeløpPerMnd;
 
     public InntektsmeldingDto() {
         //
@@ -64,6 +65,26 @@ public class InntektsmeldingDto {
         return arbeidsgiverOrgnr;
     }
 
+    public LocalDate getArbeidsgiverStartdato() {
+        return arbeidsgiverStartdato;
+    }
+
+    public Beløp getGetRefusjonBeløpPerMnd() {
+        return getRefusjonBeløpPerMnd;
+    }
+
+    public List<GraderingPeriodeDto> getGraderingPerioder() {
+        return Collections.unmodifiableList(graderingPerioder);
+    }
+
+    public LocalDateTime getInnsendingstidspunkt() {
+        return innsendingstidspunkt;
+    }
+
+    public List<UtsettelsePeriodeDto> getUtsettelsePerioder() {
+        return Collections.unmodifiableList(utsettelsePerioder);
+    }
+
     public void setArbeidsgiver(String arbeidsgiver) {
         this.arbeidsgiver = arbeidsgiver;
     }
@@ -72,32 +93,16 @@ public class InntektsmeldingDto {
         this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
     }
 
-    public LocalDate getArbeidsgiverStartdato() {
-        return arbeidsgiverStartdato;
-    }
-
     public void setArbeidsgiverStartdato(LocalDate arbeidsgiverStartdato) {
         this.arbeidsgiverStartdato = arbeidsgiverStartdato;
     }
 
-    public List<UtsettelsePeriodeDto> getUtsettelsePerioder() {
-        return utsettelsePerioder;
-    }
-
-    public List<GraderingPeriodeDto> getGraderingPerioder() {
-        return graderingPerioder;
-    }
-
-    public LocalDateTime getInnsendingstidspunkt() {
-        return innsendingstidspunkt;
-    }
-
-    public Beløp getGetRefusjonBeløpPerMnd() {
-        return getRefusjonBeløpPerMnd;
-    }
-
     public void setGetRefusjonBeløpPerMnd(Beløp getRefusjonBeløpPerMnd) {
         this.getRefusjonBeløpPerMnd = getRefusjonBeløpPerMnd;
+    }
+
+    public void setGraderingPerioder(List<GraderingPeriodeDto> perioder) {
+        this.graderingPerioder = List.copyOf(perioder);
     }
 
     public void setInnsendingstidspunkt(LocalDateTime tidspunkt) {
@@ -106,9 +111,5 @@ public class InntektsmeldingDto {
 
     public void setUtsettelsePerioder(List<UtsettelsePeriodeDto> perioder) {
         this.utsettelsePerioder = List.copyOf(perioder);
-    }
-
-    public void setGraderingPerioder(List<GraderingPeriodeDto> perioder) {
-        this.graderingPerioder = List.copyOf(perioder);
     }
 }

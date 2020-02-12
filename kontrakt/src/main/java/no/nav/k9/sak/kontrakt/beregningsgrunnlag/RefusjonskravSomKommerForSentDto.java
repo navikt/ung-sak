@@ -31,20 +31,20 @@ public class RefusjonskravSomKommerForSentDto {
         return arbeidsgiverId;
     }
 
-    public void setArbeidsgiverId(String arbeidsgiverId) {
-        this.arbeidsgiverId = arbeidsgiverId;
-    }
-
     public String getArbeidsgiverVisningsnavn() {
         return arbeidsgiverVisningsnavn;
     }
 
-    public void setArbeidsgiverVisningsnavn(String arbeidsgiverVisningsnavn) {
-        this.arbeidsgiverVisningsnavn = arbeidsgiverVisningsnavn;
-    }
-
     public Boolean getErRefusjonskravGyldig() {
         return erRefusjonskravGyldig;
+    }
+
+    public void setArbeidsgiverId(String arbeidsgiverId) {
+        this.arbeidsgiverId = arbeidsgiverId;
+    }
+
+    public void setArbeidsgiverVisningsnavn(String arbeidsgiverVisningsnavn) {
+        this.arbeidsgiverVisningsnavn = arbeidsgiverVisningsnavn;
     }
 
     public void setErRefusjonskravGyldig(Boolean erRefusjonskravGyldig) {

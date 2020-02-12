@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -42,6 +43,6 @@ public class RelaterteYtelserDto {
     }
 
     public List<TilgrensendeYtelserDto> getTilgrensendeYtelserListe() {
-        return tilgrensendeYtelserListe;
+        return Collections.unmodifiableList(tilgrensendeYtelserListe);
     }
 }

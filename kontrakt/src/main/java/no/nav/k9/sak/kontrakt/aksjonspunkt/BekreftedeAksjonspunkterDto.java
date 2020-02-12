@@ -1,6 +1,8 @@
 package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ public class BekreftedeAksjonspunkterDto {
     @Size(min = 1, max = 10)
     @NotNull
     @Valid
-    private Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer;
+    private Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
 
     public static BekreftedeAksjonspunkterDto lagDto(Long behandlingId, Long behandlingVersjon,
                                                      Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer) {
@@ -63,17 +65,25 @@ public class BekreftedeAksjonspunkterDto {
         return behandlingId.getBehandlingUuid();
     }
 
-    @AbacAttributt("aksjonspunktKode")
-    public Set<String> getBekreftedeAksjonspunktKoder(){
-        return bekreftedeAksjonspunktDtoer.stream().map(BekreftetAksjonspunktDto::getKode).collect(Collectors.toSet());
-    }
-
     public Long getBehandlingVersjon() {
         return behandlingVersjon;
     }
 
     public Collection<BekreftetAksjonspunktDto> getBekreftedeAksjonspunktDtoer() {
-        return bekreftedeAksjonspunktDtoer;
+        return Collections.unmodifiableCollection(bekreftedeAksjonspunktDtoer);
+    }
+
+    @AbacAttributt("aksjonspunktKode")
+    public Set<String> getBekreftedeAksjonspunktKoder(){
+        return bekreftedeAksjonspunktDtoer.stream().map(BekreftetAksjonspunktDto::getKode).collect(Collectors.toSet());
+    }
+
+    public void setBehandlingVersjon(Long behandlingVersjon) {
+        this.behandlingVersjon = behandlingVersjon;
+    }
+
+    public void setBekreftedeAksjonspunktDtoer(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer) {
+        this.bekreftedeAksjonspunktDtoer = List.copyOf(bekreftedeAksjonspunktDtoer);
     }
 
 }

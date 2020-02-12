@@ -33,12 +33,12 @@ public class HistorikkinnslagOpplysningDto {
         return opplysningType;
     }
 
-    public void setOpplysningType(HistorikkOpplysningType opplysningType) {
-        this.opplysningType = opplysningType;
-    }
-
     public String getTilVerdi() {
         return tilVerdi;
+    }
+
+    public void setOpplysningType(HistorikkOpplysningType opplysningType) {
+        this.opplysningType = opplysningType;
     }
 
     public void setTilVerdi(String tilVerdi) {

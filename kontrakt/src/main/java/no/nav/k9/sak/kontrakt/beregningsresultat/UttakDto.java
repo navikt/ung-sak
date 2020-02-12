@@ -31,7 +31,7 @@ public class UttakDto {
         //
     }
 
-    protected UttakDto(String periodeResultatType, boolean gradering) {
+    public UttakDto(String periodeResultatType, boolean gradering) {
         this.periodeResultatType = periodeResultatType;
         this.gradering = gradering;
     }

@@ -18,15 +18,15 @@ import no.nav.k9.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkinnslagSoeknadsperiodeDto {
 
-    @JsonProperty(value = "soeknadsperiodeType")
-    @Valid
-    @NotNull
-    private HistorikkAvklartSoeknadsperiodeType soeknadsperiodeType;
-
     @JsonProperty(value = "navnVerdi")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String navnVerdi;
+
+    @JsonProperty(value = "soeknadsperiodeType")
+    @Valid
+    @NotNull
+    private HistorikkAvklartSoeknadsperiodeType soeknadsperiodeType;
 
     @JsonProperty(value = "tilVerdi")
     @Size(max = 4000)
@@ -36,28 +36,28 @@ public class HistorikkinnslagSoeknadsperiodeDto {
     public HistorikkinnslagSoeknadsperiodeDto() {
     }
 
-    public HistorikkAvklartSoeknadsperiodeType getSoeknadsperiodeType() {
-        return soeknadsperiodeType;
+    public String getNavnVerdi() {
+        return navnVerdi;
     }
 
-    public void setSoeknadsperiodeType(HistorikkAvklartSoeknadsperiodeType soeknadsperiodeType) {
-        this.soeknadsperiodeType = soeknadsperiodeType;
+    public HistorikkAvklartSoeknadsperiodeType getSoeknadsperiodeType() {
+        return soeknadsperiodeType;
     }
 
     public String getTilVerdi() {
         return tilVerdi;
     }
 
-    public void setTilVerdi(String tilVerdi) {
-        this.tilVerdi = tilVerdi;
-    }
-
-    public String getNavnVerdi() {
-        return navnVerdi;
-    }
-
     public void setNavnVerdi(String navnVerdi) {
         this.navnVerdi = navnVerdi;
+    }
+
+    public void setSoeknadsperiodeType(HistorikkAvklartSoeknadsperiodeType soeknadsperiodeType) {
+        this.soeknadsperiodeType = soeknadsperiodeType;
+    }
+
+    public void setTilVerdi(String tilVerdi) {
+        this.tilVerdi = tilVerdi;
     }
 
 }

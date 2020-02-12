@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -25,7 +26,7 @@ public class AktivitetTomDatoMappingDto {
     @NotNull
     @Valid
     @Size(max = 200)
-    private List<BeregningAktivitetDto> aktiviteter;
+    private List<BeregningAktivitetDto> aktiviteter = Collections.emptyList();
 
     public LocalDate getTom() {
         return tom;
@@ -36,10 +37,10 @@ public class AktivitetTomDatoMappingDto {
     }
 
     public List<BeregningAktivitetDto> getAktiviteter() {
-        return aktiviteter;
+        return Collections.unmodifiableList(aktiviteter);
     }
 
     public void setAktiviteter(List<BeregningAktivitetDto> aktiviteter) {
-        this.aktiviteter = aktiviteter;
+        this.aktiviteter = List.copyOf(aktiviteter);
     }
 }

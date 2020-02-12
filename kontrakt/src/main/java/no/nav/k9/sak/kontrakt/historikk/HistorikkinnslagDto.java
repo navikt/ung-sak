@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.historikk;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,14 +22,17 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
     
+    @JsonProperty(value="aktoer")
+    private HistorikkAktør aktoer;
+    
     @JsonProperty(value="behandlingId")
     private Long behandlingId;
     
-    @JsonProperty(value="type")
-    private HistorikkinnslagType type;
+    @JsonProperty(value="dokumentLinks")
+    private List<HistorikkInnslagDokumentLinkDto> dokumentLinks = Collections.emptyList();
     
-    @JsonProperty(value="aktoer")
-    private HistorikkAktør aktoer;
+    @JsonProperty(value="historikkinnslagDeler")
+    private List<HistorikkinnslagDelDto> historikkinnslagDeler = Collections.emptyList();
     
     @JsonProperty(value="opprettetAv")
     @Size(max = 100)
@@ -38,67 +42,8 @@ public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
     @JsonProperty(value="opprettetTidspunkt")
     private LocalDateTime opprettetTidspunkt;
     
-    @JsonProperty(value="dokumentLinks")
-    private List<HistorikkInnslagDokumentLinkDto> dokumentLinks;
-    
-    @JsonProperty(value="historikkinnslagDeler")
-    private List<HistorikkinnslagDelDto> historikkinnslagDeler;
-
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
-    }
-
-    public List<HistorikkInnslagDokumentLinkDto> getDokumentLinks() {
-        return dokumentLinks;
-    }
-
-    public void setDokumentLinks(List<HistorikkInnslagDokumentLinkDto> dokumentLinks) {
-        this.dokumentLinks = dokumentLinks;
-    }
-
-    public String getOpprettetAv() {
-        return opprettetAv;
-    }
-
-    public void setOpprettetAv(String opprettetAv) {
-        this.opprettetAv = opprettetAv;
-    }
-
-    public LocalDateTime getOpprettetTidspunkt() {
-        return opprettetTidspunkt;
-    }
-
-    public void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
-        this.opprettetTidspunkt = opprettetTidspunkt;
-    }
-
-    public HistorikkinnslagType getType() {
-        return type;
-    }
-
-    public void setType(HistorikkinnslagType type) {
-        this.type = type;
-    }
-
-    public HistorikkAktør getAktoer() {
-        return aktoer;
-    }
-
-    public void setAktoer(HistorikkAktør aktoer) {
-        this.aktoer = aktoer;
-    }
-
-    public List<HistorikkinnslagDelDto> getHistorikkinnslagDeler() {
-        return historikkinnslagDeler;
-    }
-
-    public void setHistorikkinnslagDeler(List<HistorikkinnslagDelDto> historikkinnslagDeler) {
-        this.historikkinnslagDeler = historikkinnslagDeler;
-    }
+    @JsonProperty(value="type")
+    private HistorikkinnslagType type;
 
     @Override
     public int compareTo(HistorikkinnslagDto that) {
@@ -126,8 +71,64 @@ public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
             Objects.equals(getDokumentLinks(), that.getDokumentLinks());
     }
 
+    public HistorikkAktør getAktoer() {
+        return aktoer;
+    }
+
+    public Long getBehandlingId() {
+        return behandlingId;
+    }
+
+    public List<HistorikkInnslagDokumentLinkDto> getDokumentLinks() {
+        return Collections.unmodifiableList(dokumentLinks);
+    }
+
+    public List<HistorikkinnslagDelDto> getHistorikkinnslagDeler() {
+        return Collections.unmodifiableList(historikkinnslagDeler);
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
+
+    public HistorikkinnslagType getType() {
+        return type;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getBehandlingId(), getType(), getAktoer(), getOpprettetAv(), getOpprettetTidspunkt(), getDokumentLinks());
+    }
+
+    public void setAktoer(HistorikkAktør aktoer) {
+        this.aktoer = aktoer;
+    }
+
+    public void setBehandlingId(Long behandlingId) {
+        this.behandlingId = behandlingId;
+    }
+
+    public void setDokumentLinks(List<HistorikkInnslagDokumentLinkDto> dokumentLinks) {
+        this.dokumentLinks = List.copyOf(dokumentLinks);
+    }
+
+    public void setHistorikkinnslagDeler(List<HistorikkinnslagDelDto> historikkinnslagDeler) {
+        this.historikkinnslagDeler = List.copyOf(historikkinnslagDeler);
+    }
+
+    public void setOpprettetAv(String opprettetAv) {
+        this.opprettetAv = opprettetAv;
+    }
+
+    public void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
+        this.opprettetTidspunkt = opprettetTidspunkt;
+    }
+
+    public void setType(HistorikkinnslagType type) {
+        this.type = type;
     }
 }

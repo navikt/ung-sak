@@ -26,24 +26,20 @@ public class PermisjonDto {
     @NotNull
     private LocalDate permisjonFom;
 
-    @JsonProperty(value = "permisjonTom")
-    @NotNull
-    private LocalDate permisjonTom;
-
     @JsonProperty(value = "permisjonsprosent")
     @DecimalMin("0.00")
     @DecimalMax("200.00")
     @Digits(integer = 3, fraction = 2)
     private BigDecimal permisjonsprosent;
 
+    @JsonProperty(value = "permisjonTom")
+    @NotNull
+    private LocalDate permisjonTom;
+
     @JsonProperty(value = "type")
     @Valid
     @NotNull
     private PermisjonsbeskrivelseType type;
-
-    PermisjonDto() {
-        // Skjul private constructor
-    }
 
     public PermisjonDto(LocalDate permisjonFom, LocalDate permisjonTom, BigDecimal permisjonsprosent, PermisjonsbeskrivelseType type) {
         this.permisjonFom = permisjonFom;
@@ -52,32 +48,36 @@ public class PermisjonDto {
         this.type = type;
     }
 
+    PermisjonDto() {
+        // Skjul private constructor
+    }
+
     public LocalDate getPermisjonFom() {
         return permisjonFom;
-    }
-
-    public void setPermisjonFom(LocalDate permisjonFom) {
-        this.permisjonFom = permisjonFom;
-    }
-
-    public LocalDate getPermisjonTom() {
-        return permisjonTom;
-    }
-
-    public void setPermisjonTom(LocalDate permisjonTom) {
-        this.permisjonTom = permisjonTom;
     }
 
     public BigDecimal getPermisjonsprosent() {
         return permisjonsprosent;
     }
 
-    public void setPermisjonsprosent(BigDecimal permisjonsprosent) {
-        this.permisjonsprosent = permisjonsprosent;
+    public LocalDate getPermisjonTom() {
+        return permisjonTom;
     }
 
     public PermisjonsbeskrivelseType getType() {
         return type;
+    }
+
+    public void setPermisjonFom(LocalDate permisjonFom) {
+        this.permisjonFom = permisjonFom;
+    }
+
+    public void setPermisjonsprosent(BigDecimal permisjonsprosent) {
+        this.permisjonsprosent = permisjonsprosent;
+    }
+
+    public void setPermisjonTom(LocalDate permisjonTom) {
+        this.permisjonTom = permisjonTom;
     }
 
     public void setType(PermisjonsbeskrivelseType type) {

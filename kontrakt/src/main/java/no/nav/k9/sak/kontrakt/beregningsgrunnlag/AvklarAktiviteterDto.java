@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -21,13 +22,13 @@ public class AvklarAktiviteterDto {
     @NotNull
     @Valid
     @Size(max = 200)
-    private List<AktivitetTomDatoMappingDto> aktiviteterTomDatoMapping;
+    private List<AktivitetTomDatoMappingDto> aktiviteterTomDatoMapping = Collections.emptyList();
 
     public List<AktivitetTomDatoMappingDto> getAktiviteterTomDatoMapping() {
-        return aktiviteterTomDatoMapping;
+        return Collections.unmodifiableList(aktiviteterTomDatoMapping);
     }
 
     public void setAktiviteterTomDatoMapping(List<AktivitetTomDatoMappingDto> aktiviteterTomDatoMapping) {
-        this.aktiviteterTomDatoMapping = aktiviteterTomDatoMapping;
+        this.aktiviteterTomDatoMapping = List.copyOf(aktiviteterTomDatoMapping);
     }
 }

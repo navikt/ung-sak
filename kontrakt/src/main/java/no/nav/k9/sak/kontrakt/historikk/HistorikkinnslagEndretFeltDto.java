@@ -23,33 +23,33 @@ public class HistorikkinnslagEndretFeltDto {
     @NotNull
     private HistorikkEndretFeltType endretFeltNavn;
 
-    @JsonProperty(value = "navnVerdi")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String navnVerdi;
-
-    @JsonProperty(value = "klNavn")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String klNavn;
-
     @JsonProperty(value = "fraVerdi")
     @Valid 
     private Object fraVerdi;
-
-    @JsonProperty(value = "tilVerdi")
-    @Valid
-    private Object tilVerdi;
 
     @JsonProperty(value = "klFraVerdi")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String klFraVerdi;
 
+    @JsonProperty(value = "klNavn")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String klNavn;
+
     @JsonProperty(value = "klTilVerdi")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String klTilVerdi;
+
+    @JsonProperty(value = "navnVerdi")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String navnVerdi;
+
+    @JsonProperty(value = "tilVerdi")
+    @Valid
+    private Object tilVerdi;
 
     public HistorikkinnslagEndretFeltDto() {
     }
@@ -58,52 +58,52 @@ public class HistorikkinnslagEndretFeltDto {
         return endretFeltNavn;
     }
 
-    public void setEndretFeltNavn(HistorikkEndretFeltType endretFeltNavn) {
-        this.endretFeltNavn = endretFeltNavn;
-    }
-
-    public String getNavnVerdi() {
-        return navnVerdi;
-    }
-
-    public void setNavnVerdi(String navnVerdi) {
-        this.navnVerdi = navnVerdi;
-    }
-
-    public String getKlNavn() {
-        return klNavn;
-    }
-
-    public void setKlNavn(String klNavn) {
-        this.klNavn = klNavn;
-    }
-
     public Object getFraVerdi() {
         return fraVerdi;
-    }
-
-    public void setFraVerdi(Object fraVerdi) {
-        this.fraVerdi = fraVerdi;
-    }
-
-    public Object getTilVerdi() {
-        return tilVerdi;
     }
 
     public String getKlFraVerdi() {
         return klFraVerdi;
     }
 
-    public void setKlFraVerdi(String klFraVerdi) {
-        this.klFraVerdi = klFraVerdi;
+    public String getKlNavn() {
+        return klNavn;
     }
 
     public String getKlTilVerdi() {
         return klTilVerdi;
     }
 
+    public String getNavnVerdi() {
+        return navnVerdi;
+    }
+
+    public Object getTilVerdi() {
+        return tilVerdi;
+    }
+
+    public void setEndretFeltNavn(HistorikkEndretFeltType endretFeltNavn) {
+        this.endretFeltNavn = endretFeltNavn;
+    }
+
+    public void setFraVerdi(Object fraVerdi) {
+        this.fraVerdi = fraVerdi;
+    }
+
+    public void setKlFraVerdi(String klFraVerdi) {
+        this.klFraVerdi = klFraVerdi;
+    }
+
+    public void setKlNavn(String klNavn) {
+        this.klNavn = klNavn;
+    }
+
     public void setKlTilVerdi(String klTilVerdi) {
         this.klTilVerdi = klTilVerdi;
+    }
+
+    public void setNavnVerdi(String navnVerdi) {
+        this.navnVerdi = navnVerdi;
     }
 
     public void setTilVerdi(Object tilVerdi) {

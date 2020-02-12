@@ -20,13 +20,6 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HenleggBehandlingDto {
 
-    @JsonProperty(value="behandlingId")
-    @NotNull
-    @Min(0)
-    @Max(Long.MAX_VALUE)
-    // TODO (BehandlingIdDto): bør kunne støtte behandlingUuid også?
-    private Long behandlingId;
-
     @JsonProperty(value="årsakKode", required = true)
     @NotNull
     @Size(min = 1, max = 100)
@@ -39,6 +32,13 @@ public class HenleggBehandlingDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
+    @JsonProperty(value="behandlingId")
+    @NotNull
+    @Min(0)
+    @Max(Long.MAX_VALUE)
+    // TODO (BehandlingIdDto): bør kunne støtte behandlingUuid også?
+    private Long behandlingId;
+
     @JsonAlias("versjon")
     @JsonProperty(value="behanldingVersjon", required = true)
     @NotNull
@@ -46,33 +46,33 @@ public class HenleggBehandlingDto {
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
-    @AbacAttributt("behandlingId")
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
-    }
-
     public String getÅrsakKode() {
         return årsakKode;
-    }
-
-    public void setÅrsakKode(String årsakKode) {
-        this.årsakKode = årsakKode;
     }
 
     public String getBegrunnelse() {
         return begrunnelse;
     }
 
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
+    @AbacAttributt("behandlingId")
+    public Long getBehandlingId() {
+        return behandlingId;
     }
 
     public Long getBehandlingVersjon() {
         return behandlingVersjon;
+    }
+
+    public void setÅrsakKode(String årsakKode) {
+        this.årsakKode = årsakKode;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
+    }
+
+    public void setBehandlingId(Long behandlingId) {
+        this.behandlingId = behandlingId;
     }
 
     public void setBehandlingVersjon(Long behandlingVersjon) {

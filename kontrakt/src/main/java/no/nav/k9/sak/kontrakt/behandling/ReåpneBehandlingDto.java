@@ -37,12 +37,12 @@ public class ReåpneBehandlingDto {
         return behandlingId;
     }
 
-    public void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
-    }
-
     public Long getBehandlingVersjon() {
         return behandlingVersjon;
+    }
+
+    public void setBehandlingId(Long behandlingId) {
+        this.behandlingId = behandlingId;
     }
 
     public void setBehandlingVersjon(Long behandlingVersjon) {

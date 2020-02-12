@@ -17,63 +17,63 @@ import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class KontrollresultatDto {
 
-    @JsonProperty(value = "kontrollresultat", required = true)
-    @NotNull
-    @Valid
-    private Kontrollresultat kontrollresultat;
-
-    @JsonProperty(value = "iayFaresignaler")
-    @Valid
-    private FaresignalgruppeDto iayFaresignaler;
-
-    @JsonProperty(value = "medlFaresignaler")
-    @Valid
-    private FaresignalgruppeDto medlFaresignaler;
-
     @JsonProperty(value = "faresignalVurdering", required = true)
     @NotNull
     @Valid
     private FaresignalVurdering faresignalVurdering;
 
+    @JsonProperty(value = "iayFaresignaler")
+    @Valid
+    private FaresignalgruppeDto iayFaresignaler;
+
+    @JsonProperty(value = "kontrollresultat", required = true)
+    @NotNull
+    @Valid
+    private Kontrollresultat kontrollresultat;
+
+    @JsonProperty(value = "medlFaresignaler")
+    @Valid
+    private FaresignalgruppeDto medlFaresignaler;
+
     public KontrollresultatDto() {
         //
-    }
-
-    public Kontrollresultat getKontrollresultat() {
-        return kontrollresultat;
-    }
-
-    public void setKontrollresultat(Kontrollresultat kontrollresultat) {
-        this.kontrollresultat = kontrollresultat;
-    }
-
-    public FaresignalgruppeDto getIayFaresignaler() {
-        return iayFaresignaler;
-    }
-
-    public void setIayFaresignaler(FaresignalgruppeDto iayFaresignaler) {
-        this.iayFaresignaler = iayFaresignaler;
-    }
-
-    public FaresignalgruppeDto getMedlFaresignaler() {
-        return medlFaresignaler;
-    }
-
-    public void setMedlFaresignaler(FaresignalgruppeDto medlFaresignaler) {
-        this.medlFaresignaler = medlFaresignaler;
-    }
-
-    public FaresignalVurdering getFaresignalVurdering() {
-        return faresignalVurdering;
-    }
-
-    public void setFaresignalVurdering(FaresignalVurdering faresignalVurdering) {
-        this.faresignalVurdering = faresignalVurdering;
     }
 
     public static KontrollresultatDto ikkeKlassifisert() {
         KontrollresultatDto dto = new KontrollresultatDto();
         dto.setKontrollresultat(Kontrollresultat.IKKE_KLASSIFISERT);
         return dto;
+    }
+
+    public FaresignalVurdering getFaresignalVurdering() {
+        return faresignalVurdering;
+    }
+
+    public FaresignalgruppeDto getIayFaresignaler() {
+        return iayFaresignaler;
+    }
+
+    public Kontrollresultat getKontrollresultat() {
+        return kontrollresultat;
+    }
+
+    public FaresignalgruppeDto getMedlFaresignaler() {
+        return medlFaresignaler;
+    }
+
+    public void setFaresignalVurdering(FaresignalVurdering faresignalVurdering) {
+        this.faresignalVurdering = faresignalVurdering;
+    }
+
+    public void setIayFaresignaler(FaresignalgruppeDto iayFaresignaler) {
+        this.iayFaresignaler = iayFaresignaler;
+    }
+
+    public void setKontrollresultat(Kontrollresultat kontrollresultat) {
+        this.kontrollresultat = kontrollresultat;
+    }
+
+    public void setMedlFaresignaler(FaresignalgruppeDto medlFaresignaler) {
+        this.medlFaresignaler = medlFaresignaler;
     }
 }

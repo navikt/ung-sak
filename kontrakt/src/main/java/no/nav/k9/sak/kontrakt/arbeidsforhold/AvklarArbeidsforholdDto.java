@@ -41,6 +41,10 @@ public class AvklarArbeidsforholdDto {
     @Valid
     private UUID arbeidsforholdId;
 
+    public void setArbeidsforholdId(UUID arbeidsforholdId) {
+        this.arbeidsforholdId = arbeidsforholdId;
+    }
+
     @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")

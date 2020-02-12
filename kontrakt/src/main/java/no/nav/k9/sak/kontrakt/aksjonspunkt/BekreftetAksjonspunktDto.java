@@ -36,10 +36,6 @@ public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode {
         return begrunnelse;
     }
     
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
-    }
-
     @AbacAttributt("aksjonspunktKode")
     @Override
     public String getKode() {
@@ -47,5 +43,9 @@ public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode {
             return this.getClass().getDeclaredAnnotation(JsonTypeName.class).value();
         }
         throw new IllegalStateException("Utvikler-feil:" +this.getClass().getSimpleName() +" er uten JsonTypeName annotation.");
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
     }
 }

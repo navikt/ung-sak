@@ -46,11 +46,15 @@ public class UtvidetBehandlingDto extends BehandlingDto {
         this.ansvarligBeslutter = ansvarligBeslutter;
     }
 
+    public void setAsyncStatus(AsyncPollingStatus asyncStatus) {
+        this.taskStatus = asyncStatus;
+    }
+
     public void setBehandlingHenlagt(boolean behandlingHenlagt) {
         this.behandlingHenlagt = behandlingHenlagt;
     }
 
-    public void setAsyncStatus(AsyncPollingStatus asyncStatus) {
-        this.taskStatus = asyncStatus;
+    public void setTaskStatus(AsyncPollingStatus taskStatus) {
+        this.taskStatus = taskStatus;
     }
 }

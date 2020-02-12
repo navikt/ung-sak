@@ -22,28 +22,14 @@ import no.nav.k9.sak.typer.AktørId;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningAktivitetDto {
 
-    @JsonProperty(value = "arbeidsgiverNavn")
-    @Size(max = 300)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverNavn;
+    @JsonProperty(value = "aktørId")
+    @Valid
+    private AktørId aktørId;
 
-    @JsonProperty(value = "arbeidsgiverId")
+    @JsonProperty(value = "aktørIdString")
     @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverId;
-
-    @JsonProperty(value = "eksternArbeidsforholdId")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String eksternArbeidsforholdId;
-
-    @JsonProperty(value = "fom", required = true)
-    @NotNull
-    private LocalDate fom;
-
-    @JsonProperty(value = "tom", required = true)
-    @NotNull
-    private LocalDate tom;
+    private String aktørIdString;
 
     /** For virksomheter - orgnr. For personlige arbeidsgiver - aktørId. */
     @JsonProperty(value = "arbeidsforholdId")
@@ -56,100 +42,34 @@ public class BeregningAktivitetDto {
     @Valid
     private OpptjeningAktivitetType arbeidsforholdType;
 
-    @JsonProperty(value = "aktørId")
-    @Valid
-    private AktørId aktørId;
-
-    @JsonProperty(value = "aktørIdString")
+    @JsonProperty(value = "arbeidsgiverId")
     @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String aktørIdString;
+    private String arbeidsgiverId;
+
+    @JsonProperty(value = "arbeidsgiverNavn")
+    @Size(max = 300)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiverNavn;
+
+    @JsonProperty(value = "eksternArbeidsforholdId")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String eksternArbeidsforholdId;
+
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
+    private LocalDate fom;
 
     @JsonProperty(value = "skalBrukes")
     private Boolean skalBrukes;
 
+    @JsonProperty(value = "tom", required = true)
+    @NotNull
+    private LocalDate tom;
+
     public BeregningAktivitetDto() {
         // jackson
-    }
-
-    public String getArbeidsforholdId() {
-        return arbeidsforholdId;
-    }
-
-    public void setArbeidsforholdId(String arbeidsforholdId) {
-        this.arbeidsforholdId = arbeidsforholdId;
-    }
-
-    public String getArbeidsgiverNavn() {
-        return arbeidsgiverNavn;
-    }
-
-    public void setArbeidsgiverNavn(String arbeidsgiverNavn) {
-        this.arbeidsgiverNavn = arbeidsgiverNavn;
-    }
-
-    public String getArbeidsgiverId() {
-        return arbeidsgiverId;
-    }
-
-    public void setArbeidsgiverId(String arbeidsgiverId) {
-        this.arbeidsgiverId = arbeidsgiverId;
-    }
-
-    public LocalDate getFom() {
-        return fom;
-    }
-
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
-    }
-
-    public LocalDate getTom() {
-        return tom;
-    }
-
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
-    }
-
-    public OpptjeningAktivitetType getArbeidsforholdType() {
-        return arbeidsforholdType;
-    }
-
-    public void setArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
-        this.arbeidsforholdType = arbeidsforholdType;
-    }
-
-    public void setAktørId(AktørId aktørId) {
-        this.aktørId = aktørId;
-    }
-
-    public AktørId getAktørId() {
-        return aktørId;
-    }
-
-    public String getAktørIdString() {
-        return aktørIdString;
-    }
-
-    public void setAktørIdString(String aktørIdString) {
-        this.aktørIdString = aktørIdString;
-    }
-
-    public Boolean getSkalBrukes() {
-        return skalBrukes;
-    }
-
-    public void setSkalBrukes(Boolean skalBrukes) {
-        this.skalBrukes = skalBrukes;
-    }
-
-    public String getEksternArbeidsforholdId() {
-        return eksternArbeidsforholdId;
-    }
-
-    public void setEksternArbeidsforholdId(String eksternArbeidsforholdId) {
-        this.eksternArbeidsforholdId = eksternArbeidsforholdId;
     }
 
     @Override
@@ -168,8 +88,88 @@ public class BeregningAktivitetDto {
             Objects.equals(aktørId, that.aktørId);
     }
 
+    public AktørId getAktørId() {
+        return aktørId;
+    }
+
+    public String getAktørIdString() {
+        return aktørIdString;
+    }
+
+    public String getArbeidsforholdId() {
+        return arbeidsforholdId;
+    }
+
+    public OpptjeningAktivitetType getArbeidsforholdType() {
+        return arbeidsforholdType;
+    }
+
+    public String getArbeidsgiverId() {
+        return arbeidsgiverId;
+    }
+
+    public String getArbeidsgiverNavn() {
+        return arbeidsgiverNavn;
+    }
+
+    public String getEksternArbeidsforholdId() {
+        return eksternArbeidsforholdId;
+    }
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
+    public Boolean getSkalBrukes() {
+        return skalBrukes;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(arbeidsgiverId, fom, tom, arbeidsforholdId, eksternArbeidsforholdId, arbeidsforholdType, aktørId);
+    }
+
+    public void setAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
+    }
+
+    public void setAktørIdString(String aktørIdString) {
+        this.aktørIdString = aktørIdString;
+    }
+
+    public void setArbeidsforholdId(String arbeidsforholdId) {
+        this.arbeidsforholdId = arbeidsforholdId;
+    }
+
+    public void setArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
+        this.arbeidsforholdType = arbeidsforholdType;
+    }
+
+    public void setArbeidsgiverId(String arbeidsgiverId) {
+        this.arbeidsgiverId = arbeidsgiverId;
+    }
+
+    public void setArbeidsgiverNavn(String arbeidsgiverNavn) {
+        this.arbeidsgiverNavn = arbeidsgiverNavn;
+    }
+
+    public void setEksternArbeidsforholdId(String eksternArbeidsforholdId) {
+        this.eksternArbeidsforholdId = eksternArbeidsforholdId;
+    }
+
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setSkalBrukes(Boolean skalBrukes) {
+        this.skalBrukes = skalBrukes;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 }

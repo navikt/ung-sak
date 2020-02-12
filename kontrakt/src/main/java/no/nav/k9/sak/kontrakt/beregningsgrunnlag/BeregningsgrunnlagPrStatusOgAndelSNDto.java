@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -20,6 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningsgrunnlagPrStatusOgAndelSNDto extends BeregningsgrunnlagPrStatusOgAndelDto {
 
+    @JsonProperty(value = "næringer")
+    @Valid
+    @Size(max = 200)
+    private List<EgenNæringDto> næringer = Collections.emptyList();
+
     @JsonProperty(value = "pgiSnitt")
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
@@ -29,38 +35,33 @@ public class BeregningsgrunnlagPrStatusOgAndelSNDto extends BeregningsgrunnlagPr
     @JsonProperty(value = "pgiVerdier")
     @Valid
     @Size(max = 200)
-    private List<PgiDto> pgiVerdier;
-
-    @JsonProperty(value = "næringer")
-    @Valid
-    @Size(max = 200)
-    private List<EgenNæringDto> næringer;
+    private List<PgiDto> pgiVerdier = Collections.emptyList();
 
     public BeregningsgrunnlagPrStatusOgAndelSNDto() {
         // trengs for deserialisering av JSON
-    }
-
-    public BigDecimal getPgiSnitt() {
-        return pgiSnitt;
-    }
-
-    public void setPgiSnitt(BigDecimal pgiSnitt) {
-        this.pgiSnitt = pgiSnitt;
-    }
-
-    public List<PgiDto> getPgiVerdier() {
-        return pgiVerdier;
-    }
-
-    public void setPgiVerdier(List<PgiDto> pgiVerdier) {
-        this.pgiVerdier = pgiVerdier;
     }
 
     public List<EgenNæringDto> getNæringer() {
         return næringer;
     }
 
+    public BigDecimal getPgiSnitt() {
+        return pgiSnitt;
+    }
+
+    public List<PgiDto> getPgiVerdier() {
+        return Collections.unmodifiableList(pgiVerdier);
+    }
+
     public void setNæringer(List<EgenNæringDto> næringer) {
-        this.næringer = næringer;
+        this.næringer = List.copyOf(næringer);
+    }
+
+    public void setPgiSnitt(BigDecimal pgiSnitt) {
+        this.pgiSnitt = pgiSnitt;
+    }
+
+    public void setPgiVerdier(List<PgiDto> pgiVerdier) {
+        this.pgiVerdier = List.copyOf(pgiVerdier);
     }
 }

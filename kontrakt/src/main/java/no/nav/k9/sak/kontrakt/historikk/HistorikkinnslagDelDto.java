@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.historikk;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -21,6 +23,14 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkinnslagDelDto {
 
+    @JsonProperty(value = "aarsak")
+    @Valid
+    private Kodeverdi aarsak;
+
+    @JsonProperty(value = "aksjonspunkter")
+    @Valid
+    private List<HistorikkinnslagTotrinnsVurderingDto> aksjonspunkter;
+
     @JsonProperty(value = "begrunnelse")
     @Valid
     private Kodeverdi begrunnelse;
@@ -30,6 +40,14 @@ public class HistorikkinnslagDelDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelseFritekst;
 
+    @JsonProperty(value = "endredeFelter")
+    @Valid
+    private List<HistorikkinnslagEndretFeltDto> endredeFelter = new ArrayList<>();
+
+    @JsonProperty(value = "gjeldendeFra")
+    @Valid
+    private HistorikkInnslagGjeldendeFraDto gjeldendeFra;
+
     @Valid
     @NotNull
     @JsonProperty(value = "hendelse")
@@ -37,91 +55,95 @@ public class HistorikkinnslagDelDto {
 
     @JsonProperty(value = "opplysninger")
     @Valid
-    private List<HistorikkinnslagOpplysningDto> opplysninger;
-
-    @JsonProperty(value = "soeknadsperiode")
-    @Valid
-    private HistorikkinnslagSoeknadsperiodeDto soeknadsperiode;
-
-    @JsonProperty(value = "skjermlenke")
-    @Valid
-    private SkjermlenkeType skjermlenke;
-
-    @JsonProperty(value = "aarsak")
-    @Valid
-    private Kodeverdi aarsak;
-
-    @JsonProperty(value = "tema")
-    @Valid
-    private HistorikkInnslagTemaDto tema;
-
-    @JsonProperty(value = "gjeldendeFra")
-    @Valid
-    private HistorikkInnslagGjeldendeFraDto gjeldendeFra;
+    private List<HistorikkinnslagOpplysningDto> opplysninger = new ArrayList<>();
 
     @JsonProperty(value = "resultat")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String resultat;
 
-    @JsonProperty(value = "endredeFelter")
+    @JsonProperty(value = "skjermlenke")
     @Valid
-    private List<HistorikkinnslagEndretFeltDto> endredeFelter;
+    private SkjermlenkeType skjermlenke;
 
-    @JsonProperty(value = "aksjonspunkter")
+    @JsonProperty(value = "soeknadsperiode")
     @Valid
-    private List<HistorikkinnslagTotrinnsVurderingDto> aksjonspunkter;
+    private HistorikkinnslagSoeknadsperiodeDto soeknadsperiode;
+
+    @JsonProperty(value = "tema")
+    @Valid
+    private HistorikkInnslagTemaDto tema;
+
+    public Kodeverdi getAarsak() {
+        return aarsak;
+    }
+
+    public List<HistorikkinnslagTotrinnsVurderingDto> getAksjonspunkter() {
+        return Collections.unmodifiableList(aksjonspunkter);
+    }
 
     public Kodeverdi getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public void setBegrunnelse(Kodeverdi begrunnelse) {
-        this.begrunnelse = begrunnelse;
     }
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
     }
 
-    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
-        this.begrunnelseFritekst = begrunnelseFritekst;
+    public List<HistorikkinnslagEndretFeltDto> getEndredeFelter() {
+        return Collections.unmodifiableList(endredeFelter);
+    }
+
+    public HistorikkInnslagGjeldendeFraDto getGjeldendeFra() {
+        return gjeldendeFra;
     }
 
     public HistorikkinnslagHendelseDto getHendelse() {
         return hendelse;
     }
 
-    public void setHendelse(HistorikkinnslagHendelseDto hendelse) {
-        this.hendelse = hendelse;
+    public List<HistorikkinnslagOpplysningDto> getOpplysninger() {
+        return Collections.unmodifiableList(opplysninger);
+    }
+
+    public String getResultat() {
+        return resultat;
     }
 
     public SkjermlenkeType getSkjermlenke() {
         return skjermlenke;
     }
 
-    public void setSkjermlenke(SkjermlenkeType skjermlenke) {
-        this.skjermlenke = skjermlenke;
-    }
-
-    public Kodeverdi getAarsak() {
-        return aarsak;
-    }
-
-    public void setAarsak(Kodeverdi aarsak) {
-        this.aarsak = aarsak;
+    public HistorikkinnslagSoeknadsperiodeDto getSoeknadsperiode() {
+        return soeknadsperiode;
     }
 
     public HistorikkInnslagTemaDto getTema() {
         return tema;
     }
 
-    public void setTema(HistorikkInnslagTemaDto tema) {
-        this.tema = tema;
+    public void setAarsak(Kodeverdi aarsak) {
+        this.aarsak = aarsak;
     }
 
-    public HistorikkInnslagGjeldendeFraDto getGjeldendeFra() {
-        return gjeldendeFra;
+    public void setAksjonspunkter(List<HistorikkinnslagTotrinnsVurderingDto> aksjonspunkter) {
+        this.aksjonspunkter = List.copyOf(aksjonspunkter);
+    }
+
+    public void setBegrunnelse(Kodeverdi begrunnelse) {
+        this.begrunnelse = begrunnelse;
+    }
+
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    public void setEndredeFelter(List<HistorikkinnslagEndretFeltDto> endredeFelter) {
+        this.endredeFelter = List.copyOf(endredeFelter);
+    }
+
+    public void setGjeldendeFra(HistorikkInnslagGjeldendeFraDto gjeldendeFra) {
+        this.gjeldendeFra = gjeldendeFra;
     }
 
     public void setGjeldendeFra(String fra) {
@@ -142,44 +164,28 @@ public class HistorikkinnslagDelDto {
         }
     }
 
-    public String getResultat() {
-        return resultat;
+    public void setHendelse(HistorikkinnslagHendelseDto hendelse) {
+        this.hendelse = hendelse;
+    }
+
+    public void setOpplysninger(List<HistorikkinnslagOpplysningDto> opplysninger) {
+        this.opplysninger = List.copyOf(opplysninger);
     }
 
     public void setResultat(String resultat) {
         this.resultat = resultat;
     }
 
-    public List<HistorikkinnslagEndretFeltDto> getEndredeFelter() {
-        return endredeFelter;
-    }
-
-    public void setEndredeFelter(List<HistorikkinnslagEndretFeltDto> endredeFelter) {
-        this.endredeFelter = endredeFelter;
-    }
-
-    public List<HistorikkinnslagOpplysningDto> getOpplysninger() {
-        return opplysninger;
-    }
-
-    public void setOpplysninger(List<HistorikkinnslagOpplysningDto> opplysninger) {
-        this.opplysninger = opplysninger;
-    }
-
-    public HistorikkinnslagSoeknadsperiodeDto getSoeknadsperiode() {
-        return soeknadsperiode;
+    public void setSkjermlenke(SkjermlenkeType skjermlenke) {
+        this.skjermlenke = skjermlenke;
     }
 
     public void setSoeknadsperiode(HistorikkinnslagSoeknadsperiodeDto soeknadsperiode) {
         this.soeknadsperiode = soeknadsperiode;
     }
 
-    public List<HistorikkinnslagTotrinnsVurderingDto> getAksjonspunkter() {
-        return aksjonspunkter;
-    }
-
-    public void setAksjonspunkter(List<HistorikkinnslagTotrinnsVurderingDto> aksjonspunkter) {
-        this.aksjonspunkter = aksjonspunkter;
+    public void setTema(HistorikkInnslagTemaDto tema) {
+        this.tema = tema;
     }
 
 }

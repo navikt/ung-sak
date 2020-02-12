@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -18,31 +19,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FordelBeregningsgrunnlagDto {
 
-    @JsonProperty(value = "fordelBeregningsgrunnlagPerioder", required = true)
-    @NotNull
-    @Valid
-    @Size(max = 200)
-    private List<FordelBeregningsgrunnlagPeriodeDto> fordelBeregningsgrunnlagPerioder = new ArrayList<>();
-
     @JsonProperty(value = "arbeidsforholdTilFordeling", required = true)
     @NotNull
     @Valid
     @Size(max = 200)
     private List<FordelBeregningsgrunnlagArbeidsforholdDto> arbeidsforholdTilFordeling = new ArrayList<>();
 
-    public List<FordelBeregningsgrunnlagPeriodeDto> getFordelBeregningsgrunnlagPerioder() {
-        return fordelBeregningsgrunnlagPerioder;
-    }
-
-    public void setFordelBeregningsgrunnlagPerioder(List<FordelBeregningsgrunnlagPeriodeDto> fordelBeregningsgrunnlagPerioder) {
-        this.fordelBeregningsgrunnlagPerioder = fordelBeregningsgrunnlagPerioder;
-    }
+    @JsonProperty(value = "fordelBeregningsgrunnlagPerioder", required = true)
+    @NotNull
+    @Valid
+    @Size(max = 200)
+    private List<FordelBeregningsgrunnlagPeriodeDto> fordelBeregningsgrunnlagPerioder = new ArrayList<>();
 
     public List<FordelBeregningsgrunnlagArbeidsforholdDto> getArbeidsforholdTilFordeling() {
-        return arbeidsforholdTilFordeling;
+        return Collections.unmodifiableList(arbeidsforholdTilFordeling);
+    }
+
+    public List<FordelBeregningsgrunnlagPeriodeDto> getFordelBeregningsgrunnlagPerioder() {
+        return Collections.unmodifiableList(fordelBeregningsgrunnlagPerioder);
     }
 
     public void leggTilArbeidsforholdTilFordeling(FordelBeregningsgrunnlagArbeidsforholdDto arbeidsforholdTilFordeling) {
         this.arbeidsforholdTilFordeling.add(arbeidsforholdTilFordeling);
+    }
+
+    public void setArbeidsforholdTilFordeling(List<FordelBeregningsgrunnlagArbeidsforholdDto> arbeidsforholdTilFordeling) {
+        this.arbeidsforholdTilFordeling = arbeidsforholdTilFordeling;
+    }
+
+    public void setFordelBeregningsgrunnlagPerioder(List<FordelBeregningsgrunnlagPeriodeDto> fordelBeregningsgrunnlagPerioder) {
+        this.fordelBeregningsgrunnlagPerioder = fordelBeregningsgrunnlagPerioder;
     }
 }

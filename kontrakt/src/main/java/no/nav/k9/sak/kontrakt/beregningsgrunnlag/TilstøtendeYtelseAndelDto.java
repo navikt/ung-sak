@@ -17,6 +17,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TilstøtendeYtelseAndelDto extends FaktaOmBeregningAndelDto {
 
+    @JsonProperty("fastsattPrAar")
+    @DecimalMin("0.00")
+    @DecimalMax("1000000.00")
+    @Digits(integer = 7, fraction = 2)
+    private BigDecimal fastsattPrAar;
+
     @JsonProperty("fordelingForrigeYtelse")
     @DecimalMin("0.00")
     @DecimalMax("1000.00")
@@ -29,38 +35,32 @@ public class TilstøtendeYtelseAndelDto extends FaktaOmBeregningAndelDto {
     @Digits(integer = 7, fraction = 2)
     private BigDecimal refusjonskrav;
 
-    @JsonProperty("fastsattPrAar")
-    @DecimalMin("0.00")
-    @DecimalMax("1000000.00")
-    @Digits(integer = 7, fraction = 2)
-    private BigDecimal fastsattPrAar;
-
     public TilstøtendeYtelseAndelDto () {
         // 
-    }
-
-    public BigDecimal getFordelingForrigeYtelse() {
-        return fordelingForrigeYtelse;
-    }
-
-    public void setFordelingForrigeYtelse(BigDecimal fordelingForrigeYtelse) {
-        this.fordelingForrigeYtelse = fordelingForrigeYtelse;
-    }
-
-    public BigDecimal getRefusjonskrav() {
-        return refusjonskrav;
-    }
-
-    public void setRefusjonskrav(BigDecimal refusjonskrav) {
-        this.refusjonskrav = refusjonskrav;
     }
 
     public BigDecimal getFastsattPrAar() {
         return fastsattPrAar;
     }
 
+    public BigDecimal getFordelingForrigeYtelse() {
+        return fordelingForrigeYtelse;
+    }
+
+    public BigDecimal getRefusjonskrav() {
+        return refusjonskrav;
+    }
+
     public void setFastsattPrAar(BigDecimal fastsattPrAar) {
         this.fastsattPrAar = fastsattPrAar;
+    }
+
+    public void setFordelingForrigeYtelse(BigDecimal fordelingForrigeYtelse) {
+        this.fordelingForrigeYtelse = fordelingForrigeYtelse;
+    }
+
+    public void setRefusjonskrav(BigDecimal refusjonskrav) {
+        this.refusjonskrav = refusjonskrav;
     }
 
 }

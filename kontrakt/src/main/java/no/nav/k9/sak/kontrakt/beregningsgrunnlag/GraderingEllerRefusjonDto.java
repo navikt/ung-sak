@@ -15,13 +15,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class GraderingEllerRefusjonDto {
 
-    @JsonProperty(value = "erRefusjon", required = true)
-    @NotNull
-    private boolean erRefusjon;
-
     @JsonProperty(value = "erGradering", required = true)
     @NotNull
     private boolean erGradering;
+
+    @JsonProperty(value = "erRefusjon", required = true)
+    @NotNull
+    private boolean erRefusjon;
 
     @JsonProperty(value = "fom", required = true)
     @NotNull
@@ -39,32 +39,32 @@ public class GraderingEllerRefusjonDto {
         this.erRefusjon = erRefusjon;
     }
 
-    public boolean isErRefusjon() {
-        return erRefusjon;
+    public LocalDate getFom() {
+        return fom;
     }
 
-    public void setErRefusjon(boolean erRefusjon) {
-        this.erRefusjon = erRefusjon;
+    public LocalDate getTom() {
+        return tom;
     }
 
     public boolean isErGradering() {
         return erGradering;
     }
 
+    public boolean isErRefusjon() {
+        return erRefusjon;
+    }
+
     public void setErGradering(boolean erGradering) {
         this.erGradering = erGradering;
     }
 
-    public LocalDate getFom() {
-        return fom;
+    public void setErRefusjon(boolean erRefusjon) {
+        this.erRefusjon = erRefusjon;
     }
 
     public void setFom(LocalDate fom) {
         this.fom = fom;
-    }
-
-    public LocalDate getTom() {
-        return tom;
     }
 
     public void setTom(LocalDate tom) {

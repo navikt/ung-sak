@@ -21,8 +21,8 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "sendVarsel", required = true)
-    private boolean sendVarsel;
+    @JsonProperty(value = "frist")
+    private LocalDate frist;
 
     @JsonProperty(value = "fritekst", required = true)
     @NotNull
@@ -30,8 +30,8 @@ public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String fritekst;
 
-    @JsonProperty(value = "frist")
-    private LocalDate frist;
+    @JsonProperty(value = "sendVarsel", required = true)
+    private boolean sendVarsel;
 
     @JsonProperty(value = "ventearsak")
     @Valid
@@ -53,19 +53,35 @@ public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
         //
     }
 
-    public boolean isSendVarsel() {
-        return sendVarsel;
+    public LocalDate getFrist() {
+        return frist;
     }
 
     public String getFritekst() {
         return fritekst;
     }
 
-    public LocalDate getFrist() {
-        return frist;
-    }
-
     public Venteårsak getVentearsak() {
         return ventearsak;
+    }
+
+    public boolean isSendVarsel() {
+        return sendVarsel;
+    }
+
+    public void setFrist(LocalDate frist) {
+        this.frist = frist;
+    }
+
+    public void setFritekst(String fritekst) {
+        this.fritekst = fritekst;
+    }
+
+    public void setSendVarsel(boolean sendVarsel) {
+        this.sendVarsel = sendVarsel;
+    }
+
+    public void setVentearsak(Venteårsak ventearsak) {
+        this.ventearsak = ventearsak;
     }
 }

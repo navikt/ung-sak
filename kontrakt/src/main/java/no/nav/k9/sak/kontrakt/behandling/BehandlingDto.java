@@ -46,6 +46,18 @@ public class BehandlingDto {
     @Max(Long.MAX_VALUE)
     private Long versjon;
 
+    public boolean isBehandlingKøet() {
+        return behandlingKøet;
+    }
+
+    public void setBehandlingÅrsaker(List<BehandlingÅrsakDto> behandlingÅrsaker) {
+        this.behandlingÅrsaker = behandlingÅrsaker;
+    }
+
+    public void setLinks(List<ResourceLink> links) {
+        this.links = links;
+    }
+
     private BehandlingType type;
     private BehandlingStatus status;
 
@@ -100,7 +112,7 @@ public class BehandlingDto {
     @JsonProperty(value = "behandlingÅrsaker")
     @Size(max = 20)
     @Valid
-    private List<BehandlingÅrsakDto> behandlingÅrsaker;
+    private List<BehandlingÅrsakDto> behandlingÅrsaker = new ArrayList<>();
 
     @JsonAlias("fristBehandlingPåVent")
     @JsonProperty("fristBehandlingPaaVent")
@@ -233,11 +245,11 @@ public class BehandlingDto {
     }
 
     public List<BehandlingÅrsakDto> getBehandlingÅrsaker() {
-        return behandlingÅrsaker;
+        return Collections.unmodifiableList(behandlingÅrsaker);
     }
 
     public void setBehandlingArsaker(List<BehandlingÅrsakDto> behandlingÅrsaker) {
-        this.behandlingÅrsaker = behandlingÅrsaker;
+        this.behandlingÅrsaker = List.copyOf(behandlingÅrsaker);
     }
 
     public void setFagsakId(Long fagsakId) {

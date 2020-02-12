@@ -22,6 +22,21 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
 public class FagsakDto {
 
+    @JsonProperty(value = "endret")
+    private LocalDateTime endret;
+
+    @JsonProperty(value = "kanRevurderingOpprettes")
+    private Boolean kanRevurderingOpprettes;
+
+    @JsonProperty(value = "opprettet", required = true)
+    @NotNull
+    private LocalDateTime opprettet;
+
+    @JsonProperty(value = "person", required = true)
+    @NotNull
+    @Valid
+    private PersonDto person;
+
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
     private Saksnummer saksnummer;
@@ -30,27 +45,12 @@ public class FagsakDto {
     @NotNull
     private FagsakYtelseType sakstype;
 
+    @JsonProperty(value = "skalBehandlesAvInfotrygd")
+    private Boolean skalBehandlesAvInfotrygd;
+
     @JsonProperty(value = "status", required = true)
     @NotNull
     private FagsakStatus status;
-
-    @JsonProperty(value = "person", required = true)
-    @NotNull
-    @Valid
-    private PersonDto person;
-
-    @JsonProperty(value = "opprettet", required = true)
-    @NotNull
-    private LocalDateTime opprettet;
-
-    @JsonProperty(value = "endret")
-    private LocalDateTime endret;
-
-    @JsonProperty(value = "kanRevurderingOpprettes")
-    private Boolean kanRevurderingOpprettes;
-
-    @JsonProperty(value = "skalBehandlesAvInfotrygd")
-    private Boolean skalBehandlesAvInfotrygd;
 
     public FagsakDto() {
         // Injiseres i test
@@ -72,49 +72,6 @@ public class FagsakDto {
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
         this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
-    }
-
-    public Saksnummer getSaksnummer() {
-        return saksnummer;
-    }
-
-    public FagsakYtelseType getSakstype() {
-        return sakstype;
-    }
-
-    public FagsakStatus getStatus() {
-        return status;
-    }
-
-    public PersonDto getPerson() {
-        return person;
-    }
-
-    public LocalDateTime getOpprettet() {
-        return opprettet;
-    }
-
-    public LocalDateTime getEndret() {
-        return endret;
-    }
-
-    public Boolean getKanRevurderingOpprettes() {
-        return kanRevurderingOpprettes;
-    }
-
-    public Boolean getSkalBehandlesAvInfotrygd() {
-        return skalBehandlesAvInfotrygd;
-    }
-
-    @Override
-    public String toString() {
-        return "<saksnummer=" + saksnummer + //$NON-NLS-1$
-            ", sakstype=" + sakstype + //$NON-NLS-1$
-            ", status=" + status + //$NON-NLS-1$
-            ", person=" + person + //$NON-NLS-1$
-            ", opprettet=" + opprettet + //$NON-NLS-1$
-            ", endret=" + endret + //$NON-NLS-1$
-            ">";
     }
 
     @Override
@@ -139,6 +96,38 @@ public class FagsakDto {
         return endret != null ? endret.equals(fagsakDto.endret) : fagsakDto.endret == null;
     }
 
+    public LocalDateTime getEndret() {
+        return endret;
+    }
+
+    public Boolean getKanRevurderingOpprettes() {
+        return kanRevurderingOpprettes;
+    }
+
+    public LocalDateTime getOpprettet() {
+        return opprettet;
+    }
+
+    public PersonDto getPerson() {
+        return person;
+    }
+
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
+
+    public FagsakYtelseType getSakstype() {
+        return sakstype;
+    }
+
+    public Boolean getSkalBehandlesAvInfotrygd() {
+        return skalBehandlesAvInfotrygd;
+    }
+
+    public FagsakStatus getStatus() {
+        return status;
+    }
+
     @Override
     public int hashCode() {
         int result = saksnummer.hashCode();
@@ -148,6 +137,49 @@ public class FagsakDto {
         result = 31 * result + (opprettet != null ? opprettet.hashCode() : 0);
         result = 31 * result + (endret != null ? endret.hashCode() : 0);
         return result;
+    }
+
+    public void setEndret(LocalDateTime endret) {
+        this.endret = endret;
+    }
+
+    public void setKanRevurderingOpprettes(Boolean kanRevurderingOpprettes) {
+        this.kanRevurderingOpprettes = kanRevurderingOpprettes;
+    }
+
+    public void setOpprettet(LocalDateTime opprettet) {
+        this.opprettet = opprettet;
+    }
+
+    public void setPerson(PersonDto person) {
+        this.person = person;
+    }
+
+    public void setSaksnummer(Saksnummer saksnummer) {
+        this.saksnummer = saksnummer;
+    }
+
+    public void setSakstype(FagsakYtelseType sakstype) {
+        this.sakstype = sakstype;
+    }
+
+    public void setSkalBehandlesAvInfotrygd(Boolean skalBehandlesAvInfotrygd) {
+        this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
+    }
+
+    public void setStatus(FagsakStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "<saksnummer=" + saksnummer + //$NON-NLS-1$
+            ", sakstype=" + sakstype + //$NON-NLS-1$
+            ", status=" + status + //$NON-NLS-1$
+            ", person=" + person + //$NON-NLS-1$
+            ", opprettet=" + opprettet + //$NON-NLS-1$
+            ", endret=" + endret + //$NON-NLS-1$
+            ">";
     }
 
 }

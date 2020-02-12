@@ -19,66 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class RisikovurderingRequest {
 
-    @JsonProperty(value = "soekerAktoerId", required = true)
-    @Valid
-    @NotNull
-    private AktoerId soekerAktoerId;
-
-    @JsonProperty(value = "skjæringstidspunkt", required = true)
-    @Valid
-    @NotNull
-    private LocalDate skjæringstidspunkt;
-
-    @JsonProperty(value = "opplysningsperiode", required = true)
-    @Valid
-    @NotNull
-    private Opplysningsperiode opplysningsperiode;
-
-    @JsonProperty(value = "behandlingstema", required = true)
-    @Valid
-    @NotNull
-    private String behandlingstema;
-
-    @JsonProperty(value = "annenPart")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private AnnenPart annenPart;
-
-    @JsonProperty(value="konsumentId", required = true)
-    @Valid
-    @NotNull
-    private UUID konsumentId;
-
-    public RisikovurderingRequest() {
-    }
-
-    public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
-    }
-
-    public AktoerId getSoekerAktoerId() {
-        return soekerAktoerId;
-    }
-
-    public Opplysningsperiode getOpplysningsperiode() {
-        return opplysningsperiode;
-    }
-
-    public String getBehandlingstema() {
-        return behandlingstema;
-    }
-
-    public AnnenPart getAnnenPart() {
-        return annenPart;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public UUID getKonsumentId() {
-        return konsumentId;
-    }
-
     public static class Builder {
         private RisikovurderingRequest mal;
 
@@ -86,18 +26,13 @@ public class RisikovurderingRequest {
             this.mal = new RisikovurderingRequest();
         }
 
-        public Builder medSoekerAktoerId(AktoerId soekerAktoerId) {
-            mal.soekerAktoerId = soekerAktoerId;
-            return this;
+        public RisikovurderingRequest build() {
+            verifyStateForBuild();
+            return mal;
         }
 
-        public Builder medSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
-            mal.skjæringstidspunkt = skjæringstidspunkt;
-            return this;
-        }
-
-        public Builder medOpplysningsperiode(Opplysningsperiode opplysningsperiode) {
-            mal.opplysningsperiode = opplysningsperiode;
+        public Builder medAnnenPart(AnnenPart annenPart) {
+            mal.annenPart = annenPart;
             return this;
         }
 
@@ -106,19 +41,24 @@ public class RisikovurderingRequest {
             return this;
         }
 
-        public Builder medAnnenPart(AnnenPart annenPart) {
-            mal.annenPart = annenPart;
-            return this;
-        }
-
         public Builder medKonsumentId(UUID konsumentId) {
             mal.konsumentId = konsumentId;
             return this;
         }
 
-        public RisikovurderingRequest build() {
-            verifyStateForBuild();
-            return mal;
+        public Builder medOpplysningsperiode(Opplysningsperiode opplysningsperiode) {
+            mal.opplysningsperiode = opplysningsperiode;
+            return this;
+        }
+
+        public Builder medSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+            mal.skjæringstidspunkt = skjæringstidspunkt;
+            return this;
+        }
+
+        public Builder medSoekerAktoerId(AktoerId soekerAktoerId) {
+            mal.soekerAktoerId = soekerAktoerId;
+            return this;
         }
 
         private void verifyStateForBuild() {
@@ -129,6 +69,90 @@ public class RisikovurderingRequest {
             Objects.requireNonNull(mal.behandlingstema, "behandlingstema");
         }
 
+    }
+
+    @JsonProperty(value = "annenPart")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private AnnenPart annenPart;
+
+    @JsonProperty(value = "behandlingstema", required = true)
+    @Valid
+    @NotNull
+    private String behandlingstema;
+
+    @JsonProperty(value="konsumentId", required = true)
+    @Valid
+    @NotNull
+    private UUID konsumentId;
+
+    @JsonProperty(value = "opplysningsperiode", required = true)
+    @Valid
+    @NotNull
+    private Opplysningsperiode opplysningsperiode;
+
+    @JsonProperty(value = "skjæringstidspunkt", required = true)
+    @Valid
+    @NotNull
+    private LocalDate skjæringstidspunkt;
+
+    @JsonProperty(value = "soekerAktoerId", required = true)
+    @Valid
+    @NotNull
+    private AktoerId soekerAktoerId;
+
+    public RisikovurderingRequest() {
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public AnnenPart getAnnenPart() {
+        return annenPart;
+    }
+
+    public String getBehandlingstema() {
+        return behandlingstema;
+    }
+
+    public UUID getKonsumentId() {
+        return konsumentId;
+    }
+
+    public Opplysningsperiode getOpplysningsperiode() {
+        return opplysningsperiode;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public AktoerId getSoekerAktoerId() {
+        return soekerAktoerId;
+    }
+
+    public void setAnnenPart(AnnenPart annenPart) {
+        this.annenPart = annenPart;
+    }
+
+    public void setBehandlingstema(String behandlingstema) {
+        this.behandlingstema = behandlingstema;
+    }
+
+    public void setKonsumentId(UUID konsumentId) {
+        this.konsumentId = konsumentId;
+    }
+
+    public void setOpplysningsperiode(Opplysningsperiode opplysningsperiode) {
+        this.opplysningsperiode = opplysningsperiode;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
+    }
+
+    public void setSoekerAktoerId(AktoerId soekerAktoerId) {
+        this.soekerAktoerId = soekerAktoerId;
     }
 
 }

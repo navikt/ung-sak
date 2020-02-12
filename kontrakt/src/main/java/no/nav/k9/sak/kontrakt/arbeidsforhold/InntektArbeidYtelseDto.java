@@ -19,18 +19,13 @@ public class InntektArbeidYtelseDto {
 
     @Valid
     @Size(max = 1000)
+    @JsonProperty(value = "arbeidsforhold")
+    private List<InntektArbeidYtelseArbeidsforhold> arbeidsforhold = Collections.emptyList();
+
+    @Valid
+    @Size(max = 1000)
     @JsonProperty(value = "inntektsmeldinger")
     private List<InntektsmeldingDto> inntektsmeldinger = Collections.emptyList();
-
-    @Valid
-    @Size(max = 1000)
-    @JsonProperty(value = "relatertTilgrensendeYtelserForSoker")
-    private List<RelaterteYtelserDto> relatertTilgrensendeYtelserForSoker = Collections.emptyList();
-
-    @Valid
-    @Size(max = 1000)
-    @JsonProperty(value = "relatertTilgrensendeYtelserForAnnenForelder")
-    private List<RelaterteYtelserDto> relatertTilgrensendeYtelserForAnnenForelder = Collections.emptyList();
 
     @Valid
     @Size(max = 1000)
@@ -39,68 +34,77 @@ public class InntektArbeidYtelseDto {
 
     @Valid
     @Size(max = 1000)
-    @JsonProperty(value = "arbeidsforhold")
-    private List<InntektArbeidYtelseArbeidsforhold> arbeidsforhold = Collections.emptyList();
+    @JsonProperty(value = "relatertTilgrensendeYtelserForAnnenForelder")
+    private List<RelaterteYtelserDto> relatertTilgrensendeYtelserForAnnenForelder = Collections.emptyList();
 
-    @JsonProperty(value = "skalKunneLeggeTilNyeArbeidsforhold")
-    private boolean skalKunneLeggeTilNyeArbeidsforhold = false;
+    @Valid
+    @Size(max = 1000)
+    @JsonProperty(value = "relatertTilgrensendeYtelserForSoker")
+    private List<RelaterteYtelserDto> relatertTilgrensendeYtelserForSoker = Collections.emptyList();
 
     @JsonProperty(value = "skalKunneLageArbeidsforholdBasertPaInntektsmelding")
     private boolean skalKunneLageArbeidsforholdBasertPaInntektsmelding = false;
 
-    public void setInntektsmeldinger(List<InntektsmeldingDto> inntektsmeldinger) {
-        this.inntektsmeldinger = inntektsmeldinger;
+    @JsonProperty(value = "skalKunneLeggeTilNyeArbeidsforhold")
+    private boolean skalKunneLeggeTilNyeArbeidsforhold = false;
+
+    public List<InntektArbeidYtelseArbeidsforhold> getArbeidsforhold() {
+        return Collections.unmodifiableList(arbeidsforhold);
     }
 
     public List<InntektsmeldingDto> getInntektsmeldinger() {
-        return inntektsmeldinger;
-    }
-
-    public void setRelatertTilgrensendeYtelserForSoker(List<RelaterteYtelserDto> relatertTilgrensendeYtelserForSoker) {
-        this.relatertTilgrensendeYtelserForSoker = relatertTilgrensendeYtelserForSoker;
-    }
-
-    void setRelatertTilgrensendeYtelserForAnnenForelder(List<RelaterteYtelserDto> relatertTilgrensendeYtelserForAnnenForelder) {
-        this.relatertTilgrensendeYtelserForAnnenForelder = relatertTilgrensendeYtelserForAnnenForelder;
-    }
-
-    void setInnvilgetRelatertTilgrensendeYtelserForAnnenForelder(List<RelaterteYtelserDto> innvilgetRelatertTilgrensendeYtelserForAnnenForelder) {
-        this.innvilgetRelatertTilgrensendeYtelserForAnnenForelder = innvilgetRelatertTilgrensendeYtelserForAnnenForelder;
-    }
-
-    public List<RelaterteYtelserDto> getRelatertTilgrensendeYtelserForSoker() {
-        return relatertTilgrensendeYtelserForSoker;
-    }
-
-    public List<RelaterteYtelserDto> getRelatertTilgrensendeYtelserForAnnenForelder() {
-        return relatertTilgrensendeYtelserForAnnenForelder;
+        return Collections.unmodifiableList(inntektsmeldinger);
     }
 
     public List<RelaterteYtelserDto> getInnvilgetRelatertTilgrensendeYtelserForAnnenForelder() {
-        return innvilgetRelatertTilgrensendeYtelserForAnnenForelder;
+        return Collections.unmodifiableList(innvilgetRelatertTilgrensendeYtelserForAnnenForelder);
     }
 
-    public List<InntektArbeidYtelseArbeidsforhold> getArbeidsforhold() {
-        return arbeidsforhold;
+    public List<RelaterteYtelserDto> getRelatertTilgrensendeYtelserForAnnenForelder() {
+        return Collections.unmodifiableList(relatertTilgrensendeYtelserForAnnenForelder);
     }
 
-    public void setArbeidsforhold(List<InntektArbeidYtelseArbeidsforhold> arbeidsforhold) {
-        this.arbeidsforhold = arbeidsforhold;
+    public List<RelaterteYtelserDto> getRelatertTilgrensendeYtelserForSoker() {
+        return Collections.unmodifiableList(relatertTilgrensendeYtelserForSoker);
+    }
+
+    public boolean getSkalKunneLageArbeidsforholdBasertPaInntektsmelding() {
+        return skalKunneLageArbeidsforholdBasertPaInntektsmelding;
     }
 
     public boolean getSkalKunneLeggeTilNyeArbeidsforhold() {
         return skalKunneLeggeTilNyeArbeidsforhold;
     }
 
-    public void setSkalKunneLeggeTilNyeArbeidsforhold(boolean skalKunneLeggeTilNyeArbeidsforhold) {
-        this.skalKunneLeggeTilNyeArbeidsforhold = skalKunneLeggeTilNyeArbeidsforhold;
+    public void setArbeidsforhold(List<InntektArbeidYtelseArbeidsforhold> arbeidsforhold) {
+        this.arbeidsforhold = List.copyOf(arbeidsforhold);
+    }
+
+    public void setInntektsmeldinger(List<InntektsmeldingDto> inntektsmeldinger) {
+        this.inntektsmeldinger = inntektsmeldinger;
+    }
+
+    public void setRelatertTilgrensendeYtelserForSoker(List<RelaterteYtelserDto> relatertTilgrensendeYtelserForSoker) {
+        this.relatertTilgrensendeYtelserForSoker = List.copyOf(relatertTilgrensendeYtelserForSoker);
+    }
+
+    public void setSkalKunneLageArbeidsforholdBasertPaInntektsmelding(boolean skalKunneLageArbeidsforholdBasertPaInntektsmelding) {
+        this.skalKunneLageArbeidsforholdBasertPaInntektsmelding = skalKunneLageArbeidsforholdBasertPaInntektsmelding;
     }
 
     public void setSkalKunneLageArbeidsforholdBasrtPåInntektsmelding(boolean skalKunneLageArbeidsforholdBasertPaInntektsmelding) {
         this.skalKunneLageArbeidsforholdBasertPaInntektsmelding = skalKunneLageArbeidsforholdBasertPaInntektsmelding;
     }
 
-    public boolean getSkalKunneLageArbeidsforholdBasertPaInntektsmelding() {
-        return skalKunneLageArbeidsforholdBasertPaInntektsmelding;
+    public void setSkalKunneLeggeTilNyeArbeidsforhold(boolean skalKunneLeggeTilNyeArbeidsforhold) {
+        this.skalKunneLeggeTilNyeArbeidsforhold = skalKunneLeggeTilNyeArbeidsforhold;
+    }
+
+    void setInnvilgetRelatertTilgrensendeYtelserForAnnenForelder(List<RelaterteYtelserDto> innvilgetRelatertTilgrensendeYtelserForAnnenForelder) {
+        this.innvilgetRelatertTilgrensendeYtelserForAnnenForelder = List.copyOf(innvilgetRelatertTilgrensendeYtelserForAnnenForelder);
+    }
+
+    void setRelatertTilgrensendeYtelserForAnnenForelder(List<RelaterteYtelserDto> relatertTilgrensendeYtelserForAnnenForelder) {
+        this.relatertTilgrensendeYtelserForAnnenForelder = List.copyOf(relatertTilgrensendeYtelserForAnnenForelder);
     }
 }

@@ -19,11 +19,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AndreYtelserDto {
 
-    @JsonProperty(value = "ytelseType", required = true)
-    @NotNull
-    @Valid
-    private ArbeidType ytelseType;
-
     @JsonAlias("fom")
     @JsonProperty(value = "periodeFom", required = true)
     @NotNull
@@ -33,27 +28,32 @@ public class AndreYtelserDto {
     @NotNull
     private LocalDate periodeTom;
 
-    public ArbeidType getYtelseType() {
-        return ytelseType;
-    }
-
-    public void setYtelseType(ArbeidType ytelseType) {
-        this.ytelseType = ytelseType;
-    }
+    @JsonProperty(value = "ytelseType", required = true)
+    @NotNull
+    @Valid
+    private ArbeidType ytelseType;
 
     public LocalDate getPeriodeFom() {
         return periodeFom;
-    }
-
-    public void setPeriodeFom(LocalDate periodeFom) {
-        this.periodeFom = periodeFom;
     }
 
     public LocalDate getPeriodeTom() {
         return periodeTom;
     }
 
+    public ArbeidType getYtelseType() {
+        return ytelseType;
+    }
+
+    public void setPeriodeFom(LocalDate periodeFom) {
+        this.periodeFom = periodeFom;
+    }
+
     public void setPeriodeTom(LocalDate periodeTom) {
         this.periodeTom = periodeTom;
+    }
+
+    public void setYtelseType(ArbeidType ytelseType) {
+        this.ytelseType = ytelseType;
     }
 }

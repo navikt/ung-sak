@@ -29,10 +29,6 @@ public class HistorikkInnslagGjeldendeFraDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String verdi;
     
-    HistorikkInnslagGjeldendeFraDto() {
-        //
-    }
-
     public HistorikkInnslagGjeldendeFraDto(String fra) {
         this.fra = fra;
     }
@@ -43,25 +39,29 @@ public class HistorikkInnslagGjeldendeFraDto {
         this.verdi = verdi;
     }
 
+    HistorikkInnslagGjeldendeFraDto() {
+        //
+    }
+
 
     public String getFra() {
         return fra;
-    }
-
-    public void setFra(String fra) {
-        this.fra = fra;
     }
 
     public String getNavn() {
         return navn;
     }
 
-    public void setNavn(String navn) {
-        this.navn = navn;
-    }
-
     public String getVerdi() {
         return verdi;
+    }
+
+    public void setFra(String fra) {
+        this.fra = fra;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
     }
 
     public void setVerdi(String verdi) {

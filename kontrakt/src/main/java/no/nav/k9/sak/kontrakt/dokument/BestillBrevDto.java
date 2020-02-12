@@ -20,17 +20,21 @@ import no.nav.k9.kodeverk.dokument.DokumentMalType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BestillBrevDto {
 
+    @JsonProperty(value = "arsakskode")
+    @Size(min = 1, max = 100)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
+    public String arsakskode;
+
+    @JsonProperty(value = "fritekst")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    public String fritekst;
+
     @JsonProperty(value = "behandlingId", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingId;
-
-    @JsonProperty(value = "mottaker", required = true)
-    @NotNull
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    @Size(max = 256)
-    private String mottaker;
 
     @JsonProperty(value = "brevmalkode", required = true)
     @NotNull
@@ -38,25 +42,13 @@ public class BestillBrevDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String brevmalkode;
 
-    @JsonProperty(value = "fritekst")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    public String fritekst;
-
-    @JsonProperty(value = "arsakskode")
-    @Size(min = 1, max = 100)
-    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
-    public String arsakskode;
+    @JsonProperty(value = "mottaker", required = true)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 256)
+    private String mottaker;
 
     public BestillBrevDto() { // NOSONAR
-    }
-
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, String arsakskode) { // NOSONAR
-        this.behandlingId = behandlingId;
-        this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
-        this.fritekst = fritekst;
-        this.mottaker = "Søker";
-        this.arsakskode = arsakskode;
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType) {
@@ -67,13 +59,41 @@ public class BestillBrevDto {
         this(behandlingId, dokumentMalType, fritekst, null);
     }
 
+    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, String arsakskode) { // NOSONAR
+        this.behandlingId = behandlingId;
+        this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
+        this.fritekst = fritekst;
+        this.mottaker = "Søker";
+        this.arsakskode = arsakskode;
+    }
+
+    public String getArsakskode() {
+        return arsakskode;
+    }
+
+    public String getÅrsakskode() {
+        return arsakskode;
+    }
+
     @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;
     }
 
-    public String getÅrsakskode() {
-        return arsakskode;
+    public String getBrevmalkode() {
+        return brevmalkode;
+    }
+
+    public String getFritekst() {
+        return fritekst;
+    }
+
+    public String getMottaker() {
+        return mottaker;
+    }
+
+    public void setArsakskode(String arsakskode) {
+        this.arsakskode = arsakskode;
     }
 
     public void setÅrsakskode(String årsakskode) {
@@ -84,28 +104,16 @@ public class BestillBrevDto {
         this.behandlingId = behandlingId;
     }
 
-    public String getMottaker() {
-        return mottaker;
-    }
-
-    public void setMottaker(String mottaker) {
-        this.mottaker = mottaker;
-    }
-
-    public String getBrevmalkode() {
-        return brevmalkode;
-    }
-
     public void setBrevmalkode(String brevmalkode) {
         this.brevmalkode = brevmalkode;
     }
 
-    public String getFritekst() {
-        return fritekst;
-    }
-
     public void setFritekst(String fritekst) {
         this.fritekst = fritekst;
+    }
+
+    public void setMottaker(String mottaker) {
+        this.mottaker = mottaker;
     }
 
 }

@@ -1,6 +1,8 @@
 package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,7 +43,7 @@ public class OverstyrteAksjonspunkterDto {
     @JsonProperty(value = "overstyrteAksjonspunktDtoer")
     @Valid
     @Size(min = 1, max = 10)
-    private Collection<OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer;
+    private Collection<OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer = Collections.emptyList();
 
     public static OverstyrteAksjonspunkterDto lagDto(Long behandlingId, Long behandlingVersjon,
                                                      Collection<OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer) {
@@ -62,17 +64,29 @@ public class OverstyrteAksjonspunkterDto {
         return behandlingId.getBehandlingUuid();
     }
 
-    @AbacAttributt("aksjonspunktKode")
-    public Set<String> getOverstyrteAksjonspunktKoder() {
-        return overstyrteAksjonspunktDtoer.stream().map(OverstyringAksjonspunktDto::getKode).collect(Collectors.toSet());
-    }
-
     public Long getBehandlingVersjon() {
         return behandlingVersjon;
     }
 
     public Collection<OverstyringAksjonspunktDto> getOverstyrteAksjonspunktDtoer() {
-        return overstyrteAksjonspunktDtoer;
+        return Collections.unmodifiableCollection(overstyrteAksjonspunktDtoer);
+    }
+
+    @AbacAttributt("aksjonspunktKode")
+    public Set<String> getOverstyrteAksjonspunktKoder() {
+        return overstyrteAksjonspunktDtoer.stream().map(OverstyringAksjonspunktDto::getKode).collect(Collectors.toSet());
+    }
+
+    public void setBehandlingId(BehandlingIdDto behandlingId) {
+        this.behandlingId = behandlingId;
+    }
+
+    public void setBehandlingVersjon(Long behandlingVersjon) {
+        this.behandlingVersjon = behandlingVersjon;
+    }
+
+    public void setOverstyrteAksjonspunktDtoer(Collection<OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer) {
+        this.overstyrteAksjonspunktDtoer = List.copyOf(overstyrteAksjonspunktDtoer);
     }
 
 }

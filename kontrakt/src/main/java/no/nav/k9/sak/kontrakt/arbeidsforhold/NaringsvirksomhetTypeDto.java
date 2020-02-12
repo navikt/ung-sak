@@ -19,13 +19,13 @@ public class NaringsvirksomhetTypeDto {
     @JsonProperty(value = "ANNEN")
     private boolean annen;
 
-    @JsonAlias("fiske")
-    @JsonProperty(value = "FISKE")
-    private boolean fiske;
-
     @JsonAlias("dagmammaEllerFamiliebarnehage")
     @JsonProperty(value = "DAGMAMMA")
     private boolean dagmammaEllerFamiliebarnehage;
+
+    @JsonAlias("fiske")
+    @JsonProperty(value = "FISKE")
+    private boolean fiske;
 
     @JsonAlias("jordbrukEllerSkogbruk")
     @JsonProperty(value = "JORDBRUK_SKOGBRUK")
@@ -40,6 +40,10 @@ public class NaringsvirksomhetTypeDto {
         return annen;
     }
 
+    public boolean getDagmammaEllerFamiliebarnehage() {
+        return dagmammaEllerFamiliebarnehage;
+    }
+
     public boolean getFiske() {
         return fiske;
     }
@@ -52,12 +56,12 @@ public class NaringsvirksomhetTypeDto {
         return typeFiske;
     }
 
-    public boolean getDagmammaEllerFamiliebarnehage() {
-        return dagmammaEllerFamiliebarnehage;
-    }
-
     public void setAnnen(boolean annen) {
         this.annen = annen;
+    }
+
+    public void setDagmammaEllerFamiliebarnehage(boolean dagmammaEllerFamiliebarnehage) {
+        this.dagmammaEllerFamiliebarnehage = dagmammaEllerFamiliebarnehage;
     }
 
     public void setFiske(boolean fiske) {
@@ -70,9 +74,5 @@ public class NaringsvirksomhetTypeDto {
 
     public void setTypeFiske(String typeFiske) {
         this.typeFiske = typeFiske;
-    }
-
-    public void setDagmammaEllerFamiliebarnehage(boolean dagmammaEllerFamiliebarnehage) {
-        this.dagmammaEllerFamiliebarnehage = dagmammaEllerFamiliebarnehage;
     }
 }
