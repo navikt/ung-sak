@@ -232,10 +232,6 @@ public class BehandlingDto {
         return språkkode;
     }
 
-    public boolean isBehandlingKoet() {
-        return behandlingKøet;
-    }
-
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
     }
