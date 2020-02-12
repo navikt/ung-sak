@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,7 +25,10 @@ public class PleiepengerBarnSøknadMottatt {
     @Valid
     private final Saksnummer saksnummer;
 
-    public PleiepengerBarnSøknadMottatt(Saksnummer saksnummer) {
+    @JsonCreator
+    public PleiepengerBarnSøknadMottatt(@JsonProperty(value = "saksnummer", required = true)
+                                        @NotNull
+                                        @Valid Saksnummer saksnummer) {
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
     }
 
