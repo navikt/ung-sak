@@ -9,6 +9,9 @@ import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.FaktaOmBeregningTilfelleTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
@@ -19,7 +22,8 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 @ApplicationScoped
 public class AksjonspunktUtlederFaktaOmBeregning implements BeregningsgrunnlagAksjonspunktUtleder {
-
+    private static final Logger log = LoggerFactory.getLogger(AksjonspunktUtlederFaktaOmBeregning.class);
+    
     private FaktaOmBeregningTilfelleTjeneste faktaOmBeregningTilfelleTjeneste;
 
     AksjonspunktUtlederFaktaOmBeregning() {
@@ -47,6 +51,10 @@ public class AksjonspunktUtlederFaktaOmBeregning implements BeregningsgrunnlagAk
         if (faktaOmBeregningTilfeller.isEmpty()) {
             return Collections.emptyList();
         }
+
+        // TODO (fjern?): Logger midlertidig hva som ble funnet for enklere feilsøk
+        log.info("Fikk FaktaOmBeregningTilfeller: {}", faktaOmBeregningTilfeller);
+        
         return singletonList(BeregningAksjonspunktResultat.opprettFor(BeregningAksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN));
     }
 }
