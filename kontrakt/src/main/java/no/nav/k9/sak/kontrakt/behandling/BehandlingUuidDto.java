@@ -6,17 +6,16 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.abac.AbacAttributt;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BehandlingUuidDto {
 
     public static final String NAME = "behandlingUuid";
@@ -26,8 +25,7 @@ public class BehandlingUuidDto {
     /**
      * Behandling UUID (nytt alternativ til intern behandlingId. Bør brukes av eksterne systemer).
      */
-    @JsonAlias(value="uuid")
-    @JsonProperty(value = NAME, required = true)
+    @JsonValue
     @Valid
     @NotNull
     private UUID behandlingUuid;
@@ -37,7 +35,7 @@ public class BehandlingUuidDto {
     }
 
     @JsonCreator
-    public BehandlingUuidDto(@JsonAlias(value="uuid") @JsonProperty(NAME) @NotNull UUID behandlingUuid) {
+    public BehandlingUuidDto(UUID behandlingUuid) {
         this.behandlingUuid = Objects.requireNonNull(behandlingUuid, NAME);
     }
 

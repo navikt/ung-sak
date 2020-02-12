@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.abac.AbacAttributt;
 
@@ -30,7 +30,7 @@ public class BehandlingIdDto {
 
     public static final String NAME = "behandlingId";
 
-    @JsonProperty(value = NAME, required = true)
+    @JsonValue
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
@@ -52,7 +52,7 @@ public class BehandlingIdDto {
         this.id = Objects.requireNonNull(id, "id");
     }
     
-    public BehandlingIdDto() {
+    protected BehandlingIdDto() {
     }
 
     @JsonSetter(NAME)
