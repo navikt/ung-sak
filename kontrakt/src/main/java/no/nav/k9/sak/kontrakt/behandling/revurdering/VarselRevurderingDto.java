@@ -49,7 +49,7 @@ public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
         this.ventearsak = ventearsak;
     }
 
-    protected VarselRevurderingDto() {
+    public VarselRevurderingDto() {
         //
     }
 

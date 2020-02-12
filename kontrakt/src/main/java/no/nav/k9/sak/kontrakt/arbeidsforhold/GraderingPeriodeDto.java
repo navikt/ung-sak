@@ -37,7 +37,7 @@ public class GraderingPeriodeDto {
     @DecimalMax("100.00")
     private BigDecimal arbeidsprosent;
 
-    GraderingPeriodeDto() {
+    protected GraderingPeriodeDto() {
         //
     }
 

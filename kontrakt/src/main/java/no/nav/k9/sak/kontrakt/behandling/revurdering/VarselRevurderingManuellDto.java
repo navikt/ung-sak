@@ -17,7 +17,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VARSEL_REVURDERING_MANUELL_KODE)
 public class VarselRevurderingManuellDto extends VarselRevurderingDto {
 
-    protected VarselRevurderingManuellDto() {
+    public VarselRevurderingManuellDto() {
         //
     }
 

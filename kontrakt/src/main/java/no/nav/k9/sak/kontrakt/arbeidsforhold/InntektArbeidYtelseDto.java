@@ -48,6 +48,10 @@ public class InntektArbeidYtelseDto {
     @JsonProperty(value = "skalKunneLeggeTilNyeArbeidsforhold")
     private boolean skalKunneLeggeTilNyeArbeidsforhold = false;
 
+    public InntektArbeidYtelseDto() {
+        //
+    }
+
     public List<InntektArbeidYtelseArbeidsforhold> getArbeidsforhold() {
         return Collections.unmodifiableList(arbeidsforhold);
     }

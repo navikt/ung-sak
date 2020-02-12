@@ -26,7 +26,7 @@ public class AvklarArbeidsforhold extends BekreftetAksjonspunktDto {
     @Size(max = 1000)
     private List<AvklarArbeidsforholdDto> arbeidsforhold;
 
-    AvklarArbeidsforhold() {
+    public AvklarArbeidsforhold() {
         //For Jackson
     }
 

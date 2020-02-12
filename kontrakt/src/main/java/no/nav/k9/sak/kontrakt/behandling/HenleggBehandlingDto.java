@@ -46,6 +46,10 @@ public class HenleggBehandlingDto {
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
+    public HenleggBehandlingDto() {
+        //
+    }
+    
     public String getÅrsakKode() {
         return årsakKode;
     }

@@ -38,6 +38,10 @@ public class RelaterteYtelserDto {
         }
     }
 
+    public RelaterteYtelserDto() {
+        //
+    }
+    
     public String getRelatertYtelseType() {
         return relatertYtelseType;
     }

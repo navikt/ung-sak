@@ -46,6 +46,7 @@ public class TilgrensendeYtelserDto implements Comparable<TilgrensendeYtelserDto
     private String status;
 
     public TilgrensendeYtelserDto() {
+        //
     }
 
     @Override

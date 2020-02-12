@@ -30,6 +30,10 @@ public class UtvidetBehandlingDto extends BehandlingDto {
     @Valid
     private AsyncPollingStatus taskStatus;
 
+    public UtvidetBehandlingDto() {
+        //
+    }
+    
     public String getAnsvarligBeslutter() {
         return ansvarligBeslutter;
     }

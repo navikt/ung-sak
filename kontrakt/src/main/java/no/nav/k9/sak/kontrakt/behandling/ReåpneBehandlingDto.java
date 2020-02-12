@@ -32,6 +32,10 @@ public class ReåpneBehandlingDto {
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
+    public ReåpneBehandlingDto() {
+        //
+    }
+    
     @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;

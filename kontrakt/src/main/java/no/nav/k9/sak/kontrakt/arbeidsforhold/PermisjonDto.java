@@ -48,8 +48,8 @@ public class PermisjonDto {
         this.type = type;
     }
 
-    PermisjonDto() {
-        // Skjul private constructor
+    public PermisjonDto() {
+        //
     }
 
     public LocalDate getPermisjonFom() {

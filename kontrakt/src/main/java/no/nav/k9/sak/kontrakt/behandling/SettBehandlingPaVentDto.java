@@ -40,6 +40,10 @@ public class SettBehandlingPaVentDto {
     @JsonProperty(value="ventearsak")
     private Venteårsak ventearsak;
 
+    public SettBehandlingPaVentDto() {
+        //
+    }
+    
     @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;

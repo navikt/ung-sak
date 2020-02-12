@@ -99,6 +99,10 @@ public class AvklarArbeidsforholdDto {
 
     @JsonProperty(value = "overstyrtTom")
     private LocalDate overstyrtTom;
+    
+    public AvklarArbeidsforholdDto() {
+        //
+    }
 
     public String getNavn() {
         return navn;

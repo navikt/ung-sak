@@ -146,6 +146,10 @@ public class InntektArbeidYtelseArbeidsforhold {
     @JsonProperty(value = "vurderOmSkalErstattes")
     private Boolean vurderOmSkalErstattes;
 
+    public InntektArbeidYtelseArbeidsforhold() {
+        //
+    }
+    
     public UUID getArbeidsforholdId() {
         return arbeidsforholdId;
     }

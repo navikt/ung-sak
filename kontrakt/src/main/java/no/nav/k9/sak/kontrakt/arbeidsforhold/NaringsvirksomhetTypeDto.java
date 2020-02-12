@@ -36,6 +36,10 @@ public class NaringsvirksomhetTypeDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String typeFiske;
 
+    public NaringsvirksomhetTypeDto() {
+        //
+    }
+
     public boolean getAnnen() {
         return annen;
     }
