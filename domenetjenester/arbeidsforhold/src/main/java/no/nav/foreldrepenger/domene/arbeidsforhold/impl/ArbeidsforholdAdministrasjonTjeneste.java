@@ -125,10 +125,10 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             inntektsmeldinger, alleYrkesaktiviteter, overstyringer, arbeidsgiverSetMap, skjæringstidspunkt, iayGrunnlag.getArbeidsforholdInformasjon()));
 
         arbeidsforhold.addAll(utledArbeidsforholdFraYrkesaktivitet(
-            filterFør, overstyringer, inntektsmeldinger, skjæringstidspunkt));
+            filterFør, overstyringer, inntektsmeldinger, iayGrunnlag.getArbeidsforholdInformasjon(), skjæringstidspunkt));
 
         arbeidsforhold.addAll(utledArbeidsforholdFraYrkesaktivitet(
-            filterEtter, overstyringer, inntektsmeldinger, skjæringstidspunkt));
+            filterEtter, overstyringer, inntektsmeldinger, iayGrunnlag.getArbeidsforholdInformasjon(), skjæringstidspunkt));
 
         arbeidsforhold.addAll(utledArbeidsforholdFraArbeidsforholdInformasjon(filter,
             overstyringer, alleYrkesaktiviteter, inntektsmeldingerForGrunnlag, skjæringstidspunkt));
@@ -383,6 +383,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     private List<ArbeidsforholdWrapper> utledArbeidsforholdFraYrkesaktivitet(YrkesaktivitetFilter filter,
                                                                              List<ArbeidsforholdOverstyring> overstyringer,
                                                                              List<Inntektsmelding> inntektsmeldinger,
+                                                                             Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon,
                                                                              LocalDate skjæringstidspunkt) {
         DatoIntervallEntitet stp = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt);
         return filter.getYrkesaktiviteter().stream()
@@ -392,7 +393,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                 filter.getAnsettelsesPerioder(yr).stream().map(AktivitetsAvtale::getPeriode)
                     .anyMatch(periode -> periode.getFomDato().isAfter(skjæringstidspunkt)))
             .filter(yr -> filtreVekkLagtTilAvSaksbehandler(yr, overstyringer))
-            .map(yr -> mapYrkesaktivitetAAREG(filter, yr, overstyringer, skjæringstidspunkt))
+            .map(yr -> mapYrkesaktivitetAAREG(filter, yr, overstyringer, arbeidsforholdInformasjon, skjæringstidspunkt))
             .collect(Collectors.toList());
     }
 
@@ -404,7 +405,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     private ArbeidsforholdWrapper mapYrkesaktivitetAAREG(YrkesaktivitetFilter filter,
                                                          Yrkesaktivitet yrkesaktivitet,
                                                          List<ArbeidsforholdOverstyring> overstyringer,
-                                                         LocalDate skjæringstidspunkt) {
+                                                         Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon, LocalDate skjæringstidspunkt) {
         final Optional<ArbeidsforholdOverstyring> arbeidsforholdOverstyringEntitet = finnMatchendeOverstyring(yrkesaktivitet, overstyringer);
         final Arbeidsgiver arbeidsgiver = yrkesaktivitet.getArbeidsgiver();
         final InternArbeidsforholdRef arbeidsforholdRef = yrkesaktivitet.getArbeidsforholdRef();
@@ -414,6 +415,10 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         wrapper.setFomDato(ansettelsesperiode.map(DatoIntervallEntitet::getFomDato).orElse(null));
         wrapper.setTomDato(ansettelsesperiode.map(DatoIntervallEntitet::getTomDato).orElse(null));
         wrapper.setArbeidsforholdId(arbeidsforholdRef.getReferanse());
+        if (arbeidsforholdInformasjon.isPresent()) {
+            var eksternArbeidsforholdRef = arbeidsforholdInformasjon.get().finnEkstern(arbeidsgiver, arbeidsforholdRef);
+            wrapper.setEksternArbeidsforholdId(eksternArbeidsforholdRef.getReferanse());
+        }
         wrapper.setKilde(ArbeidsforholdKilde.AAREGISTERET);
         wrapper.setIkkeRegistrertIAaRegister(false);
         wrapper.setBrukArbeidsforholdet(true);

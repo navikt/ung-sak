@@ -334,10 +334,12 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+        iayTjeneste.lagreArbeidsforhold(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
         // Act
         Set<ArbeidsforholdWrapper> wrapperList = hentArbeidsforholdFerdigUtledet(behandling);
         // Assert
@@ -355,12 +357,13 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder .oppdatere(Optional.empty(), VersjonType.REGISTER);
 
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
-
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+        iayTjeneste.lagreArbeidsforhold(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
 
         // Act
         Set<ArbeidsforholdWrapper> wrapperList = hentArbeidsforholdFerdigUtledet(behandling);
@@ -381,10 +384,12 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+        iayTjeneste.lagreArbeidsforhold(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
         // Act
         Set<ArbeidsforholdWrapper> wrapperList = hentArbeidsforholdFerdigUtledet(behandling);
         // Assert
@@ -403,10 +408,12 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+        iayTjeneste.lagreArbeidsforhold(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
         // Act
         Set<ArbeidsforholdWrapper> wrapperList = hentArbeidsforholdFerdigUtledet(behandling);
         // Assert
@@ -452,11 +459,13 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
             .oppdatere(Optional.empty(), VersjonType.REGISTER);
 
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(aktørId);
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
 
-        leggTilYrkesaktivitet(aktørArbeidBuilder, arbeidsforhold, type, prosentsats, periode, periode);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, arbeidsforhold, type, prosentsats, periode, periode);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+        iayTjeneste.lagreArbeidsforhold(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
     }
 
     private void opprettInntektArbeidYtelseAggregatForYrkesaktivitetUtenAns(AktørId aktørId, InternArbeidsforholdRef arbeidsforhold,
@@ -486,21 +495,24 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
             .oppdatere(Optional.empty(), VersjonType.REGISTER);
 
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(aktørId);
-
-        leggTilYrkesaktivitet(aktørArbeidBuilder, arbeidsforhold, type, BigDecimal.TEN, periodeFørst, periodeFørstAA);
-        leggTilYrkesaktivitet(aktørArbeidBuilder, arbeidsforhold, type, prosentsats, periode, periodeAA);
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, arbeidsforhold, type, BigDecimal.TEN, periodeFørst, periodeFørstAA);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, arbeidsforhold, type, prosentsats, periode, periodeAA);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
 
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+        iayTjeneste.lagreArbeidsforhold(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
     }
 
     private InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder leggTilYrkesaktivitet(InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder builder,
-                                                                                         InternArbeidsforholdRef ref, ArbeidType type, BigDecimal prosentsats,
-                                                                                         DatoIntervallEntitet periodeYA, DatoIntervallEntitet periodeAA) {
+                                                                                        ArbeidsforholdInformasjonBuilder informasjonBuilder,
+                                                                                        InternArbeidsforholdRef ref, ArbeidType type, BigDecimal prosentsats,
+                                                                                        DatoIntervallEntitet periodeYA, DatoIntervallEntitet periodeAA) {
         YrkesaktivitetBuilder yrkesaktivitetBuilder = builder.getYrkesaktivitetBuilderForNøkkelAvType(new Opptjeningsnøkkel(ref, arbeidsgiver.getIdentifikator(), null),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         AktivitetsAvtaleBuilder aktivitetsAvtaleBuilder = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder(periodeAA, false);
         PermisjonBuilder permisjonBuilder = yrkesaktivitetBuilder.getPermisjonBuilder();
+        informasjonBuilder.leggTil(arbeidsgiver, ref, EksternArbeidsforholdRef.ref(ref.getReferanse()));
 
         AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
             .medPeriode(periodeAA)
@@ -517,7 +529,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         yrkesaktivitetBuilder
             .medArbeidType(type)
             .medArbeidsgiver(arbeidsgiver)
-            .medArbeidsforholdId(ARBEIDSFORHOLD_ID)
+            .medArbeidsforholdId(ref)
             .leggTilPermisjon(permisjon)
             .leggTilAktivitetsAvtale(aktivitetsAvtale)
             .leggTilAktivitetsAvtale(ansettelsesPeriode);
