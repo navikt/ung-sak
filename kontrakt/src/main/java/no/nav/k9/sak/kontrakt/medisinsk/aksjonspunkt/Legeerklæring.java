@@ -59,7 +59,7 @@ public class Legeerklæring {
                          LegeerklæringKilde kilde, String diagnosekode, List<Periode> innleggelsesperioder) {
         this.fom = Objects.requireNonNull(fom, "fom");
         this.tom = Objects.requireNonNull(tom, "tom");
-        this.identifikator = identifikator;
+        this.identifikator = identifikator == null ? UUID.randomUUID() : identifikator;
         this.kilde = Objects.requireNonNull(kilde, "kilde");
         this.diagnosekode = diagnosekode;
         this.innleggelsesperioder = innleggelsesperioder == null ? new ArrayList<>() : List.copyOf(innleggelsesperioder);
@@ -73,44 +73,47 @@ public class Legeerklæring {
         return diagnosekode;
     }
 
-    public LocalDate getFom() {
-        return fom;
-    }
-
-    public UUID getIdentifikator() {
-        return identifikator;
-    }
-
-    public List<Periode> getInnleggelsesperioder() {
-        return Collections.unmodifiableList(innleggelsesperioder);
-    }
-
-    public LegeerklæringKilde getKilde() {
-        return kilde;
-    }
-
-    public LocalDate getTom() {
-        return tom;
-    }
-
     public void setDiagnosekode(String diagnosekode) {
         this.diagnosekode = diagnosekode;
+    }
+
+    public LocalDate getFom() {
+        return fom;
     }
 
     public void setFom(LocalDate fom) {
         this.fom = fom;
     }
 
+    public UUID getIdentifikator() {
+        return identifikator;
+    }
+
     public void setIdentifikator(UUID identifikator) {
         this.identifikator = identifikator;
+    }
+
+    public List<Periode> getInnleggelsesperioder() {
+        if (innleggelsesperioder == null) {
+            return List.of();
+        }
+        return Collections.unmodifiableList(innleggelsesperioder);
     }
 
     public void setInnleggelsesperioder(List<Periode> innleggelsesperioder) {
         this.innleggelsesperioder = List.copyOf(innleggelsesperioder);
     }
 
+    public LegeerklæringKilde getKilde() {
+        return kilde;
+    }
+
     public void setKilde(LegeerklæringKilde kilde) {
         this.kilde = kilde;
+    }
+
+    public LocalDate getTom() {
+        return tom;
     }
 
     public void setTom(LocalDate tom) {
