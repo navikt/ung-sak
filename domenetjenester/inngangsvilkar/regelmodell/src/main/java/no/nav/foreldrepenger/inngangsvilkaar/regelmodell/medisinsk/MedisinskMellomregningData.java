@@ -56,7 +56,7 @@ class MedisinskMellomregningData {
     List<PleiePeriode> getPerioderMedToTilsynsperson() {
         return getPerioderMedPleieOgGrad()
             .stream()
-            .filter(it -> Pleiegrad.UTVIDET_TILSYN.equals(it.getGrad()))
+            .filter(it -> Pleiegrad.INNLEGGELSE.equals(it.getGrad()) || Pleiegrad.UTVIDET_TILSYN.equals(it.getGrad()))
             .collect(Collectors.toList());
     }
 

@@ -91,7 +91,9 @@ public class Legeerklæring extends BaseEntitet {
 
     public Legeerklæring(UUID identifikator, DatoIntervallEntitet periode, Set<InnleggelsePeriode> innleggelsePerioder, LegeerklæringKilde kilde, String diagnosekode) {
         this(periode, innleggelsePerioder, kilde, diagnosekode);
-        uuid = identifikator;
+        if(identifikator != null) {
+            this.uuid = identifikator;
+        }
     }
 
     public Long getId() {
@@ -128,7 +130,6 @@ public class Legeerklæring extends BaseEntitet {
             "id=" + id +
             ", uuid=" + uuid +
             ", innleggelsesPerioder=" + innleggelsesPerioder +
-            ", legeerklæringer=" + legeerklæringer +
             ", versjon=" + versjon +
             '}';
     }
