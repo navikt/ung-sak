@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -42,6 +43,7 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
@@ -76,7 +78,7 @@ public class FagsakRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentFagsakMidlertidigStatus(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto idDto,
-                                                @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ProsessTaskGruppeIdDto gruppeDto)
+                                                @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
             throws URISyntaxException {
         Saksnummer saksnummer = idDto.getVerdi();
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
@@ -142,4 +144,10 @@ public class FagsakRestTjeneste {
         return dtoer;
     }
 
+    public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
+    }
 }
