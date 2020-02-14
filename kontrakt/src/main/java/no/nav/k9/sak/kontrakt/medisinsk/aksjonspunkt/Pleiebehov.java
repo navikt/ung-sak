@@ -1,26 +1,27 @@
 package no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Size;
-import java.util.Collections;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Pleiebehov {
 
-    @JsonProperty(value = "perioderMedTilsynOgPleie")
+    @JsonProperty(value = "perioderMedKontinuerligTilsynOgPleie")
     @Valid
     @Size(max = 100)
     private List<PeriodeMedTilsyn> perioderMedTilsynOgPleie;
 
-    @JsonProperty(value = "perioderMedUtvidetTilsynOgPleie")
+    @JsonProperty(value = "perioderMedUtvidetKontinuerligTilsynOgPleie")
     @Valid
     @Size(max = 100)
     private List<PeriodeMedTilsyn> perioderMedUtvidetTilsynOgPleie;

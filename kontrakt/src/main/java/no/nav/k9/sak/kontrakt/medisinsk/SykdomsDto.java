@@ -23,12 +23,12 @@ public class SykdomsDto {
     @Valid
     private List<Legeerklæring> legeerklæringer;
 
-    @JsonProperty(value = "perioderMedKontinuerligTilsyn")
+    @JsonProperty(value = "perioderMedKontinuerligTilsynOgPleie")
     @Size(max = 100)
     @Valid
     private List<Periode> perioderMedKontinuerligTilsyn;
 
-    @JsonProperty(value = "perioderMedUtvidetKontinuerligTilsyn")
+    @JsonProperty(value = "perioderMedUtvidetKontinuerligTilsynOgPleie")
     @Size(max = 100)
     @Valid
     private List<Periode> perioderMedUtvidetKontinuerligTilsyn;
@@ -42,7 +42,7 @@ public class SykdomsDto {
     public SykdomsDto() {
         //
     }
-    
+
     public List<Legeerklæring> getLegeerklæringer() {
         return Collections.unmodifiableList(legeerklæringer);
     }
