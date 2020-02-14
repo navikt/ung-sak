@@ -167,7 +167,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
         // Arrange
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjons = new ArrayList<>();
-        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE);
+        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.AVKLAR_VERGE);
         boolean ttvGodkjent = false;
         boolean apAvbrutt = false;
 
@@ -199,44 +199,6 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
                 TotrinnskontrollAksjonspunkterDto enesteTotrinnskontrollAksjonspunkt = totrinnskontrollAksjonspunkter.get(0);
                 assertThat(enesteTotrinnskontrollAksjonspunkt.getAksjonspunktKode()).isEqualTo(aksjonspunktDefinisjon);
                 assertThat(enesteTotrinnskontrollAksjonspunkt.getTotrinnskontrollGodkjent()).isFalse();
-
-            });
-        }
-
-    }
-
-    @Test
-    public void skal_hente_tom_skjermlenkecontext_for_behandling_med_en_totrinnsvurdering_og_ett_aksjonspunkt_som_omhandler_mottate_stotte_men_hvor_skjermlenketypen_blir_underfinert(){
-
-        // Arrange
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjons = new ArrayList<>();
-        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE);
-        boolean ttvGodkjent = false;
-        boolean apAvbrutt = false;
-
-        Map<VilkårType, SkjermlenkeType> vilkårTypeSkjermlenkeTypeMap = new HashMap<>();
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.UDEFINERT);
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.UDEFINERT);
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.UDEFINERT, SkjermlenkeType.UDEFINERT);
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.OPPTJENINGSVILKÅRET, SkjermlenkeType.UDEFINERT);
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.OPPTJENINGSPERIODEVILKÅR, SkjermlenkeType.UDEFINERT);
-        vilkårTypeSkjermlenkeTypeMap.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, SkjermlenkeType.UDEFINERT);
-
-        for (AksjonspunktDefinisjon aksjonspunktDefinisjon : aksjonspunktDefinisjons) {
-            vilkårTypeSkjermlenkeTypeMap.keySet().forEach(vilkårType -> {
-
-                opprettBehandlingFor(Optional.of(vilkårType));
-
-                Totrinnsvurdering ttv = opprettTotrinnsvurdering(behandling, aksjonspunktDefinisjon, ttvGodkjent);
-                TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.of(aksjonspunktDefinisjon), Optional.of(ttv));
-                opprettAksjonspunkt(behandling, aksjonspunktDefinisjon, apAvbrutt);
-
-                setFelleseMockMetoder(totrinnskontrollAksjonspunkterDto, Collections.singletonList(ttv));
-
-                // Act
-                List<TotrinnskontrollSkjermlenkeContextDto> context = totrinnskontrollAksjonspunkterTjeneste.hentTotrinnsSkjermlenkeContext(behandling);
-                // Arrange
-                assertThat(context).isEmpty();
 
             });
         }

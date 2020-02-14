@@ -201,7 +201,7 @@ public class BehandlingskontrollEventPublisererTest {
     private BehandlingModellImpl byggModell() {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
         AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_MEDLEMSKAP;
+        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING;
         AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET;
         AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS;
         AksjonspunktDefinisjon a2_0 = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;

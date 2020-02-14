@@ -85,9 +85,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         ENTRINN, EnumSet.of(ES, FP, SVP)),
     AVKLAR_VERGE(AksjonspunktKodeDefinisjon.AVKLAR_VERGE_KODE, AksjonspunktType.MANUELL,
         "Avklar verge", BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_VERGE, ENTRINN, EnumSet.of(ES, FP, SVP)),
-    AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE(
-        AksjonspunktKodeDefinisjon.AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE_KODE, AksjonspunktType.MANUELL, "Vurdere om søkers ytelse gjelder samme barn",
-        BehandlingStegType.SØKERS_RELASJON_TIL_BARN, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, EnumSet.of(ES, FP)),
     VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
         AksjonspunktKodeDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere annen ytelse før vedtak",
         BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
@@ -151,21 +148,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     TILKNYTTET_STORTINGET(AksjonspunktKodeDefinisjon.TILKNYTTET_STORTINGET_KODE,
         AksjonspunktType.MANUELL, "Søker er stortingsrepresentant/administrativt ansatt i Stortinget", BehandlingStegType.VURDER_UTTAK,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_OPPLYSNINGER_OM_MEDLEMSKAP(
-        AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Kontroller opplysninger om medlemskap",
-        BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_OPPLYSNINGER_OM_DØD(
-        AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_DØD_KODE, AksjonspunktType.MANUELL, "Kontroller opplysninger om død",
-        BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(
-        AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE, AksjonspunktType.MANUELL, "Kontroller opplysninger om søknadsfrist",
-        BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_TILSTØTENDE_YTELSER_INNVILGET(
-        AksjonspunktKodeDefinisjon.KONTROLLER_TILSTØTENDE_YTELSER_INNVILGET_KODE, AksjonspunktType.MANUELL, "Kontroller tilstøtende ytelser innvilget",
-        BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
-    KONTROLLER_TILSTØTENDE_YTELSER_OPPHØRT(
-        AksjonspunktKodeDefinisjon.KONTROLLER_TILSTØTENDE_YTELSER_OPPHØRT_KODE, AksjonspunktType.MANUELL, "Kontroller tilstøtende ytelser opphørt",
-        BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, EnumSet.of(FP, SVP)),
     VURDER_ARBEIDSFORHOLD(AksjonspunktKodeDefinisjon.VURDER_ARBEIDSFORHOLD_KODE,
         AksjonspunktType.MANUELL, "Avklar arbeidsforhold", BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.FAKTA_OM_ARBEIDSFORHOLD, ENTRINN, EnumSet.of(FP, SVP)),
@@ -184,7 +166,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(ES, FP, SVP)),
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
-        AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN, VilkårType.MEDISINSKEVILKÅR,
+        AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN, VilkårType.MEDISINSKEVILKÅR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(ES, SVP, FP, PSB)),
 
     // Gruppe : 600
