@@ -26,14 +26,14 @@ public class SykdomsDto {
     @JsonProperty(value = "perioderMedKontinuerligTilsynOgPleie")
     @Size(max = 100)
     @Valid
-    private List<Periode> perioderMedKontinuerligTilsyn;
+    private List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn;
 
     @JsonProperty(value = "perioderMedUtvidetKontinuerligTilsynOgPleie")
     @Size(max = 100)
     @Valid
-    private List<Periode> perioderMedUtvidetKontinuerligTilsyn;
+    private List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn;
 
-    public SykdomsDto(List<Legeerklæring> legeerklæringer, List<Periode> perioderMedKontinuerligTilsyn, List<Periode> perioderMedUtvidetKontinuerligTilsyn) {
+    public SykdomsDto(List<Legeerklæring> legeerklæringer, List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn, List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn) {
         this.legeerklæringer = legeerklæringer;
         this.perioderMedKontinuerligTilsyn = perioderMedKontinuerligTilsyn;
         this.perioderMedUtvidetKontinuerligTilsyn = perioderMedUtvidetKontinuerligTilsyn;
@@ -47,11 +47,11 @@ public class SykdomsDto {
         return Collections.unmodifiableList(legeerklæringer);
     }
 
-    public List<Periode> getPerioderMedKontinuerligTilsyn() {
+    public List<PeriodeMedTilsyn> getPerioderMedKontinuerligTilsyn() {
         return Collections.unmodifiableList(perioderMedKontinuerligTilsyn);
     }
 
-    public List<Periode> getPerioderMedUtvidetKontinuerligTilsyn() {
+    public List<PeriodeMedTilsyn> getPerioderMedUtvidetKontinuerligTilsyn() {
         return Collections.unmodifiableList(perioderMedUtvidetKontinuerligTilsyn);
     }
 
@@ -59,11 +59,4 @@ public class SykdomsDto {
         this.legeerklæringer = List.copyOf(legeerklæringer);
     }
 
-    public void setPerioderMedKontinuerligTilsyn(List<Periode> perioderMedKontinuerligTilsyn) {
-        this.perioderMedKontinuerligTilsyn = List.copyOf(perioderMedKontinuerligTilsyn);
-    }
-
-    public void setPerioderMedUtvidetKontinuerligTilsyn(List<Periode> perioderMedUtvidetKontinuerligTilsyn) {
-        this.perioderMedUtvidetKontinuerligTilsyn = List.copyOf(perioderMedUtvidetKontinuerligTilsyn);
-    }
 }

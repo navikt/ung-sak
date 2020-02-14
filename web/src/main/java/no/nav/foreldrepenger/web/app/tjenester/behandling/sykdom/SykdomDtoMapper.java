@@ -10,6 +10,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligT
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæringer;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.kontrakt.medisinsk.Legeerklæring;
+import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsyn;
 import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
 import no.nav.k9.sak.typer.Periode;
 
@@ -41,19 +42,19 @@ class SykdomDtoMapper {
         return null;
     }
 
-    private List<Periode> mapPerioderMedUtvidetTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
+    private List<PeriodeMedTilsyn> mapPerioderMedUtvidetTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
         return kontinuerligTilsyn.getPerioder()
             .stream()
             .filter(periode -> periode.getGrad() > 100)
-            .map(p -> new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()))
+            .map(p -> new PeriodeMedTilsyn(new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()), p.getBegrunnelse()))
             .collect(Collectors.toList());
     }
 
-    private List<Periode> mapPerioderMedKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
+    private List<PeriodeMedTilsyn> mapPerioderMedKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
         return kontinuerligTilsyn.getPerioder()
             .stream()
             .filter(periode -> periode.getGrad() == 100)
-            .map(p -> new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()))
+            .map(p -> new PeriodeMedTilsyn(new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()), p.getBegrunnelse()))
             .collect(Collectors.toList());
     }
 
