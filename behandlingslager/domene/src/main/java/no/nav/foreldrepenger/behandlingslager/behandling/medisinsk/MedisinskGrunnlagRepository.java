@@ -40,7 +40,7 @@ public class MedisinskGrunnlagRepository {
 
     public void lagreOgFlush(Behandling behandling, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
         Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
-        Objects.requireNonNull(behandling, "kontinuerligTilsyn"); // NOSONAR $NON-NLS-1$
+        Objects.requireNonNull(kontinuerligTilsyn, "kontinuerligTilsyn"); // NOSONAR $NON-NLS-1$
         final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag

@@ -18,6 +18,10 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class SykdomsDto {
 
+    @JsonProperty(value = "periodeTilVurdering")
+    @Valid
+    private Periode periodeTilVurdering;
+
     @JsonProperty(value = "legeerklæringer")
     @Size(max = 100)
     @Valid
@@ -33,14 +37,26 @@ public class SykdomsDto {
     @Valid
     private List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn;
 
-    public SykdomsDto(List<Legeerklæring> legeerklæringer, List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn, List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn) {
+    public SykdomsDto(Periode periodeTilVurdering, List<Legeerklæring> legeerklæringer, List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn, List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn) {
+        this.periodeTilVurdering = periodeTilVurdering;
         this.legeerklæringer = legeerklæringer;
         this.perioderMedKontinuerligTilsyn = perioderMedKontinuerligTilsyn;
         this.perioderMedUtvidetKontinuerligTilsyn = perioderMedUtvidetKontinuerligTilsyn;
     }
 
+    public SykdomsDto(Periode periodeTilVurdering) {
+        this.periodeTilVurdering = periodeTilVurdering;
+        this.legeerklæringer = List.of();
+        this.perioderMedKontinuerligTilsyn = List.of();
+        this.perioderMedUtvidetKontinuerligTilsyn = List.of();
+    }
+
     public SykdomsDto() {
         //
+    }
+
+    public Periode getPeriodeTilVurdering() {
+        return periodeTilVurdering;
     }
 
     public List<Legeerklæring> getLegeerklæringer() {
@@ -53,10 +69,6 @@ public class SykdomsDto {
 
     public List<PeriodeMedTilsyn> getPerioderMedUtvidetKontinuerligTilsyn() {
         return Collections.unmodifiableList(perioderMedUtvidetKontinuerligTilsyn);
-    }
-
-    public void setLegeerklæringer(List<Legeerklæring> legeerklæringer) {
-        this.legeerklæringer = List.copyOf(legeerklæringer);
     }
 
 }
