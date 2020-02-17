@@ -22,7 +22,7 @@ public class HarBarnetEnSykdomSkadeEllerLyteDokumenterFraRettOrgan extends LeafS
         if (harIkkeSykdomSkadeEllerLyte(grunnlag.getDiagnoseKode())) {
             return nei(MedisinskeVilkårAvslagsårsaker.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE.toRuleReason());
         }
-        if (harIkkeDokumentasjonFraRettOrgan(grunnlag)) {
+        if (harIkkeDokumentasjonFraRettOrgan(grunnlag)) { // TODO: første 8 uker == må være sykehuslege
             return nei(MedisinskeVilkårAvslagsårsaker.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN.toRuleReason());
         }
         return ja();

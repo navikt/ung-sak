@@ -29,7 +29,7 @@ public class Medisinskvilkår implements RuleService<MedisinskvilkårGrunnlag> {
         Ruleset<MedisinskMellomregningData> rs = new Ruleset<>();
         return rs.hvisRegel(HarBarnetEnSykdomSkadeEllerLyteDokumenterFraRettOrgan.ID, "Har barnet en sykdom, skade eller lyte dokumentert fra rett organ?")
             .hvis(new HarBarnetEnSykdomSkadeEllerLyteDokumenterFraRettOrgan(), rs.hvisRegel(BeregnBehovForTilsynOgPleieOgAntallTilsynsPersoner.ID, "Beregn behov for kontinuerlig tilsyn og pleie. Og avklar antall pleiepersoner.")
-                .hvis(new BeregnBehovForTilsynOgPleieOgAntallTilsynsPersoner(), new HarBarnetBehovForKontinuerligTilsynOgPleie())
+                .hvis(new BeregnBehovForTilsynOgPleieOgAntallTilsynsPersoner(), new HarBarnetBehovForKontinuerligTilsynOgPleiePåBakgrunnAvSykdom())
                 .ellers(new IkkeOppfylt(MedisinskeVilkårAvslagsårsaker.IKKE_BEHOV_FOR_KONTINUERLIG_PLEIE.toRuleReason())))
             .ellers(new IkkeOppfylt(MedisinskeVilkårAvslagsårsaker.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE.toRuleReason()));
     }

@@ -4,12 +4,12 @@ import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 
-@RuleDocumentation(HarBarnetBehovForKontinuerligTilsynOgPleie.ID)
-public class HarBarnetBehovForKontinuerligTilsynOgPleie extends LeafSpecification<MedisinskMellomregningData> {
+@RuleDocumentation(HarBarnetBehovForKontinuerligTilsynOgPleiePåBakgrunnAvSykdom.ID)
+public class HarBarnetBehovForKontinuerligTilsynOgPleiePåBakgrunnAvSykdom extends LeafSpecification<MedisinskMellomregningData> {
 
     static final String ID = "PSB_VK_9.10.3";
 
-    HarBarnetBehovForKontinuerligTilsynOgPleie() {
+    HarBarnetBehovForKontinuerligTilsynOgPleiePåBakgrunnAvSykdom() {
         super(ID);
     }
 
