@@ -23,7 +23,7 @@ public class KontinuerligTilsynBuilderTest {
         assertThat(kontinuerligTilsyn).isNotNull();
         assertThat(kontinuerligTilsyn.getPerioder()).hasSize(2);
         assertThat(kontinuerligTilsyn.getPerioder().get(0).getPeriode().getFomDato()).isEqualTo(idag.minusWeeks(4));
-        assertThat(kontinuerligTilsyn.getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(idag.minusWeeks(2).minusDays(1));
+        assertThat(kontinuerligTilsyn.getPerioder().get(0).getPeriode().getTomDato()).isEqualTo(idag);
         assertThat(kontinuerligTilsyn.getPerioder().get(0).getGrad()).isEqualTo(100);
         assertThat(kontinuerligTilsyn.getPerioder().get(0).getBegrunnelse()).isEqualTo("begrunnelse");
         assertThat(kontinuerligTilsyn.getPerioder().get(1).getPeriode().getFomDato()).isEqualTo(idag.minusWeeks(2));

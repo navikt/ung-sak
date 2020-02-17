@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.medisinsk;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -13,7 +14,23 @@ public class KontinuerligTilsynBuilder {
 
     private final KontinuerligTilsyn kladd;
     private boolean bygget = false;
-    private LocalDateTimeline<GradOgBegrunnelse> tilsynstidslinje;
+    private LocalDateTimeline<GradOgBegrunnelse> kontinuerligTilsynTidslinje;
+    private LocalDateTimeline<GradOgBegrunnelse> utvidetTilsynTidslinje;
+
+    KontinuerligTilsynBuilder(KontinuerligTilsyn kontinuerligTilsyn) {
+        Objects.requireNonNull(kontinuerligTilsyn);
+        this.kladd = new KontinuerligTilsyn(kontinuerligTilsyn);
+        this.kontinuerligTilsynTidslinje = new LocalDateTimeline<>(kladd.getPerioder()
+            .stream()
+            .filter(it -> it.getGrad() == 100)
+            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new GradOgBegrunnelse(it.getGrad(), it.getBegrunnelse())))
+            .collect(Collectors.toList()));
+        this.utvidetTilsynTidslinje = new LocalDateTimeline<>(kladd.getPerioder()
+            .stream()
+            .filter(it -> it.getGrad() == 200)
+            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new GradOgBegrunnelse(it.getGrad(), it.getBegrunnelse())))
+            .collect(Collectors.toList()));
+    }
 
     public static KontinuerligTilsynBuilder builder() {
         return new KontinuerligTilsynBuilder(new KontinuerligTilsyn());
@@ -24,19 +41,15 @@ public class KontinuerligTilsynBuilder {
         return new KontinuerligTilsynBuilder(eksisterende);
     }
 
-    KontinuerligTilsynBuilder(KontinuerligTilsyn kontinuerligTilsyn) {
-        Objects.requireNonNull(kontinuerligTilsyn);
-        this.kladd = new KontinuerligTilsyn(kontinuerligTilsyn);
-        this.tilsynstidslinje = new LocalDateTimeline<>(kladd.getPerioder().stream()
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new GradOgBegrunnelse(it.getGrad(), it.getBegrunnelse())))
-            .collect(Collectors.toList()));
-    }
-
     public KontinuerligTilsynBuilder tilbakeStill(DatoIntervallEntitet periode) {
         validerBuilder();
         final var segment = new LocalDateSegment<GradOgBegrunnelse>(periode.getFomDato(), periode.getTomDato(), null);
         final var other = new LocalDateTimeline<>(List.of(segment));
-        tilsynstidslinje = tilsynstidslinje.combine(other,
+        kontinuerligTilsynTidslinje = kontinuerligTilsynTidslinje.combine(other,
+            StandardCombinators::coalesceRightHandSide,
+            LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .compress();
+        utvidetTilsynTidslinje = utvidetTilsynTidslinje.combine(other,
             StandardCombinators::coalesceRightHandSide,
             LocalDateTimeline.JoinStyle.CROSS_JOIN)
             .compress();
@@ -49,9 +62,16 @@ public class KontinuerligTilsynBuilder {
         final var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new GradOgBegrunnelse(periode.getGrad(), periode.getBegrunnelse()));
         final var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
 
-        this.tilsynstidslinje = tilsynstidslinje.combine(periodeTidslinje,
-            StandardCombinators::coalesceRightHandSide,
-            LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        if (periode.getGrad() == 100) {
+            this.kontinuerligTilsynTidslinje = kontinuerligTilsynTidslinje.combine(periodeTidslinje,
+                StandardCombinators::coalesceRightHandSide,
+                LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        if (periode.getGrad() == 200) {
+            this.utvidetTilsynTidslinje = utvidetTilsynTidslinje.combine(periodeTidslinje,
+                StandardCombinators::coalesceRightHandSide,
+                LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
 
         return this;
     }
@@ -65,12 +85,19 @@ public class KontinuerligTilsynBuilder {
     KontinuerligTilsyn build() {
         validerBuilder();
         bygget = true;
-        final var perioder = tilsynstidslinje.compress()
+        final var perioder = kontinuerligTilsynTidslinje.compress()
             .toSegments()
             .stream()
             .filter(it -> it.getValue() != null)
             .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue().getBegrunnelse(), it.getValue().getGrad()))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        perioder.addAll(utvidetTilsynTidslinje.compress()
+            .toSegments()
+            .stream()
+            .filter(it -> it.getValue() != null)
+            .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue().getBegrunnelse(), it.getValue().getGrad()))
+            .collect(Collectors.toList()));
         kladd.setPerioder(perioder);
 
         return kladd;
