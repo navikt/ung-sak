@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,6 +18,10 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
@@ -29,6 +34,7 @@ import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.medisinsk.MedisinskVilkårTjeneste;
 import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.MedisinskVilkårResultat;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.PleiePeriode;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -43,6 +49,7 @@ public class VurderMedisinskvilkårSteg implements BehandlingSteg {
 
     public static final VilkårType VILKÅRET = VilkårType.MEDISINSKEVILKÅR;
     private BehandlingRepositoryProvider repositoryProvider;
+    private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private MedisinskVilkårTjeneste medisinskVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -54,11 +61,13 @@ public class VurderMedisinskvilkårSteg implements BehandlingSteg {
 
     @Inject
     public VurderMedisinskvilkårSteg(BehandlingRepositoryProvider repositoryProvider,
+                                     PleiebehovResultatRepository resultatRepository,
                                      VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                      MedisinskVilkårTjeneste medisinskVilkårTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
+        this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.medisinskVilkårTjeneste = medisinskVilkårTjeneste;
     }
@@ -74,9 +83,27 @@ public class VurderMedisinskvilkårSteg implements BehandlingSteg {
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         // Lagre resultatstruktur
+        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
+        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(PleiebehovBuilder::builder).orElse(PleiebehovBuilder.builder());
+        final DatoIntervallEntitet periodeTilVurdering = utledPeriodeTilVurdering(perioder);
+        builder.tilbakeStill(periodeTilVurdering);
+        final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
+        vilkårresultat.getPleieperioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
+        resultatRepository.lagreOgFlush(behandlingRepository.hentBehandling(kontekst.getBehandlingId()), builder);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private Pleieperiode utledPeriode(PleiePeriode periode) {
+        return new Pleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
+    }
+
+    private DatoIntervallEntitet utledPeriodeTilVurdering(Set<DatoIntervallEntitet> perioder) {
+        var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
+        var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
+
+        return DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
     }
 
     private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {
