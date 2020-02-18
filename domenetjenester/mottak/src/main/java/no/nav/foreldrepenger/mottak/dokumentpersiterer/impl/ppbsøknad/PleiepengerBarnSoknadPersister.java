@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,9 +24,9 @@ import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.søknad.felles.Bosteder;
 import no.nav.k9.søknad.felles.Språk;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
-import no.nav.k9.søknad.pleiepengerbarn.Utland;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
@@ -73,7 +74,7 @@ public class PleiepengerBarnSoknadPersister {
 
         final Long behandlingId = behandling.getId();
 
-        byggMedlemskap(soknad.utland, behandlingId, soknad.mottattDato.toLocalDate());
+        byggMedlemskap(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
 
         final Set<FordelingPeriode> perioder = mapTilPerioder(soknad);
         final var fordeling = new Fordeling(perioder);
@@ -85,10 +86,12 @@ public class PleiepengerBarnSoknadPersister {
     }
 
     private Set<FordelingPeriode> mapTilPerioder(PleiepengerBarnSøknad soknad) {
-        return Set.of(new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(soknad.periode.fraOgMed, soknad.periode.tilOgMed)));
+        return soknad.perioder.keySet().stream()
+                .map(periode -> new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.fraOgMed, periode.tilOgMed)))
+                .collect(Collectors.toSet());
     }
 
-    private void byggMedlemskap(Utland utland, Long behandlingId, LocalDate forsendelseMottatt) {
+    private void byggMedlemskap(Bosteder bosteder, Long behandlingId, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
 
@@ -96,15 +99,15 @@ public class PleiepengerBarnSoknadPersister {
         //Boolean iNorgeVedFoedselstidspunkt = medlemskap.isINorgeVedFoedselstidspunkt();
         //oppgittTilknytningBuilder.medOppholdNå(Boolean.TRUE.equals(iNorgeVedFoedselstidspunkt));
 
-        if (utland != null) {
-            utland.opphold.forEach((periode, opphold) -> {
+        if (bosteder != null) {
+            bosteder.perioder.forEach((periode, opphold) -> {
                 // TODO: "tidligereOpphold" må fjernes fra database og domeneobjekter. Ved bruk må skjæringstidspunkt spesifikt oppgis.
                 //boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
                 oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
                     .medLand(finnLandkode(opphold.land.landkode))
                     .medPeriode(
                         Objects.requireNonNull(periode.fraOgMed),
-                        Objects.requireNonNullElse(periode.fraOgMed, Tid.TIDENES_ENDE)
+                        Objects.requireNonNullElse(periode.tilOgMed, Tid.TIDENES_ENDE)
                     )
                     //.erTidligereOpphold(tidligereOpphold)
                     .build()
