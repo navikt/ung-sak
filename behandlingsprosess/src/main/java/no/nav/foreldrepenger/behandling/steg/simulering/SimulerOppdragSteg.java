@@ -5,7 +5,6 @@ import static java.util.Collections.singletonList;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,8 +24,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
-import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragApplikasjonTjeneste;
-import no.nav.foreldrepenger.økonomi.simulering.klient.FpoppdragSystembrukerRestKlient;
 import no.nav.foreldrepenger.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.foreldrepenger.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -40,17 +37,13 @@ import no.nav.vedtak.exception.TekniskException;
 @ApplicationScoped
 public class SimulerOppdragSteg implements BehandlingSteg {
 
-    public static final long DUMMY_TASK_ID = -1L; //TODO (Team Tonic) simulerOppdrag-tjenesten krever en task-id som input, uten at den skal være i bruk
-
     private static final int ÅPNINGSTID = 7;
     private static final int STENGETID = 21;
 
     private BehandlingRepository behandlingRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private SimulerOppdragApplikasjonTjeneste simulerOppdragTjeneste;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private FpoppdragSystembrukerRestKlient fpoppdragSystembrukerRestKlient;
     private FptilbakeRestKlient fptilbakeRestKlient;
 
     SimulerOppdragSteg() {
@@ -60,17 +53,13 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     @Inject
     public SimulerOppdragSteg(BehandlingRepositoryProvider repositoryProvider,
                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                              SimulerOppdragApplikasjonTjeneste simulerOppdragTjeneste,
                               SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                               TilbakekrevingRepository tilbakekrevingRepository,
-                              FpoppdragSystembrukerRestKlient fpoppdragSystembrukerRestKlient,
                               FptilbakeRestKlient fptilbakeRestKlient) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.simulerOppdragTjeneste = simulerOppdragTjeneste;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
-        this.fpoppdragSystembrukerRestKlient = fpoppdragSystembrukerRestKlient;
         this.fptilbakeRestKlient = fptilbakeRestKlient;
     }
 
@@ -97,15 +86,14 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.SIMULER_OPPDRAG.equals(tilSteg)) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            fpoppdragSystembrukerRestKlient.kansellerSimulering(kontekst.getBehandlingId());
+            simuleringIntegrasjonTjeneste.kansellerSimulering(behandling);
             tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingValg(behandling);
             tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingInntrekk(behandling);
         }
     }
 
     private void startSimulering(Behandling behandling) {
-        List<String> oppdragXmler = simulerOppdragTjeneste.simulerOppdrag(behandling.getId(), DUMMY_TASK_ID);
-        simuleringIntegrasjonTjeneste.startSimulering(behandling.getId(), oppdragXmler);
+        simuleringIntegrasjonTjeneste.startSimulering(behandling);
     }
 
     private void opprettFortsettBehandlingTask(Behandling behandling) {

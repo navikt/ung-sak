@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.økonomi.tilkjentytelse;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -12,11 +13,15 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingInntrekkEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 
 @ApplicationScoped
@@ -24,6 +29,7 @@ public class TilkjentYtelseTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private TilbakekrevingRepository tilbakekrevingRepository;
     private Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse;
 
     TilkjentYtelseTjeneste() {
@@ -33,9 +39,11 @@ public class TilkjentYtelseTjeneste {
     @Inject
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
+                                  TilbakekrevingRepository tilbakekrevingRepository,
                                   @Any Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.tilkjentYtelse = tilkjentYtelse;
     }
 
@@ -64,6 +72,25 @@ public class TilkjentYtelseTjeneste {
             .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)
             .setErOpphør(erOpphør)
             .setEndringsdato(endringsdato);
+    }
+
+    public TilkjentYtelseOppdrag hentTilkjentYtelseOppdrag(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        return hentTilkjentYtelseOppdrag(behandling);
+    }
+
+    public TilkjentYtelseOppdrag hentTilkjentYtelseOppdrag(Behandling behandling) {
+        Long behandlingId = behandling.getId();
+        TilkjentYtelse tilkjentYtelse = hentilkjentYtelse(behandlingId);
+        TilkjentYtelseBehandlingInfoV1 behandlingInfo = hentilkjentYtelseBehandlingInfo(behandlingId);
+        InntrekkBeslutning inntrekkBeslutning = utledInntrekkBeslutning(behandling);
+        return new TilkjentYtelseOppdrag(tilkjentYtelse, behandlingInfo, behandling.getUuid(), inntrekkBeslutning);
+    }
+
+    private InntrekkBeslutning utledInntrekkBeslutning(Behandling behandling) {
+        Optional<TilbakekrevingInntrekkEntitet> valg = tilbakekrevingRepository.hentTilbakekrevingInntrekk(behandling.getId());
+        boolean erInntrekkDeaktivert = valg.isPresent() && valg.get().isAvslåttInntrekk();
+        return new InntrekkBeslutning(!erInntrekkDeaktivert);
     }
 
     private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingVedtak vedtak) {

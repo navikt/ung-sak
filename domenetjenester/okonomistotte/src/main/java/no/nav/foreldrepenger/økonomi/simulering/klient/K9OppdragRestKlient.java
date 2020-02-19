@@ -21,6 +21,7 @@ public class K9OppdragRestKlient {
     private URI uriIverksett;
     private URI uriSimulering;
     private URI uriSimuleringResultat;
+    private URI uriKansellerSimulering;
 
     public K9OppdragRestKlient() {
     }
@@ -29,11 +30,14 @@ public class K9OppdragRestKlient {
     public K9OppdragRestKlient(OidcRestClient restClient,
                                @KonfigVerdi(value = "URL_K9OPPDRAG_IVERKSETT", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/iverksett/start") String urlIverksett,
                                @KonfigVerdi(value = "URL_K9OPPDRAG_SIMULERING", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/start") String urlSimulering,
-                               @KonfigVerdi(value = "URL_K9OPPDRAG_SIMULERING_RESULTAT", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/resultat") String urlSimuleringResultat) {
+                               @KonfigVerdi(value = "URL_K9OPPDRAG_SIMULERING_RESULTAT", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/resultat") String urlSimuleringResultat,
+                               @KonfigVerdi(value = "URL_K9OPPDRAG_KANSELLER_SIMULERING", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/kanseller") String urlKansellerSimulering
+    ) {
         this.restClient = restClient;
         this.uriIverksett = tilUri(urlIverksett, "URL_K9OPPDRAG_IVERKSETT");
         this.uriSimulering = tilUri(urlSimulering, "URL_K9OPPDRAG_SIMULERING");
         this.uriSimuleringResultat = tilUri(urlSimuleringResultat, "URL_K9OPPDRAG_SIMULERING_RESULTAT");
+        this.uriKansellerSimulering = tilUri(urlKansellerSimulering, "URL_K9OPPDRAG_KANSELLER_SIMULERING");
     }
 
     private static URI tilUri(String url, String konfigurertNavn) {
@@ -55,6 +59,11 @@ public class K9OppdragRestKlient {
     public SimuleringResultatDto hentSimuleringResultat(UUID behandlingUuid) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
         return restClient.post(uriSimuleringResultat, behandlingreferanse, SimuleringResultatDto.class);
+    }
+
+    public void kansellerSimulering(UUID behandlingUuid) {
+        BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
+        restClient.post(uriKansellerSimulering, behandlingreferanse);
     }
 
 }
