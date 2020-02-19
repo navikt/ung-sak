@@ -50,13 +50,13 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         final var legeerklæringer = mapLegeerklæringer(medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null), dto.getLegeerklæring());
         final var kontinuerligTilsyn = mapKontinuerligTilsyn(periode, medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null), dto.getPleiebehov());
 
-        medisinskGrunnlagRepository.lagreOgFlush(param.getBehandling(), kontinuerligTilsyn, legeerklæringer);
+        medisinskGrunnlagRepository.lagre(param.getBehandling(), kontinuerligTilsyn, legeerklæringer);
 
         return OppdateringResultat.utenOveropp();
     }
 
     private DatoIntervallEntitet utledPerioder(Long behandlingId) {
-        final var perioder = tilVurderingTjeneste.utled(behandlingId, VilkårType.MEDISINSKEVILKÅR);
+        final var perioder = tilVurderingTjeneste.utled(behandlingId, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         final var fom = perioder.stream()
             .map(DatoIntervallEntitet::getFomDato)
             .min(LocalDate::compareTo)

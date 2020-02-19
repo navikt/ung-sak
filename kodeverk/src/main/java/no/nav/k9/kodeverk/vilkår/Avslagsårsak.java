@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
+public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
 
     SØKT_FOR_SENT("1007", "Søkt for sent", null),
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_34\", \"lovreferanse\": \"21-3,21-7\"}]}]}"),
@@ -34,12 +34,15 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
     ARBEIDSTAKER_KAN_OMPLASSERES("1064", "§14-4 første ledd: Arbeidstaker kan omplasseres til annet høvelig arbeid", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 1. ledd\"}]}]}"),
     SN_FL_HAR_IKKE_DOKUMENTERT_RISIKOFAKTORER("1065", "§14-4 andre ledd: Næringsdrivende/frilanser har ikke dokumentert risikofaktorer", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
     SN_FL_HAR_MULIGHET_TIL_Å_TILRETTELEGGE_SITT_VIRKE("1066", "§14-4 andre ledd: Næringsdrivende/frilanser har mulighet til å tilrettelegge sitt virke", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
-    IKKE_MEDISINSK_BEHOV("1067", "Ikke tilstrekkelig medisinsk behov", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"21-3,21-7\"}]}]}"),
+    IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE("1067", "Ikke dokumentert sykdom, skade eller lyte.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
+    DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
+    IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM("1069", "Ikke behov for kontinuerlig pleie.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
     UDEFINERT("-", "Ikke definert", null),
 
     ;
 
+    public static final String KODEVERK = "AVSLAGSARSAK"; //$NON-NLS-1$
     private static final Map<String, Avslagsårsak> KODER = new LinkedHashMap<>();
 
     static {
@@ -49,8 +52,6 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
             }
         }
     }
-
-    public static final String KODEVERK = "AVSLAGSARSAK"; //$NON-NLS-1$
 
     // TODO endre fra raw json
     @JsonIgnore
@@ -83,6 +84,10 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
         return Collections.unmodifiableMap(KODER);
     }
 
+    public static void main(String[] args) {
+        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
+    }
+
     @Override
     public String getNavn() {
         return navn;
@@ -108,17 +113,13 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse{
     /**
      * Get vilkår dette avslaget kan opptre i.
      */
-    public Set<VilkårType> getVilkårTyper(){
+    public Set<VilkårType> getVilkårTyper() {
         return VilkårType.getVilkårTyper(this);
     }
 
     @Override
     public String getLovHjemmelData() {
         return lovReferanse;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
     }
 
 

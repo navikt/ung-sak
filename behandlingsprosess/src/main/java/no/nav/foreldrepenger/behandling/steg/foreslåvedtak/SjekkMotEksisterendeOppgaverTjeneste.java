@@ -46,7 +46,7 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
         List<Historikkinnslag> historikkInnslagFraRepo = historikkRepository.hentHistorikk(behandling.getId());
         List<AksjonspunktDefinisjon> aksjonspunktliste = new ArrayList<>();
         List<String> oppgaveÅrsakerVurder = Arrays.asList(OppgaveÅrsak.VURDER_DOKUMENT.getKode(),
-            Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER.getOppgaveType());
+            Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER.getOppgaveType()); // FIXME : Tilpass for K9
 
         List<Oppgaveinfo> oppgaveinfos = oppgaveTjeneste.hentOppgaveListe(aktørid, oppgaveÅrsakerVurder);
         if (oppgaveinfos != null && !oppgaveinfos.isEmpty()) {

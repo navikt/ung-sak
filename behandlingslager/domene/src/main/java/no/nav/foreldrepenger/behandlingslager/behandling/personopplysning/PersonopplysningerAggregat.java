@@ -236,20 +236,20 @@ public class PersonopplysningerAggregat {
             dato.atStartOfDay().plusDays(1).atZone(ZoneId.systemDefault()).toInstant());
     }
 
-    public boolean søkerHarSammeAdresseSom(AktørId aktørId, RelasjonsRolleType relasjonsRolle) {
-        Optional<PersonRelasjonEntitet> ektefelleRelasjon = getRelasjoner().stream()
+    public boolean harSøkerSammeAdresseSom(AktørId aktørId, RelasjonsRolleType relasjonsRolle) {
+        Optional<PersonRelasjonEntitet> relasjon = getRelasjoner().stream()
                 .filter(familierelasjon -> familierelasjon.getAktørId().equals(søkerAktørId) &&
                     familierelasjon.getTilAktørId().equals(aktørId) &&
                     familierelasjon.getRelasjonsrolle().equals(relasjonsRolle))
                 .findFirst();
-        if (ektefelleRelasjon.isPresent() && ektefelleRelasjon.get().getHarSammeBosted() != null) {
-            return ektefelleRelasjon.get().getHarSammeBosted();
+        if (relasjon.isPresent() && relasjon.get().getHarSammeBosted() != null) {
+            return relasjon.get().getHarSammeBosted();
         } else {
-            return harSammeAdresseSom(aktørId);
+            return harSøkerSammeAdresseSom(aktørId);
         }
     }
 
-    private boolean harSammeAdresseSom(AktørId aktørId) {
+    private boolean harSøkerSammeAdresseSom(AktørId aktørId) {
         if (getPersonopplysninger().stream().noneMatch(it -> it.getAktørId().equals(aktørId))) {
             return false;
         }

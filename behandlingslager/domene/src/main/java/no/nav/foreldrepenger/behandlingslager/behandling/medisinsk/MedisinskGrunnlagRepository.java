@@ -38,23 +38,45 @@ public class MedisinskGrunnlagRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagreOgFlush(Behandling behandling, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
+    public void lagre(Behandling behandling, Pleietrengende pleietrengende) {
+        final var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+
+        final var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
+        final var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
+        lagre(behandling, kontinuerligTilsyn, legeerklæringer, pleietrengende);
+    }
+
+    public void lagre(Behandling behandling, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
         Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
         Objects.requireNonNull(kontinuerligTilsyn, "kontinuerligTilsyn"); // NOSONAR $NON-NLS-1$
+
+        lagre(behandling, kontinuerligTilsyn.build(), legeerklæringer, null);
+    }
+
+    private void lagre(Behandling behandling, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, Pleietrengende pleietrengende) {
+
         final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+        var pleie = pleietrengende;
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
 
             final MedisinskGrunnlag eksisterendeGrunnlagEntitet = eksisterendeGrunnlag.get();
+            pleie = eksisterendeGrunnlagEntitet.getPleietrengende();
             eksisterendeGrunnlagEntitet.setAktiv(false);
             entityManager.persist(eksisterendeGrunnlagEntitet);
             entityManager.flush();
         }
 
-        final var tilsyn = kontinuerligTilsyn.build();
-        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, tilsyn, legeerklæringer);
-        entityManager.persist(tilsyn);
-        entityManager.persist(legeerklæringer);
+        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, pleie, kontinuerligTilsyn, legeerklæringer);
+        if (kontinuerligTilsyn != null) {
+            entityManager.persist(kontinuerligTilsyn);
+        }
+        if (legeerklæringer != null) {
+            entityManager.persist(legeerklæringer);
+        }
+        if (pleie != null) {
+            entityManager.persist(pleie);
+        }
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
     }
@@ -74,6 +96,6 @@ public class MedisinskGrunnlagRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Behandling gammelBehandling, Behandling nyBehandling) {
         Optional<MedisinskGrunnlag> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandling.getId());
-        søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandling, new KontinuerligTilsynBuilder(entitet.getKontinuerligTilsyn()), entitet.getLegeerklæringer()));
+        søknadEntitet.ifPresent(entitet -> lagre(nyBehandling, new KontinuerligTilsyn(entitet.getKontinuerligTilsyn()), entitet.getLegeerklæringer(), entitet.getPleietrengende()));
     }
 }

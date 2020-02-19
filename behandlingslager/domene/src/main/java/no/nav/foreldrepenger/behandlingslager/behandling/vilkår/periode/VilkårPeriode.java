@@ -111,11 +111,12 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         this.utfallMerknad = vilkårPeriode.utfallMerknad;
         this.regelInput = vilkårPeriode.regelInput;
         this.regelEvaluering = vilkårPeriode.regelEvaluering;
+        this.begrunnelse = vilkårPeriode.begrunnelse;
     }
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { periode };
+        Object[] keyParts = {periode};
         return IndexKeyComposer.createKey(keyParts);
     }
 

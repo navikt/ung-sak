@@ -41,13 +41,13 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
-@BehandlingStegRef(kode = "VURDER_MEDISINSK")
+@BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class VurderMedisinskvilkårSteg implements BehandlingSteg {
+public class VurderOmsorgenForSteg implements BehandlingSteg {
 
-    public static final VilkårType VILKÅRET = VilkårType.MEDISINSKEVILKÅR;
+    public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
     private BehandlingRepositoryProvider repositoryProvider;
     private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
@@ -55,15 +55,15 @@ public class VurderMedisinskvilkårSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    VurderMedisinskvilkårSteg() {
+    VurderOmsorgenForSteg() {
         // CDI
     }
 
     @Inject
-    public VurderMedisinskvilkårSteg(BehandlingRepositoryProvider repositoryProvider,
-                                     PleiebehovResultatRepository resultatRepository,
-                                     VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                     MedisinskVilkårTjeneste medisinskVilkårTjeneste) {
+    public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
+                                 PleiebehovResultatRepository resultatRepository,
+                                 VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                 MedisinskVilkårTjeneste medisinskVilkårTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -75,35 +75,10 @@ public class VurderMedisinskvilkårSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
-        final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(kontekst, perioder);
 
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        final var oppdaterteVilkår = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
 
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
-
-        // Lagre resultatstruktur
-        final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(PleiebehovBuilder::builder).orElse(PleiebehovBuilder.builder());
-        final DatoIntervallEntitet periodeTilVurdering = utledPeriodeTilVurdering(perioder);
-        builder.tilbakeStill(periodeTilVurdering);
-        final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
-
-        vilkårresultat.getPleieperioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
-        resultatRepository.lagreOgFlush(behandlingRepository.hentBehandling(kontekst.getBehandlingId()), builder);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private Pleieperiode utledPeriode(PleiePeriode periode) {
-        return new Pleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
-    }
-
-    private DatoIntervallEntitet utledPeriodeTilVurdering(Set<DatoIntervallEntitet> perioder) {
-        var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
-        var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
-
-        return DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
     }
 
     private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {
@@ -119,17 +94,6 @@ public class VurderMedisinskvilkårSteg implements BehandlingSteg {
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
 
-        final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
-        ekstraVilkårresultat.getPleieperioder()
-            .stream()
-            .filter(it -> Pleiegrad.NULL.equals(it.getGrad()))
-            .forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFraOgMed(), it.getTilOgMed())
-                .medUtfall(Utfall.IKKE_OPPFYLT)
-                .medMerknadParametere(vilkårData.getMerknadParametere())
-                .medRegelEvaluering(vilkårData.getRegelEvaluering())
-                .medRegelInput(vilkårData.getRegelInput())
-                .medAvslagsårsak(Avslagsårsak.IKKE_MEDISINSK_BEHOV) // FIXME (k9) : Endre slik at denne setter en gyldig grunn pga IKKE BEHOV FOR KONTINUERLIG TILSYN
-                .medMerknad(vilkårData.getVilkårUtfallMerknad())));
         builder.leggTil(vilkårBuilder);
 
         return builder.build();

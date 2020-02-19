@@ -67,6 +67,7 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_OPPTJENING_FAKTA("VURDER_OPPTJ_FAKTA", "Vurder opptjeningfakta", UTREDES),
     VURDER_UTLAND("VURDER_UTLAND", "Vurder utland (SED)", UTREDES),
 
+    VURDER_OMSORG_FOR("VURDER_OMSORG_FOR", "Vurder omsorgen for", UTREDES),
     VURDER_MEDISINSKVILKÅR("VURDER_MEDISINSK", "Vurder medisinskvilkår", UTREDES),
     ;
 

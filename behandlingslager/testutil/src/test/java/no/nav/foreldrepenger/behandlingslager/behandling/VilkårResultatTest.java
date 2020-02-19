@@ -326,7 +326,7 @@ public class VilkårResultatTest {
 
         lagreBehandling(behandling);
         vilkårResultatRepository.lagre(behandling.getId(), Vilkårene.builder()
-            .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(8))), VilkårType.MEDISINSKEVILKÅR).build());
+            .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(8))), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).build());
         Long id = behandling.getId();
         assertThat(id).isNotNull();
 

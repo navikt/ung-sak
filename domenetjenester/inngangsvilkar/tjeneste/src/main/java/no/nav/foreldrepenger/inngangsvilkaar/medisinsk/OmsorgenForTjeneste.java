@@ -11,23 +11,22 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.VilkårUtfallOversetter;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.MedisinskVilkårResultat;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.Medisinskvilkår;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.MedisinskvilkårGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.OmsorgenForGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.OmsorgenForVilkår;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @ApplicationScoped
-public class MedisinskVilkårTjeneste {
+public class OmsorgenForTjeneste {
 
     private InngangsvilkårOversetter inngangsvilkårOversetter;
     private VilkårUtfallOversetter utfallOversetter;
 
-    MedisinskVilkårTjeneste() {
+    OmsorgenForTjeneste() {
         // CDI
     }
 
     @Inject
-    MedisinskVilkårTjeneste(InngangsvilkårOversetter inngangsvilkårOversetter) {
+    OmsorgenForTjeneste(InngangsvilkårOversetter inngangsvilkårOversetter) {
         this.inngangsvilkårOversetter = inngangsvilkårOversetter;
         this.utfallOversetter = new VilkårUtfallOversetter();
     }
@@ -37,13 +36,10 @@ public class MedisinskVilkårTjeneste {
         var sluttDato = perioderTilVurdering.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
 
         final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
-        MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(kontekst.getBehandlingId(), periodeTilVurdering);
-        MedisinskVilkårResultat resultat = new MedisinskVilkårResultat();
+        OmsorgenForGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellOmsorgen(kontekst.getBehandlingId(), kontekst.getAktørId(), periodeTilVurdering);
 
-        final var evaluation = new Medisinskvilkår().evaluer(grunnlag, resultat);
+        final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
 
-        final var vilkårData = utfallOversetter.oversett(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, evaluation, grunnlag, periodeTilVurdering);
-        vilkårData.setEkstraVilkårresultat(resultat);
-        return vilkårData;
+        return utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, grunnlag, periodeTilVurdering);
     }
 }

@@ -93,6 +93,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
+    public static final String OMSORGEN_FOR_KODE = "9002";
 
     // Andre koder
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;

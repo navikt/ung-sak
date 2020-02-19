@@ -26,6 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
 
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.foreldrepenger.behandlingslager.abakus.logg.AbakusInnhentingGrunnlagLogg;
 import no.nav.foreldrepenger.behandlingslager.abakus.logg.AbakusInnhentingGrunnlagLoggRepository;
 import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
@@ -36,6 +41,9 @@ import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkin
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.PersonstatusPeriode;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -49,11 +57,7 @@ import no.nav.foreldrepenger.domene.medlem.api.FinnMedlemRequest;
 import no.nav.foreldrepenger.domene.medlem.api.Medlemskapsperiode;
 import no.nav.foreldrepenger.domene.person.tps.PersoninfoAdapter;
 import no.nav.foreldrepenger.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
-import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
-import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -63,7 +67,6 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
 
@@ -100,6 +103,7 @@ public class RegisterdataInnhenter {
     private PersonopplysningRepository personopplysningRepository;
     private BehandlingRepository behandlingRepository;
     private MedlemskapRepository medlemskapRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste;
     private AbakusTjeneste abakusTjeneste;
     private AbakusInnhentingGrunnlagLoggRepository loggRepository;
@@ -116,6 +120,7 @@ public class RegisterdataInnhenter {
                                  MedlemTjeneste medlemTjeneste,
                                  BehandlingRepositoryProvider repositoryProvider,
                                  MedlemskapRepository medlemskapRepository,
+                                 MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                  OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste,
                                  AbakusTjeneste abakusTjeneste,
                                  AbakusInnhentingGrunnlagLoggRepository loggRepository,
@@ -125,6 +130,7 @@ public class RegisterdataInnhenter {
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.medlemskapRepository = medlemskapRepository;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.opplysningsPeriodeTjeneste = opplysningsPeriodeTjeneste;
         this.abakusTjeneste = abakusTjeneste;
         this.loggRepository = loggRepository;
@@ -182,10 +188,24 @@ public class RegisterdataInnhenter {
 
         mapTilPersonopplysning(søkerPersonInfo, informasjonBuilder, true, false, behandling);
 
+        // legg til pleietrengende
+        leggTilPleietrengende(informasjonBuilder, behandling);
+
         // Ektefelle
         leggTilEktefelle(søkerPersonInfo, informasjonBuilder, behandling);
 
         return informasjonBuilder;
+    }
+
+    private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
+        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId);
+        if (pleietrengende.isPresent()) {
+            final var aktørId = pleietrengende.get();
+            final var personinfo = personinfoAdapter.innhentSaksopplysningerForSøker(aktørId);
+            if (personinfo != null) {
+                mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
+            }
+        }
     }
 
     private void mapPersonstatus(List<PersonstatusPeriode> personstatushistorikk, PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
@@ -351,8 +371,15 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, @SuppressWarnings("unused") Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        // FIXME K9 filtrer på relevante barn
-        return relaterteBarn;
+        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId);
+
+        if (pleietrengende.isEmpty()) {
+            return List.of();
+        } else {
+            return relaterteBarn.stream()
+                .filter(it -> it.getAktørId().equals(pleietrengende.orElse(null)))
+                .collect(Collectors.toList());
+        }
     }
 
     private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo) {

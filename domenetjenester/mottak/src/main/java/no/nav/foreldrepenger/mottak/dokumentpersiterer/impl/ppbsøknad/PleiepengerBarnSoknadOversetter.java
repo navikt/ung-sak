@@ -12,6 +12,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -24,36 +26,41 @@ import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.søknad.felles.Barn;
 import no.nav.k9.søknad.felles.Bosteder;
 import no.nav.k9.søknad.felles.Språk;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
-public class PleiepengerBarnSoknadPersister {
+public class PleiepengerBarnSoknadOversetter {
 
     private VirksomhetTjeneste virksomhetTjeneste;
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private FordelingRepository fordelingRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private TpsTjeneste tpsTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
-    PleiepengerBarnSoknadPersister() {
+    PleiepengerBarnSoknadOversetter() {
         // for CDI proxy
     }
 
     @Inject
-    public PleiepengerBarnSoknadPersister(BehandlingRepositoryProvider repositoryProvider,
-                                          VirksomhetTjeneste virksomhetTjeneste,
-                                          InntektArbeidYtelseTjeneste iayTjeneste,
-                                          FordelingRepository fordelingRepository,
-                                          TpsTjeneste tpsTjeneste) {
+    public PleiepengerBarnSoknadOversetter(BehandlingRepositoryProvider repositoryProvider,
+                                           VirksomhetTjeneste virksomhetTjeneste,
+                                           InntektArbeidYtelseTjeneste iayTjeneste,
+                                           FordelingRepository fordelingRepository,
+                                           MedisinskGrunnlagRepository medisinskGrunnlagRepository,
+                                           TpsTjeneste tpsTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.fordelingRepository = fordelingRepository;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
     }
 
@@ -76,6 +83,8 @@ public class PleiepengerBarnSoknadPersister {
 
         byggMedlemskap(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
 
+        byggPleietrengende(behandling, soknad.barn);
+
         final Set<FordelingPeriode> perioder = mapTilPerioder(soknad);
         final var fordeling = new Fordeling(perioder);
         fordelingRepository.lagreOgFlush(behandling, fordeling);
@@ -85,10 +94,20 @@ public class PleiepengerBarnSoknadPersister {
         søknadRepository.lagreOgFlush(behandling, søknadEntitet);
     }
 
+    private void byggPleietrengende(Behandling behandling, Barn barn) {
+        final var norskIdentitetsnummer = barn.norskIdentitetsnummer;
+        if (norskIdentitetsnummer != null) {
+            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.verdi));
+            medisinskGrunnlagRepository.lagre(behandling, new Pleietrengende(aktørId.orElseThrow()));
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
     private Set<FordelingPeriode> mapTilPerioder(PleiepengerBarnSøknad soknad) {
         return soknad.perioder.keySet().stream()
-                .map(periode -> new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.fraOgMed, periode.tilOgMed)))
-                .collect(Collectors.toSet());
+            .map(periode -> new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.fraOgMed, periode.tilOgMed)))
+            .collect(Collectors.toSet());
     }
 
     private void byggMedlemskap(Bosteder bosteder, Long behandlingId, LocalDate forsendelseMottatt) {

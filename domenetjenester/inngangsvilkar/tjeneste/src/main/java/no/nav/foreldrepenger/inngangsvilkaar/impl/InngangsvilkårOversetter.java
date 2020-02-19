@@ -15,11 +15,14 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
+import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
@@ -38,12 +41,18 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.PeriodeMedKon
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.PeriodeMedUtvidetBehov;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.PersonStatusType;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.BostedsAdresse;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.OmsorgenForGrunnlag;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.Relasjon;
+import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.RelasjonsRolle;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class InngangsvilkårOversetter {
@@ -256,5 +265,38 @@ public class InngangsvilkårOversetter {
             return DiagnoseKilde.FASTLEGE;
         }
         return DiagnoseKilde.ANNET;
+    }
+
+    public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
+        final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periodeTilVurdering).orElseThrow();
+        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId).orElseThrow();
+        final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
+            .stream()
+            .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
+            .collect(Collectors.toList());
+        final var pleietrengendeBostedsadresser = personopplysningerAggregat.getAdresserFor(pleietrengende)
+            .stream()
+            .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
+            .collect(Collectors.toList());
+        return new OmsorgenForGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
+            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser));
+    }
+
+    private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {
+        return pleietrengendeBostedsadresser.stream()
+            .map(it -> new BostedsAdresse(it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand()))
+            .collect(Collectors.toList());
+    }
+
+    private Relasjon mapReleasjonMellomPleietrengendeOgSøker(PersonopplysningerAggregat aggregat, AktørId pleietrengende) {
+        final var relasjoner = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengende)).collect(Collectors.toSet());
+        if (relasjoner.size() > 1) {
+            throw new IllegalStateException("Fant flere relasjoner til barnet. Vet ikke hvilken som skal prioriteres");
+        } else if (relasjoner.size() == 1) {
+            final var relasjonen = relasjoner.iterator().next();
+            return new Relasjon(relasjonen.getAktørId().getId(), relasjonen.getTilAktørId().getId(), RelasjonsRolle.find(relasjonen.getRelasjonsrolle().getKode()), relasjonen.getHarSammeBosted());
+        } else {
+            return null;
+        }
     }
 }

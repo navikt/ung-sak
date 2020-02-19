@@ -48,7 +48,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktKodeDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER_KODE, AksjonspunktType.MANUELL, "Avklar tilleggsopplysninger",
         BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(ES, FP, SVP)),
     FORESLÅ_VEDTAK(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_KODE,
-        AksjonspunktType.MANUELL, "Vurder om ytelse allerede er innvilget", BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR,
+        AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(ES, FP, SVP)),
     FATTER_VEDTAK(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE,
         AksjonspunktType.MANUELL, "Fatter vedtak", BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN,
@@ -165,10 +165,15 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
         AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(ES, FP, SVP)),
-    KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
-        AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN, VilkårType.MEDISINSKEVILKÅR,
-        SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(ES, SVP, FP, PSB)),
 
+    // Gruppe : 90xx
+
+    KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
+        AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
+        SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(ES, SVP, FP, PSB)),
+    VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OMSORGEN_FOR_KODE,
+        AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
+        SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(ES, SVP, FP, PSB)),
     // Gruppe : 600
 
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,

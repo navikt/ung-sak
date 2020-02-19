@@ -14,7 +14,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad.PleiepengerBarnSoknadPersister;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad.PleiepengerBarnSoknadOversetter;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -28,7 +28,7 @@ public class DokumentmottakerPleiepengerBarnSoknad {
     private BrukerTjeneste brukerTjeneste;
     private SaksnummerRepository saksnummerRepository;
     private Behandlingsoppretter behandlingsoppretter;
-    private PleiepengerBarnSoknadPersister pleiepengerBarnSoknadPersister;
+    private PleiepengerBarnSoknadOversetter pleiepengerBarnSoknadOversetter;
     private TpsTjeneste tpsTjeneste;
     private FagsakTjeneste fagsakTjeneste;
 
@@ -41,14 +41,14 @@ public class DokumentmottakerPleiepengerBarnSoknad {
                                                  BrukerTjeneste brukerTjeneste,
                                                  SaksnummerRepository saksnummerRepository,
                                                  Behandlingsoppretter behandlingsoppretter,
-                                                 PleiepengerBarnSoknadPersister pleiepengerBarnSoknadPersister,
+                                                 PleiepengerBarnSoknadOversetter pleiepengerBarnSoknadOversetter,
                                                  TpsTjeneste tpsTjeneste,
                                                  FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.brukerTjeneste = brukerTjeneste;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
-        this.pleiepengerBarnSoknadPersister = pleiepengerBarnSoknadPersister;
+        this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
     }
@@ -62,7 +62,7 @@ public class DokumentmottakerPleiepengerBarnSoknad {
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
         // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av historikk.
         // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
-        pleiepengerBarnSoknadPersister.persister(soknad, behandling);
+        pleiepengerBarnSoknadOversetter.persister(soknad, behandling);
         return behandling;
     }
 

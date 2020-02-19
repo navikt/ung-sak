@@ -36,6 +36,11 @@ public class MedisinskGrunnlag extends BaseEntitet {
 
     @OneToOne
     @Immutable
+    @JoinColumn(name = "pleietrengende_id", nullable = false, updatable = false, unique = true)
+    private Pleietrengende pleietrengende;
+
+    @OneToOne
+    @Immutable
     @JoinColumn(name = "kontinuerlig_tilsyn_id", nullable = false, updatable = false, unique = true)
     private KontinuerligTilsyn kontinuerligTilsyn;
 
@@ -49,8 +54,9 @@ public class MedisinskGrunnlag extends BaseEntitet {
     MedisinskGrunnlag() {
     }
 
-    MedisinskGrunnlag(Behandling behandling, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
+    MedisinskGrunnlag(Behandling behandling, Pleietrengende pleietrengende, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
         this.behandling = behandling;
+        this.pleietrengende = pleietrengende;
         this.kontinuerligTilsyn = kontinuerligTilsyn; // NOSONAR
         this.legeerklæringer = legeerklæringer;
     }
@@ -63,16 +69,12 @@ public class MedisinskGrunnlag extends BaseEntitet {
         return kontinuerligTilsyn;
     }
 
-    void setKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
-        this.kontinuerligTilsyn = kontinuerligTilsyn;
-    }
-
     public Legeerklæringer getLegeerklæringer() {
         return legeerklæringer;
     }
 
-    void setLegeerklæringer(Legeerklæringer legeerklæringer) {
-        this.legeerklæringer = legeerklæringer;
+    public Pleietrengende getPleietrengende() {
+        return pleietrengende;
     }
 
     @Override
@@ -81,12 +83,13 @@ public class MedisinskGrunnlag extends BaseEntitet {
         if (o == null || getClass() != o.getClass()) return false;
         MedisinskGrunnlag that = (MedisinskGrunnlag) o;
         return Objects.equals(kontinuerligTilsyn, that.kontinuerligTilsyn) &&
+            Objects.equals(pleietrengende, that.pleietrengende) &&
             Objects.equals(legeerklæringer, that.legeerklæringer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kontinuerligTilsyn, legeerklæringer);
+        return Objects.hash(kontinuerligTilsyn, pleietrengende, legeerklæringer);
     }
 
     @Override
