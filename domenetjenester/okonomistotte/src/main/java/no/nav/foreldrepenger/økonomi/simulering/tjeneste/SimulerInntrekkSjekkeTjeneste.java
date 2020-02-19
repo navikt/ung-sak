@@ -19,7 +19,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 
 @ApplicationScoped
 public class SimulerInntrekkSjekkeTjeneste {
@@ -49,7 +49,7 @@ public class SimulerInntrekkSjekkeTjeneste {
         if (tilbakekrevingValg.filter(valg -> valg.getVidereBehandling().equals(TilbakekrevingVidereBehandling.INNTREKK)).isPresent()) {
             simuleringIntegrasjonTjeneste.startSimulering(behandling);
 
-            Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling.getId());
+            Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
             if (simuleringResultatDto.isPresent()) {
                 Optional<AksjonspunktDefinisjon> aksjonspunkt = SimulerOppdragAksjonspunktUtleder.utledAksjonspunkt(simuleringResultatDto.get());
                 if (aksjonspunkt.filter(aksjonspunktDefinisjon -> aksjonspunktDefinisjon.equals(AksjonspunktDefinisjon.VURDER_FEILUTBETALING)).isPresent()) {

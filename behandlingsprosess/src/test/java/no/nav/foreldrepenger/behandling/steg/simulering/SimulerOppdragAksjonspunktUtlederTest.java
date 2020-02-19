@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 
 public class SimulerOppdragAksjonspunktUtlederTest {
 

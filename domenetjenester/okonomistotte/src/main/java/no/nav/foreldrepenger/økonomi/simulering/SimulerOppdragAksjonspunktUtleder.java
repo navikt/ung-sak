@@ -5,7 +5,7 @@ import static java.util.Objects.isNull;
 import java.util.Optional;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 
 public class SimulerOppdragAksjonspunktUtleder {
 

@@ -28,7 +28,7 @@ import no.nav.foreldrepenger.økonomi.simulering.tjeneste.SimuleringIntegrasjonT
 import no.nav.foreldrepenger.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.vedtak.exception.TekniskException;
 
 @BehandlingStegRef(kode = "SIMOPP")
@@ -107,7 +107,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
             lagreTilbakekrevingValg(behandling, TilbakekrevingValg.medOppdaterTilbakekrevingsbehandling());
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling.getId());
+        Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
         if (simuleringResultatDto.isPresent()) {
             tilbakekrevingRepository.lagre(behandling, simuleringResultatDto.get().isSlåttAvInntrekk());
 

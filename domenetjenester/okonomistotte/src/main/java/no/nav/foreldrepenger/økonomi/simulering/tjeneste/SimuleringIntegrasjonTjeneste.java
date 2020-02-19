@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.økonomi.simulering.tjeneste;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -13,9 +12,8 @@ import org.slf4j.LoggerFactory;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimulerOppdragDto;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
 
 @ApplicationScoped
 public class SimuleringIntegrasjonTjeneste {
@@ -44,15 +42,9 @@ public class SimuleringIntegrasjonTjeneste {
         restKlient.kansellerSimulering(behandling.getUuid());
     }
 
-    public Optional<SimuleringResultatDto> hentResultat(Long behandlingId) {
-        Objects.requireNonNull(behandlingId, "Utviklerfeil: behandlingId kan ikke være null");
-        // FIXME K9 koble på simulering
-        return Optional.empty();
-        // return restKlient.hentResultat(behandlingId);
-    }
-
-    private SimulerOppdragDto map(Long behandlingId, List<String> oppdragListe) {
-        return SimulerOppdragDto.lagDto(behandlingId, oppdragListe);
+    public Optional<SimuleringResultatDto> hentResultat(Behandling behandling) {
+        Objects.requireNonNull(behandling, "Utviklerfeil: behandling kan ikke være null");
+        return Optional.ofNullable(restKlient.hentSimuleringResultat(behandling.getUuid()));
     }
 
 }
