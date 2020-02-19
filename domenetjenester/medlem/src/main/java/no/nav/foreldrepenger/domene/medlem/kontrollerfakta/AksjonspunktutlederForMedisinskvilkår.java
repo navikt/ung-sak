@@ -45,7 +45,7 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
 
                 final var pleietrengendeRelasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengende)).findFirst().map(PersonRelasjonEntitet::getRelasjonsrolle).orElse(RelasjonsRolleType.UDEFINERT);
                 final var harSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengende, RelasjonsRolleType.BARN);
-                if (harSammeBosted || RelasjonsRolleType.erRegistrertForeldre(pleietrengendeRelasjon)) {
+                if (harSammeBosted || RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
                     return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING));
                 }
             }

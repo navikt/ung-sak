@@ -45,7 +45,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_far_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.FARA, true), List.of(), List.of());
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of());
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -58,7 +58,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.MORA, true), List.of(), List.of());
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of());
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -71,7 +71,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_far_ikke_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.FARA, false), List.of(), List.of());
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of());
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -84,7 +84,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_ikke_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.MORA, false), List.of(), List.of());
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of());
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
