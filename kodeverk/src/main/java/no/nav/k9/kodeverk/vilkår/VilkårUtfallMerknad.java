@@ -50,6 +50,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1067("1067", "Ikke dokumentert sykdom, skade eller lyte."),
     VM_1068("1068", "Ikke mottatt dokumentasjon fra rett organ."),
     VM_1069("1069", "Ikke behov for kontinuerlig pleie."),
+    VM_1071("1071", "Ikke dokumentert omsorgen for."),
 
     VM_5007("5007", "søknadsfristvilkåret"),
 
