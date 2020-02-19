@@ -74,7 +74,7 @@ public class AvklarArbeidsforholdDto {
     @JsonProperty(value = "brukArbeidsforholdet")
     private Boolean brukArbeidsforholdet;
 
-    @JsonProperty(value = "fortsetBehandlingUtenInntektsmelding")
+    @JsonProperty(value = "fortsettBehandlingUtenInntektsmelding")
     private Boolean fortsettBehandlingUtenInntektsmelding;
 
     @JsonProperty(value = "erNyttArbeidsforhold")
@@ -99,7 +99,7 @@ public class AvklarArbeidsforholdDto {
 
     @JsonProperty(value = "overstyrtTom")
     private LocalDate overstyrtTom;
-    
+
     public AvklarArbeidsforholdDto() {
         //
     }
