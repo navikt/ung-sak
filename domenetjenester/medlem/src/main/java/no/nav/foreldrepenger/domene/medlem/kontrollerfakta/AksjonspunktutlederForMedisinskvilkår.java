@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.domene.medlem.kontrollerfakta;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -43,7 +42,13 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
                 final var aggregat = personopplysningerAggregat.get();
                 final var pleietrengende = grunnlag.getPleietrengende().getAktørId();
 
-                final var pleietrengendeRelasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengende)).findFirst().map(PersonRelasjonEntitet::getRelasjonsrolle).orElse(RelasjonsRolleType.UDEFINERT);
+                final var pleietrengendeRelasjon = aggregat.getSøkersRelasjoner()
+                    .stream()
+                    .filter(it -> it.getTilAktørId().equals(pleietrengende))
+                    .findFirst()
+                    .map(PersonRelasjonEntitet::getRelasjonsrolle)
+                    .orElse(RelasjonsRolleType.UDEFINERT);
+
                 final var harSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengende, RelasjonsRolleType.BARN);
                 if (harSammeBosted || RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
                     return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING));
@@ -51,6 +56,7 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
             }
         }
 
-        return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING), AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
+        return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING),
+            AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
     }
 }
