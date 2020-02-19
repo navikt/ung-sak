@@ -10,36 +10,44 @@ import org.apache.http.client.utils.URIBuilder;
 
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class FptilbakeRestKlientImpl implements FptilbakeRestKlient {
 
-    public static final String FPTILBAKE_HENT_ÅPEN_TILBAKEKREVING = "/behandlinger/tilbakekreving/aapen";
-
     private OidcRestClient restClient;
+    private URI uriHarÅpenTilbakekrevingsbehandling;
 
     public FptilbakeRestKlientImpl() {
         // for CDI proxy
     }
 
     @Inject
-    public FptilbakeRestKlientImpl(OidcRestClient restClient) {
+    public FptilbakeRestKlientImpl(OidcRestClient restClient,
+                                   @KonfigVerdi(value = "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING", defaultVerdi = "http://fptilbake/fptilbake/api/iverksett/start/behandlinger/tilbakekreving/aapen") String urlSjekkÅpenBehandling) {
         this.restClient = restClient;
+        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlSjekkÅpenBehandling, "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING");
     }
 
     @Override
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
-        URI uriHentÅpenTilbakekreving = lagRequestUri(saksnummer);
-        return restClient.get(uriHentÅpenTilbakekreving, Boolean.class);
+        URI uri = leggTilParameter(uriHarÅpenTilbakekrevingsbehandling, "saksnummer", saksnummer.getVerdi());
+        return restClient.get(uri, Boolean.class);
     }
 
-    private URI lagRequestUri(Saksnummer saksnummer) {
-        String fptilbakeBaseUrl = FptilbakeFelles.getFptilbakeBaseUrl();
-        String endpoint = fptilbakeBaseUrl + FPTILBAKE_HENT_ÅPEN_TILBAKEKREVING;
+    private static URI leggTilParameter(URI uri, String parameterNavn, String parameterVerdi) {
         try {
-            return new URIBuilder(endpoint).addParameter("saksnummer", saksnummer.getVerdi()).build();
+            return new URIBuilder(uri).addParameter(parameterNavn, parameterVerdi).build();
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Klarte ikke legge til parameter " + parameterNavn, e);
+        }
+    }
+
+    private static URI tilUri(String url, String konfigurertNavn) {
+        try {
+            return new URIBuilder(url).build();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for " + konfigurertNavn, e);
         }
     }
 

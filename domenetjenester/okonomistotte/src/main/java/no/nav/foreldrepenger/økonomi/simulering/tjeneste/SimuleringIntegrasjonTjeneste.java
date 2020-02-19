@@ -6,9 +6,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
@@ -17,8 +14,6 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 
 @ApplicationScoped
 public class SimuleringIntegrasjonTjeneste {
-
-    private static final Logger logger = LoggerFactory.getLogger(SimuleringIntegrasjonTjeneste.class);
 
     private TilkjentYtelseTjeneste tilkjentYtelseTjeneste;
     private K9OppdragRestKlient restKlient;
