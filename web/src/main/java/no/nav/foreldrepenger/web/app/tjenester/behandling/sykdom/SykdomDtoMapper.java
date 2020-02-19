@@ -70,6 +70,9 @@ class SykdomDtoMapper {
     }
 
     private List<PeriodeMedTilsyn> mapPerioderMedUtvidetTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
+        if (kontinuerligTilsyn == null) {
+            return List.of();
+        }
         return kontinuerligTilsyn.getPerioder()
             .stream()
             .filter(periode -> periode.getGrad() > 100)
@@ -78,6 +81,9 @@ class SykdomDtoMapper {
     }
 
     private List<PeriodeMedTilsyn> mapPerioderMedKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
+        if (kontinuerligTilsyn == null) {
+            return List.of();
+        }
         return kontinuerligTilsyn.getPerioder()
             .stream()
             .filter(periode -> periode.getGrad() == 100)
@@ -86,6 +92,9 @@ class SykdomDtoMapper {
     }
 
     private List<Legeerklæring> mapLegeerklæringer(Legeerklæringer legeerklæringer) {
+        if (legeerklæringer == null) {
+            return List.of();
+        }
         return legeerklæringer.getLegeerklæringer()
             .stream()
             .map(this::mapTilLegeerklæring)
