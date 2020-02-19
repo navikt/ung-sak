@@ -108,8 +108,8 @@ public class VilkårResultatTest {
         Behandlingsresultat behandlingsresultat2 = lagreOgGjenopphenteBehandlingsresultat(behandling2);
         // Assert
         assertThat(getBehandlingsresultat(behandling2)).isNotSameAs(getBehandlingsresultat(behandling1));
-        assertThat(getVilkårene(behandling2))
-            .isNotEqualTo(getVilkårene(behandling1));
+        assertThat(getVilkårene(behandling2).getId())
+            .isNotEqualTo(getVilkårene(behandling1).getId());
 
         Long id02 = behandlingsresultat2.getBehandlingId();
         assertThat(id02).isNotEqualTo(id01);

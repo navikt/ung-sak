@@ -21,7 +21,7 @@ public class VilkårResultatBuilder {
     VilkårResultatBuilder(Vilkårene eksisterendeResultat) {
         super();
         if (eksisterendeResultat != null) {
-            this.kladd = eksisterendeResultat;
+            this.kladd = new Vilkårene(eksisterendeResultat);
         }
     }
 
@@ -47,7 +47,7 @@ public class VilkårResultatBuilder {
     public Vilkårene build() {
         if (built) throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
         built = true;
-        return new Vilkårene(kladd);
+        return kladd;
     }
 
     public VilkårResultatBuilder fjernVilkår(VilkårType vilkårType) {

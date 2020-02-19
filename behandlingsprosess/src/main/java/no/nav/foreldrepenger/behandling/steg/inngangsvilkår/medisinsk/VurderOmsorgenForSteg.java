@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -18,10 +17,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
@@ -31,14 +26,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
-import no.nav.foreldrepenger.inngangsvilkaar.medisinsk.MedisinskVilkårTjeneste;
+import no.nav.foreldrepenger.inngangsvilkaar.medisinsk.OmsorgenForTjeneste;
 import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.MedisinskVilkårResultat;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.PleiePeriode;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 @BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
@@ -49,9 +39,8 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
     private BehandlingRepositoryProvider repositoryProvider;
-    private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private MedisinskVilkårTjeneste medisinskVilkårTjeneste;
+    private OmsorgenForTjeneste omsorgenForTjeneste;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -61,22 +50,25 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     @Inject
     public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 PleiebehovResultatRepository resultatRepository,
                                  VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                 MedisinskVilkårTjeneste medisinskVilkårTjeneste) {
+                                 OmsorgenForTjeneste omsorgenForTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
-        this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.medisinskVilkårTjeneste = medisinskVilkårTjeneste;
+        this.omsorgenForTjeneste = omsorgenForTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
 
+        final var vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, perioder);
 
+        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        final var oppdaterteVilkår = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
+
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
