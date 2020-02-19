@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.domene.vedtak.ekstern.VurderOppgaveArenaTask;
 import no.nav.foreldrepenger.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.foreldrepenger.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.foreldrepenger.økonomi.VurderOgSendØkonomiOppdragTask;
+import no.nav.foreldrepenger.økonomi.SendØkonomiOppdragTask;
 import no.nav.foreldrepenger.økonomi.task.SendTilkjentYtelseTask;
 import no.nav.foreldrepenger.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
@@ -50,7 +50,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
         parallelle.add(new ProsessTaskData(SendVedtaksbrevTask.TASKTYPE));
-        parallelle.add(new ProsessTaskData(VurderOgSendØkonomiOppdragTask.TASKTYPE));
+        parallelle.add(new ProsessTaskData(SendØkonomiOppdragTask.TASKTYPE));
         avsluttOppgave.ifPresent(parallelle::add);
 
         taskData.addNesteParallell(parallelle);

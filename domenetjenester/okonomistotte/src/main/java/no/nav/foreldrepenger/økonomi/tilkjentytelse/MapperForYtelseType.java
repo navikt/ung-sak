@@ -2,23 +2,23 @@ package no.nav.foreldrepenger.økonomi.tilkjentytelse;
 
 import java.util.Map;
 
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
 
 class MapperForYtelseType {
 
-    private static final Map<FagsakYtelseType, TilkjentYtelseV1.YtelseType> YTELSE_TYPE_MAP = Map.of(
-        FagsakYtelseType.ENGANGSTØNAD, TilkjentYtelseV1.YtelseType.ENGANGSTØNAD,
-        FagsakYtelseType.FORELDREPENGER, TilkjentYtelseV1.YtelseType.FORELDREPENGER,
-        FagsakYtelseType.SVANGERSKAPSPENGER, TilkjentYtelseV1.YtelseType.SVANGERSKAPSPENGER
+    private static final Map<FagsakYtelseType, YtelseType> YTELSE_TYPE_MAP = Map.of(
+        FagsakYtelseType.ENGANGSTØNAD, YtelseType.ENGANGSTØNAD,
+        FagsakYtelseType.FORELDREPENGER, YtelseType.FORELDREPENGER,
+        FagsakYtelseType.SVANGERSKAPSPENGER, YtelseType.SVANGERSKAPSPENGER
     );
 
     private MapperForYtelseType() {
         //for å unngå instansiering, slik at SonarQube blir glad
     }
 
-    static TilkjentYtelseV1.YtelseType mapYtelseType(FagsakYtelseType fagsakYtelseType) {
-        TilkjentYtelseV1.YtelseType resultat = YTELSE_TYPE_MAP.get(fagsakYtelseType);
+    static YtelseType mapYtelseType(FagsakYtelseType fagsakYtelseType) {
+        YtelseType resultat = YTELSE_TYPE_MAP.get(fagsakYtelseType);
         if (resultat != null) {
             return resultat;
         }

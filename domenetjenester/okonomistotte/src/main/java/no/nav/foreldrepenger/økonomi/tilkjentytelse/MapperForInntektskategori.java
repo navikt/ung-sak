@@ -2,30 +2,29 @@ package no.nav.foreldrepenger.økonomi.tilkjentytelse;
 
 import java.util.Map;
 
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 class MapperForInntektskategori {
 
-    private static final Map<Inntektskategori, TilkjentYtelseV1.Inntektskategori> INNTEKTSKATEGORI_MAP = Map.of(
-        Inntektskategori.ARBEIDSTAKER, TilkjentYtelseV1.Inntektskategori.ARBEIDSTAKER,
-        Inntektskategori.FRILANSER, TilkjentYtelseV1.Inntektskategori.FRILANSER,
-        Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, TilkjentYtelseV1.Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
-        Inntektskategori.DAGPENGER, TilkjentYtelseV1.Inntektskategori.DAGPENGER,
-        Inntektskategori.ARBEIDSAVKLARINGSPENGER, TilkjentYtelseV1.Inntektskategori.ARBEIDSAVKLARINGSPENGER,
-        Inntektskategori.SJØMANN, TilkjentYtelseV1.Inntektskategori.SJØMANN,
-        Inntektskategori.DAGMAMMA, TilkjentYtelseV1.Inntektskategori.DAGMAMMA,
-        Inntektskategori.JORDBRUKER, TilkjentYtelseV1.Inntektskategori.JORDBRUKER,
-        Inntektskategori.FISKER, TilkjentYtelseV1.Inntektskategori.FISKER,
-        Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, TilkjentYtelseV1.Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER
+    private static final Map<Inntektskategori, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori> INNTEKTSKATEGORI_MAP = Map.of(
+        Inntektskategori.ARBEIDSTAKER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.ARBEIDSTAKER,
+        Inntektskategori.FRILANSER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.FRILANSER,
+        Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
+        Inntektskategori.DAGPENGER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.DAGPENGER,
+        Inntektskategori.ARBEIDSAVKLARINGSPENGER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.ARBEIDSAVKLARINGSPENGER,
+        Inntektskategori.SJØMANN, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.SJØMANN,
+        Inntektskategori.DAGMAMMA, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.DAGMAMMA,
+        Inntektskategori.JORDBRUKER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.JORDBRUKER,
+        Inntektskategori.FISKER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.FISKER,
+        Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER
     );
 
     private MapperForInntektskategori() {
         //for å unngå instansiering, slik at SonarQube blir glad
     }
 
-    static TilkjentYtelseV1.Inntektskategori mapInntektskategori(Inntektskategori inntektskategori) {
-        TilkjentYtelseV1.Inntektskategori resultat = INNTEKTSKATEGORI_MAP.get(inntektskategori);
+    static no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori mapInntektskategori(Inntektskategori inntektskategori) {
+        no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori resultat = INNTEKTSKATEGORI_MAP.get(inntektskategori);
         if (resultat != null) {
             return resultat;
         }

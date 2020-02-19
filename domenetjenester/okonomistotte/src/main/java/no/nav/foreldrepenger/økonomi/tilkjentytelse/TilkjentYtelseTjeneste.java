@@ -14,10 +14,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.TilkjentYtelse;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseBehandlingInfoV1;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelsePeriodeV1;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
+import no.nav.k9.oppdrag.kontrakt.Saksnummer;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 
 @ApplicationScoped
 public class TilkjentYtelseTjeneste {
@@ -31,12 +31,20 @@ public class TilkjentYtelseTjeneste {
     }
 
     @Inject
-    public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository, 
-                                  BehandlingVedtakRepository behandlingVedtakRepository, 
+    public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
+                                  BehandlingVedtakRepository behandlingVedtakRepository,
                                   @Any Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilkjentYtelse = tilkjentYtelse;
+    }
+
+    public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId)
+            .orElseThrow(() -> new IllegalArgumentException("Vedtak er ikke fattet enda. Denne tjenesten er kun designet for bruk etter at vedtak er fattet."));
+
+        return mapBehandlingsinfo(behandling, vedtak);
     }
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
@@ -48,20 +56,19 @@ public class TilkjentYtelseTjeneste {
         YtelseTypeTilkjentYtelseTjeneste tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, behandling.getFagsakYtelseType()).orElseThrow();
 
         List<TilkjentYtelsePeriodeV1> perioder = tjeneste.hentTilkjentYtelsePerioder(behandlingId);
-        TilkjentYtelseBehandlingInfoV1 behandlingsinfo = mapBehandlingsinfo(behandling, vedtak);
 
         boolean erOpphør = tjeneste.erOpphør(behandlingsresultat);
         Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(behandling, behandlingsresultat);
         LocalDate endringsdato = tjeneste.hentEndringstidspunkt(behandlingId);
-        return new TilkjentYtelseV1(behandlingsinfo, perioder)
-            .setErOpphør(erOpphør)
+        return new TilkjentYtelse(endringsdato, perioder)
             .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)
+            .setErOpphør(erOpphør)
             .setEndringsdato(endringsdato);
     }
 
     private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingVedtak vedtak) {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
-        info.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+        info.setSaksnummer(new Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()));
         info.setBehandlingId(behandling.getId());
         info.setYtelseType(MapperForYtelseType.mapYtelseType(behandling.getFagsakYtelseType()));
         info.setAnsvarligSaksbehandler(vedtak.getAnsvarligSaksbehandler());
