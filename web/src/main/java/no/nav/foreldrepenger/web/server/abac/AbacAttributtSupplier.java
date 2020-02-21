@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 
+import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.vedtak.sikkerhet.abac.AbacAttributtType;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
+import no.nav.vedtak.sikkerhet.abac.StandardAbacAttributtType;
 
 /**
  * Mapper om dtoer som har @AbacAttributt for å angi Abac nøkler for sporing, etc.
@@ -58,10 +60,11 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
 
                 var resultat = m.invoke(obj);
                 if (resultat != null) {
+                    var abacAttributtType = toAbacAttributtType(key);
                     if (Collection.class.isAssignableFrom(rt)) {
-                        abac.leggTil(new MyAbac(key), (Collection) resultat);
+                        abac.leggTil(abacAttributtType, (Collection) resultat);
                     } else {
-                        abac.leggTil(new MyAbac(key), resultat);
+                        abac.leggTil(abacAttributtType, resultat);
                     }
                     erLagtTil = true;
                 }
@@ -74,24 +77,26 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
         }
         return abac;
     }
-
-    private static class MyAbac implements AbacAttributtType {
-
-        private String kode;
-
-        public MyAbac(String kode) {
-            this.kode = kode;
+    
+    private static final AbacAttributtType toAbacAttributtType(String key) {
+        /*
+         * XXX: Implementasjoner av AbacAttributtType mangler equals og hashcode. Flere steder, slik
+         *      som "AbacDataAttributter.getVerdier", bruker equals+hashCode for sjekk av om et gitt
+         *      attributt er satt. Inntil dette er ryddet opp i må kun én instans per key benyttes.
+         */
+        
+        for (AbacAttributtType type : StandardAbacAttributtType.values()) {
+            if (type.getSporingsloggKode().equals(key)) {
+                return type;
+            }
         }
-
-        @Override
-        public String getSporingsloggKode() {
-            return kode;
+        for (AbacAttributtType type : AppAbacAttributtType.values()) {
+            if (type.getSporingsloggKode().equals(key)) {
+                return type;
+            }
         }
-
-        @Override
-        public boolean getMaskerOutput() {
-            return false;
-        }
-
+        
+        throw new IllegalStateException("Ukjent ABAC-attributt.");
     }
+
 }
