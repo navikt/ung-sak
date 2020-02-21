@@ -171,7 +171,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
         AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(ES, SVP, FP, PSB)),
-    VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OMSORGEN_FOR_KODE,
+    VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
         AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(ES, SVP, FP, PSB)),
     // Gruppe : 600
