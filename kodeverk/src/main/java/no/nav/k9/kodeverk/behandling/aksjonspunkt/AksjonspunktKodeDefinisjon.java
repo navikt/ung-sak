@@ -34,16 +34,20 @@ public class AksjonspunktKodeDefinisjon {
     public static final String FORESLÅ_VEDTAK_KODE = "5015";
     public static final String FORESLÅ_VEDTAK_MANUELT_KODE = "5028";
 
-    public static final String OVERSTYRING_AV_BEREGNING_KODE = "6007";
+    public static final String SØKERS_OPPLYSNINGSPLIKT_OVST_KODE = "6002";
+    public static final String OVERSTYRING_AV_OMSORGENFOR_KODE = "6003";
+    public static final String OVERSTYRING_AV_MEDISINSKVILKÅR_UNDER_18_KODE = "6004";
+    public static final String OVERSTYRING_AV_MEDISINSKVILKÅR_OVER_18_KODE = "6008";
     public static final String OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_KODE = "6005";
-    public static final String OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE_KODE = "6012";
     public static final String OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE = "6006";
+    public static final String OVERSTYRING_AV_BEREGNING_KODE = "6007";
     public static final String OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE = "6011";
+    public static final String OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE_KODE = "6012";
     public static final String OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE = "6014";
     public static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
+    public static final String MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE = "6068";
 
     public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";
-    public static final String SØKERS_OPPLYSNINGSPLIKT_OVST_KODE = "6002";
 
     public static final String VARSEL_REVURDERING_ETTERKONTROLL_KODE = "5025";
     public static final String VARSEL_REVURDERING_MANUELL_KODE = "5026";
@@ -86,7 +90,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_OPPTJENINGSVILKÅRET_KODE = "5089";
 
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
-    public static final String MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE = "6068";
     public static final String VURDER_TILBAKETREKK_KODE = "5090";
 
     public static final String VURDER_FARESIGNALER_KODE = "5095";
