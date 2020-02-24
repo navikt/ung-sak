@@ -17,6 +17,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHendelse;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 @ApplicationScoped
 @ProsessTask(InnhentIAYIAbakusTask.TASKTYPE)
@@ -49,7 +50,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        Optional<ProsessTaskHendelse> hendelse = prosessTaskData.getHendelse();
+        Optional<String> hendelse = Optional.ofNullable(prosessTaskData.getPropertyValue(ProsessTaskData.HENDELSE_PROPERTY));
         if (hendelse.isPresent()) {
             validerHendelse(prosessTaskData);
             return;
@@ -79,6 +80,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     private void settTaskPåVent(ProsessTaskData prosessTaskData) {
         prosessTaskData.setProperty(ProsessTaskData.HENDELSE_PROPERTY, IAY_REGISTERDATA_CALLBACK);
+        prosessTaskData.setStatus(ProsessTaskStatus.VENTER_SVAR);
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }

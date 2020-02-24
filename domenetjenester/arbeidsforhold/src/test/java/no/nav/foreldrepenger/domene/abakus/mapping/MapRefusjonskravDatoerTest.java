@@ -23,7 +23,7 @@ public class MapRefusjonskravDatoerTest {
         LocalDate førsteDagMedRefusjonskrav = LocalDate.now().minusDays(20);
         String orgnr = "923609016";
         RefusjonskravDatoerDto dto = new RefusjonskravDatoerDto(List.of(new RefusjonskravDatoDto(new Organisasjon(orgnr),
-            førsteInnsendingAvRefusjonskrav, førsteDagMedRefusjonskrav)));
+            førsteInnsendingAvRefusjonskrav, førsteDagMedRefusjonskrav, false)));
 
         // Act
         List<RefusjonskravDato> refusjonskravDatoer = MapRefusjonskravDatoer.map(dto);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,8 +22,8 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonskravDatoerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
-import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest.GrunnlagVersjon;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerRequest;
@@ -221,9 +222,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
                     .forEach(im -> {
                         behandlingRepository.hentBehandlingHvisFinnes(iayg.getKoblingReferanse().orElseThrow())
                             .ifPresent(behandling -> {
-                            sakInntektsmeldinger.leggTil(behandling.getId(), iayg.getEksternReferanse(), iayg.getOpprettetTidspunkt(), im);
-                            sakInntektsmeldinger.leggTil(behandling.getId(), iayg.getEksternReferanse(), iayg.getOpprettetTidspunkt(), iayg);
-                        });
+                                sakInntektsmeldinger.leggTil(behandling.getId(), iayg.getEksternReferanse(), iayg.getOpprettetTidspunkt(), im);
+                                sakInntektsmeldinger.leggTil(behandling.getId(), iayg.getEksternReferanse(), iayg.getOpprettetTidspunkt(), iayg);
+                            });
                     });
             });
         }
@@ -306,7 +307,8 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             tilBehandling.getUuid(),
             fraBehandling.getUuid(),
             new YtelseType(tilBehandling.getFagsakYtelseType().getKode()),
-            new AktørIdPersonident(tilBehandling.getAktørId().getId()));
+            new AktørIdPersonident(tilBehandling.getAktørId().getId()),
+            EnumSet.allOf(Dataset.class));
         try {
             abakusTjeneste.kopierGrunnlag(request);
         } catch (IOException e) {
