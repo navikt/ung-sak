@@ -17,12 +17,12 @@ public class VurderEtterlønnSluttpakkeDto {
     @NotNull
     private Boolean erEtterlønnSluttpakke;
 
-    protected VurderEtterlønnSluttpakkeDto() {
-        //
-    }
-
     public VurderEtterlønnSluttpakkeDto(Boolean erEtterlønnSluttpakke) { // NOSONAR
         this.erEtterlønnSluttpakke = erEtterlønnSluttpakke;
+    }
+
+    protected VurderEtterlønnSluttpakkeDto() {
+        //
     }
 
     public Boolean erEtterlønnSluttpakke() {

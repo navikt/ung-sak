@@ -13,12 +13,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class KortvarigeArbeidsforholdDto extends FaktaOmBeregningAndelDto {
 
-    @JsonProperty(value="erTidsbegrensetArbeidsforhold", required = true)
+    @JsonProperty(value = "erTidsbegrensetArbeidsforhold", required = true)
     @NotNull
     private Boolean erTidsbegrensetArbeidsforhold;
-    
+
     public KortvarigeArbeidsforholdDto() {
-        // 
+        //
     }
 
     public Boolean getErTidsbegrensetArbeidsforhold() {

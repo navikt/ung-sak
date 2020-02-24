@@ -31,7 +31,7 @@ public class FastsatteVerdierForBesteberegningDto {
     @NotNull
     private Inntektskategori inntektskategori;
 
-    protected FastsatteVerdierForBesteberegningDto() {
+    public FastsatteVerdierForBesteberegningDto() {
         //
     }
 
@@ -41,15 +41,15 @@ public class FastsatteVerdierForBesteberegningDto {
         this.inntektskategori = inntektskategori;
     }
 
-    public Integer getFastsattBeløp() {
-        return fastsattBeløp;
-    }
-
     public BigDecimal finnFastsattBeløpPrÅr() {
         if (fastsattBeløp == null) {
             throw new IllegalStateException("Feil under oppdatering: Månedslønn er ikke satt");
         }
         return BigDecimal.valueOf((long) fastsattBeløp * MÅNEDER_I_1_ÅR);
+    }
+
+    public Integer getFastsattBeløp() {
+        return fastsattBeløp;
     }
 
     public Inntektskategori getInntektskategori() {
@@ -58,6 +58,14 @@ public class FastsatteVerdierForBesteberegningDto {
 
     public Boolean getSkalHaBesteberegning() {
         return true;
+    }
+
+    public void setFastsattBeløp(Integer fastsattBeløp) {
+        this.fastsattBeløp = fastsattBeløp;
+    }
+
+    public void setInntektskategori(Inntektskategori inntektskategori) {
+        this.inntektskategori = inntektskategori;
     }
 
 }

@@ -26,23 +26,13 @@ public class SaksnummerDto {
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
     private final String saksnummer;
 
-    @JsonCreator
-    public SaksnummerDto(@JsonProperty("saksnummer") @NotNull @Size(max = 19) @Pattern(regexp = "^[a-zA-Z0-9]*$") String saksnummer) {
-        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
-    }
-
     public SaksnummerDto(Saksnummer saksnummer) {
         this.saksnummer = saksnummer.getVerdi();
     }
 
-    @AbacAttributt("saksnummer")
-    public Saksnummer getVerdi() {
-        return new Saksnummer(saksnummer);
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '<' + "" + saksnummer + '>';
+    @JsonCreator
+    public SaksnummerDto(@JsonProperty("saksnummer") @NotNull @Size(max = 19) @Pattern(regexp = "^[a-zA-Z0-9]*$") String saksnummer) {
+        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
     }
 
     @Override
@@ -56,9 +46,19 @@ public class SaksnummerDto {
         return Objects.equals(saksnummer, other.saksnummer);
     }
 
+    @AbacAttributt("saksnummer")
+    public Saksnummer getVerdi() {
+        return new Saksnummer(saksnummer);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(saksnummer);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '<' + "" + saksnummer + '>';
     }
 
 }

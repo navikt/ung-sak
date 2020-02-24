@@ -14,17 +14,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class InntektPrAndelDto {
 
-    @JsonProperty(value = "inntekt", required = true)
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer inntekt;
-
     @JsonProperty(value = "andelsnr", required = true)
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long andelsnr;
 
-    protected InntektPrAndelDto() {
+    @JsonProperty(value = "inntekt", required = true)
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer inntekt;
+
+    public InntektPrAndelDto() {
         //
     }
 
@@ -33,19 +33,19 @@ public class InntektPrAndelDto {
         this.andelsnr = andelsnr;
     }
 
-    public Integer getInntekt() {
-        return inntekt;
-    }
-
-    public void setInntekt(Integer inntekt) {
-        this.inntekt = inntekt;
-    }
-
     public Long getAndelsnr() {
         return andelsnr;
     }
 
+    public Integer getInntekt() {
+        return inntekt;
+    }
+
     public void setAndelsnr(Long andelsnr) {
         this.andelsnr = andelsnr;
+    }
+
+    public void setInntekt(Integer inntekt) {
+        this.inntekt = inntekt;
     }
 }

@@ -25,7 +25,7 @@ public class OverstyringBeregningDto extends OverstyringAksjonspunktDto {
     @Max(1000000L)
     private long beregnetTilkjentYtelse;
 
-    protected OverstyringBeregningDto() {
+    public OverstyringBeregningDto() {
         //
     }
 
@@ -34,19 +34,23 @@ public class OverstyringBeregningDto extends OverstyringAksjonspunktDto {
         this.beregnetTilkjentYtelse = beregnetTilkjentYtelse;
     }
 
-    public long getBeregnetTilkjentYtelse() {
-        return beregnetTilkjentYtelse;
-    }
-
     @JsonIgnore
     @Override
     public String getAvslagskode() {
         return null;
     }
 
+    public long getBeregnetTilkjentYtelse() {
+        return beregnetTilkjentYtelse;
+    }
+
     @JsonIgnore
     @Override
     public boolean getErVilkarOk() {
         return true;
+    }
+
+    public void setBeregnetTilkjentYtelse(long beregnetTilkjentYtelse) {
+        this.beregnetTilkjentYtelse = beregnetTilkjentYtelse;
     }
 }

@@ -16,17 +16,17 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="overskrift")
-    @Size(max = 200)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String overskrift;
-
-    @JsonProperty(value="fritekstBrev")
+    @JsonProperty(value = "fritekstBrev")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String fritekstBrev;
 
-    @JsonProperty(value="skalBrukeOverstyrendeFritekstBrev", required=true)
+    @JsonProperty(value = "overskrift")
+    @Size(max = 200)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String overskrift;
+
+    @JsonProperty(value = "skalBrukeOverstyrendeFritekstBrev", required = true)
     private boolean skalBrukeOverstyrendeFritekstBrev;
 
     protected VedtaksbrevOverstyringDto() {
@@ -34,22 +34,34 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
     }
 
     protected VedtaksbrevOverstyringDto(String begrunnelse, String overskrift, String fritekstBrev,
-                              boolean skalBrukeOverstyrendeFritekstBrev) {
+                                        boolean skalBrukeOverstyrendeFritekstBrev) {
         super(begrunnelse);
         this.overskrift = overskrift;
         this.fritekstBrev = fritekstBrev;
         this.skalBrukeOverstyrendeFritekstBrev = skalBrukeOverstyrendeFritekstBrev;
     }
 
-    public String getOverskrift() {
-        return overskrift;
-    }
-
     public String getFritekstBrev() {
         return fritekstBrev;
     }
 
+    public String getOverskrift() {
+        return overskrift;
+    }
+
     public boolean isSkalBrukeOverstyrendeFritekstBrev() {
         return skalBrukeOverstyrendeFritekstBrev;
+    }
+
+    public void setFritekstBrev(String fritekstBrev) {
+        this.fritekstBrev = fritekstBrev;
+    }
+
+    public void setOverskrift(String overskrift) {
+        this.overskrift = overskrift;
+    }
+
+    public void setSkalBrukeOverstyrendeFritekstBrev(boolean skalBrukeOverstyrendeFritekstBrev) {
+        this.skalBrukeOverstyrendeFritekstBrev = skalBrukeOverstyrendeFritekstBrev;
     }
 }

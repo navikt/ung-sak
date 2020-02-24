@@ -28,11 +28,6 @@ public class JournalpostIdDto {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
     }
 
-    @AbacAttributt("journalpostId")
-    public JournalpostId getJournalpostId() {
-        return new JournalpostId(journalpostId);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
@@ -42,6 +37,11 @@ public class JournalpostIdDto {
         }
         var other = (JournalpostIdDto) obj;
         return Objects.equals(journalpostId, other.journalpostId);
+    }
+
+    @AbacAttributt("journalpostId")
+    public JournalpostId getJournalpostId() {
+        return new JournalpostId(journalpostId);
     }
 
     @Override

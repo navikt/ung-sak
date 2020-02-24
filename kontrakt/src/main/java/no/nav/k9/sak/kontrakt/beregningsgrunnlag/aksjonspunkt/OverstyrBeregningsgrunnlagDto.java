@@ -24,6 +24,11 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE)
 public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
 
+    @JsonProperty(value = "endringer")
+    @Size(max = 200)
+    @Valid
+    private Set<Lønnsendring> endringer;
+
     @JsonProperty(value = "fakta")
     @Valid
     private FaktaBeregningLagreDto fakta;
@@ -34,12 +39,7 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
     @Size(max = 100)
     private List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler;
 
-    @JsonProperty(value = "endringer")
-    @Size(max = 200)
-    @Valid
-    private Set<Lønnsendring> endringer;
-
-    protected OverstyrBeregningsgrunnlagDto() {
+    public OverstyrBeregningsgrunnlagDto() {
         //
     }
 
@@ -52,6 +52,10 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
     @Override
     public String getAvslagskode() {
         return null;
+    }
+
+    public Set<Lønnsendring> getEndringer() {
+        return endringer;
     }
 
     @JsonIgnore
@@ -68,11 +72,15 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
         return overstyrteAndeler;
     }
 
-    public Set<Lønnsendring> getEndringer() {
-        return endringer;
-    }
-
     public void setEndringer(Set<Lønnsendring> endringer) {
         this.endringer = endringer;
+    }
+
+    public void setFakta(FaktaBeregningLagreDto fakta) {
+        this.fakta = fakta;
+    }
+
+    public void setOverstyrteAndeler(List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler) {
+        this.overstyrteAndeler = overstyrteAndeler;
     }
 }

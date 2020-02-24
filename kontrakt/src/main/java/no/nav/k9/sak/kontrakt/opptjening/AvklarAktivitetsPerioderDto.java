@@ -26,7 +26,7 @@ public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
     @Size(max = 100)
     private List<AvklarOpptjeningAktivitetDto> opptjeningAktivitetList;
 
-    protected AvklarAktivitetsPerioderDto() {
+    public AvklarAktivitetsPerioderDto() {
         // For Jackson
     }
 
@@ -37,6 +37,10 @@ public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
 
     public List<AvklarOpptjeningAktivitetDto> getOpptjeningAktivitetList() {
         return opptjeningAktivitetList;
+    }
+
+    public void setOpptjeningAktivitetList(List<AvklarOpptjeningAktivitetDto> opptjeningAktivitetList) {
+        this.opptjeningAktivitetList = opptjeningAktivitetList;
     }
 
 }

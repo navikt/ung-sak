@@ -13,11 +13,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BehandlingRettigheterDto {
 
-    @JsonProperty(value="harSoknad")
+    @JsonProperty(value = "harSoknad")
     private Boolean harSoknad;
 
     @JsonCreator
-    public BehandlingRettigheterDto(@JsonProperty(value="harSoknad") Boolean harSoknad) {
+    public BehandlingRettigheterDto(@JsonProperty(value = "harSoknad") Boolean harSoknad) {
         this.harSoknad = harSoknad;
     }
 

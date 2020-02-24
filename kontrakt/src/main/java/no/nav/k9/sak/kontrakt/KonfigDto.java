@@ -33,11 +33,11 @@ public class KonfigDto {
         this.verdi = verdi;
     }
 
-    public String getVerdi() {
-        return verdi;
-    }
-
     public String getProperty() {
         return property;
+    }
+
+    public String getVerdi() {
+        return verdi;
     }
 }

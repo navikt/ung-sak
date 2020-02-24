@@ -27,6 +27,22 @@ public class BehandlingÅrsakDto {
         // trengs for deserialisering av JSON
     }
 
+    public BehandlingÅrsakType getBehandlingArsakType() {
+        return behandlingÅrsakType;
+    }
+
+    @JsonGetter
+    public Boolean getErAutomatiskRevurdering() {
+        if (behandlingÅrsakType == null) {
+            return false;
+        }
+        return BehandlingÅrsakType.årsakerForAutomatiskRevurdering().stream().anyMatch(årsak -> årsak.equals(this.behandlingÅrsakType));
+    }
+
+    public boolean isManueltOpprettet() {
+        return manueltOpprettet;
+    }
+
     public void setBehandlingArsakType(BehandlingÅrsakType behandlingArsakType) {
         this.behandlingÅrsakType = behandlingArsakType;
     }
@@ -34,22 +50,5 @@ public class BehandlingÅrsakDto {
     public void setManueltOpprettet(boolean manueltOpprettet) {
         this.manueltOpprettet = manueltOpprettet;
     }
-
-    @JsonGetter
-    public Boolean getErAutomatiskRevurdering(){
-        if(behandlingÅrsakType == null){
-            return false;
-        }
-        return BehandlingÅrsakType.årsakerForAutomatiskRevurdering().stream().anyMatch(årsak -> årsak.equals(this.behandlingÅrsakType));
-    }
-
-    public BehandlingÅrsakType getBehandlingArsakType() {
-        return behandlingÅrsakType;
-    }
-
-    public boolean isManueltOpprettet() {
-        return manueltOpprettet;
-    }
-
 
 }

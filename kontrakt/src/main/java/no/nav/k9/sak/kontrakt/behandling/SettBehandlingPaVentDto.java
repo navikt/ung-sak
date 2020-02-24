@@ -21,29 +21,29 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class SettBehandlingPaVentDto {
 
-    @JsonProperty(value="behandlingId")
+    @JsonProperty(value = "behandlingId")
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingId;
 
     @JsonAlias("versjon")
-    @JsonProperty(value="behandlingVersjon")
+    @JsonProperty(value = "behandlingVersjon")
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
-    @JsonProperty(value="frist")
+    @JsonProperty(value = "frist")
     private LocalDate frist;
 
-    @JsonProperty(value="ventearsak")
+    @JsonProperty(value = "ventearsak")
     private Venteårsak ventearsak;
 
     public SettBehandlingPaVentDto() {
         //
     }
-    
+
     @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;

@@ -34,7 +34,7 @@ public class FastsettBGTidsbegrensetArbeidsforholdDto extends BekreftetAksjonspu
     @Max(1000 * 1000 * 10)
     private Integer frilansInntekt;
 
-    protected FastsettBGTidsbegrensetArbeidsforholdDto() {
+    public FastsettBGTidsbegrensetArbeidsforholdDto() {
         // For Jackson
     }
 

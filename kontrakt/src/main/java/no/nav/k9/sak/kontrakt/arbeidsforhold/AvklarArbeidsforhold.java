@@ -21,13 +21,13 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_ARBEIDSFORHOLD_KODE)
 public class AvklarArbeidsforhold extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="arbeidsforhold")
+    @JsonProperty(value = "arbeidsforhold")
     @Valid
     @Size(max = 1000)
     private List<AvklarArbeidsforholdDto> arbeidsforhold;
 
     public AvklarArbeidsforhold() {
-        //For Jackson
+        // For Jackson
     }
 
     public AvklarArbeidsforhold(String begrunnelse, List<AvklarArbeidsforholdDto> arbeidsforhold) {
@@ -39,5 +39,8 @@ public class AvklarArbeidsforhold extends BekreftetAksjonspunktDto {
         return arbeidsforhold;
     }
 
+    public void setArbeidsforhold(List<AvklarArbeidsforholdDto> arbeidsforhold) {
+        this.arbeidsforhold = arbeidsforhold;
+    }
 
 }

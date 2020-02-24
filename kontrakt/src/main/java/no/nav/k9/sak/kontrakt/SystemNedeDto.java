@@ -17,29 +17,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class SystemNedeDto {
 
-    @JsonProperty(value = "systemNavn", required = true)
-    @NotNull
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String systemNavn;
-
     @JsonProperty(value = "endepunkt")
     @Size(max = 500)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String endepunkt;
-
-    @JsonProperty(value = "nedeFremTilTidspunkt")
-    private LocalDateTime nedeFremTilTidspunkt;
 
     @JsonProperty(value = "feilmelding")
     @Size(max = 50000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String feilmelding;
 
+    @JsonProperty(value = "nedeFremTilTidspunkt")
+    private LocalDateTime nedeFremTilTidspunkt;
+
     @JsonProperty(value = "stackTrace")
     @Size(max = 50000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String stackTrace;
+
+    @JsonProperty(value = "systemNavn", required = true)
+    @NotNull
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String systemNavn;
 
     public SystemNedeDto(String systemNavn, String endepunkt, LocalDateTime nedeFremTilTidspunkt, String feilmelding, String stackTrace) {
         this.systemNavn = systemNavn;
@@ -53,23 +53,23 @@ public class SystemNedeDto {
         //
     }
 
-    public String getSystemNavn() {
-        return systemNavn;
-    }
-
     public String getEndepunkt() {
         return endepunkt;
-    }
-
-    public LocalDateTime getNedeFremTilTidspunkt() {
-        return nedeFremTilTidspunkt;
     }
 
     public String getFeilmelding() {
         return feilmelding;
     }
 
+    public LocalDateTime getNedeFremTilTidspunkt() {
+        return nedeFremTilTidspunkt;
+    }
+
     public String getStackTrace() {
         return stackTrace;
+    }
+
+    public String getSystemNavn() {
+        return systemNavn;
     }
 }

@@ -41,15 +41,15 @@ public class PermisjonDto {
     @NotNull
     private PermisjonsbeskrivelseType type;
 
+    public PermisjonDto() {
+        //
+    }
+
     public PermisjonDto(LocalDate permisjonFom, LocalDate permisjonTom, BigDecimal permisjonsprosent, PermisjonsbeskrivelseType type) {
         this.permisjonFom = permisjonFom;
         this.permisjonTom = permisjonTom;
         this.permisjonsprosent = permisjonsprosent;
         this.type = type;
-    }
-
-    public PermisjonDto() {
-        //
     }
 
     public LocalDate getPermisjonFom() {

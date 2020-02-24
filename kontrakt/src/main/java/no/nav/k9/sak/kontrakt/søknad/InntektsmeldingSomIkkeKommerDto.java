@@ -20,12 +20,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class InntektsmeldingSomIkkeKommerDto {
 
-    /** Orgnummer dersom arbeisgiver er virksomhet. */
-    @JsonAlias({ "orgNummer" })
-    @JsonProperty(value = "organisasjonsnummer")
-    @Valid
-    private OrgNummer organisasjonsnummer;
-
     /** AktørId dersom arbeisgiver er virksomhet. */
     // AktørId (13-tall) for person-arbeidsgiver
     @JsonProperty(value = "aktørId")
@@ -34,6 +28,12 @@ public class InntektsmeldingSomIkkeKommerDto {
 
     @JsonProperty(value = "brukerHarSagtAtIkkeKommer")
     private boolean brukerHarSagtAtIkkeKommer;
+
+    /** Orgnummer dersom arbeisgiver er virksomhet. */
+    @JsonAlias({ "orgNummer" })
+    @JsonProperty(value = "organisasjonsnummer")
+    @Valid
+    private OrgNummer organisasjonsnummer;
 
     public InntektsmeldingSomIkkeKommerDto() { // NOSONAR
         // Jackson
@@ -44,6 +44,10 @@ public class InntektsmeldingSomIkkeKommerDto {
         this.brukerHarSagtAtIkkeKommer = brukerHarSagtAtIkkeKommer;
     }
 
+    public AktørId getAktørId() {
+        return aktørId;
+    }
+
     public OrgNummer getOrganisasjonsnummer() {
         return organisasjonsnummer;
     }
@@ -52,7 +56,15 @@ public class InntektsmeldingSomIkkeKommerDto {
         return brukerHarSagtAtIkkeKommer;
     }
 
-    public AktørId getAktørId() {
-        return aktørId;
+    public void setAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
+    }
+
+    public void setBrukerHarSagtAtIkkeKommer(boolean brukerHarSagtAtIkkeKommer) {
+        this.brukerHarSagtAtIkkeKommer = brukerHarSagtAtIkkeKommer;
+    }
+
+    public void setOrganisasjonsnummer(OrgNummer organisasjonsnummer) {
+        this.organisasjonsnummer = organisasjonsnummer;
     }
 }

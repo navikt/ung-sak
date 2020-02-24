@@ -18,9 +18,9 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BehandlingUuidDto {
 
-    public static final String NAME = "behandlingUuid";
-
     public static final String DESC = "behandlingUUID";
+
+    public static final String NAME = "behandlingUuid";
 
     /**
      * Behandling UUID (nytt alternativ til intern behandlingId. Bør brukes av eksterne systemer).
@@ -43,28 +43,29 @@ public class BehandlingUuidDto {
         //
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        var other = (BehandlingUuidDto) obj;
+        return Objects.equals(this.behandlingUuid, other.behandlingUuid);
+    }
+
     @AbacAttributt(NAME)
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
 
     @Override
-    public String toString() {
-        return String.valueOf(behandlingUuid);
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if(obj==this) return true;
-        if(obj==null || obj.getClass()!= this.getClass()) {
-            return false;
-        }
-        var other = (BehandlingUuidDto) obj;
-        return Objects.equals(this.behandlingUuid, other.behandlingUuid);
-    }
-    
-    @Override
     public int hashCode() {
         return Objects.hash(behandlingUuid);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(behandlingUuid);
     }
 }

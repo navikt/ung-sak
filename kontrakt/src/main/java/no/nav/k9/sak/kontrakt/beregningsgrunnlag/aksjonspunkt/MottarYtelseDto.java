@@ -16,15 +16,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MottarYtelseDto {
 
-    @JsonProperty(value = "frilansMottarYtelse")
-    private Boolean frilansMottarYtelse;
-
     @JsonProperty(value = "arbeidstakerUtenIMMottarYtelse")
     @Valid
     @Size(max = 100)
     private List<ArbeidstakerandelUtenIMMottarYtelseDto> arbeidstakerUtenIMMottarYtelse;
 
-    protected MottarYtelseDto() {
+    @JsonProperty(value = "frilansMottarYtelse")
+    private Boolean frilansMottarYtelse;
+
+    public MottarYtelseDto() {
         //
     }
 
@@ -33,19 +33,19 @@ public class MottarYtelseDto {
         this.arbeidstakerUtenIMMottarYtelse = arbeidstakerUtenIMMottarYtelse;
     }
 
-    public Boolean getFrilansMottarYtelse() {
-        return frilansMottarYtelse;
-    }
-
     public List<ArbeidstakerandelUtenIMMottarYtelseDto> getArbeidstakerUtenIMMottarYtelse() {
         return arbeidstakerUtenIMMottarYtelse;
     }
 
-    public void setFrilansMottarYtelse(Boolean frilansMottarYtelse) {
-        this.frilansMottarYtelse = frilansMottarYtelse;
+    public Boolean getFrilansMottarYtelse() {
+        return frilansMottarYtelse;
     }
 
     public void setArbeidstakerUtenIMMottarYtelse(List<ArbeidstakerandelUtenIMMottarYtelseDto> arbeidstakerUtenIMMottarYtelse) {
         this.arbeidstakerUtenIMMottarYtelse = arbeidstakerUtenIMMottarYtelse;
+    }
+
+    public void setFrilansMottarYtelse(Boolean frilansMottarYtelse) {
+        this.frilansMottarYtelse = frilansMottarYtelse;
     }
 }

@@ -23,8 +23,12 @@ public class PleiepengerBarnSøknadMottatt {
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
     @Valid
-    private final Saksnummer saksnummer;
+    private Saksnummer saksnummer;
 
+    public PleiepengerBarnSøknadMottatt() {
+        // 
+    }
+    
     @JsonCreator
     public PleiepengerBarnSøknadMottatt(@JsonProperty(value = "saksnummer", required = true)
                                         @NotNull
@@ -35,5 +39,9 @@ public class PleiepengerBarnSøknadMottatt {
     @AbacAttributt("saksnummer")
     public Saksnummer getSaksnummer() {
         return saksnummer;
+    }
+
+    public void setSaksnummer(Saksnummer saksnummer) {
+        this.saksnummer = saksnummer;
     }
 }

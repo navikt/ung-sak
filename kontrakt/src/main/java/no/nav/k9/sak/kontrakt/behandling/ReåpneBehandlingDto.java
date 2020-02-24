@@ -35,7 +35,7 @@ public class ReåpneBehandlingDto {
     public ReåpneBehandlingDto() {
         //
     }
-    
+
     @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;

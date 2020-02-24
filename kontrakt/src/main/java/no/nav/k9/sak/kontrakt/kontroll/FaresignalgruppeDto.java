@@ -21,33 +21,34 @@ import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FaresignalgruppeDto {
 
+    @JsonProperty(value = "faresignaler")
+    @Valid
+    @Size(max = 50)
+    private List<@NotNull @Size(max = 5000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String> faresignaler = Collections
+        .emptyList();
+
     @JsonProperty(value = "kontrollresultat", required = true)
     @NotNull
     @Valid
     private Kontrollresultat kontrollresultat;
 
-    @JsonProperty(value = "faresignaler")
-    @Valid
-    @Size(max = 50)
-    private List<@NotNull @Size(max = 5000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String> faresignaler = Collections.emptyList();
-
     public FaresignalgruppeDto() {
         //
-    }
-
-    public Kontrollresultat getKontrollresultat() {
-        return kontrollresultat;
-    }
-
-    public void setKontrollresultat(Kontrollresultat kontrollresultat) {
-        this.kontrollresultat = kontrollresultat;
     }
 
     public List<String> getFaresignaler() {
         return Collections.unmodifiableList(faresignaler);
     }
 
+    public Kontrollresultat getKontrollresultat() {
+        return kontrollresultat;
+    }
+
     public void setFaresignaler(List<String> faresignaler) {
         this.faresignaler = List.copyOf(faresignaler);
+    }
+
+    public void setKontrollresultat(Kontrollresultat kontrollresultat) {
+        this.kontrollresultat = kontrollresultat;
     }
 }

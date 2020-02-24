@@ -33,6 +33,10 @@ public class AndreYtelserDto {
     @Valid
     private ArbeidType ytelseType;
 
+    public AndreYtelserDto() {
+        //
+    }
+
     public LocalDate getPeriodeFom() {
         return periodeFom;
     }

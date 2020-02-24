@@ -22,6 +22,13 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class GraderingPeriodeDto {
 
+    @JsonProperty(value = "arbeidsprosent", required = true)
+    @NotNull
+    @Digits(integer = 3, fraction = 2)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    private BigDecimal arbeidsprosent;
+
     @JsonProperty(value = "fom", required = true)
     @NotNull
     private LocalDate fom;
@@ -30,21 +37,18 @@ public class GraderingPeriodeDto {
     @NotNull
     private LocalDate tom;
 
-    @JsonProperty(value = "arbeidsprosent", required = true)
-    @NotNull
-    @Digits(integer = 3, fraction = 2)
-    @DecimalMin("0.00")
-    @DecimalMax("100.00")
-    private BigDecimal arbeidsprosent;
+    public GraderingPeriodeDto(Periode periode, BigDecimal arbeidstidsprosent) {
+        this.fom = periode.getFom();
+        this.tom = periode.getTom();
+        this.arbeidsprosent = Objects.requireNonNull(arbeidstidsprosent, "arbeidstidsprosent");
+    }
 
     protected GraderingPeriodeDto() {
         //
     }
 
-    public GraderingPeriodeDto(Periode periode, BigDecimal arbeidstidsprosent) {
-        this.fom = periode.getFom();
-        this.tom = periode.getTom();
-        this.arbeidsprosent = Objects.requireNonNull(arbeidstidsprosent, "arbeidstidsprosent");
+    public BigDecimal getArbeidsprosent() {
+        return arbeidsprosent;
     }
 
     public LocalDate getFom() {
@@ -53,9 +57,5 @@ public class GraderingPeriodeDto {
 
     public LocalDate getTom() {
         return tom;
-    }
-
-    public BigDecimal getArbeidsprosent() {
-        return arbeidsprosent;
     }
 }

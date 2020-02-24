@@ -29,12 +29,12 @@ public class DokumentProdusertDto {
         return behandlingUuid;
     }
 
-    public void setBehandlingUuid(UUID behandlingUuid) {
-        this.behandlingUuid = behandlingUuid;
-    }
-
     public String getDokumentMal() {
         return dokumentMal;
+    }
+
+    public void setBehandlingUuid(UUID behandlingUuid) {
+        this.behandlingUuid = behandlingUuid;
     }
 
     public void setDokumentMal(String dokumentMal) {

@@ -20,19 +20,19 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HenleggBehandlingDto {
 
-    @JsonProperty(value="årsakKode", required = true)
+    @JsonProperty(value = "årsakKode", required = true)
     @NotNull
     @Size(min = 1, max = 100)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String årsakKode;
 
-    @JsonProperty(value="begrunnelse")
+    @JsonProperty(value = "begrunnelse")
     @NotNull
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
-    @JsonProperty(value="behandlingId")
+    @JsonProperty(value = "behandlingId")
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -40,7 +40,7 @@ public class HenleggBehandlingDto {
     private Long behandlingId;
 
     @JsonAlias("versjon")
-    @JsonProperty(value="behanldingVersjon", required = true)
+    @JsonProperty(value = "behanldingVersjon", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -49,7 +49,7 @@ public class HenleggBehandlingDto {
     public HenleggBehandlingDto() {
         //
     }
-    
+
     public String getÅrsakKode() {
         return årsakKode;
     }

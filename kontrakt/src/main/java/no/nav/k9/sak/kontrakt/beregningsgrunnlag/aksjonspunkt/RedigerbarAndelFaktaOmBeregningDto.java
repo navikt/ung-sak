@@ -25,23 +25,23 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class RedigerbarAndelFaktaOmBeregningDto {
 
+    @JsonProperty(value = "aktivitetStatus")
+    @Valid
+    private AktivitetStatus aktivitetStatus;
+
     @JsonProperty(value = "andelsnr", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long andelsnr;
 
-    @JsonProperty(value = "nyAndel")
-    private Boolean nyAndel;
-
-    @JsonProperty(value = "aktivitetStatus")
-    @Valid
-    private AktivitetStatus aktivitetStatus;
-
     @JsonProperty(value = "lagtTilAvSaksbehandler")
     private Boolean lagtTilAvSaksbehandler;
 
-    protected RedigerbarAndelFaktaOmBeregningDto() {
+    @JsonProperty(value = "nyAndel")
+    private Boolean nyAndel;
+
+    public RedigerbarAndelFaktaOmBeregningDto() {
         //
     }
 
@@ -67,12 +67,28 @@ public class RedigerbarAndelFaktaOmBeregningDto {
         return Optional.ofNullable(andelsnr);
     }
 
+    public Boolean getLagtTilAvSaksbehandler() {
+        return lagtTilAvSaksbehandler;
+    }
+
     public Boolean getNyAndel() {
         return nyAndel;
     }
 
-    public Boolean getLagtTilAvSaksbehandler() {
-        return lagtTilAvSaksbehandler;
+    public void setAktivitetStatus(AktivitetStatus aktivitetStatus) {
+        this.aktivitetStatus = aktivitetStatus;
+    }
+
+    public void setAndelsnr(Long andelsnr) {
+        this.andelsnr = andelsnr;
+    }
+
+    public void setLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
+        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
+    }
+
+    public void setNyAndel(Boolean nyAndel) {
+        this.nyAndel = nyAndel;
     }
 
 }

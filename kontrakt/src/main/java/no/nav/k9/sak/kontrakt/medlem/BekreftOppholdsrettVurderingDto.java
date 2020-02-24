@@ -14,8 +14,8 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_OPPHOLDSRETT_KODE)
 public class BekreftOppholdsrettVurderingDto extends BekreftedePerioderMalDto {
 
-    protected BekreftOppholdsrettVurderingDto() {
-        // 
+    public BekreftOppholdsrettVurderingDto() {
+        //
     }
 
     public BekreftOppholdsrettVurderingDto(String begrunnelse, List<BekreftedePerioderDto> bekreftedePerioder) { // NOSONAR

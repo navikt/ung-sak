@@ -21,7 +21,7 @@ public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode {
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
     protected BekreftetAksjonspunktDto() {
@@ -35,14 +35,14 @@ public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode {
     public String getBegrunnelse() {
         return begrunnelse;
     }
-    
+
     @AbacAttributt("aksjonspunktKode")
     @Override
     public String getKode() {
         if (this.getClass().isAnnotationPresent(JsonTypeName.class)) {
             return this.getClass().getDeclaredAnnotation(JsonTypeName.class).value();
         }
-        throw new IllegalStateException("Utvikler-feil:" +this.getClass().getSimpleName() +" er uten JsonTypeName annotation.");
+        throw new IllegalStateException("Utvikler-feil:" + this.getClass().getSimpleName() + " er uten JsonTypeName annotation.");
     }
 
     public void setBegrunnelse(String begrunnelse) {

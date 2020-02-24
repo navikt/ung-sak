@@ -30,7 +30,7 @@ public class FastsettBeregningsgrunnlagPeriodeDto {
     @JsonProperty(value = "tom")
     private LocalDate tom;
 
-    protected FastsettBeregningsgrunnlagPeriodeDto() {
+    public FastsettBeregningsgrunnlagPeriodeDto() {
         //
     }
 
@@ -38,6 +38,10 @@ public class FastsettBeregningsgrunnlagPeriodeDto {
         this.andeler = andeler;
         this.fom = fom;
         this.tom = tom;
+    }
+
+    public List<FastsettBeregningsgrunnlagAndelDto> getAndeler() {
+        return andeler;
     }
 
     public LocalDate getFom() {
@@ -48,8 +52,16 @@ public class FastsettBeregningsgrunnlagPeriodeDto {
         return tom;
     }
 
-    public List<FastsettBeregningsgrunnlagAndelDto> getAndeler() {
-        return andeler;
+    public void setAndeler(List<FastsettBeregningsgrunnlagAndelDto> andeler) {
+        this.andeler = andeler;
+    }
+
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 
 }

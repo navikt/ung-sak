@@ -22,6 +22,10 @@ public class OppgaveIdDto {
     @Size(min = 1, max = 50)
     private String verdi;
 
+    public OppgaveIdDto() {
+        //
+    }
+
     @JsonCreator
     public OppgaveIdDto(@JsonProperty(value = "verdi") @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$") @Size(min = 1, max = 50) String verdi) {
         this.verdi = verdi;
@@ -30,5 +34,9 @@ public class OppgaveIdDto {
     @AbacAttributt("oppgaveId")
     public String getVerdi() {
         return verdi;
+    }
+
+    public void setVerdi(String verdi) {
+        this.verdi = verdi;
     }
 }

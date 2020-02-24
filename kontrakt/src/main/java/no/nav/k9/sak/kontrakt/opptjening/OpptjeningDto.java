@@ -37,12 +37,12 @@ public class OpptjeningDto {
         return fastsattOpptjening;
     }
 
-    public void setFastsattOpptjening(FastsattOpptjeningDto fastsattOpptjening) {
-        this.fastsattOpptjening = fastsattOpptjening;
-    }
-
     public List<OpptjeningAktivitetDto> getOpptjeningAktivitetList() {
         return opptjeningAktivitetList;
+    }
+
+    public void setFastsattOpptjening(FastsattOpptjeningDto fastsattOpptjening) {
+        this.fastsattOpptjening = fastsattOpptjening;
     }
 
     public void setOpptjeningAktivitetList(List<OpptjeningAktivitetDto> opptjeningAktivitetList) {

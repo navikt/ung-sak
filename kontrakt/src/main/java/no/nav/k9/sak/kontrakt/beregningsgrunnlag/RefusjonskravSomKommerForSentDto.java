@@ -14,17 +14,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class RefusjonskravSomKommerForSentDto {
 
-    @JsonProperty(value="arbeidsgiverId")
+    @JsonProperty(value = "arbeidsgiverId")
     @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverId;
-    
-    @JsonProperty(value="arbeidsgiverVisningsnavn")
+
+    @JsonProperty(value = "arbeidsgiverVisningsnavn")
     @Size(max = 200)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverVisningsnavn;
-    
-    @JsonProperty(value="erRefusjonskravGyldig")
+
+    @JsonProperty(value = "erRefusjonskravGyldig")
     private Boolean erRefusjonskravGyldig;
 
     public String getArbeidsgiverId() {

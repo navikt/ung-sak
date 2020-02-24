@@ -20,8 +20,8 @@ public class ArbeidstakerandelUtenIMMottarYtelseDto {
     @JsonProperty(value = "mottarYtelse")
     private Boolean mottarYtelse;
 
-    protected ArbeidstakerandelUtenIMMottarYtelseDto() {
-        // For jackson
+    public ArbeidstakerandelUtenIMMottarYtelseDto() {
+        // 
     }
 
     public ArbeidstakerandelUtenIMMottarYtelseDto(long andelsnr, Boolean mottarYtelse) {
@@ -35,5 +35,13 @@ public class ArbeidstakerandelUtenIMMottarYtelseDto {
 
     public Boolean getMottarYtelse() {
         return mottarYtelse;
+    }
+
+    public void setAndelsnr(long andelsnr) {
+        this.andelsnr = andelsnr;
+    }
+
+    public void setMottarYtelse(Boolean mottarYtelse) {
+        this.mottarYtelse = mottarYtelse;
     }
 }

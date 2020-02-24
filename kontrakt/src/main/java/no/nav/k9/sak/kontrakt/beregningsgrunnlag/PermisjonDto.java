@@ -24,29 +24,13 @@ public class PermisjonDto {
     @NotNull
     private LocalDate permisjonTom;
 
-    PermisjonDto() {
-        // Skjul default constructor
-    }
-
     public PermisjonDto(LocalDate permisjonFom, LocalDate permisjonTom) {
         this.permisjonFom = permisjonFom;
         this.permisjonTom = permisjonTom;
     }
 
-    public LocalDate getPermisjonFom() {
-        return permisjonFom;
-    }
-
-    public void setPermisjonFom(LocalDate permisjonFom) {
-        this.permisjonFom = permisjonFom;
-    }
-
-    public LocalDate getPermisjonTom() {
-        return permisjonTom;
-    }
-
-    public void setPermisjonTom(LocalDate permisjonTom) {
-        this.permisjonTom = permisjonTom;
+    PermisjonDto() {
+        // Skjul default constructor
     }
 
     @Override
@@ -60,9 +44,25 @@ public class PermisjonDto {
             && Objects.equals(permisjonTom, that.permisjonTom);
     }
 
+    public LocalDate getPermisjonFom() {
+        return permisjonFom;
+    }
+
+    public LocalDate getPermisjonTom() {
+        return permisjonTom;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(permisjonFom, permisjonTom);
+    }
+
+    public void setPermisjonFom(LocalDate permisjonFom) {
+        this.permisjonFom = permisjonFom;
+    }
+
+    public void setPermisjonTom(LocalDate permisjonTom) {
+        this.permisjonTom = permisjonTom;
     }
 
 }

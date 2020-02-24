@@ -21,81 +21,81 @@ import no.nav.k9.kodeverk.medlem.MedlemskapType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemskapPerioderDto {
 
-    @JsonProperty(value = "fom", required = true)
-    @NotNull
-    private LocalDate fom;
-
-    @JsonProperty(value = "tom", required = true)
-    @NotNull
-    private LocalDate tom;
-
-    @JsonProperty(value = "medlemskapType", required = true)
-    @NotNull
-    @Valid
-    private MedlemskapType medlemskapType;
+    @JsonProperty(value = "beslutningsdato")
+    private LocalDate beslutningsdato;
 
     @JsonProperty(value = "dekningType", required = true)
     @NotNull
     @Valid
     private MedlemskapDekningType dekningType;
 
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
+    private LocalDate fom;
+
     @JsonProperty(value = "kildeType", required = true)
     @NotNull
     @Valid
     private MedlemskapKildeType kildeType;
 
-    @JsonProperty(value = "beslutningsdato")
-    private LocalDate beslutningsdato;
+    @JsonProperty(value = "medlemskapType", required = true)
+    @NotNull
+    @Valid
+    private MedlemskapType medlemskapType;
+
+    @JsonProperty(value = "tom", required = true)
+    @NotNull
+    private LocalDate tom;
 
     public MedlemskapPerioderDto() {
         // trengs for deserialisering av JSON
-    }
-
-    public LocalDate getFom() {
-        return fom;
-    }
-
-    public LocalDate getTom() {
-        return tom;
-    }
-
-    public MedlemskapType getMedlemskapType() {
-        return medlemskapType;
-    }
-
-    public MedlemskapDekningType getDekningType() {
-        return dekningType;
-    }
-
-    public MedlemskapKildeType getKildeType() {
-        return kildeType;
     }
 
     public LocalDate getBeslutningsdato() {
         return beslutningsdato;
     }
 
-    public void setFom(LocalDate fom) {
-        this.fom = Objects.requireNonNull(fom, "fom");
+    public MedlemskapDekningType getDekningType() {
+        return dekningType;
     }
 
-    public void setTom(LocalDate tom) {
-        this.tom = Objects.requireNonNull(tom, "tom");
+    public LocalDate getFom() {
+        return fom;
     }
 
-    public void setMedlemskapType(MedlemskapType medlemskapType) {
-        this.medlemskapType = medlemskapType;
+    public MedlemskapKildeType getKildeType() {
+        return kildeType;
+    }
+
+    public MedlemskapType getMedlemskapType() {
+        return medlemskapType;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
+
+    public void setBeslutningsdato(LocalDate beslutningsdato) {
+        this.beslutningsdato = beslutningsdato;
     }
 
     public void setDekningType(MedlemskapDekningType dekningType) {
         this.dekningType = dekningType;
     }
 
+    public void setFom(LocalDate fom) {
+        this.fom = Objects.requireNonNull(fom, "fom");
+    }
+
     public void setKildeType(MedlemskapKildeType kildeType) {
         this.kildeType = kildeType;
     }
 
-    public void setBeslutningsdato(LocalDate beslutningsdato) {
-        this.beslutningsdato = beslutningsdato;
+    public void setMedlemskapType(MedlemskapType medlemskapType) {
+        this.medlemskapType = medlemskapType;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = Objects.requireNonNull(tom, "tom");
     }
 }

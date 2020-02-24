@@ -26,9 +26,8 @@ public class AvklarteAktiviteterDto extends BekreftetAksjonspunktDto {
     @Size(max = 1000)
     private List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList;
 
-    AvklarteAktiviteterDto() {
-        // For Jackson
-        super();
+    public AvklarteAktiviteterDto() {
+        // 
     }
 
     public AvklarteAktiviteterDto(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList, String begrunnelse) { // NOSONAR
@@ -36,8 +35,12 @@ public class AvklarteAktiviteterDto extends BekreftetAksjonspunktDto {
         this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
     }
 
-
     public List<BeregningsaktivitetLagreDto> getBeregningsaktivitetLagreDtoList() {
         return beregningsaktivitetLagreDtoList;
+    }
+
+
+    public void setBeregningsaktivitetLagreDtoList(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList) {
+        this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
     }
 }

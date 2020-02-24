@@ -19,19 +19,19 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class NyBehandlingDto {
 
-    @JsonProperty(value="behandlingArsakType", required = true)
+    @JsonProperty(value = "behandlingArsakType", required = true)
     @NotNull
     @Valid
     private BehandlingÅrsakType behandlingArsakType;
 
-    @JsonProperty(value="behandlingType", required = true)
+    @JsonProperty(value = "behandlingType", required = true)
     @NotNull
     private BehandlingType behandlingType;
 
-    @JsonProperty(value="nyBehandlingEtterKlage")
+    @JsonProperty(value = "nyBehandlingEtterKlage")
     private boolean nyBehandlingEtterKlage;
 
-    @JsonProperty(value="saksnummer", required = true)
+    @JsonProperty(value = "saksnummer", required = true)
     @NotNull
     @Valid
     private Saksnummer saksnummer;

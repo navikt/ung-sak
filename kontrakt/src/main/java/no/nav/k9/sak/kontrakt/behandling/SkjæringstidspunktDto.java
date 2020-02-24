@@ -19,12 +19,12 @@ public class SkjæringstidspunktDto {
     @NotNull
     private LocalDate dato;
 
-    protected SkjæringstidspunktDto() {
-        // for jackson
-    }
-
     public SkjæringstidspunktDto(LocalDate dato) {
         this.dato = dato;
+    }
+
+    protected SkjæringstidspunktDto() {
+        // for jackson
     }
 
     public LocalDate getDato() {

@@ -13,20 +13,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility= JsonAutoDetect.Visibility.NONE, setterVisibility= JsonAutoDetect.Visibility.NONE, fieldVisibility= JsonAutoDetect.Visibility.ANY)
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class BeregningsgrunnlagPrStatusOgAndelYtelseDto extends BeregningsgrunnlagPrStatusOgAndelDto {
-
-    @JsonProperty(value = "belopFraMeldekortPrMnd")
-    @DecimalMin("0.00")
-    @DecimalMax("100000000.00")
-    @Digits(integer = 8, fraction = 2)
-    private BigDecimal belopFraMeldekortPrMnd;
 
     @JsonProperty(value = "belopFraMeldekortPrAar")
     @DecimalMin("0.00")
     @DecimalMax("100000000.00")
     @Digits(integer = 8, fraction = 2)
     private BigDecimal belopFraMeldekortPrAar;
+
+    @JsonProperty(value = "belopFraMeldekortPrMnd")
+    @DecimalMin("0.00")
+    @DecimalMax("100000000.00")
+    @Digits(integer = 8, fraction = 2)
+    private BigDecimal belopFraMeldekortPrMnd;
 
     @JsonProperty(value = "oppjustertGrunnlag")
     @DecimalMin("0.00")
@@ -38,24 +38,24 @@ public class BeregningsgrunnlagPrStatusOgAndelYtelseDto extends Beregningsgrunnl
         // trengs for deserialisering av JSON
     }
 
-    public BigDecimal getBelopFraMeldekortPrMnd() {
-        return belopFraMeldekortPrMnd;
-    }
-
     public BigDecimal getBelopFraMeldekortPrAar() {
         return belopFraMeldekortPrAar;
     }
 
-    public void setBelopFraMeldekortPrMnd(BigDecimal belopFraMeldekortPrMnd) {
-        this.belopFraMeldekortPrMnd = belopFraMeldekortPrMnd;
+    public BigDecimal getBelopFraMeldekortPrMnd() {
+        return belopFraMeldekortPrMnd;
+    }
+
+    public BigDecimal getOppjustertGrunnlag() {
+        return oppjustertGrunnlag;
     }
 
     public void setBelopFraMeldekortPrAar(BigDecimal belopFraMeldekortPrAar) {
         this.belopFraMeldekortPrAar = belopFraMeldekortPrAar;
     }
 
-    public BigDecimal getOppjustertGrunnlag() {
-        return oppjustertGrunnlag;
+    public void setBelopFraMeldekortPrMnd(BigDecimal belopFraMeldekortPrMnd) {
+        this.belopFraMeldekortPrMnd = belopFraMeldekortPrMnd;
     }
 
     public void setOppjustertGrunnlag(BigDecimal oppjustertGrunnlag) {

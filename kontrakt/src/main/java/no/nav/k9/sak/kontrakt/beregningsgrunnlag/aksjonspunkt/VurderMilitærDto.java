@@ -17,12 +17,12 @@ public class VurderMilitærDto {
     @NotNull
     private Boolean harMilitaer;
 
-    VurderMilitærDto() {
-        //
-    }
-
     public VurderMilitærDto(Boolean harMilitaer) {
         this.harMilitaer = harMilitaer;
+    }
+
+    VurderMilitærDto() {
+        //
     }
 
     public Boolean getHarMilitaer() {

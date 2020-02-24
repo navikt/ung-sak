@@ -23,13 +23,6 @@ public class FastsattBrukersAndel {
     @NotNull
     private Long andelsnr;
     
-    @JsonProperty(value = "nyAndel", required = true)
-    @NotNull
-    private Boolean nyAndel;
-    
-    @JsonProperty(value = "lagtTilAvSaksbehandler")
-    private Boolean lagtTilAvSaksbehandler;
-    
     @JsonProperty(value = "fastsattBeløp")
     @NotNull
     @Min(0)
@@ -39,8 +32,15 @@ public class FastsattBrukersAndel {
     @JsonProperty(value = "inntektskategori", required = true)
     @NotNull
     private Inntektskategori inntektskategori;
+    
+    @JsonProperty(value = "lagtTilAvSaksbehandler")
+    private Boolean lagtTilAvSaksbehandler;
+    
+    @JsonProperty(value = "nyAndel", required = true)
+    @NotNull
+    private Boolean nyAndel;
 
-    protected FastsattBrukersAndel() {
+    public FastsattBrukersAndel() {
         //
     }
 
@@ -61,39 +61,39 @@ public class FastsattBrukersAndel {
         return andelsnr;
     }
 
-    public void setAndelsnr(Long andelsnr) {
-        this.andelsnr = andelsnr;
-    }
-
-    public Boolean getNyAndel() {
-        return nyAndel;
-    }
-
-    public void setNyAndel(Boolean nyAndel) {
-        this.nyAndel = nyAndel;
-    }
-
-    public Boolean getLagtTilAvSaksbehandler() {
-        return lagtTilAvSaksbehandler;
-    }
-
-    public void setLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
-        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
-    }
-
     public Integer getFastsattBeløp() {
         return fastsattBeløp;
-    }
-
-    public void setFastsattBeløp(Integer fastsattBeløp) {
-        this.fastsattBeløp = fastsattBeløp;
     }
 
     public Inntektskategori getInntektskategori() {
         return inntektskategori;
     }
 
+    public Boolean getLagtTilAvSaksbehandler() {
+        return lagtTilAvSaksbehandler;
+    }
+
+    public Boolean getNyAndel() {
+        return nyAndel;
+    }
+
+    public void setAndelsnr(Long andelsnr) {
+        this.andelsnr = andelsnr;
+    }
+
+    public void setFastsattBeløp(Integer fastsattBeløp) {
+        this.fastsattBeløp = fastsattBeløp;
+    }
+
     public void setInntektskategori(Inntektskategori inntektskategori) {
         this.inntektskategori = inntektskategori;
+    }
+
+    public void setLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
+        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
+    }
+
+    public void setNyAndel(Boolean nyAndel) {
+        this.nyAndel = nyAndel;
     }
 }

@@ -4,9 +4,9 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -27,22 +27,14 @@ public class OverstyringMedlemskapsvilkåretDto extends OverstyringAksjonspunktD
     @JsonProperty("erVilkarOk")
     private boolean erVilkarOk;
 
-    protected OverstyringMedlemskapsvilkåretDto() {
-        // 
+    public OverstyringMedlemskapsvilkåretDto() {
+        //
     }
 
     public OverstyringMedlemskapsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
         super(begrunnelse);
         this.erVilkarOk = erVilkarOk;
         this.avslagskode = avslagskode;
-    }
-
-    public void setAvslagskode(String avslagskode) {
-        this.avslagskode = avslagskode;
-    }
-
-    public void setErVilkarOk(boolean erVilkarOk) {
-        this.erVilkarOk = erVilkarOk;
     }
 
     @Override
@@ -53,5 +45,13 @@ public class OverstyringMedlemskapsvilkåretDto extends OverstyringAksjonspunktD
     @Override
     public boolean getErVilkarOk() {
         return erVilkarOk;
+    }
+
+    public void setAvslagskode(String avslagskode) {
+        this.avslagskode = avslagskode;
+    }
+
+    public void setErVilkarOk(boolean erVilkarOk) {
+        this.erVilkarOk = erVilkarOk;
     }
 }

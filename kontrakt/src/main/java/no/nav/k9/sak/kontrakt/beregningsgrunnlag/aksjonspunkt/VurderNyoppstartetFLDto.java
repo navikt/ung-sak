@@ -17,19 +17,19 @@ public class VurderNyoppstartetFLDto {
     @NotNull
     private Boolean erNyoppstartetFL;
 
-    protected VurderNyoppstartetFLDto() {
-        //
-    }
-
     public VurderNyoppstartetFLDto(Boolean erNyoppstartetFL) {
         this.erNyoppstartetFL = erNyoppstartetFL;
     }
 
-    public void setErNyoppstartetFL(Boolean erNyoppstartetFL) {
-        this.erNyoppstartetFL = erNyoppstartetFL;
+    protected VurderNyoppstartetFLDto() {
+        //
     }
 
     public Boolean erErNyoppstartetFL() {
         return erNyoppstartetFL;
+    }
+
+    public void setErNyoppstartetFL(Boolean erNyoppstartetFL) {
+        this.erNyoppstartetFL = erNyoppstartetFL;
     }
 }

@@ -19,28 +19,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AktivitetTomDatoMappingDto {
 
-    @JsonProperty(value = "tom", required = true)
-    private LocalDate tom;
-
     @JsonProperty(value = "aktiviteter")
     @NotNull
     @Valid
     @Size(max = 200)
     private List<BeregningAktivitetDto> aktiviteter = Collections.emptyList();
 
-    public LocalDate getTom() {
-        return tom;
-    }
-
-    public void setTom(LocalDate tom) {
-        this.tom = tom;
-    }
+    @JsonProperty(value = "tom", required = true)
+    private LocalDate tom;
 
     public List<BeregningAktivitetDto> getAktiviteter() {
         return Collections.unmodifiableList(aktiviteter);
     }
 
+    public LocalDate getTom() {
+        return tom;
+    }
+
     public void setAktiviteter(List<BeregningAktivitetDto> aktiviteter) {
         this.aktiviteter = List.copyOf(aktiviteter);
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 }

@@ -25,14 +25,6 @@ import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemPeriodeDto {
 
-    @JsonProperty(value = "vurderingsdato")
-    private LocalDate vurderingsdato;
-
-    @JsonProperty(value = "personopplysninger", required = true)
-    @Valid
-    @NotNull
-    private PersonopplysningDto personopplysninger;
-
     @JsonProperty(value = "aksjonspunkter")
     @Size(max = 10)
     @Valid
@@ -43,8 +35,13 @@ public class MedlemPeriodeDto {
     @Valid
     private Set<VurderingsÅrsak> årsaker = Collections.emptySet();
 
-    @JsonProperty(value = "oppholdsrettVurdering")
-    private Boolean oppholdsrettVurdering;
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String begrunnelse;
+
+    @JsonProperty(value = "bosattVurdering")
+    private Boolean bosattVurdering;
 
     @JsonProperty(value = "erEosBorger")
     private Boolean erEosBorger;
@@ -52,87 +49,22 @@ public class MedlemPeriodeDto {
     @JsonProperty(value = "lovligOppholdVurdering")
     private Boolean lovligOppholdVurdering;
 
-    @JsonProperty(value = "bosattVurdering")
-    private Boolean bosattVurdering;
-
     @JsonProperty(value = "medlemskapManuellVurderingType")
     private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
 
-    @JsonProperty(value = "begrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String begrunnelse;
+    @JsonProperty(value = "oppholdsrettVurdering")
+    private Boolean oppholdsrettVurdering;
+
+    @JsonProperty(value = "personopplysninger", required = true)
+    @Valid
+    @NotNull
+    private PersonopplysningDto personopplysninger;
+
+    @JsonProperty(value = "vurderingsdato")
+    private LocalDate vurderingsdato;
 
     public MedlemPeriodeDto() {
         // trengs for deserialisering av JSON
-    }
-
-    public LocalDate getVurderingsdato() {
-        return vurderingsdato;
-    }
-
-    public void setVurderingsdato(LocalDate vurderingsdato) {
-        this.vurderingsdato = vurderingsdato;
-    }
-
-    public Set<String> getAksjonspunkter() {
-        return Collections.unmodifiableSet(aksjonspunkter);
-    }
-
-    public void setAksjonspunkter(Set<String> aksjonspunkter) {
-        this.aksjonspunkter = Set.copyOf(aksjonspunkter);
-    }
-
-    public Set<VurderingsÅrsak> getÅrsaker() {
-        return Collections.unmodifiableSet(årsaker);
-    }
-
-    public void setÅrsaker(Set<VurderingsÅrsak> årsaker) {
-        this.årsaker = Set.copyOf(årsaker);
-    }
-
-    public Boolean getOppholdsrettVurdering() {
-        return oppholdsrettVurdering;
-    }
-
-    public void setOppholdsrettVurdering(Boolean oppholdsrettVurdering) {
-        this.oppholdsrettVurdering = oppholdsrettVurdering;
-    }
-
-    public Boolean getErEosBorger() {
-        return erEosBorger;
-    }
-
-    public void setErEosBorger(Boolean erEosBorger) {
-        this.erEosBorger = erEosBorger;
-    }
-
-    public Boolean getLovligOppholdVurdering() {
-        return lovligOppholdVurdering;
-    }
-
-    public void setLovligOppholdVurdering(Boolean lovligOppholdVurdering) {
-        this.lovligOppholdVurdering = lovligOppholdVurdering;
-    }
-
-    public Boolean getBosattVurdering() {
-        return bosattVurdering;
-    }
-
-    public void setBosattVurdering(Boolean bosattVurdering) {
-        this.bosattVurdering = bosattVurdering;
-    }
-
-    public MedlemskapManuellVurderingType getMedlemskapManuellVurderingType() {
-        return medlemskapManuellVurderingType;
-    }
-
-    public void setMedlemskapManuellVurderingType(MedlemskapManuellVurderingType medlemskapManuellVurderingType) {
-        this.medlemskapManuellVurderingType = medlemskapManuellVurderingType;
-    }
-
-    public void setPersonopplysninger(PersonopplysningDto personopplysninger) {
-        this.personopplysninger = personopplysninger;
     }
 
     @Override
@@ -145,20 +77,88 @@ public class MedlemPeriodeDto {
         return Objects.equals(vurderingsdato, that.vurderingsdato);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(vurderingsdato);
+    public Set<String> getAksjonspunkter() {
+        return Collections.unmodifiableSet(aksjonspunkter);
     }
 
-    public PersonopplysningDto getPersonopplysninger() {
-        return personopplysninger;
+    public Set<VurderingsÅrsak> getÅrsaker() {
+        return Collections.unmodifiableSet(årsaker);
     }
 
     public String getBegrunnelse() {
         return begrunnelse;
     }
 
+    public Boolean getBosattVurdering() {
+        return bosattVurdering;
+    }
+
+    public Boolean getErEosBorger() {
+        return erEosBorger;
+    }
+
+    public Boolean getLovligOppholdVurdering() {
+        return lovligOppholdVurdering;
+    }
+
+    public MedlemskapManuellVurderingType getMedlemskapManuellVurderingType() {
+        return medlemskapManuellVurderingType;
+    }
+
+    public Boolean getOppholdsrettVurdering() {
+        return oppholdsrettVurdering;
+    }
+
+    public PersonopplysningDto getPersonopplysninger() {
+        return personopplysninger;
+    }
+
+    public LocalDate getVurderingsdato() {
+        return vurderingsdato;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(vurderingsdato);
+    }
+
+    public void setAksjonspunkter(Set<String> aksjonspunkter) {
+        this.aksjonspunkter = Set.copyOf(aksjonspunkter);
+    }
+
+    public void setÅrsaker(Set<VurderingsÅrsak> årsaker) {
+        this.årsaker = Set.copyOf(årsaker);
+    }
+
     public void setBegrunnelse(String begrunnelse) {
         this.begrunnelse = begrunnelse;
+    }
+
+    public void setBosattVurdering(Boolean bosattVurdering) {
+        this.bosattVurdering = bosattVurdering;
+    }
+
+    public void setErEosBorger(Boolean erEosBorger) {
+        this.erEosBorger = erEosBorger;
+    }
+
+    public void setLovligOppholdVurdering(Boolean lovligOppholdVurdering) {
+        this.lovligOppholdVurdering = lovligOppholdVurdering;
+    }
+
+    public void setMedlemskapManuellVurderingType(MedlemskapManuellVurderingType medlemskapManuellVurderingType) {
+        this.medlemskapManuellVurderingType = medlemskapManuellVurderingType;
+    }
+
+    public void setOppholdsrettVurdering(Boolean oppholdsrettVurdering) {
+        this.oppholdsrettVurdering = oppholdsrettVurdering;
+    }
+
+    public void setPersonopplysninger(PersonopplysningDto personopplysninger) {
+        this.personopplysninger = personopplysninger;
+    }
+
+    public void setVurderingsdato(LocalDate vurderingsdato) {
+        this.vurderingsdato = vurderingsdato;
     }
 }

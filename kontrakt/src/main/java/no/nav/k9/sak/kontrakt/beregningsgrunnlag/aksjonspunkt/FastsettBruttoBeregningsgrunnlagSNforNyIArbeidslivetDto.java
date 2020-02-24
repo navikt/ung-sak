@@ -26,7 +26,7 @@ public class FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto extends Bek
     @NotNull
     private Integer bruttoBeregningsgrunnlag;
 
-    protected FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto() {
+    public FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto() {
         // For Jackson
     }
 
@@ -37,5 +37,9 @@ public class FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto extends Bek
 
     public Integer getBruttoBeregningsgrunnlag() {
         return bruttoBeregningsgrunnlag;
+    }
+
+    public void setBruttoBeregningsgrunnlag(Integer bruttoBeregningsgrunnlag) {
+        this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
     }
 }

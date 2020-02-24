@@ -22,123 +22,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class Lønnsendring {
 
-    @JsonProperty(value = "gammelArbeidsinntekt")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer gammelArbeidsinntekt;
-
-    @JsonProperty(value = "nyArbeidsinntekt")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer nyArbeidsinntekt;
-
-    @JsonProperty(value = "nyArbeidsinntektPrÅr")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer nyArbeidsinntektPrÅr;
-
-    @JsonProperty(value = "gammelInntektskategori")
-    @Valid
-    private Inntektskategori gammelInntektskategori;
-
-    @JsonProperty(value = "nyInntektskategori")
-    @Valid
-    private Inntektskategori nyInntektskategori;
-
-    @JsonProperty(value = "gammelRefusjonPrÅr")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer gammelRefusjonPrÅr;
-
-    @JsonProperty(value = "nyRefusjonPrÅr")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer nyRefusjonPrÅr;
-
-    @JsonProperty(value = "nyTotalRefusjonPrÅr")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer nyTotalRefusjonPrÅr;
-
-    @JsonProperty(value = "nyAndel")
-    private boolean nyAndel;
-
-    @JsonProperty(value = "gammelArbeidsinntektPrÅr")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer gammelArbeidsinntektPrÅr;
-
-    @JsonProperty(value = "arbeidsgiver")
-    @Valid
-    private Arbeidsgiver arbeidsgiver;
-
-    @JsonProperty(value = "arbeidsforholdRef")
-    @Valid
-    private InternArbeidsforholdRef arbeidsforholdRef;
-
-    @JsonProperty(value = "aktivitetStatus")
-    @Valid
-    private AktivitetStatus aktivitetStatus;
-
-    private Lønnsendring() {
-    }
-
-    public void setNyAndel(boolean nyAndel) {
-        this.nyAndel = nyAndel;
-    }
-
-    public boolean isNyAndel() {
-        return nyAndel;
-    }
-
-    public Integer getGammelArbeidsinntekt() {
-        return gammelArbeidsinntekt;
-    }
-
-    public Integer getNyArbeidsinntekt() {
-        return nyArbeidsinntekt;
-    }
-
-    public Integer getNyArbeidsinntektPrÅr() {
-        return nyArbeidsinntektPrÅr;
-    }
-
-    public Integer getGammelArbeidsinntektPrÅr() {
-        return gammelArbeidsinntektPrÅr;
-    }
-
-    public Inntektskategori getGammelInntektskategori() {
-        return gammelInntektskategori;
-    }
-
-    public Inntektskategori getNyInntektskategori() {
-        return nyInntektskategori;
-    }
-
-    public Integer getGammelRefusjonPrÅr() {
-        return gammelRefusjonPrÅr;
-    }
-
-    public Integer getNyRefusjonPrÅr() {
-        return nyRefusjonPrÅr;
-    }
-
-    public Integer getNyTotalRefusjonPrÅr() {
-        return nyTotalRefusjonPrÅr;
-    }
-
-    public Optional<Arbeidsgiver> getArbeidsgiver() {
-        return Optional.ofNullable(arbeidsgiver);
-    }
-
-    public Optional<InternArbeidsforholdRef> getArbeidsforholdRef() {
-        return Optional.ofNullable(arbeidsforholdRef);
-    }
-
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
-    }
-
     public static class Builder {
         private Lønnsendring lønnsendringMal;
 
@@ -154,8 +37,22 @@ public class Lønnsendring {
             return new Builder();
         }
 
-        public Builder medNyAndel(boolean nyAndel) {
-            lønnsendringMal.nyAndel = nyAndel;
+        public Lønnsendring build() {
+            return lønnsendringMal;
+        }
+
+        public Builder medAktivitetStatus(AktivitetStatus aktivitetStatus) {
+            lønnsendringMal.aktivitetStatus = aktivitetStatus;
+            return this;
+        }
+
+        public Builder medArbeidsforholdRef(InternArbeidsforholdRef arbeidsforholdRef) {
+            lønnsendringMal.arbeidsforholdRef = arbeidsforholdRef;
+            return this;
+        }
+
+        public Builder medArbeidsgiver(Arbeidsgiver arbeidsgiver) {
+            lønnsendringMal.arbeidsgiver = arbeidsgiver;
             return this;
         }
 
@@ -166,6 +63,21 @@ public class Lønnsendring {
 
         public Builder medGammelArbeidsinntektPrÅr(Integer gammelArbeidsinntektPrÅr) {
             lønnsendringMal.gammelArbeidsinntektPrÅr = gammelArbeidsinntektPrÅr;
+            return this;
+        }
+
+        public Builder medGammelInntektskategori(Inntektskategori inntektskategori) {
+            lønnsendringMal.gammelInntektskategori = inntektskategori;
+            return this;
+        }
+
+        public Builder medGammelRefusjonPrÅr(Integer refusjon) {
+            lønnsendringMal.gammelRefusjonPrÅr = refusjon;
+            return this;
+        }
+
+        public Builder medNyAndel(boolean nyAndel) {
+            lønnsendringMal.nyAndel = nyAndel;
             return this;
         }
 
@@ -184,16 +96,6 @@ public class Lønnsendring {
             return this;
         }
 
-        public Builder medGammelInntektskategori(Inntektskategori inntektskategori) {
-            lønnsendringMal.gammelInntektskategori = inntektskategori;
-            return this;
-        }
-
-        public Builder medGammelRefusjonPrÅr(Integer refusjon) {
-            lønnsendringMal.gammelRefusjonPrÅr = refusjon;
-            return this;
-        }
-
         public Builder medNyRefusjonPrÅr(Integer refusjon) {
             lønnsendringMal.nyRefusjonPrÅr = refusjon;
             return this;
@@ -204,25 +106,123 @@ public class Lønnsendring {
             return this;
         }
 
-        public Builder medArbeidsforholdRef(InternArbeidsforholdRef arbeidsforholdRef) {
-            lønnsendringMal.arbeidsforholdRef = arbeidsforholdRef;
-            return this;
-        }
+    }
 
-        public Builder medArbeidsgiver(Arbeidsgiver arbeidsgiver) {
-            lønnsendringMal.arbeidsgiver = arbeidsgiver;
-            return this;
-        }
+    @JsonProperty(value = "aktivitetStatus")
+    @Valid
+    private AktivitetStatus aktivitetStatus;
 
-        public Builder medAktivitetStatus(AktivitetStatus aktivitetStatus) {
-            lønnsendringMal.aktivitetStatus = aktivitetStatus;
-            return this;
-        }
+    @JsonProperty(value = "arbeidsforholdRef")
+    @Valid
+    private InternArbeidsforholdRef arbeidsforholdRef;
 
-        public Lønnsendring build() {
-            return lønnsendringMal;
-        }
+    @JsonProperty(value = "arbeidsgiver")
+    @Valid
+    private Arbeidsgiver arbeidsgiver;
 
+    @JsonProperty(value = "gammelArbeidsinntekt")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer gammelArbeidsinntekt;
+
+    @JsonProperty(value = "gammelArbeidsinntektPrÅr")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer gammelArbeidsinntektPrÅr;
+
+    @JsonProperty(value = "gammelInntektskategori")
+    @Valid
+    private Inntektskategori gammelInntektskategori;
+
+    @JsonProperty(value = "gammelRefusjonPrÅr")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer gammelRefusjonPrÅr;
+
+    @JsonProperty(value = "nyAndel")
+    private boolean nyAndel;
+
+    @JsonProperty(value = "nyArbeidsinntekt")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer nyArbeidsinntekt;
+
+    @JsonProperty(value = "nyArbeidsinntektPrÅr")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer nyArbeidsinntektPrÅr;
+
+    @JsonProperty(value = "nyInntektskategori")
+    @Valid
+    private Inntektskategori nyInntektskategori;
+
+    @JsonProperty(value = "nyRefusjonPrÅr")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer nyRefusjonPrÅr;
+
+    @JsonProperty(value = "nyTotalRefusjonPrÅr")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer nyTotalRefusjonPrÅr;
+
+    private Lønnsendring() {
+    }
+
+    public AktivitetStatus getAktivitetStatus() {
+        return aktivitetStatus;
+    }
+
+    public Optional<InternArbeidsforholdRef> getArbeidsforholdRef() {
+        return Optional.ofNullable(arbeidsforholdRef);
+    }
+
+    public Optional<Arbeidsgiver> getArbeidsgiver() {
+        return Optional.ofNullable(arbeidsgiver);
+    }
+
+    public Integer getGammelArbeidsinntekt() {
+        return gammelArbeidsinntekt;
+    }
+
+    public Integer getGammelArbeidsinntektPrÅr() {
+        return gammelArbeidsinntektPrÅr;
+    }
+
+    public Inntektskategori getGammelInntektskategori() {
+        return gammelInntektskategori;
+    }
+
+    public Integer getGammelRefusjonPrÅr() {
+        return gammelRefusjonPrÅr;
+    }
+
+    public Integer getNyArbeidsinntekt() {
+        return nyArbeidsinntekt;
+    }
+
+    public Integer getNyArbeidsinntektPrÅr() {
+        return nyArbeidsinntektPrÅr;
+    }
+
+    public Inntektskategori getNyInntektskategori() {
+        return nyInntektskategori;
+    }
+
+    public Integer getNyRefusjonPrÅr() {
+        return nyRefusjonPrÅr;
+    }
+
+    public Integer getNyTotalRefusjonPrÅr() {
+        return nyTotalRefusjonPrÅr;
+    }
+
+    public boolean isNyAndel() {
+        return nyAndel;
+    }
+
+    public void setNyAndel(boolean nyAndel) {
+        this.nyAndel = nyAndel;
     }
 
 }

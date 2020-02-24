@@ -31,30 +31,30 @@ public class TotrinnskontrollAktivitetDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String aktivitetType;
 
-    @JsonProperty(value = "erEndring")
-    private Boolean erEndring;
-
     @JsonProperty(value = "arbeidsgiverNavn")
     @Size(max = 1000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverNavn;
+
+    @JsonProperty(value = "erEndring")
+    private Boolean erEndring;
+
+    @JsonProperty(value = "godkjent")
+    private boolean godkjent;
+
+    @JsonProperty(value = "opptjeningAktivitet", required = true)
+    @NotNull
+    @Valid
+    private OpptjeningAktivitetType opptjeningAktivitet;
 
     /** Orgnr dersom arbeidsgiver er virksomhet. */
     @JsonProperty(value = "orgnr")
     @Valid
     private OrgNummer orgnr;
 
-    @JsonProperty(value = "godkjent")
-    private boolean godkjent;
-
     /** Fødselsdato dersom arbeidsgiver er privatperson. */
     @JsonProperty(value = "privatpersonFødselsdato")
     private LocalDate privatpersonFødselsdato;
-
-    @JsonProperty(value = "opptjeningAktivitet", required = true)
-    @NotNull
-    @Valid
-    private OpptjeningAktivitetType opptjeningAktivitet;
 
     public TotrinnskontrollAktivitetDto() {
         // Tom
@@ -64,12 +64,12 @@ public class TotrinnskontrollAktivitetDto {
         return aktivitetType;
     }
 
-    public Boolean getErEndring() {
-        return erEndring;
-    }
-
     public String getArbeidsgiverNavn() {
         return arbeidsgiverNavn;
+    }
+
+    public Boolean getErEndring() {
+        return erEndring;
     }
 
     public OrgNummer getOrgnr() {
@@ -89,20 +89,20 @@ public class TotrinnskontrollAktivitetDto {
         this.aktivitetType = opptjeningAktivitetType.getNavn();
     }
 
-    public void setErEndring(Boolean erEndring) {
-        this.erEndring = erEndring;
-    }
-
     public void setArbeidsgiverNavn(String arbeidsgiverNavn) {
         this.arbeidsgiverNavn = arbeidsgiverNavn;
     }
 
-    public void setOrgnr(OrgNummer orgnr) {
-        this.orgnr = orgnr;
+    public void setErEndring(Boolean erEndring) {
+        this.erEndring = erEndring;
     }
 
     public void setGodkjent(boolean godkjent) {
         this.godkjent = godkjent;
+    }
+
+    public void setOrgnr(OrgNummer orgnr) {
+        this.orgnr = orgnr;
     }
 
     public void setPrivatpersonFødselsdato(LocalDate privatpersonFødselsdato) {

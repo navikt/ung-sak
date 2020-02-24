@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class VurderBesteberegningDto {
 
-    @JsonProperty(value="skalHaBesteberegning",required = true)
+    @JsonProperty(value = "skalHaBesteberegning", required = true)
     @NotNull
     private Boolean skalHaBesteberegning;
 

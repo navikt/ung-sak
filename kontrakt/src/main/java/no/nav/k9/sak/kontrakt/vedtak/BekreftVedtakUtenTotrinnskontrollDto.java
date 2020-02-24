@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL_KODE)
 public class BekreftVedtakUtenTotrinnskontrollDto extends VedtaksbrevOverstyringDto {
 
-    protected BekreftVedtakUtenTotrinnskontrollDto() {
+    public BekreftVedtakUtenTotrinnskontrollDto() {
         //
     }
 

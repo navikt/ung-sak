@@ -18,43 +18,43 @@ import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MottattDokumentDto {
 
-    @JsonProperty(value = "mottattDato", required = true)
+    @JsonProperty(value = "dokumentKategori", required = true)
     @NotNull
-    private LocalDate mottattDato;
+    private DokumentKategori dokumentKategori;
 
     @JsonProperty(value = "dokumentTypeId", required = true)
     @NotNull
     private DokumentTypeId dokumentTypeId;
 
-    @JsonProperty(value = "dokumentKategori", required = true)
+    @JsonProperty(value = "mottattDato", required = true)
     @NotNull
-    private DokumentKategori dokumentKategori;
+    private LocalDate mottattDato;
 
     public MottattDokumentDto() {
         //
     }
 
-    public void setMottattDato(LocalDate mottattDato) {
-        this.mottattDato = mottattDato;
-    }
-
-    public void setDokumentTypeId(DokumentTypeId dokumentTypeId) {
-        this.dokumentTypeId = dokumentTypeId;
-    }
-
-    public void setDokumentKategori(DokumentKategori dokumentKategori) {
-        this.dokumentKategori = dokumentKategori;
-    }
-
-    public LocalDate getMottattDato() {
-        return mottattDato;
+    public DokumentKategori getDokumentKategori() {
+        return dokumentKategori;
     }
 
     public DokumentTypeId getDokumentTypeId() {
         return dokumentTypeId;
     }
 
-    public DokumentKategori getDokumentKategori() {
-        return dokumentKategori;
+    public LocalDate getMottattDato() {
+        return mottattDato;
+    }
+
+    public void setDokumentKategori(DokumentKategori dokumentKategori) {
+        this.dokumentKategori = dokumentKategori;
+    }
+
+    public void setDokumentTypeId(DokumentTypeId dokumentTypeId) {
+        this.dokumentTypeId = dokumentTypeId;
+    }
+
+    public void setMottattDato(LocalDate mottattDato) {
+        this.mottattDato = mottattDato;
     }
 }

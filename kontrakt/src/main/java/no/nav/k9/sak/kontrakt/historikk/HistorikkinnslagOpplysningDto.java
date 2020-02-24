@@ -17,16 +17,16 @@ import no.nav.k9.kodeverk.historikk.HistorikkOpplysningType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkinnslagOpplysningDto {
 
-    @JsonProperty(value="opplysningType")
+    @JsonProperty(value = "opplysningType")
     @Valid
     private HistorikkOpplysningType opplysningType;
-    
-    @JsonProperty(value="tilVerdi")
+
+    @JsonProperty(value = "tilVerdi")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String tilVerdi;
 
-    public HistorikkinnslagOpplysningDto(){
+    public HistorikkinnslagOpplysningDto() {
     }
 
     public HistorikkOpplysningType getOpplysningType() {
@@ -45,5 +45,4 @@ public class HistorikkinnslagOpplysningDto {
         this.tilVerdi = tilVerdi;
     }
 
-   
 }

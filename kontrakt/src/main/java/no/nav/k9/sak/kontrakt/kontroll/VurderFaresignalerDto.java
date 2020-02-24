@@ -1,6 +1,5 @@
 package no.nav.k9.sak.kontrakt.kontroll;
 
-
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -19,11 +18,11 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE)
 public class VurderFaresignalerDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="harInnvirketBehandlingen", required = true)
+    @JsonProperty(value = "harInnvirketBehandlingen", required = true)
     @NotNull
     private Boolean harInnvirketBehandlingen;
 
-    protected VurderFaresignalerDto() {
+    public VurderFaresignalerDto() {
         //
     }
 
@@ -31,7 +30,6 @@ public class VurderFaresignalerDto extends BekreftetAksjonspunktDto {
         super(begrunnelse);
         this.harInnvirketBehandlingen = harInnvirketBehandlingen;
     }
-
 
     public Boolean getHarInnvirketBehandlingen() {
         return harInnvirketBehandlingen;

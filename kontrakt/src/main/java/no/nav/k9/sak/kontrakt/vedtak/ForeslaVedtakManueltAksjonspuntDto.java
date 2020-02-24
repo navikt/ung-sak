@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_MANUELT_KODE)
 public class ForeslaVedtakManueltAksjonspuntDto extends VedtaksbrevOverstyringDto {
 
-    protected ForeslaVedtakManueltAksjonspuntDto() {
+    public ForeslaVedtakManueltAksjonspuntDto() {
         //
     }
 

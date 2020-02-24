@@ -20,35 +20,39 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class HistorikkinnslagDto implements  Comparable<HistorikkinnslagDto> {
-    
-    @JsonProperty(value="aktoer")
+public class HistorikkinnslagDto implements Comparable<HistorikkinnslagDto> {
+
+    @JsonProperty(value = "aktoer")
     private HistorikkAktør aktoer;
-    
-    @JsonProperty(value="behandlingId")
+
+    @JsonProperty(value = "behandlingId")
     private Long behandlingId;
-    
-    @JsonProperty(value="dokumentLinks")
+
+    @JsonProperty(value = "dokumentLinks")
     private List<HistorikkInnslagDokumentLinkDto> dokumentLinks = Collections.emptyList();
-    
-    @JsonProperty(value="historikkinnslagDeler")
+
+    @JsonProperty(value = "historikkinnslagDeler")
     private List<HistorikkinnslagDelDto> historikkinnslagDeler = Collections.emptyList();
-    
-    @JsonProperty(value="opprettetAv")
+
+    @JsonProperty(value = "opprettetAv")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String opprettetAv;
-    
-    @JsonProperty(value="opprettetTidspunkt")
+
+    @JsonProperty(value = "opprettetTidspunkt")
     private LocalDateTime opprettetTidspunkt;
-    
-    @JsonProperty(value="type")
+
+    @JsonProperty(value = "type")
     private HistorikkinnslagType type;
+
+    public HistorikkinnslagDto() {
+        //
+    }
 
     @Override
     public int compareTo(HistorikkinnslagDto that) {
         int comparatorValue = that.getOpprettetTidspunkt().compareTo(this.getOpprettetTidspunkt());
-        if(comparatorValue == 0 && that.getType().equals(HistorikkinnslagType.REVURD_OPPR)) {
+        if (comparatorValue == 0 && that.getType().equals(HistorikkinnslagType.REVURD_OPPR)) {
             return -1;
         }
         return comparatorValue;

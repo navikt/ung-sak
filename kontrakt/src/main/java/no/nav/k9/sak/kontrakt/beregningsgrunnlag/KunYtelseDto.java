@@ -29,11 +29,11 @@ public class KunYtelseDto {
         return Collections.unmodifiableList(andeler);
     }
 
-    public void setAndeler(List<AndelMedBeløpDto> andeler) {
-        this.andeler = List.copyOf(andeler);
-    }
-
     public void leggTilAndel(AndelMedBeløpDto andel) {
         andeler.add(andel);
+    }
+
+    public void setAndeler(List<AndelMedBeløpDto> andeler) {
+        this.andeler = List.copyOf(andeler);
     }
 }

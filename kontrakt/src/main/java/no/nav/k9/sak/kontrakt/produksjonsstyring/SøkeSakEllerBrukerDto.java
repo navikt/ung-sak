@@ -23,24 +23,15 @@ public class SøkeSakEllerBrukerDto {
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
     private String searchString;
 
-    SøkeSakEllerBrukerDto() {
-    }
-
-    public SøkeSakEllerBrukerDto(String searchString) {
-        this.searchString = searchString;
+    public SøkeSakEllerBrukerDto() {
     }
 
     public SøkeSakEllerBrukerDto(Saksnummer saksnummer) {
         this.searchString = saksnummer.getVerdi();
     }
 
-    public String getSearchString() {
-        return searchString;
-    }
-
-    @AbacAttributt("saksnummer")
-    public Saksnummer getSaksnummer() {
-        return !antattFnr() ? new Saksnummer(searchString) : null;
+    public SøkeSakEllerBrukerDto(String searchString) {
+        this.searchString = searchString;
     }
 
     @AbacAttributt("fnr")
@@ -53,8 +44,21 @@ public class SøkeSakEllerBrukerDto {
         return antattFnr() ? searchString : null;
     }
 
+    @AbacAttributt("saksnummer")
+    public Saksnummer getSaksnummer() {
+        return !antattFnr() ? new Saksnummer(searchString) : null;
+    }
+
+    public String getSearchString() {
+        return searchString;
+    }
+
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
+    }
+
     private boolean antattFnr() {
-        return searchString.length() == 11 /* guess - fødselsnummer */;
+        return searchString == null || searchString.length() == 11 /* guess - fødselsnummer */;
     }
 
 }

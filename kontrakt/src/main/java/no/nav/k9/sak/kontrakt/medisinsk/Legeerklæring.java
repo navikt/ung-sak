@@ -51,6 +51,10 @@ public class Legeerklæring {
     @Valid
     private LocalDate tom;
 
+    public Legeerklæring() {
+        //
+    }
+
     public Legeerklæring(LocalDate fom, LocalDate tom,
                          UUID identifikator,
                          String kilde, String diagnosekode, List<Periode> innleggelsesperioder) {

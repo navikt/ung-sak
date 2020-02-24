@@ -27,11 +27,50 @@ public class OpptjeningAktivitetDto {
     @Valid
     private OpptjeningAktivitetType aktivitetType;
 
-    @JsonProperty(value = "originalFom")
-    private LocalDate originalFom;
+    @JsonProperty(value = "arbeidsforholdRef")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsforholdRef;
 
-    @JsonProperty(value = "originalTom")
-    private LocalDate originalTom;
+    @JsonProperty(value = "arbeidsgiver")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiver;
+
+    @JsonProperty(value = "arbeidsgiverIdentifikator")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiverIdentifikator;
+
+    @JsonProperty(value = "arbeidsgiverNavn")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiverNavn;
+
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String begrunnelse;
+
+    @JsonProperty(value = "erEndret")
+    private Boolean erEndret;
+
+    @JsonProperty(value = "erGodkjent")
+    private Boolean erGodkjent;
+
+    @JsonProperty(value = "erManueltOpprettet")
+    private Boolean erManueltOpprettet;
+
+    @JsonProperty(value = "erPeriodeEndret")
+    private Boolean erPeriodeEndret;
+
+    @JsonProperty(value = "naringRegistreringsdato")
+    private LocalDate naringRegistreringsdato;
+
+    @JsonProperty(value = "oppdragsgiverOrg")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String oppdragsgiverOrg;
 
     @JsonProperty(value = "opptjeningFom")
     private LocalDate opptjeningFom;
@@ -39,64 +78,25 @@ public class OpptjeningAktivitetDto {
     @JsonProperty(value = "opptjeningTom")
     private LocalDate opptjeningTom;
 
-    @JsonProperty(value = "arbeidsgiver")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiver;
+    @JsonProperty(value = "originalFom")
+    private LocalDate originalFom;
 
-    @JsonProperty(value = "arbeidsgiverNavn")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverNavn;
+    @JsonProperty(value = "originalTom")
+    private LocalDate originalTom;
 
-    @JsonProperty(value = "oppdragsgiverOrg")
-    @Size(max = 20)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String oppdragsgiverOrg;
-
-    @JsonProperty(value = "arbeidsgiverIdentifikator")
-    @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverIdentifikator;
+    @JsonProperty(value = "privatpersonFødselsdato")
+    private LocalDate privatpersonFødselsdato;
 
     @JsonProperty(value = "privatpersonNavn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}.\\-\\p{Space}\\p{Sc}\\p{M}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String privatpersonNavn;
 
-    @JsonProperty(value = "privatpersonFødselsdato")
-    private LocalDate privatpersonFødselsdato;
-
-    @JsonProperty(value = "arbeidsforholdRef")
-    @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsforholdRef;
-
     @JsonProperty(value = "stillingsandel")
     @DecimalMin("0.00")
     @DecimalMax("500.00")
     @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsandel;
-
-    @JsonProperty(value = "naringRegistreringsdato")
-    private LocalDate naringRegistreringsdato;
-
-    @JsonProperty(value = "erManueltOpprettet")
-    private Boolean erManueltOpprettet;
-
-    @JsonProperty(value = "erGodkjent")
-    private Boolean erGodkjent;
-
-    @JsonProperty(value = "erEndret")
-    private Boolean erEndret;
-
-    @JsonProperty(value = "begrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String begrunnelse;
-
-    @JsonProperty(value = "erPeriodeEndret")
-    private Boolean erPeriodeEndret;
 
     public OpptjeningAktivitetDto() {// NOSONAR
         //
@@ -109,155 +109,155 @@ public class OpptjeningAktivitetDto {
         this.opptjeningTom = opptjeningTom;
     }
 
-    public LocalDate getOriginalFom() {
-        return originalFom;
-    }
-
-    public void setOriginalFom(LocalDate originalFom) {
-        this.originalFom = originalFom;
-    }
-
-    public LocalDate getOriginalTom() {
-        return originalTom;
-    }
-
-    public void setOriginalTom(LocalDate originalTom) {
-        this.originalTom = originalTom;
-    }
-
     public OpptjeningAktivitetType getAktivitetType() {
         return aktivitetType;
-    }
-
-    public void setAktivitetType(OpptjeningAktivitetType aktivitetType) {
-        this.aktivitetType = aktivitetType;
-    }
-
-    public LocalDate getOpptjeningFom() {
-        return opptjeningFom;
-    }
-
-    public void setOpptjeningFom(LocalDate opptjeningFom) {
-        this.opptjeningFom = opptjeningFom;
-    }
-
-    public LocalDate getOpptjeningTom() {
-        return opptjeningTom;
-    }
-
-    public void setOpptjeningTom(LocalDate opptjeningTom) {
-        this.opptjeningTom = opptjeningTom;
-    }
-
-    public String getArbeidsgiver() {
-        return arbeidsgiver;
-    }
-
-    public void setArbeidsgiver(String arbeidsgiver) {
-        this.arbeidsgiver = arbeidsgiver;
-    }
-
-    public String getOppdragsgiverOrg() {
-        return oppdragsgiverOrg;
-    }
-
-    public void setOppdragsgiverOrg(String oppdragsgiverOrg) {
-        this.oppdragsgiverOrg = oppdragsgiverOrg;
-    }
-
-    public String getArbeidsgiverNavn() {
-        return arbeidsgiverNavn;
-    }
-
-    public void setArbeidsgiverNavn(String arbeidsgiverNavn) {
-        this.arbeidsgiverNavn = arbeidsgiverNavn;
-    }
-
-    public String getArbeidsgiverIdentifikator() {
-        return arbeidsgiverIdentifikator;
-    }
-
-    public void setArbeidsgiverIdentifikator(String arbeidsgiverIdentifikator) {
-        this.arbeidsgiverIdentifikator = arbeidsgiverIdentifikator;
-    }
-
-    public LocalDate getNaringRegistreringsdato() {
-        return naringRegistreringsdato;
-    }
-
-    public void setNaringRegistreringsdato(LocalDate naringRegistreringsdato) {
-        this.naringRegistreringsdato = naringRegistreringsdato;
-    }
-
-    public BigDecimal getStillingsandel() {
-        return stillingsandel;
-    }
-
-    public void setStillingsandel(BigDecimal stillingsandel) {
-        this.stillingsandel = stillingsandel;
-    }
-
-    public Boolean getErGodkjent() {
-        return erGodkjent;
-    }
-
-    public void setErGodkjent(Boolean erGodkjent) {
-        this.erGodkjent = erGodkjent;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
-    }
-
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
-    }
-
-    public Boolean getErManueltOpprettet() {
-        return erManueltOpprettet;
-    }
-
-    public void setErManueltOpprettet(Boolean erManueltOpprettet) {
-        this.erManueltOpprettet = erManueltOpprettet;
-    }
-
-    public Boolean getErEndret() {
-        return erEndret;
-    }
-
-    public void setErEndret(Boolean erEndret) {
-        this.erEndret = erEndret;
     }
 
     public String getArbeidsforholdRef() {
         return arbeidsforholdRef;
     }
 
-    public void setArbeidsforholdRef(String arbeidsforholdRef) {
-        this.arbeidsforholdRef = arbeidsforholdRef;
+    public String getArbeidsgiver() {
+        return arbeidsgiver;
     }
 
-    public void setErPeriodeEndret(Boolean erPeriodeEndret) {
-        this.erPeriodeEndret = erPeriodeEndret;
+    public String getArbeidsgiverIdentifikator() {
+        return arbeidsgiverIdentifikator;
+    }
+
+    public String getArbeidsgiverNavn() {
+        return arbeidsgiverNavn;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    public Boolean getErEndret() {
+        return erEndret;
+    }
+
+    public Boolean getErGodkjent() {
+        return erGodkjent;
+    }
+
+    public Boolean getErManueltOpprettet() {
+        return erManueltOpprettet;
     }
 
     public Boolean getErPeriodeEndret() {
         return erPeriodeEndret;
     }
 
-    public String getPrivatpersonNavn() {
-        return privatpersonNavn;
+    public LocalDate getNaringRegistreringsdato() {
+        return naringRegistreringsdato;
     }
 
-    public void setPrivatpersonNavn(String privatpersonNavn) {
-        this.privatpersonNavn = privatpersonNavn;
+    public String getOppdragsgiverOrg() {
+        return oppdragsgiverOrg;
+    }
+
+    public LocalDate getOpptjeningFom() {
+        return opptjeningFom;
+    }
+
+    public LocalDate getOpptjeningTom() {
+        return opptjeningTom;
+    }
+
+    public LocalDate getOriginalFom() {
+        return originalFom;
+    }
+
+    public LocalDate getOriginalTom() {
+        return originalTom;
     }
 
     public LocalDate getPrivatpersonFødselsdato() {
         return privatpersonFødselsdato;
     }
 
+    public String getPrivatpersonNavn() {
+        return privatpersonNavn;
+    }
+
+    public BigDecimal getStillingsandel() {
+        return stillingsandel;
+    }
+
+    public void setAktivitetType(OpptjeningAktivitetType aktivitetType) {
+        this.aktivitetType = aktivitetType;
+    }
+
+    public void setArbeidsforholdRef(String arbeidsforholdRef) {
+        this.arbeidsforholdRef = arbeidsforholdRef;
+    }
+
+    public void setArbeidsgiver(String arbeidsgiver) {
+        this.arbeidsgiver = arbeidsgiver;
+    }
+
+    public void setArbeidsgiverIdentifikator(String arbeidsgiverIdentifikator) {
+        this.arbeidsgiverIdentifikator = arbeidsgiverIdentifikator;
+    }
+
+    public void setArbeidsgiverNavn(String arbeidsgiverNavn) {
+        this.arbeidsgiverNavn = arbeidsgiverNavn;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
+    }
+
+    public void setErEndret(Boolean erEndret) {
+        this.erEndret = erEndret;
+    }
+
+    public void setErGodkjent(Boolean erGodkjent) {
+        this.erGodkjent = erGodkjent;
+    }
+
+    public void setErManueltOpprettet(Boolean erManueltOpprettet) {
+        this.erManueltOpprettet = erManueltOpprettet;
+    }
+
+    public void setErPeriodeEndret(Boolean erPeriodeEndret) {
+        this.erPeriodeEndret = erPeriodeEndret;
+    }
+
+    public void setNaringRegistreringsdato(LocalDate naringRegistreringsdato) {
+        this.naringRegistreringsdato = naringRegistreringsdato;
+    }
+
+    public void setOppdragsgiverOrg(String oppdragsgiverOrg) {
+        this.oppdragsgiverOrg = oppdragsgiverOrg;
+    }
+
+    public void setOpptjeningFom(LocalDate opptjeningFom) {
+        this.opptjeningFom = opptjeningFom;
+    }
+
+    public void setOpptjeningTom(LocalDate opptjeningTom) {
+        this.opptjeningTom = opptjeningTom;
+    }
+
+    public void setOriginalFom(LocalDate originalFom) {
+        this.originalFom = originalFom;
+    }
+
+    public void setOriginalTom(LocalDate originalTom) {
+        this.originalTom = originalTom;
+    }
+
     public void setPrivatpersonFødselsdato(LocalDate privatpersonFødselsdato) {
         this.privatpersonFødselsdato = privatpersonFødselsdato;
+    }
+
+    public void setPrivatpersonNavn(String privatpersonNavn) {
+        this.privatpersonNavn = privatpersonNavn;
+    }
+
+    public void setStillingsandel(BigDecimal stillingsandel) {
+        this.stillingsandel = stillingsandel;
     }
 }

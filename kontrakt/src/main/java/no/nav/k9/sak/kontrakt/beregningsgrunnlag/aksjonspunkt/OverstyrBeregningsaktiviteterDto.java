@@ -27,7 +27,7 @@ public class OverstyrBeregningsaktiviteterDto extends OverstyringAksjonspunktDto
     @Size(max = 1000)
     private List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList;
 
-    protected OverstyrBeregningsaktiviteterDto() {
+    public OverstyrBeregningsaktiviteterDto() {
         //
     }
 
@@ -42,13 +42,17 @@ public class OverstyrBeregningsaktiviteterDto extends OverstyringAksjonspunktDto
         return null;
     }
 
+    public List<BeregningsaktivitetLagreDto> getBeregningsaktivitetLagreDtoList() {
+        return beregningsaktivitetLagreDtoList;
+    }
+
     @JsonIgnore
     @Override
     public boolean getErVilkarOk() {
         return true;
     }
 
-    public List<BeregningsaktivitetLagreDto> getBeregningsaktivitetLagreDtoList() {
-        return beregningsaktivitetLagreDtoList;
+    public void setBeregningsaktivitetLagreDtoList(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList) {
+        this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
     }
 }

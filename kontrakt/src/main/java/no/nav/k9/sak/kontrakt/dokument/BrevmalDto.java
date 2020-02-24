@@ -19,28 +19,28 @@ public class BrevmalDto {
         return kode;
     }
 
-    public void setKode(String kode) {
-        this.kode = kode;
-    }
-
     public String getNavn() {
         return navn;
-    }
-
-    public void setNavn(String navn) {
-        this.navn = navn;
     }
 
     public DokumentMalRestriksjon getRestriksjon() {
         return restriksjon;
     }
 
-    public void setRestriksjon(DokumentMalRestriksjon restriksjon) {
-        this.restriksjon = restriksjon;
-    }
-
     public boolean getTilgjengelig() {
         return tilgjengelig;
+    }
+
+    public void setKode(String kode) {
+        this.kode = kode;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
+    }
+
+    public void setRestriksjon(DokumentMalRestriksjon restriksjon) {
+        this.restriksjon = restriksjon;
     }
 
     public void setTilgjengelig(boolean tilgjengelig) {

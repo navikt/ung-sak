@@ -64,10 +64,10 @@ public class AndelForFaktaOmBeregningDto {
     @DecimalMax("10000000.00")
     @Digits(integer = 8, fraction = 2)
     private BigDecimal refusjonskrav;
-    
+
     @JsonProperty(value = "skalKunneEndreAktivitet")
     private Boolean skalKunneEndreAktivitet;
-    
+
     @JsonProperty(value = "visningsnavn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")

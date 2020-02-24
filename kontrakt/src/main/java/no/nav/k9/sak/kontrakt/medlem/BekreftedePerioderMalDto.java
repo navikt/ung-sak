@@ -27,7 +27,7 @@ public abstract class BekreftedePerioderMalDto extends BekreftetAksjonspunktDto 
     private List<BekreftedePerioderDto> bekreftedePerioder;
 
     public BekreftedePerioderMalDto() { // NOSONAR
-        // For Jackson
+        //
     }
 
     public BekreftedePerioderMalDto(String begrunnelse, List<BekreftedePerioderDto> bekreftedePerioder) {
@@ -37,5 +37,9 @@ public abstract class BekreftedePerioderMalDto extends BekreftetAksjonspunktDto 
 
     public List<BekreftedePerioderDto> getBekreftedePerioder() {
         return Collections.unmodifiableList(bekreftedePerioder);
+    }
+
+    public void setBekreftedePerioder(List<BekreftedePerioderDto> bekreftedePerioder) {
+        this.bekreftedePerioder = bekreftedePerioder;
     }
 }

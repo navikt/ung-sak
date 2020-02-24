@@ -21,17 +21,17 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE)
 public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "videreBehandling", required = true)
-    @NotNull
-    private TilbakekrevingVidereBehandling videreBehandling;
-
-    @JsonProperty(value="varseltekst")
+    @JsonProperty(value = "varseltekst")
     @Size(max = 3000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String varseltekst;
 
-    protected VurderFeilutbetalingDto() {
-        // 
+    @JsonProperty(value = "videreBehandling", required = true)
+    @NotNull
+    private TilbakekrevingVidereBehandling videreBehandling;
+
+    public VurderFeilutbetalingDto() {
+        //
     }
 
     public VurderFeilutbetalingDto(String begrunnelse, TilbakekrevingVidereBehandling videreBehandling, String varseltekst) {
@@ -40,12 +40,20 @@ public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
         this.varseltekst = varseltekst;
     }
 
+    public String getVarseltekst() {
+        return varseltekst;
+    }
+
     public TilbakekrevingVidereBehandling getVidereBehandling() {
         return videreBehandling;
     }
 
-    public String getVarseltekst() {
-        return varseltekst;
+    public void setVarseltekst(String varseltekst) {
+        this.varseltekst = varseltekst;
+    }
+
+    public void setVidereBehandling(TilbakekrevingVidereBehandling videreBehandling) {
+        this.videreBehandling = videreBehandling;
     }
 
 }

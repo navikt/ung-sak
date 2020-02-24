@@ -23,21 +23,20 @@ public class BesteberegningFødendeKvinneAndelDto {
     @Max(Long.MAX_VALUE)
     private Long andelsnr;
 
-    @JsonProperty(value = "nyAndel")
-    private Boolean nyAndel;
-
-    @JsonProperty(value = "lagtTilAvSaksbehandler", required = true)
-    @NotNull
-    private Boolean lagtTilAvSaksbehandler;
-
     @JsonProperty(value = "fastsatteVerdier", required = true)
     @Valid
     @NotNull
     private FastsatteVerdierForBesteberegningDto fastsatteVerdier;
 
+    @JsonProperty(value = "lagtTilAvSaksbehandler", required = true)
+    @NotNull
+    private Boolean lagtTilAvSaksbehandler;
 
-    protected BesteberegningFødendeKvinneAndelDto() {
-        // For Jackson
+    @JsonProperty(value = "nyAndel")
+    private Boolean nyAndel;
+
+    public BesteberegningFødendeKvinneAndelDto() {
+        //
     }
 
     public BesteberegningFødendeKvinneAndelDto(Long andelsnr, Integer inntektPrMnd, Inntektskategori inntektskategori,
@@ -47,13 +46,14 @@ public class BesteberegningFødendeKvinneAndelDto {
         fastsatteVerdier = new FastsatteVerdierForBesteberegningDto(inntektPrMnd, inntektskategori);
     }
 
+    public Long getAndelsnr() {
+        return andelsnr;
+    }
+
     public FastsatteVerdierForBesteberegningDto getFastsatteVerdier() {
         return fastsatteVerdier;
     }
 
-    public Long getAndelsnr() {
-        return andelsnr;
-    }
 
     public Boolean getLagtTilAvSaksbehandler() {
         return lagtTilAvSaksbehandler;
@@ -61,6 +61,22 @@ public class BesteberegningFødendeKvinneAndelDto {
 
     public Boolean getNyAndel() {
         return nyAndel;
+    }
+
+    public void setAndelsnr(Long andelsnr) {
+        this.andelsnr = andelsnr;
+    }
+
+    public void setFastsatteVerdier(FastsatteVerdierForBesteberegningDto fastsatteVerdier) {
+        this.fastsatteVerdier = fastsatteVerdier;
+    }
+
+    public void setLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
+        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
+    }
+
+    public void setNyAndel(Boolean nyAndel) {
+        this.nyAndel = nyAndel;
     }
 
 }

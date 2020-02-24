@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_LOVLIG_OPPHOLD_KODE)
 public class BekreftLovligOppholdVurderingDto extends BekreftedePerioderMalDto {
 
-    protected BekreftLovligOppholdVurderingDto() {
+    public BekreftLovligOppholdVurderingDto() {
         //
     }
 

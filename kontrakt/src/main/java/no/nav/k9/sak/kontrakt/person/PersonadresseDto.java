@@ -6,10 +6,10 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 
@@ -17,16 +17,6 @@ import no.nav.k9.kodeverk.geografisk.AdresseType;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class PersonadresseDto {
-
-    @JsonProperty(value = "adresseType", required = true)
-    @NotNull
-    @Valid
-    private AdresseType adresseType;
-
-    @JsonProperty(value = "mottakerNavn")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String mottakerNavn;
 
     @JsonProperty(value = "adresselinje1")
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
@@ -43,6 +33,22 @@ public class PersonadresseDto {
     @Size(max = 100)
     private String adresselinje3;
 
+    @JsonProperty(value = "adresseType", required = true)
+    @NotNull
+    @Valid
+    private AdresseType adresseType;
+
+    @JsonProperty(value = "land", required = true)
+    @NotNull
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String land;
+
+    @JsonProperty(value = "mottakerNavn")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String mottakerNavn;
+
     @JsonProperty(value = "postNummer")
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     @Size(max = 100)
@@ -53,21 +59,7 @@ public class PersonadresseDto {
     @Size(max = 100)
     private String poststed;
 
-    @JsonProperty(value = "land", required = true)
-    @NotNull
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String land;
-
     public PersonadresseDto() {
-    }
-
-    public AdresseType getAdresseType() {
-        return adresseType;
-    }
-
-    public String getMottakerNavn() {
-        return mottakerNavn;
     }
 
     public String getAdresselinje1() {
@@ -82,24 +74,24 @@ public class PersonadresseDto {
         return adresselinje3;
     }
 
-    public String getPostNummer() {
-        return postNummer;
-    }
-
-    public String getPoststed() {
-        return poststed;
+    public AdresseType getAdresseType() {
+        return adresseType;
     }
 
     public String getLand() {
         return land;
     }
 
-    public void setAdresseType(AdresseType adresseType) {
-        this.adresseType = adresseType;
+    public String getMottakerNavn() {
+        return mottakerNavn;
     }
 
-    public void setMottakerNavn(String mottakerNavn) {
-        this.mottakerNavn = mottakerNavn;
+    public String getPostNummer() {
+        return postNummer;
+    }
+
+    public String getPoststed() {
+        return poststed;
     }
 
     public void setAdresselinje1(String adresselinje1) {
@@ -114,15 +106,23 @@ public class PersonadresseDto {
         this.adresselinje3 = adresselinje3;
     }
 
+    public void setAdresseType(AdresseType adresseType) {
+        this.adresseType = adresseType;
+    }
+
+    public void setLand(String land) {
+        this.land = land;
+    }
+
+    public void setMottakerNavn(String mottakerNavn) {
+        this.mottakerNavn = mottakerNavn;
+    }
+
     public void setPostNummer(String postNummer) {
         this.postNummer = postNummer;
     }
 
     public void setPoststed(String poststed) {
         this.poststed = poststed;
-    }
-
-    public void setLand(String land) {
-        this.land = land;
     }
 }

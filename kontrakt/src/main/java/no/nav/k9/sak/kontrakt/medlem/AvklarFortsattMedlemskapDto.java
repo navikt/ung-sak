@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE)
 public class AvklarFortsattMedlemskapDto extends BekreftedePerioderMalDto {
 
-    protected AvklarFortsattMedlemskapDto() { // NOSONAR
+    public AvklarFortsattMedlemskapDto() { // NOSONAR
         // For Jackson
     }
 

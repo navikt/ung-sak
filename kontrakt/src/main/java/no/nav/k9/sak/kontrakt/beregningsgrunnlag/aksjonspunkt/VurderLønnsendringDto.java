@@ -17,12 +17,12 @@ public class VurderLønnsendringDto {
     @NotNull
     private Boolean erLønnsendringIBeregningsperioden;
 
-    protected VurderLønnsendringDto() {
-        //
-    }
-
     public VurderLønnsendringDto(Boolean erLønnsendringIBeregningsperioden) { // NOSONAR
         this.erLønnsendringIBeregningsperioden = erLønnsendringIBeregningsperioden;
+    }
+
+    protected VurderLønnsendringDto() {
+        //
     }
 
     public Boolean erLønnsendringIBeregningsperioden() {

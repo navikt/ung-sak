@@ -42,7 +42,7 @@ public class AvklarMedisinskeOpplysningerDto extends BekreftetAksjonspunktDto {
         this.pleiebehov = pleiebehov;
     }
 
-    protected AvklarMedisinskeOpplysningerDto() {
+    public AvklarMedisinskeOpplysningerDto() {
         //
     }
 

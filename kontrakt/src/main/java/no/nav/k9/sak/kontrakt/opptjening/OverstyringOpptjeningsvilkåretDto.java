@@ -4,15 +4,14 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
-
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -28,7 +27,7 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
     @JsonProperty("erVilkarOk")
     private boolean erVilkarOk;
 
-    protected OverstyringOpptjeningsvilkåretDto() {
+    public OverstyringOpptjeningsvilkåretDto() {
         //
     }
 
@@ -46,6 +45,14 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
     @Override
     public boolean getErVilkarOk() {
         return erVilkarOk;
+    }
+
+    public void setAvslagskode(String avslagskode) {
+        this.avslagskode = avslagskode;
+    }
+
+    public void setErVilkarOk(boolean erVilkarOk) {
+        this.erVilkarOk = erVilkarOk;
     }
 
 }

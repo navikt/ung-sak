@@ -34,8 +34,9 @@ public class FeilDto implements Serializable {
     @Valid
     private FeilType type;
 
-    protected FeilDto() {
-        //
+    public FeilDto(FeilType type, String feilmelding) {
+        this.type = type;
+        this.feilmelding = feilmelding;
     }
 
     public FeilDto(String feilmelding) {
@@ -47,9 +48,8 @@ public class FeilDto implements Serializable {
         this.feltFeil = feltFeil;
     }
 
-    public FeilDto(FeilType type, String feilmelding) {
-        this.type = type;
-        this.feilmelding = feilmelding;
+    protected FeilDto() {
+        //
     }
 
     public String getFeilmelding() {

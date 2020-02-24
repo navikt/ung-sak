@@ -11,16 +11,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.PeriodeMedTilsyn;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class SykdomsDto {
-
-    @JsonProperty(value = "periodeTilVurdering")
-    @Valid
-    private Periode periodeTilVurdering;
 
     @JsonProperty(value = "legeerklæringer")
     @Size(max = 100)
@@ -37,11 +34,12 @@ public class SykdomsDto {
     @Valid
     private List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn;
 
-    public SykdomsDto(Periode periodeTilVurdering, List<Legeerklæring> legeerklæringer, List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn, List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn) {
-        this.periodeTilVurdering = periodeTilVurdering;
-        this.legeerklæringer = legeerklæringer;
-        this.perioderMedKontinuerligTilsyn = perioderMedKontinuerligTilsyn;
-        this.perioderMedUtvidetKontinuerligTilsyn = perioderMedUtvidetKontinuerligTilsyn;
+    @JsonProperty(value = "periodeTilVurdering")
+    @Valid
+    private Periode periodeTilVurdering;
+
+    public SykdomsDto() {
+        //
     }
 
     public SykdomsDto(Periode periodeTilVurdering) {
@@ -51,12 +49,12 @@ public class SykdomsDto {
         this.perioderMedUtvidetKontinuerligTilsyn = List.of();
     }
 
-    public SykdomsDto() {
-        //
-    }
-
-    public Periode getPeriodeTilVurdering() {
-        return periodeTilVurdering;
+    public SykdomsDto(Periode periodeTilVurdering, List<Legeerklæring> legeerklæringer, List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn,
+                      List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn) {
+        this.periodeTilVurdering = periodeTilVurdering;
+        this.legeerklæringer = legeerklæringer;
+        this.perioderMedKontinuerligTilsyn = perioderMedKontinuerligTilsyn;
+        this.perioderMedUtvidetKontinuerligTilsyn = perioderMedUtvidetKontinuerligTilsyn;
     }
 
     public List<Legeerklæring> getLegeerklæringer() {
@@ -69,6 +67,26 @@ public class SykdomsDto {
 
     public List<PeriodeMedTilsyn> getPerioderMedUtvidetKontinuerligTilsyn() {
         return Collections.unmodifiableList(perioderMedUtvidetKontinuerligTilsyn);
+    }
+
+    public Periode getPeriodeTilVurdering() {
+        return periodeTilVurdering;
+    }
+
+    public void setLegeerklæringer(List<Legeerklæring> legeerklæringer) {
+        this.legeerklæringer = legeerklæringer;
+    }
+
+    public void setPerioderMedKontinuerligTilsyn(List<PeriodeMedTilsyn> perioderMedKontinuerligTilsyn) {
+        this.perioderMedKontinuerligTilsyn = perioderMedKontinuerligTilsyn;
+    }
+
+    public void setPerioderMedUtvidetKontinuerligTilsyn(List<PeriodeMedTilsyn> perioderMedUtvidetKontinuerligTilsyn) {
+        this.perioderMedUtvidetKontinuerligTilsyn = perioderMedUtvidetKontinuerligTilsyn;
+    }
+
+    public void setPeriodeTilVurdering(Periode periodeTilVurdering) {
+        this.periodeTilVurdering = periodeTilVurdering;
     }
 
 }

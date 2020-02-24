@@ -26,7 +26,7 @@ public class FastsettBruttoBeregningsgrunnlagSNDto extends BekreftetAksjonspunkt
     @Max(Integer.MAX_VALUE)
     private Integer bruttoBeregningsgrunnlag;
 
-    protected FastsettBruttoBeregningsgrunnlagSNDto() {
+    public FastsettBruttoBeregningsgrunnlagSNDto() {
         // For Jackson
     }
 
@@ -37,5 +37,9 @@ public class FastsettBruttoBeregningsgrunnlagSNDto extends BekreftetAksjonspunkt
 
     public Integer getBruttoBeregningsgrunnlag() {
         return bruttoBeregningsgrunnlag;
+    }
+
+    public void setBruttoBeregningsgrunnlag(Integer bruttoBeregningsgrunnlag) {
+        this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
     }
 }

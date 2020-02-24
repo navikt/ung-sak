@@ -24,12 +24,12 @@ public class VurderTidsbegrensetArbeidsforholdDto {
     @Size(max = 100)
     private List<VurderteArbeidsforholdDto> fastsatteArbeidsforhold;
 
-    protected VurderTidsbegrensetArbeidsforholdDto() {
-        //
-    }
-
     public VurderTidsbegrensetArbeidsforholdDto(List<VurderteArbeidsforholdDto> fastsatteArbeidsforhold) { // NOSONAR
         this.fastsatteArbeidsforhold = new ArrayList<>(fastsatteArbeidsforhold);
+    }
+
+    protected VurderTidsbegrensetArbeidsforholdDto() {
+        //
     }
 
     public List<VurderteArbeidsforholdDto> getFastsatteArbeidsforhold() {

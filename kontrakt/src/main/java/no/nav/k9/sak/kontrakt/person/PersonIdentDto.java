@@ -21,11 +21,6 @@ import no.nav.k9.sak.typer.AktørId;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public abstract class PersonIdentDto {
 
-    @JsonProperty(value = "fnr")
-    @Size(max = 11)
-    @Pattern(regexp = "^[\\p{Alnum}]{11}+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String fnr;
-
     @JsonAlias("aktørId")
     @JsonProperty(value = "aktoerId", required = true)
     @NotNull
@@ -36,12 +31,21 @@ public abstract class PersonIdentDto {
     @Valid
     private Diskresjonskode diskresjonskode;
 
-    public Diskresjonskode getDiskresjonskode() {
-        return diskresjonskode;
+    @JsonProperty(value = "fnr")
+    @Size(max = 11)
+    @Pattern(regexp = "^[\\p{Alnum}]{11}+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String fnr;
+
+    public PersonIdentDto() {
+        //
     }
 
     public AktørId getAktørId() {
         return aktørId;
+    }
+
+    public Diskresjonskode getDiskresjonskode() {
+        return diskresjonskode;
     }
 
     @AbacAttributt("fnr")
@@ -49,16 +53,16 @@ public abstract class PersonIdentDto {
         return fnr;
     }
 
-    public void setFnr(String fnr) {
-        this.fnr = fnr;
+    public void setAktørId(AktørId aktoerId) {
+        this.aktørId = aktoerId;
     }
 
     public void setDiskresjonskode(Diskresjonskode diskresjonskode) {
         this.diskresjonskode = diskresjonskode;
     }
 
-    public void setAktørId(AktørId aktoerId) {
-        this.aktørId = aktoerId;
+    public void setFnr(String fnr) {
+        this.fnr = fnr;
     }
 
 }

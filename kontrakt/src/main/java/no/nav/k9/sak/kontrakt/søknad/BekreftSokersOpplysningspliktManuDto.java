@@ -34,7 +34,7 @@ public class BekreftSokersOpplysningspliktManuDto extends BekreftetAksjonspunktD
     @Size(max = 50)
     private List<InntektsmeldingSomIkkeKommerDto> inntektsmeldingerSomIkkeKommer;
 
-    protected BekreftSokersOpplysningspliktManuDto() { // NOSONAR
+    public BekreftSokersOpplysningspliktManuDto() { // NOSONAR
         // For Jackson
     }
 
@@ -57,5 +57,13 @@ public class BekreftSokersOpplysningspliktManuDto extends BekreftetAksjonspunktD
 
     public List<InntektsmeldingSomIkkeKommerDto> getInntektsmeldingerSomIkkeKommer() {
         return Collections.unmodifiableList(inntektsmeldingerSomIkkeKommer);
+    }
+
+    public void setErVilkarOk(Boolean erVilkarOk) {
+        this.erVilkarOk = erVilkarOk;
+    }
+
+    public void setInntektsmeldingerSomIkkeKommer(List<InntektsmeldingSomIkkeKommerDto> inntektsmeldingerSomIkkeKommer) {
+        this.inntektsmeldingerSomIkkeKommer = inntektsmeldingerSomIkkeKommer;
     }
 }
