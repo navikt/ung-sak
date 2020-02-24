@@ -68,6 +68,7 @@ public class Landkoder implements Kodeverdi {
         return kode;
     }
 
+    @JsonProperty(value = "kodeverk", access = Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
