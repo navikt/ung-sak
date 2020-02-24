@@ -454,9 +454,9 @@ public class RegisterdataInnhenter {
             new AktørIdPersonident(behandling.getAktørId().getId()),
             informasjonsElementer);
 
-        final var uuidDto = abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
-        log.info("Nytt aktivt grunnlag for behandling={} i abakus har uuid={}", behandling.getUuid(), uuidDto.toUuidReferanse());
-        loggRepository.lagre(new AbakusInnhentingGrunnlagLogg(behandling.getId(), uuidDto.toUuidReferanse()));
+        innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
+
+        abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 
     private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {

@@ -62,6 +62,7 @@ public class AbakusTjeneste {
     private URI innhentRegisterdata;
     private OidcRestClient oidcRestClient;
     private URI abakusEndpoint;
+    private URI callbackUrl;
     private URI endpointArbeidsforholdIPeriode;
     private URI endpointGrunnlag;
     private URI endpointMottaInntektsmeldinger;
@@ -78,9 +79,11 @@ public class AbakusTjeneste {
 
     @Inject
     public AbakusTjeneste(OidcRestClient oidcRestClient,
-                          @KonfigVerdi(value = "fpabakus.url") URI endpoint) {
+                          @KonfigVerdi(value = "fpabakus.url") URI endpoint,
+                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
         this.oidcRestClient = oidcRestClient;
         this.abakusEndpoint = endpoint;
+        this.callbackUrl = callbackUrl;
 
         this.endpointArbeidsforholdIPeriode = toUri("/api/arbeidsforhold/v1/arbeidstaker");
         this.endpointGrunnlag = toUri("/api/iay/grunnlag/v1/");
@@ -88,7 +91,7 @@ public class AbakusTjeneste {
         this.endpointMottaOppgittOpptjening = toUri("/api/iay/oppgitt/v1/motta");
         this.endpointGrunnlagSnapshot = toUri("/api/iay/grunnlag/v1/snapshot");
         this.endpointKopierGrunnlag = toUri("/api/iay/grunnlag/v1/kopier");
-        this.innhentRegisterdata = toUri("/api/registerdata/v1/innhent/sync");
+        this.innhentRegisterdata = toUri("/api/registerdata/v1/innhent/async");
         this.endpointInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/hentAlle");
         this.endpointRefusjonskravdatoer = toUri("/api/iay/inntektsmeldinger/v1/hentRefusjonskravDatoer");
 
@@ -186,6 +189,9 @@ public class AbakusTjeneste {
                     return null;
                 }
                 if (responseCode == HttpStatus.SC_NO_CONTENT) {
+                    return null;
+                }
+                if (responseCode == HttpStatus.SC_ACCEPTED) {
                     return null;
                 }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
@@ -295,6 +301,10 @@ public class AbakusTjeneste {
                 }
             }
         }
+    }
+
+    public String getCallbackUrl() {
+        return callbackUrl.toString();
     }
 
     public interface AbakusTjenesteFeil extends DeklarerteFeil {
