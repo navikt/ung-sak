@@ -96,13 +96,22 @@ public class TilkjentYtelseTjeneste {
     private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingVedtak vedtak) {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         info.setSaksnummer(new Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()));
-        info.setBehandlingId(behandling.getId());
+        info.setBehandlingId(behandling.getUuid());
+        info.setHenvisning(lagHenvisning(behandling));
         info.setYtelseType(MapperForYtelseType.mapYtelseType(behandling.getFagsakYtelseType()));
         info.setAnsvarligSaksbehandler(vedtak.getAnsvarligSaksbehandler());
         info.setAktørId(behandling.getAktørId().getId());
         info.setVedtaksdato(vedtak.getVedtaksdato());
         behandling.getOriginalBehandling().ifPresent(ob -> info.setForrigeBehandlingId(ob.getId()));
         return info;
+    }
+
+    private String lagHenvisning(Behandling behandling) {
+        //FIXME K9 avklar hvilken verdi som skal burkes i 'henvisning'.
+        //den brukes til 2 formål:
+        // 1 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
+        // 2 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik
+        return behandling.getUuid().toString().substring(0, 30);
     }
 
 }

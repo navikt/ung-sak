@@ -91,7 +91,7 @@
 			<dependency>
 				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
 				<artifactId>oppdrag-kontrakter</artifactId>
-				<version>1.1-20200218222903-e2b106a</version>
+				<version>1.1-20200221222649-2daf4db</version>
 			</dependency>
 
             <dependency>
