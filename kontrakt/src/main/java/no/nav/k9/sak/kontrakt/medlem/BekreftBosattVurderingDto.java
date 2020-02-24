@@ -14,14 +14,12 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_OM_ER_BOSATT_KODE)
 public class BekreftBosattVurderingDto extends BekreftedePerioderMalDto {
 
-    BekreftBosattVurderingDto() { // NOSONAR
+    public BekreftBosattVurderingDto() { // NOSONAR
         // For Jackson
     }
 
     public BekreftBosattVurderingDto(String begrunnelse, List<BekreftedePerioderDto> bekreftedePerioder) { // NOSONAR
         super(begrunnelse, bekreftedePerioder);
     }
-
-
 
 }

@@ -14,13 +14,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BekreftBosattVurderingAksjonspunktDto {
 
-    @JsonProperty(value = "bosattVurdering")
-    private Boolean bosattVurdering;
-
     @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
+
+    @JsonProperty(value = "bosattVurdering")
+    private Boolean bosattVurdering;
+
+    public BekreftBosattVurderingAksjonspunktDto() {
+        //
+    }
 
     public BekreftBosattVurderingAksjonspunktDto(Boolean bosattVurdering, String begrunnelse) {
         this.bosattVurdering = bosattVurdering;
@@ -33,5 +37,13 @@ public class BekreftBosattVurderingAksjonspunktDto {
 
     public Boolean getBosattVurdering() {
         return bosattVurdering;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
+    }
+
+    public void setBosattVurdering(Boolean bosattVurdering) {
+        this.bosattVurdering = bosattVurdering;
     }
 }

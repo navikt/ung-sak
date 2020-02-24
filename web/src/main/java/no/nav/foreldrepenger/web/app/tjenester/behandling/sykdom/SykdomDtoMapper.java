@@ -15,8 +15,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklærin
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.medisinsk.Legeerklæring;
-import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsyn;
 import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
+import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.PeriodeMedTilsyn;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped

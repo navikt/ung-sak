@@ -6,9 +6,9 @@ package no.nav.k9.sak.kontrakt.aksjonspunkt;
  */
 public interface AvslagbartAksjonspunktDto extends AksjonspunktKode {
 
-    Boolean getErVilkarOk();
-
     String getAvslagskode();
 
     String getBegrunnelse();
+
+    Boolean getErVilkarOk();
 }

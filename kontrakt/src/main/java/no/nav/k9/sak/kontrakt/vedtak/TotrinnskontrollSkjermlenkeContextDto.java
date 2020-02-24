@@ -33,6 +33,10 @@ public class TotrinnskontrollSkjermlenkeContextDto {
     @Valid
     private List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = new ArrayList<>();
 
+    public TotrinnskontrollSkjermlenkeContextDto() {
+        //
+    }
+
     public TotrinnskontrollSkjermlenkeContextDto(SkjermlenkeType skjermlenkeType, List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter) {
         this.totrinnskontrollAksjonspunkter = totrinnskontrollAksjonspunkter;
         this.skjermlenkeType = skjermlenkeType.getKode();
@@ -44,5 +48,13 @@ public class TotrinnskontrollSkjermlenkeContextDto {
 
     public List<TotrinnskontrollAksjonspunkterDto> getTotrinnskontrollAksjonspunkter() {
         return Collections.unmodifiableList(totrinnskontrollAksjonspunkter);
+    }
+
+    public void setSkjermlenkeType(String skjermlenkeType) {
+        this.skjermlenkeType = skjermlenkeType;
+    }
+
+    public void setTotrinnskontrollAksjonspunkter(List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter) {
+        this.totrinnskontrollAksjonspunkter = totrinnskontrollAksjonspunkter;
     }
 }

@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SimuleringResultatDto {
 
+    private boolean slåttAvInntrekk;
     private Long sumFeilutbetaling;
     private Long sumInntrekk;
-    private boolean slåttAvInntrekk;
 
     public SimuleringResultatDto() {
     }

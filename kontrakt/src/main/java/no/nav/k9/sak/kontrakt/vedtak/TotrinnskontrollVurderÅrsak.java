@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 
-
 /** @deprecated Bruk {@link VurderÅrsak} i stedet for dette. */
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,6 +35,10 @@ public class TotrinnskontrollVurderÅrsak {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{P}\\p{M}\\p{Sc}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String navn;
 
+    public TotrinnskontrollVurderÅrsak() {
+        //
+    }
+
     public TotrinnskontrollVurderÅrsak(VurderÅrsak vurderÅrsak) {
         this.kode = vurderÅrsak.getKode();
         this.navn = vurderÅrsak.getNavn();
@@ -47,5 +50,13 @@ public class TotrinnskontrollVurderÅrsak {
 
     public String getNavn() {
         return navn;
+    }
+
+    public void setKode(String kode) {
+        this.kode = kode;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
     }
 }

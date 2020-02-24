@@ -23,6 +23,9 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS_KODE)
 public class AvklarSaksopplysningerDto extends BekreftetAksjonspunktDto {
 
+    @JsonProperty(value = "fortsettBehandling")
+    private boolean fortsettBehandling;
+
     /** {@link PersonstatusType#getKode()}. */
     @JsonProperty(value = "personstatus", required = true)
     @NotNull
@@ -30,10 +33,7 @@ public class AvklarSaksopplysningerDto extends BekreftetAksjonspunktDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String personstatus;
 
-    @JsonProperty(value = "fortsettBehandling")
-    private boolean fortsettBehandling;
-
-    protected AvklarSaksopplysningerDto() {
+    public AvklarSaksopplysningerDto() {
         //
     }
 

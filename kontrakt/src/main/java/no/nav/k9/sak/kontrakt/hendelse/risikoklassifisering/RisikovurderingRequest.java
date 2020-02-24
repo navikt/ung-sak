@@ -80,7 +80,7 @@ public class RisikovurderingRequest {
     @NotNull
     private String behandlingstema;
 
-    @JsonProperty(value="konsumentId", required = true)
+    @JsonProperty(value = "konsumentId", required = true)
     @Valid
     @NotNull
     private UUID konsumentId;

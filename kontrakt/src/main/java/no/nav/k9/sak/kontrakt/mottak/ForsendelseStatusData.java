@@ -43,20 +43,20 @@ public class ForsendelseStatusData {
         return forsendelseStatus;
     }
 
-    public void setForsendelseStatus(ForsendelseStatus forsendelseStatus) {
-        this.forsendelseStatus = forsendelseStatus;
-    }
-
     public JournalpostId getJournalpostId() {
         return journalpostId;
     }
 
-    public void setJournalpostId(JournalpostId journalpostId) {
-        this.journalpostId = journalpostId;
-    }
-
     public Saksnummer getSaksnummer() {
         return saksnummer;
+    }
+
+    public void setForsendelseStatus(ForsendelseStatus forsendelseStatus) {
+        this.forsendelseStatus = forsendelseStatus;
+    }
+
+    public void setJournalpostId(JournalpostId journalpostId) {
+        this.journalpostId = journalpostId;
     }
 
     public void setSaksnummer(Saksnummer saksnummer) {

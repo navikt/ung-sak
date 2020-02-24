@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AndelMedBeløpDto extends FaktaOmBeregningAndelDto {
 
-    @JsonProperty(value= "fastsattBelopPrMnd", required = true)
+    @JsonProperty(value = "fastsattBelopPrMnd", required = true)
     @NotNull
     @DecimalMin("0.00")
     @DecimalMax("10000000.00")
@@ -28,9 +28,12 @@ public class AndelMedBeløpDto extends FaktaOmBeregningAndelDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
         AndelMedBeløpDto that = (AndelMedBeløpDto) o;
         return Objects.equals(fastsattBelopPrMnd, that.fastsattBelopPrMnd);
     }

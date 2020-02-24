@@ -18,6 +18,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FastsattePerioderTidsbegrensetDto {
 
+    @JsonProperty(value = "fastsatteTidsbegrensedeAndeler")
+    @Valid
+    @Size(max = 200)
+    private List<FastsatteAndelerTidsbegrensetDto> fastsatteTidsbegrensedeAndeler;
+
     @JsonProperty(value = "periodeFom", required = true)
     @NotNull
     private LocalDate periodeFom;
@@ -25,13 +30,8 @@ public class FastsattePerioderTidsbegrensetDto {
     @JsonProperty(value = "periodeTom")
     private LocalDate periodeTom;
 
-    @JsonProperty(value = "fastsatteTidsbegrensedeAndeler")
-    @Valid
-    @Size(max = 200)
-    private List<FastsatteAndelerTidsbegrensetDto> fastsatteTidsbegrensedeAndeler;
-
-    protected FastsattePerioderTidsbegrensetDto() {
-        // Jackson
+    public FastsattePerioderTidsbegrensetDto() {
+        //
     }
 
     public FastsattePerioderTidsbegrensetDto(LocalDate periodeFom,
@@ -42,6 +42,10 @@ public class FastsattePerioderTidsbegrensetDto {
         this.fastsatteTidsbegrensedeAndeler = fastsatteTidsbegrensedeAndeler;
     }
 
+    public List<FastsatteAndelerTidsbegrensetDto> getFastsatteTidsbegrensedeAndeler() {
+        return fastsatteTidsbegrensedeAndeler;
+    }
+
     public LocalDate getPeriodeFom() {
         return periodeFom;
     }
@@ -50,7 +54,15 @@ public class FastsattePerioderTidsbegrensetDto {
         return periodeTom;
     }
 
-    public List<FastsatteAndelerTidsbegrensetDto> getFastsatteTidsbegrensedeAndeler() {
-        return fastsatteTidsbegrensedeAndeler;
+    public void setFastsatteTidsbegrensedeAndeler(List<FastsatteAndelerTidsbegrensetDto> fastsatteTidsbegrensedeAndeler) {
+        this.fastsatteTidsbegrensedeAndeler = fastsatteTidsbegrensedeAndeler;
+    }
+
+    public void setPeriodeFom(LocalDate periodeFom) {
+        this.periodeFom = periodeFom;
+    }
+
+    public void setPeriodeTom(LocalDate periodeTom) {
+        this.periodeTom = periodeTom;
     }
 }

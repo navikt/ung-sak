@@ -22,11 +22,19 @@ public class AvklarFortsattMedlemskapAksjonspunktDto {
     @Size(max = 100)
     private List<BekreftedePerioderAdapter> perioder;
 
+    public AvklarFortsattMedlemskapAksjonspunktDto() {
+        //
+    }
+
     public AvklarFortsattMedlemskapAksjonspunktDto(List<BekreftedePerioderAdapter> perioder) {
         this.perioder = List.copyOf(perioder);
     }
 
     public List<BekreftedePerioderAdapter> getPerioder() {
         return Collections.unmodifiableList(perioder);
+    }
+
+    public void setPerioder(List<BekreftedePerioderAdapter> perioder) {
+        this.perioder = perioder;
     }
 }

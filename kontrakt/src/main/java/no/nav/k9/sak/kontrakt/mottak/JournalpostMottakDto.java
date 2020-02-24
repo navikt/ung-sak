@@ -31,20 +31,6 @@ public class JournalpostMottakDto {
 
     private static final int PAYLOAD_MAX_CHARS = 196000;
 
-    @JsonProperty(value = "saksnummer", required = true)
-    @NotNull
-    @Valid
-    private Saksnummer saksnummer;
-
-    @JsonProperty(value = "journalpostId", required = true)
-    @NotNull
-    @Valid
-    private JournalpostId journalpostId;
-
-    @JsonProperty(value = "forsendelseId")
-    @Valid
-    private UUID forsendelseId;
-
     @JsonProperty(value = "behandlingstemaOffisiellKode", required = true)
     @Valid
     @NotNull
@@ -52,11 +38,20 @@ public class JournalpostMottakDto {
     @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*")
     private String behandlingstemaOffisiellKode;
 
+    @JsonProperty(value = "dokumentKategoriOffisiellKode")
+    @Size(max = 25)
+    @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*")
+    private String dokumentKategoriOffisiellKode;
+
     @JsonProperty(value = "dokumentTypeIdOffisiellKode")
     @Valid
     @Size(max = 8)
     @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*")
     private String dokumentTypeIdOffisiellKode;
+
+    @JsonProperty(value = "forsendelseId")
+    @Valid
+    private UUID forsendelseId;
 
     @JsonProperty(value = "forsendelseMottatt")
     private LocalDate forsendelseMottatt;
@@ -64,15 +59,20 @@ public class JournalpostMottakDto {
     @JsonProperty(value = "forsendelseMottattTidspunkt")
     private LocalDateTime forsendelseMottattTidspunkt;
 
-    @JsonProperty(value = "dokumentKategoriOffisiellKode")
-    @Size(max = 25)
-    @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*")
-    private String dokumentKategoriOffisiellKode;
-
     @JsonProperty(value = "journalForendeEnhet")
     @Size(max = 5)
     @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*")
     private String journalForendeEnhet;
+
+    @JsonProperty(value = "journalpostId", required = true)
+    @NotNull
+    @Valid
+    private JournalpostId journalpostId;
+
+    @JsonProperty(value = "saksnummer", required = true)
+    @NotNull
+    @Valid
+    private Saksnummer saksnummer;
 
     @JsonProperty("payloadXml")
     @Pattern(regexp = "^[a-zA-Z0-9\\-_=]*$")
@@ -104,21 +104,36 @@ public class JournalpostMottakDto {
         }
     }
 
-    public void setForsendelseId(UUID forsendelseId) {
-        this.forsendelseId = forsendelseId;
+    protected JournalpostMottakDto() {
+        // For Jackson
+    }
+
+    public String getBehandlingstemaOffisiellKode() {
+        return behandlingstemaOffisiellKode;
+    }
+
+    public String getDokumentKategoriOffisiellKode() {
+        return dokumentKategoriOffisiellKode;
+    }
+
+    public Optional<String> getDokumentTypeIdOffisiellKode() {
+        return Optional.ofNullable(dokumentTypeIdOffisiellKode);
     }
 
     public Optional<UUID> getForsendelseId() {
         return Optional.ofNullable(this.forsendelseId);
     }
 
-    protected JournalpostMottakDto() {
-        // For Jackson
+    public Optional<LocalDate> getForsendelseMottatt() {
+        return Optional.ofNullable(forsendelseMottatt);
     }
 
-    @AbacAttributt("saksnummer")
-    public Saksnummer getSaksnummer() {
-        return saksnummer;
+    public LocalDateTime getForsendelseMottattTidspunkt() {
+        return forsendelseMottattTidspunkt;
+    }
+
+    public String getJournalForendeEnhet() {
+        return journalForendeEnhet;
     }
 
     @AbacAttributt("journalpostId")
@@ -126,32 +141,17 @@ public class JournalpostMottakDto {
         return journalpostId;
     }
 
-    public String getBehandlingstemaOffisiellKode() {
-        return behandlingstemaOffisiellKode;
-    }
-
-    public Optional<String> getDokumentTypeIdOffisiellKode() {
-        return Optional.ofNullable(dokumentTypeIdOffisiellKode);
-    }
-
-    public Optional<LocalDate> getForsendelseMottatt() {
-        return Optional.ofNullable(forsendelseMottatt);
-    }
-
-    public String getDokumentKategoriOffisiellKode() {
-        return dokumentKategoriOffisiellKode;
-    }
-
-    public LocalDateTime getForsendelseMottattTidspunkt() {
-        return forsendelseMottattTidspunkt;
+    @AbacAttributt("saksnummer")
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
     }
 
     public void setDokumentKategoriOffisiellKode(String dokumentKategoriOffisiellKode) {
         this.dokumentKategoriOffisiellKode = dokumentKategoriOffisiellKode;
     }
 
-    public String getJournalForendeEnhet() {
-        return journalForendeEnhet;
+    public void setForsendelseId(UUID forsendelseId) {
+        this.forsendelseId = forsendelseId;
     }
 
     public void setJournalForendeEnhet(String journalForendeEnhet) {

@@ -24,6 +24,11 @@ public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
     @NotNull
     private FastsatteVerdierDto fastsatteVerdier;
 
+    @JsonProperty(value = "forrigeArbeidsinntektPrÅr")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer forrigeArbeidsinntektPrÅr;
+
     @JsonProperty(value = "forrigeInntektskateori")
     @Valid
     private Inntektskategori forrigeInntektskategori;
@@ -33,12 +38,7 @@ public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
     @Max(Integer.MAX_VALUE)
     private Integer forrigeRefusjonPrÅr;
 
-    @JsonProperty(value = "forrigeArbeidsinntektPrÅr")
-    @Min(0)
-    @Max(Integer.MAX_VALUE)
-    private Integer forrigeArbeidsinntektPrÅr;
-
-    protected FastsettBeregningsgrunnlagAndelDto() {
+    public FastsettBeregningsgrunnlagAndelDto() {
         //
     }
 
@@ -57,6 +57,10 @@ public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
         return fastsatteVerdier;
     }
 
+    public Integer getForrigeArbeidsinntektPrÅr() {
+        return forrigeArbeidsinntektPrÅr;
+    }
+
     public Inntektskategori getForrigeInntektskategori() {
         return forrigeInntektskategori;
     }
@@ -65,7 +69,19 @@ public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
         return forrigeRefusjonPrÅr;
     }
 
-    public Integer getForrigeArbeidsinntektPrÅr() {
-        return forrigeArbeidsinntektPrÅr;
+    public void setFastsatteVerdier(FastsatteVerdierDto fastsatteVerdier) {
+        this.fastsatteVerdier = fastsatteVerdier;
+    }
+
+    public void setForrigeArbeidsinntektPrÅr(Integer forrigeArbeidsinntektPrÅr) {
+        this.forrigeArbeidsinntektPrÅr = forrigeArbeidsinntektPrÅr;
+    }
+
+    public void setForrigeInntektskategori(Inntektskategori forrigeInntektskategori) {
+        this.forrigeInntektskategori = forrigeInntektskategori;
+    }
+
+    public void setForrigeRefusjonPrÅr(Integer forrigeRefusjonPrÅr) {
+        this.forrigeRefusjonPrÅr = forrigeRefusjonPrÅr;
     }
 }

@@ -18,10 +18,14 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TotrinnsArbeidsforholdDto {
 
-    @JsonProperty(value = "navn", required = true)
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String navn;
+    @JsonProperty(value = "arbeidsforholdHandlingType")
+    @Valid
+    private ArbeidsforholdHandlingType arbeidsforholdHandlingType;
+
+    @JsonProperty(value = "arbeidsforholdId")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsforholdId;
 
     /**
      * FIXME K9: dårlig design - felt kan inneholde fødselsdato (for privat arbeisgiver) eller orgnummer (for virksomhet). Beholder
@@ -33,17 +37,17 @@ public class TotrinnsArbeidsforholdDto {
     @Pattern(regexp = "^[1-9][0-9\\-.]{6,20}+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String arbeidsgiverIdentifikator;
 
-    @JsonProperty(value = "arbeidsforholdId")
-    @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsforholdId;
-
-    @JsonProperty(value = "arbeidsforholdHandlingType")
-    @Valid
-    private ArbeidsforholdHandlingType arbeidsforholdHandlingType;
-
     @JsonProperty(value = "brukPermisjon")
     private Boolean brukPermisjon;
+
+    @JsonProperty(value = "navn", required = true)
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String navn;
+
+    public TotrinnsArbeidsforholdDto() {
+        //
+    }
 
     public TotrinnsArbeidsforholdDto(String navn,
                                      String arbeidsgiverIdentifikator,
@@ -57,24 +61,44 @@ public class TotrinnsArbeidsforholdDto {
         this.brukPermisjon = brukPermisjon;
     }
 
-    public String getNavn() {
-        return navn;
-    }
-
-    public String getArbeidsgiverIdentifikator() {
-        return arbeidsgiverIdentifikator;
+    public ArbeidsforholdHandlingType getArbeidsforholdHandlingType() {
+        return arbeidsforholdHandlingType;
     }
 
     public String getArbeidsforholdId() {
         return arbeidsforholdId;
     }
 
-    public ArbeidsforholdHandlingType getArbeidsforholdHandlingType() {
-        return arbeidsforholdHandlingType;
+    public String getArbeidsgiverIdentifikator() {
+        return arbeidsgiverIdentifikator;
     }
 
     public Boolean getBrukPermisjon() {
         return brukPermisjon;
+    }
+
+    public String getNavn() {
+        return navn;
+    }
+
+    public void setArbeidsforholdHandlingType(ArbeidsforholdHandlingType arbeidsforholdHandlingType) {
+        this.arbeidsforholdHandlingType = arbeidsforholdHandlingType;
+    }
+
+    public void setArbeidsforholdId(String arbeidsforholdId) {
+        this.arbeidsforholdId = arbeidsforholdId;
+    }
+
+    public void setArbeidsgiverIdentifikator(String arbeidsgiverIdentifikator) {
+        this.arbeidsgiverIdentifikator = arbeidsgiverIdentifikator;
+    }
+
+    public void setBrukPermisjon(Boolean brukPermisjon) {
+        this.brukPermisjon = brukPermisjon;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
     }
 
 }

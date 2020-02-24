@@ -14,21 +14,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkInnslagGjeldendeFraDto {
 
-    @JsonProperty(value="fra")
+    @JsonProperty(value = "fra")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String fra;
-    
-    @JsonProperty(value="navn")
+
+    @JsonProperty(value = "navn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String navn;
-    
-    @JsonProperty(value="verdi")
+
+    @JsonProperty(value = "verdi")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String verdi;
-    
+
     public HistorikkInnslagGjeldendeFraDto(String fra) {
         this.fra = fra;
     }
@@ -42,7 +42,6 @@ public class HistorikkInnslagGjeldendeFraDto {
     HistorikkInnslagGjeldendeFraDto() {
         //
     }
-
 
     public String getFra() {
         return fra;

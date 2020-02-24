@@ -1,7 +1,6 @@
 package no.nav.k9.sak.kontrakt.medlem;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,10 +21,32 @@ import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemDto {
 
+    @JsonProperty(value = "bosattVurdering")
+    private Boolean bosattVurdering;
+
+    @JsonProperty(value = "endringer")
+    @Size(max = 100)
+    @Valid
+    private List<EndringIPersonopplysningDto> endringer = Collections.emptyList();
+
+    @JsonProperty(value = "erEosBorger")
+    private Boolean erEosBorger;
+
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
+    private LocalDate fom; // gjeldendeFra
+
     @JsonProperty(value = "inntekt")
     @Size(max = 100)
     @Valid
     private List<InntektDto> inntekt = Collections.emptyList();
+
+    @JsonProperty(value = "lovligOppholdVurdering")
+    private Boolean lovligOppholdVurdering;
+
+    @JsonProperty(value = "medlemskapManuellVurderingType")
+    @Valid
+    private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
 
     @JsonProperty(value = "medlemskapPerioder")
     @Size(max = 100)
@@ -35,34 +56,36 @@ public class MedlemDto {
     @JsonProperty(value = "oppholdsrettVurdering")
     private Boolean oppholdsrettVurdering;
 
-    @JsonProperty(value = "erEosBorger")
-    private Boolean erEosBorger;
-
-    @JsonProperty(value = "lovligOppholdVurdering")
-    private Boolean lovligOppholdVurdering;
-
-    @JsonProperty(value = "bosattVurdering")
-    private Boolean bosattVurdering;
-
-    @JsonProperty(value = "medlemskapManuellVurderingType")
-    @Valid
-    private MedlemskapManuellVurderingType medlemskapManuellVurderingType;
-
-    @JsonProperty(value = "fom", required = true)
-    @NotNull
-    private LocalDate fom; // gjeldendeFra
-
-    @JsonProperty(value = "endringer")
-    @Size(max = 100)
-    @Valid
-    private List<EndringIPersonopplysningDto> endringer = Collections.emptyList();
-
     public MedlemDto() {
         // trengs for deserialisering av JSON
     }
 
+    public Boolean getBosattVurdering() {
+        return bosattVurdering;
+    }
+
+    public List<EndringIPersonopplysningDto> getEndringer() {
+        return Collections.unmodifiableList(endringer);
+    }
+
+    public Boolean getErEosBorger() {
+        return erEosBorger;
+    }
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
     public List<InntektDto> getInntekt() {
         return Collections.unmodifiableList(inntekt);
+    }
+
+    public Boolean getLovligOppholdVurdering() {
+        return lovligOppholdVurdering;
+    }
+
+    public MedlemskapManuellVurderingType getMedlemskapManuellVurderingType() {
+        return medlemskapManuellVurderingType;
     }
 
     public List<MedlemskapPerioderDto> getMedlemskapPerioder() {
@@ -73,32 +96,32 @@ public class MedlemDto {
         return oppholdsrettVurdering;
     }
 
-    public Boolean getLovligOppholdVurdering() {
-        return lovligOppholdVurdering;
+    public void setBosattVurdering(Boolean bosattVurdering) {
+        this.bosattVurdering = bosattVurdering;
     }
 
-    public Boolean getBosattVurdering() {
-        return bosattVurdering;
+    public void setEndringer(List<EndringIPersonopplysningDto> endringer) {
+        this.endringer = List.copyOf(endringer);
     }
 
-    public MedlemskapManuellVurderingType getMedlemskapManuellVurderingType() {
-        return medlemskapManuellVurderingType;
+    public void setErEosBorger(Boolean erEosBorger) {
+        this.erEosBorger = erEosBorger;
     }
 
-    public LocalDate getFom() {
-        return fom;
-    }
-
-    public Boolean getErEosBorger() {
-        return erEosBorger;
-    }
-
-    public List<EndringIPersonopplysningDto> getEndringer() {
-        return Collections.unmodifiableList(endringer);
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
     }
 
     public void setInntekt(List<InntektDto> inntekt) {
         this.inntekt = List.copyOf(inntekt);
+    }
+
+    public void setLovligOppholdVurdering(Boolean lovligOppholdVurdering) {
+        this.lovligOppholdVurdering = lovligOppholdVurdering;
+    }
+
+    public void setMedlemskapManuellVurderingType(MedlemskapManuellVurderingType medlemskapManuellVurderingType) {
+        this.medlemskapManuellVurderingType = medlemskapManuellVurderingType;
     }
 
     public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {
@@ -107,29 +130,5 @@ public class MedlemDto {
 
     public void setOppholdsrettVurdering(Boolean oppholdsrettVurdering) {
         this.oppholdsrettVurdering = oppholdsrettVurdering;
-    }
-
-    public void setErEosBorger(Boolean erEosBorger) {
-        this.erEosBorger = erEosBorger;
-    }
-
-    public void setLovligOppholdVurdering(Boolean lovligOppholdVurdering) {
-        this.lovligOppholdVurdering = lovligOppholdVurdering;
-    }
-
-    public void setBosattVurdering(Boolean bosattVurdering) {
-        this.bosattVurdering = bosattVurdering;
-    }
-
-    public void setMedlemskapManuellVurderingType(MedlemskapManuellVurderingType medlemskapManuellVurderingType) {
-        this.medlemskapManuellVurderingType = medlemskapManuellVurderingType;
-    }
-
-    public void setFom(LocalDate fom) {
-        this.fom = fom;
-    }
-
-    public void setEndringer(List<EndringIPersonopplysningDto> endringer) {
-        this.endringer = List.copyOf(endringer);
     }
 }

@@ -31,6 +31,10 @@ public class RelaterteYtelserDto {
     @JsonProperty(value = "tilgrensendeYtelserListe")
     private List<TilgrensendeYtelserDto> tilgrensendeYtelserListe = new ArrayList<>();
 
+    public RelaterteYtelserDto() {
+        //
+    }
+
     public RelaterteYtelserDto(String relatertYtelseType, List<TilgrensendeYtelserDto> tilgrensendeYtelserListe) {
         this.relatertYtelseType = relatertYtelseType;
         if (tilgrensendeYtelserListe != null) {
@@ -38,10 +42,6 @@ public class RelaterteYtelserDto {
         }
     }
 
-    public RelaterteYtelserDto() {
-        //
-    }
-    
     public String getRelatertYtelseType() {
         return relatertYtelseType;
     }

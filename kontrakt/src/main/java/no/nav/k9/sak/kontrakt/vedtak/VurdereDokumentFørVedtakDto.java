@@ -15,7 +15,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK_KODE)
 public class VurdereDokumentFørVedtakDto extends BekreftetAksjonspunktDto {
 
-    protected VurdereDokumentFørVedtakDto() {
+    public VurdereDokumentFørVedtakDto() {
         //
     }
 

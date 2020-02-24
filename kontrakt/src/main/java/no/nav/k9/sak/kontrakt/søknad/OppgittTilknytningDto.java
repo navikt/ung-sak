@@ -18,26 +18,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class OppgittTilknytningDto {
 
+    @JsonProperty(value = "oppholdNestePeriode")
+    private boolean oppholdNestePeriode;
+
     @JsonProperty(value = "oppholdNorgeNa")
     private boolean oppholdNorgeNa;
 
     @JsonProperty(value = "oppholdSistePeriode")
     private boolean oppholdSistePeriode;
 
-    @JsonProperty(value = "oppholdNestePeriode")
-    private boolean oppholdNestePeriode;
+    @JsonProperty(value = "utlandsoppholdEtter")
+    @Valid
+    @Size(max = 50)
+    private List<UtlandsoppholdDto> utlandsoppholdEtter = new ArrayList<>();
 
     @JsonProperty(value = "utlandsoppholdFor")
     @Valid
     @Size(max = 50)
     private List<UtlandsoppholdDto> utlandsoppholdFor = new ArrayList<>();
 
-    @JsonProperty(value = "utlandsoppholdEtter")
-    @Valid
-    @Size(max = 50)
-    private List<UtlandsoppholdDto> utlandsoppholdEtter = new ArrayList<>();
-
-    protected OppgittTilknytningDto() {
+    public OppgittTilknytningDto() {
         // trengs for deserialisering av JSON
     }
 
@@ -54,23 +54,23 @@ public class OppgittTilknytningDto {
         this.utlandsoppholdEtter = List.copyOf(utlandsoppholdEtter);
     }
 
-    public boolean isOppholdNorgeNa() {
-        return oppholdNorgeNa;
-    }
-
-    public boolean isOppholdSistePeriode() {
-        return oppholdSistePeriode;
-    }
-
-    public boolean isOppholdNestePeriode() {
-        return oppholdNestePeriode;
+    public List<UtlandsoppholdDto> getUtlandsoppholdEtter() {
+        return Collections.unmodifiableList(utlandsoppholdEtter);
     }
 
     public List<UtlandsoppholdDto> getUtlandsoppholdFor() {
         return Collections.unmodifiableList(utlandsoppholdFor);
     }
 
-    public List<UtlandsoppholdDto> getUtlandsoppholdEtter() {
-        return Collections.unmodifiableList(utlandsoppholdEtter);
+    public boolean isOppholdNestePeriode() {
+        return oppholdNestePeriode;
+    }
+
+    public boolean isOppholdNorgeNa() {
+        return oppholdNorgeNa;
+    }
+
+    public boolean isOppholdSistePeriode() {
+        return oppholdSistePeriode;
     }
 }

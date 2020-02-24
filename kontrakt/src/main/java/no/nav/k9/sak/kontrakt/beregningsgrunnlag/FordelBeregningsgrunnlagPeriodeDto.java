@@ -32,14 +32,14 @@ public class FordelBeregningsgrunnlagPeriodeDto {
     @Size(max = 200)
     private List<FordelBeregningsgrunnlagAndelDto> fordelBeregningsgrunnlagAndeler = new ArrayList<>();
 
-    @JsonProperty(value="harPeriodeAarsakGraderingEllerRefusjon", required = true)
+    @JsonProperty(value = "harPeriodeAarsakGraderingEllerRefusjon", required = true)
     @NotNull
     private boolean harPeriodeAarsakGraderingEllerRefusjon = false;
-    
-    @JsonProperty(value="skalKunneEndreRefuson", required = true)
+
+    @JsonProperty(value = "skalKunneEndreRefuson", required = true)
     @NotNull
     private boolean skalKunneEndreRefusjon = false;
-    
+
     @JsonProperty(value = "tom", required = true)
     @NotNull
     private LocalDate tom;

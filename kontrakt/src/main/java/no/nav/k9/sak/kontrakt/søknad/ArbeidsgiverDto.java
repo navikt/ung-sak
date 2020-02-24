@@ -21,17 +21,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class ArbeidsgiverDto {
 
-    @JsonAlias({ "orgNummer" })
-    @JsonProperty(value = "organisasjonsNummer")
-    @Valid
-    private OrgNummer organisasjonsnummer;
-
-    /** Navn på arbeidgiver - virksomhet eller privatperson som arbeidsgiver. */
-    @JsonProperty(value = "navn")
-    @Size(max = 200)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String navn;
-
     /** Angis når arbeidsgiver er privatperson, sammen med navn. */
     @JsonProperty(value = "aktørId")
     @Valid
@@ -41,31 +30,42 @@ public class ArbeidsgiverDto {
     @JsonProperty(value = "fødselsdato")
     private LocalDate fødselsdato;
 
-    public String getNavn() {
-        return navn;
+    /** Navn på arbeidgiver - virksomhet eller privatperson som arbeidsgiver. */
+    @JsonProperty(value = "navn")
+    @Size(max = 200)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String navn;
+
+    @JsonAlias({ "orgNummer" })
+    @JsonProperty(value = "organisasjonsNummer")
+    @Valid
+    private OrgNummer organisasjonsnummer;
+
+    public AktørId getAktørId() {
+        return aktørId;
     }
 
-    public void setNavn(String navn) {
-        this.navn = navn;
+    public String getNavn() {
+        return navn;
     }
 
     public OrgNummer getOrganisasjonsnummer() {
         return organisasjonsnummer;
     }
 
-    public void setOrganisasjonsnummer(OrgNummer organisasjonsnummer) {
-        this.organisasjonsnummer = organisasjonsnummer;
+    public void setAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
     }
 
     public void setFødselsdato(LocalDate fødselsdato) {
         this.fødselsdato = fødselsdato;
     }
 
-    public AktørId getAktørId() {
-        return aktørId;
+    public void setNavn(String navn) {
+        this.navn = navn;
     }
 
-    public void setAktørId(AktørId aktørId) {
-        this.aktørId = aktørId;
+    public void setOrganisasjonsnummer(OrgNummer organisasjonsnummer) {
+        this.organisasjonsnummer = organisasjonsnummer;
     }
 }

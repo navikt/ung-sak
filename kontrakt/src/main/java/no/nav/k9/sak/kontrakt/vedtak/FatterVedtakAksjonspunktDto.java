@@ -23,13 +23,13 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE)
 public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {
-    
-    @JsonProperty(value="aksjonspunktGodkjenningDtos")
+
+    @JsonProperty(value = "aksjonspunktGodkjenningDtos")
     @Valid
     @Size(max = 20)
     private Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos = new ArrayList<>();
 
-    FatterVedtakAksjonspunktDto() {
+    public FatterVedtakAksjonspunktDto() {
         // For Jackson
     }
 
@@ -38,8 +38,11 @@ public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {
         this.aksjonspunktGodkjenningDtos = List.copyOf(aksjonspunktGodkjenningDtos);
     }
 
-
     public Collection<AksjonspunktGodkjenningDto> getAksjonspunktGodkjenningDtos() {
         return Collections.unmodifiableCollection(aksjonspunktGodkjenningDtos);
+    }
+
+    public void setAksjonspunktGodkjenningDtos(Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos) {
+        this.aksjonspunktGodkjenningDtos = aksjonspunktGodkjenningDtos;
     }
 }

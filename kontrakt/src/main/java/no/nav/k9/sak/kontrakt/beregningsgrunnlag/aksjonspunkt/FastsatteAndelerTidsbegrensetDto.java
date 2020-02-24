@@ -27,7 +27,7 @@ public class FastsatteAndelerTidsbegrensetDto {
     @Max(Long.MAX_VALUE)
     private Integer bruttoFastsattInntekt;
 
-    protected FastsatteAndelerTidsbegrensetDto() {
+    public FastsatteAndelerTidsbegrensetDto() {
         //
     }
 
@@ -36,10 +36,18 @@ public class FastsatteAndelerTidsbegrensetDto {
         this.andelsnr = andelsnr;
         this.bruttoFastsattInntekt = bruttoFastsattInntekt;
     }
+
     public Long getAndelsnr() { return andelsnr; }
 
     public Integer getBruttoFastsattInntekt() {
         return bruttoFastsattInntekt;
+    }
+    public void setAndelsnr(Long andelsnr) {
+        this.andelsnr = andelsnr;
+    }
+
+    public void setBruttoFastsattInntekt(Integer bruttoFastsattInntekt) {
+        this.bruttoFastsattInntekt = bruttoFastsattInntekt;
     }
 
 }

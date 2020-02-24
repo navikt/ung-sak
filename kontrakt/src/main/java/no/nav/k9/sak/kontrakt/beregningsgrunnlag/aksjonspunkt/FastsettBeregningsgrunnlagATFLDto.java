@@ -24,28 +24,28 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE)
 public class FastsettBeregningsgrunnlagATFLDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "inntektPrAndelList")
-    @Valid
-    @Size(max = 100)
-    private List<InntektPrAndelDto> inntektPrAndelList;
-
     @JsonProperty(value = "inntektFrilanser")
     @Min(0)
     @Max(100 * 1000 * 1000)
     private Integer inntektFrilanser;
 
-    protected FastsettBeregningsgrunnlagATFLDto() {
+    @JsonProperty(value = "inntektPrAndelList")
+    @Valid
+    @Size(max = 100)
+    private List<InntektPrAndelDto> inntektPrAndelList;
+
+    public FastsettBeregningsgrunnlagATFLDto() {
         // For Jackson
+    }
+
+    public FastsettBeregningsgrunnlagATFLDto(String begrunnelse, Integer inntektFrilanser) { // NOSONAR
+        super(begrunnelse);
+        this.inntektFrilanser = inntektFrilanser;
     }
 
     public FastsettBeregningsgrunnlagATFLDto(String begrunnelse, List<InntektPrAndelDto> inntektPrAndelList, Integer inntektFrilanser) { // NOSONAR
         super(begrunnelse);
         this.inntektPrAndelList = new ArrayList<>(inntektPrAndelList);
-        this.inntektFrilanser = inntektFrilanser;
-    }
-
-    public FastsettBeregningsgrunnlagATFLDto(String begrunnelse, Integer inntektFrilanser) { // NOSONAR
-        super(begrunnelse);
         this.inntektFrilanser = inntektFrilanser;
     }
 
@@ -55,5 +55,13 @@ public class FastsettBeregningsgrunnlagATFLDto extends BekreftetAksjonspunktDto 
 
     public List<InntektPrAndelDto> getInntektPrAndelList() {
         return inntektPrAndelList;
+    }
+
+    public void setInntektFrilanser(Integer inntektFrilanser) {
+        this.inntektFrilanser = inntektFrilanser;
+    }
+
+    public void setInntektPrAndelList(List<InntektPrAndelDto> inntektPrAndelList) {
+        this.inntektPrAndelList = inntektPrAndelList;
     }
 }

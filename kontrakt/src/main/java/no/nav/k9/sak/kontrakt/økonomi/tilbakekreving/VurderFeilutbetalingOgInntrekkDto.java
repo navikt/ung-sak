@@ -28,11 +28,11 @@ public class VurderFeilutbetalingOgInntrekkDto extends BekreftetAksjonspunktDto 
     @JsonProperty(value = "grunnerTilReduksjon", required = false)
     private Boolean grunnerTilReduksjon; // null når !erTilbakekrevingVilkårOppfylt
 
-    @JsonProperty(value="videreBehandling")
+    @JsonProperty(value = "videreBehandling")
     @Valid
     private TilbakekrevingVidereBehandling videreBehandling; // null når erTilbakekrevingVilkårOppfylt
 
-    protected VurderFeilutbetalingOgInntrekkDto() {
+    public VurderFeilutbetalingOgInntrekkDto() {
         //
     }
 
@@ -42,16 +42,6 @@ public class VurderFeilutbetalingOgInntrekkDto extends BekreftetAksjonspunktDto 
         this.erTilbakekrevingVilkårOppfylt = erTilbakekrevingVilkårOppfylt;
         this.grunnerTilReduksjon = grunnerTilReduksjon;
         this.videreBehandling = videreBehandling;
-    }
-
-    @AssertTrue(message = "Kan kun ha grunnerTilReduksjon når erTilbakekrevingVilkårOppfylt=true")
-    private boolean okGrunner() {
-        return erTilbakekrevingVilkårOppfylt || grunnerTilReduksjon == null;
-    }
-
-    @AssertTrue(message = "Kan kun ha videreBehandling når erTilbakekrevingVilkårOppfylt=false")
-    private boolean okVidereBehandling() {
-        return !erTilbakekrevingVilkårOppfylt || videreBehandling == null;
     }
 
     public boolean getErTilbakekrevingVilkårOppfylt() {
@@ -64,6 +54,28 @@ public class VurderFeilutbetalingOgInntrekkDto extends BekreftetAksjonspunktDto 
 
     public TilbakekrevingVidereBehandling getVidereBehandling() {
         return videreBehandling;
+    }
+
+    public void setErTilbakekrevingVilkårOppfylt(boolean erTilbakekrevingVilkårOppfylt) {
+        this.erTilbakekrevingVilkårOppfylt = erTilbakekrevingVilkårOppfylt;
+    }
+
+    public void setGrunnerTilReduksjon(Boolean grunnerTilReduksjon) {
+        this.grunnerTilReduksjon = grunnerTilReduksjon;
+    }
+
+    public void setVidereBehandling(TilbakekrevingVidereBehandling videreBehandling) {
+        this.videreBehandling = videreBehandling;
+    }
+
+    @AssertTrue(message = "Kan kun ha grunnerTilReduksjon når erTilbakekrevingVilkårOppfylt=true")
+    private boolean okGrunner() {
+        return erTilbakekrevingVilkårOppfylt || grunnerTilReduksjon == null;
+    }
+
+    @AssertTrue(message = "Kan kun ha videreBehandling når erTilbakekrevingVilkårOppfylt=false")
+    private boolean okVidereBehandling() {
+        return !erTilbakekrevingVilkårOppfylt || videreBehandling == null;
     }
 
 }

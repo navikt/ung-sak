@@ -44,51 +44,15 @@ public class BehandlingIdDto {
         this.id = Objects.requireNonNull(id, "id").toString();
     }
 
-    public BehandlingIdDto(UUID id) {
-        this.id = Objects.requireNonNull(id, "id").toString();
-    }
-
     public BehandlingIdDto(String id) {
         this.id = Objects.requireNonNull(id, "id");
     }
 
+    public BehandlingIdDto(UUID id) {
+        this.id = Objects.requireNonNull(id, "id").toString();
+    }
+
     protected BehandlingIdDto() {
-    }
-
-    @JsonSetter(NAME)
-    public void setBehandlingId(String behandlingId) {
-        this.id = Objects.requireNonNull(behandlingId, NAME);
-        validerLongEllerUuid();
-    }
-
-    private void validerLongEllerUuid() {
-        // valider
-        if (isLong()) {
-            getBehandlingId();
-        } else {
-            getBehandlingUuid();
-        }
-    }
-
-    /**
-     * Denne er kun intern nøkkel, bør ikke eksponeres ut men foreløpig støttes både Long id og UUID id for behandling på grensesnittene.
-     */
-    @AbacAttributt(NAME)
-    public Long getBehandlingId() {
-        return id != null && isLong() ? Long.parseLong(id) : null;
-    }
-
-    private boolean isLong() {
-        return id.matches("^\\d+$");
-    }
-
-    @AbacAttributt("behandlingUuid")
-    public UUID getBehandlingUuid() {
-        return id != null && !isLong() ? UUID.fromString(id) : null;
-    }
-
-    public String getId() {
-        return id;
     }
 
     @Override
@@ -102,13 +66,49 @@ public class BehandlingIdDto {
         return Objects.equals(this.id, other.id);
     }
 
+    /**
+     * Denne er kun intern nøkkel, bør ikke eksponeres ut men foreløpig støttes både Long id og UUID id for behandling på grensesnittene.
+     */
+    @AbacAttributt(NAME)
+    public Long getBehandlingId() {
+        return id != null && isLong() ? Long.parseLong(id) : null;
+    }
+
+    @AbacAttributt("behandlingUuid")
+    public UUID getBehandlingUuid() {
+        return id != null && !isLong() ? UUID.fromString(id) : null;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
 
+    @JsonSetter(NAME)
+    public void setBehandlingId(String behandlingId) {
+        this.id = Objects.requireNonNull(behandlingId, NAME);
+        validerLongEllerUuid();
+    }
+
     @Override
     public String toString() {
         return id;
+    }
+
+    private boolean isLong() {
+        return id.matches("^\\d+$");
+    }
+
+    private void validerLongEllerUuid() {
+        // valider
+        if (isLong()) {
+            getBehandlingId();
+        } else {
+            getBehandlingUuid();
+        }
     }
 }

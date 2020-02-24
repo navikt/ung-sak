@@ -18,34 +18,6 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FaktaBeregningLagreDto {
 
-    @JsonProperty(value = "vurderNyoppstartetFL")
-    @Valid
-    private VurderNyoppstartetFLDto vurderNyoppstartetFL;
-
-    @JsonProperty(value = "vurderTidsbegrensetArbeidsforhold")
-    @Valid
-    private VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold;
-
-    @JsonProperty(value = "vurderNyIArbeidslivet")
-    @Valid
-    private VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto vurderNyIArbeidslivet;
-
-    @JsonProperty(value = "fastsettMaanedsinntektFL")
-    @Valid
-    private FastsettMånedsinntektFLDto fastsettMaanedsinntektFL;
-
-    @JsonProperty(value = "vurdertLonnsendring")
-    @Valid
-    private VurderLønnsendringDto vurdertLonnsendring;
-
-    @JsonProperty(value = "fastsattUtenInntektsmelding")
-    @Valid
-    private FastsettMånedsinntektUtenInntektsmeldingDto fastsattUtenInntektsmelding;
-
-    @JsonProperty(value = "vurderATogFLiSammeOrganisasjon")
-    @Valid
-    private VurderATogFLiSammeOrganisasjonDto vurderATogFLiSammeOrganisasjon;
-
     @JsonProperty(value = "besteberegningAndeler")
     @Valid
     private BesteberegningFødendeKvinneDto besteberegningAndeler;
@@ -55,32 +27,60 @@ public class FaktaBeregningLagreDto {
     @Valid
     private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller;
 
-    @JsonProperty(value = "kunYtelseFordeling")
+    @JsonProperty(value = "fastsattUtenInntektsmelding")
     @Valid
-    private FastsettBgKunYtelseDto kunYtelseFordeling;
-
-    @JsonProperty(value = "vurderEtterlønnSluttpakke")
-    @Valid
-    private VurderEtterlønnSluttpakkeDto vurderEtterlønnSluttpakke;
+    private FastsettMånedsinntektUtenInntektsmeldingDto fastsattUtenInntektsmelding;
 
     @JsonProperty(value = "fastsettEtterlønnSluttpakke")
     @Valid
     private FastsettEtterlønnSluttpakkeDto fastsettEtterlønnSluttpakke;
 
+    @JsonProperty(value = "fastsettMaanedsinntektFL")
+    @Valid
+    private FastsettMånedsinntektFLDto fastsettMaanedsinntektFL;
+
+    @JsonProperty(value = "kunYtelseFordeling")
+    @Valid
+    private FastsettBgKunYtelseDto kunYtelseFordeling;
+
     @JsonProperty(value = "mottarYtelse")
     @Valid
     private MottarYtelseDto mottarYtelse;
-
-    @JsonProperty(value = "vurderMilitaer")
-    @Valid
-    private VurderMilitærDto vurderMilitaer;
 
     @JsonProperty(value = "refusjonskravGyldighet")
     @Valid
     @Size(max = 100)
     private List<RefusjonskravPrArbeidsgiverVurderingDto> refusjonskravGyldighet;
 
-    protected FaktaBeregningLagreDto() {
+    @JsonProperty(value = "vurderATogFLiSammeOrganisasjon")
+    @Valid
+    private VurderATogFLiSammeOrganisasjonDto vurderATogFLiSammeOrganisasjon;
+
+    @JsonProperty(value = "vurderEtterlønnSluttpakke")
+    @Valid
+    private VurderEtterlønnSluttpakkeDto vurderEtterlønnSluttpakke;
+
+    @JsonProperty(value = "vurderMilitaer")
+    @Valid
+    private VurderMilitærDto vurderMilitaer;
+
+    @JsonProperty(value = "vurderNyIArbeidslivet")
+    @Valid
+    private VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto vurderNyIArbeidslivet;
+
+    @JsonProperty(value = "vurderNyoppstartetFL")
+    @Valid
+    private VurderNyoppstartetFLDto vurderNyoppstartetFL;
+
+    @JsonProperty(value = "vurderTidsbegrensetArbeidsforhold")
+    @Valid
+    private VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold;
+
+    @JsonProperty(value = "vurdertLonnsendring")
+    @Valid
+    private VurderLønnsendringDto vurdertLonnsendring;
+
+    public FaktaBeregningLagreDto() {
         //
     }
 
@@ -99,123 +99,123 @@ public class FaktaBeregningLagreDto {
         this.vurderTidsbegrensetArbeidsforhold = vurderTidsbegrensetArbeidsforhold;
     }
 
-    public List<RefusjonskravPrArbeidsgiverVurderingDto> getRefusjonskravGyldighet() {
-        return refusjonskravGyldighet;
-    }
-
-    public void setRefusjonskravGyldighet(List<RefusjonskravPrArbeidsgiverVurderingDto> refusjonskravGyldighet) {
-        this.refusjonskravGyldighet = refusjonskravGyldighet;
-    }
-
-    public VurderNyoppstartetFLDto getVurderNyoppstartetFL() {
-        return vurderNyoppstartetFL;
-    }
-
-    public void setVurderNyoppstartetFL(VurderNyoppstartetFLDto vurderNyoppstartetFL) {
-        this.vurderNyoppstartetFL = vurderNyoppstartetFL;
-    }
-
-    public VurderTidsbegrensetArbeidsforholdDto getVurderTidsbegrensetArbeidsforhold() {
-        return vurderTidsbegrensetArbeidsforhold;
-    }
-
-    public void setVurderTidsbegrensetArbeidsforhold(VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold) {
-        this.vurderTidsbegrensetArbeidsforhold = vurderTidsbegrensetArbeidsforhold;
-    }
-
-    public VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto getVurderNyIArbeidslivet() {
-        return vurderNyIArbeidslivet;
-    }
-
-    public void setVurderNyIArbeidslivet(VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto vurderNyIArbeidslivet) {
-        this.vurderNyIArbeidslivet = vurderNyIArbeidslivet;
-    }
-
-    public FastsettMånedsinntektFLDto getFastsettMaanedsinntektFL() {
-        return fastsettMaanedsinntektFL;
-    }
-
-    public void setFastsettMaanedsinntektFL(FastsettMånedsinntektFLDto fastsettMaanedsinntektFL) {
-        this.fastsettMaanedsinntektFL = fastsettMaanedsinntektFL;
+    public BesteberegningFødendeKvinneDto getBesteberegningAndeler() {
+        return besteberegningAndeler;
     }
 
     public List<FaktaOmBeregningTilfelle> getFaktaOmBeregningTilfeller() {
         return faktaOmBeregningTilfeller;
     }
 
-    public void setFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
-        this.faktaOmBeregningTilfeller = faktaOmBeregningTilfeller;
-    }
-
-    public VurderLønnsendringDto getVurdertLonnsendring() {
-        return vurdertLonnsendring;
-    }
-
-    public void setVurdertLonnsendring(VurderLønnsendringDto vurdertLonnsendring) {
-        this.vurdertLonnsendring = vurdertLonnsendring;
-    }
-
-    public VurderATogFLiSammeOrganisasjonDto getVurderATogFLiSammeOrganisasjon() {
-        return vurderATogFLiSammeOrganisasjon;
-    }
-
-    public void setVurderATogFLiSammeOrganisasjon(VurderATogFLiSammeOrganisasjonDto vurderATogFLiSammeOrganisasjon) {
-        this.vurderATogFLiSammeOrganisasjon = vurderATogFLiSammeOrganisasjon;
-    }
-
-    public BesteberegningFødendeKvinneDto getBesteberegningAndeler() {
-        return besteberegningAndeler;
-    }
-
-    public void setBesteberegningAndeler(BesteberegningFødendeKvinneDto besteberegningAndeler) {
-        this.besteberegningAndeler = besteberegningAndeler;
-    }
-
-    public FastsettBgKunYtelseDto getKunYtelseFordeling() {
-        return kunYtelseFordeling;
-    }
-
-    public void setKunYtelseFordeling(FastsettBgKunYtelseDto kunYtelseFordeling) {
-        this.kunYtelseFordeling = kunYtelseFordeling;
-    }
-
-    public VurderEtterlønnSluttpakkeDto getVurderEtterlønnSluttpakke() {
-        return vurderEtterlønnSluttpakke;
-    }
-
-    public void setVurderEtterlønnSluttpakke(VurderEtterlønnSluttpakkeDto vurderEtterlønnSluttpakke) {
-        this.vurderEtterlønnSluttpakke = vurderEtterlønnSluttpakke;
+    public FastsettMånedsinntektUtenInntektsmeldingDto getFastsattUtenInntektsmelding() {
+        return fastsattUtenInntektsmelding;
     }
 
     public FastsettEtterlønnSluttpakkeDto getFastsettEtterlønnSluttpakke() {
         return fastsettEtterlønnSluttpakke;
     }
 
-    public void setFastsettEtterlønnSluttpakke(FastsettEtterlønnSluttpakkeDto fastsettEtterlønnSluttpakke) {
-        this.fastsettEtterlønnSluttpakke = fastsettEtterlønnSluttpakke;
+    public FastsettMånedsinntektFLDto getFastsettMaanedsinntektFL() {
+        return fastsettMaanedsinntektFL;
     }
 
-    public void setMottarYtelse(MottarYtelseDto mottarYtelse) {
-        this.mottarYtelse = mottarYtelse;
+    public FastsettBgKunYtelseDto getKunYtelseFordeling() {
+        return kunYtelseFordeling;
     }
 
     public MottarYtelseDto getMottarYtelse() {
         return mottarYtelse;
     }
 
-    public FastsettMånedsinntektUtenInntektsmeldingDto getFastsattUtenInntektsmelding() {
-        return fastsattUtenInntektsmelding;
+    public List<RefusjonskravPrArbeidsgiverVurderingDto> getRefusjonskravGyldighet() {
+        return refusjonskravGyldighet;
     }
 
-    public void setFastsattUtenInntektsmelding(FastsettMånedsinntektUtenInntektsmeldingDto fastsattUtenInntektsmelding) {
-        this.fastsattUtenInntektsmelding = fastsattUtenInntektsmelding;
+    public VurderATogFLiSammeOrganisasjonDto getVurderATogFLiSammeOrganisasjon() {
+        return vurderATogFLiSammeOrganisasjon;
+    }
+
+    public VurderEtterlønnSluttpakkeDto getVurderEtterlønnSluttpakke() {
+        return vurderEtterlønnSluttpakke;
     }
 
     public VurderMilitærDto getVurderMilitaer() {
         return vurderMilitaer;
     }
 
+    public VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto getVurderNyIArbeidslivet() {
+        return vurderNyIArbeidslivet;
+    }
+
+    public VurderNyoppstartetFLDto getVurderNyoppstartetFL() {
+        return vurderNyoppstartetFL;
+    }
+
+    public VurderTidsbegrensetArbeidsforholdDto getVurderTidsbegrensetArbeidsforhold() {
+        return vurderTidsbegrensetArbeidsforhold;
+    }
+
+    public VurderLønnsendringDto getVurdertLonnsendring() {
+        return vurdertLonnsendring;
+    }
+
+    public void setBesteberegningAndeler(BesteberegningFødendeKvinneDto besteberegningAndeler) {
+        this.besteberegningAndeler = besteberegningAndeler;
+    }
+
+    public void setFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
+        this.faktaOmBeregningTilfeller = faktaOmBeregningTilfeller;
+    }
+
+    public void setFastsattUtenInntektsmelding(FastsettMånedsinntektUtenInntektsmeldingDto fastsattUtenInntektsmelding) {
+        this.fastsattUtenInntektsmelding = fastsattUtenInntektsmelding;
+    }
+
+    public void setFastsettEtterlønnSluttpakke(FastsettEtterlønnSluttpakkeDto fastsettEtterlønnSluttpakke) {
+        this.fastsettEtterlønnSluttpakke = fastsettEtterlønnSluttpakke;
+    }
+
+    public void setFastsettMaanedsinntektFL(FastsettMånedsinntektFLDto fastsettMaanedsinntektFL) {
+        this.fastsettMaanedsinntektFL = fastsettMaanedsinntektFL;
+    }
+
+    public void setKunYtelseFordeling(FastsettBgKunYtelseDto kunYtelseFordeling) {
+        this.kunYtelseFordeling = kunYtelseFordeling;
+    }
+
+    public void setMottarYtelse(MottarYtelseDto mottarYtelse) {
+        this.mottarYtelse = mottarYtelse;
+    }
+
+    public void setRefusjonskravGyldighet(List<RefusjonskravPrArbeidsgiverVurderingDto> refusjonskravGyldighet) {
+        this.refusjonskravGyldighet = refusjonskravGyldighet;
+    }
+
+    public void setVurderATogFLiSammeOrganisasjon(VurderATogFLiSammeOrganisasjonDto vurderATogFLiSammeOrganisasjon) {
+        this.vurderATogFLiSammeOrganisasjon = vurderATogFLiSammeOrganisasjon;
+    }
+
+    public void setVurderEtterlønnSluttpakke(VurderEtterlønnSluttpakkeDto vurderEtterlønnSluttpakke) {
+        this.vurderEtterlønnSluttpakke = vurderEtterlønnSluttpakke;
+    }
+
     public void setVurderMilitaer(VurderMilitærDto vurderMilitaer) {
         this.vurderMilitaer = vurderMilitaer;
+    }
+
+    public void setVurderNyIArbeidslivet(VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto vurderNyIArbeidslivet) {
+        this.vurderNyIArbeidslivet = vurderNyIArbeidslivet;
+    }
+
+    public void setVurderNyoppstartetFL(VurderNyoppstartetFLDto vurderNyoppstartetFL) {
+        this.vurderNyoppstartetFL = vurderNyoppstartetFL;
+    }
+
+    public void setVurderTidsbegrensetArbeidsforhold(VurderTidsbegrensetArbeidsforholdDto vurderTidsbegrensetArbeidsforhold) {
+        this.vurderTidsbegrensetArbeidsforhold = vurderTidsbegrensetArbeidsforhold;
+    }
+
+    public void setVurdertLonnsendring(VurderLønnsendringDto vurdertLonnsendring) {
+        this.vurdertLonnsendring = vurdertLonnsendring;
     }
 }

@@ -33,7 +33,7 @@ public class UtvidetBehandlingDto extends BehandlingDto {
     public UtvidetBehandlingDto() {
         //
     }
-    
+
     public String getAnsvarligBeslutter() {
         return ansvarligBeslutter;
     }

@@ -18,23 +18,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FastsattOpptjeningDto {
 
+    @JsonProperty(value = "fastsattOpptjeningAktivitetList")
+    @Valid
+    @Size(max = 100)
+    private List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList;
+
     @JsonProperty(value = "opptjeningFom")
     @NotNull
     private LocalDate opptjeningFom;
-
-    @JsonProperty(value = "opptjeningTom")
-    @NotNull
-    private LocalDate opptjeningTom;
 
     @JsonProperty(value = "opptjeningperiode")
     @Valid
     @NotNull
     private OpptjeningPeriodeDto opptjeningperiode;
 
-    @JsonProperty(value = "fastsattOpptjeningAktivitetList")
-    @Valid
-    @Size(max = 100)
-    private List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList;
+    @JsonProperty(value = "opptjeningTom")
+    @NotNull
+    private LocalDate opptjeningTom;
 
     public FastsattOpptjeningDto() {
         // trengs for deserialisering av JSON
@@ -48,35 +48,35 @@ public class FastsattOpptjeningDto {
         this.fastsattOpptjeningAktivitetList = fastsattOpptjeningAktivitetList;
     }
 
-    public LocalDate getOpptjeningFom() {
-        return opptjeningFom;
+    public List<FastsattOpptjeningAktivitetDto> getFastsattOpptjeningAktivitetList() {
+        return fastsattOpptjeningAktivitetList;
     }
 
-    public LocalDate getOpptjeningTom() {
-        return opptjeningTom;
+    public LocalDate getOpptjeningFom() {
+        return opptjeningFom;
     }
 
     public OpptjeningPeriodeDto getOpptjeningperiode() {
         return opptjeningperiode;
     }
 
-    public List<FastsattOpptjeningAktivitetDto> getFastsattOpptjeningAktivitetList() {
-        return fastsattOpptjeningAktivitetList;
+    public LocalDate getOpptjeningTom() {
+        return opptjeningTom;
+    }
+
+    public void setFastsattOpptjeningAktivitetList(List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList) {
+        this.fastsattOpptjeningAktivitetList = fastsattOpptjeningAktivitetList;
     }
 
     public void setOpptjeningFom(LocalDate opptjeningFom) {
         this.opptjeningFom = opptjeningFom;
     }
 
-    public void setOpptjeningTom(LocalDate opptjeningTom) {
-        this.opptjeningTom = opptjeningTom;
-    }
-
     public void setOpptjeningperiode(OpptjeningPeriodeDto opptjeningperiode) {
         this.opptjeningperiode = opptjeningperiode;
     }
 
-    public void setFastsattOpptjeningAktivitetList(List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList) {
-        this.fastsattOpptjeningAktivitetList = fastsattOpptjeningAktivitetList;
+    public void setOpptjeningTom(LocalDate opptjeningTom) {
+        this.opptjeningTom = opptjeningTom;
     }
 }

@@ -24,7 +24,7 @@ public class VurderFaktaOmBeregningDto extends BekreftetAksjonspunktDto {
     @NotNull
     private FaktaBeregningLagreDto fakta;
 
-    protected VurderFaktaOmBeregningDto() {
+    public VurderFaktaOmBeregningDto() {
         //
     }
 
@@ -35,6 +35,10 @@ public class VurderFaktaOmBeregningDto extends BekreftetAksjonspunktDto {
 
     public FaktaBeregningLagreDto getFakta() {
         return fakta;
+    }
+
+    public void setFakta(FaktaBeregningLagreDto fakta) {
+        this.fakta = fakta;
     }
 
 }

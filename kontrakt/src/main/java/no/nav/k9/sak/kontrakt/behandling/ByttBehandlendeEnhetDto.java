@@ -20,13 +20,13 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class ByttBehandlendeEnhetDto {
 
-    @JsonProperty(value="begrunnelse", required = true)
+    @JsonProperty(value = "begrunnelse", required = true)
     @NotNull
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelse;
 
-    @JsonProperty(value="behandlingId", required = true)
+    @JsonProperty(value = "behandlingId", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -34,20 +34,20 @@ public class ByttBehandlendeEnhetDto {
     private Long behandlingId;
 
     @JsonAlias("versjon")
-    @JsonProperty(value="behandlingVersjon", required = true)
+    @JsonProperty(value = "behandlingVersjon", required = true)
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
-    @JsonProperty(value="enhetId", required = true)
+    @JsonProperty(value = "enhetId", required = true)
     @NotNull
     @Size(max = 10)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String enhetId;
 
-    @JsonProperty(value="enhetNavn")
+    @JsonProperty(value = "enhetNavn")
     @Size(min = 1, max = 256)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String enhetNavn;
 
     public String getBegrunnelse() {

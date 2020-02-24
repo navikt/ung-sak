@@ -16,7 +16,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 public class MerkOpptjeningUtlandDto extends BekreftetAksjonspunktDto {
 
     public MerkOpptjeningUtlandDto() {
-        //For Jackson
+        //
     }
 
 }

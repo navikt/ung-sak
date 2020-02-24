@@ -21,7 +21,7 @@ public class FastsettEtterlønnSluttpakkeDto {
     @NotNull
     private Integer fastsattPrMnd;
 
-    protected FastsettEtterlønnSluttpakkeDto() {
+    public FastsettEtterlønnSluttpakkeDto() {
         //
     }
 

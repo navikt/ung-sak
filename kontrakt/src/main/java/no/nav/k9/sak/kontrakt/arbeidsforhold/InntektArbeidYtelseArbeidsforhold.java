@@ -149,7 +149,7 @@ public class InntektArbeidYtelseArbeidsforhold {
     public InntektArbeidYtelseArbeidsforhold() {
         //
     }
-    
+
     public UUID getArbeidsforholdId() {
         return arbeidsforholdId;
     }
@@ -275,7 +275,7 @@ public class InntektArbeidYtelseArbeidsforhold {
     }
 
     public void setArbeidsforholdId(String arbeidsforholdId) {
-        this.arbeidsforholdId = arbeidsforholdId==null ? null : UUID.fromString(arbeidsforholdId);
+        this.arbeidsforholdId = arbeidsforholdId == null ? null : UUID.fromString(arbeidsforholdId);
     }
 
     public void setArbeidsforholdId(UUID arbeidsforholdId) {

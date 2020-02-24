@@ -10,12 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FeltFeilDto implements Serializable {
 
-    @JsonProperty(value = "navn", required = true)
-    @NotNull
-    @Size(max = 2000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String navn;
-
     @JsonProperty(value = "melding", required = true)
     @NotNull
     @Size(max = 2000)
@@ -28,9 +22,11 @@ public class FeltFeilDto implements Serializable {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String metainformasjon;
 
-    protected FeltFeilDto() {
-        //
-    }
+    @JsonProperty(value = "navn", required = true)
+    @NotNull
+    @Size(max = 2000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String navn;
 
     public FeltFeilDto(String navn, String melding) {
         this.navn = navn;
@@ -43,8 +39,8 @@ public class FeltFeilDto implements Serializable {
         this.metainformasjon = metainformasjon;
     }
 
-    public String getNavn() {
-        return navn;
+    protected FeltFeilDto() {
+        //
     }
 
     public String getMelding() {
@@ -53,5 +49,9 @@ public class FeltFeilDto implements Serializable {
 
     public String getMetainformasjon() {
         return metainformasjon;
+    }
+
+    public String getNavn() {
+        return navn;
     }
 }

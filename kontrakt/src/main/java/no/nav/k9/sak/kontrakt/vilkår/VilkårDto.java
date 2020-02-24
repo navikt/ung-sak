@@ -26,33 +26,11 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class VilkårDto {
 
-    @JsonProperty(value = "vilkarType", required = true)
-    @NotNull
-    @Valid
-    private VilkårType vilkarType;
-
-    @JsonProperty(value = "vilkarStatus", required = true)
-    @NotNull
-    @Valid
-    private Utfall vilkarStatus;
-
-    @JsonProperty(value = "merknadParametere")
-    @Size(max = 20)
-    private Properties merknadParametere;
-
     @JsonProperty(value = "avslagKode")
     @Size(max = 20)
     @Size(max = 1000000)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String avslagKode;
-
-    @JsonProperty(value = "lovReferanse")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String lovReferanse;
-
-    @JsonProperty(value = "overstyrbar")
-    private Boolean overstyrbar;
 
     @JsonProperty(value = "evaluering", access = Access.READ_ONLY)
     @JsonRawValue
@@ -68,6 +46,31 @@ public class VilkårDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String input;
 
+    @JsonProperty(value = "lovReferanse")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String lovReferanse;
+
+    @JsonProperty(value = "merknadParametere")
+    @Size(max = 20)
+    private Properties merknadParametere;
+
+    @JsonProperty(value = "overstyrbar")
+    private Boolean overstyrbar;
+
+    @JsonProperty(value = "vilkarStatus", required = true)
+    @NotNull
+    @Valid
+    private Utfall vilkarStatus;
+
+    @JsonProperty(value = "vilkarType", required = true)
+    @NotNull
+    @Valid
+    private VilkårType vilkarType;
+
+    public VilkårDto() {
+    }
+
     public VilkårDto(VilkårType vilkårType,
                      Utfall utfall,
                      Properties merknadParametere,
@@ -80,27 +83,8 @@ public class VilkårDto {
         this.lovReferanse = lovReferanse;
     }
 
-    public VilkårDto() {
-    }
-
-    public VilkårType getVilkarType() {
-        return vilkarType;
-    }
-
-    public Utfall getVilkarStatus() {
-        return vilkarStatus;
-    }
-
-    public Properties getMerknadParametere() {
-        return merknadParametere;
-    }
-
     public String getAvslagKode() {
         return avslagKode;
-    }
-
-    public String getLovReferanse() {
-        return lovReferanse;
     }
 
     public String getEvaluering() {
@@ -111,16 +95,24 @@ public class VilkårDto {
         return input;
     }
 
-    public void setVilkarType(VilkårType vilkarType) {
-        this.vilkarType = vilkarType;
+    public String getLovReferanse() {
+        return lovReferanse;
     }
 
-    public void setVilkarStatus(Utfall vilkarStatus) {
-        this.vilkarStatus = vilkarStatus;
+    public Properties getMerknadParametere() {
+        return merknadParametere;
     }
 
-    public void setMerknadParametere(Properties merknadParametere) {
-        this.merknadParametere = merknadParametere;
+    public Utfall getVilkarStatus() {
+        return vilkarStatus;
+    }
+
+    public VilkårType getVilkarType() {
+        return vilkarType;
+    }
+
+    public boolean isOverstyrbar() {
+        return overstyrbar;
     }
 
     public void setAvslagKode(String avslagKode) {
@@ -139,11 +131,19 @@ public class VilkårDto {
         this.lovReferanse = lovReferanse;
     }
 
+    public void setMerknadParametere(Properties merknadParametere) {
+        this.merknadParametere = merknadParametere;
+    }
+
     public void setOverstyrbar(boolean overstyrbar) {
         this.overstyrbar = overstyrbar;
     }
 
-    public boolean isOverstyrbar() {
-        return overstyrbar;
+    public void setVilkarStatus(Utfall vilkarStatus) {
+        this.vilkarStatus = vilkarStatus;
+    }
+
+    public void setVilkarType(VilkårType vilkarType) {
+        this.vilkarType = vilkarType;
     }
 }

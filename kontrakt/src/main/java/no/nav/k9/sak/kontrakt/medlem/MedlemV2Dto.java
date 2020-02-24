@@ -18,18 +18,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemV2Dto {
 
-    @JsonProperty(value="inntekt")
-    @Size(max=200)
+    @JsonProperty(value = "inntekt")
+    @Size(max = 200)
     @Valid
     private List<InntektDto> inntekt;
-    
-    @JsonProperty(value="medlemskapPerioder")
-    @Size(max=200)
+
+    @JsonProperty(value = "medlemskapPerioder")
+    @Size(max = 200)
     @Valid
     private List<MedlemskapPerioderDto> medlemskapPerioder;
-    
-    @JsonProperty(value="perioder")
-    @Size(max=200)
+
+    @JsonProperty(value = "perioder")
+    @Size(max = 200)
     @Valid
     private Set<MedlemPeriodeDto> perioder;
 
@@ -41,20 +41,20 @@ public class MedlemV2Dto {
         return Collections.unmodifiableList(inntekt);
     }
 
-    public void setInntekt(List<InntektDto> inntekt) {
-        this.inntekt = List.copyOf(inntekt);
-    }
-
     public List<MedlemskapPerioderDto> getMedlemskapPerioder() {
         return Collections.unmodifiableList(medlemskapPerioder);
     }
 
-    public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {
-        this.medlemskapPerioder = List.copyOf(medlemskapPerioder);
-    }
-
     public Set<MedlemPeriodeDto> getPerioder() {
         return Collections.unmodifiableSet(perioder);
+    }
+
+    public void setInntekt(List<InntektDto> inntekt) {
+        this.inntekt = List.copyOf(inntekt);
+    }
+
+    public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {
+        this.medlemskapPerioder = List.copyOf(medlemskapPerioder);
     }
 
     public void setPerioder(Set<MedlemPeriodeDto> perioder) {

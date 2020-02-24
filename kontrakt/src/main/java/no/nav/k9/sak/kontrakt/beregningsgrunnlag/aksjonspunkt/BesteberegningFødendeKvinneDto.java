@@ -25,8 +25,8 @@ public class BesteberegningFødendeKvinneDto {
     @Valid
     private DagpengeAndelLagtTilBesteberegningDto nyDagpengeAndel;
 
-    protected BesteberegningFødendeKvinneDto() {
-        // For Jackson
+    public BesteberegningFødendeKvinneDto() {
+        //
     }
 
     public BesteberegningFødendeKvinneDto(List<BesteberegningFødendeKvinneAndelDto> besteberegningAndelListe) {
@@ -42,11 +42,11 @@ public class BesteberegningFødendeKvinneDto {
         return besteberegningAndelListe;
     }
 
-    public void setBesteberegningAndelListe(List<BesteberegningFødendeKvinneAndelDto> besteberegningAndelListe) {
-        this.besteberegningAndelListe = besteberegningAndelListe;
-    }
-
     public DagpengeAndelLagtTilBesteberegningDto getNyDagpengeAndel() {
         return nyDagpengeAndel;
+    }
+
+    public void setBesteberegningAndelListe(List<BesteberegningFødendeKvinneAndelDto> besteberegningAndelListe) {
+        this.besteberegningAndelListe = besteberegningAndelListe;
     }
 }

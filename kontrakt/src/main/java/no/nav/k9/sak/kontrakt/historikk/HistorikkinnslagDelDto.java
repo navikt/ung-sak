@@ -74,6 +74,10 @@ public class HistorikkinnslagDelDto {
     @Valid
     private HistorikkInnslagTemaDto tema;
 
+    public HistorikkinnslagDelDto() {
+        //
+    }
+
     public Kodeverdi getAarsak() {
         return aarsak;
     }

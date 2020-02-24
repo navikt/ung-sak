@@ -21,7 +21,7 @@ public class FastsettMånedsinntektFLDto {
     @Max(Integer.MAX_VALUE)
     private Integer maanedsinntekt;
 
-    protected FastsettMånedsinntektFLDto() {
+    public FastsettMånedsinntektFLDto() {
         //
     }
 
@@ -29,11 +29,11 @@ public class FastsettMånedsinntektFLDto {
         this.maanedsinntekt = maanedsInntekt;
     }
 
-    public void setMaanedsinntekt(Integer maanedsinntekt) {
-        this.maanedsinntekt = maanedsinntekt;
-    }
-
     public Integer getMaanedsinntekt() {
         return maanedsinntekt;
+    }
+
+    public void setMaanedsinntekt(Integer maanedsinntekt) {
+        this.maanedsinntekt = maanedsinntekt;
     }
 }

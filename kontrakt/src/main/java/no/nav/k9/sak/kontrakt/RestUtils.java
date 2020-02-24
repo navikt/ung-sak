@@ -23,8 +23,8 @@ class RestUtils {
         OM.registerModule(new JavaTimeModule());
     }
 
-    public static ObjectMapper getObjectMapper() {
-        return OM.copy();
+    public static String convertObjectToQueryString(Object object) {
+        return OM.convertValue(object, UriFormat.class).toString();
     }
     
     public static String convertObjectToQueryStringFraMap(Map<String, String> queryParams) {
@@ -33,7 +33,7 @@ class RestUtils {
         return fmt.toString();
     }
     
-    public static String convertObjectToQueryString(Object object) {
-        return OM.convertValue(object, UriFormat.class).toString();
+    public static ObjectMapper getObjectMapper() {
+        return OM.copy();
     }
 }

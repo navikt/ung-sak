@@ -14,15 +14,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class OpptjeningPeriodeDto {
 
-    @JsonProperty(value = "måneder")
-    @Min(value = 0)
-    @Max(value = 12 * 3)
-    private int måneder;
-
     @JsonProperty(value = "dager")
     @Min(value = 0)
     @Max(value = 31)
     private int dager;
+
+    @JsonProperty(value = "måneder")
+    @Min(value = 0)
+    @Max(value = 12 * 3)
+    private int måneder;
 
     public OpptjeningPeriodeDto() {
         // trengs for deserialisering av JSON
@@ -35,19 +35,19 @@ public class OpptjeningPeriodeDto {
         this.dager = dager;
     }
 
-    public int getMåneder() {
-        return måneder;
-    }
-
-    public void setMåneder(int måneder) {
-        this.måneder = måneder;
-    }
-
     public int getDager() {
         return dager;
     }
 
+    public int getMåneder() {
+        return måneder;
+    }
+
     public void setDager(int dager) {
         this.dager = dager;
+    }
+
+    public void setMåneder(int måneder) {
+        this.måneder = måneder;
     }
 }

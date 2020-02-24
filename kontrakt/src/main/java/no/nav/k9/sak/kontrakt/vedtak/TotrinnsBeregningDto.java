@@ -20,27 +20,31 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TotrinnsBeregningDto {
 
-    @JsonProperty(value = "fastsattVarigEndringNaering")
-    private boolean fastsattVarigEndringNaering;
-
     @JsonProperty(value = "faktaOmBeregningTilfeller")
     @Size(max = 100)
     @Valid
     private List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller = new ArrayList<>();
 
-    public void setFastsattVarigEndringNaering(boolean fastsattVarigEndringNaering) {
-        this.fastsattVarigEndringNaering = fastsattVarigEndringNaering;
-    }
+    @JsonProperty(value = "fastsattVarigEndringNaering")
+    private boolean fastsattVarigEndringNaering;
 
-    public boolean isFastsattVarigEndringNaering() {
-        return fastsattVarigEndringNaering;
+    public TotrinnsBeregningDto() {
+        //
     }
 
     public List<FaktaOmBeregningTilfelle> getFaktaOmBeregningTilfeller() {
         return Collections.unmodifiableList(faktaOmBeregningTilfeller);
     }
 
+    public boolean isFastsattVarigEndringNaering() {
+        return fastsattVarigEndringNaering;
+    }
+
     public void setFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller) {
         this.faktaOmBeregningTilfeller = List.copyOf(faktaOmBeregningTilfeller);
+    }
+
+    public void setFastsattVarigEndringNaering(boolean fastsattVarigEndringNaering) {
+        this.fastsattVarigEndringNaering = fastsattVarigEndringNaering;
     }
 }

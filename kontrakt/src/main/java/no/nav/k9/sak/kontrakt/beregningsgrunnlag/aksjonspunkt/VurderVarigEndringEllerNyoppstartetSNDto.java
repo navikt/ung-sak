@@ -18,16 +18,16 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE)
 public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="erVarigEndretNaering", required = true)
-    @NotNull
-    private Boolean erVarigEndretNaering;
-
     @JsonProperty(value="bruttoBeregningsgrunnlag")
     @Min(0)
     @Max(Integer.MAX_VALUE)
     private Integer bruttoBeregningsgrunnlag;
 
-    protected VurderVarigEndringEllerNyoppstartetSNDto() {
+    @JsonProperty(value="erVarigEndretNaering", required = true)
+    @NotNull
+    private Boolean erVarigEndretNaering;
+
+    public VurderVarigEndringEllerNyoppstartetSNDto() {
         //
     }
 
@@ -37,13 +37,21 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetAksjonspu
     }
 
 
+    public Integer getBruttoBeregningsgrunnlag() {
+        return bruttoBeregningsgrunnlag;
+    }
+
     public boolean getErVarigEndretNaering() {
         return erVarigEndretNaering;
     }
 
+    public void setBruttoBeregningsgrunnlag(Integer bruttoBeregningsgrunnlag) {
+        this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+    }
 
-    public Integer getBruttoBeregningsgrunnlag() {
-        return bruttoBeregningsgrunnlag;
+
+    public void setErVarigEndretNaering(Boolean erVarigEndretNaering) {
+        this.erVarigEndretNaering = erVarigEndretNaering;
     }
 
 }

@@ -6,9 +6,9 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -21,9 +21,6 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE_KODE)
 public class OverstyringMedlemskapsvilkåretLøpendeDto extends OverstyringAksjonspunktDto {
 
-    @JsonProperty("avslagDato")
-    private LocalDate overstryingsdato;
-
     @JsonProperty("avslagskode")
     @Size(min = 4, max = 4)
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
@@ -32,11 +29,11 @@ public class OverstyringMedlemskapsvilkåretLøpendeDto extends OverstyringAksjo
     @JsonProperty("erVilkarOk")
     private boolean erVilkarOk;
 
+    @JsonProperty("avslagDato")
+    private LocalDate overstryingsdato;
 
-    @SuppressWarnings("unused") // NOSONAR
-    private OverstyringMedlemskapsvilkåretLøpendeDto() {
-        super();
-        // For Jackson
+    public OverstyringMedlemskapsvilkåretLøpendeDto() {
+        //
     }
 
     public OverstyringMedlemskapsvilkåretLøpendeDto(boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
@@ -50,8 +47,13 @@ public class OverstyringMedlemskapsvilkåretLøpendeDto extends OverstyringAksjo
         return avslagskode;
     }
 
-    public void setOverstryingsdato(LocalDate overstryingsdato) {
-        this.overstryingsdato = overstryingsdato;
+    @Override
+    public boolean getErVilkarOk() {
+        return erVilkarOk;
+    }
+
+    public LocalDate getOverstryingsdato() {
+        return overstryingsdato;
     }
 
     public void setAvslagskode(String avslagskode) {
@@ -62,12 +64,7 @@ public class OverstyringMedlemskapsvilkåretLøpendeDto extends OverstyringAksjo
         this.erVilkarOk = erVilkarOk;
     }
 
-    @Override
-    public boolean getErVilkarOk() {
-        return erVilkarOk;
-    }
-
-    public LocalDate getOverstryingsdato() {
-        return overstryingsdato;
+    public void setOverstryingsdato(LocalDate overstryingsdato) {
+        this.overstryingsdato = overstryingsdato;
     }
 }

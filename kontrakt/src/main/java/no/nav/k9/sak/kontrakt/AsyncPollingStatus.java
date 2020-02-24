@@ -23,11 +23,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class AsyncPollingStatus {
 
-    @JsonProperty(value="status")
-    private Status status;
+    public enum Status {
+        CANCELLED(418),
+        COMPLETE(303),
+        DELAYED(418),
+        HALTED(418),
+        PENDING(200);
+
+        private int httpStatus;
+
+        Status(int httpStatus){
+            this.httpStatus = httpStatus;
+        }
+
+        public int getHttpStatus() {
+            return httpStatus;
+        }
+    }
+    
+    @JsonProperty(value="cancelUri")
+    private URI cancelUri;
     
     @JsonProperty(value="eta")
     private LocalDateTime eta;
+    
+    @JsonProperty(value="location")
+    private URI location;
     
     @JsonProperty(value="message")
     private String message;
@@ -35,28 +56,14 @@ public class AsyncPollingStatus {
     @JsonProperty(value="pollIntervalMillis")
     private Long pollIntervalMillis;
     
-    @JsonProperty(value="location")
-    private URI location;
-    
-    @JsonProperty(value="cancelUri")
-    private URI cancelUri;
-    
     @JsonProperty(value="readOnly")
     private boolean readOnly;
 
-    protected AsyncPollingStatus() {
-    }
+    @JsonProperty(value="status")
+    private Status status;
 
     public AsyncPollingStatus(Status status) {
         this(status, null);
-    }
-
-    public AsyncPollingStatus(Status status, String message) {
-        this(status, message, 0L);
-    }
-
-    public AsyncPollingStatus(Status status, String message, long pollIntervalMillis) {
-        this(status, null, message, null, pollIntervalMillis);
     }
 
     public AsyncPollingStatus(Status status, LocalDateTime eta, String message) {
@@ -72,24 +79,23 @@ public class AsyncPollingStatus {
         this.readOnly = status == Status.PENDING || status == Status.DELAYED || status == Status.HALTED;
     }
 
-    public Status getStatus() {
-        return status;
+    public AsyncPollingStatus(Status status, String message) {
+        this(status, message, 0L);
     }
 
-    public LocalDateTime getEta() {
-        return eta;
+    public AsyncPollingStatus(Status status, String message, long pollIntervalMillis) {
+        this(status, null, message, null, pollIntervalMillis);
     }
 
-    public String getMessage() {
-        return message;
+    protected AsyncPollingStatus() {
     }
 
     public URI getCancelUri() {
         return cancelUri;
     }
 
-    public Long getPollIntervalMillis() {
-        return pollIntervalMillis;
+    public LocalDateTime getEta() {
+        return eta;
     }
 
     public URI getLocation() {
@@ -97,8 +103,16 @@ public class AsyncPollingStatus {
         return location;
     }
 
-    public void setLocation(URI uri) {
-        this.location = uri;
+    public String getMessage() {
+        return message;
+    }
+
+    public Long getPollIntervalMillis() {
+        return pollIntervalMillis;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public boolean isPending() {
@@ -109,21 +123,7 @@ public class AsyncPollingStatus {
         return readOnly;
     }
 
-    public enum Status {
-        PENDING(200),
-        COMPLETE(303),
-        DELAYED(418),
-        CANCELLED(418),
-        HALTED(418);
-
-        private int httpStatus;
-
-        Status(int httpStatus){
-            this.httpStatus = httpStatus;
-        }
-
-        public int getHttpStatus() {
-            return httpStatus;
-        }
+    public void setLocation(URI uri) {
+        this.location = uri;
     }
 }

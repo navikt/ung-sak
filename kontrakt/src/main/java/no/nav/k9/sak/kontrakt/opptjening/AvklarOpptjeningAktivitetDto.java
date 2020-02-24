@@ -27,11 +27,37 @@ public class AvklarOpptjeningAktivitetDto {
     @NotNull
     private OpptjeningAktivitetType aktivitetType;
 
-    @JsonProperty(value = "originalFom")
-    private LocalDate originalFom;
+    @JsonProperty(value = "arbeidsforholdRef")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsforholdRef;
 
-    @JsonProperty(value = "originalTom")
-    private LocalDate originalTom;
+    @JsonProperty(value = "arbeidsgiverIdentifikator")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiverIdentifikator;
+
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String begrunnelse;
+
+    @JsonProperty(value = "erEndret")
+    private Boolean erEndret;
+
+    @JsonProperty(value = "erGodkjent")
+    private Boolean erGodkjent;
+
+    @JsonProperty(value = "erManueltOpprettet")
+    private Boolean erManueltOpprettet;
+
+    @JsonProperty(value = "naringRegistreringsdato")
+    private LocalDate naringRegistreringsdato;
+
+    @JsonProperty(value = "oppdragsgiverOrg")
+    @Size(min = 11, max = 13)
+    @Pattern(regexp = "\\d{9}|\\d{13}")
+    private String oppdragsgiverOrg;
 
     @JsonProperty(value = "opptjeningFom")
     @NotNull
@@ -41,20 +67,11 @@ public class AvklarOpptjeningAktivitetDto {
     @NotNull
     private LocalDate opptjeningTom;
 
-    @JsonProperty(value = "oppdragsgiverOrg")
-    @Size(min = 11, max = 13)
-    @Pattern(regexp = "\\d{9}|\\d{13}")
-    private String oppdragsgiverOrg;
+    @JsonProperty(value = "originalFom")
+    private LocalDate originalFom;
 
-    @JsonProperty(value = "arbeidsgiverIdentifikator")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverIdentifikator;
-
-    @JsonProperty(value = "arbeidsforholdRef")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsforholdRef;
+    @JsonProperty(value = "originalTom")
+    private LocalDate originalTom;
 
     @JsonProperty(value = "stillingsandel")
     @Min(0)
@@ -62,136 +79,119 @@ public class AvklarOpptjeningAktivitetDto {
     @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsandel;
 
-    @JsonProperty(value = "naringRegistreringsdato")
-    private LocalDate naringRegistreringsdato;
-
-    @JsonProperty(value = "erManueltOpprettet")
-    private Boolean erManueltOpprettet;
-
-    @JsonProperty(value = "erGodkjent")
-    private Boolean erGodkjent;
-
-    @JsonProperty(value = "erEndret")
-    private Boolean erEndret;
-
-    @JsonProperty(value = "begrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String begrunnelse;
-
     public AvklarOpptjeningAktivitetDto() {// NOSONAR
         // trengs for deserialisering av JSON
-    }
-
-    public LocalDate getOriginalFom() {
-        return originalFom;
-    }
-
-    public void setOriginalFom(LocalDate originalFom) {
-        this.originalFom = originalFom;
-    }
-
-    public LocalDate getOriginalTom() {
-        return originalTom;
-    }
-
-    public void setOriginalTom(LocalDate originalTom) {
-        this.originalTom = originalTom;
     }
 
     public OpptjeningAktivitetType getAktivitetType() {
         return aktivitetType;
     }
 
-    public void setAktivitetType(OpptjeningAktivitetType aktivitetType) {
-        this.aktivitetType = aktivitetType;
-    }
-
-    public LocalDate getOpptjeningFom() {
-        return opptjeningFom;
-    }
-
-    public void setOpptjeningFom(LocalDate opptjeningFom) {
-        this.opptjeningFom = opptjeningFom;
-    }
-
-    public LocalDate getOpptjeningTom() {
-        return opptjeningTom;
-    }
-
-    public void setOpptjeningTom(LocalDate opptjeningTom) {
-        this.opptjeningTom = opptjeningTom;
-    }
-
-    public String getOppdragsgiverOrg() {
-        return oppdragsgiverOrg;
-    }
-
-    public void setOppdragsgiverOrg(String oppdragsgiverOrg) {
-        this.oppdragsgiverOrg = oppdragsgiverOrg;
+    public String getArbeidsforholdRef() {
+        return arbeidsforholdRef;
     }
 
     public String getArbeidsgiverIdentifikator() {
         return arbeidsgiverIdentifikator;
     }
 
-    public void setArbeidsgiverIdentifikator(String arbeidsgiverIdentifikator) {
-        this.arbeidsgiverIdentifikator = arbeidsgiverIdentifikator;
-    }
-
-    public LocalDate getNaringRegistreringsdato() {
-        return naringRegistreringsdato;
-    }
-
-    public void setNaringRegistreringsdato(LocalDate naringRegistreringsdato) {
-        this.naringRegistreringsdato = naringRegistreringsdato;
-    }
-
-    public BigDecimal getStillingsandel() {
-        return stillingsandel;
-    }
-
-    public void setStillingsandel(BigDecimal stillingsandel) {
-        this.stillingsandel = stillingsandel;
-    }
-
-    public Boolean getErGodkjent() {
-        return erGodkjent;
-    }
-
-    public void setErGodkjent(Boolean erGodkjent) {
-        this.erGodkjent = erGodkjent;
-    }
-
     public String getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
-    }
-
-    public Boolean getErManueltOpprettet() {
-        return erManueltOpprettet;
-    }
-
-    public void setErManueltOpprettet(Boolean erManueltOpprettet) {
-        this.erManueltOpprettet = erManueltOpprettet;
     }
 
     public Boolean getErEndret() {
         return erEndret;
     }
 
-    public void setErEndret(Boolean erEndret) {
-        this.erEndret = erEndret;
+    public Boolean getErGodkjent() {
+        return erGodkjent;
     }
 
-    public String getArbeidsforholdRef() {
-        return arbeidsforholdRef;
+    public Boolean getErManueltOpprettet() {
+        return erManueltOpprettet;
+    }
+
+    public LocalDate getNaringRegistreringsdato() {
+        return naringRegistreringsdato;
+    }
+
+    public String getOppdragsgiverOrg() {
+        return oppdragsgiverOrg;
+    }
+
+    public LocalDate getOpptjeningFom() {
+        return opptjeningFom;
+    }
+
+    public LocalDate getOpptjeningTom() {
+        return opptjeningTom;
+    }
+
+    public LocalDate getOriginalFom() {
+        return originalFom;
+    }
+
+    public LocalDate getOriginalTom() {
+        return originalTom;
+    }
+
+    public BigDecimal getStillingsandel() {
+        return stillingsandel;
+    }
+
+    public void setAktivitetType(OpptjeningAktivitetType aktivitetType) {
+        this.aktivitetType = aktivitetType;
     }
 
     public void setArbeidsforholdRef(String arbeidsforholdRef) {
         this.arbeidsforholdRef = arbeidsforholdRef;
+    }
+
+    public void setArbeidsgiverIdentifikator(String arbeidsgiverIdentifikator) {
+        this.arbeidsgiverIdentifikator = arbeidsgiverIdentifikator;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
+    }
+
+    public void setErEndret(Boolean erEndret) {
+        this.erEndret = erEndret;
+    }
+
+    public void setErGodkjent(Boolean erGodkjent) {
+        this.erGodkjent = erGodkjent;
+    }
+
+    public void setErManueltOpprettet(Boolean erManueltOpprettet) {
+        this.erManueltOpprettet = erManueltOpprettet;
+    }
+
+    public void setNaringRegistreringsdato(LocalDate naringRegistreringsdato) {
+        this.naringRegistreringsdato = naringRegistreringsdato;
+    }
+
+    public void setOppdragsgiverOrg(String oppdragsgiverOrg) {
+        this.oppdragsgiverOrg = oppdragsgiverOrg;
+    }
+
+    public void setOpptjeningFom(LocalDate opptjeningFom) {
+        this.opptjeningFom = opptjeningFom;
+    }
+
+    public void setOpptjeningTom(LocalDate opptjeningTom) {
+        this.opptjeningTom = opptjeningTom;
+    }
+
+    public void setOriginalFom(LocalDate originalFom) {
+        this.originalFom = originalFom;
+    }
+
+    public void setOriginalTom(LocalDate originalTom) {
+        this.originalTom = originalTom;
+    }
+
+    public void setStillingsandel(BigDecimal stillingsandel) {
+        this.stillingsandel = stillingsandel;
     }
 }

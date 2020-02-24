@@ -23,76 +23,20 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TotrinnskontrollAksjonspunkterDto {
 
-    @JsonProperty(value = "aksjonspunktKode")
-    @Size(max = 10)
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String aksjonspunktKode;
-
-    @JsonProperty(value = "opptjeningAktiviteter")
-    @Size(max = 200)
-    @Valid
-    private List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter = new ArrayList<>();
-
-    @JsonProperty(value = "beregningDto")
-    @Valid
-    private TotrinnsBeregningDto beregningDto;
-
-    @JsonProperty(value = "besluttersBegrunnelse")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String besluttersBegrunnelse;
-
-    @JsonProperty(value = "totrinnskontrollGodkjent")
-    private Boolean totrinnskontrollGodkjent;
-
-    @JsonProperty(value = "vurderPaNyttArsaker")
-    @Size(max = 100)
-    @Valid
-    private Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker = new HashSet<>();
-
-    @JsonProperty(value = "arbeidsforholdDtos")
-    @Size(max = 200)
-    @Valid
-    private List<TotrinnsArbeidsforholdDto> arbeidforholdDtos = new ArrayList<>();
-
-    public AksjonspunktDefinisjon getAksjonspunktKode() {
-        return AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
-    }
-
-    public List<TotrinnskontrollAktivitetDto> getOpptjeningAktiviteter() {
-        return Collections.unmodifiableList(opptjeningAktiviteter);
-    }
-
-    public String getBesluttersBegrunnelse() {
-        return besluttersBegrunnelse;
-    }
-
-    public Boolean getTotrinnskontrollGodkjent() {
-        return totrinnskontrollGodkjent;
-    }
-
-    public Set<TotrinnskontrollVurderÅrsak> getVurderPaNyttArsaker() {
-        return Collections.unmodifiableSet(vurderPaNyttArsaker);
-    }
-
-    public TotrinnsBeregningDto getBeregningDto() {
-        return beregningDto;
-    }
-
-    public List<TotrinnsArbeidsforholdDto> getArbeidforholdDtos() {
-        return Collections.unmodifiableList(arbeidforholdDtos);
-    }
-
     public static class Builder {
         TotrinnskontrollAksjonspunkterDto kladd = new TotrinnskontrollAksjonspunkterDto();
+
+        public TotrinnskontrollAksjonspunkterDto build() {
+            return kladd;
+        }
 
         public Builder medAksjonspunktKode(AksjonspunktDefinisjon aksjonspunktKode) {
             kladd.aksjonspunktKode = aksjonspunktKode.getKode();
             return this;
         }
 
-        public Builder medOpptjeningAktiviteter(List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter) {
-            kladd.opptjeningAktiviteter = opptjeningAktiviteter;
+        public Builder medArbeidsforhold(List<TotrinnsArbeidsforholdDto> totrinnsArbeidsforholdDtos) {
+            kladd.arbeidforholdDtos = totrinnsArbeidsforholdDtos;
             return this;
         }
 
@@ -106,6 +50,11 @@ public class TotrinnskontrollAksjonspunkterDto {
             return this;
         }
 
+        public Builder medOpptjeningAktiviteter(List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter) {
+            kladd.opptjeningAktiviteter = opptjeningAktiviteter;
+            return this;
+        }
+
         public Builder medTotrinnskontrollGodkjent(Boolean totrinnskontrollGodkjent) {
             kladd.totrinnskontrollGodkjent = totrinnskontrollGodkjent;
             return this;
@@ -115,14 +64,97 @@ public class TotrinnskontrollAksjonspunkterDto {
             kladd.vurderPaNyttArsaker = vurderPaNyttArsaker;
             return this;
         }
+    }
 
-        public TotrinnskontrollAksjonspunkterDto build() {
-            return kladd;
-        }
+    @JsonProperty(value = "aksjonspunktKode")
+    @Size(max = 10)
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String aksjonspunktKode;
 
-        public Builder medArbeidsforhold(List<TotrinnsArbeidsforholdDto> totrinnsArbeidsforholdDtos) {
-            kladd.arbeidforholdDtos = totrinnsArbeidsforholdDtos;
-            return this;
-        }
+    @JsonProperty(value = "arbeidsforholdDtos")
+    @Size(max = 200)
+    @Valid
+    private List<TotrinnsArbeidsforholdDto> arbeidforholdDtos = new ArrayList<>();
+
+    @JsonProperty(value = "beregningDto")
+    @Valid
+    private TotrinnsBeregningDto beregningDto;
+
+    @JsonProperty(value = "besluttersBegrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String besluttersBegrunnelse;
+
+    @JsonProperty(value = "opptjeningAktiviteter")
+    @Size(max = 200)
+    @Valid
+    private List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter = new ArrayList<>();
+
+    @JsonProperty(value = "totrinnskontrollGodkjent")
+    private Boolean totrinnskontrollGodkjent;
+
+    @JsonProperty(value = "vurderPaNyttArsaker")
+    @Size(max = 100)
+    @Valid
+    private Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker = new HashSet<>();
+
+    public TotrinnskontrollAksjonspunkterDto() {
+        //
+    }
+
+    public AksjonspunktDefinisjon getAksjonspunktKode() {
+        return AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
+    }
+
+    public List<TotrinnsArbeidsforholdDto> getArbeidforholdDtos() {
+        return Collections.unmodifiableList(arbeidforholdDtos);
+    }
+
+    public TotrinnsBeregningDto getBeregningDto() {
+        return beregningDto;
+    }
+
+    public String getBesluttersBegrunnelse() {
+        return besluttersBegrunnelse;
+    }
+
+    public List<TotrinnskontrollAktivitetDto> getOpptjeningAktiviteter() {
+        return Collections.unmodifiableList(opptjeningAktiviteter);
+    }
+
+    public Boolean getTotrinnskontrollGodkjent() {
+        return totrinnskontrollGodkjent;
+    }
+
+    public Set<TotrinnskontrollVurderÅrsak> getVurderPaNyttArsaker() {
+        return Collections.unmodifiableSet(vurderPaNyttArsaker);
+    }
+
+    public void setAksjonspunktKode(String aksjonspunktKode) {
+        this.aksjonspunktKode = aksjonspunktKode;
+    }
+
+    public void setArbeidforholdDtos(List<TotrinnsArbeidsforholdDto> arbeidforholdDtos) {
+        this.arbeidforholdDtos = arbeidforholdDtos;
+    }
+
+    public void setBeregningDto(TotrinnsBeregningDto beregningDto) {
+        this.beregningDto = beregningDto;
+    }
+
+    public void setBesluttersBegrunnelse(String besluttersBegrunnelse) {
+        this.besluttersBegrunnelse = besluttersBegrunnelse;
+    }
+
+    public void setOpptjeningAktiviteter(List<TotrinnskontrollAktivitetDto> opptjeningAktiviteter) {
+        this.opptjeningAktiviteter = opptjeningAktiviteter;
+    }
+
+    public void setTotrinnskontrollGodkjent(Boolean totrinnskontrollGodkjent) {
+        this.totrinnskontrollGodkjent = totrinnskontrollGodkjent;
+    }
+
+    public void setVurderPaNyttArsaker(Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker) {
+        this.vurderPaNyttArsaker = vurderPaNyttArsaker;
     }
 }

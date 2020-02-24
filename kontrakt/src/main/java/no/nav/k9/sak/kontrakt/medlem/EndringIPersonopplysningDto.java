@@ -17,12 +17,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class EndringIPersonopplysningDto {
 
-    @JsonProperty(value = "erEndret")
-    private boolean erEndret;
-
     @JsonProperty(value = "endretAttributt")
     @Valid
     private EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt endretAttributt;
+
+    @JsonProperty(value = "erEndret")
+    private boolean erEndret;
 
     @JsonProperty(value = "fom", required = true)
     @NotNull
@@ -32,7 +32,8 @@ public class EndringIPersonopplysningDto {
     @NotNull
     LocalDate tom;
 
-    protected EndringIPersonopplysningDto() { // NOSONAR
+    public EndringIPersonopplysningDto() { // NOSONAR
+        //
     }
 
     public EndringIPersonopplysningDto(EndringsresultatPersonopplysningerForMedlemskap.Endring endring) {
@@ -42,32 +43,32 @@ public class EndringIPersonopplysningDto {
         tom = endring.getPeriode().getTom();
     }
 
-    public boolean isErEndret() {
-        return erEndret;
-    }
-
-    public void setErEndret(boolean erEndret) {
-        this.erEndret = erEndret;
-    }
-
     public EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt getEndretAttributt() {
         return endretAttributt;
-    }
-
-    public void setEndretAttributt(EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt endretAttributt) {
-        this.endretAttributt = endretAttributt;
     }
 
     public LocalDate getFom() {
         return fom;
     }
 
-    public void setFom(LocalDate fom) {
-        this.fom = Objects.requireNonNull(fom, "fom");
-    }
-
     public LocalDate getTom() {
         return tom;
+    }
+
+    public boolean isErEndret() {
+        return erEndret;
+    }
+
+    public void setEndretAttributt(EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt endretAttributt) {
+        this.endretAttributt = endretAttributt;
+    }
+
+    public void setErEndret(boolean erEndret) {
+        this.erEndret = erEndret;
+    }
+
+    public void setFom(LocalDate fom) {
+        this.fom = Objects.requireNonNull(fom, "fom");
     }
 
     public void setTom(LocalDate tom) {

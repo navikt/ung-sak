@@ -24,7 +24,7 @@ public class HistorikkinnslagEndretFeltDto {
     private HistorikkEndretFeltType endretFeltNavn;
 
     @JsonProperty(value = "fraVerdi")
-    @Valid 
+    @Valid
     private Object fraVerdi;
 
     @JsonProperty(value = "klFraVerdi")

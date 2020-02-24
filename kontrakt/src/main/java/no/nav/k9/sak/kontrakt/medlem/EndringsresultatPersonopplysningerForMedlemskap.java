@@ -27,39 +27,28 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class EndringsresultatPersonopplysningerForMedlemskap {
 
-    @JsonProperty(value = "gjeldendeFra")
-    @Valid
-    private Optional<LocalDate> gjeldendeFra;
+    /** @deprecated bruk settere i stedet. */
+    @Deprecated(forRemoval = true)
+    public static class Builder {
+        EndringsresultatPersonopplysningerForMedlemskap kladd = new EndringsresultatPersonopplysningerForMedlemskap();
 
-    @JsonProperty(value = "endringer")
-    @Size(max = 100)
-    @Valid
-    private List<Endring> endringer = new ArrayList<>();
+        private Builder() {
+        }
 
-    private EndringsresultatPersonopplysningerForMedlemskap() {
-    }
+        public EndringsresultatPersonopplysningerForMedlemskap build() {
+            return kladd;
+        }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public boolean harEndringer() {
-        return endringer.stream().anyMatch(Endring::isErEndret);
-    }
-
-    public List<Endring> getEndredeAttributter() {
-        return endringer.stream().filter(Endring::isErEndret).collect(Collectors.toList());
-    }
-
-    /**
-     * @return er satt hvis det er endringer
-     */
-    public Optional<LocalDate> getGjeldendeFra() {
-        return gjeldendeFra;
+        public Builder leggTilEndring(EndretAttributt endretAttributt, Periode periode, String endretFra, String endretTil) {
+            Endring endring = new Endring(endretAttributt, periode, endretFra, endretTil);
+            kladd.endringer.add(endring);
+            kladd.oppdaterGjeldendeFra();
+            return this;
+        }
     }
 
     public enum EndretAttributt {
-        Personstatus, StatsborgerskapRegion, Adresse;
+        Adresse, Personstatus, StatsborgerskapRegion;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -67,11 +56,14 @@ public class EndringsresultatPersonopplysningerForMedlemskap {
     @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
     public static class Endring {
 
+        @JsonProperty(value = "endretAttributt")
+        private EndretAttributt endretAttributt;
+
         @JsonProperty(value = "erEndret")
         private boolean erEndret;
 
-        @JsonProperty(value = "endretAttributt")
-        private EndretAttributt endretAttributt;
+        @JsonProperty(value = "periode")
+        private Periode periode;
 
         @JsonProperty(value = "endretFra")
         @Size(max = 4000)
@@ -82,13 +74,6 @@ public class EndringsresultatPersonopplysningerForMedlemskap {
         @Size(max = 4000)
         @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
         String endretTil;
-
-        @JsonProperty(value = "periode")
-        private Periode periode;
-
-        Endring() {
-            //
-        }
 
         private Endring(EndretAttributt endretAttributt, Periode periode, String endretFra, String endretTil) {
             Objects.requireNonNull(endretAttributt);
@@ -105,6 +90,10 @@ public class EndringsresultatPersonopplysningerForMedlemskap {
             this.periode = periode;
         }
 
+        Endring() {
+            //
+        }
+
         public EndretAttributt getEndretAttributt() {
             return endretAttributt;
         }
@@ -117,32 +106,62 @@ public class EndringsresultatPersonopplysningerForMedlemskap {
             return endretTil;
         }
 
-        public boolean isErEndret() {
-            return erEndret;
-        }
-
         public Periode getPeriode() {
             return periode;
         }
+
+        public boolean isErEndret() {
+            return erEndret;
+        }
     }
 
-    public static class Builder {
-        EndringsresultatPersonopplysningerForMedlemskap kladd = new EndringsresultatPersonopplysningerForMedlemskap();
+    @JsonProperty(value = "endringer")
+    @Size(max = 100)
+    @Valid
+    private List<Endring> endringer = new ArrayList<>();
 
-        private Builder() {
-        }
+    @JsonProperty(value = "gjeldendeFra")
+    @Valid
+    private Optional<LocalDate> gjeldendeFra;
 
-        public EndringsresultatPersonopplysningerForMedlemskap build() {
-            this.kladd.gjeldendeFra = kladd.getEndredeAttributter().stream()
-                .map(e -> e.getPeriode().getFom())
-                .min(LocalDate::compareTo);
-            return kladd;
-        }
+    public EndringsresultatPersonopplysningerForMedlemskap() {
+    }
 
-        public Builder leggTilEndring(EndretAttributt endretAttributt, Periode periode, String endretFra, String endretTil) {
-            Endring endring = new Endring(endretAttributt, periode, endretFra, endretTil);
-            kladd.endringer.add(endring);
-            return this;
-        }
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public List<Endring> getEndredeAttributter() {
+        return endringer.stream().filter(Endring::isErEndret).collect(Collectors.toList());
+    }
+
+    public List<Endring> getEndringer() {
+        return endringer;
+    }
+
+    /**
+     * @return er satt hvis det er endringer
+     */
+    public Optional<LocalDate> getGjeldendeFra() {
+        return gjeldendeFra;
+    }
+
+    public boolean harEndringer() {
+        return endringer.stream().anyMatch(Endring::isErEndret);
+    }
+
+    public void setEndringer(List<Endring> endringer) {
+        this.endringer = endringer;
+        oppdaterGjeldendeFra();
+    }
+
+    public void setGjeldendeFra(Optional<LocalDate> gjeldendeFra) {
+        this.gjeldendeFra = gjeldendeFra;
+    }
+
+    private void oppdaterGjeldendeFra() {
+        this.gjeldendeFra = getEndredeAttributter().stream()
+            .map(e -> e.getPeriode().getFom())
+            .min(LocalDate::compareTo);
     }
 }

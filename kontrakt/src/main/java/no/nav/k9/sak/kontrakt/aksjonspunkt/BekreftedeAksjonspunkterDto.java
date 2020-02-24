@@ -28,19 +28,19 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BekreftedeAksjonspunkterDto {
 
-    @JsonProperty(value="behandlingId", required = true)
+    @JsonProperty(value = "behandlingId", required = true)
     @NotNull
     @Valid
     private BehandlingIdDto behandlingId;
 
     @JsonAlias("versjon")
-    @JsonProperty(value="behandlingVersjon", required = true)
+    @JsonProperty(value = "behandlingVersjon", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
-    @JsonProperty(value="bekreftedeAksjonspunktDtoer", required = true)
+    @JsonProperty(value = "bekreftedeAksjonspunktDtoer", required = true)
     @Size(min = 1, max = 10)
     @NotNull
     @Valid
@@ -74,7 +74,7 @@ public class BekreftedeAksjonspunkterDto {
     }
 
     @AbacAttributt("aksjonspunktKode")
-    public Set<String> getBekreftedeAksjonspunktKoder(){
+    public Set<String> getBekreftedeAksjonspunktKoder() {
         return bekreftedeAksjonspunktDtoer.stream().map(BekreftetAksjonspunktDto::getKode).collect(Collectors.toSet());
     }
 

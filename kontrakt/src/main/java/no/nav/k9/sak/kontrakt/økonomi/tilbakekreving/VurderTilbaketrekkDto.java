@@ -18,11 +18,11 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE)
 public class VurderTilbaketrekkDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="hindreTilbaketrekk", required = true)
+    @JsonProperty(value = "hindreTilbaketrekk", required = true)
     @NotNull
     private Boolean hindreTilbaketrekk;
 
-    protected VurderTilbaketrekkDto() {
+    public VurderTilbaketrekkDto() {
         //
     }
 
@@ -31,10 +31,13 @@ public class VurderTilbaketrekkDto extends BekreftetAksjonspunktDto {
         this.hindreTilbaketrekk = hindreTilbaketrekk;
     }
 
+    public Boolean getHindreTilbaketrekk() {
+        return hindreTilbaketrekk;
+    }
+
     public void setHindreTilbaketrekk(Boolean hindreTilbaketrekk) {
         this.hindreTilbaketrekk = hindreTilbaketrekk;
     }
-
 
     public boolean skalHindreTilbaketrekk() {
         return hindreTilbaketrekk;

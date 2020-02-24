@@ -26,7 +26,7 @@ public class FordelBeregningsgrunnlagDto extends BekreftetAksjonspunktDto {
     @Size(max = 100)
     private List<FastsettBeregningsgrunnlagPeriodeDto> endretBeregningsgrunnlagPerioder;
 
-    protected FordelBeregningsgrunnlagDto() {
+    public FordelBeregningsgrunnlagDto() {
         //
     }
 
@@ -37,5 +37,9 @@ public class FordelBeregningsgrunnlagDto extends BekreftetAksjonspunktDto {
 
     public List<FastsettBeregningsgrunnlagPeriodeDto> getEndretBeregningsgrunnlagPerioder() {
         return endretBeregningsgrunnlagPerioder;
+    }
+
+    public void setEndretBeregningsgrunnlagPerioder(List<FastsettBeregningsgrunnlagPeriodeDto> endretBeregningsgrunnlagPerioder) {
+        this.endretBeregningsgrunnlagPerioder = endretBeregningsgrunnlagPerioder;
     }
 }

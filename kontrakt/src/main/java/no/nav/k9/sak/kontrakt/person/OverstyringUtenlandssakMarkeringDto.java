@@ -4,8 +4,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,18 +26,13 @@ public class OverstyringUtenlandssakMarkeringDto extends OverstyringAksjonspunkt
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String gammelVerdi;
 
-    OverstyringUtenlandssakMarkeringDto() {
-        // For Jackson
+    public OverstyringUtenlandssakMarkeringDto() {
+        //
     }
 
     public OverstyringUtenlandssakMarkeringDto(String begrunnelse, String gammelVerdi) {
         super(begrunnelse);
         this.gammelVerdi = gammelVerdi;
-    }
-
-    @JsonGetter
-    public String getGammelVerdi() {
-        return gammelVerdi;
     }
 
     @JsonIgnore
@@ -52,6 +47,15 @@ public class OverstyringUtenlandssakMarkeringDto extends OverstyringAksjonspunkt
     public boolean getErVilkarOk() {
         // Brukes ikke
         return false;
+    }
+
+    @JsonGetter
+    public String getGammelVerdi() {
+        return gammelVerdi;
+    }
+
+    public void setGammelVerdi(String gammelVerdi) {
+        this.gammelVerdi = gammelVerdi;
     }
 
 }

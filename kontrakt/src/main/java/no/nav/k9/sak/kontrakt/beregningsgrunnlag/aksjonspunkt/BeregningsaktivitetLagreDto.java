@@ -20,71 +20,8 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BeregningsaktivitetLagreDto {
 
-    @JsonProperty(value = "opptjeningAktivitetType", required = true)
-    @NotNull
-    @Valid
-    private OpptjeningAktivitetType opptjeningAktivitetType;
-
-    @JsonProperty(value = "fom", required = true)
-    @NotNull
-    private LocalDate fom;
-
-    @JsonProperty(value = "tom", required = true)
-    private LocalDate tom;
-
-    @JsonProperty(value = "oppdragsgiverOrg")
-    @Pattern(regexp = "\\d{9}|\\d{13}")
-    private String oppdragsgiverOrg;
-
-    @JsonProperty(value = "arbeidsgiverIdentifikator")
-    @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverIdentifikator;
-
-    @JsonProperty(value = "arbeidsforholdRef")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{XDigit}\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsforholdRef;
-
-    @JsonProperty(value = "skalBrukes")
-    private boolean skalBrukes;
-
-    BeregningsaktivitetLagreDto() { // NOSONAR
-        // for jackson
-    }
-
-    public OpptjeningAktivitetType getOpptjeningAktivitetType() {
-        return opptjeningAktivitetType;
-    }
-
-    public LocalDate getFom() {
-        return fom;
-    }
-
-    public LocalDate getTom() {
-        return tom;
-    }
-
-    public String getOppdragsgiverOrg() {
-        return oppdragsgiverOrg;
-    }
-
-    public String getArbeidsgiverIdentifikator() {
-        return arbeidsgiverIdentifikator;
-    }
-
-    public String getArbeidsforholdRef() {
-        return arbeidsforholdRef;
-    }
-
-    public boolean getSkalBrukes() {
-        return skalBrukes;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
+    /** @deprecated bruk settere .*/
+    @Deprecated(forRemoval = true)
     public static class Builder {
         private BeregningsaktivitetLagreDto kladd;
 
@@ -92,23 +29,12 @@ public class BeregningsaktivitetLagreDto {
             kladd = new BeregningsaktivitetLagreDto();
         }
 
-        public Builder medOpptjeningAktivitetType(OpptjeningAktivitetType opptjeningAktivitetType) {
-            kladd.opptjeningAktivitetType = opptjeningAktivitetType;
-            return this;
+        public BeregningsaktivitetLagreDto build() {
+            return kladd;
         }
 
-        public Builder medFom(LocalDate fom) {
-            kladd.fom = fom;
-            return this;
-        }
-
-        public Builder medTom(LocalDate tom) {
-            kladd.tom = tom;
-            return this;
-        }
-
-        public Builder medOppdragsgiverOrg(String oppdragsgiverOrg) {
-            kladd.oppdragsgiverOrg = oppdragsgiverOrg;
+        public Builder medArbeidsforholdRef(String arbeidsforholdRef) {
+            kladd.arbeidsforholdRef = arbeidsforholdRef;
             return this;
         }
 
@@ -117,8 +43,18 @@ public class BeregningsaktivitetLagreDto {
             return this;
         }
 
-        public Builder medArbeidsforholdRef(String arbeidsforholdRef) {
-            kladd.arbeidsforholdRef = arbeidsforholdRef;
+        public Builder medFom(LocalDate fom) {
+            kladd.fom = fom;
+            return this;
+        }
+
+        public Builder medOppdragsgiverOrg(String oppdragsgiverOrg) {
+            kladd.oppdragsgiverOrg = oppdragsgiverOrg;
+            return this;
+        }
+
+        public Builder medOpptjeningAktivitetType(OpptjeningAktivitetType opptjeningAktivitetType) {
+            kladd.opptjeningAktivitetType = opptjeningAktivitetType;
             return this;
         }
 
@@ -127,8 +63,102 @@ public class BeregningsaktivitetLagreDto {
             return this;
         }
 
-        public BeregningsaktivitetLagreDto build() {
-            return kladd;
+        public Builder medTom(LocalDate tom) {
+            kladd.tom = tom;
+            return this;
         }
+    }
+
+    @JsonProperty(value = "arbeidsforholdRef")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{XDigit}\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsforholdRef;
+
+    @JsonProperty(value = "arbeidsgiverIdentifikator")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiverIdentifikator;
+
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
+    private LocalDate fom;
+
+    @JsonProperty(value = "oppdragsgiverOrg")
+    @Pattern(regexp = "\\d{9}|\\d{13}")
+    private String oppdragsgiverOrg;
+
+    @JsonProperty(value = "opptjeningAktivitetType", required = true)
+    @NotNull
+    @Valid
+    private OpptjeningAktivitetType opptjeningAktivitetType;
+
+    @JsonProperty(value = "skalBrukes")
+    private boolean skalBrukes;
+
+    @JsonProperty(value = "tom", required = true)
+    private LocalDate tom;
+
+    public BeregningsaktivitetLagreDto() { // NOSONAR
+        // 
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public String getArbeidsforholdRef() {
+        return arbeidsforholdRef;
+    }
+
+    public String getArbeidsgiverIdentifikator() {
+        return arbeidsgiverIdentifikator;
+    }
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
+    public String getOppdragsgiverOrg() {
+        return oppdragsgiverOrg;
+    }
+
+    public OpptjeningAktivitetType getOpptjeningAktivitetType() {
+        return opptjeningAktivitetType;
+    }
+
+    public boolean getSkalBrukes() {
+        return skalBrukes;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
+
+    public void setArbeidsforholdRef(String arbeidsforholdRef) {
+        this.arbeidsforholdRef = arbeidsforholdRef;
+    }
+
+    public void setArbeidsgiverIdentifikator(String arbeidsgiverIdentifikator) {
+        this.arbeidsgiverIdentifikator = arbeidsgiverIdentifikator;
+    }
+
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setOppdragsgiverOrg(String oppdragsgiverOrg) {
+        this.oppdragsgiverOrg = oppdragsgiverOrg;
+    }
+
+    public void setOpptjeningAktivitetType(OpptjeningAktivitetType opptjeningAktivitetType) {
+        this.opptjeningAktivitetType = opptjeningAktivitetType;
+    }
+
+    public void setSkalBrukes(boolean skalBrukes) {
+        this.skalBrukes = skalBrukes;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
     }
 }

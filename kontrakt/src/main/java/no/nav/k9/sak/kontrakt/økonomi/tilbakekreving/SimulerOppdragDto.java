@@ -23,6 +23,16 @@ public class SimulerOppdragDto {
         this.oppdragPrMottaker = oppdragPrMottaker;
     }
 
+    @JsonIgnore
+    public static SimulerOppdragDto lagDto(Long behandlingId, List<String> råXml) {
+        Objects.requireNonNull(råXml, "Rå XML kan ikke være null");
+        List<String> encoded = råXml.stream()
+            .map(str -> Base64.getEncoder()
+                .encodeToString(str.getBytes(Charset.forName("UTF-8"))))
+            .collect(Collectors.toList());
+        return new SimulerOppdragDto(behandlingId, encoded);
+    }
+
     public Long getBehandlingId() {
         return behandlingId;
     }
@@ -43,16 +53,6 @@ public class SimulerOppdragDto {
                 }
             })
             .collect(Collectors.toList());
-    }
-
-    @JsonIgnore
-    public static SimulerOppdragDto lagDto(Long behandlingId, List<String> råXml) {
-        Objects.requireNonNull(råXml, "Rå XML kan ikke være null");
-        List<String> encoded = råXml.stream()
-            .map(str -> Base64.getEncoder()
-                .encodeToString(str.getBytes(Charset.forName("UTF-8"))))
-            .collect(Collectors.toList());
-        return new SimulerOppdragDto(behandlingId, encoded);
     }
 
 }

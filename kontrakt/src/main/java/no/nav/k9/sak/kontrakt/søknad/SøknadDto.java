@@ -19,112 +19,112 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape=Shape.OBJECT)
+@JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class SøknadDto {
-
-    /** Dato søknad mottatt av Nav. */
-    @JsonProperty(value = "mottattDato", required = true)
-    @NotNull
-    private LocalDate mottattDato;
-
-    /** Dato søknad sendt fra bruker. (er forskjellig fra mottatdato dersom ikke digital søknad). */
-    @JsonProperty(value = "soknadsdato", required = true)
-    @NotNull
-    private LocalDate soknadsdato;
-
-    /** Oppgitt startdato for ytelsen fra søknad. */
-    @JsonProperty(value = "oppgittStartdato", required = true)
-    @NotNull
-    private LocalDate oppgittStartdato;
-
-    @JsonProperty(value = "tilleggsopplysninger")
-    @Size(max = 5000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String tilleggsopplysninger;
 
     @JsonProperty(value = "begrunnelseForSenInnsending")
     @Size(max = 5000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String begrunnelseForSenInnsending;
 
-    @JsonProperty(value = "oppgittTilknytning")
-    @Valid
-    private OppgittTilknytningDto oppgittTilknytning;
-
     @JsonProperty(value = "manglendeVedlegg")
     @Valid
     @Size(max = 20)
     private List<ManglendeVedleggDto> manglendeVedlegg = new ArrayList<>();
 
+    /** Dato søknad mottatt av Nav. */
+    @JsonProperty(value = "mottattDato", required = true)
+    @NotNull
+    private LocalDate mottattDato;
+
+    /** Oppgitt startdato for ytelsen fra søknad. */
+    @JsonProperty(value = "oppgittStartdato", required = true)
+    @NotNull
+    private LocalDate oppgittStartdato;
+
+    @JsonProperty(value = "oppgittTilknytning")
+    @Valid
+    private OppgittTilknytningDto oppgittTilknytning;
+
+    /** Dato søknad sendt fra bruker. (er forskjellig fra mottatdato dersom ikke digital søknad). */
+    @JsonProperty(value = "soknadsdato", required = true)
+    @NotNull
+    private LocalDate soknadsdato;
+
     @JsonProperty(value = "spraakkode")
     @Valid
     private Språkkode spraakkode;
 
+    @JsonProperty(value = "tilleggsopplysninger")
+    @Size(max = 5000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String tilleggsopplysninger;
+
     public SøknadDto() {
-    }
-
-    public LocalDate getMottattDato() {
-        return mottattDato;
-    }
-
-    public LocalDate getSoknadsdato() {
-        return soknadsdato;
-    }
-
-    public String getTilleggsopplysninger() {
-        return tilleggsopplysninger;
     }
 
     public String getBegrunnelseForSenInnsending() {
         return begrunnelseForSenInnsending;
     }
 
-    public OppgittTilknytningDto getOppgittTilknytning() {
-        return oppgittTilknytning;
-    }
-
-    public void setMottattDato(LocalDate mottattDato) {
-        this.mottattDato = mottattDato;
-    }
-
-    public void setTilleggsopplysninger(String tilleggsopplysninger) {
-        this.tilleggsopplysninger = tilleggsopplysninger;
-    }
-
-    public void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
-        this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
-    }
-
-    public void setOppgittTilknytning(OppgittTilknytningDto oppgittTilknytning) {
-        this.oppgittTilknytning = oppgittTilknytning;
-    }
-
     public List<ManglendeVedleggDto> getManglendeVedlegg() {
         return Collections.unmodifiableList(manglendeVedlegg);
     }
 
-    public void setOppgittStartdato(LocalDate oppgittStartdato) {
-        this.oppgittStartdato = oppgittStartdato;
+    public LocalDate getMottattDato() {
+        return mottattDato;
     }
 
     public LocalDate getOppgittStartdato() {
         return oppgittStartdato;
     }
 
-    public void setManglendeVedlegg(List<ManglendeVedleggDto> manglendeVedlegg) {
-        this.manglendeVedlegg = List.copyOf(manglendeVedlegg);
+    public OppgittTilknytningDto getOppgittTilknytning() {
+        return oppgittTilknytning;
     }
 
-    public void setSoknadsdato(LocalDate soknadsdato) {
-        this.soknadsdato = soknadsdato;
+    public LocalDate getSoknadsdato() {
+        return soknadsdato;
     }
 
     public Språkkode getSpraakkode() {
         return spraakkode;
     }
 
+    public String getTilleggsopplysninger() {
+        return tilleggsopplysninger;
+    }
+
+    public void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
+        this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
+    }
+
+    public void setManglendeVedlegg(List<ManglendeVedleggDto> manglendeVedlegg) {
+        this.manglendeVedlegg = List.copyOf(manglendeVedlegg);
+    }
+
+    public void setMottattDato(LocalDate mottattDato) {
+        this.mottattDato = mottattDato;
+    }
+
+    public void setOppgittStartdato(LocalDate oppgittStartdato) {
+        this.oppgittStartdato = oppgittStartdato;
+    }
+
+    public void setOppgittTilknytning(OppgittTilknytningDto oppgittTilknytning) {
+        this.oppgittTilknytning = oppgittTilknytning;
+    }
+
+    public void setSoknadsdato(LocalDate soknadsdato) {
+        this.soknadsdato = soknadsdato;
+    }
+
     public void setSpraakkode(Språkkode spraakkode) {
         this.spraakkode = spraakkode;
+    }
+
+    public void setTilleggsopplysninger(String tilleggsopplysninger) {
+        this.tilleggsopplysninger = tilleggsopplysninger;
     }
 }

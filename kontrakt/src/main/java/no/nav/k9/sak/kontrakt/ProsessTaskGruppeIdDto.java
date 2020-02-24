@@ -19,12 +19,12 @@ public class ProsessTaskGruppeIdDto {
     @Pattern(regexp = "[a-zA-Z0-9-.]+")
     private String gruppe;
 
-    protected ProsessTaskGruppeIdDto() {
-        //
-    }
-
     public ProsessTaskGruppeIdDto(String gruppe) {
         this.gruppe = gruppe;
+    }
+
+    protected ProsessTaskGruppeIdDto() {
+        //
     }
 
     public String getGruppe() {

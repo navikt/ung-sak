@@ -18,22 +18,22 @@ import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TilbakekrevingValgDto {
-    
-    @JsonProperty(value="erTilbakekrevingVilkårOppfylt", required = true)
+
+    @JsonProperty(value = "erTilbakekrevingVilkårOppfylt", required = true)
     @NotNull
     private Boolean erTilbakekrevingVilkårOppfylt;
 
-    @JsonProperty(value="grunnerTilReduksjon")
+    @JsonProperty(value = "grunnerTilReduksjon")
     private Boolean grunnerTilReduksjon; // null når !erTilbakekrevingVilkårOppfylt
-
-    @JsonProperty(value = "videreBehandling")
-    @Valid
-    private TilbakekrevingVidereBehandling videreBehandling; // null når erTilbakekrevingVilkårOppfylt
 
     @JsonProperty(value = "varseltekst")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{P}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String varseltekst;
+
+    @JsonProperty(value = "videreBehandling")
+    @Valid
+    private TilbakekrevingVidereBehandling videreBehandling; // null når erTilbakekrevingVilkårOppfylt
 
     public TilbakekrevingValgDto(Boolean erTilbakekrevingVilkårOppfylt, Boolean grunnerTilReduksjon, TilbakekrevingVidereBehandling videreBehandling,
                                  String varseltekst) {
@@ -46,10 +46,6 @@ public class TilbakekrevingValgDto {
     protected TilbakekrevingValgDto() {
         //
     }
-    
-    public String getVarseltekst() {
-        return varseltekst;
-    }
 
     public Boolean erTilbakekrevingVilkårOppfylt() {
         return erTilbakekrevingVilkårOppfylt;
@@ -59,10 +55,14 @@ public class TilbakekrevingValgDto {
         return grunnerTilReduksjon;
     }
 
+    public String getVarseltekst() {
+        return varseltekst;
+    }
+
     public TilbakekrevingVidereBehandling getVidereBehandling() {
         return videreBehandling;
     }
-    
+
     @AssertTrue(message = "Kan kun ha grunnerTilReduksjon når erTilbakekrevingVilkårOppfylt=true")
     private boolean okGrunner() {
         return erTilbakekrevingVilkårOppfylt || grunnerTilReduksjon == null;

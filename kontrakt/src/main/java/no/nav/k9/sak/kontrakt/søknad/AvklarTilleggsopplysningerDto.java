@@ -15,7 +15,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER_KODE)
 public class AvklarTilleggsopplysningerDto extends BekreftetAksjonspunktDto {
 
-    protected AvklarTilleggsopplysningerDto() {
+    public AvklarTilleggsopplysningerDto() {
         // For Jackson
     }
 

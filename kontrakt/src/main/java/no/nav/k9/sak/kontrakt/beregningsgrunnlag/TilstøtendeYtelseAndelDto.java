@@ -7,10 +7,10 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -35,8 +35,8 @@ public class TilstøtendeYtelseAndelDto extends FaktaOmBeregningAndelDto {
     @Digits(integer = 7, fraction = 2)
     private BigDecimal refusjonskrav;
 
-    public TilstøtendeYtelseAndelDto () {
-        // 
+    public TilstøtendeYtelseAndelDto() {
+        //
     }
 
     public BigDecimal getFastsattPrAar() {

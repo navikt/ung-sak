@@ -15,10 +15,6 @@ import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class ManglendeVedleggDto {
 
-    @JsonProperty(value = "dokumentType", required = true)
-    @Valid
-    private DokumentTypeId dokumentType;
-
     @JsonProperty(value = "arbeidsgiver")
     @Valid
     private ArbeidsgiverDto arbeidsgiver;
@@ -26,31 +22,35 @@ public class ManglendeVedleggDto {
     @JsonProperty(value = "brukerHarSagtAtIkkeKommer")
     private boolean brukerHarSagtAtIkkeKommer;
 
+    @JsonProperty(value = "dokumentType", required = true)
+    @Valid
+    private DokumentTypeId dokumentType;
+
     public ManglendeVedleggDto() {
         //
-    }
-
-    public DokumentTypeId getDokumentType() {
-        return dokumentType;
-    }
-
-    public void setDokumentType(DokumentTypeId dokumentType) {
-        this.dokumentType = dokumentType;
     }
 
     public ArbeidsgiverDto getArbeidsgiver() {
         return arbeidsgiver;
     }
 
-    public void setArbeidsgiver(ArbeidsgiverDto arbeidsgiver) {
-        this.arbeidsgiver = arbeidsgiver;
-    }
-
     public boolean getBrukerHarSagtAtIkkeKommer() {
         return brukerHarSagtAtIkkeKommer;
     }
 
+    public DokumentTypeId getDokumentType() {
+        return dokumentType;
+    }
+
+    public void setArbeidsgiver(ArbeidsgiverDto arbeidsgiver) {
+        this.arbeidsgiver = arbeidsgiver;
+    }
+
     public void setBrukerHarSagtAtIkkeKommer(boolean brukerHarSagtAtIkkeKommer) {
         this.brukerHarSagtAtIkkeKommer = brukerHarSagtAtIkkeKommer;
+    }
+
+    public void setDokumentType(DokumentTypeId dokumentType) {
+        this.dokumentType = dokumentType;
     }
 }

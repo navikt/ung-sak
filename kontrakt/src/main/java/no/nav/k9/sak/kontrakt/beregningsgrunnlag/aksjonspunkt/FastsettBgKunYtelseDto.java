@@ -25,7 +25,7 @@ public class FastsettBgKunYtelseDto {
     @JsonProperty(value = "skalBrukeBesteberegning")
     private Boolean skalBrukeBesteberegning;
 
-    protected FastsettBgKunYtelseDto() {
+    public FastsettBgKunYtelseDto() {
         // For Jackson
     }
 
@@ -38,12 +38,12 @@ public class FastsettBgKunYtelseDto {
         return andeler;
     }
 
-    public void setAndeler(List<FastsattBrukersAndel> andeler) {
-        this.andeler = andeler;
-    }
-
     public Boolean getSkalBrukeBesteberegning() {
         return skalBrukeBesteberegning;
+    }
+
+    public void setAndeler(List<FastsattBrukersAndel> andeler) {
+        this.andeler = andeler;
     }
 
     public void setSkalBrukeBesteberegning(Boolean skalBrukeBesteberegning) {

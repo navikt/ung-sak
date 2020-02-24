@@ -16,9 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class ArbeidstakerUtenInntektsmeldingAndelDto extends FaktaOmBeregningAndelDto {
-    
-    @JsonProperty(value = "mottarYtelse")
-    private Boolean mottarYtelse;
 
     @JsonProperty(value = "inntektPrMnd")
     @DecimalMin("0.00")
@@ -26,19 +23,22 @@ public class ArbeidstakerUtenInntektsmeldingAndelDto extends FaktaOmBeregningAnd
     @Digits(integer = 8, fraction = 2)
     private BigDecimal inntektPrMnd;
 
-    public Boolean getMottarYtelse() {
-        return mottarYtelse;
-    }
-
-    public void setMottarYtelse(boolean mottarYtelse) {
-        this.mottarYtelse = mottarYtelse;
-    }
+    @JsonProperty(value = "mottarYtelse")
+    private Boolean mottarYtelse;
 
     public BigDecimal getInntektPrMnd() {
         return inntektPrMnd;
     }
 
+    public Boolean getMottarYtelse() {
+        return mottarYtelse;
+    }
+
     public void setInntektPrMnd(BigDecimal inntektPrMnd) {
         this.inntektPrMnd = inntektPrMnd;
+    }
+
+    public void setMottarYtelse(boolean mottarYtelse) {
+        this.mottarYtelse = mottarYtelse;
     }
 }

@@ -25,17 +25,29 @@ public class AktørInfoDto {
     @Valid
     private AktørId aktørId;
 
-    @JsonProperty(value = "person")
-    @Valid
-    private PersonDto person;
-
     @JsonProperty(value = "fagsaker")
     @Size(max = 100)
     @Valid
     private List<FagsakDto> fagsaker;
 
+    @JsonProperty(value = "person")
+    @Valid
+    private PersonDto person;
+
+    public AktørInfoDto() {
+        //
+    }
+
     public AktørId getAktørId() {
         return aktørId;
+    }
+
+    public List<FagsakDto> getFagsaker() {
+        return fagsaker;
+    }
+
+    public PersonDto getPerson() {
+        return person;
     }
 
     public void setAktørId(AktørId aktoerId) {
@@ -44,14 +56,6 @@ public class AktørInfoDto {
 
     public void setFagsaker(List<FagsakDto> fagsaker) {
         this.fagsaker = fagsaker;
-    }
-
-    public PersonDto getPerson() {
-        return person;
-    }
-
-    public List<FagsakDto> getFagsaker() {
-        return fagsaker;
     }
 
     public void setPerson(PersonDto person) {

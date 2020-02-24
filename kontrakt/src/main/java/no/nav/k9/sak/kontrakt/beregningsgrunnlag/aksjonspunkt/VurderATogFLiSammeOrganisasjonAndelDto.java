@@ -27,13 +27,13 @@ public class VurderATogFLiSammeOrganisasjonAndelDto {
     @Max(Integer.MAX_VALUE)
     private Integer arbeidsinntekt;
 
-    protected VurderATogFLiSammeOrganisasjonAndelDto() {
-        //
-    }
-
     public VurderATogFLiSammeOrganisasjonAndelDto(Long andelsnr, Integer arbeidsinntekt) { // NOSONAR
         this.andelsnr = andelsnr;
         this.arbeidsinntekt = arbeidsinntekt;
+    }
+
+    protected VurderATogFLiSammeOrganisasjonAndelDto() {
+        //
     }
 
     public Long getAndelsnr() {

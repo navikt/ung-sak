@@ -22,7 +22,7 @@ public class DagpengeAndelLagtTilBesteberegningDto {
     private FastsatteVerdierForBesteberegningDto fastsatteVerdier;
 
     public DagpengeAndelLagtTilBesteberegningDto() {
-        // For Jackson
+        // 
     }
 
     public DagpengeAndelLagtTilBesteberegningDto(int fastsattBeløp, Inntektskategori inntektskategori) {
@@ -31,6 +31,10 @@ public class DagpengeAndelLagtTilBesteberegningDto {
 
     public FastsatteVerdierForBesteberegningDto getFastsatteVerdier() {
         return fastsatteVerdier;
+    }
+
+    public void setFastsatteVerdier(FastsatteVerdierForBesteberegningDto fastsatteVerdier) {
+        this.fastsatteVerdier = fastsatteVerdier;
     }
 
 }

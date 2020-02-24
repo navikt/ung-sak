@@ -20,6 +20,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class PgiDto {
 
+    @JsonProperty(value = "årstall")
+    @Min(2000)
+    @Max(2100)
+    private Integer årstall;
+
     @JsonProperty(value = "beløp", required = true)
     @NotNull
     @DecimalMin("0.00")
@@ -27,25 +32,20 @@ public class PgiDto {
     @Digits(integer = 8, fraction = 2)
     private BigDecimal beløp;
 
-    @JsonProperty(value = "årstall")
-    @Min(2000)
-    @Max(2100)
-    private Integer årstall;
-
-    protected PgiDto() {
-        //
-    }
-
     public PgiDto(BigDecimal beløp, Integer årstall) {
         this.beløp = beløp;
         this.årstall = årstall;
     }
 
-    public BigDecimal getBeløp() {
-        return beløp;
+    protected PgiDto() {
+        //
     }
 
     public Integer getÅrstall() {
         return årstall;
+    }
+
+    public BigDecimal getBeløp() {
+        return beløp;
     }
 }

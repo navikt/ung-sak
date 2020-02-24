@@ -14,10 +14,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum FeilType {
-    MANGLER_TILGANG_FEIL("MANGLER_TILGANG_FEIL"),
-    TOMT_RESULTAT_FEIL("TOMT_RESULTAT_FEIL"),
     BEHANDLING_ENDRET_FEIL("BEHANDLING_ENDRET_FEIL"),
-    GENERELL_FEIL("GENERELL_FEIL");
+    GENERELL_FEIL("GENERELL_FEIL"),
+    MANGLER_TILGANG_FEIL("MANGLER_TILGANG_FEIL"),
+    TOMT_RESULTAT_FEIL("TOMT_RESULTAT_FEIL");
 
     private static final Map<String, FeilType> KODER = new LinkedHashMap<>();
 

@@ -17,16 +17,16 @@ public class VarseltekstDto {
 
     @JsonProperty(value = "varseltekst", required = true)
     @NotNull
-    @Size(max=4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{P}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{P}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String varseltekst;
-
-    VarseltekstDto() {
-        // Jackson
-    }
 
     public VarseltekstDto(String varseltekst) {
         this.varseltekst = varseltekst;
+    }
+
+    VarseltekstDto() {
+        // Jackson
     }
 
     public String getVarseltekst() {

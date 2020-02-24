@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FordelingDto {
 
-    @JsonProperty(value="fordelBeregningsgrunnlag", required = true)
+    @JsonProperty(value = "fordelBeregningsgrunnlag", required = true)
     @NotNull
     @Valid
     private FordelBeregningsgrunnlagDto fordelBeregningsgrunnlag;

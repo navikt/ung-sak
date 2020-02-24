@@ -16,10 +16,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum ForsendelseStatus {
 
-    INNVILGET("INNVILGET"),
     AVSLÅTT("AVSLÅTT"),
-    PÅGÅR("PÅGÅR"),
-    PÅ_VENT("PÅ_VENT");
+    INNVILGET("INNVILGET"),
+    PÅ_VENT("PÅ_VENT"),
+    PÅGÅR("PÅGÅR");
 
     private static final Map<String, ForsendelseStatus> KODER = new LinkedHashMap<>();
 
@@ -38,10 +38,6 @@ public enum ForsendelseStatus {
         this.kode = value;
     }
 
-    public String getKode() {
-        return kode;
-    }
-    
     /**
      * @return the Enum representation for the given string.
      * @throws IllegalArgumentException if unknown string.
@@ -55,5 +51,9 @@ public enum ForsendelseStatus {
             .filter(v -> v.kode.equals(kode))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("ugyldig verdi: " + kode));
+    }
+
+    public String getKode() {
+        return kode;
     }
 }

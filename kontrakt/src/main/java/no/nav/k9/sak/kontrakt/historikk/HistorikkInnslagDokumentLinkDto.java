@@ -16,26 +16,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class HistorikkInnslagDokumentLinkDto {
 
-    @JsonProperty(value="dokumentId")
+    @JsonProperty(value = "dokumentId")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String dokumentId;
-    
-    @JsonProperty(value="journalpostId")
+
+    @JsonProperty(value = "journalpostId")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String journalpostId;
 
-    @JsonProperty(value="tag")
+    @JsonProperty(value = "tag")
     @Size(max = 1000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String tag;
 
-    @JsonProperty(value="url")
+    @JsonProperty(value = "url")
     private URI url;
-    
-    @JsonProperty(value="utgått")
+
+    @JsonProperty(value = "utgått")
     private boolean utgått;
+
+    public HistorikkInnslagDokumentLinkDto() {
+        //
+    }
 
     public String getDokumentId() {
         return dokumentId;

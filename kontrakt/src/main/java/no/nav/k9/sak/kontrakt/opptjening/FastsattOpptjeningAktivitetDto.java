@@ -20,9 +20,22 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FastsattOpptjeningAktivitetDto {
 
+    @JsonProperty(value = "aktivitetReferanse")
+    @Pattern(regexp = "^[\\p{Alnum}:_\\-/\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String aktivitetReferanse;
+
+    @JsonProperty(value = "arbeidsgiverNavn")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String arbeidsgiverNavn;
+
     @JsonProperty(value = "fom")
     @NotNull
     private LocalDate fom;
+
+    @JsonProperty(value = "klasse")
+    @Valid
+    @NotNull
+    private OpptjeningAktivitetKlassifisering klasse;
 
     @JsonProperty(value = "tom")
     @NotNull
@@ -32,19 +45,6 @@ public class FastsattOpptjeningAktivitetDto {
     @Valid
     @NotNull
     private OpptjeningAktivitetType type;
-
-    @JsonProperty(value = "klasse")
-    @Valid
-    @NotNull
-    private OpptjeningAktivitetKlassifisering klasse;
-
-    @JsonProperty(value = "aktivitetReferanse")
-    @Pattern(regexp = "^[\\p{Alnum}:_\\-/\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String aktivitetReferanse;
-
-    @JsonProperty(value = "arbeidsgiverNavn")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String arbeidsgiverNavn;
 
     public FastsattOpptjeningAktivitetDto() {
         // trengs for deserialisering av JSON
@@ -56,8 +56,20 @@ public class FastsattOpptjeningAktivitetDto {
         this.klasse = klasse;
     }
 
+    public String getAktivitetReferanse() {
+        return aktivitetReferanse;
+    }
+
+    public String getArbeidsgiverNavn() {
+        return arbeidsgiverNavn;
+    }
+
     public LocalDate getFom() {
         return fom;
+    }
+
+    public OpptjeningAktivitetKlassifisering getKlasse() {
+        return klasse;
     }
 
     public LocalDate getTom() {
@@ -68,16 +80,28 @@ public class FastsattOpptjeningAktivitetDto {
         return type;
     }
 
-    public OpptjeningAktivitetKlassifisering getKlasse() {
-        return klasse;
+    public void setAktivitetReferanse(String aktivitetReferanse) {
+        this.aktivitetReferanse = aktivitetReferanse;
     }
 
-    public String getAktivitetReferanse() {
-        return aktivitetReferanse;
+    public void setArbeidsgiverNavn(String arbeidsgiverNavn) {
+        this.arbeidsgiverNavn = arbeidsgiverNavn;
     }
 
-    public String getArbeidsgiverNavn() {
-        return arbeidsgiverNavn;
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setKlasse(OpptjeningAktivitetKlassifisering klasse) {
+        this.klasse = klasse;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
+    }
+
+    public void setType(OpptjeningAktivitetType type) {
+        this.type = type;
     }
 
 }

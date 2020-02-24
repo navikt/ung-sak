@@ -18,7 +18,7 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class GjenopptaBehandlingDto {
 
-    @JsonProperty(value="behandlingId", required = true)
+    @JsonProperty(value = "behandlingId", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -26,7 +26,7 @@ public class GjenopptaBehandlingDto {
     private Long behandlingId;
 
     @JsonAlias("versjon")
-    @JsonProperty(value="behandlingVersjon", required = true)
+    @JsonProperty(value = "behandlingVersjon", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
@@ -35,7 +35,7 @@ public class GjenopptaBehandlingDto {
     public GjenopptaBehandlingDto() {
         //
     }
-    
+
     @AbacAttributt("behandlingId")
     public Long getBehandlingId() {
         return behandlingId;

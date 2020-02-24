@@ -34,7 +34,7 @@ public class FastsettMånedsinntektUtenInntektsmeldingAndelDto {
     @Valid
     private Inntektskategori inntektskategori;
 
-    protected FastsettMånedsinntektUtenInntektsmeldingAndelDto() {
+    public FastsettMånedsinntektUtenInntektsmeldingAndelDto() {
         // For Jackson
     }
 
@@ -54,6 +54,18 @@ public class FastsettMånedsinntektUtenInntektsmeldingAndelDto {
 
     public Inntektskategori getInntektskategori() {
         return inntektskategori;
+    }
+
+    public void setAndelsnr(Long andelsnr) {
+        this.andelsnr = andelsnr;
+    }
+
+    public void setFastsattBeløp(Integer fastsattBeløp) {
+        this.fastsattBeløp = fastsattBeløp;
+    }
+
+    public void setInntektskategori(Inntektskategori inntektskategori) {
+        this.inntektskategori = inntektskategori;
     }
 
 }

@@ -17,19 +17,19 @@ public class VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto {
     @NotNull
     private Boolean erNyIArbeidslivet;
 
-    protected VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto() {
-        //
-    }
-
     public VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto(Boolean erNyIArbeidslivet) {
         this.erNyIArbeidslivet = erNyIArbeidslivet;
     }
 
-    public void setErNyIArbeidslivet(Boolean erNyIArbeidslivet) {
-        this.erNyIArbeidslivet = erNyIArbeidslivet;
+    protected VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto() {
+        //
     }
 
     public Boolean erNyIArbeidslivet() {
         return erNyIArbeidslivet;
+    }
+
+    public void setErNyIArbeidslivet(Boolean erNyIArbeidslivet) {
+        this.erNyIArbeidslivet = erNyIArbeidslivet;
     }
 }

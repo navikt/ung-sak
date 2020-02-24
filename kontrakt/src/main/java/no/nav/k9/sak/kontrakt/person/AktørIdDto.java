@@ -23,7 +23,7 @@ public class AktørIdDto {
     @Valid
     private AktørId aktørId;
 
-    protected AktørIdDto() {
+    public AktørIdDto() {
         //
     }
 
@@ -39,5 +39,9 @@ public class AktørIdDto {
 
     public AktørId getAktørId() {
         return aktørId;
+    }
+
+    public void setAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
     }
 }

@@ -26,12 +26,12 @@ public class RefusjonskravPrArbeidsgiverVurderingDto {
         return arbeidsgiverId;
     }
 
-    public void setArbeidsgiverId(String arbeidsgiverId) {
-        this.arbeidsgiverId = arbeidsgiverId;
-    }
-
     public boolean isSkalUtvideGyldighet() {
         return skalUtvideGyldighet;
+    }
+
+    public void setArbeidsgiverId(String arbeidsgiverId) {
+        this.arbeidsgiverId = arbeidsgiverId;
     }
 
     public void setSkalUtvideGyldighet(boolean skalUtvideGyldighet) {
