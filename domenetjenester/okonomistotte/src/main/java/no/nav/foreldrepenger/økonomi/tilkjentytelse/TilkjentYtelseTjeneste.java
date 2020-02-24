@@ -102,7 +102,7 @@ public class TilkjentYtelseTjeneste {
         info.setAnsvarligSaksbehandler(vedtak.getAnsvarligSaksbehandler());
         info.setAktørId(behandling.getAktørId().getId());
         info.setVedtaksdato(vedtak.getVedtaksdato());
-        behandling.getOriginalBehandling().ifPresent(ob -> info.setForrigeBehandlingId(ob.getId()));
+        behandling.getOriginalBehandling().ifPresent(ob -> info.setForrigeBehandlingId(ob.getUuid()));
         return info;
     }
 
