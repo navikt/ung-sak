@@ -53,7 +53,7 @@ spec:
       value: "Europe/Oslo"
     - name: APP_NAME
       value: "K9SAK"
-    
+
     - name: DEFAULTDS_USERNAME
       value: k9-sak
     - name: DEFAULTDS_URL
@@ -149,6 +149,8 @@ spec:
       value: https://infotrygd-hendelser-api-q1.nais.preprod.local/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.q1/fpabakus
+    - name: ABAKUS_CALLBACK_URL
+      value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
       value: https://wasapp-q1.adeo.no/asm-pdp/authorize
     - name: FPFORMIDLING_ERDOKUMENTPRODUSERT_URL
@@ -184,7 +186,7 @@ spec:
     - name: BEHANDLEOPPGAVE_V1_URL
       value: https://wasapp-q1.adeo.no/nav-gsak-ws/BehandleOppgaveV1
     - name: OPPGAVE_V3_URL
-      value: https://wasapp-q1.adeo.no/nav-gsak-ws/OppgaveV3    
+      value: https://wasapp-q1.adeo.no/nav-gsak-ws/OppgaveV3
     - name: ORGANISASJON_V4_URL
       value: https://modapp-q1.adeo.no/ereg/ws/OrganisasjonService/v4
     - name: MEDLEM_V2_URL
