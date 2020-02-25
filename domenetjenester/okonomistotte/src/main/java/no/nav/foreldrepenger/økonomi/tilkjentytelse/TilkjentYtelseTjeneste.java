@@ -54,7 +54,7 @@ public class TilkjentYtelseTjeneste {
     public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId)
-            .orElseThrow(() -> new IllegalArgumentException("Vedtak er ikke fattet enda. Denne tjenesten er kun designet for bruk etter at vedtak er fattet."));
+            .orElse(null);
 
         return mapBehandlingsinfo(behandling, vedtak);
     }
@@ -101,9 +101,9 @@ public class TilkjentYtelseTjeneste {
         info.setBehandlingId(behandling.getUuid());
         info.setHenvisning(lagHenvisning(behandling));
         info.setYtelseType(MapperForYtelseType.mapYtelseType(behandling.getFagsakYtelseType()));
-        info.setAnsvarligSaksbehandler(vedtak.getAnsvarligSaksbehandler());
+        info.setAnsvarligSaksbehandler(vedtak == null ? behandling.getAnsvarligSaksbehandler() : vedtak.getAnsvarligSaksbehandler());
         info.setAktørId(behandling.getAktørId().getId());
-        info.setVedtaksdato(vedtak.getVedtaksdato());
+        info.setVedtaksdato(vedtak == null ? LocalDate.now() : vedtak.getVedtaksdato());
         behandling.getOriginalBehandling().ifPresent(ob -> info.setForrigeBehandlingId(ob.getUuid()));
         return info;
     }
