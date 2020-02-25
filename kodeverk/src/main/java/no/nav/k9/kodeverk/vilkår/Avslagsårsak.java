@@ -35,7 +35,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
     SN_FL_HAR_IKKE_DOKUMENTERT_RISIKOFAKTORER("1065", "§14-4 andre ledd: Næringsdrivende/frilanser har ikke dokumentert risikofaktorer", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
     SN_FL_HAR_MULIGHET_TIL_Å_TILRETTELEGGE_SITT_VIRKE("1066", "§14-4 andre ledd: Næringsdrivende/frilanser har mulighet til å tilrettelegge sitt virke", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
     IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE("1067", "Ikke dokumentert sykdom, skade eller lyte.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
-    DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
+    DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-16\"}]}]}"),
     IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM("1069", "Ikke behov for kontinuerlig pleie.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"9-10\"}]}]}"),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
