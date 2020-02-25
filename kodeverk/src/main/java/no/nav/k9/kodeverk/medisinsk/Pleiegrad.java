@@ -20,6 +20,7 @@ public enum Pleiegrad implements Kodeverdi {
     KONTINUERLIG_TILSYN("KONTINUERLIG_TILSYN", "Kontinuerlig tilsyn", null),
     UTVIDET_KONTINUERLIG_TILSYN("UTVIDET_KONTINUERLIG_TILSYN", "Utvidet kontinuerlig tilsyn", null),
     INNLEGGELSE("INNLEGGELSE", "Innleggelse", null),
+    NULL("NULL","Null", null),
     UDEFINERT("-", "Ikke definert", null),
     ;
 
