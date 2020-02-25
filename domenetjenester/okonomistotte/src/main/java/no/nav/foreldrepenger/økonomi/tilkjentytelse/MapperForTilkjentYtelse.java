@@ -9,9 +9,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseAndelV1;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelsePeriodeV1;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
+import no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori;
+import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 class MapperForTilkjentYtelse {
@@ -37,7 +38,7 @@ class MapperForTilkjentYtelse {
 
     private static TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel) {
         TilkjentYtelseAndelV1 resultat = mapAndelUtenFeriepenger(andel);
-        resultat.setUtbetalingsgrad(andel.getUtbetalingsgrad());
+        resultat.medUtbetalingsgrad(andel.getUtbetalingsgrad());
         for (BeregningsresultatFeriepengerPrÅr feriepengerPrÅr : andel.getBeregningsresultatFeriepengerPrÅrListe()) {
             Year år = Year.of(feriepengerPrÅr.getOpptjeningsår().getYear());
             long beløp = feriepengerPrÅr.getÅrsbeløp().getVerdi().longValue();
@@ -47,9 +48,9 @@ class MapperForTilkjentYtelse {
     }
 
     private static TilkjentYtelseAndelV1 mapAndelUtenFeriepenger(BeregningsresultatAndel andel) {
-        TilkjentYtelseV1.Inntektskategori inntektskategori = MapperForInntektskategori.mapInntektskategori(andel.getInntektskategori());
+        Inntektskategori inntektskategori = MapperForInntektskategori.mapInntektskategori(andel.getInntektskategori());
         int dagsats = andel.getDagsats();
-        TilkjentYtelseV1.SatsType satsType = TilkjentYtelseV1.SatsType.DAGSATS;
+        SatsType satsType = SatsType.DAG;
 
 
         TilkjentYtelseAndelV1 andelV1 = andel.erBrukerMottaker()

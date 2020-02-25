@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.økonomi.simulering.tjeneste;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,7 +12,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
-import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragApplikasjonTjeneste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -21,17 +19,14 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.SimuleringResultatDto;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 
 @ApplicationScoped
 public class SimulerInntrekkSjekkeTjeneste {
 
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
-    private SimulerOppdragApplikasjonTjeneste simulerOppdragTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private HistorikkRepository historikkRepository;
-
-    private static final long DUMMY_TASK_ID = -1L;
 
     SimulerInntrekkSjekkeTjeneste() {
         // for CDI proxy
@@ -39,11 +34,9 @@ public class SimulerInntrekkSjekkeTjeneste {
 
     @Inject
     public SimulerInntrekkSjekkeTjeneste(SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
-                                         SimulerOppdragApplikasjonTjeneste simulerOppdragTjeneste,
                                          TilbakekrevingRepository tilbakekrevingRepository,
                                          HistorikkRepository historikkRepository) {
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
-        this.simulerOppdragTjeneste = simulerOppdragTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.historikkRepository = historikkRepository;
     }
@@ -54,10 +47,9 @@ public class SimulerInntrekkSjekkeTjeneste {
         }
         Optional<TilbakekrevingValg> tilbakekrevingValg = tilbakekrevingRepository.hent(behandling.getId());
         if (tilbakekrevingValg.filter(valg -> valg.getVidereBehandling().equals(TilbakekrevingVidereBehandling.INNTREKK)).isPresent()) {
-            List<String> oppdragXmler = simulerOppdragTjeneste.simulerOppdrag(behandling.getId(), DUMMY_TASK_ID);
-            simuleringIntegrasjonTjeneste.startSimulering(behandling.getId(), oppdragXmler);
+            simuleringIntegrasjonTjeneste.startSimulering(behandling);
 
-            Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling.getId());
+            Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
             if (simuleringResultatDto.isPresent()) {
                 Optional<AksjonspunktDefinisjon> aksjonspunkt = SimulerOppdragAksjonspunktUtleder.utledAksjonspunkt(simuleringResultatDto.get());
                 if (aksjonspunkt.filter(aksjonspunktDefinisjon -> aksjonspunktDefinisjon.equals(AksjonspunktDefinisjon.VURDER_FEILUTBETALING)).isPresent()) {

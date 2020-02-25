@@ -1,27 +1,42 @@
 package no.nav.foreldrepenger.økonomi.tilkjentytelse;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
 
 class MapperForYtelseType {
 
-    private static final Map<FagsakYtelseType, TilkjentYtelseV1.YtelseType> YTELSE_TYPE_MAP = Map.of(
-        FagsakYtelseType.ENGANGSTØNAD, TilkjentYtelseV1.YtelseType.ENGANGSTØNAD,
-        FagsakYtelseType.FORELDREPENGER, TilkjentYtelseV1.YtelseType.FORELDREPENGER,
-        FagsakYtelseType.SVANGERSKAPSPENGER, TilkjentYtelseV1.YtelseType.SVANGERSKAPSPENGER
-    );
+    private static final Map<FagsakYtelseType, YtelseType> YTELSE_TYPE_MAP = genererMapping();
+
+    private static Map<FagsakYtelseType, YtelseType> genererMapping() {
+        Map<FagsakYtelseType, YtelseType> map = Arrays.stream(YtelseType.values())
+            .collect(Collectors.toMap(yt -> FagsakYtelseType.fraKode(yt.getKode()), Function.identity()));
+
+        for (FagsakYtelseType egenKode : FagsakYtelseType.values()) {
+            if (egenKode != FagsakYtelseType.UDEFINERT && !map.containsKey(egenKode)) {
+                throw new IllegalStateException("Kan ikke opprette mapping fra " + FagsakYtelseType.class.getName() + "." + egenKode.name() + " til " + YtelseType.class.getName() + " siden det ikke finnes tilsvarende i " + YtelseType.class.getName());
+            }
+        }
+        return map;
+    }
 
     private MapperForYtelseType() {
         //for å unngå instansiering, slik at SonarQube blir glad
     }
 
-    static TilkjentYtelseV1.YtelseType mapYtelseType(FagsakYtelseType fagsakYtelseType) {
-        TilkjentYtelseV1.YtelseType resultat = YTELSE_TYPE_MAP.get(fagsakYtelseType);
+    static YtelseType mapYtelseType(FagsakYtelseType fagsakYtelseType) {
+        YtelseType resultat = YTELSE_TYPE_MAP.get(fagsakYtelseType);
         if (resultat != null) {
             return resultat;
         }
         throw new IllegalArgumentException("Utvikler-feil: FagsakYtelseType " + fagsakYtelseType + " er ikke støttet i mapping");
+    }
+
+    public static void main(String[] args) {
+        System.out.println(genererMapping());
     }
 }

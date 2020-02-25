@@ -26,7 +26,7 @@ import no.nav.foreldrepenger.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.foreldrepenger.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties;
-import no.nav.foreldrepenger.økonomi.VurderOgSendØkonomiOppdragTask;
+import no.nav.foreldrepenger.økonomi.SendØkonomiOppdragTask;
 import no.nav.foreldrepenger.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -67,10 +67,10 @@ public class OpprettProsessTaskIverksettTest {
         // Assert
         List<ProsessTaskData> prosessTaskDataList = prosessTaskRepository.finnAlle(ProsessTaskStatus.KLAR);
         List<String> tasktyper = prosessTaskDataList.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toList());
-        assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE, 
+        assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE,
             SendVedtaksbrevTask.TASKTYPE,
-            VurderOgSendØkonomiOppdragTask.TASKTYPE, 
-            VurderOppgaveArenaTask.TASKTYPE, 
+            SendØkonomiOppdragTask.TASKTYPE,
+            VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
     }
 
@@ -85,10 +85,10 @@ public class OpprettProsessTaskIverksettTest {
         // Assert
         List<ProsessTaskData> prosessTaskDataList = prosessTaskRepository.finnAlle(ProsessTaskStatus.KLAR);
         List<String> tasktyper = prosessTaskDataList.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toList());
-        assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE, 
+        assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE,
             SendVedtaksbrevTask.TASKTYPE,
-            AvsluttOppgaveTaskProperties.TASKTYPE, 
-            VurderOgSendØkonomiOppdragTask.TASKTYPE,
+            AvsluttOppgaveTaskProperties.TASKTYPE,
+            SendØkonomiOppdragTask.TASKTYPE,
             VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
     }

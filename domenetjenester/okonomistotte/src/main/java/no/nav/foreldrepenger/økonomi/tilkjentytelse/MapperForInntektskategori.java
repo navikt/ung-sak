@@ -1,34 +1,38 @@
 package no.nav.foreldrepenger.økonomi.tilkjentytelse;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.v1.TilkjentYtelseV1;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 class MapperForInntektskategori {
 
-    private static final Map<Inntektskategori, TilkjentYtelseV1.Inntektskategori> INNTEKTSKATEGORI_MAP = Map.of(
-        Inntektskategori.ARBEIDSTAKER, TilkjentYtelseV1.Inntektskategori.ARBEIDSTAKER,
-        Inntektskategori.FRILANSER, TilkjentYtelseV1.Inntektskategori.FRILANSER,
-        Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, TilkjentYtelseV1.Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
-        Inntektskategori.DAGPENGER, TilkjentYtelseV1.Inntektskategori.DAGPENGER,
-        Inntektskategori.ARBEIDSAVKLARINGSPENGER, TilkjentYtelseV1.Inntektskategori.ARBEIDSAVKLARINGSPENGER,
-        Inntektskategori.SJØMANN, TilkjentYtelseV1.Inntektskategori.SJØMANN,
-        Inntektskategori.DAGMAMMA, TilkjentYtelseV1.Inntektskategori.DAGMAMMA,
-        Inntektskategori.JORDBRUKER, TilkjentYtelseV1.Inntektskategori.JORDBRUKER,
-        Inntektskategori.FISKER, TilkjentYtelseV1.Inntektskategori.FISKER,
-        Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, TilkjentYtelseV1.Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER
-    );
+    private static final Map<Inntektskategori, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori> INNTEKTSKATEGORI_MAP = genererMapping();
 
     private MapperForInntektskategori() {
         //for å unngå instansiering, slik at SonarQube blir glad
     }
 
-    static TilkjentYtelseV1.Inntektskategori mapInntektskategori(Inntektskategori inntektskategori) {
-        TilkjentYtelseV1.Inntektskategori resultat = INNTEKTSKATEGORI_MAP.get(inntektskategori);
+    static no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori mapInntektskategori(Inntektskategori inntektskategori) {
+        no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori resultat = INNTEKTSKATEGORI_MAP.get(inntektskategori);
         if (resultat != null) {
             return resultat;
         }
         throw new IllegalArgumentException("Utvikler-feil: Inntektskategorien " + inntektskategori + " er ikke støttet i mapping");
     }
+
+    private static Map<Inntektskategori, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori> genererMapping() {
+        Map<Inntektskategori, no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori> map = Arrays.stream(no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.values())
+            .collect(Collectors.toMap(yt -> Inntektskategori.fraKode(yt.getKode()), Function.identity()));
+
+        for (Inntektskategori egenKode : Inntektskategori.values()) {
+            if (egenKode != Inntektskategori.UDEFINERT && !map.containsKey(egenKode)) {
+                throw new IllegalStateException("Kan ikke opprette mapping fra " + Inntektskategori.class.getName() + "." + egenKode.name() + " til " + no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.class.getName() + " siden det ikke finnes tilsvarende i " + no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori.class.getName());
+            }
+        }
+        return map;
+    }
+
 }

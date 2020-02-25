@@ -27,11 +27,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.Tilbakek
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragApplikasjonTjeneste;
-import no.nav.foreldrepenger.økonomi.simulering.klient.FpOppdragRestKlient;
-import no.nav.foreldrepenger.økonomi.simulering.klient.FpoppdragSystembrukerRestKlient;
+import no.nav.foreldrepenger.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.foreldrepenger.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.foreldrepenger.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
+import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -46,10 +45,9 @@ public class SimulerOppdragStegTest {
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
     private SimulerOppdragSteg steg;
-    private SimulerOppdragApplikasjonTjeneste simulerOppdragTjenesteMock = mock(SimulerOppdragApplikasjonTjeneste.class);
-    private FpOppdragRestKlient fpOppdragRestKlientMock = mock(FpOppdragRestKlient.class);
-    private FpoppdragSystembrukerRestKlient fpoppdragSystembrukerRestKlientMock = mock(FpoppdragSystembrukerRestKlient.class);
+    private K9OppdragRestKlient k9OppdragRestKlientMock = mock(K9OppdragRestKlient.class);
     private FptilbakeRestKlient fptilbakeRestKlientMock = mock(FptilbakeRestKlient.class);
+    private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock = mock(TilkjentYtelseTjeneste.class);
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
 
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste = mock(BehandlingProsesseringTjeneste.class);
@@ -57,13 +55,12 @@ public class SimulerOppdragStegTest {
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
 
-
     @Before
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
         kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling));
-        simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjeneste(fpOppdragRestKlientMock);
+        simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjeneste(tilkjentYtelseTjenesteMock, k9OppdragRestKlientMock);
     }
 
     @Test
@@ -86,33 +83,25 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simulerOppdragTjenesteMock,
-            simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fpoppdragSystembrukerRestKlientMock, fptilbakeRestKlientMock);
-
-        Behandling behandling = mock(Behandling.class);
-        when(behandling.getId()).thenReturn(1L);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
 
         // Verify
-        verify(fpoppdragSystembrukerRestKlientMock).kansellerSimulering(kontekst.getBehandlingId());
+        verify(k9OppdragRestKlientMock).kansellerSimulering(behandling.getUuid());
     }
 
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simulerOppdragTjenesteMock,
-            simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fpoppdragSystembrukerRestKlientMock, fptilbakeRestKlientMock);
-
-        Behandling behandling = mock(Behandling.class);
-        when(behandling.getId()).thenReturn(1L);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
 
         // Verify
-        verify(fpoppdragSystembrukerRestKlientMock, never()).kansellerSimulering(kontekst.getBehandlingId());
+        verify(k9OppdragRestKlientMock, never()).kansellerSimulering(behandling.getUuid());
     }
 
     @Test
@@ -131,11 +120,9 @@ public class SimulerOppdragStegTest {
         Optional<TilbakekrevingValg> tilbakekrevingValg = tilbakekrevingRepository.hent(behandling.getId());
         assertThat(tilbakekrevingValg).isPresent();
         assertThat(tilbakekrevingValg.get().getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.TILBAKEKR_OPPDATER);
-
     }
 
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simulerOppdragTjenesteMock,
-            simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fpoppdragSystembrukerRestKlientMock, fptilbakeRestKlientMock);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
     }
 }

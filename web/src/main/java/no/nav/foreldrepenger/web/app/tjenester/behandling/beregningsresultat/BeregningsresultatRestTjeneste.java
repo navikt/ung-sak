@@ -24,7 +24,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.kontrakter.tilkjentytelse.TilkjentYtelse;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -43,7 +42,6 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class BeregningsresultatRestTjeneste {
 
     static public final String BEREGNINGSRESULTAT_PATH = "/behandling/beregningsresultat/";
-    static public final String TILKJENTYTELSE_PATH = "/behandling/beregningsresultat/tilkjentytelse";
     static public final String HAR_SAMME_RESULTAT_PATH = "/behandling/beregningsresultat/har-samme-resultat";
 
     private BehandlingRepository behandlingRepository;
@@ -88,31 +86,6 @@ public class BeregningsresultatRestTjeneste {
     public BeregningsresultatDto hentBeregningsresultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return beregningsresultatTjeneste.lagBeregningsresultatMedUttaksplan(behandling).orElse(null);
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path(TILKJENTYTELSE_PATH)
-    @Operation(description = "Hent beregningsresultat", summary = ("Brukes av fpoppdrag."), tags = "beregningsresultat")
-    @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
-    @Deprecated
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public TilkjentYtelse hentTilkjentYtelse(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
-        Long behandlingId = behandlingIdDto.getBehandlingId();
-        Behandling behandling = behandlingId != null
-            ? behandlingRepository.hentBehandling(behandlingId)
-            : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
-        return tilkjentYtelseTjeneste.hentilkjentYtelse(behandling.getId());
-    }
-
-    @GET
-    @Path(TILKJENTYTELSE_PATH)
-    @Operation(description = "Hent beregningsresultat", summary = ("Brukes av fpoppdrag."), tags = "beregningsresultat")
-    @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public TilkjentYtelse hentTilkjentYtelse(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return tilkjentYtelseTjeneste.hentilkjentYtelse(behandling.getId());
     }
 
     @GET
