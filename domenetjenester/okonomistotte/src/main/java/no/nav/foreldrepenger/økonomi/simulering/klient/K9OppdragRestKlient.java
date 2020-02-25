@@ -27,24 +27,19 @@ public class K9OppdragRestKlient {
     }
 
     @Inject
-    public K9OppdragRestKlient(OidcRestClient restClient,
-                               @KonfigVerdi(value = "URL_K9OPPDRAG_IVERKSETT", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/iverksett/start") String urlIverksett,
-                               @KonfigVerdi(value = "URL_K9OPPDRAG_SIMULERING", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/start") String urlSimulering,
-                               @KonfigVerdi(value = "URL_K9OPPDRAG_SIMULERING_RESULTAT", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/resultat") String urlSimuleringResultat,
-                               @KonfigVerdi(value = "URL_K9OPPDRAG_KANSELLER_SIMULERING", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api/simulering/kanseller") String urlKansellerSimulering
-    ) {
+    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "URL_K9OPPDRAG", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api") String urlK9Oppdrag) {
         this.restClient = restClient;
-        this.uriIverksett = tilUri(urlIverksett, "URL_K9OPPDRAG_IVERKSETT");
-        this.uriSimulering = tilUri(urlSimulering, "URL_K9OPPDRAG_SIMULERING");
-        this.uriSimuleringResultat = tilUri(urlSimuleringResultat, "URL_K9OPPDRAG_SIMULERING_RESULTAT");
-        this.uriKansellerSimulering = tilUri(urlKansellerSimulering, "URL_K9OPPDRAG_KANSELLER_SIMULERING");
+        this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
+        this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
+        this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
+        this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
     }
 
-    private static URI tilUri(String url, String konfigurertNavn) {
+    private static URI tilUri(String baseUrl, String path) {
         try {
-            return new URIBuilder(url).build();
+            return new URIBuilder(baseUrl).setPath(path).build();
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Ugyldig konfigurasjon for " + konfigurertNavn, e);
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9OPPDRAG", e);
         }
     }
 
