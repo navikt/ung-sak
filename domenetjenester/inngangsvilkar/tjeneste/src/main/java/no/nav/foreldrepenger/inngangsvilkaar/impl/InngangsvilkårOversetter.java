@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.inngangsvilkaar.impl;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,7 +13,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
@@ -87,13 +87,13 @@ public class InngangsvilkårOversetter {
 
         Optional<VurdertMedlemskap> vurdertMedlemskap = medlemskap.flatMap(MedlemskapAggregat::getVurdertMedlemskap);
         MedlemskapsvilkårGrunnlag grunnlag = new MedlemskapsvilkårGrunnlag(
-            brukerErMedlemEllerIkkeRelevantPeriode(medlemskap, personopplysninger, ref.getSkjæringstidspunkt()), // FP VK 2.13
+            brukerErMedlemEllerIkkeRelevantPeriode(medlemskap, personopplysninger, periode.getFomDato()), // FP VK 2.13
             tilPersonStatusType(personopplysninger), // FP VK 2.1
             brukerNorskNordisk(personopplysninger), // FP VK 2.11
             brukerBorgerAvEOS(vurdertMedlemskap, personopplysninger)); // FP VIK 2.12
 
         Optional<InntektArbeidYtelseGrunnlag> iayOpt = iayTjeneste.finnGrunnlag(behandlingId);
-        grunnlag.setHarSøkerArbeidsforholdOgInntekt(FinnOmSøkerHarArbeidsforholdOgInntekt.finn(iayOpt, ref.getUtledetSkjæringstidspunkt(), ref.getAktørId()));
+        grunnlag.setHarSøkerArbeidsforholdOgInntekt(FinnOmSøkerHarArbeidsforholdOgInntekt.finn(iayOpt, periode.getFomDato(), ref.getAktørId()));
 
         // defaulter uavklarte fakta til true
         grunnlag.setBrukerAvklartLovligOppholdINorge(
@@ -104,7 +104,7 @@ public class InngangsvilkårOversetter {
             vurdertMedlemskap.map(VurdertMedlemskap::getOppholdsrettVurdering).orElse(true));
 
         // FP VK 2.2 Er bruker avklart som pliktig eller frivillig medlem?
-        grunnlag.setBrukerAvklartPliktigEllerFrivillig(erAvklartSomPliktigEllerFrivilligMedlem(medlemskap, ref.getSkjæringstidspunkt()));
+        grunnlag.setBrukerAvklartPliktigEllerFrivillig(erAvklartSomPliktigEllerFrivilligMedlem(medlemskap, periode.getFomDato()));
 
         return grunnlag;
     }
@@ -112,7 +112,7 @@ public class InngangsvilkårOversetter {
     /**
      * True dersom saksbehandler har vurdert til å være medlem i relevant periode
      */
-    private boolean erAvklartSomPliktigEllerFrivilligMedlem(Optional<MedlemskapAggregat> medlemskap, Skjæringstidspunkt skjæringstidspunkter) {
+    private boolean erAvklartSomPliktigEllerFrivilligMedlem(Optional<MedlemskapAggregat> medlemskap, LocalDate utledetSkjæringstidspunkt) {
         if (medlemskap.isPresent()) {
             Optional<VurdertMedlemskap> vurdertMedlemskapOpt = medlemskap.get().getVurdertMedlemskap();
             if (vurdertMedlemskapOpt.isPresent()) {
@@ -128,7 +128,7 @@ public class InngangsvilkårOversetter {
             }
             return medlemskapPerioderTjeneste.brukerMaskineltAvklartSomFrivilligEllerPliktigMedlem(
                 medlemskap.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder).orElse(Collections.emptySet()),
-                skjæringstidspunkter.getUtledetSkjæringstidspunkt());
+                utledetSkjæringstidspunkt);
         } else {
             return false;
         }
@@ -142,8 +142,7 @@ public class InngangsvilkårOversetter {
             && MedlemskapManuellVurderingType.UNNTAK.equals(medlemskap.get().getMedlemsperiodeManuellVurdering());
     }
 
-    private boolean brukerErMedlemEllerIkkeRelevantPeriode(Optional<MedlemskapAggregat> medlemskap, PersonopplysningerAggregat søker,
-                                                           Skjæringstidspunkt skjæringstidspunkter) {
+    private boolean brukerErMedlemEllerIkkeRelevantPeriode(Optional<MedlemskapAggregat> medlemskap, PersonopplysningerAggregat søker, LocalDate utledetSkjæringstidspunkt) {
         Optional<VurdertMedlemskap> vurdertMedlemskap = medlemskap.flatMap(MedlemskapAggregat::getVurdertMedlemskap);
         if (vurdertMedlemskap.isPresent()
             && MedlemskapManuellVurderingType.IKKE_RELEVANT.equals(vurdertMedlemskap.get().getMedlemsperiodeManuellVurdering())) {
@@ -153,7 +152,7 @@ public class InngangsvilkårOversetter {
         Set<MedlemskapPerioderEntitet> medlemskapPerioder = medlemskap.isPresent() ? medlemskap.get().getRegistrertMedlemskapPerioder()
             : Collections.emptySet();
         boolean erAvklartMaskineltSomIkkeMedlem = medlemskapPerioderTjeneste.brukerMaskineltAvklartSomIkkeMedlem(søker,
-            medlemskapPerioder, skjæringstidspunkter.getUtledetSkjæringstidspunkt());
+            medlemskapPerioder, utledetSkjæringstidspunkt);
         boolean erAvklartManueltSomIkkeMedlem = erAvklartSomIkkeMedlem(vurdertMedlemskap);
 
         return !(erAvklartMaskineltSomIkkeMedlem || erAvklartManueltSomIkkeMedlem);

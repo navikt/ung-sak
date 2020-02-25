@@ -42,9 +42,6 @@ public class SimulerInntrekkSjekkeTjeneste {
     }
 
     public void sjekkIntrekk(Behandling behandling) {
-        if (FagsakYtelseType.ENGANGSTØNAD.equals(behandling.getFagsakYtelseType())) {
-            return;
-        }
         Optional<TilbakekrevingValg> tilbakekrevingValg = tilbakekrevingRepository.hent(behandling.getId());
         if (tilbakekrevingValg.filter(valg -> valg.getVidereBehandling().equals(TilbakekrevingVidereBehandling.INNTREKK)).isPresent()) {
             simuleringIntegrasjonTjeneste.startSimulering(behandling);
