@@ -2,12 +2,11 @@ package no.nav.foreldrepenger.økonomi.simulering.klient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.apache.http.client.utils.URIBuilder;
 
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
@@ -27,7 +26,7 @@ public class K9OppdragRestKlient {
     }
 
     @Inject
-    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "URL_K9OPPDRAG", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api") String urlK9Oppdrag) {
+    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "url.k9oppdrag") String urlK9Oppdrag) {
         this.restClient = restClient;
         this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
         this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
@@ -37,7 +36,7 @@ public class K9OppdragRestKlient {
 
     private static URI tilUri(String baseUrl, String path) {
         try {
-            return new URIBuilder(baseUrl).setPath(path).build();
+            return new URI(baseUrl + "/" + path);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9OPPDRAG", e);
         }
@@ -51,9 +50,9 @@ public class K9OppdragRestKlient {
         restClient.post(uriSimulering, tilkjentYtelseOppdrag);
     }
 
-    public SimuleringResultatDto hentSimuleringResultat(UUID behandlingUuid) {
+    public Optional<SimuleringResultatDto> hentSimuleringResultat(UUID behandlingUuid) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        return restClient.post(uriSimuleringResultat, behandlingreferanse, SimuleringResultatDto.class);
+        return restClient.postReturnsOptional(uriSimuleringResultat, behandlingreferanse, SimuleringResultatDto.class);
     }
 
     public void kansellerSimulering(UUID behandlingUuid) {

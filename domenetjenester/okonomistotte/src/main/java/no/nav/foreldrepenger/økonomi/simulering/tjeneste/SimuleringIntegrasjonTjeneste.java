@@ -39,7 +39,7 @@ public class SimuleringIntegrasjonTjeneste {
 
     public Optional<SimuleringResultatDto> hentResultat(Behandling behandling) {
         Objects.requireNonNull(behandling, "Utviklerfeil: behandling kan ikke være null");
-        return Optional.ofNullable(restKlient.hentSimuleringResultat(behandling.getUuid()));
+        return restKlient.hentSimuleringResultat(behandling.getUuid());
     }
 
 }
