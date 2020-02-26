@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk;
 
 public enum Pleiegrad {
-    NULL,
+    INGEN,
     KONTINUERLIG_TILSYN,
     UTVIDET_TILSYN,
     INNLEGGELSE

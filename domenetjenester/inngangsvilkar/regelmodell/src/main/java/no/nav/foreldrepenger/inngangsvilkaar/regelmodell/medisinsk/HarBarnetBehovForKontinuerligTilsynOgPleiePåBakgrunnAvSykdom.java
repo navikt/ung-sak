@@ -18,7 +18,7 @@ public class HarBarnetBehovForKontinuerligTilsynOgPleiePåBakgrunnAvSykdom exten
 
         final var ikkeBehovForKontinuerligTilsynOgPleie = mellomregning.getPerioderMedPleieOgGrad()
             .stream()
-            .allMatch(p -> Pleiegrad.NULL.equals(p.getGrad()));
+            .allMatch(p -> Pleiegrad.INGEN.equals(p.getGrad()));
 
         if (ikkeBehovForKontinuerligTilsynOgPleie) {
             return nei(MedisinskeVilkårAvslagsårsaker.IKKE_BEHOV_FOR_KONTINUERLIG_PLEIE.toRuleReason());

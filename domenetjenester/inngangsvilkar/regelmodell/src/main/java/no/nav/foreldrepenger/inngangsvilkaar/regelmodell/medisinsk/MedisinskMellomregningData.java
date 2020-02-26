@@ -16,7 +16,7 @@ class MedisinskMellomregningData {
     MedisinskMellomregningData(MedisinskvilkårGrunnlag grunnlag) {
         Objects.requireNonNull(grunnlag);
         this.grunnlag = grunnlag;
-        this.pleietidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(grunnlag.getFom(), grunnlag.getTom(), Pleiegrad.NULL)));
+        this.pleietidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(grunnlag.getFom(), grunnlag.getTom(), Pleiegrad.INGEN)));
     }
 
     MedisinskvilkårGrunnlag getGrunnlag() {
@@ -42,7 +42,7 @@ class MedisinskMellomregningData {
     List<PleiePeriode> getPerioderUtenTilsynOgPleie() {
         return getPerioderMedPleieOgGrad()
             .stream()
-            .filter(it -> Pleiegrad.NULL.equals(it.getGrad()))
+            .filter(it -> Pleiegrad.INGEN.equals(it.getGrad()))
             .collect(Collectors.toList());
     }
 

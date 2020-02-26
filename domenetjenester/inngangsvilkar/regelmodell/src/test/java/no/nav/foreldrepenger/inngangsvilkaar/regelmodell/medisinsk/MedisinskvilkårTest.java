@@ -72,7 +72,7 @@ public class MedisinskvilkårTest {
         assertThat(utfall).isEqualTo(Resultat.NEI);
 
         assertThat(resultat.getPleieperioder()).hasSize(1);
-        assertThat(resultat.getPleieperioder().get(0).getGrad()).isEqualTo(Pleiegrad.NULL);
+        assertThat(resultat.getPleieperioder().get(0).getGrad()).isEqualTo(Pleiegrad.INGEN);
     }
 
     @Test

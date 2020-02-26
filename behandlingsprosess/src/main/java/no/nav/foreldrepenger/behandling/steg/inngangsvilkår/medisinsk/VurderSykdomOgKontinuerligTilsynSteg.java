@@ -127,7 +127,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
             ekstraVilkårresultat.getPleieperioder()
                 .stream()
-                .filter(it -> Pleiegrad.NULL.equals(it.getGrad()))
+                .filter(it -> Pleiegrad.INGEN.equals(it.getGrad()))
                 .forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFraOgMed(), it.getTilOgMed())
                     .medUtfall(Utfall.IKKE_OPPFYLT)
                     .medMerknadParametere(vilkårData.getMerknadParametere())
