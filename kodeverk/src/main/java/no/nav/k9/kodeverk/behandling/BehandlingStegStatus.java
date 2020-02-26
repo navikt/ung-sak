@@ -43,6 +43,8 @@ public enum BehandlingStegStatus implements Kodeverdi {
     ;
     private static final Set<BehandlingStegStatus> KAN_UTFØRE_STEG = new HashSet<>(Arrays.asList(STARTET, VENTER));
     private static final Set<BehandlingStegStatus> KAN_FORTSETTE_NESTE = new HashSet<>(Arrays.asList(UTFØRT, FREMOVERFØRT));
+    
+    // hvis oppdaterer SLUTT_STATUSER, husk Behandling.behandlingStegTilstand har en @Where annotation som matcher
     private static final Set<BehandlingStegStatus> SLUTT_STATUSER = new HashSet<>(Arrays.asList(AVBRUTT, UTFØRT, TILBAKEFØRT));
 
     private static final Map<String, BehandlingStegStatus> KODER = new LinkedHashMap<>();

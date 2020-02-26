@@ -28,6 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.SqlResultSetMapping;
@@ -91,7 +92,7 @@ import no.nav.vedtak.feil.FeilFactory;
 public class Behandling extends BaseEntitet {
 
     // Null safe
-    private static final Comparator<? extends BaseEntitet> COMPARATOR_OPPRETTET_TID = Comparator
+    private static final Comparator<BaseEntitet> COMPARATOR_OPPRETTET_TID = Comparator
         .comparing(BaseEntitet::getOpprettetTidspunkt, (a, b) -> {
             if (a != null && b != null) {
                 return a.compareTo(b);
@@ -103,7 +104,7 @@ public class Behandling extends BaseEntitet {
         });
 
     // Null safe
-    private static final Comparator<? extends BaseEntitet> COMPARATOR_ENDRET_TID = Comparator
+    private static final Comparator<BaseEntitet> COMPARATOR_ENDRET_TID = Comparator
         .comparing(BaseEntitet::getEndretTidspunkt, (a, b) -> {
             if (a != null && b != null) {
                 return a.compareTo(b);
@@ -113,6 +114,9 @@ public class Behandling extends BaseEntitet {
                 return a == null ? -1 : 1;
             }
         });
+
+    private static final Comparator<BaseEntitet> COMP_DESC_TID = COMPARATOR_OPPRETTET_TID.reversed()
+        .thenComparing(Comparator.nullsLast(COMPARATOR_ENDRET_TID).reversed());
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING")
@@ -130,7 +134,8 @@ public class Behandling extends BaseEntitet {
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true, mappedBy = "behandling")
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "behandling")
+    @OrderBy(value = "opprettetTidspunkt desc, endretTidspunkt desc nulls first")
     private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(1);
 
     @Convert(converter = BehandlingTypeKodeverdiConverter.class)
@@ -253,16 +258,6 @@ public class Behandling extends BaseEntitet {
      */
     public static Behandling.Builder fraTidligereBehandling(Behandling forrigeBehandling, BehandlingType behandlingType) {
         return new Builder(forrigeBehandling, behandlingType);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <V extends BaseEntitet> Comparator<V> compareOpprettetTid() {
-        return (Comparator<V>) COMPARATOR_OPPRETTET_TID;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <V extends BaseEntitet> Comparator<V> compareEndretTid() {
-        return (Comparator<V>) COMPARATOR_ENDRET_TID;
     }
 
     /**
@@ -410,12 +405,8 @@ public class Behandling extends BaseEntitet {
             return sisteAktive;
         }
 
-        Comparator<BehandlingStegTilstand> comparatorOpprettet = compareOpprettetTid();
-        Comparator<BehandlingStegTilstand> comparatorEndret = compareEndretTid();
-        Comparator<BehandlingStegTilstand> comparator = comparatorOpprettet.reversed().thenComparing(Comparator.nullsLast(comparatorEndret).reversed());
-
         // tar nyeste.
-        return behandlingStegTilstander.stream().sorted(comparator).findFirst();
+        return behandlingStegTilstander.stream().sorted(COMP_DESC_TID).findFirst();
     }
 
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand(BehandlingStegType stegType) {
@@ -437,8 +428,7 @@ public class Behandling extends BaseEntitet {
      */
     @Deprecated
     public Stream<BehandlingStegTilstand> getBehandlingStegTilstandHistorikk() {
-        Comparator<BehandlingStegTilstand> comparator = compareOpprettetTid();
-        return behandlingStegTilstander.stream().sorted(comparator);
+        return behandlingStegTilstander.stream().sorted(COMPARATOR_OPPRETTET_TID);
     }
 
     public BehandlingStegType getAktivtBehandlingSteg() {

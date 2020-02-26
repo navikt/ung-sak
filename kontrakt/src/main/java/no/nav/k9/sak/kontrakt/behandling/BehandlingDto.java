@@ -19,10 +19,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 
@@ -31,19 +34,23 @@ import no.nav.k9.sak.kontrakt.ResourceLink;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class BehandlingDto {
 
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "ansvarligSaksbehandler")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String ansvarligSaksbehandler;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "avsluttet")
     private LocalDateTime avsluttet;
 
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "behandlendeEnhetId")
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String behandlendeEnhetId;
 
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "behandlendeEnhetNavn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
@@ -59,16 +66,21 @@ public class BehandlingDto {
 
     @JsonProperty("behandlingPaaVent")
     private boolean behandlingPåVent;
+
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "behandlingsfristTid")
     private LocalDate behandlingsfristTid;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "behandlingsresultat")
     @Valid
     private BehandlingsresultatDto behandlingsresultat;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "endret")
     private LocalDateTime endret;
 
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "endretAvBrukernavn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
@@ -77,15 +89,18 @@ public class BehandlingDto {
     @JsonProperty(value = "erPaaVent")
     private boolean erPaaVent;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "fagsakId")
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long fagsakId;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "førsteÅrsak")
     @Valid
     private BehandlingÅrsakDto førsteÅrsak;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonAlias("fristBehandlingPåVent")
     @JsonProperty("fristBehandlingPaaVent")
     @Size(max = 20)
@@ -95,6 +110,7 @@ public class BehandlingDto {
     @JsonProperty(value = "gjeldendeVedtak")
     private boolean gjeldendeVedtak;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "id")
     @Min(0L)
     @Max(Long.MAX_VALUE)
@@ -114,35 +130,55 @@ public class BehandlingDto {
     @NotNull
     private LocalDateTime opprettet;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "originalVedtaksDato")
     private LocalDate originalVedtaksDato;
 
+    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty("sprakkode")
     @Valid
     private Språkkode språkkode;
 
+    @JsonProperty(value = "status", required = true)
+    @Valid
     private BehandlingStatus status;
 
     @JsonProperty(value = "toTrinnsBehandling")
     private boolean toTrinnsBehandling;
 
+    @JsonProperty(value = "type", required = true)
+    @Valid
+    @NotNull
     private BehandlingType type;
 
     @JsonProperty(value = "uuid", required = true)
     @NotNull
     private UUID uuid;
 
+    /** @deprecated bruk #venteÅrsak */
+    @Deprecated
+    @JsonInclude(value = Include.NON_NULL)
     @JsonAlias("venteÅrsakKode")
     @JsonProperty("venteArsakKode")
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String venteÅrsakKode;
 
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty("venteårsak")
+    @Valid
+    private Venteårsak venteårsak;
+
     @JsonProperty(value = "versjon", required = true)
     @NotNull
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long versjon;
+
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty(value = "stegTilstand")
+    @Valid
+    private BehandlingStegTilstandDto stegTilstand;
 
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
@@ -356,8 +392,9 @@ public class BehandlingDto {
         this.uuid = uuid;
     }
 
-    public void setVenteÅrsakKode(String venteÅrsakKode) {
-        this.venteÅrsakKode = venteÅrsakKode;
+    public void setVenteårsak(Venteårsak venteårsak) {
+        this.venteårsak = venteårsak;
+        this.venteÅrsakKode = venteårsak == null ? null : venteårsak.getKode();
     }
 
     public void setVersjon(Long versjon) {
@@ -366,5 +403,9 @@ public class BehandlingDto {
 
     void setBehandlingKøet(boolean behandlingKøet) {
         this.behandlingKøet = behandlingKøet;
+    }
+
+    public void setBehandlingStegTilstand(BehandlingStegTilstandDto stegTilstand) {
+        this.stegTilstand = stegTilstand;
     }
 }

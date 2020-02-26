@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygd;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
@@ -15,16 +16,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdAnnulert;
-import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
-import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjenesteImpl;
-import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdInnvilget;
-import no.nav.foreldrepenger.domene.vedtak.infotrygd.Innhold;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedDto;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -48,7 +45,7 @@ public class InfotrygdHendelseTjenesteImplTest {
     @Mock
     private OidcRestClient oidcRestClient;
 
-    private InfotrygdHendelseTjenesteImpl tjeneste;
+    private InfotrygdHendelseTjeneste tjeneste;
 
     private static final String BASE_URL_FEED = "https://infotrygd-hendelser-api-t10.nais.preprod.local/infotrygd/hendelser";
     private URI expectedStartUri;
@@ -56,7 +53,7 @@ public class InfotrygdHendelseTjenesteImplTest {
 
     @Before
     public void setUp() {
-        tjeneste = new InfotrygdHendelseTjenesteImpl(endpoint, oidcRestClient);
+        tjeneste = new InfotrygdHendelseTjeneste(endpoint, oidcRestClient);
         String expectedQueryParams = "?fomDato=2018-05-14T08:15:30Z&aktorId=9000000001234";
         String expectedQueryParamsEncoded = konverterTilUTF8(expectedQueryParams);
         expectedStartUri = URI.create(BASE_URL_FEED + expectedQueryParamsEncoded);
@@ -68,12 +65,13 @@ public class InfotrygdHendelseTjenesteImplTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void skal_lese_fra_infotrygd_feed() {
 
         //Arrange
         FeedDto feed = lagTestData();
         LocalDateTime opprettetTidspunkt = LocalDateTime.of(2018, 5, 14, 10, 15, 30, 294);
-        when(oidcRestClient.get(expectedStartUri, FeedDto.class)).thenReturn(feed);
+        when(oidcRestClient.get(any(), any())).thenReturn(feed);
         when(behandling.getAktørId()).thenReturn(aktørId);
         when(aktørId.getId()).thenReturn("9000000001234");
         when(behandling.getBehandlingStegTilstandHistorikk()).thenReturn(Stream.of(tilstand));
@@ -81,7 +79,7 @@ public class InfotrygdHendelseTjenesteImplTest {
         when(tilstand.getOpprettetTidspunkt()).thenReturn(opprettetTidspunkt);
 
         //Act
-        List<InfotrygdHendelse> infotrygdHendelse = tjeneste.hentHendelsesListFraInfotrygdFeed(behandling);
+        List<InfotrygdHendelse> infotrygdHendelse = tjeneste.hentHendelsesListFraInfotrygdFeed(behandling, opprettetTidspunkt.toLocalDate());
 
         //Assert
         assertThat(infotrygdHendelse).hasSize(2);
