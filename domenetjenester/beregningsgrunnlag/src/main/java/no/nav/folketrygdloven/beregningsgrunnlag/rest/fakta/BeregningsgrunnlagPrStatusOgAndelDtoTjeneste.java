@@ -19,6 +19,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.input.BeregningsgrunnlagInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.kontrollerfakta.FordelBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.SammenligningsgrunnlagPrStatus;
 import no.nav.foreldrepenger.domene.iay.modell.InntektFilter;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
@@ -31,15 +32,17 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagPrStatusOgAnd
 public class BeregningsgrunnlagPrStatusOgAndelDtoTjeneste {
 
     private static final int MND_I_ÅR = 12;
-    private BeregningsgrunnlagDtoUtil dtoUtil;
-    private FordelBeregningsgrunnlagTjeneste refusjonOgGraderingTjeneste;
     private static final Map<SammenligningsgrunnlagType, AktivitetStatus> SAMMENLIGNINGSGRUNNLAGTYPE_AKTIVITETSTATUS_MAP;
+
     static {
         SAMMENLIGNINGSGRUNNLAGTYPE_AKTIVITETSTATUS_MAP = Map.of(
             SammenligningsgrunnlagType.SAMMENLIGNING_AT, AktivitetStatus.ARBEIDSTAKER,
             SammenligningsgrunnlagType.SAMMENLIGNING_FL, AktivitetStatus.FRILANSER,
             SammenligningsgrunnlagType.SAMMENLIGNING_SN, AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
     }
+
+    private BeregningsgrunnlagDtoUtil dtoUtil;
+    private FordelBeregningsgrunnlagTjeneste refusjonOgGraderingTjeneste;
 
     BeregningsgrunnlagPrStatusOgAndelDtoTjeneste() {
         // Hibernate
@@ -51,6 +54,78 @@ public class BeregningsgrunnlagPrStatusOgAndelDtoTjeneste {
                                                         FordelBeregningsgrunnlagTjeneste refusjonOgGraderingTjeneste) {
         this.dtoUtil = dtoUtil;
         this.refusjonOgGraderingTjeneste = refusjonOgGraderingTjeneste;
+    }
+
+    private static boolean skalGrunnlagFastsettes(BeregningsgrunnlagInput input, BeregningsgrunnlagPrStatusOgAndel andel) {
+        if (finnesIngenSammenligningsgrunnlagPrStatus(input)) {
+            return skalGrunnlagFastsettesForGammeltSammenligningsgrunnlag(input, andel, input.getBeregningsgrunnlag().getSammenligningsgrunnlag());
+        }
+
+        Optional<SammenligningsgrunnlagPrStatus> sammenligningsgrunnlagIkkeSplittet = input.getBeregningsgrunnlag().getSammenligningsgrunnlagPrStatusListe().stream()
+            .filter(s -> s.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_ATFL_SN))
+            .findAny();
+
+        if (sammenligningsgrunnlagIkkeSplittet.isPresent()) {
+            return skalGrunnlagFastsettesForGammeltSammenligningsgrunnlag(input, andel, sammenligningsgrunnlagIkkeSplittet.get());
+        }
+
+        if (AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE.equals(andel.getAktivitetStatus())) {
+            return skalGrunnlagFastsettesForSN(input, andel);
+        }
+
+        return input.getBeregningsgrunnlag().getSammenligningsgrunnlagPrStatusListe().stream()
+            .filter(s -> SAMMENLIGNINGSGRUNNLAGTYPE_AKTIVITETSTATUS_MAP.get(s.getSammenligningsgrunnlagType()).equals(andel.getAktivitetStatus()))
+            .anyMatch(s -> erAvvikStørreEnn25Prosent(BigDecimal.valueOf(s.getAvvikPromille())));
+
+    }
+
+    private static boolean finnesIngenSammenligningsgrunnlagPrStatus(BeregningsgrunnlagInput input) {
+        return input.getBeregningsgrunnlag().getSammenligningsgrunnlagPrStatusListe().isEmpty();
+    }
+
+    private static boolean skalGrunnlagFastsettesForSN(BeregningsgrunnlagInput input, BeregningsgrunnlagPrStatusOgAndel andel) {
+        Optional<SammenligningsgrunnlagPrStatus> sammenligningsgrunnlagPrStatus = input.getBeregningsgrunnlag().getSammenligningsgrunnlagPrStatusListe().stream()
+            .filter(s -> AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE.equals(SAMMENLIGNINGSGRUNNLAGTYPE_AKTIVITETSTATUS_MAP.get(s.getSammenligningsgrunnlagType())))
+            .findAny();
+        return sammenligningsgrunnlagPrStatus.map(prStatus -> erAvvikStørreEnn25Prosent(BigDecimal.valueOf(prStatus.getAvvikPromille()))).orElseGet(() -> Boolean.TRUE.equals(andel.getNyIArbeidslivet()));
+    }
+
+    private static boolean skalGrunnlagFastsettesForGammeltSammenligningsgrunnlag(BeregningsgrunnlagInput input, BeregningsgrunnlagPrStatusOgAndel andel, SammenligningsgrunnlagPrStatus sammenligningsgrunnlagPrStatus) {
+        if (finnesSelvstendigNæringsdrivendeAndel(input)) {
+            if (andel.getAktivitetStatus().erSelvstendigNæringsdrivende()) {
+                return erAvvikStørreEnn25Prosent(BigDecimal.valueOf(sammenligningsgrunnlagPrStatus.getAvvikPromille())) || Boolean.TRUE.equals(andel.getNyIArbeidslivet());
+            } else {
+                return false;
+            }
+        }
+        return erAvvikStørreEnn25Prosent(BigDecimal.valueOf(sammenligningsgrunnlagPrStatus.getAvvikPromille()));
+    }
+
+    private static boolean skalGrunnlagFastsettesForGammeltSammenligningsgrunnlag(BeregningsgrunnlagInput input, BeregningsgrunnlagPrStatusOgAndel andel, Sammenligningsgrunnlag sammenligningsgrunnlag) {
+        if (finnesSelvstendigNæringsdrivendeAndel(input)) {
+            if (andel.getAktivitetStatus().erSelvstendigNæringsdrivende()) {
+                return finnesSammenligningsgrunnlagOgErAvvikStørreEnn25Prosent(sammenligningsgrunnlag) || Boolean.TRUE.equals(andel.getNyIArbeidslivet());
+            } else {
+                return false;
+            }
+        }
+        return finnesSammenligningsgrunnlagOgErAvvikStørreEnn25Prosent(sammenligningsgrunnlag);
+    }
+
+    private static boolean finnesSammenligningsgrunnlagOgErAvvikStørreEnn25Prosent(Sammenligningsgrunnlag sammenligningsgrunnlag) {
+        if (sammenligningsgrunnlag != null) {
+            return erAvvikStørreEnn25Prosent(BigDecimal.valueOf(sammenligningsgrunnlag.getAvvikPromille()));
+        }
+        return false;
+    }
+
+    private static boolean erAvvikStørreEnn25Prosent(BigDecimal avvikPromille) {
+        return avvikPromille.compareTo(BigDecimal.valueOf(250)) > 0;
+    }
+
+    private static boolean finnesSelvstendigNæringsdrivendeAndel(BeregningsgrunnlagInput input) {
+        List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndel = input.getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0).getBeregningsgrunnlagPrStatusOgAndelList();
+        return beregningsgrunnlagPrStatusOgAndel.stream().anyMatch(a -> a.getAktivitetStatus().erSelvstendigNæringsdrivende());
     }
 
     List<BeregningsgrunnlagPrStatusOgAndelDto> lagBeregningsgrunnlagPrStatusOgAndelDto(BeregningsgrunnlagInput input,
@@ -123,28 +198,10 @@ public class BeregningsgrunnlagPrStatusOgAndelDtoTjeneste {
                 });
         } else if (andel.getAktivitetStatus().erFrilanser()) {
             InntektForAndelTjeneste.finnSnittAvFrilansinntektIBeregningsperioden(ref.getAktørId(),
-                    iayGrunnlag, andel, skjæringstidspunkt)
+                iayGrunnlag, andel, skjæringstidspunkt)
                 .ifPresent(dto::setBelopPrMndEtterAOrdningen);
         }
         return dto;
-    }
-
-    private boolean skalGrunnlagFastsettes(BeregningsgrunnlagInput input, BeregningsgrunnlagPrStatusOgAndel andel){
-        Optional<SammenligningsgrunnlagPrStatus> sammenligningsgrunnlagSomIkkeErSplittet = input.getBeregningsgrunnlag().getSammenligningsgrunnlagPrStatusListe().stream()
-            .filter(s -> s.getSammenligningsgrunnlagType().equals(SammenligningsgrunnlagType.SAMMENLIGNING_ATFL_SN))
-            .findAny();
-
-        if (erAndelForArbeidstakerEllerFrilanser(andel) && sammenligningsgrunnlagSomIkkeErSplittet.isPresent()){
-            return BigDecimal.valueOf(sammenligningsgrunnlagSomIkkeErSplittet.get().getAvvikPromille()).compareTo(BigDecimal.valueOf(250)) > 0;
-        }
-
-        return input.getBeregningsgrunnlag().getSammenligningsgrunnlagPrStatusListe().stream()
-            .filter(s -> SAMMENLIGNINGSGRUNNLAGTYPE_AKTIVITETSTATUS_MAP.get(s.getSammenligningsgrunnlagType()).equals(andel.getAktivitetStatus()))
-            .anyMatch(s -> BigDecimal.valueOf(s.getAvvikPromille()).compareTo(BigDecimal.valueOf(250)) > 0);
-    }
-
-    private boolean erAndelForArbeidstakerEllerFrilanser(BeregningsgrunnlagPrStatusOgAndel andel){
-        return andel.getAktivitetStatus().equals(AktivitetStatus.ARBEIDSTAKER) || andel.getAktivitetStatus().equals(AktivitetStatus.FRILANSER);
     }
 
     private void settVerdierFraAndreGrunnlag(BeregningsgrunnlagPrStatusOgAndel andel,
@@ -154,7 +211,6 @@ public class BeregningsgrunnlagPrStatusOgAndelDtoTjeneste {
         faktaAndel.ifPresentOrElse(a -> settHvisFastsattAvSaksbehandler(andel, dto, a), () -> settRedigerbareVerdierIFaktaOmBeregning(andel, dto));
         overstyrtAndel.ifPresentOrElse(a -> settHvisOverstyrt(andel, dto, a), () -> dto.setOverstyrtPrAar(andel.getOverstyrtPrÅr()));
     }
-
 
     private void settHvisOverstyrt(BeregningsgrunnlagPrStatusOgAndel andel, BeregningsgrunnlagPrStatusOgAndelDto dto, BeregningsgrunnlagPrStatusOgAndel a) {
         if (a.getOverstyrtPrÅr() != null) {
