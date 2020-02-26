@@ -76,7 +76,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
         ÅpenDatoIntervallEntitet periodeVL = periodeVLOpt.get();
         Collection<Ytelse> ytelseList = hentRegisterDataFraInfotrygd(behandlingId, behandling.getAktørId(), periodeVL);
 
-        List<InfotrygdHendelse> hendelseListe = infotrygdHendelseTjeneste.hentHendelsesListFraInfotrygdFeed(behandling);
+        List<InfotrygdHendelse> hendelseListe = infotrygdHendelseTjeneste.hentHendelsesListFraInfotrygdFeed(behandling, behandlingVedtak.getVedtaksdato());
         boolean finnesMatchMedInnvilIRegisterData = sjekkMotRegisterData(hendelseListe, ytelseList);
         if (finnesMatchMedInnvilIRegisterData) {
             log.info("Det var en hendelse av type ANNULERT fra infotrygd feed som korrelerer med en INNVILGET ytelse i registerdata");

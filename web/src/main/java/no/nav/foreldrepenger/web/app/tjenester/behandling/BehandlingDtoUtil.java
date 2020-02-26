@@ -17,6 +17,7 @@ import no.nav.foreldrepenger.web.server.jetty.JettyWebKonfigurasjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingStegTilstandDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 
@@ -36,12 +37,9 @@ public class BehandlingDtoUtil {
         return Optional.empty();
     }
 
-    private static Optional<String> getVenteÅrsak(Behandling behandling) {
+    private static Optional<Venteårsak> getVenteårsak(Behandling behandling) {
         Venteårsak venteårsak = behandling.getVenteårsak();
-        if (venteårsak != null) {
-            return Optional.of(venteårsak.getKode());
-        }
-        return Optional.empty();
+        return Optional.ofNullable(venteårsak);
     }
 
     private static List<BehandlingÅrsakDto> lagBehandlingÅrsakDto(Behandling behandling) {
@@ -69,11 +67,15 @@ public class BehandlingDtoUtil {
         dto.setBehandlingsfristTid(behandling.getBehandlingstidFrist());
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
         getFristDatoBehandlingPåVent(behandling).ifPresent(dto::setFristBehandlingPåVent);
-        getVenteÅrsak(behandling).ifPresent(dto::setVenteÅrsakKode);
+        getVenteårsak(behandling).ifPresent(dto::setVenteårsak);
         dto.setOriginalVedtaksDato(behandling.getOriginalVedtaksDato());
         dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
         dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));
+        behandling.getBehandlingStegTilstand().ifPresent(st -> {
+            dto.setBehandlingStegTilstand(new BehandlingStegTilstandDto(st.getBehandlingSteg(), st.getBehandlingStegStatus(), st.getOpprettetTidspunkt()));
+        });
+
     }
 
     static Optional<BehandlingÅrsakDto> førsteÅrsak(Behandling behandling) {
@@ -93,15 +95,15 @@ public class BehandlingDtoUtil {
     static ResourceLink get(String path, String rel, Object dto) {
         return ResourceLink.get(getApiPath(path), rel, dto);
     }
-    
+
     static ResourceLink getFraMap(String path, String rel, Map<String, String> queryParams) {
         return ResourceLink.get(getApiPath(path), rel, queryParams);
     }
-    
+
     static ResourceLink post(String path, String rel, Object dto) {
         return ResourceLink.post(getApiPath(path), rel, dto);
     }
-    
+
     private static String getApiPath() {
         String contextPath = JettyWebKonfigurasjon.CONTEXT_PATH;
         String apiUri = ApplicationConfig.API_URI;

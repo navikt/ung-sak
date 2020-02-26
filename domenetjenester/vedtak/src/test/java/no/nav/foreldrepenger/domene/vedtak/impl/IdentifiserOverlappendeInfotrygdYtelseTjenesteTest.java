@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.domene.vedtak.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -991,7 +992,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
             beregningsresultat.addBeregningsresultatPeriode(beregningsresultatPeriode);
         }
         
-        Mockito.when(beregningsresultatRepository.hentUtbetBeregningsresultat(Mockito.any())).thenReturn(Optional.of(beregningsresultat));
+        Mockito.when(beregningsresultatRepository.hentUtbetBeregningsresultat(any())).thenReturn(Optional.of(beregningsresultat));
     }
 
     private void lagBeregningsresultatAndel(BeregningsresultatPeriode beregningsresultatPeriode) {
@@ -1007,12 +1008,12 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
 
     private void opprettOgMockFellesTjenester(List<InfotrygdHendelse> hendelser, AktørYtelse aktørYtelse) {
         tjeneste = new IdentifiserOverlappendeInfotrygdYtelseTjeneste(beregningsresultatRepository, infotrygdHendelseTjeneste, inntektArbeidYtelseTjeneste, overlappRepository);
-        when(infotrygdHendelseTjeneste.hentHendelsesListFraInfotrygdFeed(behandling)).thenReturn(hendelser);
+        when(infotrygdHendelseTjeneste.hentHendelsesListFraInfotrygdFeed(any(), any())).thenReturn(hendelser);
 
         InntektArbeidYtelseGrunnlag iayg = Mockito.mock(InntektArbeidYtelseGrunnlag.class);
-        when(iayg.getAktørYtelseFraRegister(Mockito.any())).thenReturn(Optional.of(aktørYtelse));
+        when(iayg.getAktørYtelseFraRegister(any())).thenReturn(Optional.of(aktørYtelse));
 
-        when(inntektArbeidYtelseTjeneste.finnGrunnlag(Mockito.any())).thenReturn(Optional.of(iayg));
+        when(inntektArbeidYtelseTjeneste.finnGrunnlag(any())).thenReturn(Optional.of(iayg));
     }
 
 }
