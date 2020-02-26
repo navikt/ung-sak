@@ -71,7 +71,7 @@ public class BehandlingDtoTjenesteImplTest {
         UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
 
         assertThat(getLinkRel(dto)).contains("simuleringResultat");
-        assertThat(getLinkHref(dto)).contains(URI.create("/oppdrag/api/simulering/resultat-uten-inntrekk"));
+        assertThat(getLinkHref(dto)).contains(URI.create("/k9/oppdrag/api/simulering/resultat-uten-inntrekk"));
     }
 
     @Test

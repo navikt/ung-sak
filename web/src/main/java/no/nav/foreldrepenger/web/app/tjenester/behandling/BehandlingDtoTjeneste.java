@@ -320,11 +320,9 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        // fpoppdrag.override.proxy.url brukes ved testing lokalt
-        BehandlingIdDto idDto = new BehandlingIdDto(behandling.getId());
         String fpoppdragOverrideUrl = PropertyUtil.getProperty("fpoppdrag.override.proxy.url");
-        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/oppdrag/api";
-        return Optional.of(ResourceLink.post(baseUurl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", idDto));
+        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/k9/oppdrag/api";
+        return Optional.of(ResourceLink.post(baseUurl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", behandling.getUuid()));
     }
 
     private Optional<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
