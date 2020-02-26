@@ -163,10 +163,10 @@ spec:
       value: http://k9-formidling/k9-formidling/api/saksbehandlertekst/lagre-saksbehandler-tekst
     - name: FPFORMIDLING_HENTSAKSBEHANDLERTEKST_URL
       value: http://k9-formidling/k9-formidling/api/saksbehandlertekst/hent-saksbehandler-tekst
-    - name: FPOPPDRAG_SIMULERINGRESULTAT_URL
-      value: https://k9-oppdrag/oppdrag/api/simulering/resultat
     - name: FPOPPDRAG_OVERRIDE_PROXY_URL
       value: https://app-q1.adeo.no/k9/oppdrag
+    - name: URL_K9OPPDRAG
+      value: http://k9-oppdrag/k9/oppdrag/api
 
     # Web services
     - name: AKTOER_V2_URL
