@@ -88,7 +88,7 @@ public class DefaultSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
                 if (spesifiktVilkår.isPresent() && førstePeriode.isPresent()) {
                     final var vilkårPeriode = spesifiktVilkår.get().getPerioder()
                         .stream()
-                        .filter(it -> it.getPeriode().overlapper(førstePeriode.get()))
+                        .filter(it -> it.getPeriode().hengerSammen(førstePeriode.get()))
                         .map(VilkårPeriode::getPeriode)
                         .min(DatoIntervallEntitet::compareTo);
 

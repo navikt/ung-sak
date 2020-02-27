@@ -69,7 +69,7 @@ public class VurderLøpendeMedlemskapStegTest {
     private FagsakRepository fagsakRepository = provider.getFagsakRepository();
     private Repository repository = repositoryRule.getRepository();
 
-    private VurderLøpendeMedlemskapSteg steg;
+    private VurderMedlemskapSteg steg;
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -79,7 +79,7 @@ public class VurderLøpendeMedlemskapStegTest {
 
     @Before
     public void setUp() {
-        steg = new VurderLøpendeMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider);
+        steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider);
     }
 
     @Test

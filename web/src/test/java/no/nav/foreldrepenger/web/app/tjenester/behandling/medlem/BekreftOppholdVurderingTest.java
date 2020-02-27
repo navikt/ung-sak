@@ -19,6 +19,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -82,13 +83,13 @@ public class BekreftOppholdVurderingTest {
         bekreftOppholdOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto));
 
         // Assert
-        VurdertMedlemskap vurdertMedlemskap = getVurdertMedlemskap(behandling.getId(), repositoryProvider);
-        assertThat(vurdertMedlemskap.getOppholdsrettVurdering()).isTrue();
+        var vurdertMedlemskap = getVurdertMedlemskap(behandling.getId(), repositoryProvider);
+        assertThat(vurdertMedlemskap.getPerioder().iterator().next().getOppholdsrettVurdering()).isTrue();
     }
 
-    private VurdertMedlemskap getVurdertMedlemskap(Long behandlingId, BehandlingRepositoryProvider repositoryProvier) {
-        MedlemskapRepository medlemskapRepository = repositoryProvier.getMedlemskapRepository();
-        Optional<VurdertMedlemskap> vurdertMedlemskap = medlemskapRepository.hentVurdertMedlemskap(behandlingId);
+    private VurdertMedlemskapPeriodeEntitet getVurdertMedlemskap(Long behandlingId, BehandlingRepositoryProvider repositoryProvider) {
+        MedlemskapRepository medlemskapRepository = repositoryProvider.getMedlemskapRepository();
+        Optional<VurdertMedlemskapPeriodeEntitet> vurdertMedlemskap = medlemskapRepository.hentVurdertLøpendeMedlemskap(behandlingId);
         return vurdertMedlemskap.orElse(null);
     }
 
@@ -121,8 +122,8 @@ public class BekreftOppholdVurderingTest {
 
         // Assert
         Long behandlingId = behandling.getId();
-        VurdertMedlemskap vurdertMedlemskap = getVurdertMedlemskap(behandlingId, repositoryProvider);
-        assertThat(vurdertMedlemskap.getLovligOppholdVurdering()).isTrue();
+        var vurdertMedlemskap = getVurdertMedlemskap(behandlingId, repositoryProvider);
+        assertThat(vurdertMedlemskap.getPerioder().iterator().next().getLovligOppholdVurdering()).isTrue();
     }
 
     private HistorikkTjenesteAdapter lagMockHistory() {

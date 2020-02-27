@@ -36,15 +36,15 @@ public class MedlemskapAksjonspunktTjeneste {
     }
 
     public void aksjonspunktBekreftMeldlemVurdering(Long behandlingId, BekreftErMedlemVurderingAksjonspunkt adapter) {
-        new BekreftErMedlemVurderingAksjonspunktOppdaterer(repositoryProvider).oppdater(behandlingId, adapter);
+        new BekreftErMedlemVurderingAksjonspunktOppdaterer(repositoryProvider, skjæringstidspunktTjeneste).oppdater(behandlingId, adapter);
     }
 
     public void aksjonspunktBekreftOppholdVurdering(Long behandlingId, BekreftOppholdVurderingAksjonspunktDto adapter) {
-        new BekreftOppholdsrettVurderingAksjonspunkt(repositoryProvider).oppdater(behandlingId, adapter);
+        new BekreftOppholdsrettVurderingAksjonspunkt(repositoryProvider, skjæringstidspunktTjeneste).oppdater(behandlingId, adapter);
     }
 
     public void aksjonspunktBekreftBosattVurdering(Long behandlingId, BekreftBosattVurderingAksjonspunktDto adapter) {
-        new BekreftBosattVurderingAksjonspunkt(repositoryProvider).oppdater(behandlingId, adapter);
+        new BekreftBosattVurderingAksjonspunkt(repositoryProvider, skjæringstidspunktTjeneste).oppdater(behandlingId, adapter);
     }
 
     public void aksjonspunktAvklarFortsattMedlemskap(Long behandlingId, AvklarFortsattMedlemskapAksjonspunktDto adapter) {

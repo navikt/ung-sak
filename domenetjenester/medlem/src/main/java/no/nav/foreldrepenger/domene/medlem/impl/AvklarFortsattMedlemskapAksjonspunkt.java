@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.domene.medlem.impl;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -35,28 +34,24 @@ public class AvklarFortsattMedlemskapAksjonspunkt {
     public void oppdater(Long behandlingId, AvklarFortsattMedlemskapAksjonspunktDto adapter) {
         List<BekreftedePerioderAdapter> perioder = adapter.getPerioder();
         VurdertMedlemskapPeriodeEntitet.Builder vurdertMedlemskapPeriode = medlemskapRepository.hentBuilderFor(behandlingId);
-        LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
 
         perioder.forEach(vurderingsperiode -> {
-            // TODO(OJR) ønsker ikke og se på denne perioden hvis den blir sendt ned fra GUI
-            if (!skjæringstidspunkt.equals(vurderingsperiode.getVurderingsdato())) {
-                VurdertLøpendeMedlemskapBuilder løpendeBuilder = vurdertMedlemskapPeriode.getBuilderFor(vurderingsperiode.getVurderingsdato());
-                List<String> aksjonspunkter = vurderingsperiode.getAksjonspunkter();
-                if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD.getKode())) {
-                    håndterAksjonspunkt5019(løpendeBuilder, vurderingsperiode, behandlingId);
-                }
-                if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT.getKode())) {
-                    håndterAksjonspunkt5023(løpendeBuilder, vurderingsperiode, behandlingId);
-                }
-                if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT.getKode())) {
-                    håndterAksjonspunkt5020(løpendeBuilder, vurderingsperiode, behandlingId);
-                }
-                if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE.getKode())) {
-                    håndterAksjonspunkt5021(løpendeBuilder, vurderingsperiode, behandlingId);
-                }
-                løpendeBuilder.medBegrunnelse(vurderingsperiode.getBegrunnelse());
-                vurdertMedlemskapPeriode.leggTil(løpendeBuilder);
+            VurdertLøpendeMedlemskapBuilder løpendeBuilder = vurdertMedlemskapPeriode.getBuilderFor(vurderingsperiode.getVurderingsdato());
+            List<String> aksjonspunkter = vurderingsperiode.getAksjonspunkter();
+            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD.getKode())) {
+                håndterAksjonspunkt5019(løpendeBuilder, vurderingsperiode, behandlingId);
             }
+            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT.getKode())) {
+                håndterAksjonspunkt5023(løpendeBuilder, vurderingsperiode, behandlingId);
+            }
+            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT.getKode())) {
+                håndterAksjonspunkt5020(løpendeBuilder, vurderingsperiode, behandlingId);
+            }
+            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE.getKode())) {
+                håndterAksjonspunkt5021(løpendeBuilder, vurderingsperiode, behandlingId);
+            }
+            løpendeBuilder.medBegrunnelse(vurderingsperiode.getBegrunnelse());
+            vurdertMedlemskapPeriode.leggTil(løpendeBuilder);
         });
         medlemskapRepository.lagreLøpendeMedlemskapVurdering(behandlingId, vurdertMedlemskapPeriode.build());
     }

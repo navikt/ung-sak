@@ -97,7 +97,7 @@ public class HenleggBehandlingTjeneste {
 
     private void sendHenleggelsesbrev(long behandlingId, HistorikkAktør aktør) {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, DokumentMalType.HENLEGG_BEHANDLING_DOK);
-        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, aktør, false);
+        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, aktør);
     }
 
     private void lagHistorikkinnslagForHenleggelse(Long behandlingsId, BehandlingResultatType aarsak, String begrunnelse, HistorikkAktør aktør) {

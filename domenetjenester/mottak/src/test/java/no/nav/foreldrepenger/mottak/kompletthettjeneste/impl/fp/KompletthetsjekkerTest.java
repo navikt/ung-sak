@@ -119,7 +119,7 @@ public class KompletthetsjekkerTest {
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isFalse();
         assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(LocalDate.now().plusWeeks(3));
-        verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any(), Mockito.anyBoolean());
+        verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any());
 
         // Act 2
         stp = LocalDate.now().plusWeeks(3);
@@ -128,7 +128,7 @@ public class KompletthetsjekkerTest {
         // Assert
         assertThat(kompletthetResultat2.erOppfylt()).isFalse();
         assertThat(kompletthetResultat2.getVentefrist().toLocalDate()).isEqualTo(stp);
-        verify(dokumentBestillerApplikasjonTjenesteMock, times(2)).bestillDokument(any(), any(), Mockito.anyBoolean());
+        verify(dokumentBestillerApplikasjonTjenesteMock, times(2)).bestillDokument(any(), any());
     }
 
     @Test
@@ -145,7 +145,7 @@ public class KompletthetsjekkerTest {
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isFalse();
         assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(LocalDate.now().plusWeeks(3));
-        verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any(), Mockito.anyBoolean());
+        verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any());
     }
 
     @Test

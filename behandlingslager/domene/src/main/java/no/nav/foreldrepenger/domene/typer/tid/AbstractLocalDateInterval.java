@@ -142,6 +142,10 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
         return tilIntervall().overlaps(getIntervall(periode.getFomDato(), periode.getTomDato()));
     }
 
+    public boolean hengerSammen(AbstractLocalDateInterval periode) {
+        return tilIntervall().overlaps(getIntervall(periode.getFomDato(), periode.getTomDato()));
+    }
+
     public int antallArbeidsdager() {
         if (getTomDato().isEqual(TIDENES_ENDE)) {
             throw new IllegalStateException("Både fra og med og til og med dato må være satt for å regne ut arbeidsdager.");

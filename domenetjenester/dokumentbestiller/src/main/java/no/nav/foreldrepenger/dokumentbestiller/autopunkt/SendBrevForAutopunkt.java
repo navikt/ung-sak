@@ -43,7 +43,7 @@ public class SendBrevForAutopunkt {
         var dokumentMalType = DokumentMalType.INNTEKTSMELDING_FOR_TIDLIG_DOK;
         if (!harSendtBrevForMal(behandling.getId(), dokumentMalType)) {
             BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), dokumentMalType);
-            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN, false);
+            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
         }
     }
 
@@ -52,7 +52,7 @@ public class SendBrevForAutopunkt {
         if (!harSendtBrevForMal(behandling.getId(), dokumentMalType) &&
             erSøktPåPapir(behandling)) {
             BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), dokumentMalType);
-            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN, false);
+            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
         }
         oppdaterBehandlingMedNyFrist(behandling.getId(), beregnBehandlingstidsfrist(ap, behandling));
     }
@@ -62,7 +62,7 @@ public class SendBrevForAutopunkt {
         if (!harSendtBrevForMal(behandling.getId(), dokumentMalType) &&
             skalSendeForlengelsesbrevAutomatisk()) { //NOSONAR
             BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), dokumentMalType);
-            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN, false);
+            dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
         }
         oppdaterBehandlingMedNyFrist(behandling.getId(), beregnBehandlingstidsfrist(ap, behandling));
     }

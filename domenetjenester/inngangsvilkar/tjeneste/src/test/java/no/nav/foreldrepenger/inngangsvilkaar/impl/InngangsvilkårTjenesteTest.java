@@ -23,11 +23,6 @@ public class InngangsvilkårTjenesteTest {
     InngangsvilkårTjeneste inngangsvilkårTjeneste;
 
     @Test
-    public void skal_slå_opp_inngangsvilkår() {
-        sjekkVilkårKonfigurasjon(VilkårType.MEDLEMSKAPSVILKÅRET, FagsakYtelseType.FORELDREPENGER, false);
-    }
-
-    @Test
     public void skal_slå_opp_inngangsvilkår_meg_fagsak_ytelse_type_der_inngangsvilkåret_er_forskjellig_pr_ytelse(){
         sjekkVilkårKonfigurasjon(VilkårType.OPPTJENINGSPERIODEVILKÅR, FagsakYtelseType.SVANGERSKAPSPENGER, true);
         sjekkVilkårKonfigurasjon(VilkårType.OPPTJENINGSPERIODEVILKÅR, FagsakYtelseType.FORELDREPENGER, true);

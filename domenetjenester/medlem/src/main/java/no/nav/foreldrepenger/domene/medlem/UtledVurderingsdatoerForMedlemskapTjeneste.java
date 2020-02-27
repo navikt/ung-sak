@@ -31,13 +31,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.Statsb
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.domene.medlem.impl.MedlemEndringssjekker;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class UtledVurderingsdatoerForMedlemskapTjeneste {
@@ -50,10 +50,10 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
     @Inject
     public UtledVurderingsdatoerForMedlemskapTjeneste(BehandlingRepository behandlingRepository,
-                                                          MedlemskapRepository medlemskapRepository,
-                                                          @Any Instance<MedlemEndringssjekker> alleEndringssjekkere,
-                                                          PersonopplysningTjeneste personopplysningTjeneste,
-                                                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                                      MedlemskapRepository medlemskapRepository,
+                                                      @Any Instance<MedlemEndringssjekker> alleEndringssjekkere,
+                                                      PersonopplysningTjeneste personopplysningTjeneste,
+                                                      SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.alleEndringssjekkere = alleEndringssjekkere;
         this.medlemskapRepository = medlemskapRepository;
@@ -65,12 +65,14 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         //CDI
     }
 
-    /** Utleder vurderingsdatoer for:
+    /**
+     * Utleder vurderingsdatoer for:
      * - utledVurderingsdatoerForPersonopplysninger
      * - utledVurderingsdatoerForBortfallAvInntekt
      * - utledVurderingsdatoerForMedlemskap
-     *
+     * <p>
      * Ser bare på datoer etter skjæringstidspunktet
+     *
      * @param behandlingId id i databasen
      * @return datoer med diff i medlemskap
      */
@@ -81,12 +83,13 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + revurdering.getFagsakYtelseType().getKode()));
         LocalDate utledetSkjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(revurdering.getId()).getUtledetSkjæringstidspunkt();
         Set<LocalDate> datoer = new HashSet<>();
+        datoer.add(utledetSkjæringstidspunkt);
 
         datoer.addAll(utledVurderingsdatoerForTPS(revurdering, utledetSkjæringstidspunkt).keySet());
         datoer.addAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker).keySet());
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
-        return datoer.stream().filter(d -> d.isAfter(utledetSkjæringstidspunkt)).collect(Collectors.toSet());
+        return datoer.stream().filter(d -> d.isAfter(utledetSkjæringstidspunkt) || d.equals(utledetSkjæringstidspunkt)).collect(Collectors.toSet());
     }
 
     Map<LocalDate, Set<VurderingsÅrsak>> finnVurderingsdatoerMedÅrsak(Long behandlingId) {
@@ -112,7 +115,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         DatoIntervallEntitet relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusYears(3L));
 
         Optional<PersonopplysningerAggregat> personopplysningerOpt = personopplysningTjeneste
-                .hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(revurdering.getId(), revurdering.getAktørId(), relevantPeriode);
+            .hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(revurdering.getId(), revurdering.getAktørId(), relevantPeriode);
         if (personopplysningerOpt.isPresent()) {
             PersonopplysningerAggregat personopplysningerAggregat = personopplysningerOpt.get();
 
@@ -249,8 +252,8 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
     // Ligger her som en guard mot dårlig datakvalitet i medl.. Skal nemlig aldri inntreffe
     private LocalDateSegment<MedlemskapPerioderEntitet> slåSammenMedlemskapPerioder(LocalDateInterval di,
-                                                                                       LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
-                                                                                       LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
+                                                                                    LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
+                                                                                    LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
         if (førsteVersjon == null) {
             return sisteVersjon;
         } else if (sisteVersjon == null) {

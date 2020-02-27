@@ -96,7 +96,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(revurderingId);
 
         // Assert
-        assertThat(vurderingsdatoer).isEmpty();
+        assertThat(vurderingsdatoer).containsExactly(LocalDate.now());
     }
 
     @Test
@@ -143,7 +143,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(revurderingId);
 
         // Assert
-        assertThat(vurderingsdatoer).containsExactly(endringsdato);
+        assertThat(vurderingsdatoer).containsExactly(LocalDate.now(), endringsdato);
     }
 
 
@@ -168,7 +168,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(revurderingId);
 
         // Assert
-        assertThat(vurderingsdatoer).containsExactly(datoMedEndring);
+        assertThat(vurderingsdatoer).containsExactly(LocalDate.now(), datoMedEndring);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(andreÅr.getFomDato(), tredjeÅr.getFomDato());
+        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(LocalDate.now(), andreÅr.getFomDato(), tredjeÅr.getFomDato());
     }
 
     @Test
@@ -228,7 +228,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(andreÅr.getFomDato());
+        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(LocalDate.now(), andreÅr.getFomDato());
     }
 
     @Test
@@ -258,7 +258,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(andreÅr.getFomDato(), tredjeÅr.getFomDato());
+        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(LocalDate.now(), andreÅr.getFomDato(), tredjeÅr.getFomDato());
     }
 
     @Test
@@ -288,7 +288,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).isEmpty();
+        assertThat(vurderingsdatoer).containsExactly(LocalDate.now());
     }
 
     private void oppdaterMedlem(LocalDate datoMedEndring, MedlemskapPerioderEntitet periode, Long behandlingId) {

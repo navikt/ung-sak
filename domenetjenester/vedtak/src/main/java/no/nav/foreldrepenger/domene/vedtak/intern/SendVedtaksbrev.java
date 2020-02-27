@@ -47,15 +47,15 @@ public class SendVedtaksbrev {
 
     void sendVedtaksbrev(String behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        
+
         sendVedtaksbrev(BehandlingReferanse.fra(behandling));
     }
 
     void sendVedtaksbrev(BehandlingReferanse ref) {
-        
+
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId());
-        if (!behandlingVedtakOpt.isPresent()) {
+        if (behandlingVedtakOpt.isEmpty()) {
             log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", ref); //$NON-NLS-1$
             return;
         }

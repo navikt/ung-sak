@@ -47,18 +47,17 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     @JoinColumn(name = "vurdert_periode_id", nullable = false, updatable = false)
     private VurdertMedlemskapPeriodeEntitet periodeHolder;
 
-    @Column(name = "oppholdsrett_vurdering", nullable = false)
-    private Boolean oppholdsrettVurdering = Boolean.FALSE;
+    @Column(name = "oppholdsrett_vurdering")
+    private Boolean oppholdsrettVurdering;
 
-    
-    @Column(name = "lovlig_opphold_vurdering", nullable = false)
-    private Boolean lovligOppholdVurdering = Boolean.FALSE;
+    @Column(name = "lovlig_opphold_vurdering")
+    private Boolean lovligOppholdVurdering;
 
-    @Column(name = "bosatt_vurdering", nullable = false)
-    private Boolean bosattVurdering = Boolean.FALSE;
+    @Column(name = "bosatt_vurdering")
+    private Boolean bosattVurdering;
 
     @Column(name = "er_eos_borger")
-    private Boolean erEøsBorger = Boolean.FALSE;
+    private Boolean erEøsBorger;
 
     @ChangeTracked
     @Column(name = "vurderingsdato", nullable = false, updatable = false)

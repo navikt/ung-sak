@@ -5,14 +5,11 @@ import static no.nav.foreldrepenger.dokumentbestiller.vedtak.VedtaksbrevUtleder.
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.dokumentbestiller.kafka.DokumentKafkaBestiller;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
-import no.nav.foreldrepenger.kontrakter.formidling.kodeverk.FagsakYtelseType;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.DokumentbestillingDto;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
@@ -55,40 +52,6 @@ public class DokumentBestillerApplikasjonTjeneste {
     }
 
     public void bestillDokument(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
-        bestillDokument(bestillBrevDto, aktør, false);
-    }
-
-    public void bestillDokument(BestillBrevDto bestillBrevDto, HistorikkAktør aktør, boolean manueltBrev) {
-        if (manueltBrev) {
-            final Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
-            DokumentbestillingDto dokumentbestillingDto = mapDokumentbestillingDto(bestillBrevDto, behandling);
-            dokumentbestillingDto.setHistorikkAktør(aktør.getKode());
-
-            brevHistorikkinnslag.opprettHistorikkinnslagForManueltBestiltBrev(aktør, behandling, bestillBrevDto.getBrevmalkode());
-
-            formidlingRestKlient.bestillDokument(dokumentbestillingDto);
-        } else {
-            dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
-        }
-    }
-
-    private DokumentbestillingDto mapDokumentbestillingDto(BestillBrevDto bestillBrevDto, Behandling behandling) {
-        DokumentbestillingDto dokumentbestillingDto = new DokumentbestillingDto();
-        dokumentbestillingDto.setBehandlingUuid(behandling.getUuid());
-        dokumentbestillingDto.setDokumentMal(bestillBrevDto.getBrevmalkode());
-        dokumentbestillingDto.setFritekst(bestillBrevDto.getFritekst());
-        dokumentbestillingDto.setArsakskode(bestillBrevDto.getÅrsakskode());
-        dokumentbestillingDto.setYtelseType(mapFagsakYtelseType(behandling.getFagsakYtelseType().getKode()));
-        return dokumentbestillingDto;
-    }
-
-    private FagsakYtelseType mapFagsakYtelseType(String ytelseTypeKode) {
-        if (FagsakYtelseType.ENGANGSTØNAD.getKode().equals(ytelseTypeKode)) {
-            return FagsakYtelseType.ENGANGSTØNAD;
-        } else if (FagsakYtelseType.SVANGERSKAPSPENGER.getKode().equals(ytelseTypeKode)) {
-            return FagsakYtelseType.SVANGERSKAPSPENGER;
-        } else {
-            return FagsakYtelseType.FORELDREPENGER;
-        }
+        dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
     }
 }

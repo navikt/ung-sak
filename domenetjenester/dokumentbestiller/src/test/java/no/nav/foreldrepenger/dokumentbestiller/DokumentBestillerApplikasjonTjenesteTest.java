@@ -66,32 +66,10 @@ public class DokumentBestillerApplikasjonTjenesteTest {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), dokumentMalTypeInput, "fritekst");
 
         // Act
-        tjeneste.bestillDokument(bestillBrevDto, historikkAktør, false);
+        tjeneste.bestillDokument(bestillBrevDto, historikkAktør);
 
         // Assert
         verify(dokumentKafkaBestiller).bestillBrevFraKafka(bestillBrevDto, historikkAktør);
-    }
-
-    @Test
-    public void skal_bestille_manuelt_brev_fra_fpformidling() {
-        // Arrange
-        AbstractTestScenario<?> scenario = TestScenarioBuilder.builderMedSøknad();
-        settOpp(scenario);
-
-        DokumentMalType dokumentMalTypeInput = DokumentMalType.INNHENT_DOK;
-        HistorikkAktør historikkAktør = HistorikkAktør.SAKSBEHANDLER;
-        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), dokumentMalTypeInput, "fritekst");
-
-        // Act
-        tjeneste.bestillDokument(bestillBrevDto, historikkAktør, true);
-
-        // Assert
-        verify(formidlingRestKlient).bestillDokument(any(DokumentbestillingDto.class));
-
-        ArgumentCaptor<Historikkinnslag> historikkinnslagCaptor = ArgumentCaptor.forClass(Historikkinnslag.class);
-        verify(historikkRepositoryMock).lagre(historikkinnslagCaptor.capture());
-        Historikkinnslag historikkinnslag = historikkinnslagCaptor.getValue();
-        assertThat(historikkinnslag.getType()).isEqualTo(HistorikkinnslagType.BREV_BESTILT);
     }
 
 }

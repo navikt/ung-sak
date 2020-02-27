@@ -28,25 +28,25 @@ import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.konfig.Tid;
 
-@BehandlingStegRef(kode = "VULOMED")
-@BehandlingTypeRef("BT-004")
+@BehandlingStegRef(kode = "VURDERMV")
+@BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class VurderLøpendeMedlemskapSteg implements BehandlingSteg {
+public class VurderMedlemskapSteg implements BehandlingSteg {
 
     private VurderLøpendeMedlemskap vurderLøpendeMedlemskap;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     @Inject
-    public VurderLøpendeMedlemskapSteg(VurderLøpendeMedlemskap vurderLøpendeMedlemskap,
-                                       BehandlingRepositoryProvider provider) {
+    public VurderMedlemskapSteg(VurderLøpendeMedlemskap vurderLøpendeMedlemskap,
+                                BehandlingRepositoryProvider provider) {
         this.vurderLøpendeMedlemskap = vurderLøpendeMedlemskap;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
     }
 
-    VurderLøpendeMedlemskapSteg() {
+    VurderMedlemskapSteg() {
         //CDI
     }
 
@@ -54,7 +54,7 @@ public class VurderLøpendeMedlemskapSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         // FIXME K9 : Skrive om til å vurdere de periodene som vilkåret er brutt opp på.
-        Map<LocalDate, VilkårData> vurderingsTilDataMap = vurderLøpendeMedlemskap.vurderLøpendeMedlemskap(behandlingId);
+        Map<LocalDate, VilkårData> vurderingsTilDataMap = vurderLøpendeMedlemskap.vurderMedlemskap(behandlingId);
         if (!vurderingsTilDataMap.isEmpty()) {
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
             final var vilkåreneFørVurdering = vilkårResultatRepository.hent(behandlingId);
