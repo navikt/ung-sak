@@ -25,29 +25,28 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 @Table(name = "BEHANDLING_STEG_TILSTAND")
 public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_STEG_TILSTAND")
-    private Long id;
-
-    @Convert(converter = BehandlingStegTypeKodeverdiConverter.class)
-    @Column(name = "behandling_steg", nullable = false, updatable = false)
-    private BehandlingStegType behandlingSteg;
+    @Column(name = "aktiv", nullable = false)
+    private boolean aktiv = true;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
+    @Convert(converter = BehandlingStegTypeKodeverdiConverter.class)
+    @Column(name = "behandling_steg", nullable = false, updatable = false)
+    private BehandlingStegType behandlingSteg;
+
     @Convert(converter = BehandlingStegStatusKodeverdiConverter.class)
     @Column(name = "behandling_steg_status", nullable = false)
     private BehandlingStegStatus behandlingStegStatus = BehandlingStegStatus.UDEFINERT;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_STEG_TILSTAND")
+    private Long id;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
-
-    BehandlingStegTilstand() {
-        // for hibernate
-    }
 
     public BehandlingStegTilstand(Behandling behandling, BehandlingStegType behandlingSteg) {
         this(behandling, behandlingSteg, BehandlingStegStatus.UDEFINERT);
@@ -59,39 +58,8 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
         this.setBehandlingStegStatus(stegStatus);
     }
 
-    public Long getId() {
-        return id;
-    }
-    
-    @Override
-    public String getIndexKey() {
-        Object[] keyParts = { behandlingSteg, behandlingStegStatus };
-        return IndexKeyComposer.createKey(keyParts);
-    }
-
-    public Behandling getBehandling() {
-        return behandling;
-    }
-    
-    public Long getBehandlingId() {
-        return behandling.getId();
-    }
-
-    public BehandlingStegType getBehandlingSteg() {
-        return behandlingSteg;
-    }
-
-    public BehandlingStegStatus getBehandlingStegStatus() {
-        return Objects.equals(BehandlingStegStatus.UDEFINERT, behandlingStegStatus) ? null : behandlingStegStatus;
-    }
-
-    /**
-     * Set BehandlingStegStatus direkte. Kun for invortes bruk.
-     *
-     * @param behandlingStegStatus - ny status
-     */
-    void setBehandlingStegStatus(BehandlingStegStatus behandlingStegStatus) {
-        this.behandlingStegStatus = behandlingStegStatus == null ? BehandlingStegStatus.UDEFINERT : behandlingStegStatus;
+    BehandlingStegTilstand() {
+        // for hibernate
     }
 
     @Override
@@ -107,9 +75,43 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
             Objects.equals(getBehandlingStegStatus(), that.getBehandlingStegStatus());
     }
 
+    public Behandling getBehandling() {
+        return behandling;
+    }
+
+    public Long getBehandlingId() {
+        return behandling.getId();
+    }
+
+    public BehandlingStegType getBehandlingSteg() {
+        return behandlingSteg;
+    }
+
+    public BehandlingStegStatus getBehandlingStegStatus() {
+        return Objects.equals(BehandlingStegStatus.UDEFINERT, behandlingStegStatus) ? null : behandlingStegStatus;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public String getIndexKey() {
+        Object[] keyParts = { behandlingSteg, behandlingStegStatus };
+        return IndexKeyComposer.createKey(keyParts);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getBehandlingSteg(), getBehandlingStegStatus());
+    }
+
+    public boolean isAktiv() {
+        return aktiv;
+    }
+
+    public void deaktiver() {
+        this.aktiv = false;  // kan kun endre fra true til false
     }
 
     @Override
@@ -118,5 +120,14 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
             + ", steg=" + getBehandlingSteg()
             + ", stegStatus=" + getBehandlingStegStatus()
             + ">";
+    }
+
+    /**
+     * Set BehandlingStegStatus direkte. Kun for invortes bruk.
+     *
+     * @param behandlingStegStatus - ny status
+     */
+    void setBehandlingStegStatus(BehandlingStegStatus behandlingStegStatus) {
+        this.behandlingStegStatus = behandlingStegStatus == null ? BehandlingStegStatus.UDEFINERT : behandlingStegStatus;
     }
 }

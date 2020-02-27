@@ -5,7 +5,7 @@
       "schema": "public",
       "user": "k9sak_unit",
       "password": "k9sak_unit",
-      "url": "jdbc:postgresql://127.0.0.1:5432/k9sak_unit",
+      "url": "jdbc:postgresql://127.0.0.1:5432/k9sak_unit?reWriteBatchedInserts=true",
       "default": true,
       "migrationScriptsFilesystemRoot": "migreringer/src/main/resources/db/postgres/"
     }
