@@ -1,27 +1,21 @@
 package no.nav.k9.sak.kontrakt.person;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -75,7 +69,7 @@ public class PersonopplysningDto extends PersonIdentDto {
     private boolean harVerge;
 
     @JsonAlias("kjønn")
-    @JsonProperty(value = "navBrkerKjonn")
+    @JsonProperty(value = "navBrukerKjonn")
     @Valid
     private NavBrukerKjønn navBrukerKjonn;
 
@@ -89,7 +83,7 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Max(Integer.MAX_VALUE)
     private Integer nummer;
 
-    @JsonProperty(value = "pesonstatus")
+    @JsonProperty(value = "personstatus")
     @Valid
     private PersonstatusType personstatus;
 
