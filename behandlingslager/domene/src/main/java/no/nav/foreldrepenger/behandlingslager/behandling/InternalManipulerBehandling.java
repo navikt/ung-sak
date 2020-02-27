@@ -18,7 +18,7 @@ public class InternalManipulerBehandling {
     @Inject
     public InternalManipulerBehandling() {
     }
-    
+
     /**
      * Sett til angitt steg, default steg status.
      */
@@ -36,12 +36,17 @@ public class InternalManipulerBehandling {
     /**
      * Sett Behandling til angitt steg, angitt steg status, angitt slutt status for andre åpne steg.
      */
-    public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus nesteStegStatus, BehandlingStegStatus ikkeFerdigStegStatus) {
+    public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus nesteStegStatus,
+                                            BehandlingStegStatus ikkeFerdigStegStatus) {
 
         // finn riktig mapping av kodeverk slik at vi får med dette når Behandling brukes videre.
         Optional<BehandlingStegTilstand> eksisterendeTilstand = behandling.getSisteBehandlingStegTilstand();
         if (!eksisterendeTilstand.isPresent() || erUlikeSteg(stegType, eksisterendeTilstand)) {
             if (eksisterendeTilstand.isPresent() && !BehandlingStegStatus.erSluttStatus(eksisterendeTilstand.get().getBehandlingStegStatus())) {
+                if (!BehandlingStegStatus.erSluttStatus(ikkeFerdigStegStatus)) {
+                    throw new IllegalStateException("Tidligere steg må avsluttes riktig, fikk " + ikkeFerdigStegStatus + "for " + eksisterendeTilstand
+                        + " på behandling " + behandling + ". Neste steg " + stegType + ". Neste stegStatus " + nesteStegStatus);
+                }
                 eksisterendeTilstand.ifPresent(it -> it.setBehandlingStegStatus(ikkeFerdigStegStatus));
             }
             BehandlingStegTilstand tilstand = new BehandlingStegTilstand(behandling, stegType);

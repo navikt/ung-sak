@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.web.server.jetty.db;
 
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -45,6 +47,11 @@ public class DatasourceUtil {
         config.setMaxLifetime(30001);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
+        
+        // optimaliserer inserts for postgres
+        var dsProperties=new Properties();
+        dsProperties.setProperty("reWriteBatchedInserts", "true");
+        config.setDataSourceProperties(dsProperties);
 
         // skrur av autocommit her, da kan vi bypasse dette senere når hibernate setter opp entitymanager for bedre conn mgmt
         config.setAutoCommit(false);

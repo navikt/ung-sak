@@ -39,6 +39,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Where;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
@@ -136,6 +137,7 @@ public class Behandling extends BaseEntitet {
 
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "behandling")
     @OrderBy(value = "opprettetTidspunkt desc, endretTidspunkt desc nulls first")
+    @Where(clause = "aktiv=true")
     private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(1);
 
     @Convert(converter = BehandlingTypeKodeverdiConverter.class)
@@ -344,6 +346,8 @@ public class Behandling extends BaseEntitet {
     void oppdaterBehandlingStegOgStatus(BehandlingStegTilstand stegTilstand) {
         Objects.requireNonNull(stegTilstand, "behandlingStegTilstand"); //$NON-NLS-1$
 
+        getSisteBehandlingStegTilstand().ifPresent(BehandlingStegTilstand::deaktiver);
+        
         // legg til ny
         this.behandlingStegTilstander.add(stegTilstand);
         BehandlingStegType behandlingSteg = stegTilstand.getBehandlingSteg();

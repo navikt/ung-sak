@@ -10,13 +10,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -48,24 +46,14 @@ public class InfotrygdHendelseTjenesteImplTest {
     private InfotrygdHendelseTjeneste tjeneste;
 
     private static final String BASE_URL_FEED = "https://infotrygd-hendelser-api-t10.nais.preprod.local/infotrygd/hendelser";
-    private URI expectedStartUri;
     private URI endpoint = URI.create(BASE_URL_FEED);
 
     @Before
     public void setUp() {
         tjeneste = new InfotrygdHendelseTjeneste(endpoint, oidcRestClient);
-        String expectedQueryParams = "?fomDato=2018-05-14T08:15:30Z&aktorId=9000000001234";
-        String expectedQueryParamsEncoded = konverterTilUTF8(expectedQueryParams);
-        expectedStartUri = URI.create(BASE_URL_FEED + expectedQueryParamsEncoded);
-    }
-
-    private String konverterTilUTF8(String expectedQueryParams) {
-        String colonEncoded = "%3A";
-        return expectedQueryParams.replace(":", colonEncoded);
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void skal_lese_fra_infotrygd_feed() {
 
         //Arrange
@@ -74,7 +62,6 @@ public class InfotrygdHendelseTjenesteImplTest {
         when(oidcRestClient.get(any(), any())).thenReturn(feed);
         when(behandling.getAktørId()).thenReturn(aktørId);
         when(aktørId.getId()).thenReturn("9000000001234");
-        when(behandling.getBehandlingStegTilstandHistorikk()).thenReturn(Stream.of(tilstand));
         when(tilstand.getBehandlingSteg()).thenReturn(BehandlingStegType.FATTE_VEDTAK);
         when(tilstand.getOpprettetTidspunkt()).thenReturn(opprettetTidspunkt);
 
