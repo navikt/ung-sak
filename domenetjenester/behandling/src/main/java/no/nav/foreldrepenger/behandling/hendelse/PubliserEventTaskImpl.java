@@ -1,14 +1,15 @@
 package no.nav.foreldrepenger.behandling.hendelse;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.foreldrepenger.behandling.PubliserEventTask;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 @ApplicationScoped
 @ProsessTask(PubliserEventTask.TASKTYPE)
@@ -31,7 +32,7 @@ class PubliserEventTaskImpl implements PubliserEventTask {
         String eventJson = prosessTaskData.getPropertyValue(PROPERTY_EVENT);
         String key = prosessTaskData.getPropertyValue(PROPERTY_KEY);
         kafkaProducer.sendJsonMedNøkkel(key, eventJson);
-        log.info("Publiser aksjonspunktevent på kafka slik at f.eks fplos kan fordele oppgaven for videre behandling. BehandlingsId: {}", key);
+        log.info("Publisert aksjonspunktevent for behandling med id={}.", key);
     }
 
     @Override
