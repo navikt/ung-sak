@@ -28,8 +28,8 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @Column(name = "beregningsgrunnlag_id", updatable = false)
-    private Long beregningsgrunnlagId;
+    @Column(name = "beregningsgrunnlag_grunnlag_uuid", updatable = false)
+    private UUID beregningsgrunnlagGrunnlagUuid;
 
     @Column(name = "iay_grunnlag_uuid", insertable = true, updatable = false)
     private UUID iayGrunnlagUuid;
@@ -48,10 +48,10 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
 
 
     public Totrinnresultatgrunnlag(Behandling behandling,
-                                   Long beregningsgrunnlagId,
+                                   UUID beregningsgrunnlagGrunnlagUuid,
                                    UUID iayGrunnlagUuid) {
         this.behandling = behandling;
-        this.beregningsgrunnlagId = beregningsgrunnlagId;
+        this.beregningsgrunnlagGrunnlagUuid = beregningsgrunnlagGrunnlagUuid;
         this.iayGrunnlagUuid = iayGrunnlagUuid;
     }
 
@@ -63,12 +63,12 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
         return aktiv;
     }
 
-    public Optional<Long> getBeregningsgrunnlagId() {
-        return Optional.ofNullable(beregningsgrunnlagId);
+    public Optional<UUID> getBeregningsgrunnlagUuid() {
+        return Optional.ofNullable(beregningsgrunnlagGrunnlagUuid);
     }
 
-    public void setBeregningsgrunnlag(Long beregningsgrunnlagId) {
-        this.beregningsgrunnlagId = beregningsgrunnlagId;
+    public void setBeregningsgrunnlag(UUID beregningsgrunnlagGrunnlagUuid) {
+        this.beregningsgrunnlagGrunnlagUuid = beregningsgrunnlagGrunnlagUuid;
     }
 
     public Optional<UUID> getGrunnlagUuid() {

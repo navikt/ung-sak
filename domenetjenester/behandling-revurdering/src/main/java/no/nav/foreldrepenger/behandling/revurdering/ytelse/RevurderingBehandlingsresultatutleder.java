@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.foreldrepenger.behandling.revurdering.felles.HarEtablertYtelse;
 import no.nav.foreldrepenger.behandling.revurdering.felles.RevurderingBehandlingsresultatutlederFelles;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
@@ -20,14 +20,15 @@ public class RevurderingBehandlingsresultatutleder extends RevurderingBehandling
     @Inject
     public RevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider, // NOSONAR
                                                  VedtakVarselRepository vedtakVarselRepository,
-                                                 HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                                 BeregningTjeneste beregningsgrunnlagTjeneste,
                                                  @FagsakYtelseTypeRef HarEtablertYtelse harEtablertYtelse,
                                                  MedlemTjeneste medlemTjeneste) {
         super(repositoryProvider,
-            vedtakVarselRepository,
-            beregningsgrunnlagTjeneste,
-            medlemTjeneste,
-            harEtablertYtelse);
+                vedtakVarselRepository,
+                beregningsgrunnlagTjeneste,
+                medlemTjeneste,
+                harEtablertYtelse);
     }
+
 
 }

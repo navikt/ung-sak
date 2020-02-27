@@ -17,13 +17,11 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
@@ -75,7 +73,6 @@ import no.nav.vedtak.konfig.PropertyUtil;
 @ApplicationScoped
 public class BehandlingDtoTjeneste {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private SøknadRepository søknadRepository;
@@ -91,12 +88,10 @@ public class BehandlingDtoTjeneste {
     public BehandlingDtoTjeneste(BehandlingRepository behandlingRepository,
                                  BehandlingVedtakRepository behandlingVedtakRepository,
                                  SøknadRepository søknadRepository,
-                                 HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  VilkårResultatRepository vilkårResultatRepository) {
 
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
@@ -173,7 +168,7 @@ public class BehandlingDtoTjeneste {
         if (BehandlingStatus.FATTER_VEDTAK.equals(behandling.getStatus())) {
             dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", uuidQueryParams));
             dto.leggTil(
-                post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
+                    post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
         } else if (BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
             dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", uuidQueryParams));
         }
@@ -212,11 +207,11 @@ public class BehandlingDtoTjeneste {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isPresent()) {
             var vilkårResultater = vilkårene.get().getVilkårene().stream()
-                .flatMap(vt -> vt.getPerioder().stream())
-                .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
-                    new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
-                .collect(Collectors.groupingBy(Map.Entry::getKey,
-                    Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
+                    .flatMap(vt -> vt.getPerioder().stream())
+                    .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
+                            new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
+                    .collect(Collectors.groupingBy(Map.Entry::getKey,
+                            Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
             dto.setVilkårResultat(vilkårResultater);
         }
 
@@ -249,7 +244,7 @@ public class BehandlingDtoTjeneste {
         var dto = new BehandlingDto();
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
-            .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
+                .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
 
         var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId));
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(originalBehandling.getId()).orElse(null);
@@ -328,14 +323,8 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagBeregningsgrunnlagLink(Behandling behandling) {
-        Optional<BeregningsgrunnlagEntitet> beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagGrunnlagEntitet(behandling.getId())
-            .flatMap(BeregningsgrunnlagGrunnlagEntitet::getBeregningsgrunnlag);
-        if (beregningsgrunnlag.isPresent()) {
-            var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
-            return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", queryParams));
-        } else {
-            return Optional.empty();
-        }
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", queryParams));
     }
 
     private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref) {

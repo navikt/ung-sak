@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetEntitet;
 
+//TODO(OJR) erstatt med -> Design Patterns: The Builder Pattern
+@Deprecated(forRemoval = true, since = "IDAG")
 public class Kopimaskin {
     private static final Set<String> COMMON_FIELD_NAMES = Set.of("id", "versjon", "opprettetAv", "opprettetTidspunkt", "endretAv", "endretTidspunkt");
 

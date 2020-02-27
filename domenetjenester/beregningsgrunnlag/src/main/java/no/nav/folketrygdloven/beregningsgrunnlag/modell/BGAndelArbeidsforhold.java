@@ -23,54 +23,18 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-@Entity(name = "BGAndelArbeidsforhold")
-@Table(name = "BG_ANDEL_ARBEIDSFORHOLD")
-public class BGAndelArbeidsforhold extends BaseEntitet {
+public class BGAndelArbeidsforhold {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_ANDEL_ARBEIDSFORHOLD")
-    private Long id;
-
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
-    @JsonBackReference
-    @OneToOne(optional = false)
-    @JoinColumn(name = "bg_andel_id", nullable = false, updatable = false)
     private BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel;
-
-    @Embedded
     private Arbeidsgiver arbeidsgiver;
-
-    @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
-
-    @Column(name = "refusjonskrav_pr_aar")
     private BigDecimal refusjonskravPrÅr;
-
-    @Column(name = "naturalytelse_bortfalt_pr_aar")
     private BigDecimal naturalytelseBortfaltPrÅr;
-
-    @Column(name = "naturalytelse_tilkommet_pr_aar")
     private BigDecimal naturalytelseTilkommetPrÅr;
-
-    @Column(name = "tidsbegrenset_arbeidsforhold")
     private Boolean erTidsbegrensetArbeidsforhold;
-
-    @Column(name = "loennsendring_i_perioden")
     private Boolean lønnsendringIBeregningsperioden;
-
-    @Column(name = "arbeidsperiode_fom")
     private LocalDate arbeidsperiodeFom;
-
-    @Column(name = "arbeidsperiode_tom")
     private LocalDate arbeidsperiodeTom;
-
-
-    public Long getId() {
-        return id;
-    }
 
     public InternArbeidsforholdRef getArbeidsforholdRef() {
         return arbeidsforholdRef != null ? arbeidsforholdRef : InternArbeidsforholdRef.nullRef();
@@ -138,8 +102,7 @@ public class BGAndelArbeidsforhold extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-                "id=" + id + ", " //$NON-NLS-2$
+        return getClass().getSimpleName() + "<" //$NON-NLS-1$
                 + "orgnr=" + getArbeidsforholdOrgnr() + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "arbeidsgiver=" + arbeidsgiver + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "arbeidsforholdRef=" + arbeidsforholdRef + ", " //$NON-NLS-1$ //$NON-NLS-2$

@@ -5,8 +5,8 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.ytelse.UttakInputTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
@@ -35,7 +35,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
 
     private BehandlingRepository behandlingRepository;
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
@@ -48,7 +48,7 @@ public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
 
     @Inject
     public BeregneYtelseStegImpl(BehandlingRepositoryProvider repositoryProvider,
-                                 HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                 BeregningTjeneste kalkulusTjeneste,
                                  UttakInputTjeneste uttakInputTjeneste,
                                  FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
@@ -56,7 +56,7 @@ public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
         this.uttakInputTjeneste = uttakInputTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
@@ -68,11 +68,10 @@ public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        
         var input = uttakInputTjeneste.lagInput(ref);
 
-        BeregningsgrunnlagEntitet beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagAggregatForBehandling(behandlingId);
-        
+        Beregningsgrunnlag beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
+
         // Kalle regeltjeneste
         BeregningsresultatEntitet beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, input);
 

@@ -3,8 +3,6 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
 
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -20,19 +18,14 @@ import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.folketrygdloven.beregningsgrunnlag.rest.fakta.BeregningsgrunnlagDtoTjeneste;
-import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagInputFelles;
-import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagInputProvider;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -47,10 +40,8 @@ public class BeregningsgrunnlagRestTjeneste {
 
     static public final String PATH = "/behandling/beregningsgrunnlag";
     private BehandlingRepository behandlingRepository;
-    private BeregningsgrunnlagDtoTjeneste beregningsgrunnlagDtoTjeneste;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
     private OpptjeningRepository opptjeningRepository;
-    private BeregningsgrunnlagInputProvider inputTjenesteProvider;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     public BeregningsgrunnlagRestTjeneste() {
         // for resteasy
@@ -59,14 +50,10 @@ public class BeregningsgrunnlagRestTjeneste {
     @Inject
     public BeregningsgrunnlagRestTjeneste(BehandlingRepository behandlingRepository,
                                           OpptjeningRepository opptjeningRepository,
-                                          BeregningsgrunnlagInputProvider inputTjenesteProvider,
-                                          BeregningsgrunnlagDtoTjeneste beregningsgrunnlagDtoTjeneste,
-                                          InntektArbeidYtelseTjeneste iayTjeneste) {
+                                          KalkulusTjeneste kalkulusTjeneste) {
         this.opptjeningRepository = opptjeningRepository;
-        this.inputTjenesteProvider = inputTjenesteProvider;
-        this.beregningsgrunnlagDtoTjeneste = beregningsgrunnlagDtoTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.iayTjeneste = iayTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @POST
@@ -85,16 +72,7 @@ public class BeregningsgrunnlagRestTjeneste {
         if (opptjening.isEmpty()) {
             return null;
         }
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = iayTjeneste.finnGrunnlag(id);
-        return iayGrunnlagOpt.flatMap(iayGrunnlag -> {
-            var input = getInputTjeneste(behandling.getFagsakYtelseType()).lagInput(behandling, iayGrunnlag);
-            if (input.isPresent()) {
-                return beregningsgrunnlagDtoTjeneste.lagBeregningsgrunnlagDto(input.get());
-            } else {
-                return Optional.empty();
-            }
-        }).orElse(null);
-
+        return kalkulusTjeneste.hentBeregningsgrunnlagDto(id);
     }
 
     @GET
@@ -108,19 +86,7 @@ public class BeregningsgrunnlagRestTjeneste {
         if (opptjening.isEmpty()) {
             return null;
         }
-
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = iayTjeneste.finnGrunnlag(behandling.getId());
-        return iayGrunnlagOpt.flatMap(iayGrunnlag -> {
-            var input = getInputTjeneste(behandling.getFagsakYtelseType()).lagInput(behandling, iayGrunnlag);
-            if (input.isPresent()) {
-                return beregningsgrunnlagDtoTjeneste.lagBeregningsgrunnlagDto(input.get());
-            } else {
-                return Optional.empty();
-            }
-        }).orElse(null);
+        return kalkulusTjeneste.hentBeregningsgrunnlagDto(behandling.getId());
     }
 
-    private BeregningsgrunnlagInputFelles getInputTjeneste(FagsakYtelseType ytelseType) {
-        return inputTjenesteProvider.getTjeneste(ytelseType);
-    }
 }

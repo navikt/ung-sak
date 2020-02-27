@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.ytelse.beregning.psb;
 import static java.util.stream.Collectors.toSet;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class PsbUttakResultatRepoMapper implements UttakResultatRepoMapper {
             entry.getKey().getFomDato(),
             entry.getKey().getTomDato(),
             toUttakAktiviteter(entry.getValue()),
-            true
+            false
         );
     }
 
@@ -76,13 +78,22 @@ public class PsbUttakResultatRepoMapper implements UttakResultatRepoMapper {
     }
 
     private List<UttakResultatPeriode> mapUttakResultatPeriodes(UttakInput input) {
-        return input.getBeregningsgrunnlagStatusPerioder()
-            .stream()
-            .collect(Collectors.groupingBy(BeregningsgrunnlagStatusPeriode::getPeriode, toSet()))
-            .entrySet()
-            .stream()
-            .map(toUttakResultatPeriode())
-            .collect(Collectors.toList());
+        List<UttakResultatPeriode> collect = input.getBeregningsgrunnlagStatusPerioder()
+                .stream()
+                .collect(Collectors.groupingBy(BeregningsgrunnlagStatusPeriode::getPeriode, toSet()))
+                .entrySet()
+                .stream()
+                .map(toUttakResultatPeriode())
+                .collect(Collectors.toList());
+
+        List<UttakResultatPeriode> res = new ArrayList<>();
+        for (UttakResultatPeriode uttakResultatPeriode : collect) {
+            LocalDate fom = uttakResultatPeriode.getFom();
+            LocalDate tom = fom.plusYears(1);
+
+            res.add(new UttakResultatPeriode(fom, tom, uttakResultatPeriode.getUttakAktiviteter(), uttakResultatPeriode.getErOppholdsPeriode()));
+        }
+        return res;
     }
 
 }

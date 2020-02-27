@@ -4,12 +4,12 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto;
 
 @ApplicationScoped
@@ -17,26 +17,21 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBere
 public class FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer implements AksjonspunktOppdaterer<FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto>{
 
 
-    private FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer;
-    private FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste fastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer() {
         // CDI
     }
 
     @Inject
-    public FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer(FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer,
-                                                                       FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste fastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste) {
-        this.fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer = fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer;
-        this.fastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste = fastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste;
+    public FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer(KalkulusTjeneste kalkulusTjeneste) {
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto dto, AksjonspunktOppdaterParameter param) {
-
-        fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetHåndterer.oppdater(param.getBehandlingId(), dto);
-        fastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetHistorikkTjeneste.lagHistorikk(dto, param);
-
+        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
         return OppdateringResultat.utenOveropp();
 
     }

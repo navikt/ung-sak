@@ -127,7 +127,7 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
                             .map(Refusjon::getFom).orElse(TIDENES_ENDE);
                     }
                 }).min(Comparator.naturalOrder()).orElse(TIDENES_ENDE);
-                return new RefusjonskravDato(entry.getKey(), førsteDatoForRefusjon, førsteInnsendingAvRefusjon);
+                return new RefusjonskravDato(entry.getKey(), førsteDatoForRefusjon, førsteInnsendingAvRefusjon, entry.getValue().stream().anyMatch(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()));
             }).collect(Collectors.toList());
     }
     @Override

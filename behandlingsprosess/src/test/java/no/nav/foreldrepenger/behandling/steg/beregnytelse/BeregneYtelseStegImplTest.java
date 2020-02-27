@@ -18,9 +18,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.foreldrepenger.behandling.revurdering.ytelse.UttakInputTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
@@ -60,11 +59,8 @@ public class BeregneYtelseStegImplTest {
     private UttakInputTjeneste uttakInputTjeneste;
 
     @Inject
-    private HentBeregningsgrunnlagTjeneste hentBeregningsgrunnlagTjeneste;
+    private BeregningTjeneste beregningTjeneste;
 
-    @Inject
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    
     @Inject
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
@@ -86,7 +82,7 @@ public class BeregneYtelseStegImplTest {
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
             .build();
-        steg = new BeregneYtelseStegImpl(repositoryProvider, hentBeregningsgrunnlagTjeneste,
+        steg = new BeregneYtelseStegImpl(repositoryProvider, beregningTjeneste,
             uttakInputTjeneste,
             fastsettBeregningsresultatTjeneste,
             skjæringstidspunktTjeneste,
@@ -169,11 +165,11 @@ public class BeregneYtelseStegImplTest {
     }
 
     private void medBeregningsgrunnlag(Behandling behandling) {
-        var beregningsgrunnlagBuilder = BeregningsgrunnlagEntitet.builder()
-            .medSkjæringstidspunkt(LocalDate.now())
-            .medGrunnbeløp(BigDecimal.valueOf(90000));
-        BeregningsgrunnlagEntitet beregningsgrunnlag = beregningsgrunnlagBuilder.build();
-        beregningsgrunnlagTjeneste.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag, BeregningsgrunnlagTilstand.OPPRETTET);
+        var beregningsgrunnlagBuilder = Beregningsgrunnlag.builder()
+                .medSkjæringstidspunkt(LocalDate.now())
+                .medGrunnbeløp(BigDecimal.valueOf(90000));
+        Beregningsgrunnlag beregningsgrunnlag = beregningsgrunnlagBuilder.build();
+        beregningTjeneste.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag, BeregningsgrunnlagTilstand.OPPRETTET);
     }
 
     private void byggUttakPlanResultat(Behandling behandling) {

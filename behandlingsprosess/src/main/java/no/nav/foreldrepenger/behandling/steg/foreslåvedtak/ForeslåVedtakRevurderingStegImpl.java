@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
@@ -27,7 +28,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 @ApplicationScoped
 public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
 
@@ -36,9 +37,9 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                                     HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                     BeregningTjeneste kalkulusTjeneste,
                                      BehandlingRepositoryProvider repositoryProvider) {
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
     }
@@ -82,13 +83,13 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     }
 
     private boolean beregningsgrunnlagEksisterer(Behandling behandling) {
-        return beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(behandling.getId()).isPresent();
+        return kalkulusTjeneste.hentFastsatt(behandling.getId()).isPresent();
     }
 
     private boolean erRevurderingensBeregningsgrunnlagMindreEnnOrginal(Behandling orginalBehandling, Behandling revurdering) {
-        BeregningsgrunnlagEntitet orginalBeregning = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(orginalBehandling.getId())
+        Beregningsgrunnlag orginalBeregning = kalkulusTjeneste.hentFastsatt(orginalBehandling.getId())
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Skal ha Beregningsgrunnlag på orginalbehandling vedtak"));
-        BeregningsgrunnlagEntitet revurderingsBeregning = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId())
+        Beregningsgrunnlag revurderingsBeregning = kalkulusTjeneste.hentFastsatt(revurdering.getId())
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Skal ha Beregningsgrunnlag på positivt vedtak"));
 
         BigDecimal orginalBeregningSumBruttoPrÅr = orginalBeregning.getBeregningsgrunnlagPerioder().stream()

@@ -37,7 +37,8 @@
 
         <metrics.version>4.1.4</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-	</properties>
+        <kalkulus.version>1.0-2020.03.06.151151-e384fac</kalkulus.version>
+    </properties>
 
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det har uheldige virkninger ved bruk av import og dependency (bruk composition
 		over arv) da de overstyrer andre scope definisjoner. Sett det heller der det brukes. -->
@@ -144,6 +145,12 @@
                 <artifactId>abakus-kontrakt</artifactId>
                 <version>1.1-20200224134804-69d48ae</version>
             </dependency>
+
+			<dependency>
+				<groupId>no.nav.folketrygdloven.kalkulus</groupId>
+				<artifactId>kontrakt</artifactId>
+				<version>${kalkulus.version}</version>
+			</dependency>
 
 			<dependency>
   			    <groupId>no.nav.folketrygdloven</groupId>

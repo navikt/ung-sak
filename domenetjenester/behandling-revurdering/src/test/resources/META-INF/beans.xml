@@ -6,6 +6,7 @@
 	   version="2.0">
 	<alternatives>
 		<class>no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
+		<class>no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste</class>
 	</alternatives>
 </beans>
 

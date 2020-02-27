@@ -13,7 +13,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -35,7 +34,7 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    
+
     @Inject
     private BehandlingRepository behandlingRepository;
 
@@ -44,9 +43,6 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
-
-    @Inject
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
 
     @Inject
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
@@ -64,10 +60,10 @@ public class BehandlingDtoTjenesteImplTest {
     @Before
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste,
+        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, skjæringstidspunktTjeneste,
             vilkårResultatRepository);
     }
-    
+
     @Test
     public void alle_paths_skal_eksistere() {
         Set<Behandling> behandlinger = new HashSet<>();

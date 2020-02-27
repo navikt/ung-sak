@@ -4,57 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "Sammenligningsgrunnlag")
-@Table(name = "SAMMENLIGNINGSGRUNNLAG")
-public class Sammenligningsgrunnlag extends BaseEntitet {
+public class Sammenligningsgrunnlag {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SAMMENLIGNINGSGRUNNLAG")
-    private Long id;
-
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "sammenligningsperiode_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "sammenligningsperiode_tom"))
-    })
     private DatoIntervallEntitet sammenligningsperiode;
-
-    @Column(name = "rapportert_pr_aar", nullable = false)
     private BigDecimal rapportertPrÅr;
-
-    @Column(name = "avvik_promille", nullable = false)
     private Long avvikPromille = 0L;
-
-    @JsonBackReference
-    @OneToOne(optional = false)
-    @JoinColumn(name = "beregningsgrunnlag_id", nullable = false, updatable = false, unique = true)
-    private BeregningsgrunnlagEntitet beregningsgrunnlag;
-
-    public Long getId() {
-        return id;
-    }
+    private Beregningsgrunnlag beregningsgrunnlag;
 
     public LocalDate getSammenligningsperiodeFom() {
         return sammenligningsperiode.getFomDato();
@@ -72,7 +29,7 @@ public class Sammenligningsgrunnlag extends BaseEntitet {
         return avvikPromille;
     }
 
-    public BeregningsgrunnlagEntitet getBeregningsgrunnlag() {
+    public Beregningsgrunnlag getBeregningsgrunnlag() {
         return beregningsgrunnlag;
     }
 
@@ -97,8 +54,7 @@ public class Sammenligningsgrunnlag extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-                "id=" + id + ", " //$NON-NLS-2$ 
+        return getClass().getSimpleName() + "<"  //$NON-NLS-1$
                 + "beregningsgrunnlag=" + beregningsgrunnlag + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "sammenligningsperiodeFom=" + sammenligningsperiode.getFomDato() + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "sammenligningsperiodeTom=" + sammenligningsperiode.getTomDato() + ", " //$NON-NLS-1$ //$NON-NLS-2$
@@ -135,10 +91,10 @@ public class Sammenligningsgrunnlag extends BaseEntitet {
             return this;
         }
 
-        public Sammenligningsgrunnlag build(BeregningsgrunnlagEntitet beregningsgrunnlag) {
+        public Sammenligningsgrunnlag build(Beregningsgrunnlag beregningsgrunnlag) {
             sammenligningsgrunnlagMal.beregningsgrunnlag = beregningsgrunnlag;
             verifyStateForBuild();
-            BeregningsgrunnlagEntitet.builder(beregningsgrunnlag).medSammenligningsgrunnlag(sammenligningsgrunnlagMal);
+            Beregningsgrunnlag.builder(beregningsgrunnlag).medSammenligningsgrunnlag(sammenligningsgrunnlagMal);
             return sammenligningsgrunnlagMal;
         }
 

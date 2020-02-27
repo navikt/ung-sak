@@ -1,58 +1,45 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdHåndterer;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.FastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettBGTidsbegrensetArbeidsforholdDto.class, adapter = AksjonspunktOppdaterer.class)
 public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<FastsettBGTidsbegrensetArbeidsforholdDto> {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private FastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste fastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste;
-    private FastsettBGTidsbegrensetArbeidsforholdHåndterer fastsettBGTidsbegrensetArbeidsforholdHåndterer;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     FastsettBGTidsbegrensetArbeidsforholdOppdaterer() {
         // CDI
     }
 
     @Inject
-    public FastsettBGTidsbegrensetArbeidsforholdOppdaterer(HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                                           FastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste fastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste,
-                                                           FastsettBGTidsbegrensetArbeidsforholdHåndterer fastsettBGTidsbegrensetArbeidsforholdHåndterer) {
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.fastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste = fastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste;
-        this.fastsettBGTidsbegrensetArbeidsforholdHåndterer = fastsettBGTidsbegrensetArbeidsforholdHåndterer;
+    public FastsettBGTidsbegrensetArbeidsforholdOppdaterer(KalkulusTjeneste kalkulusTjeneste) {
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettBGTidsbegrensetArbeidsforholdDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
-        BeregningsgrunnlagEntitet aktivtBG = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagAggregatForBehandling(behandling.getId());
-        Optional<BeregningsgrunnlagEntitet> forrigeGrunnlag = beregningsgrunnlagTjeneste.hentSisteBeregningsgrunnlagGrunnlagEntitet(param.getBehandlingId(),
-            BeregningsgrunnlagTilstand.FORESLÅTT_UT)
-            .flatMap(BeregningsgrunnlagGrunnlagEntitet::getBeregningsgrunnlag);
-
-        fastsettBGTidsbegrensetArbeidsforholdHåndterer.håndter(param.getBehandlingId(), dto);
-        fastsettBGTidsbegrensetArbeidsforholdHistorikkTjeneste.lagHistorikk(param, aktivtBG, forrigeGrunnlag, dto);
-
+        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+        List<BeregningAksjonspunktResultat> resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        // TODO FIKS HISTORIKK
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         håndterEventueltOverflødigAksjonspunkt(behandling)
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));

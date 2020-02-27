@@ -3,47 +3,12 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.PeriodeÅrsakKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
-@Entity(name = "BeregningsgrunnlagPeriodeÅrsak")
-@Table(name = "BG_PERIODE_AARSAK")
-public class BeregningsgrunnlagPeriodeÅrsak extends BaseEntitet {
+public class BeregningsgrunnlagPeriodeÅrsak {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_PERIODE_AARSAK")
-    private Long id;
-
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
-    @JsonBackReference
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "bg_periode_id", nullable = false, updatable = false)
     private BeregningsgrunnlagPeriode beregningsgrunnlagPeriode;
-
-    @Convert(converter = PeriodeÅrsakKodeverdiConverter.class)
-    @Column(name="periode_aarsak", nullable = false)
     private PeriodeÅrsak periodeÅrsak = PeriodeÅrsak.UDEFINERT;
-
-    public Long getId() {
-        return id;
-    }
 
     public BeregningsgrunnlagPeriode getBeregningsgrunnlagPeriode() {
         return beregningsgrunnlagPeriode;

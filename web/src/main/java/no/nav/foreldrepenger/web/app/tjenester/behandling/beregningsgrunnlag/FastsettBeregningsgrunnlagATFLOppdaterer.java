@@ -1,20 +1,20 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLHåndterer;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.FastsettBeregningsgrunnlagATFLHistorikkTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
@@ -23,29 +23,23 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregnings
 @DtoTilServiceAdapter(dto = FastsettBeregningsgrunnlagATFLDto.class, adapter = AksjonspunktOppdaterer.class)
 public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOppdaterer<FastsettBeregningsgrunnlagATFLDto> {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private FastsettBeregningsgrunnlagATFLHistorikkTjeneste fastsettBeregningsgrunnlagATFLHistorikkTjeneste;
-    private FastsettBeregningsgrunnlagATFLHåndterer fastsettBeregningsgrunnlagATFLHåndterer;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     protected FastsettBeregningsgrunnlagATFLOppdaterer () {
         // CDI
     }
 
     @Inject
-    public FastsettBeregningsgrunnlagATFLOppdaterer(HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                                    FastsettBeregningsgrunnlagATFLHistorikkTjeneste fastsettBeregningsgrunnlagATFLHistorikkTjeneste,
-                                                    FastsettBeregningsgrunnlagATFLHåndterer fastsettBeregningsgrunnlagATFLHåndterer) {
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.fastsettBeregningsgrunnlagATFLHistorikkTjeneste = fastsettBeregningsgrunnlagATFLHistorikkTjeneste;
-        this.fastsettBeregningsgrunnlagATFLHåndterer = fastsettBeregningsgrunnlagATFLHåndterer;
+    public FastsettBeregningsgrunnlagATFLOppdaterer(KalkulusTjeneste kalkulusTjeneste) {
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettBeregningsgrunnlagATFLDto dto, AksjonspunktOppdaterParameter param) {
 
-        BeregningsgrunnlagEntitet forrigeGrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagAggregatForBehandling(param.getBehandlingId());
-        fastsettBeregningsgrunnlagATFLHåndterer.håndter(param.getBehandlingId(), dto);
-        fastsettBeregningsgrunnlagATFLHistorikkTjeneste.lagHistorikk(param, dto, forrigeGrunnlag);
+        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+        List<BeregningAksjonspunktResultat> resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        // TODO FIKS HISTORIKK
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         håndterEventueltOverflødigAksjonspunkt(param.getBehandling())

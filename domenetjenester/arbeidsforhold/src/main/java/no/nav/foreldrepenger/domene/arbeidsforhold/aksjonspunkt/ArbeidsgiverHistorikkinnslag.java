@@ -15,7 +15,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 
 @ApplicationScoped
-class ArbeidsgiverHistorikkinnslag {
+public class ArbeidsgiverHistorikkinnslag {
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
     ArbeidsgiverHistorikkinnslag() {
@@ -23,11 +23,11 @@ class ArbeidsgiverHistorikkinnslag {
     }
 
     @Inject
-    ArbeidsgiverHistorikkinnslag(ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+    public ArbeidsgiverHistorikkinnslag(ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
 
-    String lagArbeidsgiverHistorikkinnslagTekst(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, List<ArbeidsforholdOverstyring> overstyringer) {
+    public String lagArbeidsgiverHistorikkinnslagTekst(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, List<ArbeidsforholdOverstyring> overstyringer) {
         if (arbeidsgiver != null && arbeidsforholdRef != null && arbeidsforholdRef.gjelderForSpesifiktArbeidsforhold()) {
             return lagTekstMedArbeidsgiverOgArbeidforholdRef(arbeidsgiver, arbeidsforholdRef, overstyringer);
         } else if (arbeidsgiver != null) {
@@ -36,7 +36,7 @@ class ArbeidsgiverHistorikkinnslag {
         throw new IllegalStateException("Klarte ikke lage historikkinnslagstekst for arbeidsgiver");
     }
 
-    String lagArbeidsgiverHistorikkinnslagTekst(Arbeidsgiver arbeidsgiver, List<ArbeidsforholdOverstyring> overstyringer) {
+    public String lagArbeidsgiverHistorikkinnslagTekst(Arbeidsgiver arbeidsgiver, List<ArbeidsforholdOverstyring> overstyringer) {
         return lagTekstMedArbeidsgiver(arbeidsgiver, overstyringer);
     }
 
