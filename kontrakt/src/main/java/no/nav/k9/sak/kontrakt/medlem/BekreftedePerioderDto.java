@@ -54,7 +54,7 @@ public class BekreftedePerioderDto {
     @JsonProperty(value = "oppholdsrettVurdering")
     private Boolean oppholdsrettVurdering;
 
-    @JsonProperty(value = "vurderingdato")
+    @JsonProperty(value = "vurderingsdato")
     private LocalDate vurderingsdato;
 
     public BekreftedePerioderDto() {

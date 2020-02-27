@@ -78,12 +78,12 @@ public class MedlemDtoTjeneste {
 
     @Inject
     public MedlemDtoTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider,
-                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                 MedlemTjeneste medlemTjeneste,
-                                 PersonopplysningTjeneste personopplysningTjeneste,
-                                 PersonopplysningDtoTjeneste personopplysningDtoTjeneste) {
+                             ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                             MedlemTjeneste medlemTjeneste,
+                             PersonopplysningTjeneste personopplysningTjeneste,
+                             PersonopplysningDtoTjeneste personopplysningDtoTjeneste) {
 
         this.medlemskapRepository = behandlingRepositoryProvider.getMedlemskapRepository();
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
@@ -229,12 +229,13 @@ public class MedlemDtoTjeneste {
 
     private void mapAndrePerioder(MedlemV2Dto dto, Set<VurdertLøpendeMedlemskapEntitet> perioder, BehandlingReferanse ref) {
         final Map<LocalDate, VurderMedlemskap> vurderingspunkter = medlemTjeneste.utledVurderingspunkterMedAksjonspunkt(ref);
-        final Set<MedlemPeriodeDto> dtoPerioder = dto.getPerioder();
+        final Set<MedlemPeriodeDto> dtoPerioder = dto.getPerioder() != null ? new HashSet<>(dto.getPerioder()) : new HashSet<>();
         for (Map.Entry<LocalDate, VurderMedlemskap> entrySet : vurderingspunkter.entrySet()) {
             final MedlemPeriodeDto medlemPeriodeDto = mapTilPeriodeDto(ref.getBehandlingId(), finnVurderMedlemskap(perioder, entrySet), entrySet.getKey(), entrySet.getValue().getÅrsaker());
             medlemPeriodeDto.setAksjonspunkter(entrySet.getValue().getAksjonspunkter().stream().map(Kodeverdi::getKode).collect(Collectors.toSet()));
             dtoPerioder.add(medlemPeriodeDto);
         }
+        dto.setPerioder(dtoPerioder);
     }
 
     private Optional<VurdertMedlemskap> finnVurderMedlemskap(Set<VurdertLøpendeMedlemskapEntitet> perioder, Map.Entry<LocalDate, VurderMedlemskap> entrySet) {
@@ -253,8 +254,8 @@ public class MedlemDtoTjeneste {
         final Set<MedlemPeriodeDto> periodeSet = new HashSet<>();
         LocalDate vurderingsdato = ref.getSkjæringstidspunkt().getSkjæringstidspunktHvisUtledet().orElse(null);
         final MedlemPeriodeDto periodeDto = mapTilPeriodeDtoSkjæringstidspunkt(ref.getBehandlingId(), vurdertMedlemskapOpt, vurderingsdato, Set.of(VurderingsÅrsak.SKJÆRINGSTIDSPUNKT), aksjonspunkter);
-        periodeDto.setAksjonspunkter(aksjonspunkter.stream()
-            .map(Aksjonspunkt::getAksjonspunktDefinisjon)
+        periodeDto.setAksjonspunkter(medlemTjeneste.utledAksjonspunkterForVurderingsDato(ref, vurderingsdato)
+            .stream()
             .filter(MEDL_AKSJONSPUNKTER::contains)
             .map(Kodeverdi::getKode).collect(Collectors.toSet()));
         periodeSet.add(periodeDto);
