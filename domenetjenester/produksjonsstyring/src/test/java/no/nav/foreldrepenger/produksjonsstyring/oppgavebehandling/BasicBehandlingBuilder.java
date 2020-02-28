@@ -14,7 +14,6 @@ import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -29,7 +28,6 @@ public class BasicBehandlingBuilder {
     private final BehandlingRepository behandlingRepository;
 
     private Fagsak fagsak;
-    private VilkårResultatRepository vilkårResultatRepository;
 
     private final AktørId aktørId = AktørId.dummy();
 
@@ -38,7 +36,6 @@ public class BasicBehandlingBuilder {
     public BasicBehandlingBuilder(EntityManager em) {
         this.em = em;
         behandlingRepository = new BehandlingRepository(em);
-        vilkårResultatRepository = new VilkårResultatRepository(em);
     }
 
     public Behandling opprettOgLagreFørstegangssøknad(FagsakYtelseType ytelse) {

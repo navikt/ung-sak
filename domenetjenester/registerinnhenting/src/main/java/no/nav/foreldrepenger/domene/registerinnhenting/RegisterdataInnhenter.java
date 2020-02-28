@@ -31,7 +31,6 @@ import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
-import no.nav.foreldrepenger.behandlingslager.abakus.logg.AbakusInnhentingGrunnlagLogg;
 import no.nav.foreldrepenger.behandlingslager.abakus.logg.AbakusInnhentingGrunnlagLoggRepository;
 import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.Familierelasjon;
@@ -369,7 +368,7 @@ public class RegisterdataInnhenter {
         }
     }
 
-    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, @SuppressWarnings("unused") Behandling behandling) {
+    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
         final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId);
 

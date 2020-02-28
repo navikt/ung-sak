@@ -18,7 +18,6 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.inngangsvilkaar.InngangsvilkårTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
@@ -29,7 +28,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private InngangsvilkårTjeneste inngangsvilkårTjeneste;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste;
     private BeregningsgrunnlagInputProvider beregningsgrunnlagInputTjeneste;
@@ -40,12 +38,10 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
     @Inject
     public FastsettBeregningsaktiviteterSteg(BehandlingRepository behandlingRepository,
-                                             InngangsvilkårTjeneste inngangsvilkårTjeneste,
                                              BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                              BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste,
                                              BeregningsgrunnlagInputProvider inputTjenesteProvider) {
         this.behandlingRepository = behandlingRepository;
-        this.inngangsvilkårTjeneste = inngangsvilkårTjeneste;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.beregningInfotrygdsakTjeneste = beregningInfotrygdsakTjeneste;
         this.beregningsgrunnlagInputTjeneste = Objects.requireNonNull(inputTjenesteProvider, "inputTjenestene");

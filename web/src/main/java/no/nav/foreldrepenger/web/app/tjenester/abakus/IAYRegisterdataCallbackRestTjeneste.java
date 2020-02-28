@@ -5,7 +5,6 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDAT
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.APPLIKASJON;
 
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;

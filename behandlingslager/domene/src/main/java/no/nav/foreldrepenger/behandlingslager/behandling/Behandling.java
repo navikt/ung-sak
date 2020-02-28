@@ -64,7 +64,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.FeilFactory;
 
 @SqlResultSetMappings(value = {
@@ -74,15 +73,6 @@ import no.nav.vedtak.feil.FeilFactory;
                         @ColumnResult(name = "ansvarligSaksbehandler"),
                         @ColumnResult(name = "fagsakId"),
                         @ColumnResult(name = "fagsakStatus")
-                })
-        }),
-        @SqlResultSetMapping(name = "BehandlingIdFagsakIdAktoerId", classes = {
-                @ConstructorResult(targetClass = BehandlingIdFagsakIdAktorId.class, columns = {
-                        @ColumnResult(name = "fagsakYtelseType", type = String.class),
-                        @ColumnResult(name = "aktorId", type = String.class),
-                        @ColumnResult(name = "saksnummer", type = Saksnummer.class),
-                        @ColumnResult(name = "behandlingId", type = Long.class),
-                        @ColumnResult(name = "behandlingUuid", type = UUID.class)
                 })
         })
 })
@@ -347,7 +337,7 @@ public class Behandling extends BaseEntitet {
         Objects.requireNonNull(stegTilstand, "behandlingStegTilstand"); //$NON-NLS-1$
 
         getSisteBehandlingStegTilstand().ifPresent(BehandlingStegTilstand::deaktiver);
-        
+
         // legg til ny
         this.behandlingStegTilstander.add(stegTilstand);
         BehandlingStegType behandlingSteg = stegTilstand.getBehandlingSteg();

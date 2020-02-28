@@ -132,7 +132,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
                 Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
                 RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
-                ryddVilkårTyper.ryddVedTilbakeføring(List.of(vilkår));
+                ryddVilkårTyper.ryddVedTilbakeføring();
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
         });

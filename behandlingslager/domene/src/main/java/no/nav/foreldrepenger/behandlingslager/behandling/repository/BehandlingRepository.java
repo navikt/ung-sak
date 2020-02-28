@@ -24,9 +24,6 @@ import org.hibernate.jpa.QueryHints;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -358,12 +355,6 @@ public class BehandlingRepository {
         return optionalFirst(query.getResultList());
     }
 
-    private IllegalStateException flereAggregatOpprettelserISammeLagringException(Class<?> aggregat) {
-        return new IllegalStateException("Glemt å lagre "
-            + aggregat.getSimpleName()
-            + "? Denne må lagres separat siden den er et selvstendig aggregat delt mellom behandlinger"); //$NON-NLS-1$
-    }
-
     private TypedQuery<Behandling> lagBehandlingQuery(Long behandlingId) {
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR //$NON-NLS-1$
 
@@ -378,17 +369,6 @@ public class BehandlingRepository {
         TypedQuery<Behandling> query = getEntityManager().createQuery("from Behandling where uuid=:" + BEHANDLING_UUID, Behandling.class); //$NON-NLS-1$
         query.setParameter(BEHANDLING_UUID, behandlingUuid); // $NON-NLS-1$
         return query;
-    }
-
-    private Long lagre(Vilkårene vilkårene) {
-        getEntityManager().persist(vilkårene);
-        for (Vilkår vilkår : vilkårene.getVilkårene()) {
-            getEntityManager().persist(vilkår);
-            for (VilkårPeriode vilkårPeriode : vilkår.getPerioder()) {
-                getEntityManager().persist(vilkårPeriode);
-            }
-        }
-        return vilkårene.getId();
     }
 
     /**

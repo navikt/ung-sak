@@ -76,10 +76,9 @@ public class Totrinnsvurdering extends BaseEntitet {
         return begrunnelse;
     }
 
-    public void setAktiv(boolean aktiv) {
-        this.aktiv = aktiv;
+    public void deaktiver() {
+        this.aktiv = false;
     }
-
 
     public static class Builder {
         private Totrinnsvurdering totrinnsvurderingMal;
@@ -119,4 +118,5 @@ public class Totrinnsvurdering extends BaseEntitet {
 
         }
     }
+
 }

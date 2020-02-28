@@ -2,10 +2,14 @@ package no.nav.foreldrepenger.behandlingslager.behandling.vilkår;
 
 import static java.util.stream.Collectors.joining;
 
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,10 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
@@ -37,7 +45,7 @@ public class Vilkårene extends BaseEntitet {
     private long versjon;
 
     // CascadeType.ALL + orphanRemoval=true må til for at Vilkår skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, mappedBy = "vilkårene")
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE }, mappedBy = "vilkårene")
     private Set<Vilkår> vilkårne = new LinkedHashSet<>();
 
     Vilkårene() {
@@ -139,5 +147,31 @@ public class Vilkårene extends BaseEntitet {
             .map(Vilkår::getPerioder)
             .flatMap(Collection::stream)
             .anyMatch(vp -> Utfall.IKKE_OPPFYLT.equals(vp.getGjeldendeUtfall()));
+    }
+
+    public Optional<Vilkår> getVilkår(VilkårType vilkårType) {
+        return vilkårne.stream().filter(v -> Objects.equals(vilkårType, v.getVilkårType())).findAny();
+    }
+
+    public LocalDateTimeline<VilkårPeriode> getVilkårTimeline(VilkårType vilkårType, LocalDate fom, LocalDate tom) {
+        return getVilkårTimeline(vilkårType).intersection(new LocalDateInterval(fom, tom));
+    }
+
+    @SuppressWarnings("unchecked")
+    private LocalDateTimeline<VilkårPeriode> getVilkårTimeline(VilkårType vilkårType) {
+        var vilkår = getVilkår(vilkårType);
+
+        if (vilkår.isEmpty()) {
+            return LocalDateTimeline.EMPTY_TIMELINE;
+        } else {
+            return new LocalDateTimeline<VilkårPeriode>(vilkår.get().getPerioder().stream()
+                .map(v -> new LocalDateSegment<VilkårPeriode>(v.getFom(), v.getTom(), v)).collect(Collectors.toList()));
+        }
+    }
+
+    public Map<VilkårType, LocalDateTimeline<VilkårPeriode>> getVilkårTidslinjer(DatoIntervallEntitet maksPeriode) {
+        Map<VilkårType, LocalDateTimeline<VilkårPeriode>> map = new EnumMap<>(VilkårType.class);
+        vilkårne.stream().forEach(v -> map.put(v.getVilkårType(), getVilkårTimeline(v.getVilkårType(), maksPeriode.getFomDato(), maksPeriode.getTomDato())));
+        return map;
     }
 }

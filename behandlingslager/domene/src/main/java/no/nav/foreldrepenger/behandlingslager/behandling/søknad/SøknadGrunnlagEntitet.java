@@ -29,7 +29,6 @@ class SøknadGrunnlagEntitet extends BaseEntitet {
     @JoinColumn(name = "soeknad_id", nullable = false, updatable = false, unique = true)
     private SøknadEntitet søknad;
 
-    
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 

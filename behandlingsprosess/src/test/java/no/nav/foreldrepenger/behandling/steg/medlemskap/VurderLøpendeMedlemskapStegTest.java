@@ -30,8 +30,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
@@ -151,9 +151,6 @@ public class VurderLøpendeMedlemskapStegTest {
         Long behandlingId = behandling.getId();
 
         Long revurderingId = behandlingRepository.lagre(revudering, behandlingRepository.taSkriveLås((Long) null));
-
-        Behandlingsresultat.Builder builder = Behandlingsresultat.builderForInngangsvilkår();
-        Behandlingsresultat behandlingsresultat = builder.buildFor(revudering);
 
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(behandlingId, revurderingId);
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(behandlingId, revurderingId);

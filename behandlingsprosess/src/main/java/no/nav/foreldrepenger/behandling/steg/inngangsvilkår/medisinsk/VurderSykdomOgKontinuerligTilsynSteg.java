@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.behandling.steg.inngangsvilkår.medisinsk;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -148,7 +147,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
                 Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
                 RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
-                ryddVilkårTyper.ryddVedTilbakeføring(List.of(VILKÅRET));
+                ryddVilkårTyper.ryddVedTilbakeføring();
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
         });

@@ -24,7 +24,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingL�
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -96,7 +95,6 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
     public void skal_opprette_vurder_dokument_oppgave_dersom_avslått_behandling() {
         // Arrange - opprette avsluttet førstegangsbehandling
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medVilkårResultatType(ResultatType.AVSLÅTT);
         Behandling behandling = scenario.lagre(repositoryProvider);
         avsluttBehandling(behandling, VedtakResultatType.AVSLAG);
         behandling = behandlingRepository.hentBehandling(behandling.getId());
@@ -109,7 +107,8 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
+            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
         verify(dokumentmottakerFelles).opprettTaskForÅVurdereDokument(behandling.getFagsak(), behandling, mottattDokument);
     }
 
@@ -117,8 +116,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
     public void skal_opprette_førstegangsbehandling_dersom_avslått_behandling_har_entydig_avslag() {
         // Arrange - opprette avsluttet førstegangsbehandling
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medVilkårResultatType(ResultatType.AVSLÅTT)
-            .leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_OPPFYLT);
+        scenario.leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_OPPFYLT);
         Behandling behandling = scenario.lagre(repositoryProvider);
         behandling.avsluttBehandling();
         avsluttBehandling(behandling, VedtakResultatType.AVSLAG);
@@ -137,14 +135,14 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
+            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
     }
 
     @Test
     public void skal_opprette_vurder_dokument_oppgave_dersom_opphørt_behandling() {
         // Arrange - opprette avsluttet førstegangsbehandling
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medVilkårResultatType(ResultatType.AVSLÅTT);
         Behandling behandling = scenario.lagre(repositoryProvider);
         behandling.avsluttBehandling();
         avsluttBehandling(behandling, VedtakResultatType.OPPHØR);
@@ -158,7 +156,8 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
+            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
         verify(dokumentmottakerFelles).opprettTaskForÅVurdereDokument(behandling.getFagsak(), behandling, mottattDokument);
     }
 
@@ -166,8 +165,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
     public void skal_ikke_opprette_førstegangsbehandling_dersom_opphørt_behandling() {
         // Arrange - opprette avsluttet førstegangsbehandling
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medVilkårResultatType(ResultatType.INNVILGET)
-            .leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_OPPFYLT);
+        scenario.leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_OPPFYLT);
         Behandling behandling = scenario.lagre(repositoryProvider);
         behandling.avsluttBehandling();
         avsluttBehandling(behandling, VedtakResultatType.OPPHØR);
@@ -181,7 +179,8 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
+            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
         verify(behandlingsoppretter, times(0)).opprettFørstegangsbehandling(any(), any(), any());
     }
 

@@ -9,8 +9,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæringer;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped

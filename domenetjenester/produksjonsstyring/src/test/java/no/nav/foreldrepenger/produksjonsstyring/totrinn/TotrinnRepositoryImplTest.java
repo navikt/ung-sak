@@ -32,8 +32,10 @@ import no.nav.k9.sak.typer.PersonIdent;
 
 public class TotrinnRepositoryImplTest {
 
-    private static final AksjonspunktDefinisjon AKSDEF = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
-   
+    private static final AksjonspunktDefinisjon AKSDEF_01 = AksjonspunktDefinisjon.values()[0];
+    private static final AksjonspunktDefinisjon AKSDEF_02 = AksjonspunktDefinisjon.values()[1];
+    private static final AksjonspunktDefinisjon AKSDEF_03 = AksjonspunktDefinisjon.values()[2];
+    
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     
@@ -89,11 +91,11 @@ public class TotrinnRepositoryImplTest {
 
         // Opprett vurderinger som skal være inaktive
         Totrinnsvurdering inaktivTotrinnsvurdering1 = lagTotrinnsvurdering(behandling,
-            AKSDEF, true, "", VurderÅrsak.FEIL_FAKTA);
+            AKSDEF_01, true, "", VurderÅrsak.FEIL_FAKTA);
         Totrinnsvurdering inaktivTotrinnsvurdering2 = lagTotrinnsvurdering(behandling,
-            AKSDEF, true, "", VurderÅrsak.FEIL_FAKTA);
+            AKSDEF_02, true, "", VurderÅrsak.FEIL_FAKTA);
         Totrinnsvurdering inaktivTotrinnsvurdering3 = lagTotrinnsvurdering(behandling,
-            AKSDEF, true, "", VurderÅrsak.FEIL_FAKTA);
+            AKSDEF_03, true, "", VurderÅrsak.FEIL_FAKTA);
 
         List<Totrinnsvurdering> inaktivTotrinnsvurderingList = new ArrayList<>();
         inaktivTotrinnsvurderingList.add(inaktivTotrinnsvurdering1);
@@ -103,11 +105,11 @@ public class TotrinnRepositoryImplTest {
 
         // Opprett vurderinger som skal være aktive
         Totrinnsvurdering aktivTotrinnsvurdering1 = lagTotrinnsvurdering(behandling,
-            AKSDEF, false, "", VurderÅrsak.FEIL_FAKTA);
+            AKSDEF_01, false, "", VurderÅrsak.FEIL_FAKTA);
         Totrinnsvurdering aktivTotrinnsvurdering2 = lagTotrinnsvurdering(behandling,
-            AKSDEF, false, "", VurderÅrsak.FEIL_FAKTA);
+            AKSDEF_02, false, "", VurderÅrsak.FEIL_FAKTA);
         Totrinnsvurdering aktivTotrinnsvurdering3 = lagTotrinnsvurdering(behandling,
-            AKSDEF, false, "", VurderÅrsak.FEIL_FAKTA);
+            AKSDEF_03, false, "", VurderÅrsak.FEIL_FAKTA);
 
         List<Totrinnsvurdering> aktivTotrinnsvurderingList = new ArrayList<>();
         aktivTotrinnsvurderingList.add(aktivTotrinnsvurdering1);

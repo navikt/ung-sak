@@ -1,9 +1,6 @@
 package no.nav.foreldrepenger.skjæringstidspunkt;
 
 import java.time.LocalDate;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 

@@ -30,10 +30,7 @@ public class TotrinnRepository {
 
     private void lagreTotrinnsresultatgrunnlag(Totrinnresultatgrunnlag totrinnresultatgrunnlag) {
         entityManager.persist(totrinnresultatgrunnlag);
-    }
-
-    private void lagreTotrinnaksjonspunktvurdering(Totrinnsvurdering totrinnsvurdering) {
-        entityManager.persist(totrinnsvurdering);
+        entityManager.flush(); // må flushe pga aktiv flagg
     }
 
     public void lagreOgFlush(Behandling behandling, Totrinnresultatgrunnlag totrinnresultatgrunnlag) {
@@ -42,11 +39,11 @@ public class TotrinnRepository {
         Optional<Totrinnresultatgrunnlag> aktivtTotrinnresultatgrunnlag = getAktivtTotrinnresultatgrunnlag(behandling);
         if (aktivtTotrinnresultatgrunnlag.isPresent()) {
             Totrinnresultatgrunnlag grunnlag = aktivtTotrinnresultatgrunnlag.get();
-            grunnlag.setAktiv(false);
+            grunnlag.deaktiver();
             entityManager.persist(grunnlag);
+            entityManager.flush(); // må flushe pga aktiv flagg
         }
         lagreTotrinnsresultatgrunnlag(totrinnresultatgrunnlag);
-        entityManager.flush();
     }
 
     public void lagreOgFlush(Behandling behandling, Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger) {
@@ -55,11 +52,12 @@ public class TotrinnRepository {
         Collection<Totrinnsvurdering> aktiveVurderinger = getAktiveTotrinnaksjonspunktvurderinger(behandling);
         if (!aktiveVurderinger.isEmpty()) {
             aktiveVurderinger.forEach(vurdering -> {
-                vurdering.setAktiv(false);
+                vurdering.deaktiver();
                 entityManager.persist(vurdering);
             });
+            entityManager.flush(); // må flushe pga aktiv flagg
         }
-        totrinnaksjonspunktvurderinger.forEach(this::lagreTotrinnaksjonspunktvurdering);
+        totrinnaksjonspunktvurderinger.forEach(v -> entityManager.persist(v));
         entityManager.flush();
     }
 

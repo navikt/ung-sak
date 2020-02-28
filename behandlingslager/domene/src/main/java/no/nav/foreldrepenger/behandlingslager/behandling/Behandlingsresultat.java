@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.behandlingslager.behandling;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
@@ -27,15 +26,11 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.VedtakKodeverdiConverter;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 @Entity(name = "Behandlingsresultat")
 @Table(name = "BEHANDLING_RESULTAT")
@@ -56,16 +51,12 @@ public class Behandlingsresultat extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "behandlingsresultat")
+    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "behandlingsresultat")
     private BehandlingVedtak behandlingVedtak;
 
     @Convert(converter = BehandlingResultatKodeverdiConverter.class)
     @Column(name = "behandling_resultat_type", nullable = false)
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
-
-    @Convert(converter = AvslagsårsakKodeverdiConverter.class)
-    @Column(name = "avslag_arsak", nullable = false)
-    private Avslagsårsak avslagsårsak = Avslagsårsak.UDEFINERT;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BehandlingsresultatKonsekvensForYtelsen> konsekvenserForYtelsen = new ArrayList<>();
@@ -93,7 +84,7 @@ public class Behandlingsresultat extends BaseEntitet {
     }
 
     public static Builder builderForInngangsvilkår() {
-        return new Builder(Vilkårene.builder());
+        return new Builder();
     }
 
     public static Builder builder() {
@@ -139,28 +130,12 @@ public class Behandlingsresultat extends BaseEntitet {
         return behandlingResultatType;
     }
 
-    public Avslagsårsak getAvslagsårsak() {
-        return Objects.equals(avslagsårsak, Avslagsårsak.UDEFINERT) ? null : avslagsårsak;
-    }
-
-    public void setAvslagsårsak(Avslagsårsak avslagsårsak) {
-        this.avslagsårsak = Optional.ofNullable(avslagsårsak).orElse(Avslagsårsak.UDEFINERT);
-    }
-
     public String getAvslagarsakFritekst() {
         return avslagarsakFritekst;
     }
 
     public void setAvslagarsakFritekst(String avslagarsakFritekst) {
         this.avslagarsakFritekst = avslagarsakFritekst;
-    }
-
-    public String getOverskrift() {
-        return overskrift;
-    }
-
-    public String getFritekstbrev() {
-        return fritekstbrev;
     }
 
     public List<KonsekvensForYtelsen> getKonsekvenserForYtelsen() {
@@ -188,12 +163,12 @@ public class Behandlingsresultat extends BaseEntitet {
         // Behandlingsresultat skal p.t. kun eksisterere dersom parent Behandling allerede er persistert.
         // Det syntaktisk korrekte vil derfor være at subaggregat Behandlingsresultat med 1:1-forhold til parent
         // Behandling har også sin id knyttet opp mot Behandling alene.
-        return getBehandling().equals(that.getBehandling());
+        return getBehandlingId().equals(that.getBehandlingId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBehandling());
+        return Objects.hash(getBehandlingId());
     }
 
     public boolean isBehandlingHenlagt() {
@@ -213,14 +188,6 @@ public class Behandlingsresultat extends BaseEntitet {
         return BehandlingResultatType.OPPHØR.equals(behandlingResultatType);
     }
 
-    public boolean isBehandlingsresultatInnvilget() {
-        return BehandlingResultatType.INNVILGET.equals(behandlingResultatType);
-    }
-
-    public boolean isBehandlingsresultatForeldrepengerEndret() {
-        return BehandlingResultatType.INNVILGET_ENDRING.equals(behandlingResultatType);
-    }
-
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(behandlingResultatType);
     }
@@ -233,9 +200,6 @@ public class Behandlingsresultat extends BaseEntitet {
 
         private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         private boolean built;
-
-        Builder(VilkårResultatBuilder builder) {
-        }
 
         Builder(Behandlingsresultat gammeltResultat, boolean endreEksisterende) {
             if (endreEksisterende) {
@@ -275,12 +239,6 @@ public class Behandlingsresultat extends BaseEntitet {
         public Builder medVedtaksbrev(Vedtaksbrev vedtaksbrev) {
             validerKanModifisere();
             this.behandlingsresultat.vedtaksbrev = vedtaksbrev;
-            return this;
-        }
-
-        public Builder medAvslagsårsak(Avslagsårsak avslagsårsak) {
-            validerKanModifisere();
-            this.behandlingsresultat.avslagsårsak = Optional.ofNullable(avslagsårsak).orElse(Avslagsårsak.UDEFINERT);
             return this;
         }
 

@@ -217,8 +217,7 @@ public class BeregningsgrunnlagRepository {
         Objects.requireNonNull(behandlingId, BEHANDLING_ID);
         Optional<BeregningsgrunnlagGrunnlagEntitet> tidligereAggregat = hentBeregningsgrunnlagGrunnlagEntitet(behandlingId);
         if (tidligereAggregat.isPresent()) {
-            tidligereAggregat.get().setAktiv(false);
-            entityManager.persist(tidligereAggregat.get());
+            setAktivOgLagre(tidligereAggregat.get(), false);
         }
         lagreGrunnlag(nyttGrunnlag);
         entityManager.flush();

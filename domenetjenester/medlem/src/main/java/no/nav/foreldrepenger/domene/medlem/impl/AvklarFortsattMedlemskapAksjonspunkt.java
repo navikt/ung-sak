@@ -8,7 +8,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedle
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -21,13 +20,10 @@ import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderAdapter;
 public class AvklarFortsattMedlemskapAksjonspunkt {
 
     private MedlemskapRepository medlemskapRepository;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
-    public AvklarFortsattMedlemskapAksjonspunkt(BehandlingRepositoryProvider repositoryProvider, SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                                HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+    public AvklarFortsattMedlemskapAksjonspunkt(BehandlingRepositoryProvider repositoryProvider, HistorikkTjenesteAdapter historikkTjenesteAdapter) {
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
     }
 

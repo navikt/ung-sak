@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -65,7 +64,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private Fagsak fagsak;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
-    private ResultatType resultatType = ResultatType.IKKE_FASTSATT;
     private Long fagsakId = nyId();
     private BehandlingRepository mockBehandlingRepository;
     private BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
@@ -254,7 +252,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         lagreInntektArbeidYtelse(lagreIay);
         // opprett og lagre resulater på behandling
-        lagreBehandlingsresultatOgVilkårResultat(repositoryProvider, lås);
+        lagreBehandlingsresultatOgVilkårResultat();
         lagreTilleggsScenarier(repositoryProvider);
 
         // få med behandlingsresultat etc.
@@ -297,7 +295,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         fagsak.setId(fagsakId);
     }
 
-    private void lagreBehandlingsresultatOgVilkårResultat(RepositoryProvider repoProvider, BehandlingLås lås) {
+    private void lagreBehandlingsresultatOgVilkårResultat() {
         // opprett og lagre behandlingsresultat med VilkårResultat og BehandlingVedtak
         (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
             : behandlingresultatBuilder).buildFor(behandling);
