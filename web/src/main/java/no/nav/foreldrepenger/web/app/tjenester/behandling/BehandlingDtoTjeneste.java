@@ -7,6 +7,7 @@ import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUt
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AbstractVedtaksbrevOverstyringshåndterer.FPSAK_LAGRE_FRITEKST_INN_FORMIDLING;
 
 import java.time.LocalDate;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingDataTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.klient.TekstFraSaksbehandler;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -68,6 +70,8 @@ import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.kontrakt.behandling.SkjæringstidspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.konfig.PropertyUtil;
 
 /**
@@ -86,6 +90,7 @@ public class BehandlingDtoTjeneste {
     private BehandlingRepository behandlingRepository;
     private FormidlingDataTjeneste formidlingDataTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     BehandlingDtoTjeneste() {
         // for CDI proxy
@@ -97,10 +102,12 @@ public class BehandlingDtoTjeneste {
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  FormidlingDataTjeneste formidlingDataTjeneste,
+                                 VilkårResultatRepository vilkårResultatRepository,
                                  Unleash unleash) {
 
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.unleash = unleash;
@@ -120,7 +127,7 @@ public class BehandlingDtoTjeneste {
 
         Map<String, String> behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         Map<String, String> behandlingIdQueryParams = Map.of(BehandlingIdDto.NAME, behandling.getUuid().toString()); // legacy param name
-        
+
         // Behandlingsmeny-operasjoner
         dto.leggTil(getFraMap(BehandlingRestTjeneste.HANDLING_RETTIGHETER, "handling-rettigheter", behandlingUuidQueryParams));
         dto.leggTil(post(BehandlingRestTjeneste.BYTT_ENHET_PATH, "bytt-behandlende-enhet", new ByttBehandlendeEnhetDto()));
@@ -138,13 +145,15 @@ public class BehandlingDtoTjeneste {
         // Totrinnsbehandlin
         if (BehandlingStatus.FATTER_VEDTAK.equals(behandling.getStatus())) {
             dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", behandlingUuidQueryParams));
-            dto.leggTil(post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
+            dto.leggTil(
+                post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
         } else if (BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
             dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", behandlingUuidQueryParams));
         }
 
         if (BehandlingType.REVURDERING.equals(behandling.getType())) {
-            dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH, "har-apent-kontroller-revurdering-aksjonspunkt", behandlingUuidQueryParams));
+            dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_KONTROLLER_REVURDERING_PATH, "har-apent-kontroller-revurdering-aksjonspunkt",
+                behandlingUuidQueryParams));
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", behandlingUuidQueryParams));
         }
 
@@ -275,11 +284,23 @@ public class BehandlingDtoTjeneste {
         if (behandlingsresultat == null) {
             return Optional.empty();
         }
+        Long behandlingId = behandling.getId();
+
         BehandlingsresultatDto dto = new BehandlingsresultatDto();
         Optional<TekstFraSaksbehandler> tekstFraSaksbehandlerOptional = Optional.empty();
         dto.setId(behandlingsresultat.getId());
         dto.setType(behandlingsresultat.getBehandlingResultatType());
-        dto.setAvslagsarsak(behandlingsresultat.getAvslagsårsak());
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+        if (vilkårene.isPresent()) {
+            var vilkårResultater = vilkårene.get().getVilkårene().stream()
+                .flatMap(vt -> vt.getPerioder().stream())
+                .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
+                    new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            dto.setVilkårResultat(vilkårResultater);
+        }
+
         dto.setKonsekvenserForYtelsen(behandlingsresultat.getKonsekvenserForYtelsen());
         dto.setSkjæringstidspunkt(finnSkjæringstidspunktForBehandling(behandling).orElse(null));
         dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(behandling));
@@ -296,8 +317,8 @@ public class BehandlingDtoTjeneste {
         } else {
             dto.setAvslagsarsakFritekst(behandlingsresultat.getAvslagarsakFritekst());
             dto.setVedtaksbrev(behandlingsresultat.getVedtaksbrev());
-            dto.setOverskrift(behandlingsresultat.getOverskrift());
-            dto.setFritekstbrev(behandlingsresultat.getFritekstbrev());
+            dto.setOverskrift("TODO HENT OVERSKRIFT FRA K9-FORMIDLING");
+            dto.setFritekstbrev("TODO HENT FRITEKSTBREV FRA K9-FORMIDLING");
         }
         return Optional.of(dto);
     }

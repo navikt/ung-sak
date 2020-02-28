@@ -42,7 +42,7 @@ public class BehandlingÅrsakDtoTest {
     public void setup() {
         skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(repositoryProvider.getBehandlingRepository(), repositoryProvider.getOpptjeningRepository(), fordelingRepository, vilkårResultatRepository);
         var beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
-        behandlingDtoTjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null, unleash);
+        behandlingDtoTjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null, vilkårResultatRepository, unleash);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);

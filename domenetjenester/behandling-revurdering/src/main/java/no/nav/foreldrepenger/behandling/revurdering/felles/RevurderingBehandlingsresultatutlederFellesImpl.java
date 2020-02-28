@@ -103,7 +103,6 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
             behandlingsresultatBuilder.medBehandlingResultatType(BehandlingResultatType.OPPHØR);
             behandlingsresultatBuilder.leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.YTELSE_OPPHØRER);
             behandlingsresultatBuilder.medVedtaksbrev(Vedtaksbrev.AUTOMATISK);
-            behandlingsresultat.setAvslagsårsak(utfall.getElement2());
             return behandlingsresultatBuilder.buildFor(revurdering);
         }
 

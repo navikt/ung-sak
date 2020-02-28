@@ -18,7 +18,6 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParamet
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;

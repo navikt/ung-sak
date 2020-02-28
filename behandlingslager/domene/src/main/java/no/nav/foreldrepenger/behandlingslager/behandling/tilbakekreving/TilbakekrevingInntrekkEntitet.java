@@ -21,11 +21,9 @@ public class TilbakekrevingInntrekkEntitet extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
-    
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
-    
     @Column(name = "avslaatt_inntrekk", nullable = false)
     private boolean avslåttInntrekk;
 

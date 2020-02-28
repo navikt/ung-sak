@@ -16,19 +16,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingKandidaterRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.testutilities.aktør.NavBrukerBuilder;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
@@ -42,15 +39,12 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 @RunWith(CdiRunner.class)
 public class BehandlingRepositoryImplTest {
-
-    private static final String ANSVARLIG_SAKSBEHANDLER = "Ansvarlig Saksbehandler";
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -216,7 +210,7 @@ public class BehandlingRepositoryImplTest {
     @Test
     public void skal_kunne_lagre_konsekvens_for_ytelsen() {
         behandling = opprettBehandlingMedTermindato();
-        Behandlingsresultat behandlingsresultat = oppdaterMedBehandlingsresultatOgLagre(behandling, true, false);
+        Behandlingsresultat behandlingsresultat = oppdaterMedBehandlingsresultatOgLagre(behandling, false);
 
         setKonsekvensForYtelsen(behandlingsresultat, List.of(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK));
         List<BehandlingsresultatKonsekvensForYtelsen> brKonsekvenser = repository.hentAlle(BehandlingsresultatKonsekvensForYtelsen.class);
@@ -229,7 +223,7 @@ public class BehandlingRepositoryImplTest {
     @Test
     public void dersom_man_lagrer_konsekvens_for_ytelsen_flere_ganger_skal_kun_den_siste_lagringen_gjelde() {
         behandling = opprettBehandlingMedTermindato();
-        Behandlingsresultat behandlingsresultat = oppdaterMedBehandlingsresultatOgLagre(behandling, true, false);
+        Behandlingsresultat behandlingsresultat = oppdaterMedBehandlingsresultatOgLagre(behandling, false);
 
         setKonsekvensForYtelsen(behandlingsresultat, List.of(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK));
         behandling = behandlingRepository.hentBehandling(behandling.getId());
@@ -549,35 +543,9 @@ public class BehandlingRepositoryImplTest {
         return aksjonspunkt;
     }
 
-    private Fagsak byggFagsak(AktørId aktørId) {
-        NavBruker navBruker = new NavBrukerBuilder()
-            .medAktørId(aktørId)
-            .build();
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad()
-            .medBruker(navBruker).build();
-        fagsakRepository.opprettNy(fagsak);
-        return fagsak;
-    }
-
-    private Behandling byggBehandlingForElektroniskSøknad(Fagsak fagsak, LocalDate mottattDato) {
-        Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
-        Behandling behandling = behandlingBuilder.build();
-        behandling.setAnsvarligSaksbehandler(ANSVARLIG_SAKSBEHANDLER);
-        lagreBehandling(behandling);
-        var søknad = new SøknadEntitet.Builder()
-            .medSøknadsdato(LocalDate.now())
-            .medMottattDato(mottattDato)
-            .medElektroniskRegistrert(true)
-            .build();
-        repositoryProvider.getSøknadRepository().lagreOgFlush(behandling, søknad);
-
-        return behandling;
-
-    }
-
     private BehandlingVedtak.Builder opprettBuilderForVedtak() {
         behandling = opprettBehandlingMedTermindato();
-        oppdaterMedBehandlingsresultatOgLagre(behandling, true, false);
+        oppdaterMedBehandlingsresultatOgLagre(behandling, false);
 
         return BehandlingVedtak.builder().medVedtakstidspunkt(LocalDateTime.now())
             .medAnsvarligSaksbehandler("Janne Hansen")
@@ -609,7 +577,7 @@ public class BehandlingRepositoryImplTest {
         return behandling;
     }
 
-    private Behandlingsresultat oppdaterMedBehandlingsresultatOgLagre(Behandling behandling, boolean innvilget, boolean henlegg) {
+    private Behandlingsresultat oppdaterMedBehandlingsresultatOgLagre(Behandling behandling, boolean henlegg) {
 
         Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
         if (henlegg) {

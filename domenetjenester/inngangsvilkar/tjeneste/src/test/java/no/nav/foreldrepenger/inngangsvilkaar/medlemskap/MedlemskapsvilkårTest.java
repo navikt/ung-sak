@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
@@ -44,9 +43,7 @@ import no.nav.foreldrepenger.domene.medlem.MedlemskapPerioderTjeneste;
 import no.nav.foreldrepenger.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.InngangsvilkårOversetter;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjenesteImpl;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
@@ -94,7 +91,7 @@ public class MedlemskapsvilkårTest {
     @Before
     public void before() throws Exception {
         final var oversetter = new InngangsvilkårOversetter(medisinskGrunnlagRepository,
-            personopplysningTjeneste, iayTjeneste, repositoryProvider.getMedlemskapRepository());
+            personopplysningTjeneste);
 
         this.vilkår = new VurderLøpendeMedlemskap(personopplysningTjeneste, repositoryProvider.getBehandlingRepository(), repositoryProvider.getMedlemskapRepository(), oversetter, new MedlemskapPerioderTjeneste(), utledVurderingsdatoerMedlemskapTjeneste, iayTjeneste);
     }

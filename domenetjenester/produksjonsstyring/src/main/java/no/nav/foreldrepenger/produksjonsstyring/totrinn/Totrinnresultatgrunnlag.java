@@ -63,10 +63,6 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
         return aktiv;
     }
 
-    public void setAktiv(boolean aktiv) {
-        this.aktiv = aktiv;
-    }
-
     public Optional<Long> getBeregningsgrunnlagId() {
         return Optional.ofNullable(beregningsgrunnlagId);
     }
@@ -81,5 +77,9 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
 
     public void setGrunnlagUuid(UUID iayGrunnlagUuid) {
         this.iayGrunnlagUuid = iayGrunnlagUuid;
+    }
+
+    public void deaktiver() {
+        this.aktiv = false;
     }
 }

@@ -92,8 +92,9 @@ public class BeregningsresultatRepository {
     private void lagreOgFlush(Behandling behandling, BehandlingBeregningsresultatBuilder builder) {
         Optional<BehandlingBeregningsresultatEntitet> tidligereAggregat = hentBeregningsresultatAggregat(behandling.getId());
         if (tidligereAggregat.isPresent()) {
-            tidligereAggregat.get().setAktiv(false);
+            tidligereAggregat.get().deaktiver();
             entityManager.persist(tidligereAggregat.get());
+            entityManager.flush();
         }
         BehandlingBeregningsresultatEntitet aggregatEntitet = builder.build(behandling.getId());
         entityManager.persist(aggregatEntitet.getBgBeregningsresultat());
@@ -126,14 +127,12 @@ public class BeregningsresultatRepository {
 
     public void deaktiverBeregningsresultat(Long behandlingId, BehandlingLås skriveLås) {
         Optional<BehandlingBeregningsresultatEntitet> aggregatOpt = hentBeregningsresultatAggregat(behandlingId);
-        aggregatOpt.ifPresent(aggregat -> setAktivOgLagre(aggregat, false));
+        aggregatOpt.ifPresent(aggregat -> {
+            aggregat.deaktiver();
+            entityManager.persist(aggregat);
+            entityManager.flush();
+        });
         verifiserBehandlingLås(skriveLås);
-        entityManager.flush();
-    }
-
-    private void setAktivOgLagre(BehandlingBeregningsresultatEntitet aggregat, boolean aktiv) {
-        aggregat.setAktiv(aktiv);
-        entityManager.persist(aggregat);
         entityManager.flush();
     }
 

@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.fordeling;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Fordeling")
 @Table(name = "FO_FORDELING")
@@ -24,7 +26,7 @@ public class Fordeling extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_FO_FORDELING")
     private Long id;
 
-    @OneToMany(mappedBy = "fordeling", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "fordeling", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
     private Set<FordelingPeriode> perioder;
 
     @Version
@@ -50,6 +52,22 @@ public class Fordeling extends BaseEntitet {
         return perioder;
     }
 
+    public DatoIntervallEntitet getMaksPeriode() {
+        var perioder = getPerioder();
+        var fom = perioder.stream()
+            .map(FordelingPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getFomDato)
+            .min(LocalDate::compareTo)
+            .orElseThrow();
+        var tom = perioder.stream()
+            .map(FordelingPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getTomDato)
+            .max(LocalDate::compareTo)
+            .orElseThrow();
+
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+    }
+
     @Override
     public String toString() {
         return "Fordeling{" +
@@ -60,8 +78,10 @@ public class Fordeling extends BaseEntitet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Fordeling fordeling = (Fordeling) o;
         return Objects.equals(perioder, fordeling.perioder);
     }

@@ -39,7 +39,6 @@ public class UttakResultatEntitet extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -106,7 +105,7 @@ public class UttakResultatEntitet extends BaseEntitet {
 
         public UttakResultatEntitet build() {
             if (kladd.getOverstyrtPerioder() != null && kladd.getOpprinneligPerioder() == null) {
-                throw UttakFeil.FACTORY.manueltFastettePerioderManglerEksisterendeResultat(kladd.behandlingsresultat.getBehandling()).toException();
+                throw UttakFeil.FACTORY.manueltFastettePerioderManglerEksisterendeResultat(kladd.behandlingsresultat.getBehandlingId()).toException();
             }
             return kladd;
         }

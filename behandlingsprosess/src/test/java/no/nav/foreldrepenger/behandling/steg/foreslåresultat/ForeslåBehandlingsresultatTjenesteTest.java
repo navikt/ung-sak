@@ -9,6 +9,9 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,18 +23,20 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandling.revurdering.ytelse.HarEtablertYtelseImpl;
 import no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
-import no.nav.foreldrepenger.behandling.steg.foreslåresultat.AvslagsårsakTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
@@ -39,6 +44,7 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -55,33 +61,41 @@ import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
 public class ForeslåBehandlingsresultatTjenesteTest {
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
+    private static final LocalDate FOM = LocalDate.now();
+    private static final LocalDate TOM = FOM.plusWeeks(6);
+
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = FOM;
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private final EntityManager entityManager = repoRule.getEntityManager();
+    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste = mock(DokumentBehandlingTjeneste.class);
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
-    private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
-    private ForeslåBehandlingsresultatTjenesteImpl tjeneste;
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
+
+    private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
+    private ForeslåBehandlingsresultatTjeneste tjeneste;
+
+    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste = mock(DokumentBehandlingTjeneste.class);
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
+    private FordelingRepository fordelingRepository = mock(FordelingRepository.class);
 
     @Before
     public void setup() {
-        AvslagsårsakTjeneste avslagsårsakTjeneste = new AvslagsårsakTjeneste();
+        when(fordelingRepository.hent(any())).thenReturn(new Fordeling(Set.of(new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
+        
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,
             beregningsgrunnlagTjeneste,
             new HarEtablertYtelseImpl(),
             skjæringstidspunktTjeneste,
             medlemTjeneste));
-        tjeneste = new ForeslåBehandlingsresultatTjenesteImpl(repositoryProvider,
-            avslagsårsakTjeneste,
+        tjeneste = new ForeslåBehandlingsresultatTjeneste(repositoryProvider,
             dokumentBehandlingTjeneste,
+            fordelingRepository,
             revurderingBehandlingsresultatutleder);
     }
 
@@ -108,21 +122,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
                 .medFørsteUttaksdato(SKJÆRINGSTIDSPUNKT.plusDays(1))
                 .build());
         return tjeneste.foreslåBehandlingsresultat(ref);
-    }
-
-    @Test
-    public void skalFjerneAvslagsårsakNårInnvilget() {
-        // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        inngangsvilkårOgUttak(behandling, Utfall.OPPFYLT);
-        getBehandlingsresultat(behandling).setAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON);
-
-        // Act
-        Behandlingsresultat behandlingsresultat = foreslåBehandlingsresultat(behandling);
-
-        // Assert
-        assertThat(behandlingsresultat.getAvslagsårsak()).isNull();
     }
 
     @Test
@@ -240,7 +239,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     private void lagreUttak(Behandling behandling) {
         UttakResultatPerioderEntitet uttakResultatPerioder = new UttakResultatPerioderEntitet();
-        UttakResultatPeriodeEntitet uttakResultatPeriode = new UttakResultatPeriodeEntitet.Builder(LocalDate.now(), LocalDate.now().plusWeeks(6))
+        UttakResultatPeriodeEntitet uttakResultatPeriode = new UttakResultatPeriodeEntitet.Builder(FOM, TOM)
             .medPeriodeResultat(PeriodeResultatType.INNVILGET, PeriodeResultatÅrsak.UKJENT)
             .build();
         uttakResultatPerioder.leggTilPeriode(uttakResultatPeriode);

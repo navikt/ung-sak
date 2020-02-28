@@ -1,12 +1,7 @@
 package no.nav.foreldrepenger.domene.medlem.impl;
 
 import java.time.LocalDate;
-import java.util.Optional;
-
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;

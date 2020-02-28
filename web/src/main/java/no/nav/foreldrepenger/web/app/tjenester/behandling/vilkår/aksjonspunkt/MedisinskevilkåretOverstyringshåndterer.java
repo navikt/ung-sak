@@ -12,7 +12,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.OverstyringMedisinskevilkåretDto;
-import no.nav.k9.sak.kontrakt.medlem.OverstyringMedlemskapsvilkåretDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyringMedisinskevilkåretDto.class, adapter = Overstyringshåndterer.class)

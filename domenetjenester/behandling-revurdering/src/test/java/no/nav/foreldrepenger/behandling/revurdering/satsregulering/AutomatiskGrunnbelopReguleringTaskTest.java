@@ -21,7 +21,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -114,7 +113,6 @@ public class AutomatiskGrunnbelopReguleringTaskTest {
             .medSøknadDato(dato.minusDays(20));
 
         scenario.leggTilVilkår(VilkårType.MEDLEMSKAPSVILKÅRET, Utfall.OPPFYLT);
-        scenario.medVilkårResultatType(ResultatType.INNVILGET);
 
         scenario.medBehandlingVedtak()
             .medVedtakResultatType(VedtakResultatType.INNVILGET)

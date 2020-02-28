@@ -56,7 +56,6 @@ class BeregningsgrunnlagVilkårTjeneste {
         VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(regelEvaluering, regelInput, vilkårOppfylt, vilkårene);
         if (!vilkårOppfylt) {
             Behandlingsresultat.builderEndreEksisterende(behandlingsresultat).medBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
-            behandlingsresultat.setAvslagsårsak(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
             behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), behandlingsresultat);
         }
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());

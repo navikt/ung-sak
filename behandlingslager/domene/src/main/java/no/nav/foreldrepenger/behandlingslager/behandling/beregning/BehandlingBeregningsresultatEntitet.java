@@ -94,4 +94,8 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
     void setSkalHindreTilbaketrekk(Boolean skalHindreTilbaketrekk) {
         this.skalHindreTilbaketrekk = skalHindreTilbaketrekk;
     }
+
+    public void deaktiver() {
+        this.aktiv = false;
+    }
 }

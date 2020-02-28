@@ -16,7 +16,6 @@ import org.hibernate.annotations.Immutable;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæringer;
 
 @Entity(name = "PleiebehovResultat")
 @Table(name = "RS_PLEIEBEHOV")

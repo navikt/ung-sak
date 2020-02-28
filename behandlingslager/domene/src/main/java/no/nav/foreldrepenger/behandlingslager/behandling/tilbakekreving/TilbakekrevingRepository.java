@@ -71,6 +71,7 @@ public class TilbakekrevingRepository {
             TilbakekrevingValgEntitet eksisterendeEntitet = eksisterende.get();
             eksisterendeEntitet.deaktiver();
             entityManager.persist(eksisterendeEntitet);
+            entityManager.flush();
         }
     }
 
@@ -101,6 +102,7 @@ public class TilbakekrevingRepository {
             TilbakekrevingInntrekkEntitet eksisterendeInntrekk = tilbakekrevingInntrekkEntitet.get();
             eksisterendeInntrekk.deaktiver();
             entityManager.persist(eksisterendeInntrekk);
+            entityManager.flush();
         }
     }
 }

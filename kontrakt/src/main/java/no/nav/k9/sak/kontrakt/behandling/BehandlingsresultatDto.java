@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.behandling;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -21,6 +22,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -36,7 +39,7 @@ public class BehandlingsresultatDto {
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String avslagsarsakFritekst;
-
+    
     @JsonProperty(value = "erRevurderingMedUendretUtfall")
     @Valid
     private Boolean erRevurderingMedUendretUtfall;
@@ -78,12 +81,12 @@ public class BehandlingsresultatDto {
     @Valid
     private Vedtaksbrev vedtaksbrev;
 
+    @JsonProperty(value="vilkårResultat")
+    @Valid
+    private Map<VilkårType, VilkårResultatDto> vilkårResultat;
+
     public BehandlingsresultatDto() {
         // trengs for deserialisering av JSON
-    }
-
-    public Avslagsårsak getAvslagsarsak() {
-        return avslagsarsak;
     }
 
     public String getAvslagsarsakFritekst() {
@@ -122,8 +125,8 @@ public class BehandlingsresultatDto {
         return vedtaksbrev;
     }
 
-    public void setAvslagsarsak(Avslagsårsak avslagsarsak) {
-        this.avslagsarsak = avslagsarsak;
+    public Map<VilkårType, VilkårResultatDto> getVilkårResultat() {
+        return vilkårResultat;
     }
 
     public void setAvslagsarsakFritekst(String avslagsarsakFritekst) {
@@ -160,5 +163,9 @@ public class BehandlingsresultatDto {
 
     public void setVedtaksbrev(Vedtaksbrev vedtaksbrev) {
         this.vedtaksbrev = vedtaksbrev;
+    }
+
+    public void setVilkårResultat(Map<VilkårType, VilkårResultatDto> vilkårResultat) {
+        this.vilkårResultat = vilkårResultat;
     }
 }

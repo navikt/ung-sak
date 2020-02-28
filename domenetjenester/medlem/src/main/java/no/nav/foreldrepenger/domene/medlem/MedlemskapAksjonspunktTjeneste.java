@@ -48,6 +48,6 @@ public class MedlemskapAksjonspunktTjeneste {
     }
 
     public void aksjonspunktAvklarFortsattMedlemskap(Long behandlingId, AvklarFortsattMedlemskapAksjonspunktDto adapter) {
-        new AvklarFortsattMedlemskapAksjonspunkt(repositoryProvider, skjæringstidspunktTjeneste, historikkTjenesteAdapter).oppdater(behandlingId, adapter);
+        new AvklarFortsattMedlemskapAksjonspunkt(repositoryProvider, historikkTjenesteAdapter).oppdater(behandlingId, adapter);
     }
 }

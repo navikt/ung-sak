@@ -23,6 +23,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -50,6 +51,9 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private TilbakekrevingRepository tilbakekrevingRepository;
+    
+    @Inject
+    private VilkårResultatRepository vilkårResultatRepository;
 
     private FakeUnleash unleash = new FakeUnleash();
 
@@ -61,6 +65,7 @@ public class BehandlingDtoTjenesteImplTest {
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
         tjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null,
+            vilkårResultatRepository,
             unleash);
     }
 

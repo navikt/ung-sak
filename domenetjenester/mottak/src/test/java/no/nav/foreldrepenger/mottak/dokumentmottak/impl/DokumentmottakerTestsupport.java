@@ -71,8 +71,7 @@ public abstract class DokumentmottakerTestsupport {
                                          VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
 
         scenario.medBehandlingsresultat(Behandlingsresultat.builder()
-            .medBehandlingResultatType(behandlingResultatType)
-            .medAvslagsårsak(avslagsårsak));
+            .medBehandlingResultatType(behandlingResultatType));
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         BehandlingLås behandlingLås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);

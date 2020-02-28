@@ -12,7 +12,6 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
-@SuppressWarnings("unused")
 @ApplicationScoped
 @ProsessTask(SendØkonomiOppdragTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)

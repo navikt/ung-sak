@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -33,6 +34,7 @@ import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.vedtak.felles.jpa.converters.PropertiesToStringConverter;
 
@@ -134,6 +136,14 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
+    
+    public LocalDate getFom() {
+        return periode.getFomDato();
+    }
+    
+    public LocalDate getTom() {
+        return periode.getTomDato();
+    }
 
     void setPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
@@ -229,6 +239,10 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
 
     public String getRegelInput() {
         return regelInput;
+    }
+    
+    public VilkårType getVilkårType() {
+        return vilkår.getVilkårType();
     }
 
     void setRegelInput(String regelInput) {

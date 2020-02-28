@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.behandling.steg.inngangsvilkår;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -41,7 +40,7 @@ public class RyddVilkårTyper {
         this.kontekst = kontekst;
     }
 
-    public void ryddVedTilbakeføring(List<VilkårType> vilkårTyper) {
+    public void ryddVedTilbakeføring() {
         nullstillVedtaksresultat();
     }
 
@@ -58,15 +57,6 @@ public class RyddVilkårTyper {
 
     private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
         return behandling.getBehandlingsresultat();
-    }
-
-    private void slettAvklarteFakta(List<VilkårType> vilkårTyper) {
-        vilkårTyper.forEach(vilkårType -> {
-            Consumer<RyddVilkårTyper> ryddVilkårConsumer = OPPRYDDER_FOR_AVKLARTE_DATA.get(vilkårType);
-            if (ryddVilkårConsumer != null) {
-                ryddVilkårConsumer.accept(this);
-            }
-        });
     }
 
 }

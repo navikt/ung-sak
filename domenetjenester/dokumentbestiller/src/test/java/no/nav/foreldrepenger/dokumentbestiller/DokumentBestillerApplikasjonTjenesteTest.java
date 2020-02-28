@@ -1,27 +1,21 @@
 package no.nav.foreldrepenger.dokumentbestiller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dokumentbestiller.kafka.DokumentKafkaBestiller;
 import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.DokumentbestillingDto;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 
 public class DokumentBestillerApplikasjonTjenesteTest {

@@ -17,10 +17,12 @@ import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
@@ -55,6 +57,8 @@ public class VurderFagsystemTjenesteImplForAvlsluttetFagsakOgAvslåttBehandlingT
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(entityManager);
+    private FordelingRepository fordelingrepository = new FordelingRepository(entityManager);
 
     @Before
     public void setUp() {
@@ -62,7 +66,7 @@ public class VurderFagsystemTjenesteImplForAvlsluttetFagsakOgAvslåttBehandlingT
         DokumentPersistererTjeneste dokumentPersistererTjeneste = new DokumentPersistererTjeneste(mock(MottattDokumentPersistertPubliserer.class));
 
         MottatteDokumentTjeneste mottatteDokumentTjeneste =
-            new MottatteDokumentTjeneste(FRIST_INNSENDING_PERIODE, dokumentPersistererTjeneste, mottatteDokumentRepository, repositoryProvider);
+            new MottatteDokumentTjeneste(FRIST_INNSENDING_PERIODE, dokumentPersistererTjeneste, mottatteDokumentRepository, vilkårResultatRepository, fordelingrepository, repositoryProvider);
 
         VurderFagsystemFellesUtils fellesUtils = new VurderFagsystemFellesUtils(behandlingRepository, mottatteDokumentTjeneste, null);
 
@@ -140,8 +144,7 @@ public class VurderFagsystemTjenesteImplForAvlsluttetFagsakOgAvslåttBehandlingT
             .medSaksnummer(new Saksnummer("2345"))
             .medBehandlingType(behandlingType);
         scenarioES.medBehandlingsresultat(Behandlingsresultat.builder()
-            .medBehandlingResultatType(behandlingResultatType)
-            .medAvslagsårsak(avslagsårsak));
+            .medBehandlingResultatType(behandlingResultatType));
         scenarioES.medBehandlingVedtak()
             .medVedtakstidspunkt(vedtaksdato.atStartOfDay())
             .medVedtakResultatType(vedtakResultatType)

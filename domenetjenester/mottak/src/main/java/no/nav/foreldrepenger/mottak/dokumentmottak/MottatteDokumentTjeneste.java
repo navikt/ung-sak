@@ -11,16 +11,18 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.DokumentPersistererTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.MottattDokumentWrapper;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -31,6 +33,8 @@ public class MottatteDokumentTjeneste {
     private DokumentPersistererTjeneste dokumentPersistererTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private FordelingRepository fordelingRepository;
 
     protected MottatteDokumentTjeneste() {
         // for CDI proxy
@@ -43,11 +47,15 @@ public class MottatteDokumentTjeneste {
     @Inject
     public MottatteDokumentTjeneste(@KonfigVerdi(value = "sak.frist.innsending.dok", defaultVerdi = "P6W") Period fristForInnsendingAvDokumentasjon,
                                     DokumentPersistererTjeneste dokumentPersistererTjeneste,
-                                    MottatteDokumentRepository mottatteDokumentRepository, 
+                                    MottatteDokumentRepository mottatteDokumentRepository,
+                                    VilkårResultatRepository vilkårResultatRepository,
+                                    FordelingRepository fordelingRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.fristForInnsendingAvDokumentasjon = fristForInnsendingAvDokumentasjon;
         this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.fordelingRepository = fordelingRepository;
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
@@ -112,8 +120,16 @@ public class MottatteDokumentTjeneste {
 
     private boolean erAvsluttetPgaManglendeDokumentasjon(Behandling behandling) {
         Objects.requireNonNull(behandling, "Behandling");
-        Optional<Behandlingsresultat> bRes = behandlingRepositoryProvider.getBehandlingsresultatRepository().hentHvisEksisterer(behandling.getId());
-        return bRes.map(Behandlingsresultat::getAvslagsårsak).map(Avslagsårsak.MANGLENDE_DOKUMENTASJON::equals).orElse(Boolean.FALSE);
+        var fordeling = fordelingRepository.hentHvisEksisterer(behandling.getId());
+        var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        if (fordeling.isPresent() && vilkår.isPresent()) {
+            var v = vilkår.get();
+            var maksPeriode = fordeling.get().getMaksPeriode();
+            var vt = v.getVilkårTimeline(VilkårType.SØKERSOPPLYSNINGSPLIKT, maksPeriode.getFomDato(), maksPeriode.getTomDato());
+            return !vt.filterValue(p -> Objects.equals(p.getAvslagsårsak(), Avslagsårsak.MANGLENDE_DOKUMENTASJON)).isEmpty();
+        } else {
+            return false;
+        }
     }
 
 }

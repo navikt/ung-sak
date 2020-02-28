@@ -57,7 +57,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -125,7 +124,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private BehandlingStegType startSteg;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
-    private ResultatType resultatType = ResultatType.IKKE_FASTSATT;
     private Map<VilkårType, Utfall> vilkårTyper = new HashMap<>();
     private List<MedlemskapPerioderEntitet> medlemskapPerioder = new ArrayList<>();
     private Long fagsakId = nyId();
@@ -873,12 +871,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     @SuppressWarnings("unchecked")
     public S leggTilVilkår(VilkårType vilkårType, Utfall utfall) {
         vilkårTyper.put(vilkårType, utfall);
-        return (S) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public S medVilkårResultatType(ResultatType resultatType) {
-        this.resultatType = resultatType;
         return (S) this;
     }
 
