@@ -256,30 +256,4 @@ public class BehandlingsgrunnlagEntitetTest {
         assertThat(medlemskapPerioders).hasSize(2);
         assertThat(medlemskapPerioders).containsExactlyInAnyOrder(medlemskapPerioder1, medlemskapPerioder2);
     }
-
-    @Test
-    public void skal_kunne_lagre_medlemskap() {
-        Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
-        Behandling behandling = behandlingBuilder.build();
-        lagreBehandling(behandling);
-        repository.flushAndClear();
-
-        VurdertMedlemskap vurdertMedlemskap = new VurdertMedlemskapBuilder()
-            .medOppholdsrettVurdering(true)
-            .medLovligOppholdVurdering(true)
-            .medBosattVurdering(true)
-            .build();
-
-        MedlemskapRepository medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-
-        // Act
-        Long behandlingId = behandling.getId();
-        medlemskapRepository.lagreMedlemskapVurdering(behandlingId, vurdertMedlemskap);
-
-        // Assert
-        Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
-        assertThat(medlemskap).isNotNull().isPresent();
-        assertThat(medlemskap.get().getVurdertMedlemskap().get()).isEqualTo(vurdertMedlemskap);
-    }
-
 }

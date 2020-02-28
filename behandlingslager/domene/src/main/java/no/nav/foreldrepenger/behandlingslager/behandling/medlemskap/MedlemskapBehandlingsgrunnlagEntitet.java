@@ -33,7 +33,7 @@ import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 @DynamicUpdate
 public class MedlemskapBehandlingsgrunnlagEntitet extends BaseEntitet {
 
-    
+
     @Column(name = "aktiv", nullable = false)
     private Boolean aktiv = true;
 
@@ -138,8 +138,7 @@ public class MedlemskapBehandlingsgrunnlagEntitet extends BaseEntitet {
 
     MedlemskapAggregat tilAggregat() {
         return new MedlemskapAggregat(
-            this.getVurderingMedlemskapSkjæringstidspunktet(),
-            this.getRegistertMedlemskapPerioder(),
+                this.getRegistertMedlemskapPerioder(),
             this.getOppgittTilknytning(),
             this.getVurderingLøpendeMedlemskap());
     }

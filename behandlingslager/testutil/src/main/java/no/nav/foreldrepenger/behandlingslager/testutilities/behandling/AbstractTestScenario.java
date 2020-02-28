@@ -682,8 +682,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private void lagreMedlemskapOpplysninger(BehandlingRepositoryProvider repositoryProvider, Long behandlingId) {
         repositoryProvider.getMedlemskapRepository().lagreMedlemskapRegisterOpplysninger(behandlingId, medlemskapPerioder);
 
-        VurdertMedlemskap vurdertMedlemskap = medMedlemskap().build();
-        repositoryProvider.getMedlemskapRepository().lagreMedlemskapVurdering(behandlingId, vurdertMedlemskap);
         if (oppgittTilknytningBuilder != null) {
             final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medOppgittTilknytning().build();
             repositoryProvider.getMedlemskapRepository().lagreOppgittTilkytning(behandlingId, oppgittTilknytning);
@@ -855,13 +853,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     protected void utenSøknad() {
         this.søknadBuilder = null;
-    }
-
-    public VurdertMedlemskapBuilder medMedlemskap() {
-        if (vurdertMedlemskapBuilder == null) {
-            vurdertMedlemskapBuilder = new VurdertMedlemskapBuilder();
-        }
-        return vurdertMedlemskapBuilder;
     }
 
     @SuppressWarnings("unchecked")

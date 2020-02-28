@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.medlem;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -55,21 +57,25 @@ public class BekreftBosattVurderingOppdaterer implements AksjonspunktOppdaterer<
             return OppdateringResultat.utenOveropp();
         }
         BekreftedePerioderDto bekreftet = bekreftedeDto.get();
-        boolean totrinn = håndterEndringHistorikk(bekreftet, behandling);
+        boolean totrinn = håndterEndringHistorikk(bekreftet, behandling, param);
         medlemTjeneste.aksjonspunktBekreftBosattVurdering(behandlingId, new BekreftBosattVurderingAksjonspunktDto(bekreftet.getBosattVurdering(), bekreftet.getBegrunnelse()));
 
         return OppdateringResultat.utenTransisjon().medTotrinnHvis(totrinn).build();
     }
 
-    private boolean håndterEndringHistorikk(BekreftedePerioderDto bekreftet, Behandling behandling) {
+    private boolean håndterEndringHistorikk(BekreftedePerioderDto bekreftet, Behandling behandling, AksjonspunktOppdaterParameter param) {
         Boolean bosattVurdering = bekreftet.getBosattVurdering();
         String begrunnelse = bekreftet.getBegrunnelse();
         Long behandlingId = behandling.getId();
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
-        Boolean originalBosattBool = medlemskap.flatMap(MedlemskapAggregat::getVurdertMedlemskap)
-            .map(VurdertMedlemskap::getBosattVurdering).orElse(null);
-        String begrunnelseOrg = medlemskap.flatMap(MedlemskapAggregat::getVurdertMedlemskap)
-            .map(VurdertMedlemskap::getBegrunnelse).orElse(null);
+        Optional<VurdertMedlemskapPeriodeEntitet> løpendeVurderinger = medlemskap.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap);
+        final var vurdertMedlemskap = løpendeVurderinger.map(VurdertMedlemskapPeriodeEntitet::getPerioder)
+            .orElse(Set.of())
+            .stream()
+            .filter(it -> it.getVurderingsdato().equals(param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt()))
+            .findFirst();
+        Boolean originalBosattBool = vurdertMedlemskap.map(VurdertMedlemskap::getBosattVurdering).orElse(null);
+        String begrunnelseOrg = vurdertMedlemskap.map(VurdertMedlemskap::getBegrunnelse).orElse(null);
 
         HistorikkEndretFeltVerdiType originalBosatt = mapTilBosattVerdiKode(originalBosattBool);
         HistorikkEndretFeltVerdiType bekreftetBosatt = mapTilBosattVerdiKode(bosattVurdering);
