@@ -144,20 +144,14 @@ public class MedlemskapRepository {
     public void slettAvklarteMedlemskapsdata(Long behandlingId, BehandlingLås lås) {
         oppdaterLås(lås);
         Optional<MedlemskapBehandlingsgrunnlagEntitet> gr = getAktivtBehandlingsgrunnlag(behandlingId);
-        MedlemskapBehandlingsgrunnlagEntitet nyttGrunnlag = MedlemskapBehandlingsgrunnlagEntitet.fra(gr, behandlingId,
-            (VurdertMedlemskapEntitet) null);
+        MedlemskapBehandlingsgrunnlagEntitet nyttGrunnlag = MedlemskapBehandlingsgrunnlagEntitet.fra(gr, behandlingId
+        );
         lagreOgFlush(behandlingId, gr, nyttGrunnlag);
         getEntityManager().flush();
     }
 
     protected void oppdaterLås(BehandlingLås lås) {
         behandlingLåsRepository.oppdaterLåsVersjon(lås);
-    }
-
-    public void lagreVurdertMedlemskap(VurdertMedlemskapEntitet ny) {
-        EntityManager em = getEntityManager();
-        em.persist(ny);
-        em.flush();
     }
 
     public void lagreOppgittTilknytning(MedlemskapOppgittTilknytningEntitet ny) {
@@ -218,26 +212,6 @@ public class MedlemskapRepository {
             lagreMedlemskapRegistrert(ny);
             return ny;
         }
-    }
-
-    private VurdertMedlemskapEntitet kopierOgLagreHvisEndret(Optional<MedlemskapBehandlingsgrunnlagEntitet> gr,
-                                                             VurdertMedlemskap vurdertMedlemskap) {
-
-        VurdertMedlemskapEntitet ny = new VurdertMedlemskapEntitet(vurdertMedlemskap);
-        if (gr.isPresent()) {
-            VurdertMedlemskapEntitet eksisterende = gr.get().getVurderingMedlemskapSkjæringstidspunktet();
-            boolean erForskjellig = medlemskapAggregatDiffer(false).areDifferent(eksisterende, ny);
-            if (erForskjellig) {
-                lagreVurdertMedlemskap(ny);
-                return ny;
-            } else {
-                return eksisterende;
-            }
-        } else {
-            lagreVurdertMedlemskap(ny);
-            return ny;
-        }
-
     }
 
     private VurdertMedlemskapPeriodeEntitet kopierOgLagreHvisEndret(Optional<MedlemskapBehandlingsgrunnlagEntitet> gr,

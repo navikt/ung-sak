@@ -21,7 +21,6 @@
     <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet"/>
     <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet"/>
     <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRegistrertEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapEntitet"/>
     <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet"/>
     <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet"/>
     <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapBehandlingsgrunnlagEntitet"/>

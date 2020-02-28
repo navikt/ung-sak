@@ -41,9 +41,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOp
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRegistrertEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -119,7 +116,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private Fagsak fagsak;
     private SøknadEntitet.Builder søknadBuilder;
 
-    private VurdertMedlemskapBuilder vurdertMedlemskapBuilder;
     private BehandlingVedtak.Builder behandlingVedtakBuilder;
     private MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder;
     private BehandlingStegType startSteg;
@@ -426,11 +422,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
             @Override
             public void lagreOppgittTilknytning(MedlemskapOppgittTilknytningEntitet ny) {
-                // ignore, tracker kun grunnlag for mock
-            }
-
-            @Override
-            public void lagreVurdertMedlemskap(VurdertMedlemskapEntitet ny) {
                 // ignore, tracker kun grunnlag for mock
             }
 
