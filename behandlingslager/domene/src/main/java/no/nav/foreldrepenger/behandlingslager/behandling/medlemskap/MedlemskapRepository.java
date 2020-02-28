@@ -53,18 +53,6 @@ public class MedlemskapRepository {
         return hentMedlemskap(optGrunnlag);
     }
 
-    /**
-     * Hent kun {@link VurdertMedlemskap} fra Behandling.
-     */
-    public Optional<VurdertMedlemskap> hentVurdertMedlemskap(Long behandlingId) {
-        Optional<MedlemskapAggregat> medlemskap = hentMedlemskap(behandlingId);
-        if (medlemskap.isPresent()) {
-            return medlemskap.get().getVurdertMedlemskap();
-        } else {
-            return Optional.empty();
-        }
-    }
-
     public Optional<VurdertMedlemskapPeriodeEntitet> hentVurdertLøpendeMedlemskap(Long behandlingId) {
         Optional<MedlemskapAggregat> medlemskap = hentMedlemskap(behandlingId);
         if (medlemskap.isPresent()) {
@@ -91,17 +79,6 @@ public class MedlemskapRepository {
         oppdaterLås(nyLås);
     }
 
-    public void kopierGrunnlagFraEksisterendeBehandlingForRevurdering(Long eksisterendeBehandlingId, Long nyBehandlingId) {
-        final BehandlingLås nyLås = taLås(nyBehandlingId);
-        Optional<MedlemskapBehandlingsgrunnlagEntitet> eksisterendeGrunnlag = getAktivtBehandlingsgrunnlag(eksisterendeBehandlingId);
-
-        MedlemskapBehandlingsgrunnlagEntitet nyttGrunnlag = MedlemskapBehandlingsgrunnlagEntitet.forRevurdering(eksisterendeGrunnlag,
-            nyBehandlingId);
-
-        lagreOgFlush(nyBehandlingId, Optional.empty(), nyttGrunnlag);
-        oppdaterLås(nyLås);
-    }
-
     /** Lagre registrert opplysninger om medlemskap (fra MEDL). Merk at implementasjonen står fritt til å ta en kopi av oppgitte data.*/
     public void lagreMedlemskapRegisterOpplysninger(Long behandlingId, Collection<MedlemskapPerioderEntitet> registrertMedlemskap) {
         final BehandlingLås lås = taLås(behandlingId);
@@ -120,16 +97,6 @@ public class MedlemskapRepository {
         EntityManager em = getEntityManager();
         em.persist(ny);
         em.flush();
-    }
-
-    /** Lagre vurderte opplysninger om meldemskap slik det har blitt gjort av Saksbehandler eller av systemet automatisk. Merk at implementasjonen står fritt til å ta en kopi av oppgitte data.*/
-    public void lagreMedlemskapVurdering(Long behandlingId, VurdertMedlemskap vurdertMedlemskap) {
-        final BehandlingLås lås = taLås(behandlingId);
-        Optional<MedlemskapBehandlingsgrunnlagEntitet> gr = getAktivtBehandlingsgrunnlag(behandlingId);
-        VurdertMedlemskapEntitet data = kopierOgLagreHvisEndret(gr, vurdertMedlemskap);
-        MedlemskapBehandlingsgrunnlagEntitet nyttGrunnlag = MedlemskapBehandlingsgrunnlagEntitet.fra(gr, behandlingId, data);
-        lagreOgFlush(behandlingId, gr, nyttGrunnlag);
-        oppdaterLås(lås);
     }
 
     protected void lagreOgFlush(@SuppressWarnings("unused") Long behandlingId,
@@ -177,20 +144,14 @@ public class MedlemskapRepository {
     public void slettAvklarteMedlemskapsdata(Long behandlingId, BehandlingLås lås) {
         oppdaterLås(lås);
         Optional<MedlemskapBehandlingsgrunnlagEntitet> gr = getAktivtBehandlingsgrunnlag(behandlingId);
-        MedlemskapBehandlingsgrunnlagEntitet nyttGrunnlag = MedlemskapBehandlingsgrunnlagEntitet.fra(gr, behandlingId,
-            (VurdertMedlemskapEntitet) null);
+        MedlemskapBehandlingsgrunnlagEntitet nyttGrunnlag = MedlemskapBehandlingsgrunnlagEntitet.fra(gr, behandlingId
+        );
         lagreOgFlush(behandlingId, gr, nyttGrunnlag);
         getEntityManager().flush();
     }
 
     protected void oppdaterLås(BehandlingLås lås) {
         behandlingLåsRepository.oppdaterLåsVersjon(lås);
-    }
-
-    public void lagreVurdertMedlemskap(VurdertMedlemskapEntitet ny) {
-        EntityManager em = getEntityManager();
-        em.persist(ny);
-        em.flush();
     }
 
     public void lagreOppgittTilknytning(MedlemskapOppgittTilknytningEntitet ny) {
@@ -251,26 +212,6 @@ public class MedlemskapRepository {
             lagreMedlemskapRegistrert(ny);
             return ny;
         }
-    }
-
-    private VurdertMedlemskapEntitet kopierOgLagreHvisEndret(Optional<MedlemskapBehandlingsgrunnlagEntitet> gr,
-                                                             VurdertMedlemskap vurdertMedlemskap) {
-
-        VurdertMedlemskapEntitet ny = new VurdertMedlemskapEntitet(vurdertMedlemskap);
-        if (gr.isPresent()) {
-            VurdertMedlemskapEntitet eksisterende = gr.get().getVurderingMedlemskapSkjæringstidspunktet();
-            boolean erForskjellig = medlemskapAggregatDiffer(false).areDifferent(eksisterende, ny);
-            if (erForskjellig) {
-                lagreVurdertMedlemskap(ny);
-                return ny;
-            } else {
-                return eksisterende;
-            }
-        } else {
-            lagreVurdertMedlemskap(ny);
-            return ny;
-        }
-
     }
 
     private VurdertMedlemskapPeriodeEntitet kopierOgLagreHvisEndret(Optional<MedlemskapBehandlingsgrunnlagEntitet> gr,

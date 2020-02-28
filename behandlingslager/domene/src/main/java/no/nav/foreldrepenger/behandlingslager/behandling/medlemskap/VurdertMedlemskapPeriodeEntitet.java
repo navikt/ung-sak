@@ -41,7 +41,7 @@ public class VurdertMedlemskapPeriodeEntitet extends BaseEntitet {
     }
 
     VurdertMedlemskapPeriodeEntitet(VurdertMedlemskapPeriodeEntitet løpendeMedlemskap) {
-        perioder = løpendeMedlemskap.getPerioder().stream().map(VurdertLøpendeMedlemskapEntitet::new).peek(lm -> lm.setPeriodeHolder(this)).collect(Collectors.toSet());
+        perioder = løpendeMedlemskap.perioder.stream().map(VurdertLøpendeMedlemskapEntitet::new).peek(lm -> lm.setPeriodeHolder(this)).collect(Collectors.toSet());
     }
 
     public VurdertLøpendeMedlemskapBuilder getBuilderFor(LocalDate vurderingsdato) {

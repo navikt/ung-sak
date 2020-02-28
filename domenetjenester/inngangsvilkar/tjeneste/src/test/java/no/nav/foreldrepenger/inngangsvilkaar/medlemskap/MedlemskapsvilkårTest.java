@@ -106,7 +106,6 @@ public class MedlemskapsvilkårTest {
     public void skal_vurdere_manuell_avklart_ikke_medlem_som_vilkår_ikke_oppfylt() {
         // Arrange
         var scenario = lagTestScenario(MedlemskapDekningType.FTL_2_7_a, Landkoder.NOR, PersonstatusType.BOSA);
-        scenario.medMedlemskap().medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.UNNTAK);
         Behandling behandling = lagre(scenario);
         final var builder = medlemskapRepository.hentBuilderFor(behandling.getId());
         builder.leggTil(builder.getBuilderFor(SKJÆRINGSTIDSPUNKT)
@@ -158,9 +157,12 @@ public class MedlemskapsvilkårTest {
     public void skal_vurdere_avklart_pliktig_medlem_som_vilkår_oppfylt() throws JsonProcessingException, IOException {
         // Arrange
         var scenario = lagTestScenario(MedlemskapDekningType.FTL_2_7_a, Landkoder.NOR, PersonstatusType.BOSA);
-        scenario.medMedlemskap().medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.MEDLEM);
         leggTilSøker(scenario, PersonstatusType.BOSA, Region.UDEFINERT, Landkoder.SWE);
         Behandling behandling = lagre(scenario);
+        final var builder = medlemskapRepository.hentBuilderFor(behandling.getId());
+        builder.leggTil(builder.getBuilderFor(SKJÆRINGSTIDSPUNKT)
+            .medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.MEDLEM));
+        medlemskapRepository.lagreLøpendeMedlemskapVurdering(behandling.getId(), builder.build());
 
         // Act
         var vilkårDataMap = vilkår.vurderMedlemskap(behandling.getId());
@@ -190,7 +192,6 @@ public class MedlemskapsvilkårTest {
     public void skal_vurdere_utvandret_som_vilkår_ikke_oppfylt_ingen_relevant_arbeid_og_inntekt() {
         // Arrange
         var scenario = lagTestScenario(MedlemskapDekningType.UNNTATT, Landkoder.NOR, PersonstatusType.UTVA);
-        scenario.medMedlemskap().medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.IKKE_RELEVANT);
         Behandling behandling = lagre(scenario);
         final var builder = medlemskapRepository.hentBuilderFor(behandling.getId());
         builder.leggTil(builder.getBuilderFor(SKJÆRINGSTIDSPUNKT)
@@ -219,7 +220,6 @@ public class MedlemskapsvilkårTest {
     public void skal_vurdere_utvandret_som_vilkår_oppfylt_når_relevant_arbeid_og_inntekt_finnes() {
         // Arrange
         var scenario = lagTestScenario(MedlemskapDekningType.UNNTATT, Landkoder.NOR, PersonstatusType.UTVA);
-        scenario.medMedlemskap().medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.IKKE_RELEVANT);
         Behandling behandling = lagre(scenario);
         final var builder = medlemskapRepository.hentBuilderFor(behandling.getId());
         builder.leggTil(builder.getBuilderFor(SKJÆRINGSTIDSPUNKT)
@@ -456,9 +456,12 @@ public class MedlemskapsvilkårTest {
         // Arrange
         var scenario = lagTestScenario(Landkoder.NOR, PersonstatusType.BOSA);
         leggTilSøker(scenario, PersonstatusType.BOSA, Region.UDEFINERT, Landkoder.USA);
-        scenario.medMedlemskap().medBosattVurdering(true).medLovligOppholdVurdering(true);
         Behandling behandling = lagre(scenario);
-
+        final var builder = medlemskapRepository.hentBuilderFor(behandling.getId());
+        builder.leggTil(builder.getBuilderFor(SKJÆRINGSTIDSPUNKT)
+            .medBosattVurdering(true)
+            .medLovligOppholdVurdering(true));
+        medlemskapRepository.lagreLøpendeMedlemskapVurdering(behandling.getId(), builder.build());
         // Act
         var vilkårDataMap = vilkår.vurderMedlemskap(behandling.getId());
         final var vilkårData = vilkårDataMap.get(SKJÆRINGSTIDSPUNKT);
@@ -510,11 +513,14 @@ public class MedlemskapsvilkårTest {
         // Arrange
 
         var scenario = lagTestScenario(MedlemskapDekningType.FTL_2_9_1_c, Landkoder.NOR, PersonstatusType.UREG);
-        scenario.medMedlemskap().medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.IKKE_RELEVANT);
 
         leggTilSøker(scenario, PersonstatusType.UREG, Region.NORDEN, Landkoder.SWE);
 
         Behandling behandling = lagre(scenario);
+        final var builder = medlemskapRepository.hentBuilderFor(behandling.getId());
+        builder.leggTil(builder.getBuilderFor(SKJÆRINGSTIDSPUNKT)
+            .medMedlemsperiodeManuellVurdering(MedlemskapManuellVurderingType.IKKE_RELEVANT));
+        medlemskapRepository.lagreLøpendeMedlemskapVurdering(behandling.getId(), builder.build());
 
         opprettArbeidOgInntektForBehandling(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(5), SKJÆRINGSTIDSPUNKT.plusDays(2));
 

@@ -30,7 +30,6 @@ public class SlettAvklarteDataTest {
     public void skal_slette_avklarte_medlemskapdata() {
         // Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medMedlemskap().build();
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
@@ -45,9 +44,5 @@ public class SlettAvklarteDataTest {
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
         assertThat(medlemskap).isPresent();
 
-        Optional<VurdertMedlemskap> vurdertMedlemskap = medlemskapRepository.hentVurdertMedlemskap(behandlingId);
-        assertThat(vurdertMedlemskap).isNotPresent();
-
-        assertThat(medlemskap.get().getVurdertMedlemskap()).isNotPresent();
     }
 }

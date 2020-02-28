@@ -41,9 +41,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOp
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRegistrertEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -118,7 +115,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private Fagsak fagsak;
     private SøknadEntitet.Builder søknadBuilder;
 
-    private VurdertMedlemskapBuilder vurdertMedlemskapBuilder;
     private BehandlingVedtak.Builder behandlingVedtakBuilder;
     private MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder;
     private BehandlingStegType startSteg;
@@ -428,11 +424,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             }
 
             @Override
-            public void lagreVurdertMedlemskap(VurdertMedlemskapEntitet ny) {
-                // ignore, tracker kun grunnlag for mock
-            }
-
-            @Override
             protected BehandlingLås taLås(Long behandlingId) {
                 return null;
             }
@@ -680,8 +671,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private void lagreMedlemskapOpplysninger(BehandlingRepositoryProvider repositoryProvider, Long behandlingId) {
         repositoryProvider.getMedlemskapRepository().lagreMedlemskapRegisterOpplysninger(behandlingId, medlemskapPerioder);
 
-        VurdertMedlemskap vurdertMedlemskap = medMedlemskap().build();
-        repositoryProvider.getMedlemskapRepository().lagreMedlemskapVurdering(behandlingId, vurdertMedlemskap);
         if (oppgittTilknytningBuilder != null) {
             final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medOppgittTilknytning().build();
             repositoryProvider.getMedlemskapRepository().lagreOppgittTilkytning(behandlingId, oppgittTilknytning);
@@ -853,13 +842,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     protected void utenSøknad() {
         this.søknadBuilder = null;
-    }
-
-    public VurdertMedlemskapBuilder medMedlemskap() {
-        if (vurdertMedlemskapBuilder == null) {
-            vurdertMedlemskapBuilder = new VurdertMedlemskapBuilder();
-        }
-        return vurdertMedlemskapBuilder;
     }
 
     @SuppressWarnings("unchecked")

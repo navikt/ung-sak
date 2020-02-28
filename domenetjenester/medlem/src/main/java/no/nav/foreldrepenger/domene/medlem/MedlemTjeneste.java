@@ -110,6 +110,11 @@ public class MedlemTjeneste {
             .orElse(EndringsresultatSnapshot.utenSnapshot(MedlemskapAggregat.class));
     }
 
+    public Set<AksjonspunktDefinisjon> utledAksjonspunkterForVurderingsDato(BehandlingReferanse ref, LocalDate dato) {
+        final var medlemResultat = vurderMedlemskapTjeneste.vurderMedlemskap(ref, dato);
+        return medlemResultat.stream().map(mr -> mapMedlemResulatTilAkDef.get(mr)).collect(Collectors.toSet());
+    }
+
     /**
      * Sjekker endringer i personopplysninger som tilsier at bruker 'ikke er'/'skal miste' medlemskap.
      * Sjekker statsborgerskap (kun mht endring i {@link Region}, ikke land),

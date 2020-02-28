@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.medlem;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskap;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -52,7 +54,12 @@ public abstract class BekreftOppholdOppdaterer implements AksjonspunktOppdaterer
         }
         BekreftedePerioderDto bekreftet = bekreftedeDto.get();
         Optional<MedlemskapAggregat> medlemskap = medlemTjeneste.hentMedlemskap(behandlingId);
-        Optional<VurdertMedlemskap> vurdertMedlemskap = medlemskap.flatMap(MedlemskapAggregat::getVurdertMedlemskap);
+        Optional<VurdertMedlemskapPeriodeEntitet> løpendeVurderinger = medlemskap.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap);
+        final var vurdertMedlemskap = løpendeVurderinger.map(VurdertMedlemskapPeriodeEntitet::getPerioder)
+            .orElse(Set.of())
+            .stream()
+            .filter(it -> it.getVurderingsdato().equals(param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt()))
+            .findFirst();
 
         Boolean orginalOppholdsrettBool = vurdertMedlemskap.map(VurdertMedlemskap::getOppholdsrettVurdering).orElse(null);
         HistorikkEndretFeltVerdiType orginalOppholdsrett = mapTilOppholdsrettVerdiKode(orginalOppholdsrettBool);

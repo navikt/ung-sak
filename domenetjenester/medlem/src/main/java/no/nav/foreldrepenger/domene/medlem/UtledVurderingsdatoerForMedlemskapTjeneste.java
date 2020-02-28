@@ -98,10 +98,6 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + revurdering.getFagsakYtelseType().getKode()));
         Map<LocalDate, Set<VurderingsÅrsak>> datoer = new HashMap<>();
 
-        //kan ikke gjøre en vurdering hvis det ikke er en revurderingkontekts
-        if (!revurdering.erRevurdering()) {
-            return datoer;
-        }
         LocalDate utledetSkjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(revurdering.getId()).getUtledetSkjæringstidspunkt();
         datoer.putAll(utledVurderingsdatoerForTPS(revurdering, utledetSkjæringstidspunkt));
         datoer.putAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker));
