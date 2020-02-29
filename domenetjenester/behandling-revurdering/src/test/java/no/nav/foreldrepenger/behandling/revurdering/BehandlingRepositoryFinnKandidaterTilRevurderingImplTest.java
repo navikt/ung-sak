@@ -29,7 +29,6 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -134,15 +133,13 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
         Behandling.Builder revurderingBuilder = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
                 .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ANNET));
         Behandling revurderingsBehandling = revurderingBuilder.build();
+        behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-                .buildFor(revurderingsBehandling);
-        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakstidspunkt(LocalDateTime.now())
-                .medBehandlingsresultat(behandlingsresultat).medVedtakResultatType(VedtakResultatType.INNVILGET)
+        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(revurderingsBehandling.getId())
                 .medAnsvarligSaksbehandler("asdf").build();
         revurderingsBehandling.avsluttBehandling();
-        behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(revurderingsBehandling));
+        behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
         Etterkontroll etterkontroll = new Etterkontroll.Builder(revurderingsBehandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake)).medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
         etterkontrollRepository.lagre(etterkontroll);
@@ -169,10 +166,8 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
     private Behandling opprettRevurderingsKandidat() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder()
-                .medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
-        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakstidspunkt(LocalDateTime.now().minusDays(1))
-                .medBehandlingsresultat(behandlingsresultat).medVedtakResultatType(VedtakResultatType.INNVILGET)
+        var behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+                .medVedtakstidspunkt(LocalDateTime.now().minusDays(1))
                 .medAnsvarligSaksbehandler("asdf").build();
 
         behandling.avsluttBehandling();

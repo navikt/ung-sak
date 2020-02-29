@@ -136,7 +136,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private Behandling originalBehandling;
     private BehandlingÅrsakType behandlingÅrsakType;
     private BehandlingRepositoryProvider repositoryProvider;
-    private no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopplysning.PersonInformasjon.Builder personInformasjonBuilder;
+    private PersonInformasjon.Builder personInformasjonBuilder;
     private boolean manueltOpprettet;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
@@ -289,7 +289,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private BehandlingVedtakRepository mockBehandlingVedtakRepository() {
         BehandlingVedtakRepository behandlingVedtakRepository = mock(BehandlingVedtakRepository.class);
         BehandlingVedtak behandlingVedtak = mockBehandlingVedtak();
-        when(behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(Mockito.any())).thenReturn(Optional.of(behandlingVedtak));
+        when(behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(Mockito.any())).thenReturn(Optional.of(behandlingVedtak));
 
         return behandlingVedtakRepository;
     }
@@ -349,7 +349,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(Mockito.any())).thenAnswer(a -> {
             return List.copyOf(behandlingMap.values());
         });
-        when(behandlingRepository.finnUnikBehandlingForBehandlingId(Mockito.any())).thenAnswer(a -> {
+        when(behandlingRepository.hentBehandlingHvisFinnes(Mockito.anyLong())).thenAnswer(a -> {
             Long id = a.getArgument(0);
             return Optional.ofNullable(behandlingMap.getOrDefault(id, null));
         });
@@ -747,9 +747,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         if (behandlingVedtakBuilder != null) {
             // Må lagre Behandling for at Behandlingsresultat ikke skal være transient når BehandlingVedtak blir lagret:
-            repoProvider.getBehandlingRepository().lagre(behandling, lås);
-            behandlingVedtak = behandlingVedtakBuilder.medBehandlingsresultat(behandlingsresultat).build();
-            Whitebox.setInternalState(behandlingsresultat, "behandlingVedtak", behandlingVedtak);
+            behandlingVedtak = behandlingVedtakBuilder.medBehandling(behandling.getId()).build();
             repoProvider.getBehandlingVedtakRepository().lagre(behandlingVedtak, lås);
         }
     }

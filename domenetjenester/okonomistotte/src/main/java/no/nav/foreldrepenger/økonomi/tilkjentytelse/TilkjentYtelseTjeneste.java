@@ -53,7 +53,7 @@ public class TilkjentYtelseTjeneste {
 
     public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId)
+        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
             .orElse(null);
 
         return mapBehandlingsinfo(behandling, vedtak);

@@ -114,13 +114,11 @@ public class VurderBehandlingerUnderIverksettelseTest {
 
     private BehandlingVedtak lagreBehandlingVedtak(Behandling behandling, IverksettingStatus iverksettingStatus) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(3))
             .medAnsvarligSaksbehandler("E2354345")
             .medVedtakResultatType(VedtakResultatType.INNVILGET)
             .medIverksettingStatus(iverksettingStatus)
-            .medBehandlingsresultat(behandlingsresultat)
             .build();
         LocalDateTime opprettetTidspunkt = behandling.erRevurdering() ? LocalDateTime.now().plusSeconds(1) : LocalDateTime.now();
         Whitebox.setInternalState(behandlingVedtak, "opprettetTidspunkt", opprettetTidspunkt);

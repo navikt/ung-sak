@@ -62,11 +62,10 @@ public class BehandlingVedtakTjeneste {
         LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 
         boolean erRevurderingMedUendretUtfall = revurderingTjeneste.erRevurderingMedUendretUtfall(behandling);
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakResultatType(vedtakResultatType)
             .medAnsvarligSaksbehandler(ansvarligSaksbehandler)
             .medVedtakstidspunkt(vedtakstidspunkt)
-            .medBehandlingsresultat(behandling.getBehandlingsresultat())
             .medBeslutning(erRevurderingMedUendretUtfall)
             .build();
         behandlingVedtakRepository.lagre(behandlingVedtak, kontekst.getSkriveLås());

@@ -5,7 +5,7 @@ import static no.nav.foreldrepenger.dokumentbestiller.vedtak.VedtaksbrevUtleder.
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.dokumentbestiller.kafka.DokumentKafkaBestiller;
@@ -23,6 +23,7 @@ public class DokumentBestillerApplikasjonTjeneste {
 
     private BrevHistorikkinnslag brevHistorikkinnslag;
     private DokumentKafkaBestiller dokumentKafkaBestiller;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
 
     public DokumentBestillerApplikasjonTjeneste() {
@@ -31,18 +32,19 @@ public class DokumentBestillerApplikasjonTjeneste {
 
     @Inject
     public DokumentBestillerApplikasjonTjeneste(BehandlingRepository behandlingRepository,
+                                                BehandlingsresultatRepository behandlingsresultatRepository,
                                                 BrevHistorikkinnslag brevHistorikkinnslag,
                                                 FormidlingRestKlient formidlingRestKlient,
                                                 DokumentKafkaBestiller dokumentKafkaBestiller) {
         this.behandlingRepository = behandlingRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.brevHistorikkinnslag = brevHistorikkinnslag;
         this.dokumentKafkaBestiller = dokumentKafkaBestiller;
         this.formidlingRestKlient = formidlingRestKlient;
     }
 
     public void produserVedtaksbrev(BehandlingVedtak behandlingVedtak) {
-        final Behandlingsresultat behandlingsresultat = behandlingVedtak.getBehandlingsresultat();
-
+        var behandlingsresultat = behandlingsresultatRepository.hent(behandlingVedtak.getBehandlingId());
         if (Vedtaksbrev.INGEN.equals(behandlingsresultat.getVedtaksbrev())) {
             return;
         }

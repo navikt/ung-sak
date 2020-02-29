@@ -38,7 +38,7 @@ public class UtledVedtakResultatType {
     }
 
     public static VedtakResultatType utled(Behandling behandling, Optional<LocalDate> opphørsdato, Optional<LocalDate> skjæringstidspunkt) {
-        BehandlingResultatType behandlingResultatType = behandling.getBehandlingsresultat().getBehandlingResultatType();
+        BehandlingResultatType behandlingResultatType = behandling.getBehandlingResultatType();
         return utled(behandling, behandlingResultatType, opphørsdato, skjæringstidspunkt);
     }
 }

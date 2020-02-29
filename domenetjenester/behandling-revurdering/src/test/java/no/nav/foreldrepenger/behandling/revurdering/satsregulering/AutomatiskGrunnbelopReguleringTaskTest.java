@@ -117,8 +117,7 @@ public class AutomatiskGrunnbelopReguleringTaskTest {
         scenario.medBehandlingVedtak()
             .medVedtakResultatType(VedtakResultatType.INNVILGET)
             .medVedtakstidspunkt(dato.minusWeeks(2).atStartOfDay())
-            .medAnsvarligSaksbehandler("Severin Saksbehandler")
-            .build();
+            .medAnsvarligSaksbehandler("Severin Saksbehandler");
 
         scenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
 

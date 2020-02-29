@@ -7,17 +7,13 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.IverksettingStatusKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.VedtakResultatTypeKodeverdiConverter;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
@@ -42,27 +38,29 @@ public class BehandlingVedtak extends BaseEntitet {
     private String ansvarligSaksbehandler;
 
     @Convert(converter = VedtakResultatTypeKodeverdiConverter.class)
-    @Column(name="vedtak_resultat_type", nullable = false)
+    @Column(name = "vedtak_resultat_type", nullable = false)
     private VedtakResultatType vedtakResultatType = VedtakResultatType.UDEFINERT;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "BEHANDLING_RESULTAT_ID", nullable = false, updatable = false, unique = true)
-    private Behandlingsresultat behandlingsresultat;
+    @Column(name = "behandling_id", updatable = false, nullable = false, unique =true)
+    private Long behandlingId;
 
     /**
      * Hvorvidt vedtaket er et "beslutningsvedtak". Et beslutningsvedtak er et vedtak med samme utfall som forrige vedtak.
      *
      * @see https://jira.adeo.no/browse/BEGREP-2012
      */
-    
     @Column(name = "BESLUTNING", nullable = false)
     private boolean beslutningsvedtak;
 
-    @Convert(converter=IverksettingStatusKodeverdiConverter.class)
-    @Column(name="iverksetting_status", nullable = false)
+    @Convert(converter = IverksettingStatusKodeverdiConverter.class)
+    @Column(name = "iverksetting_status", nullable = false)
     private IverksettingStatus iverksettingStatus = IverksettingStatus.UDEFINERT;
 
     private BehandlingVedtak() {
+    }
+
+    public Long getBehandlingId() {
+        return behandlingId;
     }
 
     public Long getId() {
@@ -83,10 +81,6 @@ public class BehandlingVedtak extends BaseEntitet {
 
     public VedtakResultatType getVedtakResultatType() {
         return Objects.equals(VedtakResultatType.UDEFINERT, vedtakResultatType) ? null : vedtakResultatType;
-    }
-
-    public Behandlingsresultat getBehandlingsresultat() {
-        return behandlingsresultat;
     }
 
     public Boolean isBeslutningsvedtak() {
@@ -112,10 +106,6 @@ public class BehandlingVedtak extends BaseEntitet {
         return Objects.hash(vedtakstidspunkt, ansvarligSaksbehandler, getVedtakResultatType());
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public IverksettingStatus getIverksettingStatus() {
         return Objects.equals(IverksettingStatus.UDEFINERT, iverksettingStatus) ? null : iverksettingStatus;
     }
@@ -125,12 +115,16 @@ public class BehandlingVedtak extends BaseEntitet {
     }
 
     public static class Builder {
-        private LocalDateTime vedtakstidspunkt;
+        private LocalDateTime vedtakstidspunkt = LocalDateTime.now();
         private String ansvarligSaksbehandler;
-        private VedtakResultatType vedtakResultatType;
-        private Behandlingsresultat behandlingsresultat;
+        private VedtakResultatType vedtakResultatType = VedtakResultatType.INNVILGET;
         private IverksettingStatus iverksettingStatus = IverksettingStatus.IKKE_IVERKSATT;
         private boolean beslutning = false;
+        private Long behandlingId;
+
+        public Builder(Long behandlingId) {
+            this.behandlingId = behandlingId;
+        }
 
         public Builder medVedtakstidspunkt(LocalDateTime vedtakstidspunkt) {
             this.vedtakstidspunkt = vedtakstidspunkt;
@@ -147,11 +141,6 @@ public class BehandlingVedtak extends BaseEntitet {
             return this;
         }
 
-        public Builder medBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-            this.behandlingsresultat = behandlingsresultat;
-            return this;
-        }
-
         public Builder medIverksettingStatus(IverksettingStatus iverksettingStatus) {
             this.iverksettingStatus = iverksettingStatus;
             return this;
@@ -161,16 +150,21 @@ public class BehandlingVedtak extends BaseEntitet {
             this.beslutning = beslutning;
             return this;
         }
+        
+        public Builder medBehandling(Long behandlingId) {
+            this.behandlingId = behandlingId;
+            return this;
+        }
 
         public BehandlingVedtak build() {
             verifyStateForBuild();
             BehandlingVedtak vedtak = new BehandlingVedtak();
-            vedtak.vedtakstidspunkt = vedtakstidspunkt;
+            vedtak.behandlingId = Objects.requireNonNull(behandlingId, "behandlingId");
+            vedtak.vedtakstidspunkt = Objects.requireNonNull(vedtakstidspunkt, "vedtakstidspunkt");
             vedtak.ansvarligSaksbehandler = ansvarligSaksbehandler;
             vedtak.vedtakResultatType = vedtakResultatType;
-            vedtak.behandlingsresultat = behandlingsresultat;
             vedtak.beslutningsvedtak = beslutning;
-            vedtak.setIverksettingStatus(iverksettingStatus);
+            vedtak.iverksettingStatus = Objects.requireNonNull(iverksettingStatus, "iverksettingStatus");
             return vedtak;
         }
 
@@ -179,6 +173,14 @@ public class BehandlingVedtak extends BaseEntitet {
             Objects.requireNonNull(ansvarligSaksbehandler, "ansvarligSaksbehandler");
             Objects.requireNonNull(vedtakResultatType, "vedtakResultatType");
         }
+    }
+
+    public static Builder builder(Long behandlingId) {
+        return new Builder(behandlingId);
+    }
+    
+    public static Builder builder() {
+        return new Builder(null);
     }
 
 }

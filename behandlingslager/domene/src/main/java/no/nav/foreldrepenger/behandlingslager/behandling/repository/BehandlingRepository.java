@@ -61,7 +61,7 @@ public class BehandlingRepository {
     /**
      * Hent Behandling, der det ikke er gitt at behandlingId er korrekt (eks. for validering av innsendte verdier)
      */
-    public Optional<Behandling> finnUnikBehandlingForBehandlingId(Long behandlingId) {
+    public Optional<Behandling> hentBehandlingHvisFinnes(Long behandlingId) {
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR //$NON-NLS-1$
         return hentUniktResultat(lagBehandlingQuery(behandlingId));
     }
@@ -256,8 +256,7 @@ public class BehandlingRepository {
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT behandling FROM Behandling behandling " +
-                "INNER JOIN Behandlingsresultat behandlingsresultat ON behandling=behandlingsresultat.behandling " +
-                "INNER JOIN BehandlingVedtak behandling_vedtak ON behandlingsresultat=behandling_vedtak.behandlingsresultat " +
+                "INNER JOIN BehandlingVedtak behandling_vedtak ON behandling.id=behandling_vedtak.behandlingId " +
                 "WHERE behandling.status IN :avsluttetOgIverkKode " +
                 "  AND behandling.fagsak.id=:fagsakId " +
                 "ORDER BY behandling_vedtak.vedtakstidspunkt DESC, behandling_vedtak.endretTidspunkt DESC",
@@ -275,8 +274,8 @@ public class BehandlingRepository {
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT behandling FROM Behandling behandling " +
-                "INNER JOIN Behandlingsresultat behandlingsresultat ON behandling=behandlingsresultat.behandling " +
-                "INNER JOIN BehandlingVedtak behandling_vedtak ON behandlingsresultat=behandling_vedtak.behandlingsresultat " +
+                "INNER JOIN Behandlingsresultat behandlingsresultat ON behandling.id=behandlingsresultat.behandling.id " +
+                "INNER JOIN BehandlingVedtak behandling_vedtak ON behandling.id=behandling_vedtak.behandlingId " +
                 "WHERE behandling.status IN :avsluttetOgIverkKode " +
                 "  AND behandlingsresultat.behandlingResultatType IN (:innvilgetKoder) " +
                 "  AND behandling.fagsak.id=:fagsakId " +

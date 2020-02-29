@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
@@ -82,13 +81,9 @@ public class DokumentmottakTestUtil {
     }
 
     public static BehandlingVedtak oppdaterVedtaksresultat(Behandling origBehandling, VedtakResultatType vedtakResultatType) {
-        BehandlingVedtak vedtak = BehandlingVedtak.builder()
+        return BehandlingVedtak.builder(origBehandling.getId())
             .medVedtakResultatType(vedtakResultatType)
-            .medVedtakstidspunkt(LocalDateTime.now())
-            .medBehandlingsresultat(origBehandling.getBehandlingsresultat())
             .medAnsvarligSaksbehandler("Severin Saksbehandler")
             .build();
-
-        return vedtak;
     }
 }

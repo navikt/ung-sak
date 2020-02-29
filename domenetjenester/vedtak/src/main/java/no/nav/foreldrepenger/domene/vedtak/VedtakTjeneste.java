@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -143,14 +144,14 @@ public class VedtakTjeneste {
     }
 
     public VedtakResultatType utledVedtakResultatType(Behandling behandling) {
-        BehandlingResultatType resultatType = behandling.getBehandlingsresultat().getBehandlingResultatType();
+        BehandlingResultatType resultatType = behandling.getBehandlingResultatType();
         return utledVedtakResultatType(behandling, resultatType);
     }
 
     private VedtakResultatType utledVedtakResultatType(Behandling behandling, BehandlingResultatType resultatType) {
         if (BehandlingResultatType.INGEN_ENDRING.equals(resultatType)) {
             Optional<Behandling> originalBehandlingOpt = behandling.getOriginalBehandling();
-            if (originalBehandlingOpt.isPresent() && originalBehandlingOpt.get().getBehandlingsresultat() != null) {
+            if (originalBehandlingOpt.isPresent() && !Objects.equals(originalBehandlingOpt.get().getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
                 return utledVedtakResultatType(originalBehandlingOpt.get());
             }
         }

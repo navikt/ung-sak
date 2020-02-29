@@ -333,8 +333,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         repository.flushAndClear();
         
         // Legg til vedtak
-        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()
-            .medBehandlingsresultat(behandlingsresultat)
+        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakResultatType(VedtakResultatType.INNVILGET)
             .medVedtakstidspunkt(vedtakstidspunkt)
             .medAnsvarligSaksbehandler("asdf").build();

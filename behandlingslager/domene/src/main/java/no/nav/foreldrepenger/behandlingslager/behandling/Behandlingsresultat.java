@@ -17,7 +17,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -25,7 +24,6 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.VedtakKodeverdiConverter;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -50,9 +48,6 @@ public class Behandlingsresultat extends BaseEntitet {
     @ManyToOne(optional = false)
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
-
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "behandlingsresultat")
-    private BehandlingVedtak behandlingVedtak;
 
     @Convert(converter = BehandlingResultatKodeverdiConverter.class)
     @Column(name = "behandling_resultat_type", nullable = false)
@@ -120,10 +115,6 @@ public class Behandlingsresultat extends BaseEntitet {
 
     public Long getBehandlingId() {
         return behandling.getId();
-    }
-
-    public BehandlingVedtak getBehandlingVedtak() {
-        return behandlingVedtak;
     }
 
     public BehandlingResultatType getBehandlingResultatType() {
@@ -239,12 +230,6 @@ public class Behandlingsresultat extends BaseEntitet {
         public Builder medVedtaksbrev(Vedtaksbrev vedtaksbrev) {
             validerKanModifisere();
             this.behandlingsresultat.vedtaksbrev = vedtaksbrev;
-            return this;
-        }
-
-        public Builder medAvslagarsakFritekst(String avslagarsakFritekst) {
-            validerKanModifisere();
-            this.behandlingsresultat.avslagarsakFritekst = avslagarsakFritekst;
             return this;
         }
 

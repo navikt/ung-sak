@@ -52,7 +52,7 @@ public class ForsendelseStatusTjeneste {
     private ForsendelseStatusData getForsendelseStatusDataDTO(Behandling behandling, UUID forsendelseId, JournalpostId journalpostId) {
         ForsendelseStatusData dto;
         if (behandling.erStatusFerdigbehandlet()) {
-            BehandlingResultatType resultat = behandling.getBehandlingsresultat().getBehandlingResultatType();
+            BehandlingResultatType resultat = behandling.getBehandlingResultatType();
             if(resultat.equals(BehandlingResultatType.INNVILGET)) {
                 dto = new ForsendelseStatusData(ForsendelseStatus.INNVILGET);
             } else if(resultat.equals(BehandlingResultatType.AVSLÅTT)) {

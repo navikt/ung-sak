@@ -74,7 +74,7 @@ public class VilkårResultatTest {
         assertThat(getVilkårene(behandling2))
             .isEqualTo(getVilkårene(behandling1));
 
-        Long id02 = behandlingsresultat2.getBehandling().getId();
+        Long id02 = behandlingsresultat2.getBehandlingId();
         assertThat(id02).isNotEqualTo(id01);
     }
 

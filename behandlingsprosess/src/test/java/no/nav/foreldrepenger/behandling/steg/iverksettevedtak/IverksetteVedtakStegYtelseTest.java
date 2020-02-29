@@ -72,7 +72,8 @@ public class IverksetteVedtakStegYtelseTest {
 
     @Before
     public void setup() {
-        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider, opprettProsessTaskIverksett, vurderBehandlingerUnderIverksettelse, iverksettingSkalIkkeStoppesAvOverlappendeYtelse);
+        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider, opprettProsessTaskIverksett, vurderBehandlingerUnderIverksettelse,
+            iverksettingSkalIkkeStoppesAvOverlappendeYtelse);
         behandling = opprettBehandling();
     }
 
@@ -92,11 +93,10 @@ public class IverksetteVedtakStegYtelseTest {
         Historikkinnslag historikkinnslag = historikkRepository.hentHistorikk(behandling.getId()).get(0);
         assertThat(historikkinnslag.getHistorikkinnslagDeler()).hasSize(1);
         HistorikkinnslagDel del1 = historikkinnslag.getHistorikkinnslagDeler().get(0);
-        assertThat(del1.getHendelse()).hasValueSatisfying(hendelse ->
-            assertThat(hendelse.getNavn()).as("navn").isEqualTo(HistorikkinnslagType.IVERKSETTELSE_VENT.getKode()));
+        assertThat(del1.getHendelse())
+            .hasValueSatisfying(hendelse -> assertThat(hendelse.getNavn()).as("navn").isEqualTo(HistorikkinnslagType.IVERKSETTELSE_VENT.getKode()));
         assertThat(del1.getAarsak().get()).isEqualTo(Venteårsak.VENT_TIDLIGERE_BEHANDLING.getKode());
     }
-
 
     @Test
     public void vurder_gitt_venterPåInfotrygd_ikkeVenterTidligereBehandling_skal_gi_empty_og_lagre_overlapp() {
@@ -136,7 +136,6 @@ public class IverksetteVedtakStegYtelseTest {
         return iverksetteVedtakSteg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), lås));
     }
 
-
     private Behandling opprettBehandling() {
         var scenario = TestScenarioBuilder.builderMedSøknad().medBehandlingStegStart(BehandlingStegType.IVERKSETT_VEDTAK);
 
@@ -152,13 +151,11 @@ public class IverksetteVedtakStegYtelseTest {
 
     private BehandlingVedtak opprettBehandlingVedtak(VedtakResultatType resultatType, IverksettingStatus iverksettingStatus) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(3))
             .medAnsvarligSaksbehandler("E2354345")
             .medVedtakResultatType(resultatType)
             .medIverksettingStatus(iverksettingStatus)
-            .medBehandlingsresultat(behandlingsresultat)
             .build();
         behandlingVedtakRepository.lagre(behandlingVedtak, lås);
         return behandlingVedtak;

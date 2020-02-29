@@ -53,6 +53,7 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsystemKodeverkConverte
 import no.nav.foreldrepenger.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -649,14 +650,6 @@ public class Behandling extends BaseEntitet {
         return erHenlagt();
     }
 
-    public LocalDate getOriginalVedtaksDato() {
-        Behandlingsresultat originaltBehandlingsResultat = getBehandlingsresultat();
-        if (originaltBehandlingsResultat == null || originaltBehandlingsResultat.getBehandlingVedtak() == null) {
-            return null;
-        }
-        return getBehandlingsresultat().getBehandlingVedtak().getVedtaksdato();
-    }
-
     public FagsakYtelseType getFagsakYtelseType() {
         return getFagsak().getYtelseType();
     }
@@ -901,6 +894,11 @@ public class Behandling extends BaseEntitet {
 
             return behandling;
         }
+    }
+
+    public BehandlingResultatType getBehandlingResultatType() {
+        var r = getBehandlingsresultat();
+        return r == null ? BehandlingResultatType.IKKE_FASTSATT : r.getBehandlingResultatType();
     }
 
 }

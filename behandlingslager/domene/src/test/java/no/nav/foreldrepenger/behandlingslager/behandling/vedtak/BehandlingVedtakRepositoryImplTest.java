@@ -21,7 +21,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class BehandlingVedtakRepositoryImplTest {
@@ -35,9 +34,9 @@ public class BehandlingVedtakRepositoryImplTest {
     private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private Behandling behandling;
-    
+
     private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
-    
+
     private BehandlingsresultatRepository behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
 
     @Before
@@ -71,7 +70,7 @@ public class BehandlingVedtakRepositoryImplTest {
         // Act
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingVedtakRepository.lagre(behandlingVedtak, lås);
-        Optional<BehandlingVedtak> lagretVedtakOpt = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId());
+        Optional<BehandlingVedtak> lagretVedtakOpt = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId());
 
         // Assert
         assertThat(lagretVedtakOpt).hasValueSatisfying(lagretVedtak -> {
@@ -81,13 +80,10 @@ public class BehandlingVedtakRepositoryImplTest {
     }
 
     private BehandlingVedtak opprettBehandlingVedtak(Behandling behandling) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.hent(behandling.getId());
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(3))
             .medAnsvarligSaksbehandler("E2354345")
-            .medVedtakResultatType(VedtakResultatType.INNVILGET)
             .medIverksettingStatus(IverksettingStatus.IVERKSATT)
-            .medBehandlingsresultat(behandlingsresultat)
             .build();
         return behandlingVedtak;
     }

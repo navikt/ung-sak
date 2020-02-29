@@ -64,7 +64,7 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             final long behandlingId = Long.parseLong(behandingIdString);
 
-            final Optional<Behandling> behandlingOptional = behandlingRepository.finnUnikBehandlingForBehandlingId(behandlingId);
+            final Optional<Behandling> behandlingOptional = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
             if (behandlingOptional.isPresent()) {
                 final String payload = generatePayload(behandlingOptional.get());
 

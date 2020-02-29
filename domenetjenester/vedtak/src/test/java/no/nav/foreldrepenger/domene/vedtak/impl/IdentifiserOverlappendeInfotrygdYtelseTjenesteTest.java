@@ -21,7 +21,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -100,13 +99,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3))
-        );
+            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3)));
         AktørYtelse infotrygdAktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, infotrygdAktørYtelse);
         behandlingVedtak = lagVedtak(VedtakResultatType.AVSLAG);
@@ -129,13 +126,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3))
-        );
+            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3)));
         AktørYtelse infotrygdAktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, infotrygdAktørYtelse);
 
@@ -157,13 +152,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(2))
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(2)));
         AktørYtelse infotrygdAktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, infotrygdAktørYtelse);
 
@@ -186,13 +179,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4))
-        );
+            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4)));
         AktørYtelse infotrygdAktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, infotrygdAktørYtelse);
 
@@ -215,13 +206,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3))
-        );
+            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3)));
         AktørYtelse infotrygdAktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(2)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, infotrygdAktørYtelse);
 
@@ -244,13 +233,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2))
-        );
+            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(2)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -273,13 +260,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4))
-        );
+            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(2)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -302,13 +287,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse)
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -331,13 +314,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -360,13 +341,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse)
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(2)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -389,13 +368,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(2)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7)));
         // Infotrygd: startdatoVLYtelse.plusDays(7) -> startdatoVLYtelse.plusDays(14)
         // VL: startdatoVLYtelse -> startdatoVLYtelse.plusDays(7)
         // Hendelse: OPPHØR
@@ -409,7 +386,6 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         assertThat(overlapp).isEmpty();
     }
 
-
     // CASE 11:
     // Løpende ytelse: Ja, infotrygd ytelse opphører samme dag som FP
     // Nyeste hendelse: Opphoert
@@ -421,13 +397,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -450,13 +424,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(2)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -479,13 +451,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             Collections.emptyList(),
-            Collections.emptyList()
-        );
+            Collections.emptyList());
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse, RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -508,13 +478,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             Collections.emptyList(),
-            Collections.emptyList()
-        );
+            Collections.emptyList());
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(7), startdatoVLYtelse.plusDays(14), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -537,13 +505,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(2))
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(2)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -566,13 +532,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4))
-        );
+            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -595,13 +559,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3))
-        );
+            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -624,13 +586,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(2))
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(2)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -653,13 +613,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4))
-        );
+            List.of(startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3), startdatoVLYtelse.plusDays(4)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -682,13 +640,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT, ANNULERT),
-            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3))
-        );
+            List.of(startdatoVLYtelse, startdatoVLYtelse.plusDays(1), startdatoVLYtelse.plusDays(2), startdatoVLYtelse.plusDays(3)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -711,13 +667,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -740,13 +694,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse)
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -769,13 +721,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(3), startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -798,13 +748,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse)
-        );
+            List.of(startdatoVLYtelse.minusDays(2), startdatoVLYtelse.minusDays(1), startdatoVLYtelse));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -827,13 +775,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -844,7 +790,6 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         assertThat(overlapp).isPresent();
 
     }
-
 
     // CASE 26:
     // Løpende ytelse: Nei, FP opphører før infortrygd ytelse starter
@@ -857,13 +802,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             List.of(INNVILGET, ENDRET, OPPHOERT),
-            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1))
-        );
+            List.of(startdatoVLYtelse.minusDays(1), startdatoVLYtelse, startdatoVLYtelse.plusDays(1)));
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -886,13 +829,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             Collections.emptyList(),
-            Collections.emptyList()
-        );
+            Collections.emptyList());
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.minusDays(5), startdatoVLYtelse.minusDays(1), RelatertYtelseTilstand.AVSLUTTET);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusWeeks(1)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusWeeks(1).plusDays(1), startdatoVLYtelse.plusWeeks(2)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -915,13 +856,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
         // Arrange
         List<InfotrygdHendelse> hendelser = lagInfotrygdHendelse(
             Collections.emptyList(),
-            Collections.emptyList()
-        );
+            Collections.emptyList());
         AktørYtelse aktørYtelse = lagAktørYtelse(startdatoVLYtelse.plusDays(8), startdatoVLYtelse.plusDays(12), RelatertYtelseTilstand.LØPENDE);
         opprettOgLagreBeregningsResultat(
             DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse, startdatoVLYtelse.plusDays(3)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7))
-        );
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoVLYtelse.plusDays(4), startdatoVLYtelse.plusDays(7)));
 
         opprettOgMockFellesTjenester(hendelser, aktørYtelse);
 
@@ -934,13 +873,11 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
     }
 
     private BehandlingVedtak lagVedtak(VedtakResultatType vedtakResultatType) {
-        Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder()
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(3))
             .medAnsvarligSaksbehandler("E2354345")
             .medVedtakResultatType(vedtakResultatType)
             .medIverksettingStatus(IverksettingStatus.IKKE_IVERKSATT)
-            .medBehandlingsresultat(behandlingsresultat)
             .build();
         return behandlingVedtak;
     }
@@ -991,7 +928,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
             lagBeregningsresultatAndel(beregningsresultatPeriode);
             beregningsresultat.addBeregningsresultatPeriode(beregningsresultatPeriode);
         }
-        
+
         Mockito.when(beregningsresultatRepository.hentUtbetBeregningsresultat(any())).thenReturn(Optional.of(beregningsresultat));
     }
 
@@ -1007,7 +944,8 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjenesteTest {
     }
 
     private void opprettOgMockFellesTjenester(List<InfotrygdHendelse> hendelser, AktørYtelse aktørYtelse) {
-        tjeneste = new IdentifiserOverlappendeInfotrygdYtelseTjeneste(beregningsresultatRepository, infotrygdHendelseTjeneste, inntektArbeidYtelseTjeneste, overlappRepository);
+        tjeneste = new IdentifiserOverlappendeInfotrygdYtelseTjeneste(beregningsresultatRepository, infotrygdHendelseTjeneste, inntektArbeidYtelseTjeneste,
+            overlappRepository);
         when(infotrygdHendelseTjeneste.hentHendelsesListFraInfotrygdFeed(any(), any())).thenReturn(hendelser);
 
         InntektArbeidYtelseGrunnlag iayg = Mockito.mock(InntektArbeidYtelseGrunnlag.class);

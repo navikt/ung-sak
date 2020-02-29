@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.domene.vedtak.intern;
 
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,8 +63,6 @@ public class SendVedtaksbrevTest {
         behandlingVedtak = scenario.mockBehandlingVedtak();
         sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository, repositoryProvider.getBehandlingVedtakRepository(), dokumentBestillerApplikasjonTjeneste, dokumentBehandlingTjeneste);
         when(behandlingsresultat.getVedtaksbrev()).thenReturn(Vedtaksbrev.AUTOMATISK);
-        when(behandlingVedtak.getBehandlingsresultat()).thenReturn(behandlingsresultat);
-        when(behandlingVedtak.getVedtakResultatType()).thenReturn(VedtakResultatType.INNVILGET);
 
     }
 
@@ -120,16 +117,5 @@ public class SendVedtaksbrevTest {
 
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(behandlingVedtak);
     }
-
-    @Test
-    public void sender_brev_dersom_førstegangsøknad_som_er_migrert_fra_infotrygd_men_overstyrt_til_fritekstbrev() {
-        behandling.setMigrertKilde(Fagsystem.INFOTRYGD);
-        when(behandlingsresultat.getVedtaksbrev()).thenReturn(Vedtaksbrev.FRITEKST);
-
-        sendVedtaksbrev.sendVedtaksbrev(ref);
-
-        verify(dokumentBestillerApplikasjonTjeneste, times(1)).produserVedtaksbrev(behandlingVedtak);
-    }
-
 
 }

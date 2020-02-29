@@ -116,12 +116,13 @@ public class BehandlingDtoTjeneste {
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     }
 
-    private static BehandlingDto lagBehandlingDto(Behandling behandling,
+    private BehandlingDto lagBehandlingDto(Behandling behandling,
                                                   Optional<BehandlingsresultatDto> behandlingsresultatDto,
                                                   boolean erBehandlingMedGjeldendeVedtak,
                                                   SøknadRepository søknadRepository) {
         var dto = new BehandlingDto();
-        setStandardfelter(behandling, dto, erBehandlingMedGjeldendeVedtak);
+        var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
+        setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
@@ -178,7 +179,7 @@ public class BehandlingDtoTjeneste {
             return Collections.emptyList();
         }
         Optional<BehandlingVedtak> gjeldendeVedtak = behandlingVedtakRepository.hentGjeldendeVedtak(behandlinger.get(0).getFagsak());
-        Optional<Behandling> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(bv -> bv.getBehandlingsresultat().getBehandling());
+        Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(bv -> bv.getBehandlingId());
         return behandlinger.stream().map(behandling -> {
             boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);
             var behandlingsresultatDto = lagBehandlingsresultatDto(behandling);
@@ -186,16 +187,16 @@ public class BehandlingDtoTjeneste {
         }).collect(Collectors.toList());
     }
 
-    private boolean erBehandlingMedGjeldendeVedtak(Behandling behandling, Optional<Behandling> behandlingMedGjeldendeVedtak) {
+    private boolean erBehandlingMedGjeldendeVedtak(Behandling behandling, Optional<Long> behandlingMedGjeldendeVedtak) {
         if (behandlingMedGjeldendeVedtak.isEmpty()) {
             return false;
         }
-        return Objects.equals(behandlingMedGjeldendeVedtak.get().getId(), behandling.getId());
+        return Objects.equals(behandlingMedGjeldendeVedtak.get(), behandling.getId());
     }
 
     public UtvidetBehandlingDto lagUtvidetBehandlingDto(Behandling behandling, AsyncPollingStatus asyncStatus) {
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsakId());
-        UtvidetBehandlingDto dto = mapFra(behandling, erBehandlingMedGjeldendeVedtak(behandling, sisteAvsluttedeIkkeHenlagteBehandling));
+        UtvidetBehandlingDto dto = mapFra(behandling, erBehandlingMedGjeldendeVedtak(behandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId)));
         if (asyncStatus != null && !asyncStatus.isPending()) {
             dto.setAsyncStatus(asyncStatus);
         }
@@ -207,8 +208,10 @@ public class BehandlingDtoTjeneste {
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
             .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
-        var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling);
-        setStandardfelter(originalBehandling, dto, erBehandlingMedGjeldendeVedtak);
+        
+        var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId));
+        var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(originalBehandling.getId()).orElse(null);
+        setStandardfelter(originalBehandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         var behandlingsresultatDto = lagBehandlingsresultatDto(originalBehandling);
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
@@ -222,7 +225,9 @@ public class BehandlingDtoTjeneste {
     }
 
     private void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
-        BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, erBehandlingMedGjeldendeVedtak);
+        var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
+        
+        BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         var behandlingsresultatDto = lagBehandlingsresultatDto(behandling);
         dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
@@ -289,7 +294,7 @@ public class BehandlingDtoTjeneste {
         BehandlingsresultatDto dto = new BehandlingsresultatDto();
         Optional<TekstFraSaksbehandler> tekstFraSaksbehandlerOptional = Optional.empty();
         dto.setId(behandlingsresultat.getId());
-        dto.setType(behandlingsresultat.getBehandlingResultatType());
+        dto.setType(behandling.getBehandlingResultatType());
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isPresent()) {

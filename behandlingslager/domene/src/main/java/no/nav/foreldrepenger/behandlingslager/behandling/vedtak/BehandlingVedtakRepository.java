@@ -42,9 +42,9 @@ public class BehandlingVedtakRepository {
         return entityManager;
     }
 
-    public Optional<BehandlingVedtak> hentBehandlingvedtakForBehandlingId(Long behandlingId) {
+    public Optional<BehandlingVedtak> hentBehandlingVedtakForBehandlingId(Long behandlingId) {
         Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR //$NON-NLS-1$
-        TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("from BehandlingVedtak where behandlingsresultat.behandling.id=:behandlingId", BehandlingVedtak.class);
+        TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("from BehandlingVedtak where behandlingId=:behandlingId", BehandlingVedtak.class);
         query.setParameter("behandlingId", behandlingId); // $NON-NLS-1$
         return optionalFirstVedtak(query.getResultList());
     }
@@ -55,7 +55,7 @@ public class BehandlingVedtakRepository {
         }
         Behandling originalBehandling = behandling.getOriginalBehandling()
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Original behandling mangler på revurdering - skal ikke skje"));
-        return hentBehandlingvedtakForBehandlingId(originalBehandling.getId())
+        return hentBehandlingVedtakForBehandlingId(originalBehandling.getId())
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Original behandling har ikke behandlingsvedtak - skal ikke skje"));
     }
 
@@ -79,12 +79,11 @@ public class BehandlingVedtakRepository {
         }
 
         List<Behandling> behandlingerMedSisteVedtakstidspunkt = behandlingMedSisteVedtakstidspunkt(avsluttedeIkkeHenlagteBehandlinger);
-        //Før PFP-8620 hadde vedtak bare dato og ikke klokkeslett
         if (behandlingerMedSisteVedtakstidspunkt.size() > 1) {
             Behandling behandlingMedGjeldendeVedtak = sisteEndretVedtak(behandlingerMedSisteVedtakstidspunkt);
-            return hentBehandlingvedtakForBehandlingId(behandlingMedGjeldendeVedtak.getId());
+            return hentBehandlingVedtakForBehandlingId(behandlingMedGjeldendeVedtak.getId());
         } else {
-            return hentBehandlingvedtakForBehandlingId(behandlingerMedSisteVedtakstidspunkt.get(0).getId());
+            return hentBehandlingVedtakForBehandlingId(behandlingerMedSisteVedtakstidspunkt.get(0).getId());
         }
     }
 
@@ -105,7 +104,7 @@ public class BehandlingVedtakRepository {
     }
 
     private LocalDateTime vedtakstidspunktForBehandling(Behandling behandling) {
-        return hentBehandlingvedtakForBehandlingId(behandling.getId()).orElseThrow().getVedtakstidspunkt();
+        return hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow().getVedtakstidspunkt();
     }
 
     private Behandling sisteEndretVedtak(List<Behandling> behandlinger) {
@@ -113,13 +112,15 @@ public class BehandlingVedtakRepository {
             throw new IllegalArgumentException("Behandlinger må ha minst ett element");
         }
         BehandlingVedtak sistEndretVedtak = null;
+        Behandling sistEndretVedtakBehandling = null;
         for (Behandling behandling : behandlinger) {
-            BehandlingVedtak vedtak = hentBehandlingvedtakForBehandlingId(behandling.getId()).orElseThrow();
+            BehandlingVedtak vedtak = hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
             if (sistEndretVedtak == null || vedtak.getOpprettetTidspunkt().isAfter(sistEndretVedtak.getOpprettetTidspunkt())) {
                 sistEndretVedtak = vedtak;
+                sistEndretVedtakBehandling = behandling; 
             }
         }
-        return sistEndretVedtak.getBehandlingsresultat().getBehandling();
+        return sistEndretVedtakBehandling;
     }
 
     // sjekk lås og oppgrader til skriv

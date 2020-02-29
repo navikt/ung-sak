@@ -38,7 +38,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.Repository;
@@ -151,7 +150,7 @@ public class BehandlingRepositoryImplTest {
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingsresultatRepository.lagre(behandling.getId(), behandlingsresultat);
-        behandlingVedtakRepository.lagre(forVedtak.medBehandlingsresultat(getBehandlingsresultat(behandling)).medIverksettingStatus(IverksettingStatus.IVERKSATT).build(), lås);
+        behandlingVedtakRepository.lagre(forVedtak.medIverksettingStatus(IverksettingStatus.IVERKSATT).build(), lås);
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, lås);
 
@@ -206,7 +205,6 @@ public class BehandlingRepositoryImplTest {
         assertThat(resultat).isNotPresent();
     }
 
-
     @Test
     public void skal_kunne_lagre_konsekvens_for_ytelsen() {
         behandling = opprettBehandlingMedTermindato();
@@ -216,7 +214,8 @@ public class BehandlingRepositoryImplTest {
         List<BehandlingsresultatKonsekvensForYtelsen> brKonsekvenser = repository.hentAlle(BehandlingsresultatKonsekvensForYtelsen.class);
         assertThat(brKonsekvenser).hasSize(2);
         brKonsekvenser.forEach(brk -> assertThat(brk.getBehandlingsresultat()).isNotNull());
-        List<KonsekvensForYtelsen> konsekvenser = brKonsekvenser.stream().map(BehandlingsresultatKonsekvensForYtelsen::getKonsekvensForYtelsen).collect(Collectors.toList());
+        List<KonsekvensForYtelsen> konsekvenser = brKonsekvenser.stream().map(BehandlingsresultatKonsekvensForYtelsen::getKonsekvensForYtelsen)
+            .collect(Collectors.toList());
         assertThat(konsekvenser).containsExactlyInAnyOrder(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK);
     }
 
@@ -233,7 +232,8 @@ public class BehandlingRepositoryImplTest {
         List<BehandlingsresultatKonsekvensForYtelsen> brKonsekvenser = repository.hentAlle(BehandlingsresultatKonsekvensForYtelsen.class);
         assertThat(brKonsekvenser).hasSize(1);
         brKonsekvenser.forEach(brk -> assertThat(brk.getBehandlingsresultat()).isNotNull());
-        List<KonsekvensForYtelsen> konsekvenser = brKonsekvenser.stream().map(BehandlingsresultatKonsekvensForYtelsen::getKonsekvensForYtelsen).collect(Collectors.toList());
+        List<KonsekvensForYtelsen> konsekvenser = brKonsekvenser.stream().map(BehandlingsresultatKonsekvensForYtelsen::getKonsekvensForYtelsen)
+            .collect(Collectors.toList());
         assertThat(konsekvenser).containsExactlyInAnyOrder(KonsekvensForYtelsen.ENDRING_I_FORDELING_AV_YTELSEN);
     }
 
@@ -378,7 +378,6 @@ public class BehandlingRepositoryImplTest {
         assertThat(liste).contains(behandling3);
     }
 
-
     @Test
     public void skal_finne_førstegangsbehandling_naar_frist_er_utgatt() {
         // Arrange
@@ -402,7 +401,7 @@ public class BehandlingRepositoryImplTest {
         LocalDate tidsfrist = LocalDate.now().minusDays(1);
         Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
             .medBehandlingstidFrist(tidsfrist).build();
-        //Tidsfristen blir overstyrt
+        // Tidsfristen blir overstyrt
         revurderingsBehandling.setBehandlingstidFrist(tidsfrist);
         behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
@@ -423,7 +422,7 @@ public class BehandlingRepositoryImplTest {
             .medBehandlingstidFrist(tidsfrist)
             .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))
             .build();
-        //Tidsfristen blir overstyrt
+        // Tidsfristen blir overstyrt
         revurderingsBehandling.setBehandlingstidFrist(tidsfrist);
         behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
         // Act
@@ -547,11 +546,9 @@ public class BehandlingRepositoryImplTest {
         behandling = opprettBehandlingMedTermindato();
         oppdaterMedBehandlingsresultatOgLagre(behandling, false);
 
-        return BehandlingVedtak.builder().medVedtakstidspunkt(LocalDateTime.now())
+        return BehandlingVedtak.builder(behandling.getId())
             .medAnsvarligSaksbehandler("Janne Hansen")
-            .medVedtakResultatType(VedtakResultatType.INNVILGET)
-            .medIverksettingStatus(IverksettingStatus.IKKE_IVERKSATT)
-            .medBehandlingsresultat(getBehandlingsresultat(behandling));
+            .medIverksettingStatus(IverksettingStatus.IKKE_IVERKSATT);
     }
 
     private Behandling opprettBehandlingMedTermindato() {
@@ -566,10 +563,8 @@ public class BehandlingRepositoryImplTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
 
         behandling = scenario.lagre(repositoryProvider);
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
-        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakstidspunkt(LocalDateTime.now()).medBehandlingsresultat(behandlingsresultat)
-            .medVedtakResultatType(VedtakResultatType.INNVILGET).medAnsvarligSaksbehandler("asdf").build();
+        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+            .medAnsvarligSaksbehandler("asdf").build();
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));

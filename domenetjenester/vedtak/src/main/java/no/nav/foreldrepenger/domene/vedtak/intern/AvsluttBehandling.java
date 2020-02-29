@@ -69,7 +69,7 @@ public class AvsluttBehandling {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         
-        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId)
+        BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
             .orElseThrow(() -> BehandlingRepositoryFeil.FACTORY.fantIkkeBehandlingVedtak(ref).toException());
         vedtak.setIverksettingStatus(IverksettingStatus.IVERKSATT);
 
@@ -80,7 +80,7 @@ public class AvsluttBehandling {
 
         log.info("Har avsluttet behandling: {}", ref); //$NON-NLS-1$
 
-        // TODO (Fluoritt): Kunne vi flyttet dette ut i en Event observer (ref BehandlingStatusEvent) Hilsen FC.
+        // TODO: Kunne vi flyttet dette ut i en Event observer (ref BehandlingStatusEvent)
         Optional<Behandling> ventendeBehandlingOpt = vurderBehandlingerUnderIverksettelse.finnBehandlingSomVenterIverksetting(behandling);
         ventendeBehandlingOpt.ifPresent(ventendeBehandling -> {
             log.info("Fortsetter iverksetting av ventende behandling: {}", ventendeBehandling.getId()); //$NON-NLS-1$

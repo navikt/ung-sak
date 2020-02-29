@@ -40,11 +40,11 @@ public class VedtakFattetEventObserver {
     }
 
     private boolean erBehandlingAvRettType(Long behandlingId) {
-        final Optional<Behandling> optBehandling = behandlingRepository.finnUnikBehandlingForBehandlingId(behandlingId);
+        final Optional<Behandling> optBehandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
         if (optBehandling.isPresent()) {
             final Behandling behandling = optBehandling.get();
             if (behandling.erYtelseBehandling()) {
-                final VedtakResultatType resultatType = vedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId)
+                final VedtakResultatType resultatType = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
                     .map(BehandlingVedtak::getVedtakResultatType)
                     .orElse(VedtakResultatType.AVSLAG);
 

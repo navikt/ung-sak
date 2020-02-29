@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.repo.LagretVedtakRepository;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -51,10 +50,10 @@ public class FatteVedtakTjeneste {
 
     @Inject
     public FatteVedtakTjeneste(LagretVedtakRepository vedtakRepository,
-                        VedtakTjeneste vedtakTjeneste,
-                        OppgaveTjeneste oppgaveTjeneste,
-                        TotrinnTjeneste totrinnTjeneste,
-                        BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
+                               VedtakTjeneste vedtakTjeneste,
+                               OppgaveTjeneste oppgaveTjeneste,
+                               TotrinnTjeneste totrinnTjeneste,
+                               BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
         this.lagretVedtakRepository = vedtakRepository;
         this.vedtakTjeneste = vedtakTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
@@ -94,23 +93,22 @@ public class FatteVedtakTjeneste {
     }
 
     private void verifiserBehandlingsresultat(Behandling behandling) { // NOSONAR dette er bare enkel verifisering og har ikke høy complexity
-        Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
+        BehandlingResultatType behandlingResultatType = behandling.getBehandlingResultatType();
         if (behandling.erRevurdering()) {
-            if (!VEDTAKSTILSTANDER_REVURDERING.contains(behandlingsresultat.getBehandlingResultatType())) {
+            if (!VEDTAKSTILSTANDER_REVURDERING.contains(behandlingResultatType)) {
                 throw new IllegalStateException(
-                    UTVIKLER_FEIL_VEDTAK //$NON-NLS-1$
-                        + (behandlingsresultat.getBehandlingResultatType().getNavn()));
+                    UTVIKLER_FEIL_VEDTAK // $NON-NLS-1$
+                        + (behandlingResultatType.getNavn()));
             }
-        } else if (behandlingsresultat == null || !VEDTAKSTILSTANDER.contains(behandlingsresultat.getBehandlingResultatType())) {
+        } else if (!VEDTAKSTILSTANDER.contains(behandlingResultatType)) {
             throw new IllegalStateException(
-                UTVIKLER_FEIL_VEDTAK //$NON-NLS-1$
-                    + (behandlingsresultat == null ? "null" : behandlingsresultat.getBehandlingResultatType().getNavn()));
+                UTVIKLER_FEIL_VEDTAK + behandlingResultatType.getNavn());
         }
     }
 
     private void opprettLagretVedtak(Behandling behandling) {
         if (!erKlarForVedtak(behandling)) {
-            throw new IllegalStateException("Behandlig er ikke klar for vedtak : " + behandling.getId() + ", status=" +behandling.getStatus().getKode());
+            throw new IllegalStateException("Behandlig er ikke klar for vedtak : " + behandling.getId() + ", status=" + behandling.getStatus().getKode());
         }
         // FIXME K9 - lagre vedtak
     }

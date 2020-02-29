@@ -13,7 +13,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
@@ -22,10 +21,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
@@ -34,14 +31,12 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingRepositoryProvider repositoryProvider;
-    private BehandlingStegType behandlingStegType;
 
-    public InngangsvilkårStegImpl(BehandlingRepositoryProvider repositoryProvider, InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste, BehandlingStegType behandlingStegType) {
+    public InngangsvilkårStegImpl(BehandlingRepositoryProvider repositoryProvider, InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste, @SuppressWarnings("unused") BehandlingStegType behandlingStegType) {
         this.repositoryProvider = repositoryProvider;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.inngangsvilkårFellesTjeneste = inngangsvilkårFellesTjeneste;
-        this.behandlingStegType = behandlingStegType;
     }
 
     protected InngangsvilkårStegImpl() {
@@ -84,31 +79,6 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         }
 
         return regelResultat.getAksjonspunktDefinisjoner();
-    }
-
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandling.getBehandlingsresultat();
-    }
-
-    private boolean harAvslåttForrigeBehandling(Behandling revurdering) {
-        Optional<Behandling> originalBehandling = revurdering.getOriginalBehandling();
-        if (originalBehandling.isPresent()) {
-            Behandlingsresultat behandlingsresultat = getBehandlingsresultat(originalBehandling.get());
-            // Dersom originalBehandling er et beslutningsvedtak må vi lete videre etter det faktiske resultatet for å kunne vurdere om forrige behandling var avslått
-            if (BehandlingResultatType.INGEN_ENDRING.equals(behandlingsresultat.getBehandlingResultatType())) {
-                return harAvslåttForrigeBehandling(originalBehandling.get());
-            } else {
-                return behandlingsresultat.isBehandlingsresultatAvslått();
-            }
-        }
-        return false;
-    }
-
-    private boolean harÅpentOverstyringspunktForInneværendeSteg(Behandling behandling) {
-        return behandling.getÅpneAksjonspunkter().stream()
-            .filter(aksjonspunkt -> aksjonspunkt.getAksjonspunktDefinisjon().getAksjonspunktType().equals(AksjonspunktType.OVERSTYRING))
-            .anyMatch(aksjonspunkt ->
-                aksjonspunkt.getAksjonspunktDefinisjon().getBehandlingSteg().equals(behandlingStegType));
     }
 
     protected BehandleStegResultat stegResultat(List<AksjonspunktDefinisjon> aksjonspunkter) {

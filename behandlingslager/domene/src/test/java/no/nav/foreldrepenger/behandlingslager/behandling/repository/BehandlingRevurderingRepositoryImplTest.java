@@ -29,7 +29,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.typer.AktørId;
@@ -81,7 +80,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         Long revurderingsBehandlingId = revurderingsBehandling.getId();
         List<Behandling> result = behandlingRevurderingRepository.finnHenlagteBehandlingerEtterSisteInnvilgedeIkkeHenlagteBehandling(fagsakId);
         assertThat(result).isNotEmpty();
-        result.forEach(r -> assertThat(getBehandlingsresultat(r).getBehandlingResultatType()).isEqualTo(BehandlingResultatType.HENLAGT_FEILOPPRETTET));
+        result.forEach(r -> assertThat(r.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.HENLAGT_FEILOPPRETTET));
         assertThat(result).anySatisfy(r -> r.getId().equals(revurderingsBehandlingId));
         assertThat(result).hasSize(2);
     }
@@ -108,7 +107,7 @@ public class BehandlingRevurderingRepositoryImplTest {
 
         List<Behandling> result = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsakId);
         assertThat(result).isNotEmpty();
-        result.forEach(r -> assertThat(getBehandlingsresultat(r).getBehandlingResultatType()).isEqualTo(BehandlingResultatType.INNVILGET));
+        result.forEach(r -> assertThat(r.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.INNVILGET));
         assertThat(result).anySatisfy(r -> r.getId().equals(behandling.getId()));
         assertThat(result).hasSize(1);
     }
@@ -126,7 +125,6 @@ public class BehandlingRevurderingRepositoryImplTest {
         return revurderingsBehandling;
     }
 
-
     private Behandling opprettRevurderingsKandidat() {
         LocalDateTime tidligereTidspunkt = NOW.minusSeconds(1);
 
@@ -134,12 +132,15 @@ public class BehandlingRevurderingRepositoryImplTest {
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
-        final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakstidspunkt(tidligereTidspunkt).medBehandlingsresultat(behandlingsresultat)
-            .medVedtakResultatType(VedtakResultatType.INNVILGET).medAnsvarligSaksbehandler("asdf").build();
+        
+        Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
+        
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+
+        var behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+                .medVedtakstidspunkt(tidligereTidspunkt)
+                .medAnsvarligSaksbehandler("asdf").build();
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
         return behandling;
@@ -160,6 +161,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         Repository repository = repoRule.getRepository();
 
         repository.lagre(behandling);
+        repository.lagre(behandling.getBehandlingsresultat());
 
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }

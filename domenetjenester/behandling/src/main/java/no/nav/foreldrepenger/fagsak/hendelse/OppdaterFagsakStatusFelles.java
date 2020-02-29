@@ -7,10 +7,10 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.FagsakStatusEventPubliserer;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
@@ -22,7 +22,7 @@ public class OppdaterFagsakStatusFelles {
     private FagsakRepository fagsakRepository;
     private FagsakStatusEventPubliserer fagsakStatusEventPubliserer;
     private BehandlingRepository behandlingRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
     public OppdaterFagsakStatusFelles(BehandlingRepositoryProvider provider,
@@ -30,7 +30,7 @@ public class OppdaterFagsakStatusFelles {
         this.fagsakRepository = provider.getFagsakRepository();
         this.fagsakStatusEventPubliserer = fagsakStatusEventPubliserer;
         this.behandlingRepository = provider.getBehandlingRepository();
-        this.behandlingsresultatRepository = provider.getBehandlingsresultatRepository();
+        this.behandlingVedtakRepository = provider.getBehandlingVedtakRepository();
     }
 
     public void oppdaterFagsakStatus(Fagsak fagsak, Behandling behandling, FagsakStatus nyStatus) {
@@ -48,14 +48,14 @@ public class OppdaterFagsakStatusFelles {
 
         if (sisteInnvilgedeBehandling.isPresent()) {
             Behandling sisteBehandling = sisteInnvilgedeBehandling.get();
-            return erVedtakResultat(sisteBehandling, VedtakResultatType.AVSLAG) || erVedtakResultat(sisteBehandling, VedtakResultatType.OPPHØR);
+            var vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(sisteBehandling.getId());
+            return erVedtakResultat(vedtak, VedtakResultatType.AVSLAG) || erVedtakResultat(vedtak, VedtakResultatType.OPPHØR);
         }
         return true;
     }
 
-    private boolean erVedtakResultat(Behandling behandling, VedtakResultatType vedtakResultat) {
-        return behandlingsresultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(Behandlingsresultat::getBehandlingVedtak)
+    private boolean erVedtakResultat(Optional<BehandlingVedtak> behandlingVedtakOpt, VedtakResultatType vedtakResultat) {
+        return behandlingVedtakOpt
             .map(vedtak -> vedtak.getVedtakResultatType().equals(vedtakResultat))
             .orElse(Boolean.FALSE);
     }

@@ -101,7 +101,7 @@ public class DokumentmottakerEndringssøknadTest {
             .builderUtenSøknad()
             .lagre(repositoryProvider);
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.INNVILGET);
-        repoRule.getRepository().lagre(vedtak.getBehandlingsresultat());
+        repoRule.getRepository().lagre(vedtak);
 
         Behandling revurdering = TestScenarioBuilder
             .builderUtenSøknad()
@@ -130,7 +130,7 @@ public class DokumentmottakerEndringssøknadTest {
             .builderUtenSøknad()
             .lagre(repositoryProvider);
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.INNVILGET);
-        repoRule.getRepository().lagre(vedtak.getBehandlingsresultat());
+        repoRule.getRepository().lagre(behandling.getBehandlingsresultat());
 
         Behandling revurdering = TestScenarioBuilder
             .builderUtenSøknad()
@@ -163,7 +163,7 @@ public class DokumentmottakerEndringssøknadTest {
             .builderUtenSøknad()
             .lagre(repositoryProvider);
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.INNVILGET);
-        repoRule.getRepository().lagre(vedtak.getBehandlingsresultat());
+        repoRule.getRepository().lagre(behandling.getBehandlingsresultat());
 
         Behandling revurdering = TestScenarioBuilder
             .builderUtenSøknad()

@@ -46,7 +46,6 @@ public class BehandlingDtoForBackendTjenesteTest {
     private BehandlingDtoForBackendTjeneste behandlingDtoForBackendTjeneste = new BehandlingDtoForBackendTjeneste(repositoryProvider);
     private LocalDateTime now = LocalDateTime.now();
 
-
     @Test
     public void skal_lage_BehandlingDto() {
         Behandling behandling = lagBehandling();
@@ -98,9 +97,9 @@ public class BehandlingDtoForBackendTjenesteTest {
     }
 
     private void lagBehandligVedtak(Behandling behandling) {
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakResultatType(VedtakResultatType.INNVILGET)
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+            .medVedtakResultatType(VedtakResultatType.INNVILGET)
             .medAnsvarligSaksbehandler(ANSVARLIG_SAKSBEHANDLER)
-            .medBehandlingsresultat(behandling.getBehandlingsresultat())
             .medIverksettingStatus(IverksettingStatus.IVERKSATT)
             .medVedtakstidspunkt(now)
             .medBeslutning(true).build();
