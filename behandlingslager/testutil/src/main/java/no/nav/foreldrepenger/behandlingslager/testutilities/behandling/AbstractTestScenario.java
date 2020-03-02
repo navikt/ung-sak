@@ -643,8 +643,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         Long behandlingId = behandling.getId();
         
         if(behandlingresultatBuilder!=null) {
-            var behandlingsresultat = behandlingresultatBuilder.build();
-            behandling.setBehandlingresultat(behandlingsresultat);
+            var behandlingsresultat = behandlingresultatBuilder.buildFor(behandling);
             repositoryProvider.getBehandlingsresultatRepository().lagre(behandlingId, behandlingsresultat);
         }
 

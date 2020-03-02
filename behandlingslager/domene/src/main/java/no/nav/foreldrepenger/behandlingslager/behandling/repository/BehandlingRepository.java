@@ -381,10 +381,8 @@ public class BehandlingRepository {
     Long lagre(Behandling behandling) {
         getEntityManager().persist(behandling);
 
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        if (behandlingsresultat != null) {
-            getEntityManager().persist(behandlingsresultat);
-        }
+        lagreBehandlingsresultat(behandling);
+
         List<BehandlingÅrsak> behandlingÅrsak = behandling.getBehandlingÅrsaker();
         behandlingÅrsak.forEach(getEntityManager()::persist);
 
@@ -393,8 +391,13 @@ public class BehandlingRepository {
         return behandling.getId();
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandling.getBehandlingsresultat();
+    // FIXME: Fjern Behandlingsresultat
+    private void lagreBehandlingsresultat(Behandling behandling) {
+        var resultat = behandling.getBehandlingsresultat();
+        if (resultat != null) {
+            resultat.setBehandling(behandling.getId());
+            getEntityManager().persist(resultat);
+        }
     }
 
     public Boolean erVersjonUendret(Long behandlingId, Long versjon) {

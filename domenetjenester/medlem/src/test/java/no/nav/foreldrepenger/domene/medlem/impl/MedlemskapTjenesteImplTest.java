@@ -15,13 +15,12 @@ import org.junit.runner.RunWith;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -36,7 +35,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.konfig.Tid;
-import no.nav.vedtak.util.Tuple;
 
 @RunWith(CdiRunner.class)
 public class MedlemskapTjenesteImplTest {
@@ -55,9 +53,8 @@ public class MedlemskapTjenesteImplTest {
     @Test
     public void skal_returnere_empty_når_vilkåret_er_overstyrt_til_godkjent() {
         // Arrange
-        Tuple<Behandling, Behandlingsresultat> tuple = lagBehandling();
+        var behandling = lagBehandling();
         LocalDate now = LocalDate.now();
-        Behandling behandling = tuple.getElement1();
 
         VilkårResultatBuilder vilkår = Vilkårene.builder();
         final var vilkårBuilder = vilkår.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
@@ -73,7 +70,7 @@ public class MedlemskapTjenesteImplTest {
         assertThat(localDate).isEmpty();
     }
 
-    private Tuple<Behandling, Behandlingsresultat> lagBehandling() {
+    private Behandling lagBehandling() {
         final Personinfo personinfo = new Personinfo.Builder()
             .medNavn("Navn navnesen")
             .medAktørId(AktørId.dummy())
@@ -90,9 +87,6 @@ public class MedlemskapTjenesteImplTest {
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);
-        Behandlingsresultat.Builder behandlingsresultatBuilder = Behandlingsresultat.builderForInngangsvilkår();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatBuilder.buildFor(behandling);
-        behandlingRepository.lagre(behandling, lås);
-        return new Tuple<>(behandling, behandlingsresultat);
+        return behandling;
     }
 }
