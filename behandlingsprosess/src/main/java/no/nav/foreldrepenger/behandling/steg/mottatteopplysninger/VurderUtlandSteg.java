@@ -18,8 +18,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -87,25 +85,17 @@ public class VurderUtlandSteg implements BehandlingSteg {
     private void utledVilkår(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         UtledeteVilkår utledeteVilkår = new DefaultVilkårUtleder().utledVilkår(behandling);
-        opprettVilkår(utledeteVilkår, behandling, kontekst.getSkriveLås());
+        opprettVilkår(utledeteVilkår, behandling);
     }
 
-    private void opprettVilkår(UtledeteVilkår utledeteVilkår, Behandling behandling, BehandlingLås skriveLås) {
+    private void opprettVilkår(UtledeteVilkår utledeteVilkår, Behandling behandling) {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
-        opprettBehandlingsresultatHvisIkkeEksisterende(behandling);
         final var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
         final var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder.leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
         final var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
-    }
-
-    private void opprettBehandlingsresultatHvisIkkeEksisterende(Behandling behandling) {
-        var behandlingsresultat = behandling.getBehandlingsresultat();
-        if (behandlingsresultat == null) {
-            Behandlingsresultat.builder().buildFor(behandling);
-        }
     }
 
     private boolean harOppgittUtenlandskInntekt(Long behandlingId) {
