@@ -56,7 +56,7 @@ class MedisinskMellomregningData {
     List<PleiePeriode> getPerioderMedToTilsynsperson() {
         return getPerioderMedPleieOgGrad()
             .stream()
-            .filter(it -> Pleiegrad.INNLEGGELSE.equals(it.getGrad()) || Pleiegrad.UTVIDET_TILSYN.equals(it.getGrad()))
+            .filter(it -> Pleiegrad.INNLEGGELSE.equals(it.getGrad()) || Pleiegrad.UTVIDET_KONTINUERLIG_TILSYN.equals(it.getGrad()))
             .collect(Collectors.toList());
     }
 
@@ -77,9 +77,9 @@ class MedisinskMellomregningData {
             return lagSegment(di, siste);
         } else if (Pleiegrad.INNLEGGELSE.equals(første) && !Pleiegrad.INNLEGGELSE.equals(siste)) {
             return lagSegment(di, første);
-        } else if (!Pleiegrad.UTVIDET_TILSYN.equals(første) && Pleiegrad.UTVIDET_TILSYN.equals(siste)) {
+        } else if (!Pleiegrad.UTVIDET_KONTINUERLIG_TILSYN.equals(første) && Pleiegrad.UTVIDET_KONTINUERLIG_TILSYN.equals(siste)) {
             return lagSegment(di, siste);
-        } else if (Pleiegrad.UTVIDET_TILSYN.equals(første) && !Pleiegrad.UTVIDET_TILSYN.equals(siste)) {
+        } else if (Pleiegrad.UTVIDET_KONTINUERLIG_TILSYN.equals(første) && !Pleiegrad.UTVIDET_KONTINUERLIG_TILSYN.equals(siste)) {
             return lagSegment(di, første);
         } else if (!Pleiegrad.KONTINUERLIG_TILSYN.equals(første) && Pleiegrad.KONTINUERLIG_TILSYN.equals(siste)) {
             return lagSegment(di, siste);
