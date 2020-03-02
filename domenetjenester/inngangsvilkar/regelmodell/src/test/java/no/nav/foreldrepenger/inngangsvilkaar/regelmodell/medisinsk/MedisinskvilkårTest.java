@@ -151,7 +151,7 @@ public class MedisinskvilkårTest {
         assertThat(resultat.getPleieperioder().get(0).getGrad()).isEqualTo(Pleiegrad.INNLEGGELSE);
         assertThat(resultat.getPleieperioder().get(0).getFraOgMed()).isEqualTo(fom);
         assertThat(resultat.getPleieperioder().get(0).getTilOgMed()).isEqualTo(fom.plusWeeks(2));
-        assertThat(resultat.getPleieperioder().get(1).getGrad()).isEqualTo(Pleiegrad.UTVIDET_TILSYN);
+        assertThat(resultat.getPleieperioder().get(1).getGrad()).isEqualTo(Pleiegrad.UTVIDET_KONTINUERLIG_TILSYN);
         assertThat(resultat.getPleieperioder().get(1).getFraOgMed()).isEqualTo(fom.plusWeeks(2).plusDays(1));
         assertThat(resultat.getPleieperioder().get(1).getTilOgMed()).isEqualTo(tom.minusWeeks(2));
         assertThat(resultat.getPleieperioder().get(2).getGrad()).isEqualTo(Pleiegrad.KONTINUERLIG_TILSYN);
