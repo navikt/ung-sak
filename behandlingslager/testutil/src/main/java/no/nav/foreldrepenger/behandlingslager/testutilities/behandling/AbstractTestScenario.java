@@ -241,6 +241,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
                 }
                 return behandling.getBehandlingsresultat();
             }
+            
+            @Override
+            public void lagre(Long behandlingId, Behandlingsresultat resultat) {
+                Behandling behandling = behandlingMap.get(behandlingId);
+                behandling.setBehandlingresultat(resultat);
+            }
         };
     }
 
@@ -635,12 +641,18 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
         Long behandlingId = behandling.getId();
+        
+        if(behandlingresultatBuilder!=null) {
+            var behandlingsresultat = behandlingresultatBuilder.build();
+            behandling.setBehandlingresultat(behandlingsresultat);
+            repositoryProvider.getBehandlingsresultatRepository().lagre(behandlingId, behandlingsresultat);
+        }
 
         lagrePersonopplysning(repositoryProvider, behandling);
         lagreMedlemskapOpplysninger(repositoryProvider, behandlingId);
         lagreSøknad(repositoryProvider);
         // opprett og lagre resulater på behandling
-        lagreBehandlingsresultatOgVilkårResultat(repositoryProvider, lås);
+        lagreVilkårResultat(repositoryProvider, lås);
 
         if (this.opplysningerOppdatertTidspunkt != null) {
             behandlingRepo.oppdaterSistOppdatertTidspunkt(this.behandling, this.opplysningerOppdatertTidspunkt);
@@ -727,12 +739,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         fagsak.setId(fagsakId);
     }
 
-    private void lagreBehandlingsresultatOgVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås) {
-        // opprett og lagre behandlingsresultat med VilkårResultat og BehandlingVedtak
-        Behandlingsresultat behandlingsresultat = (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
-            : behandlingresultatBuilder).buildFor(behandling);
-        behandlingresultatBuilder = null; // resett
-
+    private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås) {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
         vilkårTyper.forEach((vilkårType, vilkårUtfallType) -> {

@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
@@ -42,6 +43,7 @@ public class BehandlingDtoForBackendTjeneste {
 
     private BehandlingVedtakRepository vedtakRepository;
     private SøknadRepository søknadRepository;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     public BehandlingDtoForBackendTjeneste() {
         // for CDI proxy
@@ -51,15 +53,16 @@ public class BehandlingDtoForBackendTjeneste {
     public BehandlingDtoForBackendTjeneste(BehandlingRepositoryProvider repositoryProvider) {
         this.vedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
+        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
-    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, AsyncPollingStatus taskStatus) {
+    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Behandlingsresultat behandlingsresultat, AsyncPollingStatus taskStatus) {
         var behandlingVedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
 
-        return lagBehandlingDto(behandling, behandlingVedtak, taskStatus);
+        return lagBehandlingDto(behandling, behandlingsresultat, behandlingVedtak, taskStatus);
     }
 
-    private UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, BehandlingVedtak behandlingVedtak, AsyncPollingStatus asyncStatus) {
+    private UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Behandlingsresultat behandlingsresultat, BehandlingVedtak behandlingVedtak, AsyncPollingStatus asyncStatus) {
         UtvidetBehandlingDto dto = new UtvidetBehandlingDto();
         BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingGjeldendeVedtak(behandling));
         if (asyncStatus != null && !asyncStatus.isPending()) {
@@ -81,9 +84,9 @@ public class BehandlingDtoForBackendTjeneste {
                 Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString())));
         });
 
-        setVedtakDato(dto, behandlingVedtak);
-        if (behandlingVedtak != null) {
-            setBehandlingsresultat(dto, behandling.getBehandlingsresultat());
+        if (behandlingVedtak != null && behandlingsresultat != null) {
+            dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
+            setBehandlingsresultat(dto, behandlingsresultat);
         }
         dto.setSpråkkode(getSpråkkode(behandling));
 
@@ -95,12 +98,6 @@ public class BehandlingDtoForBackendTjeneste {
         return gjeldendeVedtak
             .filter(v -> v.getBehandlingId().equals(behandling.getId()))
             .isPresent();
-    }
-
-    private void setVedtakDato(UtvidetBehandlingDto dto, BehandlingVedtak behandlingsVedtak) {
-        if(behandlingsVedtak!=null) {
-            dto.setOriginalVedtaksDato(behandlingsVedtak.getVedtaksdato());
-        }
     }
 
     private void setBehandlingsresultat(BehandlingDto dto, Behandlingsresultat behandlingsresultat) {
@@ -117,5 +114,10 @@ public class BehandlingDtoForBackendTjeneste {
         } else {
             return behandling.getFagsak().getNavBruker().getSpråkkode();
         }
+    }
+
+    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, AsyncPollingStatus taskStatus) {
+        var resultat = behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
+        return lagBehandlingDto(behandling, resultat, taskStatus);
     }
 }

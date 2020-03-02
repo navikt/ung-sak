@@ -40,12 +40,12 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
     @Test
     public void gittAvslåttBehandlingPgaManglendeDokMedIkkeUtløptFristForInnsendingSkalOppretteNyFørstegangsbehandling() {
         //Arrange
-        Behandling nyBehandling = opprettNyBehandlingUtenVedtak(FagsakYtelseType.FORELDREPENGER);
+        Behandling nyBehandling = opprettNyBehandlingUtenVedtak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
         Mockito.doReturn(nyBehandling).when(dokumentmottakerFellesSpied).opprettNyFørstegangFraAvslag(Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.doReturn(true).when(dokumentmottakerFellesSpied).skalOppretteNyFørstegangsbehandling(any());
 
         Behandling avslåttBehandling = opprettBehandling(
-            FagsakYtelseType.FORELDREPENGER,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
             Avslagsårsak.MANGLENDE_DOKUMENTASJON,
@@ -65,7 +65,7 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
         //Arrange
         Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
         Behandling behandling = opprettBehandling(
-            FagsakYtelseType.FORELDREPENGER,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
             Avslagsårsak.MANGLENDE_DOKUMENTASJON,
@@ -86,7 +86,7 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
         //Arrange
         Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
         Behandling behandling = opprettBehandling(
-            FagsakYtelseType.FORELDREPENGER,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
             Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
@@ -107,7 +107,7 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
         //Arrange
         Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
         Behandling behandling = opprettBehandling(
-            FagsakYtelseType.FORELDREPENGER,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.MANGLER_BEREGNINGSREGLER,
             null,

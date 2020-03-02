@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
@@ -43,9 +42,6 @@ public class BehandlingModellTest {
 
     private final BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
     private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.ENGANGSTØNAD;
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();

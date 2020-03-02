@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.MapFastsettBeregningsgrunnlagPerioderFraRegelTilVLNaturalytelse;
 import no.nav.folketrygdloven.beregningsgrunnlag.adapter.regelmodelltilvl.MapFastsettBeregningsgrunnlagPerioderFraRegelTilVLRefusjonOgGradering;
@@ -63,6 +63,8 @@ import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.domene.iay.modell.NaturalYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Refusjon;
 import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetBuilder;
+import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -77,8 +79,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.exception.TekniskException;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.konfig.Tid;
 
@@ -100,9 +100,6 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final EntityManager entityManager = repoRule.getEntityManager();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private RepositoryProvider repositoryProvider = new RepositoryProvider(entityManager);
     private final BeregningsgrunnlagRepository beregningsgrunnlagRepository = new BeregningsgrunnlagRepository(entityManager);
@@ -230,7 +227,7 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
                                                                              List<Inntektsmelding> inntektsmeldinger) {
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.oppdatere(iayTjeneste.hentGrunnlag(ref.getBehandlingId())).medInntektsmeldinger(inntektsmeldinger).build();
         var input = new BeregningsgrunnlagInput(ref, iayGrunnlag, null, aktivitetGradering, null)
-                .medBeregningsgrunnlagGrunnlag(grunnlag);
+            .medBeregningsgrunnlagGrunnlag(grunnlag);
         return tjeneste.fastsettPerioderForRefusjonOgGradering(input, beregningsgrunnlag);
     }
 
@@ -241,7 +238,7 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
                                                                        List<Inntektsmelding> inntektsmeldinger) {
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.oppdatere(iayTjeneste.hentGrunnlag(ref.getBehandlingId())).medInntektsmeldinger(inntektsmeldinger).build();
         var input = new BeregningsgrunnlagInput(ref, iayGrunnlag, null, aktivitetGradering, null)
-                .medBeregningsgrunnlagGrunnlag(grunnlag);
+            .medBeregningsgrunnlagGrunnlag(grunnlag);
         return tjeneste.fastsettPerioderForNaturalytelse(input, beregningsgrunnlag);
     }
 
@@ -623,7 +620,7 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
 
     @Test
     public void lagPeriodeForGraderingArbeidsforholdTilkomEtterStp() {
-     // Arrange
+        // Arrange
         LocalDate graderingFom = SKJÆRINGSTIDSPUNKT.plusWeeks(9);
         LocalDate graderingTom = SKJÆRINGSTIDSPUNKT.plusWeeks(18).minusDays(1);
 
@@ -899,7 +896,8 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
         var arbeidsgiver = Arbeidsgiver.virksomhet(ORG_NUMMER);
 
         BeregningAktivitetHandlingType handlingIkkeBenytt = BeregningAktivitetHandlingType.IKKE_BENYTT;
-        BeregningAktivitetOverstyringerEntitet overstyring = BeregningAktivitetOverstyringerEntitet.builder().leggTilOverstyring(lagOverstyringForAktivitet(InternArbeidsforholdRef.nullRef(), arbeidsgiver, handlingIkkeBenytt)).build();
+        BeregningAktivitetOverstyringerEntitet overstyring = BeregningAktivitetOverstyringerEntitet.builder()
+            .leggTilOverstyring(lagOverstyringForAktivitet(InternArbeidsforholdRef.nullRef(), arbeidsgiver, handlingIkkeBenytt)).build();
         BeregningsgrunnlagGrunnlagEntitet grunnlag = lagBeregningsgrunnlag(List.of(), behandlingReferanse, beregningAktivitetAggregat, overstyring);
         BeregningsgrunnlagEntitet beregningsgrunnlag = grunnlag.getBeregningsgrunnlag().get();
         BigDecimal inntekt1 = BigDecimal.valueOf(90000);
@@ -922,7 +920,8 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
     public void skalSetteRefusjonForAktivitetSomErFjernetISaksbehandlet() {
         // Arrange
         var behandlingReferanse = lagre(scenario);
-        BeregningsgrunnlagGrunnlagEntitet grunnlag = lagBeregningsgrunnlagMedSaksbehandlet(List.of(), behandlingReferanse, beregningAktivitetAggregat, BeregningAktivitetAggregatEntitet.builder().medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT).build());
+        BeregningsgrunnlagGrunnlagEntitet grunnlag = lagBeregningsgrunnlagMedSaksbehandlet(List.of(), behandlingReferanse, beregningAktivitetAggregat,
+            BeregningAktivitetAggregatEntitet.builder().medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT).build());
         BeregningsgrunnlagEntitet beregningsgrunnlag = grunnlag.getBeregningsgrunnlag().get();
         BigDecimal inntekt1 = BigDecimal.valueOf(90000);
         var im1 = inntektsmeldingTestUtil.opprettInntektsmelding(behandlingReferanse, ORG_NUMMER, SKJÆRINGSTIDSPUNKT, inntekt1, inntekt1,
@@ -1495,7 +1494,7 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
 
     @Test
     public void skalLeggeTilAndelSomTilkommerPåSkjæringstidspunktMedOpphørUtenSlettingPgaGradering() {
-     // Arrange
+        // Arrange
         LocalDate graderingFom = SKJÆRINGSTIDSPUNKT;
         LocalDate graderingTom = SKJÆRINGSTIDSPUNKT.plusMonths(2);
 
@@ -1580,14 +1579,13 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
             .medBeregningsgrunnlag(beregningsgrunnlag)
             .build(behandlingReferanse.getId(), BeregningsgrunnlagTilstand.OPPDATERT_MED_ANDELER);
 
-        // Assert
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("periode, fant 2");
-
         // Act
         var input = new BeregningsgrunnlagInput(behandlingRef, null, null, AktivitetGradering.INGEN_GRADERING, null)
-                .medBeregningsgrunnlagGrunnlag(grunnlag);
-        tjeneste.fastsettPerioderForNaturalytelse(input, beregningsgrunnlag);
+            .medBeregningsgrunnlagGrunnlag(grunnlag);
+
+        Assert.assertThrows(TekniskException.class, () -> {
+            tjeneste.fastsettPerioderForNaturalytelse(input, beregningsgrunnlag);
+        });
 
     }
 
@@ -1697,14 +1695,13 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
         assertThat(beregningsgrunnlagPeriode.getPeriodeÅrsaker()).as("periodeÅrsaker").containsExactlyInAnyOrder(perioderÅrsaker);
     }
 
-
     private BeregningsgrunnlagGrunnlagEntitet lagBeregningsgrunnlagMedOverstyring(List<String> orgnrs, BehandlingReferanse behandlingReferanse,
                                                                                   BeregningAktivitetAggregatEntitet beregningAktivitetAggregat) {
         return lagBeregningsgrunnlag(orgnrs, behandlingReferanse, beregningAktivitetAggregat, null);
     }
 
     private BeregningsgrunnlagGrunnlagEntitet lagBeregningsgrunnlagMedSaksbehandlet(List<String> orgnrs, BehandlingReferanse behandlingReferanse,
-                                                                    BeregningAktivitetAggregatEntitet beregningAktivitetAggregat, BeregningAktivitetAggregatEntitet saksbehandlet) {
+                                                                                    BeregningAktivitetAggregatEntitet beregningAktivitetAggregat, BeregningAktivitetAggregatEntitet saksbehandlet) {
         BeregningsgrunnlagPeriode.Builder beregningsgrunnlagPeriodeBuilder = lagBeregningsgrunnlagPerioderBuilder(SKJÆRINGSTIDSPUNKT, null, orgnrs);
         BeregningsgrunnlagEntitet.Builder beregningsgrunnlagBuilder = BeregningsgrunnlagEntitet.builder()
             .medSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)
@@ -1720,7 +1717,8 @@ public class FastsettBeregningsgrunnlagPerioderTjenesteImplTest {
     }
 
     private BeregningsgrunnlagGrunnlagEntitet lagBeregningsgrunnlag(List<String> orgnrs, BehandlingReferanse behandlingReferanse,
-                                                                    BeregningAktivitetAggregatEntitet beregningAktivitetAggregat, BeregningAktivitetOverstyringerEntitet beregningAktivitetOverstyringerEntitet) {
+                                                                    BeregningAktivitetAggregatEntitet beregningAktivitetAggregat,
+                                                                    BeregningAktivitetOverstyringerEntitet beregningAktivitetOverstyringerEntitet) {
         BeregningsgrunnlagPeriode.Builder beregningsgrunnlagPeriodeBuilder = lagBeregningsgrunnlagPerioderBuilder(SKJÆRINGSTIDSPUNKT, null, orgnrs);
         BeregningsgrunnlagEntitet.Builder beregningsgrunnlagBuilder = BeregningsgrunnlagEntitet.builder()
             .medSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)

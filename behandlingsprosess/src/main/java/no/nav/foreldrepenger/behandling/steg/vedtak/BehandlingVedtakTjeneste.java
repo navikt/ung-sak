@@ -14,6 +14,7 @@ import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -29,6 +30,7 @@ public class BehandlingVedtakTjeneste {
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OpphørUttakTjeneste opphørUttakTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     BehandlingVedtakTjeneste() {
         // for CDI proxy
@@ -40,6 +42,7 @@ public class BehandlingVedtakTjeneste {
                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
         this.opphørUttakTjeneste = opphørUttakTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
@@ -50,18 +53,19 @@ public class BehandlingVedtakTjeneste {
         VedtakResultatType vedtakResultatType;
         Optional<LocalDate> opphørsdato = Optional.empty();
         Optional<LocalDate> skjæringstidspunkt = Optional.empty();
-        if (behandling.erRevurdering()) {
-            Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-            var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-            opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref, behandling.getBehandlingsresultat());
+        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        var resultat = behandlingsresultatRepository.hent(behandling.getId());
 
+        if (behandling.erRevurdering()) {
+            opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref, resultat);
             skjæringstidspunkt = skjæringstidspunkter.getSkjæringstidspunktHvisUtledet();
         }
-        vedtakResultatType = UtledVedtakResultatType.utled(behandling, opphørsdato, skjæringstidspunkt);
+        vedtakResultatType = UtledVedtakResultatType.utled(behandling, resultat.getBehandlingResultatType(), opphørsdato, skjæringstidspunkt);
         String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandling);
         LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 
-        boolean erRevurderingMedUendretUtfall = revurderingTjeneste.erRevurderingMedUendretUtfall(behandling);
+        boolean erRevurderingMedUendretUtfall = revurderingTjeneste.erRevurderingMedUendretUtfall(ref, resultat.getKonsekvenserForYtelsen());
         BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakResultatType(vedtakResultatType)
             .medAnsvarligSaksbehandler(ansvarligSaksbehandler)

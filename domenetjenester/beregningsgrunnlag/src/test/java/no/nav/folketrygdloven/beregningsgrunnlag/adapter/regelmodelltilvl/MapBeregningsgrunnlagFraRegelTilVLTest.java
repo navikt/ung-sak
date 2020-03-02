@@ -25,7 +25,6 @@ import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
@@ -44,9 +43,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregnings
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.BeregningsgrunnlagPrStatus;
-import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.BeregningIAYTestUtil;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -67,8 +66,9 @@ public class MapBeregningsgrunnlagFraRegelTilVLTest {
     private BehandlingReferanse behandlingReferanse;
     @Rule
     public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+
     private RepositoryProvider repositoryProvider = new RepositoryProvider(repositoryRule.getEntityManager());
-    public final ExpectedException expectedException = ExpectedException.none();
+    
     @Inject
     private MapBGSkjæringstidspunktOgStatuserFraRegelTilVL mapBeregningsgrunnlagFraRegelTilVL;
     @Inject

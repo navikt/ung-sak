@@ -10,9 +10,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Rule;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
@@ -51,9 +50,6 @@ public class PdpRequestBuilderTest {
     private static final AktørId AKTØR_2 = AktørId.dummy();
 
     private static final String PERSON_0 = "00000000000";
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private PipRepository pipRepository = Mockito.mock(PipRepository.class);
     private AktørConsumerMedCache aktørConsumer = Mockito.mock(AktørConsumerMedCache.class);
@@ -159,9 +155,6 @@ public class PdpRequestBuilderTest {
     @Test
     public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_og_behandling_id_som_ikke_stemmer_overens() throws Exception {
 
-        expectedException.expect(ManglerTilgangException.class);
-        expectedException.expectMessage("Ugyldig input. Ikke samsvar mellom behandlingId 1234 og fagsakId [123]");
-
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.FAGSAK_ID, 123L));
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
@@ -169,7 +162,9 @@ public class PdpRequestBuilderTest {
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
             Optional.of(new PipBehandlingsData(BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode())));
 
-        requestBuilder.lagPdpRequest(attributter);
+        Assert.assertThrows(ManglerTilgangException.class, () -> {
+            requestBuilder.lagPdpRequest(attributter);
+        });
 
     }
 

@@ -201,7 +201,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     private Behandling lagRevurdering(Behandling originalBehandling) {
         Behandling revurdering = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING)
-            .medKopiAvForrigeBehandlingsresultat()
             .medBehandlingÅrsak(
                 BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)
                     .medManueltOpprettet(true)

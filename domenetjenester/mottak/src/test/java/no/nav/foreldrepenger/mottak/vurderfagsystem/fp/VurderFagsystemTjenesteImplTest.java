@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -46,9 +44,6 @@ import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class VurderFagsystemTjenesteImplTest {
 
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste;
     @Mock
     private BehandlingRepository behandlingRepository;
@@ -58,7 +53,7 @@ public class VurderFagsystemTjenesteImplTest {
 
     private Fagsak fagsakUdefinert = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, lagNavBruker());
 
-    private MottatteDokumentTjeneste mottatteDokumentTjenesteMock ;
+    private MottatteDokumentTjeneste mottatteDokumentTjenesteMock;
     private BehandlingRepositoryProvider repositoryProvider;
     private VurderFagsystemFellesUtils fellesUtils;
 

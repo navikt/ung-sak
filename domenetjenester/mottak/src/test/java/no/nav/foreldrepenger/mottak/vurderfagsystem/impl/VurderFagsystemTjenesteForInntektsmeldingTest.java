@@ -18,9 +18,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -46,8 +44,6 @@ import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class VurderFagsystemTjenesteForInntektsmeldingTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private VurderFagsystemFellesTjeneste vurderFagsystemTjeneste;
     @Mock
     private BehandlingRepository behandlingRepository;
@@ -58,7 +54,6 @@ public class VurderFagsystemTjenesteForInntektsmeldingTest {
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     @Mock
     private FagsakTjeneste fagsakTjenesteMock;
-
 
     private Fagsak fpFagsakUdefinert = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, lagNavBruker());
 
@@ -74,7 +69,8 @@ public class VurderFagsystemTjenesteForInntektsmeldingTest {
         MottatteDokumentTjeneste mottatteDokumentTjenesteMock = Mockito.mock(MottatteDokumentTjeneste.class);
 
         var skjæringsTidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
-        when(skjæringsTidspunktTjeneste.getSkjæringstidspunkter(any())).thenReturn(Skjæringstidspunkt.builder().medFørsteUttaksdato(LocalDate.now()).medUtledetSkjæringstidspunkt(LocalDate.now()).build());
+        when(skjæringsTidspunktTjeneste.getSkjæringstidspunkter(any()))
+            .thenReturn(Skjæringstidspunkt.builder().medFørsteUttaksdato(LocalDate.now()).medUtledetSkjæringstidspunkt(LocalDate.now()).build());
         var fellesUtil = new VurderFagsystemFellesUtils(behandlingRepository, mottatteDokumentTjenesteMock, skjæringsTidspunktTjeneste);
         var tjenesteFP = new VurderFagsystemTjenesteImpl(fellesUtil);
         vurderFagsystemTjeneste = new VurderFagsystemFellesTjeneste(fagsakTjenesteMock, fellesUtil, new UnitTestLookupInstanceImpl<>(tjenesteFP));
@@ -82,7 +78,8 @@ public class VurderFagsystemTjenesteForInntektsmeldingTest {
 
     @Test
     public void skalReturnereVedtaksløsningMedSaksnummerNårEnSakFinnesOgÅrsakInnsendingErEndring() {
-        VurderFagsystem fagsystem = byggVurderFagsystemForInntektsmelding(VurderFagsystem.ÅRSAK_ENDRING, BehandlingTema.FORELDREPENGER, LocalDateTime.now(), AktørId.dummy(), JOURNALPOST_ID, ARBEIDSFORHOLDSID, VIRKSOMHETSNUMMER);
+        VurderFagsystem fagsystem = byggVurderFagsystemForInntektsmelding(VurderFagsystem.ÅRSAK_ENDRING, BehandlingTema.FORELDREPENGER, LocalDateTime.now(), AktørId.dummy(), JOURNALPOST_ID,
+            ARBEIDSFORHOLDSID, VIRKSOMHETSNUMMER);
 
         when(fagsakTjenesteMock.finnFagsakerForAktør(any())).thenReturn(Collections.singletonList(buildFagsakMedUdefinertRelasjon(123L, false)));
 
@@ -96,7 +93,8 @@ public class VurderFagsystemTjenesteForInntektsmeldingTest {
 
     @Test
     public void skalReturnereInfotrygdNårBrukerIkkeHarSakIVL() {
-        VurderFagsystem fagsystem = byggVurderFagsystemForInntektsmelding(VurderFagsystem.ÅRSAK_NY, BehandlingTema.FORELDREPENGER, LocalDateTime.now(), AktørId.dummy(), JOURNALPOST_ID, ARBEIDSFORHOLDSID, VIRKSOMHETSNUMMER);
+        VurderFagsystem fagsystem = byggVurderFagsystemForInntektsmelding(VurderFagsystem.ÅRSAK_NY, BehandlingTema.FORELDREPENGER, LocalDateTime.now(), AktørId.dummy(), JOURNALPOST_ID,
+            ARBEIDSFORHOLDSID, VIRKSOMHETSNUMMER);
 
         when(fagsakRepositoryMock.hentJournalpost(any())).thenReturn(Optional.empty());
         when(fagsakRepositoryMock.hentForBruker(any())).thenReturn(Collections.emptyList());

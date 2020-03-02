@@ -13,9 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -45,9 +43,8 @@ public class Behandlingsresultat extends BaseEntitet {
     private long versjon;
 
     /* bruker @ManyToOne siden JPA ikke støtter OneToOne join på non-PK column. */
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
+    @Column(name = "behandling_id", nullable = false, updatable = false)
+    private Long behandlingId;
 
     @Convert(converter = BehandlingResultatKodeverdiConverter.class)
     @Column(name = "behandling_resultat_type", nullable = false)
@@ -74,47 +71,19 @@ public class Behandlingsresultat extends BaseEntitet {
         // for hibernate
     }
 
-    public static Behandlingsresultat opprettFor(Behandling behandling) {
-        return builder().buildFor(behandling);
-    }
-
-    public static Builder builderForInngangsvilkår() {
-        return new Builder();
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder builderFraEksisterende(Behandlingsresultat behandlingsresultat) {
-        return new Builder(behandlingsresultat, false);
-    }
-
-    public static Builder builderEndreEksisterende(Behandlingsresultat behandlingsresultat) {
-        return new Builder(behandlingsresultat, true);
-    }
-
     public Long getId() {
         return id;
     }
 
     /**
-     * @deprecated Ikke hent behandling herfra - bruk {@link #getBehandlingId()}
-     */
-    @Deprecated
-    public Behandling getBehandling() {
-        return behandling;
-    }
-
-    /**
      * NB: ikke eksponer settere fra modellen. Skal ha package-scope.
      */
-    void setBehandling(Behandling behandling) {
-        this.behandling = behandling;
+    void setBehandling(Long behandlingId) {
+        this.behandlingId = Objects.requireNonNull(behandlingId, "behandlingId");
     }
 
     public Long getBehandlingId() {
-        return behandling.getId();
+        return behandlingId;
     }
 
     public BehandlingResultatType getBehandlingResultatType() {
@@ -187,13 +156,29 @@ public class Behandlingsresultat extends BaseEntitet {
         return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(behandlingResultatType);
     }
 
+    public static Behandlingsresultat opprettFor(Behandling behandling) {
+        return builder().buildFor(behandling);
+    }
+
+    public static Builder builderForInngangsvilkår() {
+        return new Builder();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builderEndreEksisterende(Behandlingsresultat behandlingsresultat) {
+        return new Builder(behandlingsresultat);
+    }
+
     public static class Builder {
 
         private Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         private boolean built;
 
-        Builder(Behandlingsresultat gammeltResultat, boolean endreEksisterende) {
-            if (endreEksisterende) {
+        Builder(Behandlingsresultat gammeltResultat) {
+            if (gammeltResultat != null) {
                 behandlingsresultat = gammeltResultat;
             }
         }
@@ -255,6 +240,7 @@ public class Behandlingsresultat extends BaseEntitet {
          */
         @Deprecated
         public Behandlingsresultat buildFor(Behandling behandling) {
+            behandlingsresultat.setBehandling(behandling.getId());
             behandling.setBehandlingresultat(behandlingsresultat);
             built = true;
             return behandlingsresultat;

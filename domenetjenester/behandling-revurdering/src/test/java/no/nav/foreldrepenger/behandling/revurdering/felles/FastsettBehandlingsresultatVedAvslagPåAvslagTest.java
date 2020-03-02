@@ -50,7 +50,8 @@ public class FastsettBehandlingsresultatVedAvslagPåAvslagTest {
         // Act
         boolean erAvslagPåAvslag = FastsettBehandlingsresultatVedAvslagPåAvslag.vurder(
             lagBehandlingsresultat(revurdering, BehandlingResultatType.INGEN_ENDRING, KonsekvensForYtelsen.INGEN_ENDRING),
-            lagBehandlingsresultat(originalBehandling, BehandlingResultatType.INNVILGET, KonsekvensForYtelsen.UDEFINERT));
+            lagBehandlingsresultat(originalBehandling, BehandlingResultatType.INNVILGET, KonsekvensForYtelsen.UDEFINERT),
+            BehandlingType.FØRSTEGANGSSØKNAD);
 
         // Assert
         assertThat(erAvslagPåAvslag).isFalse();

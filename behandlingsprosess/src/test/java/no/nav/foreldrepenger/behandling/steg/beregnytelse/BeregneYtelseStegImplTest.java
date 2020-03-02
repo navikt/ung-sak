@@ -10,10 +10,10 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -22,7 +22,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.foreldrepenger.behandling.revurdering.ytelse.UttakInputTjeneste;
-import no.nav.foreldrepenger.behandling.steg.beregnytelse.BeregneYtelseStegImpl;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -51,9 +50,6 @@ import no.nav.vedtak.util.Tuple;
 public class BeregneYtelseStegImplTest {
 
     @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
-    @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @Inject
@@ -67,7 +63,7 @@ public class BeregneYtelseStegImplTest {
 
     @Inject
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    
+
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private final BeregningsresultatRepository beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
     private final UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
@@ -86,8 +82,8 @@ public class BeregneYtelseStegImplTest {
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
             .build();
-        steg = new BeregneYtelseStegImpl(repositoryProvider, hentBeregningsgrunnlagTjeneste, 
-            uttakInputTjeneste, 
+        steg = new BeregneYtelseStegImpl(repositoryProvider, hentBeregningsgrunnlagTjeneste,
+            uttakInputTjeneste,
             fastsettBeregningsresultatTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
     }
@@ -138,16 +134,16 @@ public class BeregneYtelseStegImplTest {
 
     @Test
     public void skalKasteFeilNårBeregningsgrunnlagMangler() {
-        // Assert
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Mangler Beregningsgrunnlag for behandling");
+        Assert.assertThrows("Mangler Beregningsgrunnlag for behandling", IllegalStateException.class, () -> {
+            // Assert
 
-        // Arrange
-        Tuple<Behandling, BehandlingskontrollKontekst> behandlingKontekst = byggGrunnlag(false, true);
-        BehandlingskontrollKontekst kontekst = behandlingKontekst.getElement2();
+            // Arrange
+            Tuple<Behandling, BehandlingskontrollKontekst> behandlingKontekst = byggGrunnlag(false, true);
+            BehandlingskontrollKontekst kontekst = behandlingKontekst.getElement2();
 
-        // Act
-        steg.utførSteg(kontekst);
+            // Act
+            steg.utførSteg(kontekst);
+        });
     }
 
     private Tuple<Behandling, BehandlingskontrollKontekst> byggGrunnlag(boolean medBeregningsgrunnlag, boolean medUttaksPlanResultat) {
@@ -169,8 +165,8 @@ public class BeregneYtelseStegImplTest {
 
     private void medBeregningsgrunnlag(Behandling behandling) {
         var beregningsgrunnlagBuilder = BeregningsgrunnlagEntitet.builder()
-                .medSkjæringstidspunkt(LocalDate.now())
-                .medGrunnbeløp(BigDecimal.valueOf(90000));
+            .medSkjæringstidspunkt(LocalDate.now())
+            .medGrunnbeløp(BigDecimal.valueOf(90000));
         BeregningsgrunnlagEntitet beregningsgrunnlag = beregningsgrunnlagBuilder.build();
         beregningsgrunnlagTjeneste.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag, BeregningsgrunnlagTilstand.OPPRETTET);
     }

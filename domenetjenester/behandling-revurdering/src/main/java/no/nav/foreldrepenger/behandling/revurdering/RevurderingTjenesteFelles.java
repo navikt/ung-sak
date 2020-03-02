@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -60,11 +59,9 @@ public class RevurderingTjenesteFelles {
     }
 
     public void kopierVilkårsresultat(Behandling origBehandling, Behandling revurdering, BehandlingskontrollKontekst kontekst) {
-        Behandlingsresultat.builderFraEksisterende(origBehandling.getBehandlingsresultat()).buildFor(revurdering);
-
         vilkårResultatRepository.kopier(origBehandling.getId(), revurdering.getId());
         behandlingRepository.lagre(revurdering, kontekst.getSkriveLås());
-
+        
         // Kan være at førstegangsbehandling ble avslått før den har kommet til opptjening.
         if (opptjeningRepository.finnOpptjening(origBehandling.getId()).isPresent()) {
             opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(origBehandling, revurdering);

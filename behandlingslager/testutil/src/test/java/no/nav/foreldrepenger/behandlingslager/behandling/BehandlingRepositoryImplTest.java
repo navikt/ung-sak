@@ -145,8 +145,9 @@ public class BehandlingRepositoryImplTest {
     @Test
     public void skal_hente_siste_innvilget_eller_endret_på_fagsakId() {
         BehandlingVedtak.Builder forVedtak = opprettBuilderForVedtak();
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        Behandlingsresultat.builderEndreEksisterende(behandlingsresultat).medBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        var behandlingsresultat = Behandlingsresultat.builderEndreEksisterende(getBehandlingsresultat(behandling))
+            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
+            .build();
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingsresultatRepository.lagre(behandling.getId(), behandlingsresultat);

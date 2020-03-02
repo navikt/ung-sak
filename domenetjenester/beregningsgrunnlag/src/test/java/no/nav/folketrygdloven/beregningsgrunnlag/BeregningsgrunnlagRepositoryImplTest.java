@@ -13,7 +13,6 @@ import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
@@ -70,9 +69,6 @@ public class BeregningsgrunnlagRepositoryImplTest {
     private Behandling behandling;
 
     private final FagsakBehandlingBuilder behandlingBuilder = new FagsakBehandlingBuilder(entityManager);
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {

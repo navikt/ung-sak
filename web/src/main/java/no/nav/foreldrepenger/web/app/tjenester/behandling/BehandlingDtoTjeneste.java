@@ -8,6 +8,7 @@ import static no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonsp
 
 import java.time.LocalDate;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import no.finn.unleash.Unleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -53,6 +55,7 @@ import no.nav.foreldrepenger.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
@@ -290,6 +293,7 @@ public class BehandlingDtoTjeneste {
             return Optional.empty();
         }
         Long behandlingId = behandling.getId();
+        var ref = BehandlingReferanse.fra(behandling);
 
         BehandlingsresultatDto dto = new BehandlingsresultatDto();
         Optional<TekstFraSaksbehandler> tekstFraSaksbehandlerOptional = Optional.empty();
@@ -308,7 +312,7 @@ public class BehandlingDtoTjeneste {
 
         dto.setKonsekvenserForYtelsen(behandlingsresultat.getKonsekvenserForYtelsen());
         dto.setSkjæringstidspunkt(finnSkjæringstidspunktForBehandling(behandling).orElse(null));
-        dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(behandling));
+        dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(ref, behandlingsresultat.getKonsekvenserForYtelsen()));
         if (unleash.isEnabled(FPSAK_LAGRE_FRITEKST_INN_FORMIDLING)) {
             tekstFraSaksbehandlerOptional = formidlingDataTjeneste.hentSaksbehandlerTekst(behandling.getUuid());
         }
@@ -328,9 +332,9 @@ public class BehandlingDtoTjeneste {
         return Optional.of(dto);
     }
 
-    private boolean erRevurderingMedUendretUtfall(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, behandling.getFagsakYtelseType()).orElseThrow()
-            .erRevurderingMedUendretUtfall(behandling);
+    private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref, Collection<KonsekvensForYtelsen> konsekvenserForYtelsen) {
+        return FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, ref.getFagsakYtelseType()).orElseThrow()
+            .erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen);
     }
 
     private Optional<SkjæringstidspunktDto> finnSkjæringstidspunktForBehandling(Behandling behandling) {

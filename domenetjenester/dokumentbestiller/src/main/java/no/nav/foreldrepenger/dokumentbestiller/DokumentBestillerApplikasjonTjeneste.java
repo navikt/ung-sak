@@ -44,13 +44,14 @@ public class DokumentBestillerApplikasjonTjeneste {
     }
 
     public void produserVedtaksbrev(BehandlingVedtak behandlingVedtak) {
-        var behandlingsresultat = behandlingsresultatRepository.hent(behandlingVedtak.getBehandlingId());
+        Long behandlingId = behandlingVedtak.getBehandlingId();
+        var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
         if (Vedtaksbrev.INGEN.equals(behandlingsresultat.getVedtaksbrev())) {
             return;
         }
-
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
         DokumentMalType dokumentMal = velgDokumentMalForVedtak(behandlingsresultat, behandlingVedtak);
-        dokumentKafkaBestiller.bestillBrev(behandlingsresultat.getBehandling(), dokumentMal, null, null, HistorikkAktør.VEDTAKSLØSNINGEN);
+        dokumentKafkaBestiller.bestillBrev(behandling, dokumentMal, null, null, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     public void bestillDokument(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {

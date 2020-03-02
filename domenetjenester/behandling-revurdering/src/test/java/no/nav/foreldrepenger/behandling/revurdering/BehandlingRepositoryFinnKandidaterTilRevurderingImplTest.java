@@ -93,12 +93,14 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
         etterkontrollRepository.lagre(etterkontroll);
 
         Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.FØRSTEGANGSSØKNAD).build();
+        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+
         Behandlingsresultat henlagt = new Behandlingsresultat.Builder()
             .medBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET).buildFor(henlagtBehandling);
         henlagtBehandling.setBehandlingresultat(henlagt);
         henlagtBehandling.avsluttBehandling();
         behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
-
+        
         final List<Behandling> behandlings = etterkontrollRepository
             .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P0D"));
 
@@ -188,6 +190,8 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
         Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.FØRSTEGANGSSØKNAD).build();
+        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+        
         Behandlingsresultat henlagt = new Behandlingsresultat.Builder()
                 .medBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET).buildFor(henlagtBehandling);
         henlagtBehandling.setBehandlingresultat(henlagt);

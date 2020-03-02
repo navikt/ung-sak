@@ -5,9 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
 
-import org.junit.Rule;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
@@ -17,9 +16,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class BeregningAktivitetEntitetTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private static final InternArbeidsforholdRef ARBEIDSFORHOLD_REF = InternArbeidsforholdRef.namedRef("TEST-REF");
     private static final Arbeidsgiver ARBEIDSGIVER = Arbeidsgiver.fra(AktørId.dummy());
@@ -72,11 +68,10 @@ public class BeregningAktivitetEntitetTest {
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.ARBEID)
             .build();
 
-        // Assert
-        expectedException.expect(IllegalStateException.class);
-
         // Act
-        aktivitet.skalBrukes(overstyringer);
+        Assert.assertThrows(IllegalStateException.class, () -> {
+            aktivitet.skalBrukes(overstyringer);
+        });
     }
 
     private BeregningAktivitetOverstyringerEntitet lagOverstyring(int antallOverstyringer) {

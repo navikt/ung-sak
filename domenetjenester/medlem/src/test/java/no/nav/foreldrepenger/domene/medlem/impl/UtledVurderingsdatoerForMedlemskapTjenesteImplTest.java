@@ -47,6 +47,8 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 @RunWith(CdiRunner.class)
 public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
 
+    private static final LocalDate DAGENS_DATO = LocalDate.now();
+
     @Rule
     public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
 
@@ -96,7 +98,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(revurderingId);
 
         // Assert
-        assertThat(vurderingsdatoer).containsExactly(LocalDate.now());
+        assertThat(vurderingsdatoer).containsExactly(DAGENS_DATO);
     }
 
     @Test
@@ -128,7 +130,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Behandling revudering = opprettRevudering(behandling);
         Long revurderingId = revudering.getId();
 
-        LocalDate endringsdato = LocalDate.now().plusMonths(1);
+        LocalDate endringsdato = DAGENS_DATO.plusMonths(1);
         MedlemskapPerioderEntitet endretPeriode = new MedlemskapPerioderBuilder()
             .medDekningType(MedlemskapDekningType.FULL)
             .medMedlemskapType(MedlemskapType.ENDELIG)
@@ -143,16 +145,16 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(revurderingId);
 
         // Assert
-        assertThat(vurderingsdatoer).containsExactly(LocalDate.now(), endringsdato);
+        assertThat(vurderingsdatoer).containsExactly(DAGENS_DATO, endringsdato);
     }
 
 
     @Test
     public void skal_utled_vurderingsdato_ved_endring_i_medlemskapsperioder() {
         // Arrange
-        LocalDate datoMedEndring = LocalDate.now().plusDays(10);
-        LocalDate ettÅrSiden = LocalDate.now().minusYears(1);
-        LocalDate iDag = LocalDate.now();
+        LocalDate datoMedEndring = DAGENS_DATO.plusDays(10);
+        LocalDate ettÅrSiden = DAGENS_DATO.minusYears(1);
+        LocalDate iDag = DAGENS_DATO;
         var scenario = TestScenarioBuilder.builderMedSøknad();
         MedlemskapPerioderEntitet periode = opprettPeriode(ettÅrSiden, iDag, MedlemskapDekningType.FTL_2_6);
         scenario.leggTilMedlemskapPeriode(periode);
@@ -168,13 +170,13 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(revurderingId);
 
         // Assert
-        assertThat(vurderingsdatoer).containsExactly(LocalDate.now(), datoMedEndring);
+        assertThat(vurderingsdatoer).containsExactly(DAGENS_DATO, datoMedEndring);
     }
 
     @Test
     public void skal_utled_vurderingsdato_ved_endring_personopplysninger_statsborgerskap() {
         // Arrange
-        LocalDate iDag = LocalDate.now();
+        LocalDate iDag = DAGENS_DATO;
         var scenario = TestScenarioBuilder.builderMedSøknad();
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
 
@@ -198,13 +200,13 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(LocalDate.now(), andreÅr.getFomDato(), tredjeÅr.getFomDato());
+        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(DAGENS_DATO, andreÅr.getFomDato(), tredjeÅr.getFomDato());
     }
 
     @Test
     public void skal_utled_vurderingsdato_ved_endring_personopplysninger_personstatus_skal_ikke_se_på_død() {
         // Arrange
-        LocalDate iDag = LocalDate.now();
+        LocalDate iDag = DAGENS_DATO;
         var scenario = TestScenarioBuilder.builderMedSøknad();
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
 
@@ -228,13 +230,13 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(LocalDate.now(), andreÅr.getFomDato());
+        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(DAGENS_DATO, andreÅr.getFomDato());
     }
 
     @Test
     public void skal_utled_vurderingsdato_ved_endring_personopplysninger_adressetype() {
         // Arrange
-        LocalDate iDag = LocalDate.now();
+        LocalDate iDag = DAGENS_DATO;
         var scenario = TestScenarioBuilder.builderMedSøknad();
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
 
@@ -258,13 +260,13 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(LocalDate.now(), andreÅr.getFomDato(), tredjeÅr.getFomDato());
+        assertThat(vurderingsdatoer).containsExactlyInAnyOrder(DAGENS_DATO, andreÅr.getFomDato(), tredjeÅr.getFomDato());
     }
 
     @Test
     public void skal_ikke_utlede_vurderingsdato_som_ligger_før_skjæringstidspunkt() {
         // Arrange
-        LocalDate iDag = LocalDate.now();
+        LocalDate iDag = DAGENS_DATO;
         var scenario = TestScenarioBuilder.builderMedSøknad();
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
 
@@ -288,7 +290,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         // Act
         Set<LocalDate> vurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
 
-        assertThat(vurderingsdatoer).containsExactly(LocalDate.now());
+        assertThat(vurderingsdatoer).containsExactly(DAGENS_DATO);
     }
 
     private void oppdaterMedlem(LocalDate datoMedEndring, MedlemskapPerioderEntitet periode, Long behandlingId) {

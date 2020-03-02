@@ -166,10 +166,6 @@ public class BehandlingRevurderingRepositoryImplTest {
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandling.getBehandlingsresultat();
-    }
-
     private Personinfo lagPerson() {
         final Personinfo personinfo = new Personinfo.Builder()
             .medNavn("Navn navnesen")

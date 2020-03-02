@@ -19,7 +19,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.RepositoryProvider;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling.Builder;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -59,8 +58,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private InntektArbeidYtelseScenario iayScenario;
     private Behandling behandling;
 
-    private Behandlingsresultat.Builder behandlingresultatBuilder;
-
     private Fagsak fagsak;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
@@ -91,7 +88,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return BehandlingReferanse.fra(behandling);
     }
 
-
     public BehandlingReferanse lagre(RepositoryProvider repositoryProvider) {
         class LegacyBridgeIay implements LagreInntektArbeidYtelse {
             @Override
@@ -110,8 +106,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     public BehandlingReferanse lagre(RepositoryProvider repositoryProvider,
-                            BiConsumer<Long, InntektArbeidYtelseAggregatBuilder> lagreIayAggregat,
-                            BiConsumer<Long, OppgittOpptjeningBuilder> lagreOppgittOpptjening) {
+                                     BiConsumer<Long, InntektArbeidYtelseAggregatBuilder> lagreIayAggregat,
+                                     BiConsumer<Long, OppgittOpptjeningBuilder> lagreOppgittOpptjening) {
 
         class LegacyBridgeIay implements LagreInntektArbeidYtelse {
             @Override
@@ -252,7 +248,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         lagreInntektArbeidYtelse(lagreIay);
         // opprett og lagre resulater på behandling
-        lagreBehandlingsresultatOgVilkårResultat();
         lagreTilleggsScenarier(repositoryProvider);
 
         // få med behandlingsresultat etc.
@@ -293,13 +288,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         fagsak = fagsakBuilder.build();
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
-    }
-
-    private void lagreBehandlingsresultatOgVilkårResultat() {
-        // opprett og lagre behandlingsresultat med VilkårResultat og BehandlingVedtak
-        (behandlingresultatBuilder == null ? Behandlingsresultat.builderForInngangsvilkår()
-            : behandlingresultatBuilder).buildFor(behandling);
-
     }
 
     private void lagreTilleggsScenarier(RepositoryProvider repositoryProvider) {

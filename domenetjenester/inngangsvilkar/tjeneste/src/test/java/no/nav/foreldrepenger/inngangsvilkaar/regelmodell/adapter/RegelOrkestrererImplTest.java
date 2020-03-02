@@ -12,10 +12,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
@@ -37,9 +36,6 @@ import no.nav.vedtak.exception.TekniskException;
 public class RegelOrkestrererImplTest {
 
     private static final FagsakYtelseType YTELSE_TYPE = TestScenarioBuilder.DEFAULT_TEST_YTELSE;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private RegelOrkestrerer orkestrerer;
 
@@ -112,7 +108,6 @@ public class RegelOrkestrererImplTest {
         assertThat(regelResultat.getAksjonspunktDefinisjoner()).containsExactly(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
     }
 
-
     @Test
     public void skal_sammenstille_individuelle_vilkårsutfall_til_ett_samlet_vilkårresultat() {
         orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste, null);
@@ -130,10 +125,10 @@ public class RegelOrkestrererImplTest {
 
     @Test
     public void skal_kaste_feil_dersom_vilkårsresultat_ikke_kan_utledes() {
-        expectedException.expect(TekniskException.class);
         orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste, null);
-
-        orkestrerer.utledInngangsvilkårUtfall(emptyList());
+        Assert.assertThrows(TekniskException.class, () -> {
+            orkestrerer.utledInngangsvilkårUtfall(emptyList());
+        });
     }
 
     private Behandling byggBehandlingMedVilkårresultat(VilkårType vilkårType) {

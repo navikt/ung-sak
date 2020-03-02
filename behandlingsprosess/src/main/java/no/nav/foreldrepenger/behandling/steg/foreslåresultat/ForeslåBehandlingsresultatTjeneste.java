@@ -47,9 +47,9 @@ class ForeslåBehandlingsresultatTjeneste {
 
     @Inject
     public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                       DokumentBehandlingTjeneste dokumentBehandlingTjeneste,
-                                       FordelingRepository fordelingRepository,
-                                       @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
+                                              DokumentBehandlingTjeneste dokumentBehandlingTjeneste,
+                                              FordelingRepository fordelingRepository,
+                                              @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
         this.fordelingRepository = fordelingRepository;
         this.uttakRepository = repositoryProvider.getUttakRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
@@ -67,26 +67,26 @@ class ForeslåBehandlingsresultatTjeneste {
 
     public Behandlingsresultat foreslåBehandlingsresultat(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
-        if (behandlingsresultat.isPresent()) {
-            var vilkårene = vilkårResultatRepository.hent(behandlingId);
-            if (sjekkVilkårAvslått(behandlingId, vilkårene)) {
-                return foreslåBehandlingresultatAvslått(ref, behandlingsresultat.get());
-            } else {
-                return foreslåBehandlingsresultatInnvilget(ref, behandlingsresultat);
-            }
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+
+        // kun for å sette behandlingsresulattype
+        var behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+
+        if (sjekkVilkårAvslått(behandlingId, vilkårene)) {
+            return foreslåBehandlingresultatAvslått(ref, behandlingsresultat);
         } else {
-            return null;
+            return foreslåBehandlingsresultatInnvilget(ref, behandlingsresultat);
         }
     }
 
-    private Behandlingsresultat foreslåBehandlingsresultatInnvilget(BehandlingReferanse ref, Optional<Behandlingsresultat> behandlingsresultat) {
-        Behandlingsresultat.builderEndreEksisterende(behandlingsresultat.get()).medBehandlingResultatType(BehandlingResultatType.INNVILGET);
+    private Behandlingsresultat foreslåBehandlingsresultatInnvilget(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
+        var builder = (behandlingsresultat == null ? Behandlingsresultat.builder() : Behandlingsresultat.builderEndreEksisterende(behandlingsresultat))
+            .medBehandlingResultatType(BehandlingResultatType.INNVILGET);
         if (ref.erRevurdering()) {
             boolean erVarselOmRevurderingSendt = erVarselOmRevurderingSendt(ref);
             return revurderingBehandlingsresultatutlederFelles.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt);
         }
-        return behandlingsresultat.orElse(null);
+        return builder.build();
     }
 
     private boolean sjekkVilkårAvslått(Long behandlingId, Vilkårene vilkårene) {
@@ -112,15 +112,16 @@ class ForeslåBehandlingsresultatTjeneste {
     private Behandlingsresultat foreslåBehandlingresultatAvslått(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
         if (ref.erRevurdering()) {
             boolean erVarselOmRevurderingSendt = erVarselOmRevurderingSendt(ref);
-            revurderingBehandlingsresultatutlederFelles.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt);
+            return revurderingBehandlingsresultatutlederFelles.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt);
         } else {
-            Behandlingsresultat.Builder resultatBuilder = Behandlingsresultat.builderEndreEksisterende(behandlingsresultat)
-                .medBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+            Behandlingsresultat.Builder resultatBuilder = (behandlingsresultat == null ? Behandlingsresultat.builder()
+                : Behandlingsresultat.builderEndreEksisterende(behandlingsresultat))
+                    .medBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             if (skalTilInfoTrygd(ref)) {
                 resultatBuilder.medVedtaksbrev(Vedtaksbrev.INGEN);
             }
+            return resultatBuilder.build();
         }
-        return behandlingsresultat;
     }
 
     private boolean skalTilInfoTrygd(BehandlingReferanse ref) {

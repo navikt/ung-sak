@@ -83,7 +83,7 @@ public class BehandlingRevurderingRepository {
                 " AND b.behandlingType=:type" +
                 " AND b.opprettetTidspunkt >= :etterTidspunkt" +
                 " AND EXISTS (SELECT r FROM Behandlingsresultat r" +
-                "    WHERE r.behandling=b " +
+                "    WHERE r.behandlingId=b.id " +
                 "    AND r.behandlingResultatType IN :henlagtKoder)" +
                 " ORDER BY b.opprettetTidspunkt ASC", //$NON-NLS-1$
             Long.class);

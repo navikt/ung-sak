@@ -138,7 +138,8 @@ public class Behandling extends BaseEntitet {
     /**
      * Er egentlig OneToOne, men må mappes slik da JPA/Hibernate ikke støtter OneToOne på annet enn shared PK.
      */
-    @OneToMany(mappedBy = "behandling")
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "behandling_id")
     private Set<Behandlingsresultat> behandlingsresultat = new HashSet<>(1);
 
     // CascadeType.ALL + orphanRemoval=true må til for at aksjonspunkter skal bli slettet fra databasen ved fjerning fra HashSet
@@ -440,7 +441,7 @@ public class Behandling extends BaseEntitet {
         // kolonne, så emuleres her ved å tømme listen.
 
         this.behandlingsresultat.clear();
-        behandlingsresultat.setBehandling(this);
+        behandlingsresultat.setBehandling(this.getId());
         // kun ett om gangen, mappet på annet enn pk
         this.behandlingsresultat.add(behandlingsresultat);
     }
@@ -799,12 +800,6 @@ public class Behandling extends BaseEntitet {
         private Builder(BehandlingType behandlingType) {
             Objects.requireNonNull(behandlingType, "behandlingType"); //$NON-NLS-1$
             this.behandlingType = behandlingType;
-        }
-
-        public Builder medKopiAvForrigeBehandlingsresultat() {
-            Behandlingsresultat behandlingsresultatForrige = forrigeBehandling.getBehandlingsresultat();
-            this.resultatBuilder = Behandlingsresultat.builderFraEksisterende(behandlingsresultatForrige);
-            return this;
         }
 
         public Builder medBehandlingÅrsak(BehandlingÅrsak.Builder årsakBuilder) {

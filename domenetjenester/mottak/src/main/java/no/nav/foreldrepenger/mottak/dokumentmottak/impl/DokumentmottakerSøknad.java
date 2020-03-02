@@ -4,7 +4,9 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
@@ -13,6 +15,9 @@ import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 
 public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesrelatertDokument {
+
+    private BehandlingRevurderingRepository revurderingRepository;
+    private BehandlingRepository behandlingRepository;
 
     public DokumentmottakerSøknad(BehandlingRepositoryProvider repositoryProvider,
                                   DokumentmottakerFelles dokumentmottakerFelles,
@@ -24,6 +29,8 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
             behandlingsoppretter,
             kompletthetskontroller,
             repositoryProvider);
+        this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override

@@ -13,7 +13,6 @@ import javax.inject.Inject;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
@@ -51,9 +50,6 @@ public class KontrollerFaktaBeregningStegImplTest {
 
     @Rule
     public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private BehandlingReferanse behandlingReferanse;
     private RepositoryProvider repositoryProvider = new RepositoryProvider(repositoryRule.getEntityManager());

@@ -14,7 +14,6 @@ import org.junit.Test;
 import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -36,8 +35,6 @@ public class BehandlingVedtakRepositoryImplTest {
     private Behandling behandling;
 
     private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
-
-    private BehandlingsresultatRepository behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
 
     @Before
     public void setup() {

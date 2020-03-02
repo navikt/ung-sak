@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import no.finn.unleash.FakeUnleash;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -87,6 +88,8 @@ public class AksjonspunktOppdatererTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.medBehandlingsresultat(Behandlingsresultat.builder());
+        
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
@@ -115,7 +118,8 @@ public class AksjonspunktOppdatererTest {
     public void oppdaterer_aksjonspunkt_med_godkjent_totrinnskontroll() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
-
+        scenario.medBehandlingsresultat(Behandlingsresultat.builder());
+        
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();

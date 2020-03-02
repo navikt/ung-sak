@@ -2,15 +2,16 @@ package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Set;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndring;
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndringBasertPåKonsekvenserForYtelsen;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -29,9 +30,6 @@ public class RevurderingEndringTest {
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private RevurderingEndring revurderingEndring = new no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingEndring();
     private Behandling originalBehandling;
     private Behandling revurdering;
@@ -47,70 +45,56 @@ public class RevurderingEndringTest {
 
     @Test
     public void jaHvisRevurderingMedUendretUtfall() {
-        Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-            .leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.INGEN_ENDRING)
-            .buildFor(revurdering);
-
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
-
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(revurdering)).isTrue();
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(revurdering, null)).isTrue();
+        var ref = BehandlingReferanse.fra(revurdering);
+        var konsekvenserForYtelsen = Set.of(KonsekvensForYtelsen.INGEN_ENDRING);
+        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen, BehandlingResultatType.INGEN_ENDRING)).isTrue();
+        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen, null)).isTrue();
     }
 
-    @Test
+    @Test()
     public void kasterFeilHvisRevurderingMedUendretUtfallOgOpphørAvYtelsen() {
-        // Arrange
-        Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-            .leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.INGEN_ENDRING)
-            .leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.YTELSE_OPPHØRER)
-            .buildFor(revurdering);
-
-        // Assert
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage(RevurderingEndringBasertPåKonsekvenserForYtelsen.UTVIKLERFEIL_INGEN_ENDRING_SAMMEN);
 
         // Act
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
 
         // Assert
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(revurdering)).isFalse();
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(revurdering, null)).isFalse();
+        var ref = BehandlingReferanse.fra(revurdering);
+        var konsekvenserForYtelsen = Set.of(KonsekvensForYtelsen.INGEN_ENDRING, KonsekvensForYtelsen.YTELSE_OPPHØRER);
+
+        Assert.assertThrows(IllegalStateException.class, () -> {
+            assertThat(revurderingEndring.erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen, BehandlingResultatType.INNVILGET)).isFalse();
+        });
+
     }
 
     @Test
     public void neiHvisRevurderingMedEndring() {
-        Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET_ENDRING)
-            .leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.ENDRING_I_BEREGNING)
-            .leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.ENDRING_I_UTTAK)
-            .buildFor(revurdering);
-
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
 
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(revurdering)).isFalse();
+        var ref = BehandlingReferanse.fra(revurdering);
+        var konsekvenserForYtelsen = Set.of(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK);
+        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen, BehandlingResultatType.INNVILGET_ENDRING)).isFalse();
+
     }
 
     @Test
     public void neiHvisRevurderingMedOpphør() {
-        Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.OPPHØR)
-            .leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.YTELSE_OPPHØRER)
-            .buildFor(revurdering);
-
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
 
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(revurdering)).isFalse();
+        var ref = BehandlingReferanse.fra(revurdering);
+        var konsekvenserForYtelsen = Set.of(KonsekvensForYtelsen.YTELSE_OPPHØRER);
+        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen, BehandlingResultatType.OPPHØR)).isFalse();
     }
 
     @Test
     public void neiHvisFørstegangsbehandling() {
-        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(originalBehandling)).isFalse();
+        var ref = BehandlingReferanse.fra(originalBehandling);
+        assertThat(revurderingEndring.erRevurderingMedUendretUtfall(ref, Set.of())).isFalse();
     }
 
     private Behandling opprettOriginalBehandling() {

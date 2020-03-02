@@ -273,13 +273,13 @@ public class BehandlingRepository {
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
-            "SELECT behandling FROM Behandling behandling " +
-                "INNER JOIN Behandlingsresultat behandlingsresultat ON behandling.id=behandlingsresultat.behandling.id " +
-                "INNER JOIN BehandlingVedtak behandling_vedtak ON behandling.id=behandling_vedtak.behandlingId " +
-                "WHERE behandling.status IN :avsluttetOgIverkKode " +
-                "  AND behandlingsresultat.behandlingResultatType IN (:innvilgetKoder) " +
-                "  AND behandling.fagsak.id=:fagsakId " +
-                "ORDER BY behandling_vedtak.vedtakstidspunkt DESC, behandling_vedtak.endretTidspunkt DESC",
+            "SELECT b FROM Behandling b " +
+                "INNER JOIN Behandlingsresultat br ON b.id=br.behandlingId " +
+                "INNER JOIN BehandlingVedtak bv ON b.id=bv.behandlingId " +
+                "WHERE b.status IN :avsluttetOgIverkKode " +
+                "  AND br.behandlingResultatType IN (:innvilgetKoder) " +
+                "  AND b.fagsak.id=:fagsakId " +
+                "ORDER BY bv.vedtakstidspunkt DESC, bv.endretTidspunkt DESC",
             Behandling.class);
 
         query.setParameter(FAGSAK_ID, fagsakId);
@@ -342,7 +342,7 @@ public class BehandlingRepository {
             " FROM Behandling b WHERE b.fagsak.id=:fagsakId " +
                 " AND b.behandlingType=:behandlingType " +
                 " AND NOT EXISTS (SELECT r FROM Behandlingsresultat r" +
-                "    WHERE r.behandling=b " +
+                "    WHERE r.behandlingId=b.id " +
                 "    AND r.behandlingResultatType IN :henlagtKoder)" +
                 " ORDER BY b.opprettetTidspunkt DESC",
             Behandling.class);
