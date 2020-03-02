@@ -91,7 +91,7 @@ public class BehandlingskontrollEventObserver {
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
-        Optional<Behandling> behandling = behandlingRepository.finnUnikBehandlingForBehandlingId(behandlingId);
+        Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
         BehandlingProsessEventDto behandlingProsessEventDto = getProduksjonstyringEventDto(eventHendelse, behandling.get());
 

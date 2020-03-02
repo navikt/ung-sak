@@ -16,6 +16,7 @@ import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
@@ -49,7 +50,8 @@ import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingVedtakTjenesteTest {
 
-    public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
+
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final Repository repository = repoRule.getRepository();
@@ -59,6 +61,7 @@ public class BehandlingVedtakTjenesteTest {
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
     private BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+    private BehandlingsresultatRepository behandlingsresultatRepository = new BehandlingsresultatRepository(repoRule.getEntityManager());
 
     @Before
     public void setUp() {
@@ -76,19 +79,22 @@ public class BehandlingVedtakTjenesteTest {
         // Arrange
         Behandling originalBehandling = lagInnvilgetOriginalBehandling();
         Behandling revurdering = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_MANGLER_FØDSEL).medOriginalBehandling(originalBehandling)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ANNET)
+                .medOriginalBehandling(originalBehandling))
+            .build();
         manipulerBehandling.forceOppdaterBehandlingSteg(revurdering, BehandlingStegType.FATTE_VEDTAK);
-        BehandlingLås behandlingLås = lagreBehandling(revurdering);
-        Fagsak fagsak = revurdering.getFagsak();
-        BehandlingskontrollKontekst revurderingKontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
-        oppdaterMedBehandlingsresultat(revurderingKontekst, BehandlingResultatType.OPPHØR);
+        var behandlingLås = lagreBehandling(revurdering);
+        var fagsak = revurdering.getFagsak();
+        var revurderingKontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
+        
+        revurdering = oppdaterMedBehandlingsresultat(revurderingKontekst, BehandlingResultatType.OPPHØR);
         lagUttaksresultatOpphørEtterSkjæringstidspunkt(revurdering);
 
         // Act
         behandlingVedtakTjeneste.opprettBehandlingVedtak(revurderingKontekst, revurdering);
 
         // Assert
-        Optional<BehandlingVedtak> vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(revurdering.getId());
+        Optional<BehandlingVedtak> vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(revurdering.getId());
         assertThat(vedtak).isPresent();
         assertThat(vedtak.get().getVedtakResultatType()).isEqualTo(VedtakResultatType.INNVILGET);
     }
@@ -104,22 +110,21 @@ public class BehandlingVedtakTjenesteTest {
         BehandlingLås behandlingLås = lagreBehandling(revurdering);
         Fagsak fagsak = revurdering.getFagsak();
         BehandlingskontrollKontekst revurderingKontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
-        oppdaterMedBehandlingsresultat(revurderingKontekst, BehandlingResultatType.OPPHØR);
+        revurdering = oppdaterMedBehandlingsresultat(revurderingKontekst, BehandlingResultatType.OPPHØR);
         lagUttaksresultatOpphørPåSkjæringstidspunkt(revurdering);
 
         // Act
         behandlingVedtakTjeneste.opprettBehandlingVedtak(revurderingKontekst, revurdering);
 
         // Assert
-        Optional<BehandlingVedtak> vedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(revurdering.getId());
+        Optional<BehandlingVedtak> vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(revurdering.getId());
         assertThat(vedtak).isPresent();
         assertThat(vedtak.get().getVedtakResultatType()).isEqualTo(VedtakResultatType.AVSLAG);
     }
 
     private Behandling lagInnvilgetOriginalBehandling() {
-        BehandlingskontrollKontekst kontekst = byggBehandlingsgrunnlagFPForFødsel(BehandlingStegType.FATTE_VEDTAK);
-        oppdaterMedBehandlingsresultat(kontekst, BehandlingResultatType.INNVILGET);
-        return behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        BehandlingskontrollKontekst kontekst = byggBehandlingsgrunnlag(BehandlingStegType.FATTE_VEDTAK);
+        return oppdaterMedBehandlingsresultat(kontekst, BehandlingResultatType.INNVILGET);
     }
 
     private void lagUttaksresultatOpphørEtterSkjæringstidspunkt(Behandling revurdering) {
@@ -134,7 +139,6 @@ public class BehandlingVedtakTjenesteTest {
         uttakResultatPerioderEntitet.leggTilPeriode(lagOpphørtPeriode(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusMonths(6)));
         uttakRepository.lagreOpprinneligUttakResultatPerioder(revurdering.getId(), uttakResultatPerioderEntitet);
     }
-
 
     private UttakResultatPeriodeEntitet lagInnvilgetUttakPeriode(LocalDate fom, LocalDate tom) {
         return new UttakResultatPeriodeEntitet.Builder(fom, tom)
@@ -152,13 +156,13 @@ public class BehandlingVedtakTjenesteTest {
         return behandlingLås;
     }
 
+    private Behandling oppdaterMedBehandlingsresultat(BehandlingskontrollKontekst kontekst, BehandlingResultatType behandlingResultatType) {
+        Long behandlingId = kontekst.getBehandlingId();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-    private void oppdaterMedBehandlingsresultat(BehandlingskontrollKontekst kontekst, BehandlingResultatType behandlingResultatType) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var resultat = Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(behandlingResultatType).build();
+        behandlingsresultatRepository.lagre(behandlingId, resultat);
 
-        Behandlingsresultat.builderForInngangsvilkår()
-            .medBehandlingResultatType(behandlingResultatType)
-            .buildFor(behandling);
         boolean ikkeAvslått = !behandlingResultatType.equals(BehandlingResultatType.AVSLÅTT);
         final var vilkårResultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
@@ -170,17 +174,19 @@ public class BehandlingVedtakTjenesteTest {
         repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
         behandlingRepository.lagre(behandling, lås);
         repository.flush();
+        return behandlingRepository.hentBehandling(behandlingId);
     }
 
-
-    private BehandlingskontrollKontekst byggBehandlingsgrunnlagFPForFødsel(BehandlingStegType behandlingStegType) {
+    private BehandlingskontrollKontekst byggBehandlingsgrunnlag(BehandlingStegType behandlingStegType) {
         var scenario = TestScenarioBuilder.builderMedSøknad();
 
         Behandling behandling = scenario
             .medBehandlingStegStart(behandlingStegType)
             .medBehandlendeEnhet("Stord")
             .lagre(repositoryProvider);
-        Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
+        var resultat = Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).build();
+        behandlingsresultatRepository.lagre(behandling.getId(), resultat);
+
         Fagsak fagsak = behandling.getFagsak();
         return new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingRepository.taSkriveLås(behandling));
     }

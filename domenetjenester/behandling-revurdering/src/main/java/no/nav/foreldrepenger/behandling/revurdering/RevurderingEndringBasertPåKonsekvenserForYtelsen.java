@@ -1,9 +1,8 @@
 package no.nav.foreldrepenger.behandling.revurdering;
 
-import java.util.List;
+import java.util.Collection;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
@@ -13,20 +12,18 @@ public abstract class RevurderingEndringBasertPåKonsekvenserForYtelsen implemen
     public static final String UTVIKLERFEIL_INGEN_ENDRING_SAMMEN = "Utviklerfeil: Det skal ikke være mulig å ha INGEN_ENDRING sammen med andre konsekvenser. BehandlingId: ";
 
     @Override
-    public boolean erRevurderingMedUendretUtfall(Behandling behandling, BehandlingResultatType nyResultatType) {
-        return erRevurderingMedUendretUtfall(behandling);
+    public boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref, Collection<KonsekvensForYtelsen> konsekvenserForYtelsen, BehandlingResultatType nyResultatType) {
+        return erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen);
     }
 
     @Override
-    public boolean erRevurderingMedUendretUtfall(Behandling behandling) {
-        if (!BehandlingType.REVURDERING.equals(behandling.getType())) {
+    public boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref, Collection<KonsekvensForYtelsen> konsekvenserForYtelsen) {
+        if (!BehandlingType.REVURDERING.equals(ref.getBehandlingType())) {
             return false;
         }
-        Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
-        List<KonsekvensForYtelsen> konsekvenserForYtelsen = behandlingsresultat.getKonsekvenserForYtelsen();
         boolean ingenKonsekvensForYtelsen = konsekvenserForYtelsen.contains(KonsekvensForYtelsen.INGEN_ENDRING);
         if (ingenKonsekvensForYtelsen && konsekvenserForYtelsen.size() > 1) {
-            throw new IllegalStateException(UTVIKLERFEIL_INGEN_ENDRING_SAMMEN + behandling.getId());
+            throw new IllegalStateException(UTVIKLERFEIL_INGEN_ENDRING_SAMMEN + ref.getBehandlingId());
         }
         return ingenKonsekvensForYtelsen;
     }

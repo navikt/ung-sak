@@ -54,19 +54,19 @@ public class SendVedtaksbrev {
     void sendVedtaksbrev(BehandlingReferanse ref) {
 
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId());
+        Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId());
         if (behandlingVedtakOpt.isEmpty()) {
             log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", ref); //$NON-NLS-1$
             return;
         }
-        BehandlingVedtak behandlingVedtak = behandlingVedtakOpt.get();
 
-        boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandlingVedtak.getBehandlingsresultat().getVedtaksbrev());
+        boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandling.getBehandlingsresultat().getVedtaksbrev());
         if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde()) && !fritekstVedtaksbrev) {
             log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", ref);
             return;
         }
 
+        var behandlingVedtak = behandlingVedtakOpt.get();
         if (behandlingVedtak.isBeslutningsvedtak()) {
             if (harSendtVarselOmRevurdering(behandling.getId())) {
                 log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", ref); //$NON-NLS-1$
@@ -75,7 +75,7 @@ public class SendVedtaksbrev {
                 return;
             }
         } else {
-            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType().getKode(), ref); //$NON-NLS-1
+            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref); //$NON-NLS-1
         }
         dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(behandlingVedtak);
     }

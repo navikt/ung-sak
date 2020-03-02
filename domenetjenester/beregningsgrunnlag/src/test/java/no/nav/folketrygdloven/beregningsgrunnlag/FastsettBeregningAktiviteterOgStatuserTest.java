@@ -1,6 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.adapter.vltilregelmodell.MapBeregningAktiviteterFraVLTilRegel.INGEN_AKTIVITET_MELDING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -17,11 +16,10 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -84,9 +82,6 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private final EntityManager entityManager = repoRule.getEntityManager();
     private RepositoryProvider repositoryProvider = new RepositoryProvider(entityManager);
 
@@ -106,8 +101,7 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
     @Before
     public void setup() {
         iayTestUtil = new BeregningIAYTestUtil(iayTjeneste);
-        var oversetterFraRegelSkjæringstidspunkt = new MapBGSkjæringstidspunktOgStatuserFraRegelTilVL(repositoryProvider.getBeregningsgrunnlagRepository()
-        );
+        var oversetterFraRegelSkjæringstidspunkt = new MapBGSkjæringstidspunktOgStatuserFraRegelTilVL(repositoryProvider.getBeregningsgrunnlagRepository());
         fastsettSkjæringstidspunktOgStatuser = new FastsettSkjæringstidspunktOgStatuser(
             oversetterFraRegelSkjæringstidspunkt, new MapBGStatuserFraVLTilRegel());
         scenario = TestScenarioBuilder.nyttScenario();
@@ -121,12 +115,10 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
         // Arrange
         lagArbeidOgOpptjening(ORG_NUMMER, SKJÆRINGSTIDSPUNKT_OPPTJENING.minusYears(2), SKJÆRINGSTIDSPUNKT_OPPTJENING.minusMonths(13), arbId1);
 
-        // Assert
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(CoreMatchers.containsString(INGEN_AKTIVITET_MELDING));
-
         // Act
-        act();
+        Assert.assertThrows(IllegalStateException.class, () -> {
+            act();
+        });
     }
 
     private BeregningsgrunnlagEntitet act() {
@@ -625,9 +617,9 @@ public class FastsettBeregningAktiviteterOgStatuserTest {
 
     private OpptjeningAktivitetType utledOpptjeningAktivitetType(FagsakYtelseType ytelseType) {
         return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()
-                .get(ytelseType).stream()
-                .findFirst()
-                .orElse(OpptjeningAktivitetType.UDEFINERT);
+            .get(ytelseType).stream()
+            .findFirst()
+            .orElse(OpptjeningAktivitetType.UDEFINERT);
     }
 
     private void leggTilAktørytelse(BehandlingReferanse behandlingReferanse, LocalDate fom, LocalDate tom, // NOSONAR - brukes bare til test

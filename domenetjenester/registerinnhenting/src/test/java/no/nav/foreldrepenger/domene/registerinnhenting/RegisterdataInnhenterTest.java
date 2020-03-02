@@ -166,6 +166,6 @@ public class RegisterdataInnhenterTest {
             repositoryProvider,
             null,
             null,
-            opplysningsPeriodeTjeneste, null, null, Period.parse("P1W"));
+            opplysningsPeriodeTjeneste, null, Period.parse("P1W"));
     }
 }

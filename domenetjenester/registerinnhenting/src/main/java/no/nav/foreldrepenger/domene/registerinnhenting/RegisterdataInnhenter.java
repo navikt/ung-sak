@@ -31,7 +31,6 @@ import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
-import no.nav.foreldrepenger.behandlingslager.abakus.logg.AbakusInnhentingGrunnlagLoggRepository;
 import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.Familierelasjon;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
@@ -105,7 +104,6 @@ public class RegisterdataInnhenter {
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste;
     private AbakusTjeneste abakusTjeneste;
-    private AbakusInnhentingGrunnlagLoggRepository loggRepository;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -122,7 +120,6 @@ public class RegisterdataInnhenter {
                                  MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                  OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste,
                                  AbakusTjeneste abakusTjeneste,
-                                 AbakusInnhentingGrunnlagLoggRepository loggRepository,
                                  @KonfigVerdi(value = "etterkontroll.førsøknad.periode", defaultVerdi = "P1W") Period etterkontrollTidsromFørSøknadsdato) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
@@ -132,7 +129,6 @@ public class RegisterdataInnhenter {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.opplysningsPeriodeTjeneste = opplysningsPeriodeTjeneste;
         this.abakusTjeneste = abakusTjeneste;
-        this.loggRepository = loggRepository;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {

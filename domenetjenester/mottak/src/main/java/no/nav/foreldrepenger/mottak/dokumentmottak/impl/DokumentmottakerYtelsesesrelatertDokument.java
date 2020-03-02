@@ -28,10 +28,11 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     MottatteDokumentTjeneste mottatteDokumentTjeneste;
     Behandlingsoppretter behandlingsoppretter;
     Kompletthetskontroller kompletthetskontroller;
-    BehandlingRevurderingRepository revurderingRepository;
-    protected BehandlingRepository behandlingRepository;
+    
+    private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingRevurderingRepository revurderingRepository;
 
     protected DokumentmottakerYtelsesesrelatertDokument() {
         // For CDI proxy

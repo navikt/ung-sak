@@ -1,11 +1,13 @@
 package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndring;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingFeil;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
@@ -21,6 +23,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 
@@ -106,7 +109,7 @@ public class RevurderingTjenesteImpl implements RevurderingTjeneste {
     }
 
     @Override
-    public boolean erRevurderingMedUendretUtfall(Behandling behandling) {
-        return revurderingEndring.erRevurderingMedUendretUtfall(behandling);
+    public boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref, Collection<KonsekvensForYtelsen> konsekvenserForYtelsen) {
+        return revurderingEndring.erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen);
     }
 }

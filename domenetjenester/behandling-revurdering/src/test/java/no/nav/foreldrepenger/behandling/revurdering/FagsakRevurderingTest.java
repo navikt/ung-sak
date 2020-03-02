@@ -23,6 +23,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.Whitebox;
 
 public class FagsakRevurderingTest {
 
@@ -41,10 +42,13 @@ public class FagsakRevurderingTest {
         behandlingRepository = mock(BehandlingRepository.class);
     }
 
+    @SuppressWarnings("deprecation")
     @Before
     public void opprettBehandlinger() {
         fagsak = FagsakBuilder.nyEngangstønad().medSaksnummer(fagsakSaksnummer).build();
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        
+        Whitebox.setInternalState(behandling, "id", 1L);
 
         fagsakMedFlereBehandlinger = FagsakBuilder.nyEngangstønad().medSaksnummer(fagsakMedFlereBehSaksnr).build();
         nyesteBehandling = Behandling.forFørstegangssøknad(fagsakMedFlereBehandlinger)

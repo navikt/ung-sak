@@ -12,20 +12,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
-
 @ApplicationScoped
 public class UttakRepository  {
 
     private EntityManager entityManager;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     @Inject
     public UttakRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
-        this.behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
     }
 
     protected UttakRepository() {
@@ -39,7 +34,7 @@ public class UttakRepository  {
     private void lagreUttaksresultat(Long behandlingId, Function<UttakResultatEntitet.Builder, UttakResultatEntitet.Builder> resultatTransformator) {
         Optional<UttakResultatEntitet> eksistrendeResultat = hentUttakResultatHvisEksisterer(behandlingId);
 
-        UttakResultatEntitet.Builder builder = new UttakResultatEntitet.Builder(hentBeregningsresultat(behandlingId));
+        UttakResultatEntitet.Builder builder = new UttakResultatEntitet.Builder(behandlingId);
         if (eksistrendeResultat.isPresent()) {
             UttakResultatEntitet eksisterende = eksistrendeResultat.get();
             if (eksisterende.getOpprinneligPerioder() != null) {
@@ -56,11 +51,6 @@ public class UttakRepository  {
 
         persistResultat(nyttResultat);
         entityManager.flush();
-    }
-
-    private Behandlingsresultat hentBeregningsresultat(Long behandlingId) {
-        return behandlingsresultatRepository.hentHvisEksisterer(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Må ha beregningsresultat ved lagring av uttak"));
     }
 
     private void persistResultat(UttakResultatEntitet resultat) {
@@ -95,8 +85,7 @@ public class UttakRepository  {
     public Optional<UttakResultatEntitet> hentUttakResultatHvisEksisterer(Long behandlingId) {
         TypedQuery<UttakResultatEntitet> query = entityManager.createQuery(
             "select uttakResultat from UttakResultatEntitet uttakResultat " +
-                "join uttakResultat.behandlingsresultat resultat" +
-                " where resultat.behandling.id=:behandlingId and uttakResultat.aktiv=TRUE", UttakResultatEntitet.class); //$NON-NLS-1$
+                " where uttakResultat.behandlingId=:behandlingId and uttakResultat.aktiv=TRUE", UttakResultatEntitet.class); //$NON-NLS-1$
         query.setParameter("behandlingId", behandlingId); // NOSONAR //$NON-NLS-1$
         return hentUniktResultat(query);
     }

@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.behandlingslager.behandling;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -7,26 +8,24 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped
 public class BehandlingsresultatRepository {
 
     private EntityManager entityManager;
-    private BehandlingRepository behandlingRepository;
 
     @Inject
     public BehandlingsresultatRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
-        behandlingRepository = new BehandlingRepository(entityManager);
     }
 
     protected BehandlingsresultatRepository() {
     }
 
     public Optional<Behandlingsresultat> hentHvisEksisterer(Long behandlingId) {
-        TypedQuery<Behandlingsresultat> query = entityManager.createQuery("from Behandlingsresultat where behandling.id = :behandlingId", Behandlingsresultat.class);
+        TypedQuery<Behandlingsresultat> query = entityManager
+            .createQuery("from Behandlingsresultat where behandlingId = :behandlingId", Behandlingsresultat.class);
         query.setParameter("behandlingId", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);
     }
@@ -36,10 +35,9 @@ public class BehandlingsresultatRepository {
     }
 
     public void lagre(Long behandlingId, Behandlingsresultat resultat) {
-        // midlertidig må hente Behandling (inntil vi får fjernet Behandlingresultat#getBehandling()
-        // dropper foreløpig lås her
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        resultat.setBehandling(behandling);
+        Objects.requireNonNull(behandlingId, "behandlingId");
+        Objects.requireNonNull(resultat, "behandlingsresultat");
+        resultat.setBehandling(behandlingId);
         entityManager.persist(resultat);
         entityManager.flush();
     }

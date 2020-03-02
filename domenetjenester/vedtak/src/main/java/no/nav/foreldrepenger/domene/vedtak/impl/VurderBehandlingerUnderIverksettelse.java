@@ -11,7 +11,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -66,10 +65,12 @@ public class VurderBehandlingerUnderIverksettelse {
         // Finn behandlinger i samme sak. OBS på at berørt sniker i køen så man bør se på vedtakstidspunkt
         Optional<BehandlingVedtak> venter = finnBehandlingerUnderIverksetting(behandling).stream()
             .filter(beh -> BehandlingStegStatus.STARTET.equals(beh.getBehandlingStegStatus()))
-            .map(beh -> behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(beh.getId()).orElse(null))
+            .map(beh -> behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(beh.getId()).orElse(null))
             .filter(Objects::nonNull)
             .min(Comparator.comparing(BehandlingVedtak::getOpprettetTidspunkt));
-        return venter.map(BehandlingVedtak::getBehandlingsresultat).map(Behandlingsresultat::getBehandling);
+        
+        return venter.map(BehandlingVedtak::getBehandlingId)
+            .flatMap(behandlingRepository::hentBehandlingHvisFinnes);
     }
 
     private List<Behandling> finnBehandlingerUnderIverksetting(Behandling behandling) {
@@ -82,7 +83,7 @@ public class VurderBehandlingerUnderIverksettelse {
     }
 
     private LocalDateTime utledVedtakstidspunkt(Behandling behandling) {
-        return behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId())
+        return behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId())
             .map(BehandlingVedtak::getOpprettetTidspunkt).orElse(Tid.TIDENES_ENDE.atStartOfDay());
     }
 }

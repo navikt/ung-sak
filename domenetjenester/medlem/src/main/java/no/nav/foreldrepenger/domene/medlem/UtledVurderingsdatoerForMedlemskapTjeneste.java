@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -62,7 +63,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     }
 
     UtledVurderingsdatoerForMedlemskapTjeneste() {
-        //CDI
+        // CDI
     }
 
     /**
@@ -89,7 +90,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         datoer.addAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker).keySet());
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
-        return datoer.stream().filter(d -> d.isAfter(utledetSkjæringstidspunkt) || d.equals(utledetSkjæringstidspunkt)).collect(Collectors.toSet());
+        return datoer.stream()
+            .filter(d -> d.isAfter(utledetSkjæringstidspunkt) || d.equals(utledetSkjæringstidspunkt))
+            .sorted().collect(Collectors.toCollection(TreeSet::new));
     }
 
     Map<LocalDate, Set<VurderingsÅrsak>> finnVurderingsdatoerMedÅrsak(Long behandlingId) {
@@ -103,7 +106,8 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         datoer.putAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker));
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
-        return datoer.entrySet().stream().filter(entry -> entry.getKey().isAfter(utledetSkjæringstidspunkt)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return datoer.entrySet().stream().filter(entry -> entry.getKey().isAfter(utledetSkjæringstidspunkt))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Map<LocalDate, Set<VurderingsÅrsak>> utledVurderingsdatoerForTPS(Behandling revurdering, LocalDate skjæringstidspunkt) {
@@ -141,13 +145,17 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         Set<MedlemskapPerioderEntitet> første = førsteVersjon.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder).orElse(Collections.emptySet());
         Set<MedlemskapPerioderEntitet> siste = sisteVersjon.map(MedlemskapAggregat::getRegistrertMedlemskapPerioder).orElse(Collections.emptySet());
 
-        List<LocalDateSegment<MedlemskapPerioderEntitet>> førsteListe = første.stream().map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), r)).collect(Collectors.toList());
-        List<LocalDateSegment<MedlemskapPerioderEntitet>> sisteListe = siste.stream().map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), r)).collect(Collectors.toList());
+        List<LocalDateSegment<MedlemskapPerioderEntitet>> førsteListe = første.stream().map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), r))
+            .collect(Collectors.toList());
+        List<LocalDateSegment<MedlemskapPerioderEntitet>> sisteListe = siste.stream().map(r -> new LocalDateSegment<>(r.getFom(), r.getTom(), r))
+            .collect(Collectors.toList());
 
         LocalDateTimeline<MedlemskapPerioderEntitet> førsteTidsserie = new LocalDateTimeline<>(førsteListe, this::slåSammenMedlemskapPerioder);
         LocalDateTimeline<MedlemskapPerioderEntitet> andreTidsserie = new LocalDateTimeline<>(sisteListe, this::slåSammenMedlemskapPerioder);
 
-        LocalDateTimeline<MedlemskapPerioderEntitet> resultat = førsteTidsserie.combine(andreTidsserie, (di, førsteVersjon1, sisteVersjon1) -> sjekkForEndringIMedl(di, førsteVersjon1, sisteVersjon1, endringssjekker), LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        LocalDateTimeline<MedlemskapPerioderEntitet> resultat = førsteTidsserie.combine(andreTidsserie,
+            (di, førsteVersjon1, sisteVersjon1) -> sjekkForEndringIMedl(di, førsteVersjon1, sisteVersjon1, endringssjekker),
+            LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         return utledResultat(resultat);
     }
@@ -189,8 +197,9 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             if (i != personstatus.size() - 1) { // sjekker om det er siste element
                 PersonstatusEntitet førsteElement = personstatus.get(i);
                 PersonstatusEntitet nesteElement = personstatus.get(i + 1);
-                //skal ikke trigge på personstaus død
-                boolean personStausInneholderDød = PersonstatusType.erDød(førsteElement.getPersonstatus()) || PersonstatusType.erDød(nesteElement.getPersonstatus());
+                // skal ikke trigge på personstaus død
+                boolean personStausInneholderDød = PersonstatusType.erDød(førsteElement.getPersonstatus())
+                    || PersonstatusType.erDød(nesteElement.getPersonstatus());
                 if (!personStausInneholderDød && !førsteElement.getPersonstatus().equals(nesteElement.getPersonstatus())) {
                     utledetResultat.put(nesteElement.getPeriode().getFomDato(), Set.of(VurderingsÅrsak.PERSONSTATUS));
                 }
@@ -216,9 +225,10 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         return utledetResultat;
     }
 
-    private LocalDateSegment<MedlemskapPerioderEntitet> sjekkForEndringIMedl(@SuppressWarnings("unused") LocalDateInterval di,  // NOSONAR
+    private LocalDateSegment<MedlemskapPerioderEntitet> sjekkForEndringIMedl(@SuppressWarnings("unused") LocalDateInterval di, // NOSONAR
                                                                              LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
-                                                                             LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon, MedlemEndringssjekker endringssjekker) {
+                                                                             LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon,
+                                                                             MedlemEndringssjekker endringssjekker) {
 
         // må alltid sjekke datoer med overlapp
         if (førsteVersjon != null && førsteVersjon.getValue().getKildeType() == null) {
@@ -264,7 +274,8 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), builder.build());
     }
 
-    private MedlemskapPerioderEntitet finnMedlemskapPeriodeMedSenestBeslutningsdato(LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon, LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
+    private MedlemskapPerioderEntitet finnMedlemskapPeriodeMedSenestBeslutningsdato(LocalDateSegment<MedlemskapPerioderEntitet> førsteVersjon,
+                                                                                    LocalDateSegment<MedlemskapPerioderEntitet> sisteVersjon) {
         MedlemskapPerioderEntitet riktigEntitetVerdi;
         LocalDate førsteBeslutningsdato = førsteVersjon.getValue().getBeslutningsdato();
         LocalDate sisteBeslutningsdato = sisteVersjon.getValue().getBeslutningsdato();

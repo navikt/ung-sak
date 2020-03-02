@@ -7,10 +7,9 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -23,9 +22,6 @@ import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling
 import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 
 public class VurderFeilutbetalingOppdatererTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private TilbakekrevingRepository repository = mock(TilbakekrevingRepository.class);
     private HistorikkTjenesteAdapter historikkTjenesteAdapter = mock(HistorikkTjenesteAdapter.class);
@@ -62,10 +58,9 @@ public class VurderFeilutbetalingOppdatererTest {
     public void skal_feile_når_Inntrekk_er_forsøkt_valgt() {
         VurderFeilutbetalingDto dto = new VurderFeilutbetalingDto("lorem ipsum", TilbakekrevingVidereBehandling.INNTREKK, null);
 
-        expectedException.expect(IllegalArgumentException.class);
-
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+        });
     }
 
 }

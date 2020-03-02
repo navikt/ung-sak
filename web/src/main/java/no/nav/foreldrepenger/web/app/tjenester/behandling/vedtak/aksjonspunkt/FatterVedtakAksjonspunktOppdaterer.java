@@ -57,8 +57,6 @@ public class FatterVedtakAksjonspunktOppdaterer implements AksjonspunktOppdatere
 
     private Collection<String> fraDto(Collection<VurderÅrsak> arsaker) {
         if (arsaker == null) {
-            // TODO HUMLE/SOMMERFUGL Virker merkelig å ha nullsjekk her, men kreves for at tester i
-            // AksjonspunktOppdatererTest skal gå OK
             return Collections.emptySet();
         }
         return arsaker.stream().map(Kodeverdi::getKode).collect(Collectors.toSet());

@@ -53,6 +53,7 @@ import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsystemKodeverkConverte
 import no.nav.foreldrepenger.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -137,7 +138,8 @@ public class Behandling extends BaseEntitet {
     /**
      * Er egentlig OneToOne, men må mappes slik da JPA/Hibernate ikke støtter OneToOne på annet enn shared PK.
      */
-    @OneToMany(mappedBy = "behandling")
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "behandling_id")
     private Set<Behandlingsresultat> behandlingsresultat = new HashSet<>(1);
 
     // CascadeType.ALL + orphanRemoval=true må til for at aksjonspunkter skal bli slettet fra databasen ved fjerning fra HashSet
@@ -439,7 +441,7 @@ public class Behandling extends BaseEntitet {
         // kolonne, så emuleres her ved å tømme listen.
 
         this.behandlingsresultat.clear();
-        behandlingsresultat.setBehandling(this);
+        behandlingsresultat.setBehandling(this.getId());
         // kun ett om gangen, mappet på annet enn pk
         this.behandlingsresultat.add(behandlingsresultat);
     }
@@ -649,14 +651,6 @@ public class Behandling extends BaseEntitet {
         return erHenlagt();
     }
 
-    public LocalDate getOriginalVedtaksDato() {
-        Behandlingsresultat originaltBehandlingsResultat = getBehandlingsresultat();
-        if (originaltBehandlingsResultat == null || originaltBehandlingsResultat.getBehandlingVedtak() == null) {
-            return null;
-        }
-        return getBehandlingsresultat().getBehandlingVedtak().getVedtaksdato();
-    }
-
     public FagsakYtelseType getFagsakYtelseType() {
         return getFagsak().getYtelseType();
     }
@@ -808,12 +802,6 @@ public class Behandling extends BaseEntitet {
             this.behandlingType = behandlingType;
         }
 
-        public Builder medKopiAvForrigeBehandlingsresultat() {
-            Behandlingsresultat behandlingsresultatForrige = forrigeBehandling.getBehandlingsresultat();
-            this.resultatBuilder = Behandlingsresultat.builderFraEksisterende(behandlingsresultatForrige);
-            return this;
-        }
-
         public Builder medBehandlingÅrsak(BehandlingÅrsak.Builder årsakBuilder) {
             this.behandlingÅrsakBuilder = årsakBuilder;
             return this;
@@ -901,6 +889,11 @@ public class Behandling extends BaseEntitet {
 
             return behandling;
         }
+    }
+
+    public BehandlingResultatType getBehandlingResultatType() {
+        var r = getBehandlingsresultat();
+        return r == null ? BehandlingResultatType.IKKE_FASTSATT : r.getBehandlingResultatType();
     }
 
 }

@@ -4,10 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -21,9 +20,6 @@ import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling
 import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingOgInntrekkDto;
 
 public class VurderFeilutbetalingOgInntrekkOppdatererTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private TilbakekrevingRepository repository = Mockito.mock(TilbakekrevingRepository.class);
     private HistorikkTjenesteAdapter historikkTjenesteAdapter = Mockito.mock(HistorikkTjenesteAdapter.class);
@@ -39,6 +35,7 @@ public class VurderFeilutbetalingOgInntrekkOppdatererTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         this.behandling = scenario.lagMocked();
     }
+
     @Test
     public void skal_lagre_at_videre_behandling_er_med_inntrekk_når_riktige_felter_er_valgt() {
         var dto = new VurderFeilutbetalingOgInntrekkDto("lorem ipsum", true, false, null);
@@ -69,10 +66,9 @@ public class VurderFeilutbetalingOgInntrekkOppdatererTest {
     public void skal_feile_når_boolske_variable_indikerer_inntrekk_men_noe_annet_er_valgt() {
         var dto = new VurderFeilutbetalingOgInntrekkDto("lorem ipsum", true, false, TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
 
-        expectedException.expect(IllegalArgumentException.class);
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+        });
     }
-
 
 }

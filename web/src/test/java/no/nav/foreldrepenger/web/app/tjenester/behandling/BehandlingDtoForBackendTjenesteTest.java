@@ -11,7 +11,6 @@ import org.junit.Test;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -19,7 +18,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -35,17 +33,16 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 public class BehandlingDtoForBackendTjenesteTest {
 
-    private static final String ANSVARLIG_SAKSBEHANDLER = "ABCD";
-    private static final BehandlingÅrsakType BEHANDLING_ÅRSAK_TYPE = BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
-    private static final BehandlingResultatType BEHANDLING_RESULTAT_TYPE = BehandlingResultatType.INNVILGET_ENDRING;
     @Rule
     public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+
+    private static final String ANSVARLIG_SAKSBEHANDLER = "ABCD";
+    private static final BehandlingÅrsakType BEHANDLING_ÅRSAK_TYPE = BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
 
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private BehandlingDtoForBackendTjeneste behandlingDtoForBackendTjeneste = new BehandlingDtoForBackendTjeneste(repositoryProvider);
     private LocalDateTime now = LocalDateTime.now();
-
 
     @Test
     public void skal_lage_BehandlingDto() {
@@ -64,7 +61,6 @@ public class BehandlingDtoForBackendTjenesteTest {
 
         assertThat(utvidetBehandlingDto.getSpråkkode()).isEqualTo(Språkkode.nb);
         assertThat(utvidetBehandlingDto.getOriginalVedtaksDato()).isEqualTo(now.toLocalDate().toString());
-        assertThat(utvidetBehandlingDto.getBehandlingsresultat().getType()).isEqualByComparingTo(BEHANDLING_RESULTAT_TYPE);
         assertThat(utvidetBehandlingDto.getLinks()).isNotEmpty();
     }
 
@@ -77,10 +73,6 @@ public class BehandlingDtoForBackendTjenesteTest {
         Behandling behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD)
             .medBehandlingÅrsak(BehandlingÅrsak.builder(BEHANDLING_ÅRSAK_TYPE))
             .build();
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder()
-            .medBehandlingResultatType(BEHANDLING_RESULTAT_TYPE)
-            .buildFor(behandling);
-        behandling.setBehandlingresultat(behandlingsresultat);
         behandling.setAnsvarligSaksbehandler(ANSVARLIG_SAKSBEHANDLER);
 
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
@@ -98,9 +90,9 @@ public class BehandlingDtoForBackendTjenesteTest {
     }
 
     private void lagBehandligVedtak(Behandling behandling) {
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakResultatType(VedtakResultatType.INNVILGET)
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+            .medVedtakResultatType(VedtakResultatType.INNVILGET)
             .medAnsvarligSaksbehandler(ANSVARLIG_SAKSBEHANDLER)
-            .medBehandlingsresultat(behandling.getBehandlingsresultat())
             .medIverksettingStatus(IverksettingStatus.IVERKSATT)
             .medVedtakstidspunkt(now)
             .medBeslutning(true).build();

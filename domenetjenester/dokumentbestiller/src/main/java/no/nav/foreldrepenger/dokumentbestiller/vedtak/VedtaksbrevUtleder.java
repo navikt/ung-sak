@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.dokumentbestiller.vedtak;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.dokumentbestiller.BrevFeil;
@@ -35,8 +34,6 @@ public class VedtaksbrevUtleder {
 
     public static DokumentMalType velgDokumentMalForVedtak(Behandlingsresultat behandlingsresultat,
                                                            BehandlingVedtak behandlingVedtak) {
-        Behandling behandling = behandlingsresultat.getBehandling();
-
         DokumentMalType dokumentMal = null;
 
         if (erLagetFritekstBrev(behandlingsresultat)) {
@@ -44,12 +41,12 @@ public class VedtaksbrevUtleder {
         } else if (erRevurderingMedUendretUtfall(behandlingVedtak)) {
             dokumentMal = DokumentMalType.UENDRETUTFALL_DOK;
         } else if (erInnvilget(behandlingVedtak)) {
-            dokumentMal = velgPositivtVedtaksmal(behandling);
+            dokumentMal = DokumentMalType.INNVILGELSE_DOK;
         } else if (erAvlåttEllerOpphørt(behandlingVedtak)) {
-            dokumentMal = velgNegativVedtaksmal(behandling, behandlingsresultat);
+            dokumentMal = behandlingsresultat.isBehandlingsresultatOpphørt() ? DokumentMalType.OPPHØR_DOK : DokumentMalType.AVSLAG__DOK;
         }
         if (dokumentMal == null) {
-            throw BrevFeil.FACTORY.ingenBrevmalKonfigurert(behandling.getId()).toException();
+            throw BrevFeil.FACTORY.ingenBrevmalKonfigurert(behandlingsresultat.getBehandlingId()).toException();
         }
         return dokumentMal;
     }
@@ -58,15 +55,4 @@ public class VedtaksbrevUtleder {
         return vedtak.isBeslutningsvedtak();
     }
 
-    public static DokumentMalType velgNegativVedtaksmal(@SuppressWarnings("unused") Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat.isBehandlingsresultatOpphørt()) {
-            return DokumentMalType.OPPHØR_DOK;
-        } else {
-            return DokumentMalType.AVSLAG__DOK;
-        }
-    }
-
-    public static DokumentMalType velgPositivtVedtaksmal(@SuppressWarnings("unused") Behandling behandling) {
-        return DokumentMalType.INNVILGELSE_DOK;
-    }
 }

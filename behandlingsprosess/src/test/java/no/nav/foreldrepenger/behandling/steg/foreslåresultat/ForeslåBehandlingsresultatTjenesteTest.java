@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -86,7 +85,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Before
     public void setup() {
         when(fordelingRepository.hent(any())).thenReturn(new Fordeling(Set.of(new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
-        
+
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,
             beregningsgrunnlagTjeneste,
@@ -202,7 +201,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     private Behandling lagRevurdering(Behandling originalBehandling) {
         Behandling revurdering = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING)
-            .medKopiAvForrigeBehandlingsresultat()
             .medBehandlingÅrsak(
                 BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)
                     .medManueltOpprettet(true)
@@ -231,9 +229,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         }
     }
 
-    private void leggTilVilkårMedUtfall(Utfall utfall, VilkårResultatBuilder vilkårsresultatBuilder, VilkårType opptjeningsvilkåret, Avslagsårsak søkerErUtvandret) {
+    private void leggTilVilkårMedUtfall(Utfall utfall, VilkårResultatBuilder vilkårsresultatBuilder, VilkårType opptjeningsvilkåret,
+                                        Avslagsårsak søkerErUtvandret) {
         final var opptjeningBuilder = vilkårsresultatBuilder.hentBuilderFor(opptjeningsvilkåret);
-        opptjeningBuilder.leggTil(opptjeningBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(utfall).medAvslagsårsak(søkerErUtvandret));
+        opptjeningBuilder
+            .leggTil(opptjeningBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(utfall).medAvslagsårsak(søkerErUtvandret));
         vilkårsresultatBuilder.leggTil(opptjeningBuilder);
     }
 
@@ -249,9 +249,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private void lagBehandlingsresultat(Behandling behandling) {
         Behandlingsresultat behandlingsresultat = Behandlingsresultat.builderEndreEksisterende(getBehandlingsresultat(behandling))
             .medBehandlingResultatType(BehandlingResultatType.AVSLÅTT).leggTilKonsekvensForYtelsen(KonsekvensForYtelsen.INGEN_ENDRING).buildFor(behandling);
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder().medVedtakstidspunkt(LocalDateTime.now()).medBehandlingsresultat(behandlingsresultat)
-            .medVedtakResultatType(VedtakResultatType.AVSLAG).medAnsvarligSaksbehandler("asdf").build();
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+            .medVedtakResultatType(VedtakResultatType.AVSLAG)
+            .medAnsvarligSaksbehandler("asdf").build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        repositoryProvider.getBehandlingsresultatRepository().lagre(behandling.getId(), behandlingsresultat);
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
         final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);

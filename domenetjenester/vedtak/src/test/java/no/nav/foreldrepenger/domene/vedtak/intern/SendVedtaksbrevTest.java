@@ -1,13 +1,16 @@
 package no.nav.foreldrepenger.domene.vedtak.intern;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -18,118 +21,114 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
+import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
+@RunWith(CdiRunner.class)
 public class SendVedtaksbrevTest {
+
+    @Rule
+    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
-    @Mock
-    private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-    @Mock
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
-    @Mock
-    private Behandlingsresultat behandlingsresultat;
-    @Mock
-    private Behandling behandlingMock;
-    @Mock
-    private Fagsak fagsakMock;
-
-    private SendVedtaksbrev sendVedtaksbrev;
-
-    private Behandling behandling;
-    private BehandlingVedtak behandlingVedtak;
-
+    @Inject
     private BehandlingRepository behandlingRepository;
 
+    @Inject
     private BehandlingRepositoryProvider repositoryProvider;
 
-    private BehandlingReferanse ref;
+    @Mock
+    private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
+
+    @Mock
+    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
+
+    private SendVedtaksbrev sendVedtaksbrev;
+    private Behandling behandling;
+
+    private TestScenarioBuilder scenario;
+
+    public SendVedtaksbrevTest() {
+        scenario = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
+    }
 
     @Before
     public void oppsett() {
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        behandling = scenario.lagMocked();
-        ref = BehandlingReferanse.fra(behandling);
-        behandlingRepository = scenario.mockBehandlingRepository();
-        repositoryProvider = scenario.mockBehandlingRepositoryProvider();
-        behandlingVedtak = scenario.mockBehandlingVedtak();
-        sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository, repositoryProvider.getBehandlingVedtakRepository(), dokumentBestillerApplikasjonTjeneste, dokumentBehandlingTjeneste);
-        when(behandlingsresultat.getVedtaksbrev()).thenReturn(Vedtaksbrev.AUTOMATISK);
-        when(behandlingVedtak.getBehandlingsresultat()).thenReturn(behandlingsresultat);
-        when(behandlingVedtak.getVedtakResultatType()).thenReturn(VedtakResultatType.INNVILGET);
+        sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository,
+            repositoryProvider.getBehandlingVedtakRepository(),
+            dokumentBestillerApplikasjonTjeneste,
+            dokumentBehandlingTjeneste);
 
     }
 
     @Test
     public void testSendVedtaksbrevVedtakInnvilget() {
+        scenario.medBehandlingVedtak().medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+        
         // Act
-        sendVedtaksbrev.sendVedtaksbrev(ref);
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
 
         // Assert
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(behandlingVedtak);
+        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(BehandlingVedtak.class));
     }
 
     @Test
     public void testSendVedtaksbrevVedtakAvslag() {
         // Arrange
-        when(behandlingVedtak.getVedtakResultatType()).thenReturn(VedtakResultatType.AVSLAG);
-
+        scenario.medBehandlingVedtak().medVedtakResultatType(VedtakResultatType.AVSLAG);
+        behandling = scenario.lagre(repositoryProvider);
+        
         // Act
-        sendVedtaksbrev.sendVedtaksbrev(ref);
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
 
         // Assert
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(behandlingVedtak);
+        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(BehandlingVedtak.class));
     }
 
     @Test
     public void senderBrevOmUendretUtfallVedRevurdering() {
-        when(behandlingVedtak.isBeslutningsvedtak()).thenReturn(true);
+        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+        
         when(dokumentBehandlingTjeneste.erDokumentProdusert(behandling.getId(), DokumentMalType.REVURDERING_DOK))
             .thenReturn(true);
 
-        sendVedtaksbrev.sendVedtaksbrev(ref);
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
 
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(behandlingVedtak);
+        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(BehandlingVedtak.class));
     }
 
     @Test
     public void senderIkkeBrevOmUendretUtfallHvisIkkeSendtVarselbrevOmRevurdering() {
-        when(behandlingVedtak.isBeslutningsvedtak()).thenReturn(true);
+        behandling = scenario.lagre(repositoryProvider);
+        
         when(dokumentBehandlingTjeneste.erDokumentProdusert(behandling.getId(), DokumentMalType.REVURDERING_DOK))
             .thenReturn(false);
 
-        sendVedtaksbrev.sendVedtaksbrev(ref);
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
 
-        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(behandlingVedtak);
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(BehandlingVedtak.class));
     }
 
     @Test
     public void sender_ikke_brev_dersom_førstegangsøknad_som_er_migrert_fra_infotrygd() {
+        behandling = scenario.lagre(repositoryProvider);
         behandling.setMigrertKilde(Fagsystem.INFOTRYGD);
+        
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
 
-        sendVedtaksbrev.sendVedtaksbrev(ref);
-
-        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(behandlingVedtak);
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(BehandlingVedtak.class));
     }
-
-    @Test
-    public void sender_brev_dersom_førstegangsøknad_som_er_migrert_fra_infotrygd_men_overstyrt_til_fritekstbrev() {
-        behandling.setMigrertKilde(Fagsystem.INFOTRYGD);
-        when(behandlingsresultat.getVedtaksbrev()).thenReturn(Vedtaksbrev.FRITEKST);
-
-        sendVedtaksbrev.sendVedtaksbrev(ref);
-
-        verify(dokumentBestillerApplikasjonTjeneste, times(1)).produserVedtaksbrev(behandlingVedtak);
-    }
-
 
 }

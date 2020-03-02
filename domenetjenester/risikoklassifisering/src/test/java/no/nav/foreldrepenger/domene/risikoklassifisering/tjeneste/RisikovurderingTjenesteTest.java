@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class RisikovurderingTjenesteTest {
@@ -91,7 +91,7 @@ public class RisikovurderingTjenesteTest {
         risikovurderingTjeneste.lagreKontrollresultat(lagWrapper(uuid, Kontrollresultat.HØY));
 
         // Assert
-        verifyZeroInteractions(risikoklassifiseringRepository);
+        verifyNoInteractions(risikoklassifiseringRepository);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class RisikovurderingTjenesteTest {
 
         // Assert
         assertThat(faresignalWrapper).isNotPresent();
-        verifyZeroInteractions(hentFaresignalerTjeneste);
+        verifyNoInteractions(hentFaresignalerTjeneste);
     }
 
     @Test
@@ -120,8 +120,8 @@ public class RisikovurderingTjenesteTest {
         assertThat(faresignalWrapper.get().getKontrollresultat()).isEqualTo(Kontrollresultat.IKKE_HØY);
         assertThat(faresignalWrapper.get().getMedlFaresignaler()).isNull();
         assertThat(faresignalWrapper.get().getIayFaresignaler()).isNull();
-        verifyZeroInteractions(mapper);
-        verifyZeroInteractions(hentFaresignalerTjeneste);
+        verifyNoInteractions(mapper);
+        verifyNoInteractions(hentFaresignalerTjeneste);
     }
 
     @Test

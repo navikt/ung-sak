@@ -46,8 +46,7 @@ public class KompletthetssjekkerTestUtil {
         scenario.medBehandlingVedtak()
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(7))
             .medVedtakResultatType(VedtakResultatType.INNVILGET)
-            .medAnsvarligSaksbehandler("Nav Navsdotter")
-            .build();
+            .medAnsvarligSaksbehandler("Nav Navsdotter");
         Behandling førstegangsbehandling = scenario.lagre(repositoryProvider);
         avsluttBehandlingOgFagsak(førstegangsbehandling);
         return førstegangsbehandling;

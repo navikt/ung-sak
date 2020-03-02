@@ -34,7 +34,7 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
     @Override
     public final BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         long behandlingId = kontekst.getBehandlingId();
-        Optional<BehandlingVedtak> fantVedtak = behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(behandlingId);
+        Optional<BehandlingVedtak> fantVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId);
         if (!fantVedtak.isPresent()) {
             throw new IllegalStateException(String.format("Utviklerfeil: Kan ikke iverksette, behandling mangler vedtak %s", behandlingId));
         }

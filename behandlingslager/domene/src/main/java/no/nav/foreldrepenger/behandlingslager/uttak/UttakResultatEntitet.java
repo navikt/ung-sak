@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 
 @Table(name = "UTTAK_RESULTAT")
 @Entity
@@ -31,9 +30,8 @@ public class UttakResultatEntitet extends BaseEntitet {
     @JoinColumn(name = "overstyrt_perioder_id", updatable = false, unique = true)
     private UttakResultatPerioderEntitet overstyrtPerioder;
 
-    @ManyToOne
-    @JoinColumn(name = "behandling_resultat_id", nullable = false, updatable = false)
-    private Behandlingsresultat behandlingsresultat;
+    @Column(name = "behandling_id", nullable = false, updatable = false)
+    private Long behandlingId;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -44,10 +42,6 @@ public class UttakResultatEntitet extends BaseEntitet {
 
     public Long getId() {
         return id;
-    }
-
-    public Behandlingsresultat getBehandlingsresultat() {
-        return behandlingsresultat;
     }
 
     public UttakResultatPerioderEntitet getOpprinneligPerioder() {
@@ -80,10 +74,9 @@ public class UttakResultatEntitet extends BaseEntitet {
     public static class Builder {
         private UttakResultatEntitet kladd;
 
-        public Builder(Behandlingsresultat behandlingsresultat) {
-            Objects.requireNonNull(behandlingsresultat, "Må ha behandlingsresultat for å opprette UttakResultatEntitet"); // $NON-NLS-1$
+        public Builder(Long behandlingId) {
             kladd = new UttakResultatEntitet();
-            kladd.behandlingsresultat = behandlingsresultat;
+            kladd.behandlingId = Objects.requireNonNull(behandlingId, "behandlingId");
         }
 
         public Builder medOpprinneligPerioder(UttakResultatPerioderEntitet opprinneligPerioder) {
@@ -105,7 +98,7 @@ public class UttakResultatEntitet extends BaseEntitet {
 
         public UttakResultatEntitet build() {
             if (kladd.getOverstyrtPerioder() != null && kladd.getOpprinneligPerioder() == null) {
-                throw UttakFeil.FACTORY.manueltFastettePerioderManglerEksisterendeResultat(kladd.behandlingsresultat.getBehandlingId()).toException();
+                throw UttakFeil.FACTORY.manueltFastettePerioderManglerEksisterendeResultat(kladd.behandlingId).toException();
             }
             return kladd;
         }

@@ -1,10 +1,8 @@
 package no.nav.foreldrepenger.behandling.steg.foreslåvedtak;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -72,8 +71,10 @@ public class ForeslåVedtakTjenesteTest {
     private OppgaveTjeneste oppgaveTjeneste;
     @Mock
     private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
-    private HistorikkRepository historikkRepository = spy(repositoryProvider.getHistorikkRepository());
-    @Mock
+
+    @Spy
+    private HistorikkRepository historikkRepository = repositoryProvider.getHistorikkRepository();
+
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
 
@@ -86,7 +87,6 @@ public class ForeslåVedtakTjenesteTest {
     @Before
     public void setUp() {
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
-        entityManager.persist(behandling.getBehandlingsresultat());
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
         when(oppgaveTjeneste.hentOppgaveListe(any(AktørId.class), any())).thenReturn(oppgaveinfoerSomReturneres);
@@ -99,7 +99,9 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void oppretterAksjonspunktVedTotrinnskontrollOgSetterStegPåVent() {
         // Arrange
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT, true);
+        var aksjonspunkt = leggTilAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT);
+        Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
+        Whitebox.setInternalState(aksjonspunkt, "toTrinnsBehandling", true);
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
@@ -110,11 +112,10 @@ public class ForeslåVedtakTjenesteTest {
         assertThat(stegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
     }
 
-
     @Test
     public void setterTotrinnskontrollPaBehandlingHvisIkkeSattFraFør() {
         // Arrange
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET, false);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET);
 
         // Act
         tjeneste.foreslåVedtak(behandling, kontekst);
@@ -122,7 +123,6 @@ public class ForeslåVedtakTjenesteTest {
         // Assert
         assertThat(behandling.isToTrinnsBehandling()).isTrue();
     }
-
 
     @Test
     public void setterPåVentHvisÅpentAksjonspunktVedtakUtenTotrinnskontroll() {
@@ -188,7 +188,9 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void lagerIkkeNyeAksjonspunkterNårAksjonspunkterAlleredeFinnes() {
         // Arrange
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK, false);
+        var aksjonspunkt = leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
+        Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
+        
         oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER);
         oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_DOKUMENT);
 
@@ -274,7 +276,7 @@ public class ForeslåVedtakTjenesteTest {
     public void oppretterAksjonspunktVedTotrinnskontrollForRevurdering() {
         // Arrange
         behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET, true);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET);
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
@@ -288,8 +290,8 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void skalAvbryteForeslåOgFatteVedtakAksjonspunkterNårDeFinnesPåBehandlingUtenTotrinnskontroll() {
         // Arrange
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.FORESLÅ_VEDTAK, false);
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, false);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK);
 
         // Act
         tjeneste.foreslåVedtak(behandling, kontekst);
@@ -301,10 +303,8 @@ public class ForeslåVedtakTjenesteTest {
         assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FATTER_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
     }
 
-    private void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, boolean totrinnsbehandling) {
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
-        Whitebox.setInternalState(aksjonspunkt, "toTrinnsBehandling", totrinnsbehandling);
+    private Aksjonspunkt leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        return aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
     }
 
 }

@@ -6,14 +6,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
@@ -35,15 +38,18 @@ public class VedtakTjeneste {
     private HistorikkRepository historikkRepository;
     private LagretVedtakRepository lagretVedtakRepository;
     private TotrinnTjeneste totrinnTjeneste;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     VedtakTjeneste() {
         // CDI
     }
 
     @Inject
-    public VedtakTjeneste(LagretVedtakRepository lagretVedtakRepository,
+    public VedtakTjeneste(BehandlingsresultatRepository behandlingsresultatRepository,
+                          LagretVedtakRepository lagretVedtakRepository,
                           HistorikkRepository historikkRepository,
                           TotrinnTjeneste totrinnTjeneste) {
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.historikkRepository = historikkRepository;
         this.lagretVedtakRepository = lagretVedtakRepository;
         this.totrinnTjeneste = totrinnTjeneste;
@@ -78,7 +84,10 @@ public class VedtakTjeneste {
     }
 
     private void lagHistorikkInnslagVedtakFattet(Behandling behandling) {
-        boolean erUendretUtfall = getRevurderingTjeneste(behandling).erRevurderingMedUendretUtfall(behandling);
+        var behandlingsresultat = behandlingsresultatRepository.hent(behandling.getId());
+        var ref = BehandlingReferanse.fra(behandling);
+        boolean erUendretUtfall = getRevurderingTjeneste(behandling).erRevurderingMedUendretUtfall(ref, behandlingsresultat.getKonsekvenserForYtelsen());
+        
         HistorikkinnslagType historikkinnslagType = erUendretUtfall ? HistorikkinnslagType.UENDRET_UTFALL : HistorikkinnslagType.VEDTAK_FATTET;
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder()
             .medHendelse(historikkinnslagType)
@@ -143,14 +152,14 @@ public class VedtakTjeneste {
     }
 
     public VedtakResultatType utledVedtakResultatType(Behandling behandling) {
-        BehandlingResultatType resultatType = behandling.getBehandlingsresultat().getBehandlingResultatType();
+        BehandlingResultatType resultatType = behandling.getBehandlingResultatType();
         return utledVedtakResultatType(behandling, resultatType);
     }
 
     private VedtakResultatType utledVedtakResultatType(Behandling behandling, BehandlingResultatType resultatType) {
         if (BehandlingResultatType.INGEN_ENDRING.equals(resultatType)) {
             Optional<Behandling> originalBehandlingOpt = behandling.getOriginalBehandling();
-            if (originalBehandlingOpt.isPresent() && originalBehandlingOpt.get().getBehandlingsresultat() != null) {
+            if (originalBehandlingOpt.isPresent() && !Objects.equals(originalBehandlingOpt.get().getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
                 return utledVedtakResultatType(originalBehandlingOpt.get());
             }
         }

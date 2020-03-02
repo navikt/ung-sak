@@ -7,25 +7,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus.Status;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 public class BehandlingsprosessApplikasjonTjenesteTest {
 
     private static final String GRUPPE_1 = "gruppe1";
-
-    @Rule
-    public final ExpectedException expected = ExpectedException.none();
 
     private final ProsessTaskData taskData = new ProsessTaskData("taskType1");
     private Behandling behandling;

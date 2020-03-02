@@ -77,10 +77,8 @@ public abstract class DokumentmottakerTestsupport {
         BehandlingLås behandlingLås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);
         repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
 
-        final var behandlingsresultat = behandling.getBehandlingsresultat();
-        BehandlingVedtak originalVedtak = BehandlingVedtak.builder()
+        BehandlingVedtak originalVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakstidspunkt(vedtaksdato.atStartOfDay())
-            .medBehandlingsresultat(behandlingsresultat)
             .medVedtakResultatType(vedtakResultatType)
             .medAnsvarligSaksbehandler("fornavn etternavn")
             .build();

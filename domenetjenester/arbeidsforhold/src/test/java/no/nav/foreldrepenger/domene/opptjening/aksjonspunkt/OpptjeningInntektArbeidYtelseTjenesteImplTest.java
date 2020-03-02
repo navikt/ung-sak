@@ -20,7 +20,6 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -63,6 +62,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
     public static final String ORG_NUMMER = "974760673";
+    
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final LocalDate skjæringstidspunkt = LocalDate.now();
@@ -396,7 +396,6 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = builder.build();
-        Behandlingsresultat.opprettFor(behandling);
         Vilkårene nyttResultat = Vilkårene.builder().build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);

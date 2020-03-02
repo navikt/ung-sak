@@ -141,7 +141,7 @@ public class DokumentmottakerSøknadDefaultTest {
             .lagre(repositoryProvider);
 
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.AVSLAG);
-        repoRule.getRepository().lagre(vedtak.getBehandlingsresultat());
+        repoRule.getRepository().lagre(vedtak);
 
         //simulere at den tidliggere behandligen er avsluttet
         behandling.avsluttBehandling();
@@ -175,7 +175,7 @@ public class DokumentmottakerSøknadDefaultTest {
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.OPPHØR);
-        repoRule.getRepository().lagre(vedtak.getBehandlingsresultat());
+        repoRule.getRepository().lagre(vedtak);
 
         //simulere at den tidliggere behandligen er avsluttet
         behandling.avsluttBehandling();

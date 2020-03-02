@@ -4,7 +4,6 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +52,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     public void skal_ikke_filtrere_ut_permisjon_selv_med_flere_yrkesaktivteter_med_arbeidtype_fra_aareg(){
 
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
 
         yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(new Opptjeningsnøkkel(
             InternArbeidsforholdRef.nyRef(), null, null), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -87,7 +86,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_filtrere_ut_permisjon_hvis_arbeidstype_ikke_er_fra_aareg(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO.minusYears(1), DAGENS_DATO.plusMonths(6), PermisjonsbeskrivelseType.PERMISJON, BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(3), DAGENS_DATO.plusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.FRILANSER);
@@ -101,7 +100,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_filtrere_ut_permisjon_som_ikke_har_ansettelsesperioder_som_overlapper_stp(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO.minusYears(2), null, PermisjonsbeskrivelseType.PERMISJON, BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(5), DAGENS_DATO.minusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -115,7 +114,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_filtrere_ut_permisjon_som_har_mindre_enn_100_prosentsats(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO.minusYears(1), DAGENS_DATO.plusMonths(6), PermisjonsbeskrivelseType.PERMISJON, BigDecimal.valueOf(99));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(3), DAGENS_DATO.plusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -129,7 +128,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_filtrere_ut_permisjon_som_starter_etter_stp(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.minusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO, DAGENS_DATO.plusMonths(6), PermisjonsbeskrivelseType.PERMISJON, BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(3), DAGENS_DATO.plusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -156,7 +155,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_ikke_filtrere_ut_permisjon_som_slutter_samtiding_som_stp(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO.minusYears(1), stp, PermisjonsbeskrivelseType.PERMISJON, BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(3), DAGENS_DATO.plusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -170,7 +169,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_filtrere_ut_permisjon_av_type_UTDANNINGSPERMISJON(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO.minusYears(1), DAGENS_DATO.plusMonths(6), PermisjonsbeskrivelseType.UTDANNINGSPERMISJON, BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(3), DAGENS_DATO.plusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
@@ -184,7 +183,7 @@ public class UtledPermisjonSomFørerTilAksjonspunktTest {
     @Test
     public void skal_filtrere_ut_permisjon_av_type_PERMISJON_MED_FORELDREPENGER(){
         // Arrange
-        LocalDate stp = LocalDate.of(2019, Month.MARCH, 1);
+        LocalDate stp = DAGENS_DATO.plusMonths(1);
         Permisjon permisjon = byggPermisjon(DAGENS_DATO.minusYears(1), DAGENS_DATO.plusMonths(6), PermisjonsbeskrivelseType.PERMISJON_MED_FORELDREPENGER, BigDecimal.valueOf(100));
         AktivitetsAvtaleBuilder aktivitetsAvtale = byggAktivitetsAvtale(DAGENS_DATO.minusYears(3), DAGENS_DATO.plusYears(1));
         Yrkesaktivitet yrkesaktivitet = byggYrkesAktivitet(permisjon, aktivitetsAvtale, "123", ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);

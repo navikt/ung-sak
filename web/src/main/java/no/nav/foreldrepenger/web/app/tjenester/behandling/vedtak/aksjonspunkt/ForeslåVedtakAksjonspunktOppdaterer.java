@@ -61,7 +61,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
 
     private void oppdaterBegrunnelse(Behandling behandling, String begrunnelse) {
         behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).ifPresent(behandlingsresultat -> {
-            if ((BehandlingType.KLAGE.equals(behandling.getType()) || behandlingsresultat.isBehandlingsresultatAvslåttOrOpphørt() || begrunnelse != null)
+            if ((behandlingsresultat.isBehandlingsresultatAvslåttOrOpphørt() || begrunnelse != null)
                 || skalNullstilleFritekstfelt(behandling, behandlingsresultat)) {
                 if (unleash.isEnabled(FPSAK_LAGRE_FRITEKST_INN_FORMIDLING)) {
                     Optional<TekstFraSaksbehandlerDto> tekstFraSaksbehandlerDtoOptional = formidlingRestKlient.hentTekstFraSaksbehandler(new BehandlingUuidDto(behandling.getUuid()));

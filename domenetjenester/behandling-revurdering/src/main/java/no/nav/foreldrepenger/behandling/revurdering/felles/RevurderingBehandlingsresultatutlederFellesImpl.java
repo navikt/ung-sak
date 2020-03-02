@@ -1,9 +1,10 @@
 package no.nav.foreldrepenger.behandling.revurdering.felles;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
@@ -86,7 +87,7 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
 
         Optional<Behandlingsresultat> behandlingsresultatRevurdering = behandlingsresultatRepository.hentHvisEksisterer(behandlingId);
         Optional<Behandlingsresultat> behandlingsresultatOriginal = finnBehandlingsresultatPåOriginalBehandling(originalBehandling);
-        if (FastsettBehandlingsresultatVedAvslagPåAvslag.vurder(behandlingsresultatRevurdering, behandlingsresultatOriginal)) {
+        if (FastsettBehandlingsresultatVedAvslagPåAvslag.vurder(behandlingsresultatRevurdering, behandlingsresultatOriginal, originalBehandling.getType())) {
             /* 2b */
             return FastsettBehandlingsresultatVedAvslagPåAvslag.fastsett(revurdering);
         }
@@ -138,12 +139,15 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
         if (sisteInnvilgede == null) {
             return false;
         }
-        List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(fagsak.getSaksnummer());
-        return behandlinger.stream()
+        var sistInnvilgedeVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(sisteInnvilgede.getId());
+        Map<Long, Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(fagsak.getSaksnummer())
+                .stream().collect(Collectors.toMap(v -> v.getId(), v -> v));
+        
+        return behandlinger.values().stream()
             .filter(this::erAvsluttetRevurdering)
             .map(this::tilBehandlingvedtak)
-            .filter(vedtak -> erFattetEtter(sisteInnvilgede, vedtak))
-            .noneMatch(opphørvedtak());
+            .filter(vedtak -> erFattetEtter(sistInnvilgedeVedtak, vedtak))
+            .noneMatch(opphørvedtak(behandlinger));
     }
 
     private boolean erAvsluttetRevurdering(Behandling behandling) {
@@ -151,15 +155,21 @@ public abstract class RevurderingBehandlingsresultatutlederFellesImpl implements
     }
 
     private BehandlingVedtak tilBehandlingvedtak(Behandling b) {
-        return behandlingVedtakRepository.hentBehandlingvedtakForBehandlingId(b.getId()).orElse(null);
+        return behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(b.getId()).orElse(null);
     }
 
-    private boolean erFattetEtter(Behandling sisteInnvilget, BehandlingVedtak vedtak) {
-        return vedtak != null && vedtak.getVedtaksdato().isAfter(sisteInnvilget.getOriginalVedtaksDato());
+    private boolean erFattetEtter(Optional<BehandlingVedtak> sistInnvilgedeVedtak, BehandlingVedtak vedtak) {
+        if (sistInnvilgedeVedtak.isEmpty()) {
+            return vedtak != null;
+        }
+        return (vedtak != null && vedtak.getVedtaksdato().isAfter(sistInnvilgedeVedtak.get().getVedtaksdato()));
     }
 
-    private Predicate<BehandlingVedtak> opphørvedtak() {
-        return vedtak -> BehandlingResultatType.OPPHØR.equals(vedtak.getBehandlingsresultat().getBehandlingResultatType());
+    private Predicate<BehandlingVedtak> opphørvedtak(Map<Long, Behandling> behandlinger) {
+        return vedtak -> {
+            var behandling = behandlinger.get(vedtak.getBehandlingId());
+            return BehandlingResultatType.OPPHØR.equals(behandling.getBehandlingResultatType());
+        };
     }
 
     private void validerReferanser(BehandlingReferanse ref, Long behandlingId) {

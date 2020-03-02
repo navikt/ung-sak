@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.domene.opptjening.aksjonspunkt;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -11,7 +12,6 @@ import org.junit.Test;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
@@ -92,7 +92,6 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         fagsakRepository.opprettNy(fagsak);
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         final Behandling behandling = builder.build();
-        Behandlingsresultat.opprettFor(behandling);
         final Vilkårene nyttResultat = Vilkårene.builder().build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), nyttResultat);

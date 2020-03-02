@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.web.app.ApplicationConfig;
 import no.nav.foreldrepenger.web.server.jetty.JettyWebKonfigurasjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -23,8 +24,9 @@ import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 
 public class BehandlingDtoUtil {
 
-    static void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
-        setStandardfelter(behandling, dto, erBehandlingMedGjeldendeVedtak);
+    static void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, BehandlingVedtak behandlingVedtak,
+                                          boolean erBehandlingMedGjeldendeVedtak) {
+        setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
@@ -49,7 +51,11 @@ public class BehandlingDtoUtil {
         return Collections.emptyList();
     }
 
-    static void setStandardfelter(Behandling behandling, BehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
+    static void setStandardfelter(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
+        if (behandlingVedtak != null) {
+            dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
+        }
+        
         dto.setFagsakId(behandling.getFagsakId());
         dto.setId(behandling.getId());
         dto.setUuid(behandling.getUuid());
@@ -60,18 +66,20 @@ public class BehandlingDtoUtil {
         dto.setEndretAvBrukernavn(behandling.getEndretAv());
         dto.setAvsluttet(behandling.getAvsluttetDato());
         dto.setStatus(behandling.getStatus());
-        dto.setBehandlendeEnhetId(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId());
-        dto.setBehandlendeEnhetNavn(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
-        dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setGjeldendeVedtak(erBehandlingMedGjeldendeVedtak);
         dto.setBehandlingsfristTid(behandling.getBehandlingstidFrist());
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
-        getFristDatoBehandlingPåVent(behandling).ifPresent(dto::setFristBehandlingPåVent);
-        getVenteårsak(behandling).ifPresent(dto::setVenteårsak);
-        dto.setOriginalVedtaksDato(behandling.getOriginalVedtaksDato());
         dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
         dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
+
+        dto.setBehandlendeEnhetId(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId());
+        dto.setBehandlendeEnhetNavn(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
+
+        dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));
+
+        getFristDatoBehandlingPåVent(behandling).ifPresent(dto::setFristBehandlingPåVent);
+        getVenteårsak(behandling).ifPresent(dto::setVenteårsak);
         behandling.getBehandlingStegTilstand().ifPresent(st -> {
             dto.setBehandlingStegTilstand(new BehandlingStegTilstandDto(st.getBehandlingSteg(), st.getBehandlingStegStatus(), st.getOpprettetTidspunkt()));
         });

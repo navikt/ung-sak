@@ -9,9 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
@@ -37,9 +35,6 @@ public class TilbakekrevingRestTjenesteTest {
     private BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
     private TilbakekrevingRepository tilbakekrevingRepository = mock(TilbakekrevingRepository.class);
     private TilbakekrevingRestTjeneste tilbakekrevingRestTjeneste = new TilbakekrevingRestTjeneste(behandlingRepository, tilbakekrevingRepository);
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {

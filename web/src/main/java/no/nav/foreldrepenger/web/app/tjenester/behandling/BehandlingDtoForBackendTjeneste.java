@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
@@ -42,26 +43,28 @@ public class BehandlingDtoForBackendTjeneste {
 
     private BehandlingVedtakRepository vedtakRepository;
     private SøknadRepository søknadRepository;
+    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     public BehandlingDtoForBackendTjeneste() {
-        //for CDI proxy
+        // for CDI proxy
     }
 
     @Inject
     public BehandlingDtoForBackendTjeneste(BehandlingRepositoryProvider repositoryProvider) {
         this.vedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
+        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
-    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, AsyncPollingStatus taskStatus) {
-        Optional<BehandlingVedtak> behandlingVedtak = vedtakRepository.hentBehandlingvedtakForBehandlingId(behandling.getId());
+    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Behandlingsresultat behandlingsresultat, AsyncPollingStatus taskStatus) {
+        var behandlingVedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
 
-        return lagBehandlingDto(behandling, behandlingVedtak, taskStatus);
+        return lagBehandlingDto(behandling, behandlingsresultat, behandlingVedtak, taskStatus);
     }
 
-    private UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Optional<BehandlingVedtak> behandlingVedtak, AsyncPollingStatus asyncStatus) {
+    private UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Behandlingsresultat behandlingsresultat, BehandlingVedtak behandlingVedtak, AsyncPollingStatus asyncStatus) {
         UtvidetBehandlingDto dto = new UtvidetBehandlingDto();
-        BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, erBehandlingGjeldendeVedtak(behandling));
+        BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingGjeldendeVedtak(behandling));
         if (asyncStatus != null && !asyncStatus.isPending()) {
             dto.setAsyncStatus(asyncStatus);
         }
@@ -77,11 +80,14 @@ public class BehandlingDtoForBackendTjeneste {
         dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", behandlinUuidQueryParams));
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
-            dto.leggTil(getFraMap(BehandlingBackendRestTjeneste.BEHANDLINGER_BACKEND_ROOT_PATH, "original-behandling", Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString())));
+            dto.leggTil(getFraMap(BehandlingBackendRestTjeneste.BEHANDLINGER_BACKEND_ROOT_PATH, "original-behandling",
+                Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString())));
         });
 
-        setVedtakDato(dto, behandlingVedtak);
-        setBehandlingsresultat(dto, behandlingVedtak);
+        if (behandlingVedtak != null && behandlingsresultat != null) {
+            dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
+            setBehandlingsresultat(dto, behandlingsresultat);
+        }
         dto.setSpråkkode(getSpråkkode(behandling));
 
         return dto;
@@ -90,22 +96,15 @@ public class BehandlingDtoForBackendTjeneste {
     private boolean erBehandlingGjeldendeVedtak(Behandling behandling) {
         Optional<BehandlingVedtak> gjeldendeVedtak = vedtakRepository.hentGjeldendeVedtak(behandling.getFagsak());
         return gjeldendeVedtak
-            .filter(v -> v.getBehandlingsresultat().getBehandling().getId().equals(behandling.getId()))
+            .filter(v -> v.getBehandlingId().equals(behandling.getId()))
             .isPresent();
     }
 
-    private void setVedtakDato(UtvidetBehandlingDto dto, Optional<BehandlingVedtak> behandlingsVedtak) {
-        behandlingsVedtak.ifPresent(behandlingVedtak -> dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato()));
-    }
-
-    private void setBehandlingsresultat(BehandlingDto dto, Optional<BehandlingVedtak> behandlingsVedtak) {
-        if (behandlingsVedtak.isPresent()) {
-            Behandlingsresultat behandlingsresultat = behandlingsVedtak.get().getBehandlingsresultat();
-            BehandlingsresultatDto behandlingsresultatDto = new BehandlingsresultatDto();
-            behandlingsresultatDto.setType(behandlingsresultat.getBehandlingResultatType());
-            behandlingsresultatDto.setKonsekvenserForYtelsen(behandlingsresultat.getKonsekvenserForYtelsen());
-            dto.setBehandlingsresultat(behandlingsresultatDto);
-        }
+    private void setBehandlingsresultat(BehandlingDto dto, Behandlingsresultat behandlingsresultat) {
+        BehandlingsresultatDto behandlingsresultatDto = new BehandlingsresultatDto();
+        behandlingsresultatDto.setType(behandlingsresultat.getBehandlingResultatType());
+        behandlingsresultatDto.setKonsekvenserForYtelsen(behandlingsresultat.getKonsekvenserForYtelsen());
+        dto.setBehandlingsresultat(behandlingsresultatDto);
     }
 
     private Språkkode getSpråkkode(Behandling behandling) {
@@ -115,5 +114,10 @@ public class BehandlingDtoForBackendTjeneste {
         } else {
             return behandling.getFagsak().getNavBruker().getSpråkkode();
         }
+    }
+
+    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, AsyncPollingStatus taskStatus) {
+        var resultat = behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
+        return lagBehandlingDto(behandling, resultat, taskStatus);
     }
 }

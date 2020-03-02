@@ -76,7 +76,7 @@ public class VilkårResultatRepository {
     public void kopier(Long fraBehandlingId, Long tilBehandlingId) {
         kopieringPrecondition(fraBehandlingId, tilBehandlingId);
 
-        final var fraBehandlingVilkår = hentHvisEksisterer(fraBehandlingId);
+        var fraBehandlingVilkår = hentHvisEksisterer(fraBehandlingId);
 
         if (fraBehandlingVilkår.isEmpty()) {
             return;
@@ -89,7 +89,7 @@ public class VilkårResultatRepository {
         Objects.requireNonNull(fraBehandlingId);
         Objects.requireNonNull(tilBehandlingId);
 
-        final var tilBehandlingVilkår = hentHvisEksisterer(tilBehandlingId);
+        var tilBehandlingVilkår = hentHvisEksisterer(tilBehandlingId);
         if (tilBehandlingVilkår.isPresent()) {
             throw new IllegalStateException("Kan ikke kopiere vilkår til en behandling hvor det allerede eksisterer et vilkårsresultat");
         }

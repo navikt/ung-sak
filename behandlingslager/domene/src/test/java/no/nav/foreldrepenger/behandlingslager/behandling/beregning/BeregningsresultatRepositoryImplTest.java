@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -44,9 +43,6 @@ public class BeregningsresultatRepositoryImplTest {
 
     private final BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
     
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Before
     public void setup() {
         aktørId = AktørId.dummy();

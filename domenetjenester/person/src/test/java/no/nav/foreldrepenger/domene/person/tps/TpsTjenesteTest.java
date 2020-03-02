@@ -16,7 +16,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.threeten.extra.Interval;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
@@ -26,10 +25,6 @@ import no.nav.foreldrepenger.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.domene.person.tps.TpsAdapter;
-import no.nav.foreldrepenger.domene.person.tps.TpsFeilmeldinger;
-import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
-import no.nav.foreldrepenger.domene.person.tps.TpsTjenesteImpl;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
@@ -59,8 +54,7 @@ public class TpsTjenesteTest {
         "Adresse", true);
     private static Map<AktørId, PersonIdent> FNR_VED_AKTØR_ID = new HashMap<>();
     private static Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     public Repository repository = repoRule.getRepository();
@@ -107,10 +101,8 @@ public class TpsTjenesteTest {
         tpsTjeneste.hentGeografiskTilknytning(new PersonIdent("666"));
     }
 
-    @Test
+    @Test(expected = TpsException.class)
     public void skal_kaste_feil_ved_tjenesteexception_dersom_aktør_ikke_er_cachet() {
-        expectedException.expect(TpsException.class);
-
         tpsTjeneste.hentBrukerForAktør(AKTØR_ID_SOM_TRIGGER_EXCEPTION);
     }
 
@@ -187,7 +179,6 @@ public class TpsTjenesteTest {
                 .medFødselsdato(FØDSELSDATO)
                 .build());
         }
-
 
         @Override
         public List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent fnr) {

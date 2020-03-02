@@ -27,7 +27,7 @@ public class UtledVedtakResultatType {
         if (BehandlingResultatType.INGEN_ENDRING.equals(behandlingResultatType)) {
             Behandling originalBehandling = behandling.getOriginalBehandling()
                 .orElseThrow(() -> new IllegalStateException("Kan ikke ha resultat INGEN ENDRING uten å ha en original behandling"));
-            return utled(originalBehandling, Optional.empty(), skjæringstidspunkt);
+            return utled(originalBehandling, originalBehandling.getBehandlingResultatType(), Optional.empty(), skjæringstidspunkt);
         }
         if (BehandlingResultatType.OPPHØR.equals(behandlingResultatType)) {
             if (opphørsdato.isPresent() && skjæringstidspunkt.isPresent() && opphørsdato.get().isAfter(skjæringstidspunkt.get())) {
@@ -35,10 +35,5 @@ public class UtledVedtakResultatType {
             }
         }
         return VedtakResultatType.AVSLAG;
-    }
-
-    public static VedtakResultatType utled(Behandling behandling, Optional<LocalDate> opphørsdato, Optional<LocalDate> skjæringstidspunkt) {
-        BehandlingResultatType behandlingResultatType = behandling.getBehandlingsresultat().getBehandlingResultatType();
-        return utled(behandling, behandlingResultatType, opphørsdato, skjæringstidspunkt);
     }
 }

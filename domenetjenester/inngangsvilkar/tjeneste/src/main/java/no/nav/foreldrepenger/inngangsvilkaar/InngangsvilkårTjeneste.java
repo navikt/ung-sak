@@ -9,13 +9,12 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårTypeRef.VilkårTypeRefLiteral;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -32,7 +31,6 @@ public class InngangsvilkårTjeneste {
 
     private Instance<Inngangsvilkår> alleInngangsvilkår;
     private BehandlingRepository behandlingRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     InngangsvilkårTjeneste() {
@@ -43,7 +41,6 @@ public class InngangsvilkårTjeneste {
     public InngangsvilkårTjeneste(@Any Instance<Inngangsvilkår> alleInngangsvilkår, BehandlingRepositoryProvider repositoryProvider) {
         this.alleInngangsvilkår = alleInngangsvilkår;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 

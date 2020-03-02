@@ -37,7 +37,7 @@ public class BehandlingsresultatTest {
 
     @Test
     public void skal_opprette_ny_behandlingsresultat() throws Exception {
-
+        lagreBehandling(behandling);
         Behandlingsresultat.Builder behandlingsresultatBuilder = Behandlingsresultat.builderForInngangsvilkår();
         Behandlingsresultat behandlingsresultat = behandlingsresultatBuilder.buildFor(behandling);
 

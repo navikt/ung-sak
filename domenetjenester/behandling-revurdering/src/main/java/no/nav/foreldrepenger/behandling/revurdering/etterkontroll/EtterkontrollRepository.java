@@ -93,7 +93,7 @@ public class EtterkontrollRepository {
                 "    AND k.erBehandlet = false" +
                 "    AND k.kontrollTidspunkt <= :periodeTilbake)" +
                 "  AND NOT EXISTS (SELECT r FROM Behandlingsresultat r" +
-                "    WHERE r.behandling=b " +
+                "    WHERE r.behandlingId=b.id " +
                 "    AND r.behandlingResultatType IN :henlagtKoder)" +
                 " ORDER BY b.opprettetTidspunkt DESC" //$NON-NLS-1$
         );
