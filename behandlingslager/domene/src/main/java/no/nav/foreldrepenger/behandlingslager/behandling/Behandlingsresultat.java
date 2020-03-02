@@ -75,11 +75,8 @@ public class Behandlingsresultat extends BaseEntitet {
         return id;
     }
 
-    /**
-     * NB: ikke eksponer settere fra modellen. Skal ha package-scope.
-     */
-    void setBehandling(Long behandlingId) {
-        this.behandlingId = Objects.requireNonNull(behandlingId, "behandlingId");
+    public void setBehandling(Long behandlingId) {
+        this.behandlingId = behandlingId;
     }
 
     public Long getBehandlingId() {
@@ -240,8 +237,8 @@ public class Behandlingsresultat extends BaseEntitet {
          */
         @Deprecated
         public Behandlingsresultat buildFor(Behandling behandling) {
-            behandlingsresultat.setBehandling(behandling.getId());
             behandling.setBehandlingresultat(behandlingsresultat);
+            behandlingsresultat.setBehandling(behandling.getId());
             built = true;
             return behandlingsresultat;
         }

@@ -33,7 +33,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class BehandlingRevurderingRepositoryImplTest {
 
@@ -132,15 +131,15 @@ public class BehandlingRevurderingRepositoryImplTest {
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        
+
         Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
-        
+
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
         var behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
-                .medVedtakstidspunkt(tidligereTidspunkt)
-                .medAnsvarligSaksbehandler("asdf").build();
+            .medVedtakstidspunkt(tidligereTidspunkt)
+            .medAnsvarligSaksbehandler("asdf").build();
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
         return behandling;
@@ -155,14 +154,12 @@ public class BehandlingRevurderingRepositoryImplTest {
             .leggTil(vilkårBuilder)
             .build();
 
-        Behandlingsresultat.builderForInngangsvilkår()
+        behandlingRepository.lagre(behandling);
+
+        var behandlingsresultat = Behandlingsresultat.builderForInngangsvilkår()
             .medBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET)
             .buildFor(behandling);
-        Repository repository = repoRule.getRepository();
-
-        repository.lagre(behandling);
-        repository.lagre(behandling.getBehandlingsresultat());
-
+        repoRule.getRepository().lagre(behandlingsresultat);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 

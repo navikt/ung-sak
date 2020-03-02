@@ -394,7 +394,13 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     @Override
     public void opprettBehandling(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         final FagsakLås fagsakLås = serviceProvider.taFagsakLås(behandling.getFagsakId());
+        
+        // FIXME K9: Fjern behandlingsresultat, oppretter inntil videre tomt behandlingsresultat
+        @SuppressWarnings("unused")
+        var resultat = Behandlingsresultat.builder().buildFor(behandling);
+        
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        
         serviceProvider.oppdaterLåsVersjon(fagsakLås);
         eventPubliserer.fireEvent(kontekst, null, behandling.getStatus());
     }
