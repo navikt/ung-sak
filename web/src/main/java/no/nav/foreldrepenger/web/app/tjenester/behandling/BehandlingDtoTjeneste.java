@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
-import static java.util.stream.Collectors.flatMapping;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.get;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.post;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -76,7 +74,6 @@ import no.nav.k9.sak.kontrakt.behandling.SkjæringstidspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
-import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.konfig.PropertyUtil;
 
@@ -122,10 +119,19 @@ public class BehandlingDtoTjeneste {
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     }
 
+    private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
+        Optional<SøknadEntitet> søknadOpt = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
+        if (søknadOpt.isPresent()) {
+            return søknadOpt.get().getSpråkkode();
+        } else {
+            return behandling.getFagsak().getNavBruker().getSpråkkode();
+        }
+    }
+
     private BehandlingDto lagBehandlingDto(Behandling behandling,
-                                                  Optional<BehandlingsresultatDto> behandlingsresultatDto,
-                                                  boolean erBehandlingMedGjeldendeVedtak,
-                                                  SøknadRepository søknadRepository) {
+                                           Optional<BehandlingsresultatDto> behandlingsresultatDto,
+                                           boolean erBehandlingMedGjeldendeVedtak,
+                                           SøknadRepository søknadRepository) {
         var dto = new BehandlingDto();
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
         setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
@@ -169,15 +175,6 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
 
         return dto;
-    }
-
-    private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
-        Optional<SøknadEntitet> søknadOpt = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
-        if (søknadOpt.isPresent()) {
-            return søknadOpt.get().getSpråkkode();
-        } else {
-            return behandling.getFagsak().getNavBruker().getSpråkkode();
-        }
     }
 
     public List<BehandlingDto> lagBehandlingDtoer(List<Behandling> behandlinger) {
