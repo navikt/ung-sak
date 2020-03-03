@@ -310,7 +310,7 @@ public class BehandlingDtoTjeneste {
                 .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
                     new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
                 .collect(Collectors.groupingBy(Map.Entry::getKey,
-                    flatMapping(im -> Stream.of(im.getValue()), Collectors.toSet())));
+                    Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
             dto.setVilkårResultat(vilkårResultater);
         }
 
