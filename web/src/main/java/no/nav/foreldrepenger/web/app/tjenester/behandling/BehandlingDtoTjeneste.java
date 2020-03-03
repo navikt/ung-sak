@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
+import static java.util.stream.Collectors.flatMapping;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.get;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.post;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -74,6 +76,7 @@ import no.nav.k9.sak.kontrakt.behandling.SkjæringstidspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.konfig.PropertyUtil;
 
@@ -211,7 +214,7 @@ public class BehandlingDtoTjeneste {
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
             .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
-        
+
         var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId));
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(originalBehandling.getId()).orElse(null);
         setStandardfelter(originalBehandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
@@ -229,7 +232,7 @@ public class BehandlingDtoTjeneste {
 
     private void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
-        
+
         BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         var behandlingsresultatDto = lagBehandlingsresultatDto(behandling);
@@ -306,7 +309,8 @@ public class BehandlingDtoTjeneste {
                 .flatMap(vt -> vt.getPerioder().stream())
                 .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
                     new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                    flatMapping(im -> Stream.of(im.getValue()), Collectors.toSet())));
             dto.setVilkårResultat(vilkårResultater);
         }
 

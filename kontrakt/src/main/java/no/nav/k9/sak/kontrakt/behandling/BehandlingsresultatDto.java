@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.behandling;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -39,7 +40,7 @@ public class BehandlingsresultatDto {
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String avslagsarsakFritekst;
-    
+
     @JsonProperty(value = "erRevurderingMedUendretUtfall")
     @Valid
     private Boolean erRevurderingMedUendretUtfall;
@@ -82,8 +83,7 @@ public class BehandlingsresultatDto {
     private Vedtaksbrev vedtaksbrev;
 
     @JsonProperty(value="vilkårResultat")
-    @Valid
-    private Map<VilkårType, VilkårResultatDto> vilkårResultat;
+    private Map<VilkårType, Set<VilkårResultatDto>> vilkårResultat;
 
     public BehandlingsresultatDto() {
         // trengs for deserialisering av JSON
@@ -125,7 +125,7 @@ public class BehandlingsresultatDto {
         return vedtaksbrev;
     }
 
-    public Map<VilkårType, VilkårResultatDto> getVilkårResultat() {
+    public Map<VilkårType, Set<VilkårResultatDto>> getVilkårResultat() {
         return vilkårResultat;
     }
 
@@ -165,7 +165,7 @@ public class BehandlingsresultatDto {
         this.vedtaksbrev = vedtaksbrev;
     }
 
-    public void setVilkårResultat(Map<VilkårType, VilkårResultatDto> vilkårResultat) {
+    public void setVilkårResultat(Map<VilkårType, Set<VilkårResultatDto>> vilkårResultat) {
         this.vilkårResultat = vilkårResultat;
     }
 }
