@@ -119,10 +119,19 @@ public class BehandlingDtoTjeneste {
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     }
 
+    private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
+        Optional<SøknadEntitet> søknadOpt = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
+        if (søknadOpt.isPresent()) {
+            return søknadOpt.get().getSpråkkode();
+        } else {
+            return behandling.getFagsak().getNavBruker().getSpråkkode();
+        }
+    }
+
     private BehandlingDto lagBehandlingDto(Behandling behandling,
-                                                  Optional<BehandlingsresultatDto> behandlingsresultatDto,
-                                                  boolean erBehandlingMedGjeldendeVedtak,
-                                                  SøknadRepository søknadRepository) {
+                                           Optional<BehandlingsresultatDto> behandlingsresultatDto,
+                                           boolean erBehandlingMedGjeldendeVedtak,
+                                           SøknadRepository søknadRepository) {
         var dto = new BehandlingDto();
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
         setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
@@ -168,15 +177,6 @@ public class BehandlingDtoTjeneste {
         return dto;
     }
 
-    private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
-        Optional<SøknadEntitet> søknadOpt = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
-        if (søknadOpt.isPresent()) {
-            return søknadOpt.get().getSpråkkode();
-        } else {
-            return behandling.getFagsak().getNavBruker().getSpråkkode();
-        }
-    }
-
     public List<BehandlingDto> lagBehandlingDtoer(List<Behandling> behandlinger) {
         if (behandlinger.isEmpty()) {
             return Collections.emptyList();
@@ -211,7 +211,7 @@ public class BehandlingDtoTjeneste {
 
         Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
             .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
-        
+
         var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId));
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(originalBehandling.getId()).orElse(null);
         setStandardfelter(originalBehandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
@@ -229,7 +229,7 @@ public class BehandlingDtoTjeneste {
 
     private void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
-        
+
         BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         var behandlingsresultatDto = lagBehandlingsresultatDto(behandling);
@@ -306,7 +306,8 @@ public class BehandlingDtoTjeneste {
                 .flatMap(vt -> vt.getPerioder().stream())
                 .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
                     new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                    Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
             dto.setVilkårResultat(vilkårResultater);
         }
 
