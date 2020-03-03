@@ -15,12 +15,13 @@ public class DatasourceUtil {
 
     public static DataSource createDatasource(String datasourceName, DatasourceRole role, EnvironmentClass environmentClass, int maxPoolSize) {
         String rolePrefix = getRolePrefix(datasourceName);
-        HikariConfig config = initConnectionPoolConfig(datasourceName, role, maxPoolSize);
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
-            String password = PropertyUtil.getProperty(datasourceName + ".password");
+            final HikariConfig config = initConnectionPoolConfig(datasourceName, null, maxPoolSize);
+            final String password = PropertyUtil.getProperty(datasourceName + ".password");
             return createLocalDatasource(config, "public", rolePrefix, password);
         } else {
-            String dbRole = getRole(rolePrefix, role);
+            final String dbRole = getRole(rolePrefix, role);
+            final HikariConfig config = initConnectionPoolConfig(datasourceName, dbRole, maxPoolSize);
             return createVaultDatasource(config, environmentClass.mountPath(), dbRole);
         }
     }
@@ -37,9 +38,7 @@ public class DatasourceUtil {
         return PropertyUtil.getProperty(datasourceName + ".username");
     }
 
-    private static HikariConfig initConnectionPoolConfig(String dataSourceName, DatasourceRole role, int maxPoolSize) {
-        final String initSql = String.format("SET ROLE \"%s\"", getDbRole("defaultDS", role));
-        
+    private static HikariConfig initConnectionPoolConfig(String dataSourceName, String dbRole, int maxPoolSize) {
         final HikariConfig config = new HikariConfig();
         config.setJdbcUrl(PropertyUtil.getProperty(dataSourceName + ".url"));
 
@@ -49,7 +48,11 @@ public class DatasourceUtil {
         config.setMaxLifetime(30001);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
-        config.setConnectionInitSql(initSql);
+        
+        if (dbRole != null) {
+            final String initSql = String.format("SET ROLE \"%s\"", dbRole);
+            config.setConnectionInitSql(initSql);
+        }
         
         // optimaliserer inserts for postgres
         var dsProperties=new Properties();
