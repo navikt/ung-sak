@@ -1,0 +1,21 @@
+{
+  "topics": [
+    {
+      "configEntries": {
+        "retention.ms": -1
+      },
+      "members": [
+        {
+          "member": "srvk9sak",
+          "role": "PRODUCER"
+        },
+        {
+          "member": "srvk9los",
+          "role": "CONSUMER"
+        }
+      ],
+      "numPartitions": 3,
+      "topicName": "privat-k9-aksjonspunkthendelse"
+    }
+  ]
+}
