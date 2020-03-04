@@ -9,12 +9,14 @@ public class OmsorgenForGrunnlag implements VilkårGrunnlag {
     private final Relasjon relasjonMellomSøkerOgPleietrengende;
     private final List<BostedsAdresse> søkersAdresser;
     private final List<BostedsAdresse> pleietrengendeAdresser;
+    private final Boolean erOmsorgsPerson;
 
-    public OmsorgenForGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> pleietrengendeAdresser) {
+    public OmsorgenForGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> pleietrengendeAdresser, Boolean erOmsorgsPerson) {
 
         this.relasjonMellomSøkerOgPleietrengende = relasjonMellomSøkerOgPleietrengende;
         this.søkersAdresser = søkersAdresser;
         this.pleietrengendeAdresser = pleietrengendeAdresser;
+        this.erOmsorgsPerson = erOmsorgsPerson;
     }
 
     public Relasjon getRelasjonMellomSøkerOgPleietrengende() {
@@ -29,12 +31,18 @@ public class OmsorgenForGrunnlag implements VilkårGrunnlag {
         return pleietrengendeAdresser;
     }
 
+    public Boolean getErOmsorgsPerson() {
+        return erOmsorgsPerson;
+    }
+
     @Override
     public String toString() {
         return "OmsorgenForGrunnlag{" +
-            "relasjonMellomSøkerOgPleietrengende=" + relasjonMellomSøkerOgPleietrengende +
+            "erOmsorgsPerson=" + erOmsorgsPerson +
+            ", relasjonMellomSøkerOgPleietrengende=" + relasjonMellomSøkerOgPleietrengende +
             ", søkersAdresser=" + søkersAdresser +
             ", pleietrengendeAdresser=" + pleietrengendeAdresser +
             '}';
     }
+
 }

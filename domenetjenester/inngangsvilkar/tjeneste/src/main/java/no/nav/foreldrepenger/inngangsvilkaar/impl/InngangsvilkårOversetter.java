@@ -12,6 +12,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligT
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.OmsorgenFor;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -132,7 +133,8 @@ public class InngangsvilkårOversetter {
 
     public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periodeTilVurdering).orElseThrow();
-        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId).orElseThrow();
+        final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId).orElseThrow();
         final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
@@ -142,7 +144,7 @@ public class InngangsvilkårOversetter {
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .collect(Collectors.toList());
         return new OmsorgenForGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
-            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser));
+            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null));
     }
 
     private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {

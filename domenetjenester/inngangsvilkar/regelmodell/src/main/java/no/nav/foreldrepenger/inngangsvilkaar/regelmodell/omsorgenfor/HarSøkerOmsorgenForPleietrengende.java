@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor;
 
+import java.util.Objects;
+
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
@@ -20,16 +22,20 @@ public class HarSøkerOmsorgenForPleietrengende extends LeafSpecification<Omsorg
         if (relasjon != null) {
             if (erMorEllerFarTilPleietrengende(relasjon) && relasjon.getHarSammeBosted()) {
                 return ja();
-            } else if (erMorEllerFarTilPleietrengende(relasjon)) {
+            } else if (erMorEllerFarTilPleietrengende(relasjon) && saksbehandlerBekreftetOmsorgen(grunnlag)) {
                 return ja();
             }
         }
 
-        if (harSammeBosted(grunnlag)) {
+        if (harSammeBosted(grunnlag) && saksbehandlerBekreftetOmsorgen(grunnlag)) {
             return ja();
         }
 
         return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
+    }
+
+    private boolean saksbehandlerBekreftetOmsorgen(OmsorgenForGrunnlag grunnlag) {
+        return Objects.equals(grunnlag.getErOmsorgsPerson(), true);
     }
 
     private boolean harSammeBosted(OmsorgenForGrunnlag grunnlag) {

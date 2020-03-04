@@ -50,7 +50,7 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
                     .orElse(RelasjonsRolleType.UDEFINERT);
 
                 final var harSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengende, RelasjonsRolleType.BARN);
-                if (harSammeBosted || RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
+                if (harSammeBosted && RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
                     return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING));
                 }
             }

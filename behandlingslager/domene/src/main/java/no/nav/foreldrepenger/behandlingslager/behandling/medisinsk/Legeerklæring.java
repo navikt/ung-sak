@@ -44,7 +44,7 @@ public class Legeerklæring extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
-    @OneToMany(mappedBy = "legeerklæring", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "legeerklæring", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<InnleggelsePeriode> innleggelsesPerioder;
 
     @ManyToOne

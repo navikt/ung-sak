@@ -15,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Immutable;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
 @Entity(name = "Legeerklæringer")
@@ -25,7 +27,8 @@ public class Legeerklæringer extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_LEGEERKLAERINGER")
     private Long id;
 
-    @OneToMany(mappedBy = "legeerklæringer", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @Immutable
+    @OneToMany(mappedBy = "legeerklæringer", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<Legeerklæring> legeerklæringer;
 
     @Version

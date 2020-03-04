@@ -15,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Immutable;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
 @Entity(name = "KontinuerligTilsyn")
@@ -25,7 +27,8 @@ public class KontinuerligTilsyn extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_KONTINUERLIG_TILSYN")
     private Long id;
 
-    @OneToMany(mappedBy = "kontinuerligTilsyn", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @Immutable
+    @OneToMany(mappedBy = "kontinuerligTilsyn", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private List<KontinuerligTilsynPeriode> perioder = new ArrayList<>();
 
     @Version
