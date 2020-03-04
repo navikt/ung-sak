@@ -28,7 +28,7 @@ public class KontinuerligTilsyn extends BaseEntitet {
     private Long id;
 
     @Immutable
-    @OneToMany(mappedBy = "kontinuerligTilsyn", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(mappedBy = "kontinuerligTilsyn", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KontinuerligTilsynPeriode> perioder = new ArrayList<>();
 
     @Version

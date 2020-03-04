@@ -28,7 +28,7 @@ public class Legeerklæringer extends BaseEntitet {
     private Long id;
 
     @Immutable
-    @OneToMany(mappedBy = "legeerklæringer", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(mappedBy = "legeerklæringer", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Legeerklæring> legeerklæringer;
 
     @Version
