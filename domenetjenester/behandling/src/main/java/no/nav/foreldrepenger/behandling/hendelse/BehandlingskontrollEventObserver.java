@@ -114,6 +114,7 @@ public class BehandlingskontrollEventObserver {
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
 
         return BehandlingProsessEventDto.builder()
+            .medEksternId(behandling.getUuid())
             .medFagsystem(Fagsystem.FPSAK)
             .medBehandlingId(behandling.getId())
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
