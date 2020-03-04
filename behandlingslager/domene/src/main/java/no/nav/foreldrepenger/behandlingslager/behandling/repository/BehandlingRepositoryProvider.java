@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -40,7 +39,6 @@ public class BehandlingRepositoryProvider {
     private BeregningsresultatRepository beregningsresultatRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     private BehandlingRepository behandlingRepository;
@@ -67,9 +65,8 @@ public class BehandlingRepositoryProvider {
         this.medlemskapRepository = new MedlemskapRepository(entityManager);
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
         this.personopplysningRepository = new PersonopplysningRepository(entityManager);
-        this.søknadRepository = new SøknadRepository(entityManager, this.behandlingRepository);
+        this.søknadRepository = new SøknadRepository(entityManager);
         this.uttakRepository = new UttakRepository(entityManager);
-        this.behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
 
         // inntekt arbeid ytelser
         this.virksomhetRepository = new VirksomhetRepository();
@@ -157,10 +154,6 @@ public class BehandlingRepositoryProvider {
 
     public FagsakLåsRepository getFagsakLåsRepository() {
         return fagsakLåsRepository;
-    }
-
-    public BehandlingsresultatRepository getBehandlingsresultatRepository() {
-        return behandlingsresultatRepository;
     }
 
 }

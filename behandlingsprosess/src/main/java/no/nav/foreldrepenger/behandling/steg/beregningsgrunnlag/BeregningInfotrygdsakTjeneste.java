@@ -13,6 +13,7 @@ public class BeregningInfotrygdsakTjeneste {
     }
 
     public boolean vurderOgOppdaterSakSomBehandlesAvInfotrygd(@Deprecated Behandling behandling, BehandlingReferanse ref) {
+        // FIXME K9 : trengs denne?
         return false;
     }
 

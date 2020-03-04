@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelOrkestrerer;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
@@ -33,8 +32,8 @@ public class InngangsvilkårFellesTjeneste  {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
-    RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, List<DatoIntervallEntitet> intervaller) {
-        return regelOrkestrerer.vurderInngangsvilkår(vilkårHåndtertAvSteg, behandling, ref, intervaller);
+    RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, List<DatoIntervallEntitet> intervaller) {
+        return regelOrkestrerer.vurderInngangsvilkår(vilkårHåndtertAvSteg, ref, intervaller);
     }
 
     Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId) {

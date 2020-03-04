@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.HistorikkInnslagFeltTypeKodeverdiConverter;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;

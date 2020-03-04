@@ -13,16 +13,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
-import no.nav.foreldrepenger.behandlingslager.lagretvedtak.LagretVedtak;
-import no.nav.foreldrepenger.behandlingslager.lagretvedtak.LagretVedtakMedBehandlingType;
-import no.nav.foreldrepenger.domene.vedtak.repo.LagretVedtakRepository;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
@@ -36,35 +30,17 @@ import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 public class VedtakTjeneste {
 
     private HistorikkRepository historikkRepository;
-    private LagretVedtakRepository lagretVedtakRepository;
     private TotrinnTjeneste totrinnTjeneste;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     VedtakTjeneste() {
         // CDI
     }
 
     @Inject
-    public VedtakTjeneste(BehandlingsresultatRepository behandlingsresultatRepository,
-                          LagretVedtakRepository lagretVedtakRepository,
-                          HistorikkRepository historikkRepository,
+    public VedtakTjeneste(HistorikkRepository historikkRepository,
                           TotrinnTjeneste totrinnTjeneste) {
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.historikkRepository = historikkRepository;
-        this.lagretVedtakRepository = lagretVedtakRepository;
         this.totrinnTjeneste = totrinnTjeneste;
-    }
-
-    public List<LagretVedtakMedBehandlingType> hentLagreteVedtakPåFagsak(Long fagsakId) {
-        return lagretVedtakRepository.hentLagreteVedtakPåFagsak(fagsakId);
-    }
-
-    public LagretVedtak hentLagreteVedtak(Long behandlingId) {
-        return lagretVedtakRepository.hentLagretVedtakForBehandlingForOppdatering(behandlingId);
-    }
-
-    public List<Long> hentLagreteVedtakBehandlingId(LocalDateTime fom, LocalDateTime tom){
-        return lagretVedtakRepository.hentLagreteVedtakBehandlingId(fom,tom);
     }
 
     public void lagHistorikkinnslagFattVedtak(Behandling behandling) {
@@ -84,10 +60,9 @@ public class VedtakTjeneste {
     }
 
     private void lagHistorikkInnslagVedtakFattet(Behandling behandling) {
-        var behandlingsresultat = behandlingsresultatRepository.hent(behandling.getId());
         var ref = BehandlingReferanse.fra(behandling);
-        boolean erUendretUtfall = getRevurderingTjeneste(behandling).erRevurderingMedUendretUtfall(ref, behandlingsresultat.getKonsekvenserForYtelsen());
-        
+        boolean erUendretUtfall = ref.getBehandlingResultat().isBehandlingsresultatIkkeEndret();
+
         HistorikkinnslagType historikkinnslagType = erUendretUtfall ? HistorikkinnslagType.UENDRET_UTFALL : HistorikkinnslagType.VEDTAK_FATTET;
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder()
             .medHendelse(historikkinnslagType)
@@ -103,11 +78,6 @@ public class VedtakTjeneste {
 
         historikkRepository.lagre(innslag);
     }
-
-    private RevurderingTjeneste getRevurderingTjeneste(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, behandling.getFagsakYtelseType()).orElseThrow();
-    }
-
 
     private void lagHistorikkInnslagVurderPåNytt(Behandling behandling, Collection<Totrinnsvurdering> medTotrinnskontroll) {
         Map<SkjermlenkeType, List<HistorikkinnslagTotrinnsvurdering>> vurdering = new HashMap<>();

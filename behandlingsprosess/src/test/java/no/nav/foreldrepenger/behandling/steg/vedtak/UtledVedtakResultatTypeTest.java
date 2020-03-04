@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -32,7 +31,7 @@ public class UtledVedtakResultatTypeTest {
     @Test
     public void vedtakResultatTypeSettesTilAVSLAG() {
         // Arrange
-        scenarioFørstegang.medBehandlingsresultat(Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.AVSLÅTT));
+        scenarioFørstegang.medBehandlingsresultat(BehandlingResultatType.AVSLÅTT);
         Behandling behandling = scenarioFørstegang.lagMocked();
 
         // Act
@@ -45,7 +44,7 @@ public class UtledVedtakResultatTypeTest {
     @Test
     public void vedtakResultatTypeSettesTilINNVILGETForInnvilget() {
         // Arrange
-        scenarioFørstegang.medBehandlingsresultat(Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
+        scenarioFørstegang.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         Behandling behandling = scenarioFørstegang.lagMocked();
 
         // Act
@@ -58,7 +57,7 @@ public class UtledVedtakResultatTypeTest {
     @Test
     public void vedtakResultatTypeSettesTilINNVILGETForForeldrepengerEndret() {
         // Arrange
-        scenarioFørstegang.medBehandlingsresultat(Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET_ENDRING));
+        scenarioFørstegang.medBehandlingsresultat(BehandlingResultatType.INNVILGET_ENDRING);
         Behandling behandling = scenarioFørstegang.lagMocked();
 
         // Act
@@ -75,7 +74,7 @@ public class UtledVedtakResultatTypeTest {
     @Test
     public void vedtakResultatTypeSettesTilAVSLAGForIngenEndringNårForrigeBehandlingAvslått() {
         // Arrange
-        scenarioFørstegang.medBehandlingsresultat(Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.AVSLÅTT));
+        scenarioFørstegang.medBehandlingsresultat(BehandlingResultatType.AVSLÅTT);
         Behandling behandling1 = scenarioFørstegang.lagMocked();
         Behandling behandling2 = lagRevurdering(behandling1, BehandlingResultatType.INGEN_ENDRING);
 
@@ -94,7 +93,7 @@ public class UtledVedtakResultatTypeTest {
     @Test
     public void vedtakResultatTypeSettesTilAVSLAGForIngenEndringNårBehandling1InnvilgetOgBehandling2IngenEndring() {
         // Arrange
-        scenarioFørstegang.medBehandlingsresultat(Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
+        scenarioFørstegang.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         Behandling behandling1 = scenarioFørstegang.lagMocked();
         Behandling behandling2 = lagRevurdering(behandling1, BehandlingResultatType.INGEN_ENDRING);
         Behandling behandling3 = lagRevurdering(behandling2, BehandlingResultatType.INGEN_ENDRING);
@@ -135,10 +134,9 @@ public class UtledVedtakResultatTypeTest {
             .medOriginalBehandling(tidligereBehandling);
         Behandling revurdering = Behandling.fraTidligereBehandling(tidligereBehandling, BehandlingType.REVURDERING)
             .medBehandlingÅrsak(årsakBuilder)
+            .medBehandlingResultatType(behandlingResultatType)
             .build();
         Whitebox.setInternalState(revurdering, "id", 99L);
-        var behandlingsresultat = Behandlingsresultat.builder().medBehandlingResultatType(behandlingResultatType).build();
-        revurdering.setBehandlingresultat(behandlingsresultat);
         return revurdering;
     }
 }

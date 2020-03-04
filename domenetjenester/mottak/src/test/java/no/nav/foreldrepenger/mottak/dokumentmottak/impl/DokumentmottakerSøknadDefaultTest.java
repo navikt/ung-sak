@@ -23,7 +23,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -171,7 +170,7 @@ public class DokumentmottakerSøknadDefaultTest {
     public void skal_lage_manuell_revurdering_fra_opphørt_førstegangsbehandling_på_saken_fra_før() {
         //Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.OPPHØR));
+        scenario.medBehandlingsresultat(BehandlingResultatType.OPPHØR);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.OPPHØR);

@@ -33,14 +33,16 @@ public enum BehandlingResultatType implements Kodeverdi {
     MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler"),
     ;
 
-    private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, HENLAGT_SØKNAD_MANGLER, MANGLER_BEREGNINGSREGLER);
-    private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, MERGET_OG_HENLAGT, HENLAGT_SØKNAD_MANGLER, MANGLER_BEREGNINGSREGLER);
+    private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, HENLAGT_SØKNAD_MANGLER,
+        MANGLER_BEREGNINGSREGLER);
+    private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, MERGET_OG_HENLAGT, HENLAGT_SØKNAD_MANGLER,
+        MANGLER_BEREGNINGSREGLER);
     private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, INNVILGET_ENDRING);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "BEHANDLING_RESULTAT_TYPE";
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
@@ -51,7 +53,7 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     @JsonIgnore
     private String navn;
-    
+
     private String kode;
 
     private BehandlingResultatType(String kode) {
@@ -78,7 +80,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     public static Map<String, BehandlingResultatType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
@@ -89,22 +91,22 @@ public enum BehandlingResultatType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
-    
+
     public static void main(String[] args) {
         System.out.println(KODER.keySet());
     }
-    
+
     public static Set<BehandlingResultatType> getAlleHenleggelseskoder() {
         return ALLE_HENLEGGELSESKODER;
     }
@@ -119,6 +121,31 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     public boolean erHenlagt() {
         return ALLE_HENLEGGELSESKODER.contains(this);
+    }
+
+    public boolean isBehandlingHenlagt() {
+        return BehandlingResultatType.getAlleHenleggelseskoder().contains(this);
+    }
+
+    public boolean isBehandlingsresultatAvslåttOrOpphørt() {
+        return BehandlingResultatType.AVSLÅTT.equals(this)
+            || BehandlingResultatType.OPPHØR.equals(this);
+    }
+
+    public boolean isBehandlingsresultatAvslått() {
+        return BehandlingResultatType.AVSLÅTT.equals(this);
+    }
+
+    public boolean isBehandlingsresultatOpphørt() {
+        return BehandlingResultatType.OPPHØR.equals(this);
+    }
+
+    public boolean isBehandlingsresultatIkkeEndret() {
+        return BehandlingResultatType.INGEN_ENDRING.equals(this);
+    }
+
+    public boolean isBehandlingsresultatHenlagt() {
+        return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
 
 }

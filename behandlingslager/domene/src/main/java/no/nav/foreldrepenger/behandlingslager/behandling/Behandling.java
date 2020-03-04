@@ -47,6 +47,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspun
 import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
+import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.FagsystemKodeverkConverter;
@@ -135,13 +136,6 @@ public class Behandling extends BaseEntitet {
     @Column(name = "behandling_type", nullable = false)
     private BehandlingType behandlingType = BehandlingType.UDEFINERT;
 
-    /**
-     * Er egentlig OneToOne, men må mappes slik da JPA/Hibernate ikke støtter OneToOne på annet enn shared PK.
-     */
-    @OneToMany(orphanRemoval = true)
-    @JoinColumn(name = "behandling_id")
-    private Set<Behandlingsresultat> behandlingsresultat = new HashSet<>(1);
-
     // CascadeType.ALL + orphanRemoval=true må til for at aksjonspunkter skal bli slettet fra databasen ved fjerning fra HashSet
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "behandling", orphanRemoval = true, cascade = CascadeType.ALL, targetEntity = Aksjonspunkt.class)
     private Set<Aksjonspunkt> aksjonspunkter = new HashSet<>();
@@ -190,6 +184,10 @@ public class Behandling extends BaseEntitet {
 
     @Column(name = "behandlingstid_frist", nullable = false)
     private LocalDate behandlingstidFrist;
+
+    @Convert(converter = BehandlingResultatKodeverdiConverter.class)
+    @Column(name = "behandling_resultat_type", nullable = false)
+    private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
 
     @Column(name = "aapnet_for_endring", nullable = false)
     private boolean åpnetForEndring = false;
@@ -252,19 +250,6 @@ public class Behandling extends BaseEntitet {
      */
     public static Behandling.Builder fraTidligereBehandling(Behandling forrigeBehandling, BehandlingType behandlingType) {
         return new Builder(forrigeBehandling, behandlingType);
-    }
-
-    /**
-     * @deprecated FIXME PFP-1131 Fjern direkte kobling Behandling->Behandlingsresultat fra entiteter/jpa modell
-     */
-    @Deprecated
-    // (FC) støtter bare ett Behandlingsresultat for en Behandling - JPA har ikke støtte for OneToOne på non-PK
-    // kolonne, så emuleres her ved å tømme listen.
-    public Behandlingsresultat getBehandlingsresultat() {
-        if (this.behandlingsresultat.size() > 1) {
-            throw FeilFactory.create(BehandlingFeil.class).merEnnEttBehandlingsresultat(behandlingsresultat.size()).toException();
-        }
-        return this.behandlingsresultat.isEmpty() ? null : this.behandlingsresultat.iterator().next();
     }
 
     public List<BehandlingÅrsak> getBehandlingÅrsaker() {
@@ -432,20 +417,6 @@ public class Behandling extends BaseEntitet {
         return stegTilstand == null ? null : stegTilstand.getBehandlingSteg();
     }
 
-    /**
-     * @deprecated FIXME skal ikke ha public settere, og heller ikke setter for behandlingsresultat her. Bør gå via repository.
-     */
-    @Deprecated
-    public void setBehandlingresultat(Behandlingsresultat behandlingsresultat) {
-        // (FC) støtter bare ett Behandlingsresultat for en Behandling - JPA har ikke støtte for OneToOne på non-PK
-        // kolonne, så emuleres her ved å tømme listen.
-
-        this.behandlingsresultat.clear();
-        behandlingsresultat.setBehandling(this.getId());
-        // kun ett om gangen, mappet på annet enn pk
-        this.behandlingsresultat.add(behandlingsresultat);
-    }
-
     @Override
     public boolean equals(Object object) {
         if (object == this) {
@@ -508,13 +479,6 @@ public class Behandling extends BaseEntitet {
         return fagsak;
     }
 
-    /**
-     * Internt API, IKKE BRUK.
-     */
-    void addAksjonspunkt(Aksjonspunkt aksjonspunkt) {
-        aksjonspunkter.add(aksjonspunkt);
-    }
-
     public Set<Aksjonspunkt> getAksjonspunkter() {
         return Collections.unmodifiableSet(aksjonspunkter);
     }
@@ -565,6 +529,13 @@ public class Behandling extends BaseEntitet {
         return getÅpneAksjonspunkterStream()
             .filter(a -> matchKriterier.contains(a.getAksjonspunktDefinisjon()))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Internt API, IKKE BRUK.
+     */
+    void addAksjonspunkt(Aksjonspunkt aksjonspunkt) {
+        aksjonspunkter.add(aksjonspunkt);
     }
 
     public List<Aksjonspunkt> getAksjonspunkterMedTotrinnskontroll() {
@@ -696,10 +667,7 @@ public class Behandling extends BaseEntitet {
     }
 
     private boolean erHenlagt() {
-        if (behandlingsresultat == null || behandlingsresultat.isEmpty()) {
-            return false;
-        }
-        return getBehandlingsresultat().isBehandlingHenlagt();
+        return getBehandlingResultatType().isBehandlingHenlagt();
     }
 
     public boolean erUnderIverksettelse() {
@@ -733,6 +701,11 @@ public class Behandling extends BaseEntitet {
     public void setStartpunkt(StartpunktType startpunkt) {
         guardTilstandPåBehandling();
         this.startpunkt = startpunkt;
+    }
+
+    public void setBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
+        guardTilstandPåBehandling();
+        this.behandlingResultatType = behandlingResultatType;
     }
 
     public boolean erÅpnetForEndring() {
@@ -770,10 +743,6 @@ public class Behandling extends BaseEntitet {
         private final BehandlingType behandlingType;
         private Fagsak fagsak;
         private Behandling forrigeBehandling;
-        /**
-         * optional
-         */
-        private Behandlingsresultat.Builder resultatBuilder;
 
         private LocalDateTime opprettetDato;
         private LocalDateTime avsluttetDato;
@@ -785,6 +754,7 @@ public class Behandling extends BaseEntitet {
         private LocalDate behandlingstidFrist = LocalDate.now().plusWeeks(6);
 
         private BehandlingÅrsak.Builder behandlingÅrsakBuilder;
+        private BehandlingResultatType behandlingResultatType;
 
         private Builder(Fagsak fagsak, BehandlingType behandlingType) {
             this(behandlingType);
@@ -812,6 +782,11 @@ public class Behandling extends BaseEntitet {
          */
         public Builder medOpprettetDato(LocalDateTime tid) {
             this.opprettetDato = tid == null ? null : tid.withNano(0);
+            return this;
+        }
+
+        public Builder medBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
+            this.behandlingResultatType = Objects.requireNonNull(behandlingResultatType, "behandlingResultatType");
             return this;
         }
 
@@ -870,6 +845,9 @@ public class Behandling extends BaseEntitet {
                 behandling.behandlingstidFrist = behandlingstidFrist;
             }
 
+            if (behandlingResultatType != null) {
+                behandling.setBehandlingResultatType(behandlingResultatType);
+            }
             if (opprettetDato != null) {
                 behandling.opprettetDato = opprettetDato.withNano(0);
             } else {
@@ -878,10 +856,6 @@ public class Behandling extends BaseEntitet {
             if (avsluttetDato != null) {
                 behandling.avsluttetDato = avsluttetDato.withNano(0);
             }
-            if (resultatBuilder != null) {
-                Behandlingsresultat behandlingsresultat = resultatBuilder.build();
-                behandling.setBehandlingresultat(behandlingsresultat);
-            }
 
             if (behandlingÅrsakBuilder != null) {
                 behandlingÅrsakBuilder.buildFor(behandling);
@@ -889,11 +863,11 @@ public class Behandling extends BaseEntitet {
 
             return behandling;
         }
+
     }
 
     public BehandlingResultatType getBehandlingResultatType() {
-        var r = getBehandlingsresultat();
-        return r == null ? BehandlingResultatType.IKKE_FASTSATT : r.getBehandlingResultatType();
+        return behandlingResultatType;
     }
 
 }

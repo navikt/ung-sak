@@ -15,8 +15,6 @@ import org.mockito.Mockito;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
@@ -45,7 +43,6 @@ import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingVedtakTjenesteTest {
@@ -54,14 +51,12 @@ public class BehandlingVedtakTjenesteTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final Repository repository = repoRule.getRepository();
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private final InternalManipulerBehandling manipulerBehandling = new InternalManipulerBehandling();
     private BehandlingVedtakTjeneste behandlingVedtakTjeneste;
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
     private BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-    private BehandlingsresultatRepository behandlingsresultatRepository = new BehandlingsresultatRepository(repoRule.getEntityManager());
 
     @Before
     public void setUp() {
@@ -159,9 +154,9 @@ public class BehandlingVedtakTjenesteTest {
     private Behandling oppdaterMedBehandlingsresultat(BehandlingskontrollKontekst kontekst, BehandlingResultatType behandlingResultatType) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-
-        var resultat = Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(behandlingResultatType).build();
-        behandlingsresultatRepository.lagre(behandlingId, resultat);
+        behandling.setBehandlingResultatType(behandlingResultatType);
+        BehandlingLås lås = kontekst.getSkriveLås();
+        behandlingRepository.lagre(behandling, lås);
 
         boolean ikkeAvslått = !behandlingResultatType.equals(BehandlingResultatType.AVSLÅTT);
         final var vilkårResultatBuilder = Vilkårene.builder();
@@ -170,10 +165,7 @@ public class BehandlingVedtakTjenesteTest {
         vilkårResultatBuilder.leggTil(vilkårBuilder);
         Vilkårene vilkårene = vilkårResultatBuilder.build();
 
-        BehandlingLås lås = kontekst.getSkriveLås();
         repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
-        behandlingRepository.lagre(behandling, lås);
-        repository.flush();
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
@@ -183,9 +175,8 @@ public class BehandlingVedtakTjenesteTest {
         Behandling behandling = scenario
             .medBehandlingStegStart(behandlingStegType)
             .medBehandlendeEnhet("Stord")
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET)    
             .lagre(repositoryProvider);
-        var resultat = Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).build();
-        behandlingsresultatRepository.lagre(behandling.getId(), resultat);
 
         Fagsak fagsak = behandling.getFagsak();
         return new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingRepository.taSkriveLås(behandling));

@@ -26,7 +26,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends DokumentmottakerTestsupport {
@@ -76,7 +75,6 @@ public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends
             FagsakYtelseType.FORELDREPENGER,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.MANGLENDE_DOKUMENTASJON,
             VedtakResultatType.AVSLAG,
             DATO_FØR_INNSENDINGSFRISTEN);
         MottattDokument søknadDokument = dummySøknadDokument(behandling);

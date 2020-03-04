@@ -13,7 +13,6 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.TilbakekrevingVidereBehandlingKodeverdiConverter;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 
 @Table(name = "TILBAKEKREVING_VALG")

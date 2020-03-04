@@ -33,6 +33,7 @@ import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -300,6 +301,7 @@ public class AvklarAktiviteterTjenesteImplTest {
         return BehandlingReferanse.fra(
             FagsakYtelseType.FORELDREPENGER,
             BehandlingType.FØRSTEGANGSSØKNAD,
+            BehandlingResultatType.INNVILGET,
             AKTØR_ID,
             new Saksnummer("2398040234"),
             FAGSAK_ID,

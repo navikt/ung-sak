@@ -15,9 +15,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandling.revurdering.BeregningRevurderingTestUtil;
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndring;
+import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingTjenesteImpl;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
@@ -77,8 +76,8 @@ public class RevurderingTjenesteImplTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        var revurderingTjeneste = new RevurderingTjenesteImpl(repositoryProvider, behandlingskontrollTjeneste,
-            iayTjeneste, revurderingEndring, revurderingTjenesteFelles);
+        var revurderingTjeneste = new RevurderingTjeneste(repositoryProvider, behandlingskontrollTjeneste,
+            iayTjeneste, revurderingTjenesteFelles);
 
         // Act
         Behandling revurdering = revurderingTjeneste

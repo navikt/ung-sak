@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.BeregningSatsTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
 

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -24,6 +23,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
@@ -33,7 +34,6 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
@@ -62,7 +62,7 @@ public class BehandlingRepositoryImplTest {
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VedtakVarselRepository vedtakVarselRepository;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -145,12 +145,8 @@ public class BehandlingRepositoryImplTest {
     @Test
     public void skal_hente_siste_innvilget_eller_endret_på_fagsakId() {
         BehandlingVedtak.Builder forVedtak = opprettBuilderForVedtak();
-        var behandlingsresultat = Behandlingsresultat.builderEndreEksisterende(getBehandlingsresultat(behandling))
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-            .build();
-
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingsresultatRepository.lagre(behandling.getId(), behandlingsresultat);
         behandlingVedtakRepository.lagre(forVedtak.medIverksettingStatus(IverksettingStatus.IVERKSATT).build(), lås);
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, lås);
@@ -207,56 +203,14 @@ public class BehandlingRepositoryImplTest {
     }
 
     @Test
-    public void skal_kunne_lagre_konsekvens_for_ytelsen() {
-        behandling = opprettBehandlingMedTermindato();
-        Behandlingsresultat behandlingsresultat = oppdaterMedBehandlingsresultatOgLagre(behandling, false);
-
-        setKonsekvensForYtelsen(behandlingsresultat, List.of(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK));
-        List<BehandlingsresultatKonsekvensForYtelsen> brKonsekvenser = repository.hentAlle(BehandlingsresultatKonsekvensForYtelsen.class);
-        assertThat(brKonsekvenser).hasSize(2);
-        brKonsekvenser.forEach(brk -> assertThat(brk.getBehandlingsresultat()).isNotNull());
-        List<KonsekvensForYtelsen> konsekvenser = brKonsekvenser.stream().map(BehandlingsresultatKonsekvensForYtelsen::getKonsekvensForYtelsen)
-            .collect(Collectors.toList());
-        assertThat(konsekvenser).containsExactlyInAnyOrder(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK);
-    }
-
-    @Test
-    public void dersom_man_lagrer_konsekvens_for_ytelsen_flere_ganger_skal_kun_den_siste_lagringen_gjelde() {
-        behandling = opprettBehandlingMedTermindato();
-        Behandlingsresultat behandlingsresultat = oppdaterMedBehandlingsresultatOgLagre(behandling, false);
-
-        setKonsekvensForYtelsen(behandlingsresultat, List.of(KonsekvensForYtelsen.ENDRING_I_BEREGNING, KonsekvensForYtelsen.ENDRING_I_UTTAK));
-        behandling = behandlingRepository.hentBehandling(behandling.getId());
-        Behandlingsresultat.builderEndreEksisterende(getBehandlingsresultat(behandling)).fjernKonsekvenserForYtelsen();
-        setKonsekvensForYtelsen(getBehandlingsresultat(behandling), List.of(KonsekvensForYtelsen.ENDRING_I_FORDELING_AV_YTELSEN));
-
-        List<BehandlingsresultatKonsekvensForYtelsen> brKonsekvenser = repository.hentAlle(BehandlingsresultatKonsekvensForYtelsen.class);
-        assertThat(brKonsekvenser).hasSize(1);
-        brKonsekvenser.forEach(brk -> assertThat(brk.getBehandlingsresultat()).isNotNull());
-        List<KonsekvensForYtelsen> konsekvenser = brKonsekvenser.stream().map(BehandlingsresultatKonsekvensForYtelsen::getKonsekvensForYtelsen)
-            .collect(Collectors.toList());
-        assertThat(konsekvenser).containsExactlyInAnyOrder(KonsekvensForYtelsen.ENDRING_I_FORDELING_AV_YTELSEN);
-    }
-
-    private void setKonsekvensForYtelsen(Behandlingsresultat behandlingsresultat, List<KonsekvensForYtelsen> konsekvenserForYtelsen) {
-        Behandlingsresultat.Builder builder = Behandlingsresultat.builderEndreEksisterende(behandlingsresultat);
-        konsekvenserForYtelsen.forEach(builder::leggTilKonsekvensForYtelsen);
-        builder.buildFor(behandling);
-
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, lås);
-        repository.flushAndClear();
-    }
-
-    @Test
     public void skal_hente_liste_over_revurderingsaarsaker() {
         Map<String, VurderÅrsak> stringVurderÅrsakMap = VurderÅrsak.kodeMap();
         assertThat(stringVurderÅrsakMap).hasSize(5);
         assertThat(stringVurderÅrsakMap.containsValue(VurderÅrsak.FEIL_FAKTA)).isTrue();
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
+    private VedtakVarsel getBehandlingsresultat(Behandling behandling) {
+        return vedtakVarselRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
     }
 
     @Test
@@ -573,17 +527,16 @@ public class BehandlingRepositoryImplTest {
         return behandling;
     }
 
-    private Behandlingsresultat oppdaterMedBehandlingsresultatOgLagre(Behandling behandling, boolean henlegg) {
+    private VedtakVarsel oppdaterMedBehandlingsresultatOgLagre(Behandling behandling, boolean henlegg) {
 
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
         if (henlegg) {
-            Behandlingsresultat.builderEndreEksisterende(behandlingsresultat).medBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
+            behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
         }
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);
 
-        return behandlingsresultat;
+        return getBehandlingsresultat(behandling);
     }
 
     private Behandling.Builder opprettBuilderForBehandling() {

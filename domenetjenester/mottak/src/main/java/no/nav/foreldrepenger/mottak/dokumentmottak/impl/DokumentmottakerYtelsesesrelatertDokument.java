@@ -5,8 +5,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -31,7 +29,6 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     
     private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private BehandlingRevurderingRepository revurderingRepository;
 
     protected DokumentmottakerYtelsesesrelatertDokument() {
@@ -51,7 +48,6 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.uttakRepository = repositoryProvider.getUttakRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
     /* TEMPLATE-metoder som må håndteres spesifikt for hver type av ytelsesdokumenter - START */
@@ -93,8 +89,7 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     }
 
     protected final boolean erAvslag(Behandling avsluttetBehandling) {
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(avsluttetBehandling.getId());
-        return behandlingsresultat.isPresent() && behandlingsresultat.get().isBehandlingsresultatAvslått();
+        return avsluttetBehandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
     boolean harAvslåttPeriode(Behandling avsluttetBehandling) {

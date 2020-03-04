@@ -4,27 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 
-class FastsettBehandlingsresultatVedEndring {
-    private FastsettBehandlingsresultatVedEndring() {
+class FastsettResultatVedEndring {
+
+    FastsettResultatVedEndring() {
     }
 
-    public static Behandlingsresultat fastsett(Behandling revurdering,
-                                               Betingelser er,
-                                               HarEtablertYtelse harEtablertYtelse) {
+    static VedtakVarsel fastsett(Behandling revurdering,
+                                 VedtakVarsel vedtakVarsel,
+                                 Betingelser er,
+                                 HarEtablertYtelse harEtablertYtelse) {
         List<KonsekvensForYtelsen> konsekvenserForYtelsen = utledKonsekvensForYtelsen(er.endringIBeregning);
 
         if (!harEtablertYtelse.vurder(er.minstEnInnvilgetBehandlingUtenPåfølgendeOpphør)) {
-            return harEtablertYtelse.fastsettForIkkeEtablertYtelse(revurdering, konsekvenserForYtelsen);
+            return harEtablertYtelse.fastsettForIkkeEtablertYtelse(revurdering);
         }
 
         Vedtaksbrev vedtaksbrev = utledVedtaksbrev(konsekvenserForYtelsen, er.varselOmRevurderingSendt);
         BehandlingResultatType behandlingResultatType = utledBehandlingResultatType(konsekvenserForYtelsen);
-        return buildBehandlingsresultat(revurdering, behandlingResultatType, konsekvenserForYtelsen, vedtaksbrev);
+
+        vedtakVarsel.setVedtaksbrev(vedtaksbrev);
+        revurdering.setBehandlingResultatType(behandlingResultatType);
+
+        return vedtakVarsel;
     }
 
     private static Vedtaksbrev utledVedtaksbrev(List<KonsekvensForYtelsen> konsekvenserForYtelsen, boolean erVarselOmRevurderingSendt) {
@@ -53,16 +59,6 @@ class FastsettBehandlingsresultatVedEndring {
         return konsekvensForYtelsen;
     }
 
-    protected static Behandlingsresultat buildBehandlingsresultat(Behandling revurdering, BehandlingResultatType behandlingResultatType,
-                                                                  List<KonsekvensForYtelsen> konsekvenserForYtelsen, Vedtaksbrev vedtaksbrev) {
-        Behandlingsresultat behandlingsresultat = revurdering.getBehandlingsresultat();
-        Behandlingsresultat.Builder behandlingsresultatBuilder = Behandlingsresultat.builderEndreEksisterende(behandlingsresultat);
-        behandlingsresultatBuilder.medBehandlingResultatType(behandlingResultatType);
-        behandlingsresultatBuilder.medVedtaksbrev(vedtaksbrev);
-        konsekvenserForYtelsen.forEach(behandlingsresultatBuilder::leggTilKonsekvensForYtelsen);
-        return behandlingsresultatBuilder.buildFor(revurdering);
-    }
-
     static class Betingelser {
         boolean endringIBeregning;
         boolean varselOmRevurderingSendt;
@@ -71,7 +67,7 @@ class FastsettBehandlingsresultatVedEndring {
         private Betingelser() {
         }
 
-        public static Betingelser fastsett(boolean erEndringIBeregning, 
+        public static Betingelser fastsett(boolean erEndringIBeregning,
                                            boolean erVarselOmRevurderingSendt,
                                            boolean erMinstEnInnvilgetBehandlingUtenPåfølgendeOpphør) {
             Betingelser b = new Betingelser();

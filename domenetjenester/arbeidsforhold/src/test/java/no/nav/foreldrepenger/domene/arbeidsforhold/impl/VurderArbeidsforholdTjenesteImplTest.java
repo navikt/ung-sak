@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
@@ -361,7 +360,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     private void avsluttBehandlingOgFagsak(Behandling behandling) {
         BehandlingLås lås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);
-        Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         repositoryProvider.getBehandlingRepository().lagre(behandling, lås);
         FagsakRepository fagsakRepository = repositoryProvider.getFagsakRepository();

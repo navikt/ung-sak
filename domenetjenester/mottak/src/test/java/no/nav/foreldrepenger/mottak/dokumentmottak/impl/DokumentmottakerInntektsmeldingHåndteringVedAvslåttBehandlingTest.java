@@ -16,7 +16,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest extends DokumentmottakerTestsupport {
 
@@ -26,9 +25,11 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
 
     @Before
     public void setup() {
-        this.behandlingsoppretterSpied = Mockito.spy(behandlingsoppretter);
-        this.dokumentmottakerFellesSpied = Mockito.spy(dokumentmottakerFelles);
+        this.behandlingsoppretterSpied = Mockito.spy(super.behandlingsoppretter);
+        this.dokumentmottakerFellesSpied = Mockito.spy(super.dokumentmottakerFelles);
 
+        Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
+        
         dokumentmottakerInntektsmelding = new DokumentmottakerInntektsmelding(
             dokumentmottakerFellesSpied,
             mottatteDokumentTjeneste,
@@ -48,7 +49,6 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.MANGLENDE_DOKUMENTASJON,
             VedtakResultatType.AVSLAG,
             DATO_FØR_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyInntektsmeldingDokument(avslåttBehandling);
@@ -63,12 +63,10 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
     @Test
     public void gittAvslåttBehandlingPgaManglendeDokMedUtløptFristForInnsendingSkalOppretteTaskForÅVurdereDokument() {
         //Arrange
-        Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
         Behandling behandling = opprettBehandling(
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.MANGLENDE_DOKUMENTASJON,
             VedtakResultatType.AVSLAG,
             DATO_ETTER_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyInntektsmeldingDokument(behandling);
@@ -84,12 +82,10 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
     @Test
     public void gittAvslåttBehandlingMenIkkePgaManglendeDokMedSkalOppretteTaskForÅVurdereDokument() {
         //Arrange
-        Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
         Behandling behandling = opprettBehandling(
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
             VedtakResultatType.AVSLAG,
             DATO_ETTER_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyInntektsmeldingDokument(behandling);
@@ -105,12 +101,12 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
     @Test
     public void gittHenlagtBehandlingSkalOppretteVurderDokumentInntilVidere() {
         //Arrange
-        Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
+        Mockito.doReturn(true).when(behandlingsoppretterSpied).erBehandlingOgFørstegangsbehandlingHenlagt(any());
+        
         Behandling behandling = opprettBehandling(
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.MANGLER_BEREGNINGSREGLER,
-            null,
             VedtakResultatType.UDEFINERT,
             DATO_ETTER_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyInntektsmeldingDokument(behandling);

@@ -30,8 +30,6 @@ import no.nav.foreldrepenger.behandlingslager.aktør.NavBrukerRepository;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling.Builder;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
@@ -69,6 +67,7 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.aktør.NavBrukerBuil
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopplysning.PersonInformasjon;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.personopplysning.Personstatus;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -110,8 +109,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private ArgumentCaptor<Fagsak> fagsakCaptor = ArgumentCaptor.forClass(Fagsak.class);
     private Behandling behandling;
 
-    private Behandlingsresultat.Builder behandlingresultatBuilder;
-
     private Fagsak fagsak;
     private SøknadEntitet.Builder søknadBuilder;
 
@@ -138,6 +135,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private BehandlingRepositoryProvider repositoryProvider;
     private PersonInformasjon.Builder personInformasjonBuilder;
     private boolean manueltOpprettet;
+    private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -173,7 +171,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         MedlemskapRepository mockMedlemskapRepository = lagMockMedlemskapRepository();
         SøknadRepository søknadRepository = mockSøknadRepository();
         FagsakLåsRepository fagsakLåsRepository = mockFagsakLåsRepository();
-        BehandlingsresultatRepository resultatRepository = mockBehandlingresultatRepository();
         VilkårResultatRepository vilkårResultatRepository = mockVilkårResultatRepository();
 
         BehandlingLåsRepository behandlingLåsReposiory = mockBehandlingLåsRepository();
@@ -190,7 +187,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         when(repositoryProvider.getBehandlingVedtakRepository()).thenReturn(behandlingVedtakRepository);
         when(repositoryProvider.getFagsakLåsRepository()).thenReturn(fagsakLåsRepository);
         when(repositoryProvider.getBehandlingLåsRepository()).thenReturn(behandlingLåsReposiory);
-        when(repositoryProvider.getBehandlingsresultatRepository()).thenReturn(resultatRepository);
         when(repositoryProvider.getVilkårResultatRepository()).thenReturn(vilkårResultatRepository);
 
         return behandlingRepository;
@@ -218,34 +214,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             @Override
             public void kopier(Long fraBehandlingId, Long tilBehandlingId) {
                 entiteter.put(fraBehandlingId, new VilkårsResultat(tilBehandlingId, hent(tilBehandlingId)));
-            }
-        };
-    }
-
-    private BehandlingsresultatRepository mockBehandlingresultatRepository() {
-        return new BehandlingsresultatRepository() {
-            @Override
-            public Optional<Behandlingsresultat> hentHvisEksisterer(Long behandlingId) {
-                Behandling behandling = behandlingMap.get(behandlingId);
-                if (behandling == null) {
-                    return Optional.empty();
-                }
-                return Optional.ofNullable(behandling.getBehandlingsresultat());
-            }
-
-            @Override
-            public Behandlingsresultat hent(Long behandlingId) {
-                Behandling behandling = behandlingMap.get(behandlingId);
-                if (behandling == null) {
-                    throw new IllegalStateException("Forventet behandlingsresultat");
-                }
-                return behandling.getBehandlingsresultat();
-            }
-            
-            @Override
-            public void lagre(Long behandlingId, Behandlingsresultat resultat) {
-                Behandling behandling = behandlingMap.get(behandlingId);
-                behandling.setBehandlingresultat(resultat);
             }
         };
     }
@@ -374,7 +342,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             .thenAnswer(a -> {
                 Long id = a.getArgument(0);
                 return behandlingMap.values().stream()
-                    .filter(b -> b.getFagsakId().equals(id) && b.getBehandlingsresultat() != null && !b.getBehandlingsresultat().isBehandlingHenlagt()).sorted()
+                    .filter(b -> b.getFagsakId().equals(id) && b.getBehandlingResultatType().isBehandlingHenlagt()).sorted()
                     .findFirst();
             });
 
@@ -631,6 +599,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         Builder behandlingBuilder = grunnBuild(repositoryProvider);
 
         this.behandling = behandlingBuilder.build();
+        this.behandling.setBehandlingResultatType(behandlingResultatType);
 
         if (startSteg != null) {
             new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, startSteg);
@@ -642,11 +611,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         behandlingRepo.lagre(behandling, lås);
         Long behandlingId = behandling.getId();
         
-        if(behandlingresultatBuilder!=null) {
-            var behandlingsresultat = behandlingresultatBuilder.buildFor(behandling);
-            repositoryProvider.getBehandlingsresultatRepository().lagre(behandlingId, behandlingsresultat);
-        }
-
         lagrePersonopplysning(repositoryProvider, behandling);
         lagreMedlemskapOpplysninger(repositoryProvider, behandlingId);
         lagreSøknad(repositoryProvider);
@@ -799,10 +763,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
-    public S medBehandlingsresultat(Behandlingsresultat.Builder builder) {
-        if (behandlingresultatBuilder == null) {
-            behandlingresultatBuilder = builder;
-        }
+    public S medBehandlingsresultat(BehandlingResultatType behandlingResultatType) {
+        this.behandlingResultatType  = behandlingResultatType;
         return (S) this;
     }
 

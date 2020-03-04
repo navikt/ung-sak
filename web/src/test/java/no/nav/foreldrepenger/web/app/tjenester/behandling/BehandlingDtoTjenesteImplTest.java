@@ -17,12 +17,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -42,6 +44,15 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
+    
+    @Inject
+    private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private SøknadRepository søknadRepository;
+
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
     private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
@@ -51,11 +62,9 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private TilbakekrevingRepository tilbakekrevingRepository;
-    
+
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
-    private FakeUnleash unleash = new FakeUnleash();
 
     private BehandlingDtoTjeneste tjeneste;
 
@@ -64,9 +73,8 @@ public class BehandlingDtoTjenesteImplTest {
     @Before
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null,
-            vilkårResultatRepository,
-            unleash);
+        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste,
+            vilkårResultatRepository);
     }
 
     @Test

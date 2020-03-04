@@ -28,11 +28,9 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -82,7 +80,7 @@ public class ForeslåBeregningsgrunnlagStegTest {
     @Test
     public void stegUtførtUtenAksjonspunkter() {
         // Arrange
-        opprettVilkårResultatForBehandling(ResultatType.INNVILGET);
+        opprettVilkårResultatForBehandling();
 
         // Act
         BehandleStegResultat resultat = steg.utførSteg(kontekst);
@@ -95,7 +93,7 @@ public class ForeslåBeregningsgrunnlagStegTest {
     @Test
     public void stegUtførtNårRegelResultatInneholderAutopunkt() {
         // Arrange
-        opprettVilkårResultatForBehandling(ResultatType.INNVILGET);
+        opprettVilkårResultatForBehandling();
         BeregningAksjonspunktResultat aksjonspunktResultat = BeregningAksjonspunktResultat.opprettFor(BeregningAksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS);
         when(beregningsgrunnlagRegelResultat.getAksjonspunkter()).thenReturn(Collections.singletonList(aksjonspunktResultat));
 
@@ -108,9 +106,8 @@ public class ForeslåBeregningsgrunnlagStegTest {
         assertThat(resultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS);
     }
 
-    private void opprettVilkårResultatForBehandling(ResultatType resultatType) {
+    private void opprettVilkårResultatForBehandling() {
         Vilkårene vilkårene = Vilkårene.builder().build();
-        Behandlingsresultat.opprettFor(behandling);
         behandlingRepositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
     }
 }

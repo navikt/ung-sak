@@ -16,7 +16,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 public class DokumentmottakerVedleggHåndteringVedAvslåttBehandlingTest extends DokumentmottakerTestsupport {
 
@@ -48,7 +47,6 @@ public class DokumentmottakerVedleggHåndteringVedAvslåttBehandlingTest extends
             FagsakYtelseType.FORELDREPENGER,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.MANGLENDE_DOKUMENTASJON,
             VedtakResultatType.AVSLAG,
             DATO_FØR_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyVedleggDokument(behandling);
@@ -68,7 +66,6 @@ public class DokumentmottakerVedleggHåndteringVedAvslåttBehandlingTest extends
             FagsakYtelseType.FORELDREPENGER,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.MANGLENDE_DOKUMENTASJON,
             VedtakResultatType.AVSLAG,
             DATO_ETTER_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyVedleggDokument(behandling);
@@ -89,7 +86,6 @@ public class DokumentmottakerVedleggHåndteringVedAvslåttBehandlingTest extends
             FagsakYtelseType.FORELDREPENGER,
             BehandlingType.FØRSTEGANGSSØKNAD,
             BehandlingResultatType.AVSLÅTT,
-            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
             VedtakResultatType.AVSLAG,
             DATO_ETTER_INNSENDINGSFRISTEN);
         MottattDokument inntektsmelding = dummyVedleggDokument(behandling);

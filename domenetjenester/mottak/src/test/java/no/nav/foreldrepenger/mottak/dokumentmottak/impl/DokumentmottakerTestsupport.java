@@ -12,7 +12,6 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -29,7 +28,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
@@ -60,18 +58,22 @@ public abstract class DokumentmottakerTestsupport {
         return behandling;
     }
 
-    protected Behandling opprettBehandling(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, BehandlingResultatType behandlingResultatType,
-                                           Avslagsårsak avslagsårsak, VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
+    protected Behandling opprettBehandling(FagsakYtelseType fagsakYtelseType, 
+                                           BehandlingType behandlingType, 
+                                           BehandlingResultatType behandlingResultatType,
+                                           VedtakResultatType vedtakResultatType, 
+                                           LocalDate vedtaksdato) {
         var scenario = TestScenarioBuilder.builderMedSøknad(fagsakYtelseType)
             .medBehandlingType(behandlingType);
-        return opprettBehandling(scenario, behandlingResultatType, avslagsårsak, vedtakResultatType, vedtaksdato);
+        return opprettBehandling(scenario, behandlingResultatType, vedtakResultatType, vedtaksdato);
     }
 
-    private Behandling opprettBehandling(AbstractTestScenario<?> scenario, BehandlingResultatType behandlingResultatType, Avslagsårsak avslagsårsak,
-                                         VedtakResultatType vedtakResultatType, LocalDate vedtaksdato) {
+    private Behandling opprettBehandling(AbstractTestScenario<?> scenario, 
+                                         BehandlingResultatType behandlingResultatType, 
+                                         VedtakResultatType vedtakResultatType,
+                                         LocalDate vedtaksdato) {
 
-        scenario.medBehandlingsresultat(Behandlingsresultat.builder()
-            .medBehandlingResultatType(behandlingResultatType));
+        scenario.medBehandlingsresultat(behandlingResultatType);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         BehandlingLås behandlingLås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);

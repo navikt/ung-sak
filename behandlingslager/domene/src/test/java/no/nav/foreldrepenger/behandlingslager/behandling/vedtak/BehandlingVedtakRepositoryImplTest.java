@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -39,8 +38,6 @@ public class BehandlingVedtakRepositoryImplTest {
     @Before
     public void setup() {
         behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
-        var resultat = Behandlingsresultat.builder().build();
-        behandlingBuilder.lagreBehandlingsresultat(behandling.getId(), resultat);
     }
 
     @Test

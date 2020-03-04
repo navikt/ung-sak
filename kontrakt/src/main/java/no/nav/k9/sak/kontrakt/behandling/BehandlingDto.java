@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -76,6 +77,11 @@ public class BehandlingDto {
     @Valid
     private BehandlingsresultatDto behandlingsresultat;
 
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty(value = "behandlingResultatType")
+    @Valid
+    private BehandlingResultatType behandlingResultatType;
+    
     @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "endret")
     private LocalDateTime endret;
@@ -143,6 +149,11 @@ public class BehandlingDto {
     @Valid
     private BehandlingStatus status;
 
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty(value = "stegTilstand")
+    @Valid
+    private BehandlingStegTilstandDto stegTilstand;
+
     @JsonProperty(value = "toTrinnsBehandling")
     private boolean toTrinnsBehandling;
 
@@ -155,8 +166,13 @@ public class BehandlingDto {
     @NotNull
     private UUID uuid;
 
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty("venteårsak")
+    @Valid
+    private Venteårsak venteårsak;
+
     /** @deprecated bruk #venteÅrsak */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @JsonInclude(value = Include.NON_NULL)
     @JsonAlias("venteÅrsakKode")
     @JsonProperty("venteArsakKode")
@@ -164,21 +180,11 @@ public class BehandlingDto {
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String venteÅrsakKode;
 
-    @JsonInclude(value = Include.NON_NULL)
-    @JsonProperty("venteårsak")
-    @Valid
-    private Venteårsak venteårsak;
-
     @JsonProperty(value = "versjon", required = true)
     @NotNull
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long versjon;
-
-    @JsonInclude(value = Include.NON_NULL)
-    @JsonProperty(value = "stegTilstand")
-    @Valid
-    private BehandlingStegTilstandDto stegTilstand;
 
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
@@ -324,8 +330,12 @@ public class BehandlingDto {
         this.behandlingsfristTid = behandlingsfristTid;
     }
 
-    public void setBehandlingsresultat(BehandlingsresultatDto behandlingsresultat) {
-        this.behandlingsresultat = behandlingsresultat;
+    public void setBehandlingsresultat(BehandlingsresultatDto dto) {
+        this.behandlingsresultat = dto;
+    }
+
+    public void setBehandlingStegTilstand(BehandlingStegTilstandDto stegTilstand) {
+        this.stegTilstand = stegTilstand;
     }
 
     public void setEndret(LocalDateTime endret) {
@@ -401,11 +411,7 @@ public class BehandlingDto {
         this.versjon = versjon;
     }
 
-    void setBehandlingKøet(boolean behandlingKøet) {
+    public void setBehandlingKøet(boolean behandlingKøet) {
         this.behandlingKøet = behandlingKøet;
-    }
-
-    public void setBehandlingStegTilstand(BehandlingStegTilstandDto stegTilstand) {
-        this.stegTilstand = stegTilstand;
     }
 }

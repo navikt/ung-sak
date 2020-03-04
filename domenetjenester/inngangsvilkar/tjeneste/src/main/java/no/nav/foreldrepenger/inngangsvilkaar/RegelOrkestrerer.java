@@ -18,11 +18,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -46,7 +45,7 @@ public class RegelOrkestrerer {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, Behandling behandling, BehandlingReferanse ref, List<DatoIntervallEntitet> perioder) {
+    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, List<DatoIntervallEntitet> perioder) {
         Objects.requireNonNull(perioder, "Perioden som skal vurderes må være satt");
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         List<Vilkår> matchendeVilkårPåBehandling = vilkårene.getVilkårene().stream()
@@ -108,7 +107,7 @@ public class RegelOrkestrerer {
         return vurderVilkår(vilkår.getVilkårType(), ref, periode);
     }
 
-    public ResultatType utledInngangsvilkårUtfall(Collection<Utfall> vilkårene) {
+    public VilkårResultatType utledInngangsvilkårUtfall(Collection<Utfall> vilkårene) {
         boolean oppfylt = vilkårene.stream()
             .anyMatch(utfall -> utfall.equals(Utfall.OPPFYLT));
         boolean ikkeOppfylt = vilkårene.stream()
@@ -118,13 +117,13 @@ public class RegelOrkestrerer {
 
         // Enkeltutfallene per vilkår sammenstilles til et samlet vilkårsresultat.
         // Høyest rangerte enkeltutfall ift samlet vilkårsresultat sjekkes først, deretter nest høyeste osv.
-        ResultatType resultatType;
+        VilkårResultatType resultatType;
         if (ikkeOppfylt) {
-            resultatType = ResultatType.AVSLÅTT;
+            resultatType = VilkårResultatType.AVSLÅTT;
         } else if (ikkeVurdert) {
-            resultatType = ResultatType.IKKE_FASTSATT;
+            resultatType = VilkårResultatType.IKKE_FASTSATT;
         } else if (oppfylt) {
-            resultatType = ResultatType.INNVILGET;
+            resultatType = VilkårResultatType.INNVILGET;
         } else {
             throw FEILFACTORY.kanIkkeUtledeVilkårsresultatFraRegelmotor().toException();
         }

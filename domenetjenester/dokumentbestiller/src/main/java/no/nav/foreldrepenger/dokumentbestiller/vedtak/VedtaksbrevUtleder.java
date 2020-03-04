@@ -1,7 +1,8 @@
 package no.nav.foreldrepenger.dokumentbestiller.vedtak;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.foreldrepenger.dokumentbestiller.BrevFeil;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
@@ -28,11 +29,12 @@ public class VedtaksbrevUtleder {
         return VedtakResultatType.INNVILGET.equals(behandlingVedtak.getVedtakResultatType());
     }
 
-    static boolean erLagetFritekstBrev(Behandlingsresultat behandlingsresultat) {
+    static boolean erLagetFritekstBrev(VedtakVarsel behandlingsresultat) {
         return Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
     }
 
-    public static DokumentMalType velgDokumentMalForVedtak(Behandlingsresultat behandlingsresultat,
+    public static DokumentMalType velgDokumentMalForVedtak(BehandlingReferanse ref, 
+                                                           VedtakVarsel behandlingsresultat,
                                                            BehandlingVedtak behandlingVedtak) {
         DokumentMalType dokumentMal = null;
 
@@ -43,7 +45,7 @@ public class VedtaksbrevUtleder {
         } else if (erInnvilget(behandlingVedtak)) {
             dokumentMal = DokumentMalType.INNVILGELSE_DOK;
         } else if (erAvlåttEllerOpphørt(behandlingVedtak)) {
-            dokumentMal = behandlingsresultat.isBehandlingsresultatOpphørt() ? DokumentMalType.OPPHØR_DOK : DokumentMalType.AVSLAG__DOK;
+            dokumentMal = ref.getBehandlingResultat().isBehandlingsresultatOpphørt() ? DokumentMalType.OPPHØR_DOK : DokumentMalType.AVSLAG__DOK;
         }
         if (dokumentMal == null) {
             throw BrevFeil.FACTORY.ingenBrevmalKonfigurert(behandlingsresultat.getBehandlingId()).toException();

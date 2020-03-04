@@ -8,9 +8,8 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
@@ -46,17 +45,17 @@ public class TilkjentYtelseBeregning implements YtelseTypeTilkjentYtelseTjeneste
     }
 
     @Override
-    public boolean erOpphør(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.isBehandlingsresultatOpphørt();
+    public boolean erOpphør(BehandlingReferanse ref) {
+        return ref.getBehandlingResultat().isBehandlingsresultatOpphørt();
     }
 
     @Override
-    public Boolean erOpphørEtterSkjæringstidspunkt(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (!behandlingsresultat.isBehandlingsresultatOpphørt()) {
+    public Boolean erOpphørEtterSkjæringstidspunkt(BehandlingReferanse ref) {
+        if (!ref.getBehandlingResultat().isBehandlingsresultatOpphørt()) {
             return null; //ikke relevant //NOSONAR
         }
 
-        Optional<UttakResultatEntitet> uttak = uttakRepository.hentUttakResultatHvisEksisterer(behandling.getId());
+        Optional<UttakResultatEntitet> uttak = uttakRepository.hentUttakResultatHvisEksisterer(ref.getBehandlingId());
         return uttak.map(uttakResultatEntitet ->
             uttakResultatEntitet.getGjeldendePerioder().getPerioder().stream()
                 .anyMatch(UttakResultatPeriodeEntitet::isInnvilget))
