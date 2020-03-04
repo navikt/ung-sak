@@ -15,7 +15,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
@@ -309,6 +308,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
 
     private void byggScenario(LocalDate ytelserFom, LocalDate ytelserTom, LocalDate t1, LocalDateTime vedtakstidspunkt,
                               DatoIntervallEntitet fpIntervall, Fagsystem fagsystem) {
+        scenario.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         behandling = lagre(scenario);
         
         // Legg til ytelse
@@ -325,10 +325,6 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
         
         // Legg til behandling resultat
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-            .buildFor(behandling);
-        repository.lagre(behandlingsresultat);
         repository.lagre(behandling);
         repository.flushAndClear();
         

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -46,6 +47,13 @@ public class BehandlingVedtakRepository {
         Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR //$NON-NLS-1$
         TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("from BehandlingVedtak where behandlingId=:behandlingId", BehandlingVedtak.class);
         query.setParameter("behandlingId", behandlingId); // $NON-NLS-1$
+        return optionalFirstVedtak(query.getResultList());
+    }
+    
+    public Optional<BehandlingVedtak> hentBehandlingVedtakFor(UUID behandlingUuid) {
+        Objects.requireNonNull(behandlingUuid, "behandlingUuid"); // NOSONAR //$NON-NLS-1$
+        TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("from BehandlingVedtak where uuid=:uuid", BehandlingVedtak.class);
+        query.setParameter("uuid", behandlingUuid); // $NON-NLS-1$
         return optionalFirstVedtak(query.getResultList());
     }
 
@@ -132,5 +140,7 @@ public class BehandlingVedtakRepository {
     private static Optional<BehandlingVedtak> optionalFirstVedtak(List<BehandlingVedtak> behandlinger) {
         return behandlinger.isEmpty() ? Optional.empty() : Optional.of(behandlinger.get(0));
     }
+
+    
 
 }

@@ -10,7 +10,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -23,7 +22,6 @@ class DokumentmottakerVedlegg implements Dokumentmottaker {
 
     private BehandlingRepository behandlingRepository;
     private DokumentmottakerFelles dokumentmottakerFelles;
-    private BehandlingRevurderingRepository revurderingRepository;
     private Kompletthetskontroller kompletthetskontroller;
 
     @Inject
@@ -32,7 +30,6 @@ class DokumentmottakerVedlegg implements Dokumentmottaker {
                                    Behandlingsoppretter behandlingsoppretter,
                                    Kompletthetskontroller kompletthetskontroller) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.kompletthetskontroller = kompletthetskontroller;
     }

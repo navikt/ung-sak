@@ -11,8 +11,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
@@ -21,12 +19,11 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
+import no.nav.foreldrepenger.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingsresultatDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 
@@ -43,26 +40,25 @@ public class BehandlingDtoForBackendTjeneste {
 
     private BehandlingVedtakRepository vedtakRepository;
     private SøknadRepository søknadRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
-
+    private BehandlingDtoTjeneste behandlingDtoTjeneste;
     public BehandlingDtoForBackendTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public BehandlingDtoForBackendTjeneste(BehandlingRepositoryProvider repositoryProvider) {
+    public BehandlingDtoForBackendTjeneste(BehandlingDtoTjeneste behandlingDtoTjeneste, BehandlingRepositoryProvider repositoryProvider) {
+        this.behandlingDtoTjeneste = behandlingDtoTjeneste;
         this.vedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
-    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Behandlingsresultat behandlingsresultat, AsyncPollingStatus taskStatus) {
+    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, AsyncPollingStatus taskStatus) {
         var behandlingVedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
 
-        return lagBehandlingDto(behandling, behandlingsresultat, behandlingVedtak, taskStatus);
+        return lagBehandlingDto(behandling, behandlingVedtak, taskStatus);
     }
 
-    private UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, Behandlingsresultat behandlingsresultat, BehandlingVedtak behandlingVedtak, AsyncPollingStatus asyncStatus) {
+    private UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, BehandlingVedtak behandlingVedtak, AsyncPollingStatus asyncStatus) {
         UtvidetBehandlingDto dto = new UtvidetBehandlingDto();
         BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingGjeldendeVedtak(behandling));
         if (asyncStatus != null && !asyncStatus.isPending()) {
@@ -70,24 +66,23 @@ public class BehandlingDtoForBackendTjeneste {
         }
 
         UUID behandlingUuid = behandling.getUuid();
-        Map<String, String> behandlinUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandlingUuid.toString());
+        Map<String, String> queryParams = Map.of(BehandlingUuidDto.NAME, behandlingUuid.toString());
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
-        dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", behandlinUuidQueryParams));
-        dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "medlemskap-v2", behandlinUuidQueryParams));
-        dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", behandlinUuidQueryParams));
-        dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", behandlinUuidQueryParams));
-        dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", behandlinUuidQueryParams));
+        dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", queryParams));
+        dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "medlemskap-v2", queryParams));
+        dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", queryParams));
+        dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", queryParams));
+        dto.leggTil(getFraMap(TilbakekrevingRestTjeneste.VALG_PATH, "tilbakekreving-valg", queryParams));
+        dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", queryParams));
 
         behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
             dto.leggTil(getFraMap(BehandlingBackendRestTjeneste.BEHANDLINGER_BACKEND_ROOT_PATH, "original-behandling",
                 Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString())));
         });
-
-        if (behandlingVedtak != null && behandlingsresultat != null) {
-            dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
-            setBehandlingsresultat(dto, behandlingsresultat);
-        }
+        
+        dto.setBehandlingsresultat(behandlingDtoTjeneste.lagBehandlingsresultat(behandling));
+        
         dto.setSpråkkode(getSpråkkode(behandling));
 
         return dto;
@@ -100,13 +95,6 @@ public class BehandlingDtoForBackendTjeneste {
             .isPresent();
     }
 
-    private void setBehandlingsresultat(BehandlingDto dto, Behandlingsresultat behandlingsresultat) {
-        BehandlingsresultatDto behandlingsresultatDto = new BehandlingsresultatDto();
-        behandlingsresultatDto.setType(behandlingsresultat.getBehandlingResultatType());
-        behandlingsresultatDto.setKonsekvenserForYtelsen(behandlingsresultat.getKonsekvenserForYtelsen());
-        dto.setBehandlingsresultat(behandlingsresultatDto);
-    }
-
     private Språkkode getSpråkkode(Behandling behandling) {
         Optional<SøknadEntitet> søknadOpt = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
         if (søknadOpt.isPresent()) {
@@ -116,8 +104,4 @@ public class BehandlingDtoForBackendTjeneste {
         }
     }
 
-    public UtvidetBehandlingDto lagBehandlingDto(Behandling behandling, AsyncPollingStatus taskStatus) {
-        var resultat = behandlingsresultatRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
-        return lagBehandlingDto(behandling, resultat, taskStatus);
-    }
 }

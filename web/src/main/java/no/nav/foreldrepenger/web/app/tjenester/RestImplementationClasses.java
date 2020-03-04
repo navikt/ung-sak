@@ -31,7 +31,6 @@ import no.nav.foreldrepenger.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.konfig.KonfigRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.FeatureToggleRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.vedtak.VedtakRestTjeneste;
 import no.nav.foreldrepenger.web.server.abac.PipRestTjeneste;
 import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
 
@@ -53,7 +52,6 @@ public class RestImplementationClasses {
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(FordelRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
-        classes.add(VedtakRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
         classes.add(ForsendelseStatusRestTjeneste.class);
         classes.add(PersonRestTjeneste.class);

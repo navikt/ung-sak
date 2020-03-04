@@ -12,7 +12,6 @@ import org.junit.Test;
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -130,10 +129,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(lagPerson()));
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-
-        Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(behandling);
-
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
@@ -154,12 +150,8 @@ public class BehandlingRevurderingRepositoryImplTest {
             .leggTil(vilkårBuilder)
             .build();
 
+        behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
         behandlingRepository.lagre(behandling);
-
-        var behandlingsresultat = Behandlingsresultat.builderForInngangsvilkår()
-            .medBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET)
-            .buildFor(behandling);
-        repoRule.getRepository().lagre(behandlingsresultat);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 

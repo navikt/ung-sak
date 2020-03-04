@@ -42,7 +42,7 @@ public class DokumentBehandlingTjenesteImplTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        dokumentBehandlingTjeneste = new DokumentBehandlingTjeneste(repositoryProvider, behandlingskontrollTjeneste, null);
+        dokumentBehandlingTjeneste = new DokumentBehandlingTjeneste(behandlingRepository, behandlingskontrollTjeneste);
         this.scenario = TestScenarioBuilder.builderMedSøknad();
     }
 

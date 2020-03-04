@@ -1,22 +1,28 @@
 package no.nav.foreldrepenger.dokumentbestiller.klient;
 
-import java.util.List;
-import java.util.Optional;
+import java.net.URI;
 
-import no.nav.foreldrepenger.kontrakter.formidling.v1.BehandlingUuidDto;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.BrevmalDto;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.DokumentProdusertDto;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.DokumentbestillingDto;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.TekstFraSaksbehandlerDto;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-public interface FormidlingRestKlient {
-    void bestillDokument(DokumentbestillingDto dokumentbestillingDto);
+import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
-    List<BrevmalDto> hentBrevMaler(BehandlingUuidDto behandlingUuidDto);
+@ApplicationScoped
+public class FormidlingRestKlient {
+    private static final String ENDPOINT_KEY_SJEKK_DOKUMENT_PRODUSERT = "fpformidling.erdokumentprodusert.url";
+    private OidcRestClient oidcRestClient;
+    private URI endpointSjekkDokumentProdusert;
 
-    Boolean erDokumentProdusert(DokumentProdusertDto dokumentProdusertDto);
+    public FormidlingRestKlient() {
+        // CDI
+    }
 
-    void lagreTekstFraSaksbehandler(TekstFraSaksbehandlerDto tekstFraSaksbehandlerDto);
+    @Inject
+    public FormidlingRestKlient(OidcRestClient oidcRestClient,
+                                    @KonfigVerdi(ENDPOINT_KEY_SJEKK_DOKUMENT_PRODUSERT) URI endpointSjekkDokumentProdusert) {
+        this.oidcRestClient = oidcRestClient;
+        this.endpointSjekkDokumentProdusert = endpointSjekkDokumentProdusert;
+    }
 
-    Optional<TekstFraSaksbehandlerDto> hentTekstFraSaksbehandler(BehandlingUuidDto behandlingUuidDto);
 }

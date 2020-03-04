@@ -33,7 +33,6 @@ import no.nav.k9.sak.typer.JournalpostId;
 @ApplicationScoped
 public class HistorikkinnslagTjeneste {
 
-    private static final String KLAGE = "Klage";
     private static final String VEDLEGG = "Vedlegg";
     private static final String PAPIRSØKNAD = "Papirsøknad";
     private static final String SØKNAD = "Søknad";

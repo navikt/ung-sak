@@ -92,9 +92,7 @@ public class EtterkontrollRepository {
                 "    WHERE k.fagsakId=b.fagsak.id  " +
                 "    AND k.erBehandlet = false" +
                 "    AND k.kontrollTidspunkt <= :periodeTilbake)" +
-                "  AND NOT EXISTS (SELECT r FROM Behandlingsresultat r" +
-                "    WHERE r.behandlingId=b.id " +
-                "    AND r.behandlingResultatType IN :henlagtKoder)" +
+                "  AND b.behandlingResultatType NOT IN :henlagtKoder " +
                 " ORDER BY b.opprettetTidspunkt DESC" //$NON-NLS-1$
         );
         query1.setParameter("ytelsetyper", BehandlingType.getYtelseBehandlingTyper());

@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
@@ -54,7 +53,6 @@ import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 @RunWith(CdiRunner.class)
@@ -67,7 +65,6 @@ public class VurderLøpendeMedlemskapStegTest {
     private MedlemskapRepository medlemskapRepository = provider.getMedlemskapRepository();
     private PersonopplysningRepository personopplysningRepository = provider.getPersonopplysningRepository();
     private FagsakRepository fagsakRepository = provider.getFagsakRepository();
-    private Repository repository = repositoryRule.getRepository();
 
     private VurderMedlemskapSteg steg;
 
@@ -108,8 +105,6 @@ public class VurderLøpendeMedlemskapStegTest {
         inngangsvilkårBuilder.leggTil(vilkårBuilder);
         Vilkårene vilkårene = inngangsvilkårBuilder.build();
 
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.opprettFor(revudering);
-        repository.lagre(behandlingsresultat);
         provider.getVilkårResultatRepository().lagre(revudering.getId(), vilkårene);
         oppdaterMedlem(datoMedEndring, periode, revudering.getId());
 

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.kodeverk;
+package no.nav.foreldrepenger.behandlingslager.behandling.personopplysning;
 
 import java.util.List;
 import java.util.Objects;

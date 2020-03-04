@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum ResultatType {
+public enum VilkårResultatType {
      INNVILGET("INNVILGET", "Innvilget"),
      DELEVIS_AVSLÅTT("DELEVIS_AVSLÅTT", "Delevis avslått"),
      AVSLÅTT("AVSLAATT", "Avslått"),
@@ -22,24 +22,24 @@ public enum ResultatType {
      UDEFINERT("-", "Ikke definert"),
     ;
 
-    private static final Map<String, ResultatType> KODER = new LinkedHashMap<>();
+    private static final Map<String, VilkårResultatType> KODER = new LinkedHashMap<>();
 
     @JsonIgnore
     private String navn;
 
     private String kode;
 
-    private ResultatType(String kode) {
+    private VilkårResultatType(String kode) {
         this.kode = kode;
     }
 
-    private ResultatType(String kode, String navn) {
+    private VilkårResultatType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
     @JsonCreator
-    public static ResultatType fraKode(@JsonProperty("kode") String kode) {
+    public static VilkårResultatType fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return null;
         }
@@ -50,7 +50,7 @@ public enum ResultatType {
         return ad;
     }
 
-    public static Map<String, ResultatType> kodeMap() {
+    public static Map<String, VilkårResultatType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
 

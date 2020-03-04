@@ -9,10 +9,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingInntrekkEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
@@ -30,7 +29,6 @@ public class TilkjentYtelseTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse;
 
@@ -41,12 +39,10 @@ public class TilkjentYtelseTjeneste {
     @Inject
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
-                                  BehandlingsresultatRepository behandlingsresultatRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
                                   @Any Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.tilkjentYtelse = tilkjentYtelse;
     }
@@ -61,14 +57,13 @@ public class TilkjentYtelseTjeneste {
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
-
-        YtelseTypeTilkjentYtelseTjeneste tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, behandling.getFagsakYtelseType()).orElseThrow();
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        YtelseTypeTilkjentYtelseTjeneste tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
 
         List<TilkjentYtelsePeriodeV1> perioder = tjeneste.hentTilkjentYtelsePerioder(behandlingId);
 
-        boolean erOpphør = tjeneste.erOpphør(behandlingsresultat);
-        Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(behandling, behandlingsresultat);
+        boolean erOpphør = tjeneste.erOpphør(ref);
+        Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(ref);
         LocalDate endringsdato = tjeneste.hentEndringstidspunkt(behandlingId);
         return new TilkjentYtelse(endringsdato, perioder)
             .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)

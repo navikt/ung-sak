@@ -5,8 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import javax.inject.Inject;
+
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
@@ -14,9 +17,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
+import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -30,7 +34,9 @@ import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
+@RunWith(CdiRunner.class)
 public class BehandlingDtoForBackendTjenesteTest {
 
     @Rule
@@ -39,9 +45,18 @@ public class BehandlingDtoForBackendTjenesteTest {
     private static final String ANSVARLIG_SAKSBEHANDLER = "ABCD";
     private static final BehandlingÅrsakType BEHANDLING_ÅRSAK_TYPE = BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private BehandlingDtoForBackendTjeneste behandlingDtoForBackendTjeneste = new BehandlingDtoForBackendTjeneste(repositoryProvider);
+    @Inject
+    private BehandlingRepository behandlingRepository;
+    
+    @Inject
+    private FagsakRepository fagsakRepository;
+    
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+    
+    @Inject
+    private BehandlingDtoForBackendTjeneste behandlingDtoForBackendTjeneste;
+    
     private LocalDateTime now = LocalDateTime.now();
 
     @Test
@@ -68,7 +83,7 @@ public class BehandlingDtoForBackendTjenesteTest {
         Personinfo personinfo = lagPersonInfo();
         NavBruker navBruker = NavBruker.opprettNy(personinfo);
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, navBruker, new Saksnummer("12345"));
-        repositoryProvider.getFagsakRepository().opprettNy(fagsak);
+        fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD)
             .medBehandlingÅrsak(BehandlingÅrsak.builder(BEHANDLING_ÅRSAK_TYPE))
@@ -97,7 +112,7 @@ public class BehandlingDtoForBackendTjenesteTest {
             .medVedtakstidspunkt(now)
             .medBeslutning(true).build();
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
-        repositoryProvider.getBehandlingVedtakRepository().lagre(behandlingVedtak, behandlingLås);
+        behandlingVedtakRepository.lagre(behandlingVedtak, behandlingLås);
     }
 
     private void avsluttBehandling(Behandling behandling) {

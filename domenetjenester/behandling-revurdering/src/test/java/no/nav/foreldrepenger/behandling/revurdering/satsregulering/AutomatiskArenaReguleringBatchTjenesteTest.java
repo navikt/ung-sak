@@ -16,7 +16,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivi
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
@@ -52,7 +51,7 @@ public class AutomatiskArenaReguleringBatchTjenesteTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-
+    
     private LocalDate cutoff;
     private LocalDate nySatsDato;
     private ProsessTaskData taskData;
@@ -82,7 +81,7 @@ public class AutomatiskArenaReguleringBatchTjenesteTest {
         var scenario = TestScenarioBuilder.builderMedSøknad()
             .medSøknadDato(dato.minusDays(40));
 
-        scenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
+        scenario.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         Whitebox.setInternalState(behandling, "status", status);

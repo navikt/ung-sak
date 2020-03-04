@@ -2,8 +2,6 @@ package no.nav.foreldrepenger.dokumentbestiller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,62 +11,25 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.BehandlingUuidDto;
-import no.nav.foreldrepenger.kontrakter.formidling.v1.DokumentProdusertDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.k9.kodeverk.dokument.DokumentMalRestriksjon;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
-import no.nav.k9.sak.kontrakt.dokument.BrevmalDto;
 
 @ApplicationScoped
 public class DokumentBehandlingTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private FormidlingRestKlient formidlingRestKlient;
 
     public DokumentBehandlingTjeneste() {
         // for cdi proxy
     }
 
     @Inject
-    public DokumentBehandlingTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                      FormidlingRestKlient formidlingRestKlient) {
+    public DokumentBehandlingTjeneste(BehandlingRepository behandlingRepository,
+                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
 
-        Objects.requireNonNull(repositoryProvider, "repositoryProvider");
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        Objects.requireNonNull(behandlingRepository, "behandlingRepository");
+        this.behandlingRepository = behandlingRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.formidlingRestKlient = formidlingRestKlient;
-    }
-
-    public List<BrevmalDto> hentBrevmalerFor(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        final List<no.nav.foreldrepenger.kontrakter.formidling.v1.BrevmalDto> brevmalDtos = formidlingRestKlient.hentBrevMaler(new BehandlingUuidDto(behandling.getUuid()));
-        List<BrevmalDto> brevmalListe = new ArrayList<>();
-        for (no.nav.foreldrepenger.kontrakter.formidling.v1.BrevmalDto brevmalDto : brevmalDtos) {
-            brevmalListe.add(new BrevmalDto(brevmalDto.getKode(), brevmalDto.getNavn(), mapDokumentMalRestriksjon(brevmalDto.getRestriksjon().getKode()), brevmalDto.getTilgjengelig()));
-        }
-        return brevmalListe;
-    }
-
-    private DokumentMalRestriksjon mapDokumentMalRestriksjon(String restriksjon) {
-        if (DokumentMalRestriksjon.ÅPEN_BEHANDLING.getKode().equals(restriksjon)) {
-            return DokumentMalRestriksjon.ÅPEN_BEHANDLING;
-        } else if (DokumentMalRestriksjon.ÅPEN_BEHANDLING_IKKE_SENDT.getKode().equals(restriksjon)) {
-            return DokumentMalRestriksjon.ÅPEN_BEHANDLING_IKKE_SENDT;
-        } else if (DokumentMalRestriksjon.REVURDERING.getKode().equals(restriksjon)) {
-            return DokumentMalRestriksjon.REVURDERING;
-        } else {
-            return DokumentMalRestriksjon.INGEN;
-        }
-    }
-
-    public boolean erDokumentProdusert(Long behandlingId, DokumentMalType dokumentMalTypeKode) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return formidlingRestKlient.erDokumentProdusert(new DokumentProdusertDto(behandling.getUuid(), dokumentMalTypeKode.getKode()));
     }
 
     public void settBehandlingPåVent(Long behandlingId, Venteårsak venteårsak) {

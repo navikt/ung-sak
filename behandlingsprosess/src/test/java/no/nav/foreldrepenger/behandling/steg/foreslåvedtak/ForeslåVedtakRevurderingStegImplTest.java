@@ -23,12 +23,12 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriod
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -50,15 +50,15 @@ public class ForeslåVedtakRevurderingStegImplTest {
     @Mock
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VedtakVarselRepository vedtakVarselRepository;
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
     private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     @Mock
-    private Behandlingsresultat behandlingsresultat;
+    private VedtakVarsel behandlingsresultat;
     @Mock
-    private Behandlingsresultat orginalBehandlingsresultat;
+    private VedtakVarsel orginalBehandlingsresultat;
 
     private BehandlingRepositoryProvider repositoryProvider = mock(BehandlingRepositoryProvider.class);
     private ForeslåVedtakRevurderingStegImpl foreslåVedtakRevurderingStegForeldrepenger;
@@ -71,20 +71,15 @@ public class ForeslåVedtakRevurderingStegImplTest {
     public void before() {
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
         when(repositoryProvider.getBehandlingRevurderingRepository()).thenReturn(behandlingRevurderingRepository);
-        when(repositoryProvider.getBehandlingsresultatRepository()).thenReturn(behandlingsresultatRepository);
 
         orginalBehandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
+        orginalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         orginalBehandling.avsluttBehandling();
         revurdering = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medOriginalBehandling(orginalBehandling, BehandlingÅrsakType.BERØRT_BEHANDLING)
             .lagMocked();
 
-        behandlingsresultat = Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT).buildFor(revurdering);
-        orginalBehandlingsresultat =  Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(orginalBehandling);
-
-        when(behandlingsresultatRepository.hent(orginalBehandling.getId())).thenReturn(orginalBehandlingsresultat);
-        when(behandlingsresultatRepository.hent(revurdering.getId())).thenReturn(behandlingsresultat);
 
         kontekstRevurdering = mock(BehandlingskontrollKontekst.class);
         BehandlingLås behandlingLås = mock(BehandlingLås.class);
@@ -125,7 +120,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
         // Assert
         revurdering = behandlingRepository.hentBehandling(revurdering.getId());
-        assertThat(behandlingsresultat.getKonsekvenserForYtelsen()).isEmpty();
+        assertThat(revurdering.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.IKKE_FASTSATT);
     }
 
     private BeregningsgrunnlagEntitet buildBeregningsgrunnlag(Long bruttoPerÅr) {

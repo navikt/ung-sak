@@ -16,10 +16,10 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -40,7 +40,7 @@ class StartpunktUtlederInntektsmelding {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private BehandlingRepository behandlingRepository;
 
     StartpunktUtlederInntektsmelding() {
         // For CDI
@@ -52,8 +52,8 @@ class StartpunktUtlederInntektsmelding {
                                      BehandlingRepositoryProvider repositoryProvider) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag grunnlag1, InntektArbeidYtelseGrunnlag grunnlag2) {
@@ -177,22 +177,22 @@ class StartpunktUtlederInntektsmelding {
         if (nyIm.getGraderinger().isEmpty()) {
             return false;
         }
-        Long orgigBehandlingId = ref.getOriginalBehandlingId().orElse(null);
-        if (orgigBehandlingId == null) {
+        Long originalBehandlingId = ref.getOriginalBehandlingId().orElse(null);
+        if (originalBehandlingId == null) {
             return false;
         }
-        Optional<Behandlingsresultat> originalBehandlingsresultat = this.behandlingsresultatRepository.hentHvisEksisterer(orgigBehandlingId);
-        if (!originalBehandlingsresultat.isPresent() || originalBehandlingsresultat.get().isBehandlingsresultatAvslåttOrOpphørt()) {
-            return false;
-        }
-
-        Optional<BeregningsresultatEntitet> origBeregningsresultatFP = beregningsresultatRepository.hentBeregningsresultat(orgigBehandlingId);
-
-        if (!origBeregningsresultatFP.isPresent()) {
+        Optional<Behandling> originalBehandling = this.behandlingRepository.hentBehandlingHvisFinnes(originalBehandlingId);
+        if (!originalBehandling.isPresent() || originalBehandling.get().getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()) {
             return false;
         }
 
-        return StartpunktutlederHjelper.finnesAktivitetHvorAlleHarDagsatsNull(origBeregningsresultatFP.get());
+        Optional<BeregningsresultatEntitet> originalBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(originalBehandlingId);
+
+        if (!originalBeregningsresultat.isPresent()) {
+            return false;
+        }
+
+        return StartpunktutlederHjelper.finnesAktivitetHvorAlleHarDagsatsNull(originalBeregningsresultat.get());
     }
 
     private static class ArbeidforholdNøkkel {

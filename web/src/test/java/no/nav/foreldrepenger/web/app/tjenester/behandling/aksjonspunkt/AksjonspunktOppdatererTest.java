@@ -14,14 +14,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
 import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.impl.FatterVedtakAksjonspunkt;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
@@ -58,6 +56,9 @@ public class AksjonspunktOppdatererTest {
     
     @Inject
     private OpprettToTrinnsgrunnlag opprettTotrinnsgrunnlag;
+    
+    @Inject
+    private VedtakVarselRepository vedtakVarselRepository;
 
     @Test
     public void bekreft_foreslå_vedtak_aksjonspkt_setter_ansvarlig_saksbehandler() {
@@ -68,11 +69,10 @@ public class AksjonspunktOppdatererTest {
 
         ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false);
         ForeslåVedtakAksjonspunktOppdaterer foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(
-            repositoryProvider, mock(HistorikkTjenesteAdapter.class),
+            vedtakVarselRepository, 
+            mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,
-            vedtakTjeneste,
-            mock(FormidlingRestKlient.class),
-            new FakeUnleash()) {
+            vedtakTjeneste) {
             @Override
             protected String getCurrentUserId() {
                 // return test verdi
@@ -88,8 +88,6 @@ public class AksjonspunktOppdatererTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
-        scenario.medBehandlingsresultat(Behandlingsresultat.builder());
-        
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
@@ -118,8 +116,6 @@ public class AksjonspunktOppdatererTest {
     public void oppdaterer_aksjonspunkt_med_godkjent_totrinnskontroll() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
-        scenario.medBehandlingsresultat(Behandlingsresultat.builder());
-        
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();

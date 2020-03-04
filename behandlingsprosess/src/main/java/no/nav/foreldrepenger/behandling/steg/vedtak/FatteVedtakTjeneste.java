@@ -16,7 +16,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
-import no.nav.foreldrepenger.domene.vedtak.repo.LagretVedtakRepository;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveForBehandlingSendtTilbakeTask;
 import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -37,8 +36,6 @@ public class FatteVedtakTjeneste {
     private static final Set<BehandlingResultatType> VEDTAKSTILSTANDER = new HashSet<>(
         Arrays.asList(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.INNVILGET));
 
-    @SuppressWarnings("unused")
-    private LagretVedtakRepository lagretVedtakRepository;
     private VedtakTjeneste vedtakTjeneste;
     private OppgaveTjeneste oppgaveTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
@@ -49,12 +46,10 @@ public class FatteVedtakTjeneste {
     }
 
     @Inject
-    public FatteVedtakTjeneste(LagretVedtakRepository vedtakRepository,
-                               VedtakTjeneste vedtakTjeneste,
+    public FatteVedtakTjeneste(VedtakTjeneste vedtakTjeneste,
                                OppgaveTjeneste oppgaveTjeneste,
                                TotrinnTjeneste totrinnTjeneste,
                                BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
-        this.lagretVedtakRepository = vedtakRepository;
         this.vedtakTjeneste = vedtakTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;

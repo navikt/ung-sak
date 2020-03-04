@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndringBasertPåKonsekvenserForYtelsen;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 
 /**
@@ -10,7 +9,7 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
  */
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class RevurderingEndring extends RevurderingEndringBasertPåKonsekvenserForYtelsen {
+public class RevurderingEndring {
 
     public RevurderingEndring() {
         // for CDI proxy

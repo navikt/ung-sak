@@ -8,7 +8,7 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakManueltAksjonspuntDto;
@@ -22,11 +22,11 @@ class ForeslåVedtakManueltAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
     }
 
     @Inject
-    public ForeslåVedtakManueltAksjonspunktOppdaterer(BehandlingRepositoryProvider repositoryProvider,
+    public ForeslåVedtakManueltAksjonspunktOppdaterer(VedtakVarselRepository vedtakVarselRepository,
                                                        HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
                                                        OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
                                                        VedtakTjeneste vedtakTjeneste) {
-        super(repositoryProvider, historikkApplikasjonTjeneste, opprettToTrinnsgrunnlag, vedtakTjeneste);
+        super(vedtakVarselRepository, historikkApplikasjonTjeneste, opprettToTrinnsgrunnlag, vedtakTjeneste);
     }
 
     @Override

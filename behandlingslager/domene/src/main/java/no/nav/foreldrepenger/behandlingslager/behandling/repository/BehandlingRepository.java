@@ -22,7 +22,6 @@ import javax.persistence.TypedQuery;
 import org.hibernate.jpa.QueryHints;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -274,12 +273,11 @@ public class BehandlingRepository {
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT b FROM Behandling b " +
-                "INNER JOIN Behandlingsresultat br ON b.id=br.behandlingId " +
-                "INNER JOIN BehandlingVedtak bv ON b.id=bv.behandlingId " +
-                "WHERE b.status IN :avsluttetOgIverkKode " +
-                "  AND br.behandlingResultatType IN (:innvilgetKoder) " +
+                " INNER JOIN BehandlingVedtak bv ON b.id=bv.behandlingId " +
+                " WHERE b.status IN :avsluttetOgIverkKode " +
+                "  AND b.behandlingResultatType IN (:innvilgetKoder) " +
                 "  AND b.fagsak.id=:fagsakId " +
-                "ORDER BY bv.vedtakstidspunkt DESC, bv.endretTidspunkt DESC",
+                " ORDER BY bv.vedtakstidspunkt DESC, bv.endretTidspunkt DESC",
             Behandling.class);
 
         query.setParameter(FAGSAK_ID, fagsakId);
@@ -341,9 +339,7 @@ public class BehandlingRepository {
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             " FROM Behandling b WHERE b.fagsak.id=:fagsakId " +
                 " AND b.behandlingType=:behandlingType " +
-                " AND NOT EXISTS (SELECT r FROM Behandlingsresultat r" +
-                "    WHERE r.behandlingId=b.id " +
-                "    AND r.behandlingResultatType IN :henlagtKoder)" +
+                " AND b.behandlingResultatType NOT IN :henlagtKoder " +
                 " ORDER BY b.opprettetTidspunkt DESC",
             Behandling.class);
 
@@ -381,23 +377,12 @@ public class BehandlingRepository {
     Long lagre(Behandling behandling) {
         getEntityManager().persist(behandling);
 
-        lagreBehandlingsresultat(behandling);
-
         List<BehandlingÅrsak> behandlingÅrsak = behandling.getBehandlingÅrsaker();
         behandlingÅrsak.forEach(getEntityManager()::persist);
 
         getEntityManager().flush();
 
         return behandling.getId();
-    }
-
-    // FIXME: Fjern Behandlingsresultat
-    private void lagreBehandlingsresultat(Behandling behandling) {
-        var resultat = behandling.getBehandlingsresultat();
-        if (resultat != null) {
-            resultat.setBehandling(behandling.getId());
-            getEntityManager().persist(resultat);
-        }
     }
 
     public Boolean erVersjonUendret(Long behandlingId, Long versjon) {

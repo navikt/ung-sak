@@ -4,11 +4,9 @@ import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUt
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.post;
 import static no.nav.foreldrepenger.web.app.tjenester.behandling.BehandlingDtoUtil.setStandardfelter;
-import static no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.aksjonspunkt.AbstractVedtaksbrevOverstyringshåndterer.FPSAK_LAGRE_FRITEKST_INN_FORMIDLING;
 
 import java.time.LocalDate;
 import java.util.AbstractMap;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,24 +17,18 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.finn.unleash.Unleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingDataTjeneste;
-import no.nav.foreldrepenger.dokumentbestiller.klient.TekstFraSaksbehandler;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
@@ -55,7 +47,6 @@ import no.nav.foreldrepenger.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
@@ -81,7 +72,6 @@ import no.nav.vedtak.konfig.PropertyUtil;
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
  */
 
-// FIXME (TEAM SVP) denne burde splittes til å støtte en enkelt ytelse
 @ApplicationScoped
 public class BehandlingDtoTjeneste {
 
@@ -89,9 +79,7 @@ public class BehandlingDtoTjeneste {
     private TilbakekrevingRepository tilbakekrevingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private SøknadRepository søknadRepository;
-    private Unleash unleash;
     private BehandlingRepository behandlingRepository;
-    private FormidlingDataTjeneste formidlingDataTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -100,23 +88,21 @@ public class BehandlingDtoTjeneste {
     }
 
     @Inject
-    public BehandlingDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
+    public BehandlingDtoTjeneste(BehandlingRepository behandlingRepository,
+                                 BehandlingVedtakRepository behandlingVedtakRepository,
+                                 SøknadRepository søknadRepository,
                                  HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 FormidlingDataTjeneste formidlingDataTjeneste,
-                                 VilkårResultatRepository vilkårResultatRepository,
-                                 Unleash unleash) {
+                                 VilkårResultatRepository vilkårResultatRepository) {
 
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.søknadRepository = repositoryProvider.getSøknadRepository();
+        this.søknadRepository = søknadRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.unleash = unleash;
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.formidlingDataTjeneste = formidlingDataTjeneste;
-        this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        this.behandlingRepository = behandlingRepository;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
     }
 
     private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
@@ -129,14 +115,14 @@ public class BehandlingDtoTjeneste {
     }
 
     private BehandlingDto lagBehandlingDto(Behandling behandling,
-                                           Optional<BehandlingsresultatDto> behandlingsresultatDto,
+                                           BehandlingsresultatDto behandlingsresultatDto,
                                            boolean erBehandlingMedGjeldendeVedtak,
                                            SøknadRepository søknadRepository) {
         var dto = new BehandlingDto();
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
         setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
-        dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
+        dto.setBehandlingsresultat(behandlingsresultatDto);
 
         Map<String, String> behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         Map<String, String> behandlingIdQueryParams = Map.of(BehandlingIdDto.NAME, behandling.getUuid().toString()); // legacy param name
@@ -185,9 +171,34 @@ public class BehandlingDtoTjeneste {
         Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(bv -> bv.getBehandlingId());
         return behandlinger.stream().map(behandling -> {
             boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);
-            var behandlingsresultatDto = lagBehandlingsresultatDto(behandling);
-            return lagBehandlingDto(behandling, behandlingsresultatDto, erBehandlingMedGjeldendeVedtak, søknadRepository);
+            var behandlingsresultat = lagBehandlingsresultat(behandling);
+            return lagBehandlingDto(behandling, behandlingsresultat, erBehandlingMedGjeldendeVedtak, søknadRepository);
         }).collect(Collectors.toList());
+    }
+
+    BehandlingsresultatDto lagBehandlingsresultat(Behandling behandling) {
+        var ref = BehandlingReferanse.fra(behandling);
+        var dto = new BehandlingsresultatDto();
+
+        Long behandlingId = behandling.getId();
+
+        dto.setResultatType(behandling.getBehandlingResultatType());
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+        if (vilkårene.isPresent()) {
+            var vilkårResultater = vilkårene.get().getVilkårene().stream()
+                .flatMap(vt -> vt.getPerioder().stream())
+                .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
+                    new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
+                    Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
+            dto.setVilkårResultat(vilkårResultater);
+        }
+
+        dto.setSkjæringstidspunkt(finnSkjæringstidspunktForBehandling(behandling).orElse(null));
+        dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(ref));
+
+        return dto;
     }
 
     private boolean erBehandlingMedGjeldendeVedtak(Behandling behandling, Optional<Long> behandlingMedGjeldendeVedtak) {
@@ -215,8 +226,6 @@ public class BehandlingDtoTjeneste {
         var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId));
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(originalBehandling.getId()).orElse(null);
         setStandardfelter(originalBehandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
-        var behandlingsresultatDto = lagBehandlingsresultatDto(originalBehandling);
-        dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
 
         var queryParams = Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString());
         dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", queryParams));
@@ -232,8 +241,6 @@ public class BehandlingDtoTjeneste {
 
         BehandlingDtoUtil.settStandardfelterUtvidet(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
-        var behandlingsresultatDto = lagBehandlingsresultatDto(behandling);
-        dto.setBehandlingsresultat(behandlingsresultatDto.orElse(null));
     }
 
     private UtvidetBehandlingDto mapFra(Behandling behandling, boolean erBehandlingMedGjeldendeVedtak) {
@@ -270,6 +277,8 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH, "opptjening", queryParams));
 
+        dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", queryParams));
+
         Optional<BeregningsgrunnlagEntitet> beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagGrunnlagEntitet(behandling.getId())
             .flatMap(BeregningsgrunnlagGrunnlagEntitet::getBeregningsgrunnlag);
         if (beregningsgrunnlag.isPresent()) {
@@ -287,55 +296,8 @@ public class BehandlingDtoTjeneste {
         return dto;
     }
 
-    private Optional<BehandlingsresultatDto> lagBehandlingsresultatDto(Behandling behandling) {
-        var behandlingsresultat = behandling.getBehandlingsresultat();
-        if (behandlingsresultat == null) {
-            return Optional.empty();
-        }
-        Long behandlingId = behandling.getId();
-        var ref = BehandlingReferanse.fra(behandling);
-
-        BehandlingsresultatDto dto = new BehandlingsresultatDto();
-        Optional<TekstFraSaksbehandler> tekstFraSaksbehandlerOptional = Optional.empty();
-        dto.setId(behandlingsresultat.getId());
-        dto.setType(behandling.getBehandlingResultatType());
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        if (vilkårene.isPresent()) {
-            var vilkårResultater = vilkårene.get().getVilkårene().stream()
-                .flatMap(vt -> vt.getPerioder().stream())
-                .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
-                    new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
-                .collect(Collectors.groupingBy(Map.Entry::getKey,
-                    Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
-            dto.setVilkårResultat(vilkårResultater);
-        }
-
-        dto.setKonsekvenserForYtelsen(behandlingsresultat.getKonsekvenserForYtelsen());
-        dto.setSkjæringstidspunkt(finnSkjæringstidspunktForBehandling(behandling).orElse(null));
-        dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(ref, behandlingsresultat.getKonsekvenserForYtelsen()));
-        if (unleash.isEnabled(FPSAK_LAGRE_FRITEKST_INN_FORMIDLING)) {
-            tekstFraSaksbehandlerOptional = formidlingDataTjeneste.hentSaksbehandlerTekst(behandling.getUuid());
-        }
-        // For å støtte eksiterende data inn i FPSAK
-        if (tekstFraSaksbehandlerOptional.isPresent()) {
-            final TekstFraSaksbehandler tekstFraSaksbehandlerDto = tekstFraSaksbehandlerOptional.get();
-            dto.setAvslagsarsakFritekst(tekstFraSaksbehandlerDto.getAvslagarsakFritekst());
-            dto.setVedtaksbrev(tekstFraSaksbehandlerDto.getVedtaksbrev());
-            dto.setOverskrift(tekstFraSaksbehandlerDto.getOverskrift());
-            dto.setFritekstbrev(tekstFraSaksbehandlerDto.getFritekstbrev());
-        } else {
-            dto.setAvslagsarsakFritekst(behandlingsresultat.getAvslagarsakFritekst());
-            dto.setVedtaksbrev(behandlingsresultat.getVedtaksbrev());
-            dto.setOverskrift("TODO HENT OVERSKRIFT FRA K9-FORMIDLING");
-            dto.setFritekstbrev("TODO HENT FRITEKSTBREV FRA K9-FORMIDLING");
-        }
-        return Optional.of(dto);
-    }
-
-    private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref, Collection<KonsekvensForYtelsen> konsekvenserForYtelsen) {
-        return FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, ref.getFagsakYtelseType()).orElseThrow()
-            .erRevurderingMedUendretUtfall(ref, konsekvenserForYtelsen);
+    private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref) {
+        return ref.getBehandlingResultat().isBehandlingsresultatIkkeEndret();
     }
 
     private Optional<SkjæringstidspunktDto> finnSkjæringstidspunktForBehandling(Behandling behandling) {
@@ -351,9 +313,9 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        String fpoppdragOverrideUrl = PropertyUtil.getProperty("fpoppdrag.override.proxy.url");
-        String baseUurl = fpoppdragOverrideUrl != null ? fpoppdragOverrideUrl : "/k9/oppdrag/api";
-        return Optional.of(ResourceLink.post(baseUurl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", behandling.getUuid()));
+        String oppdragOverrideUrl = PropertyUtil.getProperty("fpoppdrag.override.proxy.url");
+        String baseUrl = oppdragOverrideUrl != null ? oppdragOverrideUrl : "/k9/oppdrag/api";
+        return Optional.of(ResourceLink.post(baseUrl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", behandling.getUuid()));
     }
 
     private Optional<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {

@@ -4,17 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -23,33 +28,51 @@ import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
 import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
+import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
+@RunWith(CdiRunner.class)
 public class BehandlingÅrsakDtoTest {
 
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    
+    @Inject
+    private BehandlingRepositoryProvider repositoryProvider;
+    
+    @Inject
+    private BehandlingRepository behandlingRepository;
 
+    @Inject
+    private SøknadRepository søknadRepository;
+
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+
+    @Inject
+    private TilbakekrevingRepository tilbakekrevingRepository;
+
+    @Inject
+    private FordelingRepository fordelingRepository;
+
+    @Inject
+    private VilkårResultatRepository vilkårResultatRepository;
+    
     private Behandling behandling;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private TilbakekrevingRepository tilbakekrevingRepository = new TilbakekrevingRepository(repoRule.getEntityManager());
-    private FordelingRepository fordelingRepository = new FordelingRepository(repoRule.getEntityManager());
-    private VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(repoRule.getEntityManager());
-    private FakeUnleash unleash = new FakeUnleash();
 
     @Before
     public void setup() {
-        skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(repositoryProvider.getBehandlingRepository(), repositoryProvider.getOpptjeningRepository(), fordelingRepository, vilkårResultatRepository);
+        skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(behandlingRepository, repositoryProvider.getOpptjeningRepository(), fordelingRepository, vilkårResultatRepository);
         var beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
-        behandlingDtoTjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null, vilkårResultatRepository, unleash);
+        behandlingDtoTjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
         var behandlingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_FORDELING)
             .medManueltOpprettet(true);
         behandlingÅrsak.buildFor(behandling);
-        repositoryProvider.getBehandlingRepository().lagre(behandling, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling));
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
     }
 

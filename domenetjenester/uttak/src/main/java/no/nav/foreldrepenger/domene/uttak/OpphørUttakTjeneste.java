@@ -12,7 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
@@ -34,8 +33,8 @@ public class OpphørUttakTjeneste {
         this.uttakRepository = repositoryProvider.getUttakRepository();
     }
 
-    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
-        if (!behandlingsresultat.isBehandlingsresultatOpphørt()) {
+    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
+        if (!ref.getBehandlingResultat().isBehandlingsresultatOpphørt()) {
             return Optional.empty();
         }
         LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();

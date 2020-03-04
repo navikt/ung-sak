@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -47,11 +48,14 @@ public class BehandlingReferanse {
     /** Eksternt refererbar UUID for behandling. */
     private UUID behandlingUuid;
 
+    private BehandlingResultatType behandlingResultatType;
+
     BehandlingReferanse() {
     }
 
-    private BehandlingReferanse(FagsakYtelseType fagsakYtelseType,  // NOSONAR
+    private BehandlingReferanse(FagsakYtelseType fagsakYtelseType, // NOSONAR
                                 BehandlingType behandlingType,
+                                BehandlingResultatType behandlingResultatType,
                                 AktørId aktørId,
                                 Saksnummer saksnummer,
                                 Long fagsakId,
@@ -62,6 +66,7 @@ public class BehandlingReferanse {
                                 Skjæringstidspunkt skjæringstidspunkt) { // NOSONAR
         this.fagsakYtelseType = fagsakYtelseType;
         this.behandlingType = behandlingType;
+        this.behandlingResultatType = behandlingResultatType;
         this.aktørId = aktørId;
         this.saksnummer = saksnummer;
         this.fagsakId = fagsakId;
@@ -82,6 +87,7 @@ public class BehandlingReferanse {
     public static BehandlingReferanse fra(Behandling behandling, LocalDate utledetSkjæringstidspunkt) {
         return new BehandlingReferanse(behandling.getFagsakYtelseType(),
             behandling.getType(),
+            behandling.getBehandlingResultatType(),
             behandling.getAktørId(),
             behandling.getFagsak().getSaksnummer(),
             behandling.getFagsakId(),
@@ -97,6 +103,7 @@ public class BehandlingReferanse {
     public static BehandlingReferanse fra(Behandling behandling, Skjæringstidspunkt skjæringstidspunkt) {
         return new BehandlingReferanse(behandling.getFagsakYtelseType(),
             behandling.getType(),
+            behandling.getBehandlingResultatType(),
             behandling.getAktørId(),
             behandling.getFagsak().getSaksnummer(),
             behandling.getFagsakId(),
@@ -109,6 +116,7 @@ public class BehandlingReferanse {
 
     public static BehandlingReferanse fra(FagsakYtelseType fagsakYtelseType, // NOSONAR
                                           BehandlingType behandlingType,
+                                          BehandlingResultatType behandlingResultatType,
                                           AktørId aktørId,
                                           Saksnummer saksnummer,
                                           Long fagsakId,
@@ -119,6 +127,7 @@ public class BehandlingReferanse {
                                           Skjæringstidspunkt skjæringstidspunkt) { // NOSONAR
         return new BehandlingReferanse(fagsakYtelseType,
             behandlingType,
+            behandlingResultatType,
             aktørId,
             saksnummer,
             fagsakId,
@@ -170,6 +179,14 @@ public class BehandlingReferanse {
     public Skjæringstidspunkt getSkjæringstidspunkt() {
         sjekkSkjæringstidspunkt();
         return skjæringstidspunkt;
+    }
+
+    /**
+     * returnerer BehandlingResultatType. Hvis det endrer seg underveis i prosessen som pågår, så vær oppmerksom på at dette er et snapshot fra
+     * da steget startet, og reflekterer ikke nødvendigvis endringer.
+     */
+    public BehandlingResultatType getBehandlingResultat() {
+        return behandlingResultatType;
     }
 
     public LocalDate getSkjæringstidspunktBeregning() {
@@ -243,6 +260,7 @@ public class BehandlingReferanse {
     public BehandlingReferanse medSkjæringstidspunkt(LocalDate utledetSkjæringstidspunkt) {
         return new BehandlingReferanse(getFagsakYtelseType(),
             getBehandlingType(),
+            getBehandlingResultat(),
             getAktørId(),
             getSaksnummer(),
             getFagsakId(),
@@ -261,6 +279,7 @@ public class BehandlingReferanse {
     public BehandlingReferanse medSkjæringstidspunkt(Skjæringstidspunkt skjæringstidspunkt) {
         return new BehandlingReferanse(getFagsakYtelseType(),
             getBehandlingType(),
+            getBehandlingResultat(),
             getAktørId(),
             getSaksnummer(),
             getFagsakId(),

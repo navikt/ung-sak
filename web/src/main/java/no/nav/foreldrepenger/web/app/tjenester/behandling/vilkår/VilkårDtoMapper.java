@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårDto;
-
 
 class VilkårDtoMapper {
 
@@ -18,28 +16,25 @@ class VilkårDtoMapper {
     }
 
     static List<VilkårDto> lagVilkarDto(Behandling behandling, boolean medVilkårkjøring, Vilkårene vilkårene) {
-        Behandlingsresultat behandlingsresultat = behandling.getBehandlingsresultat();
-        if (behandlingsresultat != null) {
-            if (vilkårene != null) {
-                return vilkårene.getVilkårene().stream().flatMap(vilkår -> {
-                    return vilkår.getPerioder().stream().map(it -> {
-                        VilkårDto dto = new VilkårDto();
-                        dto.setAvslagKode(it.getAvslagsårsak() != null ? it.getAvslagsårsak().getKode() : null);
-                        dto.setVilkarType(vilkår.getVilkårType());
-                        dto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
-                        dto.setVilkarStatus(it.getGjeldendeUtfall());
-                        dto.setMerknadParametere(it.getMerknadParametere());
-                        dto.setOverstyrbar(erOverstyrbar(vilkår, behandling));
+        if (vilkårene != null) {
+            return vilkårene.getVilkårene().stream().flatMap(vilkår -> {
+                return vilkår.getPerioder().stream().map(it -> {
+                    VilkårDto dto = new VilkårDto();
+                    dto.setAvslagKode(it.getAvslagsårsak() != null ? it.getAvslagsårsak().getKode() : null);
+                    dto.setVilkarType(vilkår.getVilkårType());
+                    dto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
+                    dto.setVilkarStatus(it.getGjeldendeUtfall());
+                    dto.setMerknadParametere(it.getMerknadParametere());
+                    dto.setOverstyrbar(erOverstyrbar(vilkår, behandling));
 
-                        if (medVilkårkjøring) {
-                            dto.setInput(it.getRegelInput());
-                            dto.setEvaluering(it.getRegelEvaluering());
-                        }
+                    if (medVilkårkjøring) {
+                        dto.setInput(it.getRegelInput());
+                        dto.setEvaluering(it.getRegelEvaluering());
+                    }
 
-                        return dto;
-                    });
-                }).collect(Collectors.toList());
-            }
+                    return dto;
+                });
+            }).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }

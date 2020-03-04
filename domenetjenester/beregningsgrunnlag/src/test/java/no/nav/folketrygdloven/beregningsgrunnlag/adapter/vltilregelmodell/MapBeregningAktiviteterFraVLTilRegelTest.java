@@ -21,11 +21,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.opptjening.OpptjeningAktivitete
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Aktivitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.grunnlag.inntekt.Arbeidsforhold;
-import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivPeriode;
-import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.BeregningInntektsmeldingTestUtil;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.AbstractTestScenario;
 import no.nav.folketrygdloven.beregningsgrunnlag.testutilities.behandling.TestScenarioBuilder;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivPeriode;
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivitetStatusModell;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -34,6 +34,7 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -331,8 +332,13 @@ public class MapBeregningAktiviteterFraVLTilRegelTest {
             .medUtledetSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)
             .medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT).build();
 
-        return BehandlingReferanse.fra(FagsakYtelseType.FORELDREPENGER, BehandlingType.FØRSTEGANGSSØKNAD, aktørId, new Saksnummer("1"),
-            1L, 1L, UUID.randomUUID(), Optional.empty(), BehandlingStatus.UTREDES, skjæringstidspunkt);
+        return BehandlingReferanse.fra(FagsakYtelseType.FORELDREPENGER,
+            BehandlingType.FØRSTEGANGSSØKNAD,
+            BehandlingResultatType.INNVILGET,
+            aktørId,
+            new Saksnummer("1"), 1L, 1L, UUID.randomUUID(), Optional.empty(),
+            BehandlingStatus.UTREDES,
+            skjæringstidspunkt);
     }
 
     @Test

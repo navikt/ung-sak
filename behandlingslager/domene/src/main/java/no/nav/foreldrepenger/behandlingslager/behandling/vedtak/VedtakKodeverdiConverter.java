@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.kodeverk;
+package no.nav.foreldrepenger.behandlingslager.behandling.vedtak;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

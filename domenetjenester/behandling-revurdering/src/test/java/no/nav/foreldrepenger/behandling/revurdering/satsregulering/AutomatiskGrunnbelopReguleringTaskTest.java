@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -119,7 +118,7 @@ public class AutomatiskGrunnbelopReguleringTaskTest {
             .medVedtakstidspunkt(dato.minusWeeks(2).atStartOfDay())
             .medAnsvarligSaksbehandler("Severin Saksbehandler");
 
-        scenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.INNVILGET));
+        scenario.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
 
         Behandling behandling = scenario.lagre(repositoryProvider);
 

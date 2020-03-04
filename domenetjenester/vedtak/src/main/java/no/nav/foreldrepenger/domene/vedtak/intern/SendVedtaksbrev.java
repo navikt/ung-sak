@@ -13,10 +13,10 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 
 @ApplicationScoped
@@ -30,6 +30,8 @@ public class SendVedtaksbrev {
 
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
+    private VedtakVarselRepository behandlingsresultatRepository;
+
     SendVedtaksbrev() {
         // for CDI proxy
     }
@@ -37,10 +39,12 @@ public class SendVedtaksbrev {
     @Inject
     public SendVedtaksbrev(BehandlingRepository behandlingRepository,
                            BehandlingVedtakRepository behandlingVedtakRepository,
+                           VedtakVarselRepository behandlingsresultatRepository,
                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
                            DokumentBehandlingTjeneste dokumentBehandlingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
         this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
     }
@@ -53,34 +57,30 @@ public class SendVedtaksbrev {
 
     void sendVedtaksbrev(BehandlingReferanse ref) {
 
-        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId());
+        Long behandlingId = ref.getBehandlingId();
+        Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId);
         if (behandlingVedtakOpt.isEmpty()) {
             log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", ref); //$NON-NLS-1$
             return;
         }
 
-        boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandling.getBehandlingsresultat().getVedtaksbrev());
-        if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde()) && !fritekstVedtaksbrev) {
-            log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", ref);
-            return;
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde())) {
+            var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
+            boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
+            if (!fritekstVedtaksbrev) {
+                log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", ref);
+                return;
+            }
         }
 
         var behandlingVedtak = behandlingVedtakOpt.get();
         if (behandlingVedtak.isBeslutningsvedtak()) {
-            if (harSendtVarselOmRevurdering(behandling.getId())) {
-                log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", ref); //$NON-NLS-1$
-            } else {
-                log.info("Uendret utfall av revurdering og har ikke sendt varsel om revurdering. Sender ikke brev for behandling: {}", ref); //$NON-NLS-1$
-                return;
-            }
+            log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", ref); //$NON-NLS-1$
         } else {
-            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref); //$NON-NLS-1
+            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref); // $NON-NLS-1
         }
-        dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(behandlingVedtak);
+        dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(ref, behandlingVedtak);
     }
 
-    private Boolean harSendtVarselOmRevurdering(Long behandlingId) {
-        return dokumentBehandlingTjeneste.erDokumentProdusert(behandlingId, DokumentMalType.REVURDERING_DOK);
-    }
 }

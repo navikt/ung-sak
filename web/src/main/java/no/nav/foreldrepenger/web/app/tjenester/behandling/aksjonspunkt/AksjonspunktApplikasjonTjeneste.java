@@ -33,8 +33,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -47,7 +45,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -67,7 +64,6 @@ public class AksjonspunktApplikasjonTjeneste {
     private static final Set<AksjonspunktDefinisjon> VEDTAK_AP = Set.of(AksjonspunktDefinisjon.FORESLÅ_VEDTAK, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL, AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
     private BehandlingRepository behandlingRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
@@ -101,7 +97,6 @@ public class AksjonspunktApplikasjonTjeneste {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
@@ -204,10 +199,6 @@ public class AksjonspunktApplikasjonTjeneste {
         }
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandlingsresultatRepository.hent(behandling.getId());
-    }
-
     private TransisjonIdentifikator utledFremhoppTransisjon(BehandlingskontrollKontekst kontekst, TransisjonIdentifikator transisjon) {
         if (FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR.equals(transisjon)) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -221,15 +212,15 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private boolean harAvslåttForrigeBehandling(Behandling revurdering) {
-        Optional<Behandling> originalBehandling = revurdering.getOriginalBehandling();
-        if (originalBehandling.isPresent()) {
-            Behandlingsresultat behandlingsresultat = getBehandlingsresultat(originalBehandling.get());
+        Optional<Behandling> originalBehandlingOpt = revurdering.getOriginalBehandling();
+        if (originalBehandlingOpt.isPresent()) {
+            Behandling behandling = originalBehandlingOpt.get();
             // Dersom originalBehandling er et beslutningsvedtak må vi lete videre etter det faktiske resultatet for å kunne vurdere om forrige
             // behandling var avslått
-            if (BehandlingResultatType.INGEN_ENDRING.equals(behandlingsresultat.getBehandlingResultatType())) {
-                return harAvslåttForrigeBehandling(originalBehandling.get());
+            if (behandling.getBehandlingResultatType().isBehandlingsresultatIkkeEndret()) {
+                return harAvslåttForrigeBehandling(behandling);
             } else {
-                return behandlingsresultat.isBehandlingsresultatAvslått();
+                return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
             }
         }
         return false;

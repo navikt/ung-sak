@@ -10,11 +10,8 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandling.hendelse.FinnAnsvarligSaksbehandler;
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -30,7 +27,6 @@ public class BehandlingVedtakTjeneste {
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OpphørUttakTjeneste opphørUttakTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     BehandlingVedtakTjeneste() {
         // for CDI proxy
@@ -42,31 +38,30 @@ public class BehandlingVedtakTjeneste {
                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
         this.opphørUttakTjeneste = opphørUttakTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     public void opprettBehandlingVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, behandling.getFagsak().getYtelseType())
-            .orElseThrow();
+        Long behandlingId = behandling.getId();
+
         VedtakResultatType vedtakResultatType;
         Optional<LocalDate> opphørsdato = Optional.empty();
         Optional<LocalDate> skjæringstidspunkt = Optional.empty();
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
+        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        var resultat = behandlingsresultatRepository.hent(behandling.getId());
 
         if (behandling.erRevurdering()) {
-            opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref, resultat);
+            opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref);
             skjæringstidspunkt = skjæringstidspunkter.getSkjæringstidspunktHvisUtledet();
         }
-        vedtakResultatType = UtledVedtakResultatType.utled(behandling, resultat.getBehandlingResultatType(), opphørsdato, skjæringstidspunkt);
+        vedtakResultatType = UtledVedtakResultatType.utled(behandling, behandling.getBehandlingResultatType(), opphørsdato, skjæringstidspunkt);
         String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandling);
         LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 
-        boolean erRevurderingMedUendretUtfall = revurderingTjeneste.erRevurderingMedUendretUtfall(ref, resultat.getKonsekvenserForYtelsen());
-        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
+        boolean erRevurderingMedUendretUtfall = ref.getBehandlingResultat().isBehandlingsresultatIkkeEndret();
+        
+        BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandlingId)
             .medVedtakResultatType(vedtakResultatType)
             .medAnsvarligSaksbehandler(ansvarligSaksbehandler)
             .medVedtakstidspunkt(vedtakstidspunkt)

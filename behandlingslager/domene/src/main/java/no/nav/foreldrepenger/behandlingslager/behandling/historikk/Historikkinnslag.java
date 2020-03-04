@@ -23,8 +23,6 @@ import org.hibernate.annotations.NaturalId;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.HistorikkAktørKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.HistorikkinnslagTypeKodeverdiConverter;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 

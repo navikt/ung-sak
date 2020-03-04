@@ -18,11 +18,8 @@ import org.junit.runner.RunWith;
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
 import no.nav.foreldrepenger.behandling.revurdering.BeregningRevurderingTestUtil;
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingEndring;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingTjenesteImpl;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -55,8 +52,6 @@ public class ErEndringIBeregningTest {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     @Inject
     private BeregningRevurderingTestUtil revurderingTestUtil;
-    @Inject @FagsakYtelseTypeRef
-    private RevurderingEndring revurderingEndring;
 
     @Inject
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
@@ -80,8 +75,8 @@ public class ErEndringIBeregningTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         RevurderingTjenesteFelles revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        RevurderingTjeneste revurderingTjeneste = new RevurderingTjenesteImpl(repositoryProvider, behandlingskontrollTjeneste,
-            iayTjeneste, revurderingEndring, revurderingTjenesteFelles);
+        RevurderingTjeneste revurderingTjeneste = new RevurderingTjeneste(repositoryProvider, behandlingskontrollTjeneste,
+            iayTjeneste, revurderingTjenesteFelles);
         revurdering = revurderingTjeneste
             .opprettAutomatiskRevurdering(behandlingSomSkalRevurderes.getFagsak(), BehandlingÅrsakType.RE_ANNET, Optional.empty());
         VirksomhetEntitet virksomhet = new VirksomhetEntitet.Builder().medOrgnr(ARBEIDSFORHOLD_ID).medNavn("Virksomheten").oppdatertOpplysningerNå().build();
