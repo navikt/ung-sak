@@ -12,6 +12,26 @@
         {
           "member": "srvk9los",
           "role": "CONSUMER"
+        },
+        {
+          "member": "L142425",
+          "role": "MANAGER"
+        },
+        {
+          "member": "F154868",
+          "role": "MANAGER"
+        },
+        {
+          "member": "C149071",
+          "role": "MANAGER"
+        },
+        {
+          "member": "G150402",
+          "role": "MANAGER"
+        },
+        {
+          "member": "S152394",
+          "role": "MANAGER"
         }
       ],
       "numPartitions": 3,
