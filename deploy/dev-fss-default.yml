@@ -92,7 +92,7 @@ spec:
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
     - name: KAFKA_AKSJONSPUNKTHENDELSE_CLIENT_ID
-      value: KP-privat-k9-aksjonspunkthendelse-q1
+      value: KP-privat-k9-aksjonspunkthendelse
     - name: KAFKA_AKSJONSPUNKTHENDELSE_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.preprod.local
     - name: KAFKA_AKSJONSPUNKTHENDELSE_GROUP_ID
