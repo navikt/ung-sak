@@ -19,13 +19,13 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 
 @Entity(name = "VedtakVarsel")
-@Table(name = "VEDTAK_VARSEL")
+@Table(name = "BEHANDLING_VEDTAK_VARSEL")
 @DynamicInsert
 @DynamicUpdate
 public class VedtakVarsel extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VEDTAK_VARSEL")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_VEDTAK_VARSEL")
     private Long id;
 
     @Version

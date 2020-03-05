@@ -20,11 +20,10 @@ import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingStegTilstandDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
-import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 
 public class BehandlingDtoUtil {
 
-    static void settStandardfelterUtvidet(Behandling behandling, UtvidetBehandlingDto dto, BehandlingVedtak behandlingVedtak,
+    static void settStandardfelterUtvidet(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
                                           boolean erBehandlingMedGjeldendeVedtak) {
         setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
         dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.behandling;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,8 +29,7 @@ public class BehandlingsresultatDto {
     @Valid
     private Boolean erRevurderingMedUendretUtfall;
 
-    @JsonProperty(value = "skjæringstidspunkt", required = true)
-    @NotNull
+    @JsonProperty(value = "skjæringstidspunkt")
     @Valid
     private SkjæringstidspunktDto skjæringstidspunkt;
 
@@ -38,8 +38,14 @@ public class BehandlingsresultatDto {
     @Valid
     private BehandlingResultatType type = BehandlingResultatType.IKKE_FASTSATT;
 
-    @JsonProperty(value="vilkårResultat")
+    @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "vilkårResultat")
     private Map<VilkårType, Set<VilkårResultatDto>> vilkårResultat;
+
+    @JsonProperty(value = "vedtaksdato")
+    @JsonInclude(value = Include.NON_EMPTY)
+    @Valid
+    private LocalDate vedtaksdato;
 
     public BehandlingsresultatDto() {
         //
@@ -57,6 +63,9 @@ public class BehandlingsresultatDto {
         return type;
     }
 
+    public LocalDate getVedtaksdato() {
+        return vedtaksdato;
+    }
 
     public Map<VilkårType, Set<VilkårResultatDto>> getVilkårResultat() {
         return vilkårResultat;
@@ -76,5 +85,9 @@ public class BehandlingsresultatDto {
 
     public void setVilkårResultat(Map<VilkårType, Set<VilkårResultatDto>> vilkårResultat) {
         this.vilkårResultat = vilkårResultat;
+    }
+
+    public void setVedtaksdato(LocalDate vedtaksdato) {
+        this.vedtaksdato = vedtaksdato;
     }
 }

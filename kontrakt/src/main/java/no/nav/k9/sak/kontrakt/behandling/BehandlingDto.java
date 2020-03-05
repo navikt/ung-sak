@@ -28,6 +28,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -81,7 +82,7 @@ public class BehandlingDto {
     @JsonProperty(value = "behandlingResultatType")
     @Valid
     private BehandlingResultatType behandlingResultatType;
-    
+
     @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "endret")
     private LocalDateTime endret;
@@ -179,6 +180,22 @@ public class BehandlingDto {
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String venteÅrsakKode;
+
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty("ansvarligBeslutter")
+    @Size(max = 100000)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String ansvarligBeslutter;
+
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty(value = "behandlingHenlagt")
+    private Boolean behandlingHenlagt;
+
+    /** Eventuelt async status på tasks. */
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty("taskStatus")
+    @Valid
+    private AsyncPollingStatus taskStatus;
 
     @JsonProperty(value = "versjon", required = true)
     @NotNull
@@ -413,5 +430,33 @@ public class BehandlingDto {
 
     public void setBehandlingKøet(boolean behandlingKøet) {
         this.behandlingKøet = behandlingKøet;
+    }
+    
+    public String getAnsvarligBeslutter() {
+        return ansvarligBeslutter;
+    }
+
+    public AsyncPollingStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public boolean isBehandlingHenlagt() {
+        return behandlingHenlagt;
+    }
+
+    public void setAnsvarligBeslutter(String ansvarligBeslutter) {
+        this.ansvarligBeslutter = ansvarligBeslutter;
+    }
+
+    public void setAsyncStatus(AsyncPollingStatus asyncStatus) {
+        this.taskStatus = asyncStatus;
+    }
+
+    public void setBehandlingHenlagt(boolean behandlingHenlagt) {
+        this.behandlingHenlagt = behandlingHenlagt;
+    }
+
+    public void setTaskStatus(AsyncPollingStatus taskStatus) {
+        this.taskStatus = taskStatus;
     }
 }
