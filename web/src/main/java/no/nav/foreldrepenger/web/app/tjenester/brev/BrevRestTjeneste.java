@@ -47,8 +47,6 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @Transactional
 public class BrevRestTjeneste {
 
-    public static final String MALER_PATH = "/brev/maler";
-    public static final String DOKUMENT_SENDT_PATH = "/brev/dokument-sendt";
     public static final String VARSEL_REVURDERING_PATH = "/brev/varsel/revurdering";
     public static final String HENT_VEDTAKVARSEL_PATH = "/brev/vedtak";
     public static final String BREV_BESTILL_PATH = "/brev/bestill";

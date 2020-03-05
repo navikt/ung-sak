@@ -42,7 +42,6 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -75,7 +74,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private ForeslåBehandlingsresultatTjeneste tjeneste;
 
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste = mock(DokumentBehandlingTjeneste.class);
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
     private FordelingRepository fordelingRepository = mock(FordelingRepository.class);
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);

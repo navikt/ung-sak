@@ -61,7 +61,6 @@ import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
-import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -172,7 +171,7 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingMidlertidigStatus(
-                                                    @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)  BehandlingUuidDto behandlingUuid,
+                                                    @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
                                                     @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
             throws URISyntaxException {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
@@ -184,7 +183,7 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(BEHANDLINGER_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UtvidetBehandlingDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -194,7 +193,7 @@ public class BehandlingRestTjeneste {
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
         AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
-        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
+        BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }
@@ -202,14 +201,14 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(BEHANDLING_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UtvidetBehandlingDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
-        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
+        var dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }
@@ -217,7 +216,7 @@ public class BehandlingRestTjeneste {
     @GET
     @Path("/behandlinger/revurdering-original")
     @Operation(description = "Hent avsluttet førstegangsbehandling gitt id", summary = ("Henter førstegangngsbehandlingen som er/blir revurdert"), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UtvidetBehandlingDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -227,7 +226,7 @@ public class BehandlingRestTjeneste {
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling);
+        BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }
@@ -235,13 +234,13 @@ public class BehandlingRestTjeneste {
     @GET
     @Path(REVURDERING_ORGINAL_PATH)
     @Operation(description = "Hent avsluttet førstegangsbehandling gitt id", summary = ("Henter førstegangngsbehandlingen som er/blir revurdert"), tags = "behandlinger", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UtvidetBehandlingDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer avsluttet førstegangsbehandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentRevurderingensOriginalBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling);
+        BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }

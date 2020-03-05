@@ -12,8 +12,6 @@
 	<sequence-generator name="SEQ_AKSJONSPUNKT" allocation-size="50" sequence-name="SEQ_AKSJONSPUNKT" />
 	<sequence-generator name="SEQ_VILKAR" allocation-size="50" sequence-name="SEQ_VILKAR" />
 
-	<sequence-generator name="SEQ_MOTTATT_DOKUMENT" allocation-size="50" sequence-name="SEQ_MOTTATT_DOKUMENT" />
-
 	<sequence-generator name="SEQ_BEHANDLING_ARSAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_ARSAK" />
 	<sequence-generator name="SEQ_VILKAR_PERIODE" allocation-size="50" sequence-name="SEQ_VILKAR_PERIODE" />
 	<sequence-generator name="SEQ_RS_VILKARS_RESULTAT" allocation-size="50" sequence-name="SEQ_RS_VILKARS_RESULTAT" />
@@ -22,10 +20,6 @@
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.Behandling" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak" />
-
-	<!-- Hendelser -->
-	<entity class="no.nav.foreldrepenger.behandlingslager.hendelser.MottattHendelse" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument" />
 
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt" />
 

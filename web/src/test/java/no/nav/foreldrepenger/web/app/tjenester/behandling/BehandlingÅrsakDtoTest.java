@@ -26,8 +26,8 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.skjæringstidspunkt.DefaultSkjæringstidspunktTjenesteImpl;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
-import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -79,7 +79,7 @@ public class BehandlingÅrsakDtoTest {
     @Test
     public void skal_teste_at_behandlingÅrsakDto_får_korrekte_verdier() {
 
-        UtvidetBehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, null);
+        BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, null);
 
         List<BehandlingÅrsakDto> årsaker = dto.getBehandlingÅrsaker();
 

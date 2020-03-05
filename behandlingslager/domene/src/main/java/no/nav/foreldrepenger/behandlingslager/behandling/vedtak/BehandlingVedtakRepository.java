@@ -52,7 +52,7 @@ public class BehandlingVedtakRepository {
     
     public Optional<BehandlingVedtak> hentBehandlingVedtakFor(UUID behandlingUuid) {
         Objects.requireNonNull(behandlingUuid, "behandlingUuid"); // NOSONAR //$NON-NLS-1$
-        TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("from BehandlingVedtak where uuid=:uuid", BehandlingVedtak.class);
+        TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("Select bv from BehandlingVedtak bv INNER JOIN Behandling b ON b.id=bv.behandlingId where b.uuid=:uuid", BehandlingVedtak.class);
         query.setParameter("uuid", behandlingUuid); // $NON-NLS-1$
         return optionalFirstVedtak(query.getResultList());
     }

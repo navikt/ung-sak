@@ -40,7 +40,7 @@ public class BehandlingBackendRestTjeneste {
     public static final String BEHANDLINGER_BACKEND_ROOT_PATH = BASE_PATH + BACKEND_ROOT_PATH;
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
-    private BehandlingDtoForBackendTjeneste behandlingDtoForBackendTjeneste;
+    private BehandlingDtoTjeneste behandlingDtoTjeneste;
 
     public BehandlingBackendRestTjeneste() {
         // for resteasy
@@ -48,9 +48,9 @@ public class BehandlingBackendRestTjeneste {
 
     @Inject
     public BehandlingBackendRestTjeneste(BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-                                         BehandlingDtoForBackendTjeneste behandlingDtoForBackendTjeneste) {
+                                         BehandlingDtoTjeneste behandlingDtoTjeneste) {
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
-        this.behandlingDtoForBackendTjeneste = behandlingDtoForBackendTjeneste;
+        this.behandlingDtoTjeneste = behandlingDtoTjeneste;
     }
 
     @GET
@@ -65,7 +65,7 @@ public class BehandlingBackendRestTjeneste {
     public Response hentBehandlingResultatForBackend(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
-        BehandlingDto dto = behandlingDtoForBackendTjeneste.lagBehandlingDto(behandling, taskStatus);
+        BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }
