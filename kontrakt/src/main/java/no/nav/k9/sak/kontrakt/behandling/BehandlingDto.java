@@ -187,9 +187,8 @@ public class BehandlingDto {
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String ansvarligBeslutter;
 
-    @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "behandlingHenlagt")
-    private Boolean behandlingHenlagt;
+    private boolean behandlingHenlagt;
 
     /** Eventuelt async status på tasks. */
     @JsonInclude(value = Include.NON_NULL)
