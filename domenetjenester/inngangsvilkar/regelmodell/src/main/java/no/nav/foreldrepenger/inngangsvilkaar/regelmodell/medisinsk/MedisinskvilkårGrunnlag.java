@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.VilkårGrunnlag;
 import no.nav.fpsak.nare.doc.RuleDocumentationGrunnlag;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 
 @RuleDocumentationGrunnlag
 public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
@@ -29,6 +30,10 @@ public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
 
     public LocalDate getTom() {
         return tom;
+    }
+
+    public LocalDateInterval getInterval() {
+        return new LocalDateInterval(fom, tom);
     }
 
     public List<InnleggelsesPeriode> getInnleggelsesPerioder() {

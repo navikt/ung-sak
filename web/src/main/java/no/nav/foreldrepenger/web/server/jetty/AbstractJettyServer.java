@@ -36,19 +36,16 @@ abstract class AbstractJettyServer {
      * @see AbstractNetworkConnector#getHost()
      * @see org.eclipse.jetty.server.ServerConnector#openAcceptChannel()
      */
-    // TODO (u139158): Trenger vi egentlig å sette denne? Spec ser ut til å si at det er eq med null, settes den default til null eller binder
-    // den mot et interface?
-
     protected static final String SERVER_HOST = "0.0.0.0";
     /**
      * nedstrippet sett med Jetty configurations for raskere startup.
      */
-    protected static final Configuration[] CONFIGURATIONS = new Configuration[] {
-            new WebInfConfiguration(),
-            new WebXmlConfiguration(),
-            new AnnotationConfiguration(),
-            new EnvConfiguration(),
-            new PlusConfiguration(),
+    protected static final Configuration[] CONFIGURATIONS = new Configuration[]{
+        new WebInfConfiguration(),
+        new WebXmlConfiguration(),
+        new AnnotationConfiguration(),
+        new EnvConfiguration(),
+        new PlusConfiguration(),
     };
     private AppKonfigurasjon appKonfigurasjon;
 
@@ -95,7 +92,7 @@ abstract class AbstractJettyServer {
 
     protected void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
         Server server = new Server(appKonfigurasjon.getServerPort());
-        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[] {}));
+        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
         server.setHandler(createContext(appKonfigurasjon));
         server.start();
         server.join();

@@ -102,8 +102,8 @@ class SykdomDtoMapper {
     }
 
     private Legeerklæring mapTilLegeerklæring(no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring it) {
-        return new Legeerklæring(it.getPeriode().getFomDato(),
-            it.getPeriode().getTomDato(),
+        return new Legeerklæring(it.getDatert(),
+            it.getDatert(),
             it.getUuid(),
             it.getKilde().getKode(),
             it.getDiagnose(),

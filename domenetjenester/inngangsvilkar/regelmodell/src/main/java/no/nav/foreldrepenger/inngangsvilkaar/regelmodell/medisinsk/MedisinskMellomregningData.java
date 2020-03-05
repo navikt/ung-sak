@@ -19,6 +19,10 @@ class MedisinskMellomregningData {
         this.pleietidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(grunnlag.getFom(), grunnlag.getTom(), Pleiegrad.INGEN)));
     }
 
+    private static <V> LocalDateTimeline<V> trimTidslinje(LocalDateTimeline<V> tidslinje, LocalDateInterval maxInterval) {
+        return tidslinje.intersection(maxInterval);
+    }
+
     MedisinskvilkårGrunnlag getGrunnlag() {
         return grunnlag;
     }
@@ -32,7 +36,7 @@ class MedisinskMellomregningData {
     }
 
     List<PleiePeriode> getPerioderMedPleieOgGrad() {
-        return pleietidslinje.compress()
+        return trimTidslinje(pleietidslinje.compress(), grunnlag.getInterval())
             .toSegments()
             .stream()
             .map(segment -> new PleiePeriode(segment.getFom(), segment.getTom(), segment.getValue()))
