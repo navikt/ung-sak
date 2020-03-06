@@ -73,6 +73,43 @@
       ],
       "numPartitions": 1,
       "topicName": "privat-k9-infotrygdFeedHendelse"
+    },
+    {
+      "configEntries": {
+        "retention.ms": -1
+      },
+      "members": [
+        {
+          "member": "srvk9sak",
+          "role": "PRODUCER"
+        },
+        {
+          "member": "srvk9formidling",
+          "role": "CONSUMER"
+        },
+        {
+          "member": "L142425",
+          "role": "MANAGER"
+        },
+        {
+          "member": "F154868",
+          "role": "MANAGER"
+        },
+        {
+          "member": "C149071",
+          "role": "MANAGER"
+        },
+        {
+          "member": "G150402",
+          "role": "MANAGER"
+        },
+        {
+          "member": "S152394",
+          "role": "MANAGER"
+        }
+      ],
+      "numPartitions": 3,
+      "topicName": "privat-k9-dokumenthendelse"
     }
   ]
 }
