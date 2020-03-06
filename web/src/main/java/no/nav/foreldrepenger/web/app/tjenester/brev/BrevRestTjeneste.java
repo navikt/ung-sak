@@ -114,14 +114,14 @@ public class BrevRestTjeneste {
     public Boolean harSendtVarselOmRevurdering(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         return vedtakVarselRepository.hentHvisEksisterer(behandlingUuid.getBehandlingUuid()).orElse(new VedtakVarsel()).getErVarselOmRevurderingSendt(); // NOSONAR
     }
-    
+
     @GET
     @Path(HENT_VEDTAKVARSEL_PATH)
     @Operation(description = "Hent vedtak varsel gitt behandlingId", tags = "vedtak")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentVedtaksdokument(@NotNull @QueryParam("behandlingId") @Parameter(description = "BehandlingId(UUID) for vedtak varsel ") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
-        var varsel = lagVedtakVarsel(behandlingIdDto.getBehandlingUuid());
+    public Response hentVedtaksdokument(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var varsel = lagVedtakVarsel(behandlingUuid.getBehandlingUuid());
         if(varsel.isEmpty()) {
             return Response.noContent().build();
         } else {
@@ -145,7 +145,7 @@ public class BrevRestTjeneste {
 
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakFor(behandlingUuid);
         behandlingVedtak.ifPresent(v -> dto.setVedtaksdato(v.getVedtaksdato()));
-        
+
         return Optional.of(dto);
     }
 
