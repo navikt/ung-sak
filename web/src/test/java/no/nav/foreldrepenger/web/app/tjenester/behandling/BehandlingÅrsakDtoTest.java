@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
+import no.finn.unleash.FakeUnleash;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
@@ -35,10 +35,10 @@ public class BehandlingÅrsakDtoTest {
 
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    
+
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    
+
     @Inject
     private BehandlingRepository behandlingRepository;
 
@@ -56,7 +56,7 @@ public class BehandlingÅrsakDtoTest {
 
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-    
+
     private Behandling behandling;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
@@ -64,8 +64,7 @@ public class BehandlingÅrsakDtoTest {
     @Before
     public void setup() {
         skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(behandlingRepository, repositoryProvider.getOpptjeningRepository(), fordelingRepository, vilkårResultatRepository);
-        var beregningsgrunnlagTjeneste = new HentBeregningsgrunnlagTjeneste(repoRule.getEntityManager());
-        behandlingDtoTjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
+        behandlingDtoTjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);

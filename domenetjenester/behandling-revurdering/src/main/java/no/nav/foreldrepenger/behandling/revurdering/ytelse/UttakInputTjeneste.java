@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
@@ -36,19 +36,19 @@ public class UttakInputTjeneste {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private MedlemTjeneste medlemTjeneste;
     private BehandlingRepository behandlingRepository;
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
     private SøknadRepository søknadRepository;
     private PersonopplysningRepository personopplysningRepository;
 
     @Inject
     public UttakInputTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                              HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                              MedlemTjeneste medlemTjeneste,
-                              InntektArbeidYtelseTjeneste iayTjeneste) {
+                              BeregningTjeneste kalkulusTjeneste,
+                              InntektArbeidYtelseTjeneste iayTjeneste,
+                              MedlemTjeneste medlemTjeneste) {
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
         this.medlemTjeneste = Objects.requireNonNull(medlemTjeneste, "medlemTjeneste");
         this.søknadRepository = repositoryProvider.getSøknadRepository();
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
     }
@@ -69,7 +69,6 @@ public class UttakInputTjeneste {
         var årsaker = finnÅrsaker(ref);
         var statusPerioder = lagBeregningsgrunnlagStatusPerioder(ref);
         return new UttakInput(ref, iayGrunnlag)
-            .medMedlemskapOpphørsdato(medlemskapOpphørsdato)
             .medBeregningsgrunnlagPerioder(statusPerioder)
             .medSøknadMottattDato(mottattDato)
             .medBehandlingÅrsaker(map(årsaker))
@@ -91,7 +90,7 @@ public class UttakInputTjeneste {
     }
 
     private Collection<BeregningsgrunnlagStatusPeriode> lagBeregningsgrunnlagStatusPerioder(BehandlingReferanse ref) {
-        var beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(ref.getBehandlingId());
+        var beregningsgrunnlag = kalkulusTjeneste.hentFastsatt(ref.getBehandlingId());
         if (beregningsgrunnlag.isPresent()) {
             var andeler = beregningsgrunnlag.get().getBeregningsgrunnlagPerioder().stream()
                 .flatMap(beregningsgrunnlagPeriode -> beregningsgrunnlagPeriode.getBeregningsgrunnlagPrStatusOgAndelList().stream())

@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.ytelse.beregning.adapter;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.adapter.util.BeregningsgrunnlagUtil;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagUtil;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatPeriode;

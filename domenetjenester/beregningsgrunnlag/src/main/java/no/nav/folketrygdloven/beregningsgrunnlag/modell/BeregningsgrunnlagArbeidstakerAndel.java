@@ -17,26 +17,11 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
-@Entity(name = "BeregningsgrunnlagArbeidstakerAndel")
-@Table(name = "BG_ARBEIDSTAKER_ANDEL")
-public class BeregningsgrunnlagArbeidstakerAndel extends BaseEntitet {
+public class BeregningsgrunnlagArbeidstakerAndel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_ARBEIDSTAKER_ANDEL")
-    private Long id;
-
-    @OneToOne(optional = false)
-    @JsonBackReference
-    @JoinColumn(name = "BG_PR_STATUS_ANDEL_ID", nullable = false, updatable = false)
     private BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel;
-
-    @Column(name = "MOTTAR_YTELSE")
     private Boolean mottarYtelse;
 
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-    
     public static BeregningsgrunnlagArbeidstakerAndel.Builder builder() {
         return new BeregningsgrunnlagArbeidstakerAndel.Builder();
     }
@@ -71,8 +56,7 @@ public class BeregningsgrunnlagArbeidstakerAndel extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-                "id=" + id + ", " //$NON-NLS-2$
+        return getClass().getSimpleName() + "<" //$NON-NLS-1$
                 + "mottarYtelse=" + mottarYtelse + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + ">"; //$NON-NLS-1$
     }

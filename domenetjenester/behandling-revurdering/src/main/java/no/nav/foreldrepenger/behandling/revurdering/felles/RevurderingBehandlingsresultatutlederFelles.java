@@ -10,8 +10,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.RevurderingFeil;
 import no.nav.foreldrepenger.behandling.revurdering.felles.FastsettResultatVedEndring.Betingelser;
@@ -36,7 +35,7 @@ import no.nav.vedtak.util.Tuple;
 
 public abstract class RevurderingBehandlingsresultatutlederFelles {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
     private MedlemTjeneste medlemTjeneste;
 
     private BehandlingRepository behandlingRepository;
@@ -52,11 +51,11 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
 
     public RevurderingBehandlingsresultatutlederFelles(BehandlingRepositoryProvider repositoryProvider,
                                                            VedtakVarselRepository vedtakVarselRepository,
-                                                           HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                                           BeregningTjeneste kalkulusTjeneste,
                                                            MedlemTjeneste medlemTjeneste,
                                                            HarEtablertYtelse harEtablertYtelse) {
 
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.medlemTjeneste = medlemTjeneste;
@@ -86,7 +85,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
 
         var originalOrg = finnBehandlingsresultatPåOriginalBehandling(originalBehandling);
         VedtakVarsel vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-        
+
         if (vurderAvslagPåAslag(Optional.of(revurdering), Optional.of(originalOrg), originalBehandling.getType())) {
             /* 2b */
             revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
@@ -110,10 +109,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             return vedtakVarsel;
         }
 
-        Optional<BeregningsgrunnlagEntitet> revurderingsGrunnlagOpt = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId());
-        Optional<BeregningsgrunnlagEntitet> originalGrunnlagOpt = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(originalBehandling.getId());
-
-        boolean erEndringIBeregning = ErEndringIBeregning.vurder(revurderingsGrunnlagOpt, originalGrunnlagOpt);
+        boolean erEndringIBeregning = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId());
 
         Betingelser betingelser = Betingelser.fastsett(erEndringIBeregning, erVarselOmRevurderingSendt,
             harInnvilgetIkkeOpphørtVedtak(revurdering.getFagsak()));
@@ -177,7 +173,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
                 "BehandlingReferanse [" + ref.getBehandlingId() + "] matcher ikke forventet [" + behandlingId + "]");
         }
     }
-    
+
     private boolean vurder(List<Vilkår> vilkårene) {
         ChronoLocalDate chronoLocalDate = LocalDate.now();
         return vilkårene.stream()
@@ -195,7 +191,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             .anyMatch(periode -> Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN.equals(periode.getAvslagsårsak())
                 && Utfall.IKKE_OPPFYLT.equals(periode.getGjeldendeUtfall()));
     }
-    
+
     private static boolean vurderAvslagPåAslag(Optional<Behandling> resRevurdering, Optional<Behandling> resOriginal, BehandlingType originalBehandlingType) {
         if (resOriginal.isPresent() && resRevurdering.isPresent()) {
             if (BehandlingType.FØRSTEGANGSSØKNAD.equals(originalBehandlingType)) {

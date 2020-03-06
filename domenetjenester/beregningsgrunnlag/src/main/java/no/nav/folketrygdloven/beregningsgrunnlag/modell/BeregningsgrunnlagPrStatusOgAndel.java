@@ -9,29 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -40,128 +17,40 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-@Entity(name = "BeregningsgrunnlagPrStatusOgAndel")
-@Table(name = "BG_PR_STATUS_OG_ANDEL")
-public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
+public class BeregningsgrunnlagPrStatusOgAndel {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_PR_STATUS_OG_ANDEL")
-    private Long id;
-
-    @Column(name = "andelsnr", nullable = false)
     private Long andelsnr;
-
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
-    @JsonBackReference
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "bg_periode_id", nullable = false, updatable = false)
     private BeregningsgrunnlagPeriode beregningsgrunnlagPeriode;
-
-    @Convert(converter=AktivitetStatusKodeverdiConverter.class)
-    @Column(name="aktivitet_status", nullable = false)
     private AktivitetStatus aktivitetStatus;
-
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "beregningsperiode_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "beregningsperiode_tom"))
-    })
     private ÅpenDatoIntervallEntitet beregningsperiode;
-
-    @Convert(converter = OpptjeningAktivitetTypeKodeverdiConverter.class)
-    @Column(name="arbeidsforhold_type", nullable = false)
     private OpptjeningAktivitetType arbeidsforholdType;
-
-    @Column(name = "brutto_pr_aar")
     private BigDecimal bruttoPrÅr;
-
-    @Column(name = "overstyrt_pr_aar")
     private BigDecimal overstyrtPrÅr;
-
-    @Column(name = "avkortet_pr_aar")
     private BigDecimal avkortetPrÅr;
-
-    @Column(name = "redusert_pr_aar")
     private BigDecimal redusertPrÅr;
-
-    @Column(name = "beregnet_pr_aar")
     private BigDecimal beregnetPrÅr;
-
-    @Column(name = "fordelt_pr_aar")
     private BigDecimal fordeltPrÅr;
-
-    @Column(name = "maksimal_refusjon_pr_aar")
     private BigDecimal maksimalRefusjonPrÅr;
-
-    @Column(name = "avkortet_refusjon_pr_aar")
     private BigDecimal avkortetRefusjonPrÅr;
-
-    @Column(name = "redusert_refusjon_pr_aar")
     private BigDecimal redusertRefusjonPrÅr;
-
-    @Column(name = "avkortet_brukers_andel_pr_aar")
     private BigDecimal avkortetBrukersAndelPrÅr;
-
-    @Column(name = "redusert_brukers_andel_pr_aar")
     private BigDecimal redusertBrukersAndelPrÅr;
-
-    @Column(name = "dagsats_bruker")
     private Long dagsatsBruker;
-
-    @Column(name = "dagsats_arbeidsgiver")
     private Long dagsatsArbeidsgiver;
-
-    @Column(name = "pgi_snitt")
     private BigDecimal pgiSnitt;
-
-    @Column(name = "pgi1")
     private BigDecimal pgi1;
-
-    @Column(name = "pgi2")
     private BigDecimal pgi2;
-
-    @Column(name = "pgi3")
     private BigDecimal pgi3;
-
-    @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "verdi", column = @Column(name = "aarsbeloep_tilstoetende_ytelse")))
-    @ChangeTracked
     private Beløp årsbeløpFraTilstøtendeYtelse;
-
-    @Column(name = "ny_i_arbeidslivet")
     private Boolean nyIArbeidslivet;
-
-    @Column(name = "fastsatt_av_saksbehandler", nullable = false)
     private Boolean fastsattAvSaksbehandler = Boolean.FALSE;
-
-    @Column(name = "besteberegning_pr_aar")
     private BigDecimal besteberegningPrÅr;
-
-    @Convert(converter=InntektskategoriKodeverdiConverter.class)
-    @Column(name="inntektskategori", nullable = false)
     private Inntektskategori inntektskategori = Inntektskategori.UDEFINERT;
-
-    @Column(name = "lagt_til_av_saksbehandler", nullable = false)
     private Boolean lagtTilAvSaksbehandler = Boolean.FALSE;
-
-    @OneToOne(mappedBy = "beregningsgrunnlagPrStatusOgAndel", cascade = CascadeType.PERSIST)
     private BGAndelArbeidsforhold bgAndelArbeidsforhold;
-
-    @Column(name = "dagsats_tilstoetende_ytelse")
     private Long orginalDagsatsFraTilstøtendeYtelse;
-
-    @OneToOne(mappedBy = "beregningsgrunnlagPrStatusOgAndel", cascade = CascadeType.PERSIST)
     private BeregningsgrunnlagFrilansAndel beregningsgrunnlagFrilansAndel;
-
-    @OneToOne(mappedBy = "beregningsgrunnlagPrStatusOgAndel", cascade = CascadeType.PERSIST)
     private BeregningsgrunnlagArbeidstakerAndel beregningsgrunnlagArbeidstakerAndel;
-
-    public Long getId() {
-        return id;
-    }
 
     public BeregningsgrunnlagPeriode getBeregningsgrunnlagPeriode() {
         return beregningsgrunnlagPeriode;
@@ -411,8 +300,7 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-                "id=" + id + ", " //$NON-NLS-2$
+        return getClass().getSimpleName() + "<" //$NON-NLS-1$
                 + "beregningsgrunnlagPeriode=" + beregningsgrunnlagPeriode + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "aktivitetStatus=" + aktivitetStatus + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "beregningsperiode=" + beregningsperiode + ", " //$NON-NLS-1$ //$NON-NLS-2$
@@ -444,9 +332,6 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
     }
 
     public static Builder builder(BeregningsgrunnlagPrStatusOgAndel eksisterendeBGPrStatusOgAndel) {
-        if (eksisterendeBGPrStatusOgAndel.getId() != null) {
-            throw new IllegalArgumentException("Utviklerfeil: Kan ikke bygge på en allerede lagret andel.");
-        }
         return new Builder(eksisterendeBGPrStatusOgAndel);
     }
 
@@ -539,6 +424,11 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
             return this;
         }
 
+        public Builder medBruttoPrÅr(BigDecimal bruttoPrÅr) {
+            kladd.bruttoPrÅr = bruttoPrÅr;
+            return this;
+        }
+
         public Builder medRedusertRefusjonPrÅr(BigDecimal redusertRefusjonPrÅr) {
             verifiserKanModifisere();
             kladd.redusertRefusjonPrÅr = redusertRefusjonPrÅr;
@@ -595,6 +485,10 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
         }
 
         public Builder medMottarYtelse(Boolean mottarYtelse, AktivitetStatus aktivitetStatus) {
+            if (mottarYtelse == null) {
+                return this;
+            }
+
             verifiserKanModifisere();
             kladd.aktivitetStatus = aktivitetStatus;
             if (kladd.aktivitetStatus.erFrilanser()) {
@@ -619,7 +513,10 @@ public class BeregningsgrunnlagPrStatusOgAndel extends BaseEntitet {
             return this;
         }
 
-        public Builder medNyoppstartet(boolean nyoppstartet, AktivitetStatus aktivitetStatus) {
+        public Builder medNyoppstartet(Boolean nyoppstartet, AktivitetStatus aktivitetStatus) {
+            if (nyoppstartet == null) {
+                return this;
+            }
             verifiserKanModifisere();
             kladd.aktivitetStatus = aktivitetStatus;
             if (kladd.aktivitetStatus.erFrilanser()) {

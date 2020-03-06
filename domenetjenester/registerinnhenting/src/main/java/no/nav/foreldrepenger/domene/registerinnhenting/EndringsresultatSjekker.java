@@ -9,9 +9,8 @@ import java.util.UUID;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
@@ -36,7 +35,7 @@ public class EndringsresultatSjekker {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     private OpptjeningRepository opptjeningRepository;
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private KalkulusTjeneste kalkulusTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     EndringsresultatSjekker() {
@@ -47,13 +46,13 @@ public class EndringsresultatSjekker {
     public EndringsresultatSjekker(PersonopplysningTjeneste personopplysningTjeneste,
                                    MedlemTjeneste medlemTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                   HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                   KalkulusTjeneste kalkulusTjeneste,
                                    BehandlingRepositoryProvider provider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.medlemTjeneste = medlemTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = provider.getOpptjeningRepository();
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
     }
 
@@ -121,12 +120,12 @@ public class EndringsresultatSjekker {
 
     //Denne metoden bør legges i Tjeneste
     public EndringsresultatSnapshot finnAktivBeregningsgrunnlagGrunnlagAggregatId(Long behandlingId) {
-        Optional<Long> aktivBeregningsgrunnlagGrunnlagId = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagGrunnlagEntitet(behandlingId).map(BeregningsgrunnlagGrunnlagEntitet::getId);
+        //TODO(OJR) koble på kalkulus her
+        Optional<Long> aktivBeregningsgrunnlagGrunnlagId = Optional.empty();
         return aktivBeregningsgrunnlagGrunnlagId
-            .map(id -> EndringsresultatSnapshot.medSnapshot(BeregningsgrunnlagEntitet.class, id))
-            .orElse(EndringsresultatSnapshot.utenSnapshot(BeregningsgrunnlagEntitet.class));
+            .map(id -> EndringsresultatSnapshot.medSnapshot(Beregningsgrunnlag.class, id))
+            .orElse(EndringsresultatSnapshot.utenSnapshot(Beregningsgrunnlag.class));
     }
-
 
     private Long hentLongVerdiAvEndretTid(BaseEntitet entitet) {
        LocalDateTime endretTidspunkt = entitet.getOpprettetTidspunkt();

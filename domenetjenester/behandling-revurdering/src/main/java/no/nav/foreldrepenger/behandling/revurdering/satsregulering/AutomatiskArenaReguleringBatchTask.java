@@ -19,6 +19,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.util.Tuple;
 
+@Deprecated(since = "Kalkulus skal eie satsregulering")
 @ApplicationScoped
 @ProsessTask(AutomatiskArenaReguleringBatchTask.TASKTYPE)
 public class AutomatiskArenaReguleringBatchTask implements ProsessTaskHandler {

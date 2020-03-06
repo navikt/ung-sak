@@ -17,8 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
@@ -54,7 +54,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste beregningsgrunnlagTjeneste;
     @Mock
     private VedtakVarsel behandlingsresultat;
     @Mock
@@ -95,8 +95,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
     @Test
     public void skal_ikke_opprette_aksjonspunkt_når_samme_beregningsgrunnlag() {
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
 
         BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingStegForeldrepenger.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe()).isEmpty();
@@ -104,8 +104,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
     @Test
     public void skal_opprette_aksjonspunkt_når_revurdering_har_mindre_beregningsgrunnlag() {
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(900L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(900L)));
 
         BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingStegForeldrepenger.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST);
@@ -123,8 +123,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
         assertThat(revurdering.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.IKKE_FASTSATT);
     }
 
-    private BeregningsgrunnlagEntitet buildBeregningsgrunnlag(Long bruttoPerÅr) {
-        BeregningsgrunnlagEntitet beregningsgrunnlag = BeregningsgrunnlagEntitet.builder()
+    private Beregningsgrunnlag buildBeregningsgrunnlag(Long bruttoPerÅr) {
+        Beregningsgrunnlag beregningsgrunnlag = Beregningsgrunnlag.builder()
             .medSkjæringstidspunkt(LocalDate.now())
             .medGrunnbeløp(BigDecimal.valueOf(91425))
             .build();

@@ -51,7 +51,7 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
         this.producer = new HendelseProducer(TopicManifest.FATTET_VEDTAK, bootstrapServers, schemaRegistryUrl, username, password);
-        
+
         @SuppressWarnings("resource")
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         // hibernate validator implementations er thread-safe, trenger ikke close

@@ -6,7 +6,8 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.VurderVarigEndretNyoppstartetSNHåndterer;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -14,7 +15,6 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDto;
@@ -25,20 +25,17 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
     private static final AksjonspunktDefinisjon FASTSETTBRUTTOSNKODE = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste vurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
-    private VurderVarigEndretNyoppstartetSNHåndterer vurderVarigEndretNyoppstartetSNHåndterer;
-    
+    private KalkulusTjeneste kalkulusTjeneste;
+
     VurderVarigEndringEllerNyoppstartetSNOppdaterer() {
         // CDI
     }
 
     @Inject
     public VurderVarigEndringEllerNyoppstartetSNOppdaterer(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                                           VurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste vurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste,
-                                                           VurderVarigEndretNyoppstartetSNHåndterer vurderVarigEndretNyoppstartetSNHåndterer) {
+                                                           KalkulusTjeneste kalkulusTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.vurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste = vurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste;
-        this.vurderVarigEndretNyoppstartetSNHåndterer = vurderVarigEndretNyoppstartetSNHåndterer;
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
@@ -50,7 +47,8 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
         // Aksjonspunkt "opprettet" i GUI må legge til, bør endre på hvordan dette er løst
         if (dto.getErVarigEndretNaering()) {
             if (dto.getBruttoBeregningsgrunnlag() != null) {
-                vurderVarigEndretNyoppstartetSNHåndterer.håndter(behandling.getId(), dto);
+                HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+                kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
             } else {
                 behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(FASTSETTBRUTTOSNKODE));
             }
@@ -58,9 +56,6 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
             behandling.getÅpentAksjonspunktMedDefinisjonOptional(FASTSETTBRUTTOSNKODE)
             .ifPresent(a -> behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(a)));
         }
-
-        vurderVarigEndringEllerNyoppstarteteSNHistorikkTjeneste.lagHistorikkInnslag(param, dto);
-
         return resultatBuilder.build();
     }
 }

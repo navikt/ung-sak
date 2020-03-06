@@ -28,6 +28,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.Ytelse;
 import no.nav.foreldrepenger.domene.iay.modell.YtelseFilter;
+import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
 import no.nav.foreldrepenger.domene.vedtak.infotrygd.Meldingstype;
@@ -35,7 +36,6 @@ import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 @ApplicationScoped
 public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
@@ -69,8 +69,14 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
     public Optional<BehandlingOverlappInfotrygd> vurder(Behandling behandling, BehandlingVedtak behandlingVedtak) {
         Long behandlingId = behandling.getId();
         Optional<ÅpenDatoIntervallEntitet> periodeVLOpt = fastsettPeriodeVL(behandlingId);
+
+        //FIXME (K9) legg inn ny kode her
+        if (true) {
+            return Optional.empty();
+        }
+
         if (!VedtakResultatType.INNVILGET.equals(behandlingVedtak.getVedtakResultatType())
-            || !periodeVLOpt.isPresent()) {
+                || !periodeVLOpt.isPresent()) {
             return Optional.empty();
         }
         ÅpenDatoIntervallEntitet periodeVL = periodeVLOpt.get();
@@ -89,45 +95,45 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
     private Optional<ÅpenDatoIntervallEntitet> fastsettPeriodeVL(Long behandlingId) {
         var beregningsresultatOpt = beregningsresultatRepository.hentUtbetBeregningsresultat(behandlingId);
         var beregningsresultatPerioder = beregningsresultatOpt.map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
-            .orElse(Collections.emptyList());
+                .orElse(Collections.emptyList());
         List<BeregningsresultatPeriode> perioderMedInnvilgetYtelse = beregningsresultatPerioder.stream()
-            .filter(brPeriode -> brPeriode.getBeregningsresultatAndelList().stream()
-                .anyMatch(andel -> andel.getDagsats() > 0))
-            .collect(Collectors.toList());
+                .filter(brPeriode -> brPeriode.getBeregningsresultatAndelList().stream()
+                        .anyMatch(andel -> andel.getDagsats() > 0))
+                .collect(Collectors.toList());
 
         if (perioderMedInnvilgetYtelse.isEmpty()) {
             return Optional.empty();
         }
 
         LocalDate førsteUttaksdato = perioderMedInnvilgetYtelse.stream()
-            .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom)
-            .min(Comparator.naturalOrder())
-            .get();
+                .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom)
+                .min(Comparator.naturalOrder())
+                .get();
         LocalDate sisteUttaksdato = perioderMedInnvilgetYtelse.stream()
-            .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeTom)
-            .max(Comparator.naturalOrder())
-            .get();
+                .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeTom)
+                .max(Comparator.naturalOrder())
+                .get();
         ÅpenDatoIntervallEntitet vlPeriode = ÅpenDatoIntervallEntitet.fraOgMedTilOgMed(førsteUttaksdato, sisteUttaksdato);
         return Optional.of(vlPeriode);
     }
 
     private Collection<Ytelse> hentRegisterDataFraInfotrygd(Long behandlingId, AktørId aktørId, ÅpenDatoIntervallEntitet periodeVL) {
         var ytelseFilter = iayTjeneste.finnGrunnlag(behandlingId)
-            .map(it -> new YtelseFilter(it.getAktørYtelseFraRegister(aktørId))).orElse(YtelseFilter.EMPTY);
+                .map(it -> new YtelseFilter(it.getAktørYtelseFraRegister(aktørId))).orElse(YtelseFilter.EMPTY);
 
         return ytelseFilter
-            .filter(ytelse -> ytelse.getKilde().equals(Fagsystem.INFOTRYGD))
-            .filter(ytelse -> periodeVL.overlapper(ytelse.getPeriode()))
-            .filter(ytelse -> Arrays.asList(RelatertYtelseTilstand.LØPENDE, RelatertYtelseTilstand.AVSLUTTET).contains(ytelse.getStatus()))
-            .getFiltrertYtelser();
+                .filter(ytelse -> ytelse.getKilde().equals(Fagsystem.INFOTRYGD))
+                .filter(ytelse -> periodeVL.overlapper(ytelse.getPeriode()))
+                .filter(ytelse -> Arrays.asList(RelatertYtelseTilstand.LØPENDE, RelatertYtelseTilstand.AVSLUTTET).contains(ytelse.getStatus()))
+                .getFiltrertYtelser();
     }
 
     private boolean sjekkMotRegisterData(List<InfotrygdHendelse> hendelseListe, Collection<Ytelse> ytelseList) {
         Map<String, List<InfotrygdHendelse>> groupedByType = hendelseListe.stream()
-            .collect(Collectors.groupingBy(InfotrygdHendelse::getType));
+                .collect(Collectors.groupingBy(InfotrygdHendelse::getType));
         List<InfotrygdHendelse> listAnnulSammenMedOpphInnv = fjernAnnulertSomErKorrelertMedInnvEllerOpph(groupedByType);
         List<InfotrygdHendelse> listMedKunAnnul = listAnnulSammenMedOpphInnv.stream()
-            .filter(infotrygdHendelse -> infotrygdHendelse.getType().equals(Meldingstype.INFOTRYGD_ANNULLERT.getType())).collect(Collectors.toList());
+                .filter(infotrygdHendelse -> infotrygdHendelse.getType().equals(Meldingstype.INFOTRYGD_ANNULLERT.getType())).collect(Collectors.toList());
 
         for (InfotrygdHendelse hendelse : listMedKunAnnul) {
             LocalDate identDato = konverterTilLocalDate(hendelse.getIdentDato());
@@ -142,7 +148,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
     private Optional<InfotrygdHendelse> finnNyesteHendelse(List<InfotrygdHendelse> hendelseListe) {
 
         Map<String, List<InfotrygdHendelse>> groupedByType = hendelseListe.stream()
-            .collect(Collectors.groupingBy(InfotrygdHendelse::getType));
+                .collect(Collectors.groupingBy(InfotrygdHendelse::getType));
         List<InfotrygdHendelse> filtrertList = fjernAnnulertSomErKorrelertMedInnvEllerOpph(groupedByType);
         filtrertList.removeIf(infotrygdHendelse -> infotrygdHendelse.getType().equals(Meldingstype.INFOTRYGD_ANNULLERT.getType()));
         filtrertList.removeIf(infotrygdHendelse -> infotrygdHendelse.getType().equals(Meldingstype.INFOTRYGD_ENDRET.getType()));
@@ -173,9 +179,9 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
                                                      List<InfotrygdHendelse> toRemove) {
         String keyOPPH = Meldingstype.INFOTRYGD_OPPHOERT.getType();
         Optional<InfotrygdHendelse> opphOpt = groupedByType.containsKey(keyOPPH) ? groupedByType.get(keyOPPH)
-            .stream()
-            .filter(ih -> ih.getIdentDato().equals(hendelse.getIdentDato()) && ih.getTypeYtelse().equals(hendelse.getTypeYtelse()))
-            .findFirst() : Optional.empty();
+                .stream()
+                .filter(ih -> ih.getIdentDato().equals(hendelse.getIdentDato()) && ih.getTypeYtelse().equals(hendelse.getTypeYtelse()))
+                .findFirst() : Optional.empty();
 
         if (opphOpt.isPresent()) {
             toRemove.add(opphOpt.get());
@@ -188,9 +194,9 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
                                                     List<InfotrygdHendelse> toRemove) {
         String keyINNVIL = Meldingstype.INFOTRYGD_INNVILGET.getType();
         Optional<InfotrygdHendelse> innvilOpt = groupedByType.containsKey(keyINNVIL) ? groupedByType.get(keyINNVIL)
-            .stream()
-            .filter(ih -> ih.getIdentDato().equals(hendelse.getIdentDato()) && ih.getTypeYtelse().equals(hendelse.getTypeYtelse()))
-            .findFirst() : Optional.empty();
+                .stream()
+                .filter(ih -> ih.getIdentDato().equals(hendelse.getIdentDato()) && ih.getTypeYtelse().equals(hendelse.getTypeYtelse()))
+                .findFirst() : Optional.empty();
 
         if (innvilOpt.isPresent()) {
             toRemove.add(innvilOpt.get());
@@ -205,13 +211,13 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
 
     private Optional<BehandlingOverlappInfotrygd> vurderHendelse(Behandling behandling, Optional<InfotrygdHendelse> nyesteHendelsen, Collection<Ytelse> ytelseList, ÅpenDatoIntervallEntitet periodeVL) {
         Optional<InfotrygdHendelse> innvilgetHendelse = nyesteHendelsen
-            .filter(hendelse -> hendelse.getType().equals(Meldingstype.INFOTRYGD_INNVILGET.getType()));
+                .filter(hendelse -> hendelse.getType().equals(Meldingstype.INFOTRYGD_INNVILGET.getType()));
         if (innvilgetHendelse.isPresent()) {
             InfotrygdHendelse infotrygdHendelse = innvilgetHendelse.get();
             return lagOverlappInfotrygd(behandling, ytelseList, periodeVL, infotrygdHendelse);
         }
         Optional<InfotrygdHendelse> opphørHendelseOpt = nyesteHendelsen
-            .filter(hendelse -> hendelse.getType().equals(Meldingstype.INFOTRYGD_OPPHOERT.getType()));
+                .filter(hendelse -> hendelse.getType().equals(Meldingstype.INFOTRYGD_OPPHOERT.getType()));
         if (opphørHendelseOpt.isPresent()) { // NOSONAR
             InfotrygdHendelse opphørHendelse = opphørHendelseOpt.get();
             return håndterOpphørshendelse(behandling, ytelseList, periodeVL, opphørHendelse);
@@ -247,22 +253,22 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
     private Optional<BehandlingOverlappInfotrygd> lagBehandlingOverlappInfotrygd(Behandling behandling, Ytelse ytelse, ÅpenDatoIntervallEntitet periodeVL) {
         ÅpenDatoIntervallEntitet periodeInfotrygd = ÅpenDatoIntervallEntitet.fraOgMedTilOgMed(ytelse.getPeriode().getFomDato(), ytelse.getPeriode().getTomDato());
         BehandlingOverlappInfotrygd behandlingOverlappInfotrygd = BehandlingOverlappInfotrygd.builder()
-            .medSaksnummer(behandling.getFagsak().getSaksnummer())
-            .medBehandlingId(behandling.getId())
-            .medPeriodeInfotrygd(periodeInfotrygd)
-            .medPeriodeVL(periodeVL)
-            .build();
+                .medSaksnummer(behandling.getFagsak().getSaksnummer())
+                .medBehandlingId(behandling.getId())
+                .medPeriodeInfotrygd(periodeInfotrygd)
+                .medPeriodeVL(periodeVL)
+                .build();
         return Optional.of(behandlingOverlappInfotrygd);
     }
 
     private Optional<BehandlingOverlappInfotrygd> lagBehandlingOverlappInfotrygd(Behandling behandling, InfotrygdHendelse infotrygdHendelse, ÅpenDatoIntervallEntitet periodeVL) {
         ÅpenDatoIntervallEntitet periodeInfotrygd = ÅpenDatoIntervallEntitet.fraOgMedTilOgMed(infotrygdHendelse.getFom(), null);
         BehandlingOverlappInfotrygd behandlingOverlappInfotrygd = BehandlingOverlappInfotrygd.builder()
-            .medSaksnummer(behandling.getFagsak().getSaksnummer())
-            .medBehandlingId(behandling.getId())
-            .medPeriodeInfotrygd(periodeInfotrygd)
-            .medPeriodeVL(periodeVL)
-            .build();
+                .medSaksnummer(behandling.getFagsak().getSaksnummer())
+                .medBehandlingId(behandling.getId())
+                .medPeriodeInfotrygd(periodeInfotrygd)
+                .medPeriodeVL(periodeVL)
+                .build();
         return Optional.of(behandlingOverlappInfotrygd);
     }
 

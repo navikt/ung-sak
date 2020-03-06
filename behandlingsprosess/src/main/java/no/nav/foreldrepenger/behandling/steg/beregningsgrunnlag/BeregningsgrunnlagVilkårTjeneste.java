@@ -8,7 +8,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagRegelResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -46,13 +45,10 @@ class BeregningsgrunnlagVilkårTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, BeregningsgrunnlagRegelResultat beregningsgrunnlagResultat) {
-        boolean vilkårOppfylt = beregningsgrunnlagResultat.getVilkårOppfylt();
-        var beregningsgrunnlagPeriode = beregningsgrunnlagResultat.getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0);
-        String regelEvaluering = beregningsgrunnlagPeriode.getRegelEvalueringVilkårvurdering();
-        String regelInput = beregningsgrunnlagPeriode.getRegelInputVilkårvurdering();
+    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, boolean vilkårOppfylt) {
+
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(regelEvaluering, regelInput, vilkårOppfylt, vilkårene);
+        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (!vilkårOppfylt) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
@@ -61,16 +57,15 @@ class BeregningsgrunnlagVilkårTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    private VilkårResultatBuilder opprettVilkårsResultat(String regelEvaluering, String regelInput, boolean oppfylt, Vilkårene vilkårene) {
+
+    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         vilkårBuilder.leggTil(vilkårBuilder
-            .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) - Sett reelle perioder
-            .medUtfall(oppfylt ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)
-            .medMerknad(oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041)
-            .medAvslagsårsak(oppfylt ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG)
-            .medRegelInput(regelInput)
-            .medRegelEvaluering(regelEvaluering));
+                .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) - Sett reelle perioder
+                .medUtfall(oppfylt ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)
+                .medMerknad(oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041)
+                .medAvslagsårsak(oppfylt ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
         builder.leggTil(vilkårBuilder);
         return builder;
     }

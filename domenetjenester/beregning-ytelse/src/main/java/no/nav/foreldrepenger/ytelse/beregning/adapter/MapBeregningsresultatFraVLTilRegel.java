@@ -5,7 +5,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.foreldrepenger.ytelse.beregning.UttakResultatRepoMapper;
@@ -26,7 +26,7 @@ public class MapBeregningsresultatFraVLTilRegel {
         this.uttakResultatRepoMapper = uttakResultatRepoMapper;
     }
 
-    public BeregningsresultatRegelmodell mapFra(BeregningsgrunnlagEntitet beregningsgrunnlag, 
+    public BeregningsresultatRegelmodell mapFra(Beregningsgrunnlag beregningsgrunnlag,
                                                 UttakInput input) {
         var mapper = FagsakYtelseTypeRef.Lookup.find(this.uttakResultatRepoMapper, input.getFagsakYtelseType()).orElseThrow();
         var regelBeregningsgrunnlag = MapBeregningsgrunnlagFraVLTilRegel.map(beregningsgrunnlag);

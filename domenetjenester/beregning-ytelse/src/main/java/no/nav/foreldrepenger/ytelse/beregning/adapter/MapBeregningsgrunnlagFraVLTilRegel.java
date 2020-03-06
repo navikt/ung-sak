@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPeriode;
@@ -20,7 +20,7 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
     private MapBeregningsgrunnlagFraVLTilRegel() {
     }
 
-    public static no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsgrunnlag map(BeregningsgrunnlagEntitet vlBeregningsgrunnlag) {
+    public static no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsgrunnlag map(Beregningsgrunnlag vlBeregningsgrunnlag) {
         List<AktivitetStatus> aktivitetStatuser = vlBeregningsgrunnlag.getAktivitetStatuser().stream()
             .map(vlBGAktivitetStatus -> AktivitetStatusMapper.fraVLTilRegel(vlBGAktivitetStatus.getAktivitetStatus()))
             .collect(Collectors.toList());
@@ -34,7 +34,7 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
             .build();
     }
 
-    private static List<BeregningsgrunnlagPeriode> mapBeregningsgrunnlagPerioder(BeregningsgrunnlagEntitet vlBeregningsgrunnlag) {
+    private static List<BeregningsgrunnlagPeriode> mapBeregningsgrunnlagPerioder(Beregningsgrunnlag vlBeregningsgrunnlag) {
         return vlBeregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .map(MapBeregningsgrunnlagFraVLTilRegel::mapBeregningsgrunnlagPeriode)
             .collect(Collectors.toList());

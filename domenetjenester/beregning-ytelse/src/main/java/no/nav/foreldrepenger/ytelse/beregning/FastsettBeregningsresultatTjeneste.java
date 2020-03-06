@@ -5,7 +5,7 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
@@ -38,7 +38,7 @@ public class FastsettBeregningsresultatTjeneste {
         this.mapBeregningsresultatFraRegelTilVL = mapBeregningsresultatFraRegelTilVL;
     }
 
-    public BeregningsresultatEntitet fastsettBeregningsresultat(BeregningsgrunnlagEntitet beregningsgrunnlag, UttakInput input) {
+    public BeregningsresultatEntitet fastsettBeregningsresultat(Beregningsgrunnlag beregningsgrunnlag, UttakInput input) {
         // Map til regelmodell
         BeregningsresultatRegelmodell regelmodell = mapBeregningsresultatFraVLTilRegel.mapFra(beregningsgrunnlag, input);
         // Kalle regel

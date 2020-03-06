@@ -1,16 +1,16 @@
 package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
@@ -20,7 +20,6 @@ import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @FagsakYtelseTypeRef("*")
 @BehandlingStegRef(kode = "KOFAKBER")
@@ -28,46 +27,27 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 @ApplicationScoped
 public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {
 
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private BehandlingRepository behandlingRepository;
-    private HentBeregningsgrunnlagTjeneste hentBeregningsgrunnlagTjeneste;
-    private BeregningsgrunnlagInputProvider beregningsgrunnlagInputProvider;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     protected KontrollerFaktaBeregningSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public KontrollerFaktaBeregningSteg(BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                        BehandlingRepository behandlingRepository,
-                                        HentBeregningsgrunnlagTjeneste hentBeregningsgrunnlagTjeneste,
-                                        BeregningsgrunnlagInputProvider inputTjenesteProvider) {
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+    public KontrollerFaktaBeregningSteg(BehandlingRepository behandlingRepository,
+                                        KalkulusTjeneste kalkulusTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.hentBeregningsgrunnlagTjeneste = hentBeregningsgrunnlagTjeneste;
-        this.beregningsgrunnlagInputProvider = Objects.requireNonNull(inputTjenesteProvider, "inputTjenesteProvider");
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var input = getInputTjeneste(behandling.getFagsakYtelseType()).lagInput(behandling);
-        List<BeregningAksjonspunktResultat> aksjonspunkter = beregningsgrunnlagTjeneste.kontrollerFaktaBeregningsgrunnlag(input);
+
+        List<BeregningAksjonspunktResultat> aksjonspunkter = kalkulusTjeneste.fortsettBeregning(BehandlingReferanse.fra(behandling), KONTROLLER_FAKTA_BEREGNING);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
     }
 
-    @Override
-    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        Boolean erOverstyrt = hentBeregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(kontekst.getBehandlingId())
-            .map(BeregningsgrunnlagEntitet::isOverstyrt)
-            .orElse(false);
-        if (BehandlingStegType.KONTROLLER_FAKTA_BEREGNING.equals(tilSteg) && !erOverstyrt) {
-            beregningsgrunnlagTjeneste.getRyddBeregningsgrunnlag(kontekst).gjenopprettOppdatertBeregningsgrunnlag();
-        }
-    }
-
-    private BeregningsgrunnlagInputFelles getInputTjeneste(FagsakYtelseType ytelseType) {
-        return beregningsgrunnlagInputProvider.getTjeneste(ytelseType);
-    }
 }

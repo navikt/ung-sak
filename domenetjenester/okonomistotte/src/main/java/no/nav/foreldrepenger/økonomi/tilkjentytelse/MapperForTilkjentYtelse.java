@@ -58,7 +58,7 @@ class MapperForTilkjentYtelse {
             : TilkjentYtelseAndelV1.refusjon(inntektskategori, dagsats, satsType);
 
         Optional<Arbeidsgiver> arbeidsgiverOpt = andel.getArbeidsgiver();
-        if (arbeidsgiverOpt.isPresent()) {
+        if (!andel.erBrukerMottaker() && arbeidsgiverOpt.isPresent()) {
             if (andel.erArbeidsgiverPrivatperson()) {
                 andelV1.medArbeidsgiverAktørId(arbeidsgiverOpt.get().getIdentifikator());
             } else {
@@ -67,6 +67,4 @@ class MapperForTilkjentYtelse {
         }
         return andelV1;
     }
-
-
 }
