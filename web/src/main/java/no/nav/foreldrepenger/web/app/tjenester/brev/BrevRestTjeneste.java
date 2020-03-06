@@ -117,15 +117,16 @@ public class BrevRestTjeneste {
 
     @GET
     @Path(HENT_VEDTAKVARSEL_PATH)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Operation(description = "Hent vedtak varsel gitt behandlingId", tags = "vedtak")
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentVedtaksdokument(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public Response hentVedtakVarsel(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var varsel = lagVedtakVarsel(behandlingUuid.getBehandlingUuid());
         if(varsel.isEmpty()) {
             return Response.noContent().build();
         } else {
-            return Response.ok(varsel.get(), "text/html").build();
+            return Response.ok(varsel.get(), MediaType.APPLICATION_JSON).build();
         }
     }
 
