@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.ytelse.UttakInputTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
@@ -19,6 +20,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.beregning.Beregningsres
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
@@ -38,6 +40,7 @@ public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private UttakInputTjeneste uttakInputTjeneste;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     protected BeregneYtelseStegImpl() {
         // for proxy
@@ -48,8 +51,10 @@ public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
                                  HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                  UttakInputTjeneste uttakInputTjeneste,
                                  FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
+                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
         this.uttakInputTjeneste = uttakInputTjeneste;
+        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
@@ -61,11 +66,13 @@ public class BeregneYtelseStegImpl implements BeregneYtelseSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var input = uttakInputTjeneste.lagInput(behandlingId);
-        var ref = input.getBehandlingReferanse();
+        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        
+        var input = uttakInputTjeneste.lagInput(ref);
 
         BeregningsgrunnlagEntitet beregningsgrunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagAggregatForBehandling(behandlingId);
-
+        
         // Kalle regeltjeneste
         BeregningsresultatEntitet beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, input);
 

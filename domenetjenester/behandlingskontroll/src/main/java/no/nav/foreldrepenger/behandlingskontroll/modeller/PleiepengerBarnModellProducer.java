@@ -38,11 +38,13 @@ public class PleiepengerBarnModellProducer {
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
             BehandlingStegType.VURDER_SAMLET,
+
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
             BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
             BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG,
             BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG,
+
             BehandlingStegType.BEREGN_YTELSE,
             BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT,
             BehandlingStegType.SIMULER_OPPDRAG,
