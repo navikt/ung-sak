@@ -37,6 +37,7 @@ import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
@@ -63,6 +64,9 @@ public class BeregneYtelseStegImplTest {
 
     @Inject
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    
+    @Inject
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private final BeregningsresultatRepository beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
@@ -85,6 +89,7 @@ public class BeregneYtelseStegImplTest {
         steg = new BeregneYtelseStegImpl(repositoryProvider, hentBeregningsgrunnlagTjeneste,
             uttakInputTjeneste,
             fastsettBeregningsresultatTjeneste,
+            skjæringstidspunktTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
     }
 

@@ -45,7 +45,7 @@ public class VedtakVarselRepository {
 
     public Optional<VedtakVarsel> hentHvisEksisterer(UUID behandlingUuid) {
         TypedQuery<VedtakVarsel> query = entityManager
-                .createQuery("from VedtakVarsel where uuid = :uuid", VedtakVarsel.class);
+                .createQuery("SELECT v from VedtakVarsel v INNER JOIN Behandling b on b.id=v.behandlingId where b.uuid = :uuid", VedtakVarsel.class);
             query.setParameter("uuid", behandlingUuid);
             return HibernateVerktøy.hentUniktResultat(query);
     }
