@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
@@ -28,6 +29,10 @@ public class VilkårsResultat extends BaseEntitet {
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
+    
+    @Version
+    @Column(name = "versjon", nullable = false)
+    private long versjon;
 
     public VilkårsResultat() {
     }
