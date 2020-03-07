@@ -25,12 +25,6 @@ import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 
 /**
  * Entitetsklasse for løpende medlemskap.
- *
- * Implementert iht. builder pattern (ref. "Effective Java, 2. ed." J.Bloch).
- * Non-public constructors og setters, dvs. immutable.
- *
- * OBS: Legger man til nye felter så skal dette oppdateres mange steder:
- * builder, equals, hashcode etc.
  */
 
 @Entity(name = "VurdertLøpendeMedlemskap")
