@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
@@ -36,11 +37,13 @@ public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends
     @Before
     public void setup() {
         this.behandlingsoppretterSpied = Mockito.spy(behandlingsoppretter);
+        UttakTjeneste uttakTjeneste = Mockito.mock(UttakTjeneste.class);
         dokumentmottakerSøknad = new DokumentmottakerSøknadDefault(
             repositoryProvider,
             dokumentmottakerFelles,
             mottatteDokumentTjeneste,
             behandlingsoppretterSpied,
+            uttakTjeneste,
             kompletthetskontroller);
     }
 
@@ -48,13 +51,14 @@ public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends
     @Test
     public void skal_opprette_ny_førstegangsbehandling_når_forrige_behandling_var_avslått() {
         //Arrange
-        MottatteDokumentTjeneste mockMD = Mockito.mock(MottatteDokumentTjeneste.class);
-        HistorikkinnslagTjeneste mockHist = Mockito.mock(HistorikkinnslagTjeneste.class);
-        BehandlendeEnhetTjeneste enhetsTjeneste = mock(BehandlendeEnhetTjeneste.class);
-        OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
+        var mockMD = Mockito.mock(MottatteDokumentTjeneste.class);
+        var mockHist = Mockito.mock(HistorikkinnslagTjeneste.class);
+        var enhetsTjeneste = mock(BehandlendeEnhetTjeneste.class);
+        var enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(enhetsTjeneste.finnBehandlendeEnhetFraSøker(any(Fagsak.class))).thenReturn(enhet);
         when(enhetsTjeneste.finnBehandlendeEnhetFraSøker(any(Behandling.class))).thenReturn(enhet);
-        ProsessTaskRepository taskrepo = mock(ProsessTaskRepository.class);
+        var taskrepo = mock(ProsessTaskRepository.class);
+        UttakTjeneste uttakTjeneste = mock(UttakTjeneste.class);
         DokumentmottakerFelles felles = new DokumentmottakerFelles(repositoryProvider,
             taskrepo,
             enhetsTjeneste,
@@ -66,6 +70,7 @@ public class DokumentmottakerSøknadHåndteringVedAvslåttBehandlingTest extends
             felles,
             mockMD,
             behandlingsoppretterSpied,
+            uttakTjeneste,
             kompletthetskontroller);
         Behandling nyBehandling = opprettNyBehandlingUtenVedtak(FagsakYtelseType.FORELDREPENGER);
         Mockito.doReturn(nyBehandling).when(behandlingsoppretterSpied).opprettNyFørstegangsbehandlingMedImOgVedleggFraForrige(Mockito.any(),  Mockito.any());

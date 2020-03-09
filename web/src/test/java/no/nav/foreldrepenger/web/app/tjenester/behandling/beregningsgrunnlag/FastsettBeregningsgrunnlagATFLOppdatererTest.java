@@ -2,11 +2,9 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 

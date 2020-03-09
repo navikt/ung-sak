@@ -66,7 +66,7 @@ public class KalkulusRestTjeneste {
     private URI erEndringIBeregningEndpoint;
     private URI deaktiverBeregningsgrunnlag;
 
-    public KalkulusRestTjeneste() {
+    protected KalkulusRestTjeneste() {
         // cdi
     }
 
@@ -93,7 +93,7 @@ public class KalkulusRestTjeneste {
         try {
             return getTilstandResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -103,7 +103,7 @@ public class KalkulusRestTjeneste {
         try {
             return getTilstandResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -113,7 +113,7 @@ public class KalkulusRestTjeneste {
         try {
             return getTilstandResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -122,7 +122,7 @@ public class KalkulusRestTjeneste {
         try {
             utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -132,7 +132,7 @@ public class KalkulusRestTjeneste {
         try {
             return getBeregningsgrunnlagGrunnlagDtoResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -142,7 +142,7 @@ public class KalkulusRestTjeneste {
         try {
             return getBeregningsgrunnlagGrunnlagDtoResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -153,7 +153,7 @@ public class KalkulusRestTjeneste {
         try {
             return getBeregningsgrunnlagDtoResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -164,7 +164,7 @@ public class KalkulusRestTjeneste {
         try {
             return getErEndringIBeregningResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -173,7 +173,7 @@ public class KalkulusRestTjeneste {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<TilstandResponse>(endpoint, tilstandReader));
         } catch (IOException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
 
@@ -181,7 +181,7 @@ public class KalkulusRestTjeneste {
         try {
             utførOgHent(endpoint, json, new ObjectReaderResponseHandler<TilstandResponse>(endpoint, tilstandReader));
         } catch (IOException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
 
@@ -189,7 +189,7 @@ public class KalkulusRestTjeneste {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, grunnlagReader));
         } catch (IOException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
 
@@ -197,7 +197,7 @@ public class KalkulusRestTjeneste {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, dtoReader));
         } catch (IOException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
 
@@ -205,7 +205,7 @@ public class KalkulusRestTjeneste {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, dtoReader));
         } catch (IOException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
 
@@ -213,7 +213,7 @@ public class KalkulusRestTjeneste {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, fastSattReader));
         } catch (IOException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
 
@@ -222,7 +222,7 @@ public class KalkulusRestTjeneste {
         try {
             return getBeregningsgrunnlagFastsattDtoResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
-            throw KalkulusTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -249,9 +249,9 @@ public class KalkulusRestTjeneste {
                 String feilmelding = "Kunne ikke hente grunnlag fra kalkulus: " + httpPost.getURI()
                         + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
-                    throw KalkulusTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
                 } else {
-                    throw KalkulusTjenesteFeil.FEIL.feilVedKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(feilmelding).toException();
                 }
             }
         } catch (RuntimeException re) {
@@ -270,8 +270,8 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    public interface KalkulusTjenesteFeil extends DeklarerteFeil {
-        KalkulusRestTjeneste.KalkulusTjenesteFeil FEIL = FeilFactory.create(KalkulusRestTjeneste.KalkulusTjenesteFeil.class);
+    interface RestTjenesteFeil extends DeklarerteFeil {
+        static final KalkulusRestTjeneste.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestTjeneste.RestTjenesteFeil.class);
 
         @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilKalkulus(String feilmelding);

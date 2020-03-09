@@ -65,8 +65,8 @@ public class UttaksplanRequestTest {
         
         var arbeidsforhold = new UttakArbeidsforhold();
         var arbeidsforholdInfo = new UttakArbeidsforholdInfo();
-        arbeidsforholdInfo.setJobberNormalt(Duration.parse("P7D"));
-        arbeidsforholdInfo.setSkalJobbe(new BigDecimal(50));
+        arbeidsforholdInfo.setJobberNormaltPerUke(Duration.parse("P7D"));
+        arbeidsforholdInfo.setSkalJobbeProsent(new BigDecimal(50));
         arbeidsforhold.setPerioder(Map.of(new Periode(fom, tom), arbeidsforholdInfo));
         req.setArbeid(Map.of(UUID.randomUUID(), arbeidsforhold));
         

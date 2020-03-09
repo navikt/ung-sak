@@ -2,7 +2,6 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;

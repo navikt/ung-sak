@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.behandling.steg.foreslåresultat;
 
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -19,9 +17,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultat
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
@@ -30,8 +25,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 @ApplicationScoped
 @FagsakYtelseTypeRef
 class ForeslåBehandlingsresultatTjeneste {
-
-    private UttakRepository uttakRepository;
 
     private RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder;
     private VedtakVarselRepository vedtakVarselRepository;
@@ -53,18 +46,11 @@ class ForeslåBehandlingsresultatTjeneste {
                                               FordelingRepository fordelingRepository,
                                               @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
         this.fordelingRepository = fordelingRepository;
-        this.uttakRepository = repositoryProvider.getUttakRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.revurderingBehandlingsresultatutleder = revurderingBehandlingsresultatutleder;
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-    }
-
-    protected boolean minstEnGyldigUttaksPeriode(VedtakVarsel behandlingsresultat) {
-        Optional<UttakResultatEntitet> uttakResultat = uttakRepository.hentUttakResultatHvisEksisterer(behandlingsresultat.getBehandlingId());
-        return uttakResultat.isPresent()
-            && uttakResultat.get().getGjeldendePerioder().getPerioder().stream().anyMatch(UttakResultatPeriodeEntitet::isInnvilget);
     }
 
     public void foreslåVedtakVarsel(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {

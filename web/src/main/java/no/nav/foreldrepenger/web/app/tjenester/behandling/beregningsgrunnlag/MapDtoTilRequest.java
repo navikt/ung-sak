@@ -63,7 +63,7 @@ class MapDtoTilRequest {
         if (dto instanceof FordelBeregningsgrunnlagDto) {
             FordelBeregningsgrunnlagDto fordelBeregningsgrunnlagDto = (FordelBeregningsgrunnlagDto) dto;
             return new FaktaOmFordelingHåndteringDto(OppdatererDtoMapper.mapFordelBeregningsgrunnlagDto(fordelBeregningsgrunnlagDto));
-        };
+        }
         throw new IllegalStateException("Aksjonspunkt er ikke mappet i kalkulus");
     }
 
@@ -71,12 +71,12 @@ class MapDtoTilRequest {
         if (dto instanceof OverstyrBeregningsaktiviteterDto) {
             OverstyrBeregningsaktiviteterDto overstyrBeregningsaktiviteterDto = (OverstyrBeregningsaktiviteterDto) dto;
             return new no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto(OppdatererDtoMapper.mapOverstyrBeregningsaktiviteterDto(overstyrBeregningsaktiviteterDto.getBeregningsaktivitetLagreDtoList()));
-        };
+        }
         if (dto instanceof OverstyrBeregningsgrunnlagDto) {
             OverstyrBeregningsgrunnlagDto overstyrBeregningsgrunnlagDto = (OverstyrBeregningsgrunnlagDto) dto;
             return new OverstyrBeregningsgrunnlagHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(overstyrBeregningsgrunnlagDto.getFakta()),
                 OppdatererDtoMapper.mapFastsettBeregningsgrunnlagPeriodeAndeler(overstyrBeregningsgrunnlagDto.getOverstyrteAndeler()));
-        };
+        }
         throw new IllegalStateException("Overstyringaksjonspunkt er ikke mappet i kalkulus");
 
     }

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving;
+package no.nav.foreldrepenger.økonomi.tilbakekreving.modell;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -11,9 +11,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
+import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;

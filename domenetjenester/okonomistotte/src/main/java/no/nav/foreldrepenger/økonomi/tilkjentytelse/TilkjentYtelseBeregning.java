@@ -12,9 +12,7 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 
 @FagsakYtelseTypeRef
@@ -22,21 +20,21 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 public class TilkjentYtelseBeregning implements YtelseTypeTilkjentYtelseTjeneste {
 
     private BeregningsresultatRepository beregningsresultatRepository;
-    private UttakRepository uttakRepository;
+    private UttakTjeneste uttakTjeneste;
 
     TilkjentYtelseBeregning() {
-        //for CDI proxy
+        // for CDI proxy
     }
 
     @Inject
-    public TilkjentYtelseBeregning(BeregningsresultatRepository beregningsresultatRepository, UttakRepository uttakRepository) {
+    public TilkjentYtelseBeregning(BeregningsresultatRepository beregningsresultatRepository, UttakTjeneste uttakTjeneste) {
         this.beregningsresultatRepository = beregningsresultatRepository;
-        this.uttakRepository = uttakRepository;
+        this.uttakTjeneste = uttakTjeneste;
     }
 
     @Override
     public List<TilkjentYtelsePeriodeV1> hentTilkjentYtelsePerioder(Long behandlingId) {
-        Optional<BeregningsresultatEntitet> resultatOpt = hentResultatFP(behandlingId);
+        Optional<BeregningsresultatEntitet> resultatOpt = hentResultat(behandlingId);
         if (!resultatOpt.isPresent()) {
             return Collections.emptyList();
         }
@@ -52,24 +50,21 @@ public class TilkjentYtelseBeregning implements YtelseTypeTilkjentYtelseTjeneste
     @Override
     public Boolean erOpphørEtterSkjæringstidspunkt(BehandlingReferanse ref) {
         if (!ref.getBehandlingResultat().isBehandlingsresultatOpphørt()) {
-            return null; //ikke relevant //NOSONAR
+            return null; // ikke relevant //NOSONAR
         }
 
-        Optional<UttakResultatEntitet> uttak = uttakRepository.hentUttakResultatHvisEksisterer(ref.getBehandlingId());
-        return uttak.map(uttakResultatEntitet ->
-            uttakResultatEntitet.getGjeldendePerioder().getPerioder().stream()
-                .anyMatch(UttakResultatPeriodeEntitet::isInnvilget))
-            .orElse(false);
+        var uttakOpt = uttakTjeneste.hentUttaksplanHvisEksisterer(ref.getBehandlingUuid());
+        return uttakOpt.map(uttaksplan -> uttaksplan.harInnvilgetPerioder()).orElse(false);
     }
 
     @Override
     public LocalDate hentEndringstidspunkt(Long behandlingId) {
-        return hentResultatFP(behandlingId)
+        return hentResultat(behandlingId)
             .flatMap(BeregningsresultatEntitet::getEndringsdato)
             .orElse(null);
     }
 
-    private Optional<BeregningsresultatEntitet> hentResultatFP(Long behandlingId) {
+    private Optional<BeregningsresultatEntitet> hentResultat(Long behandlingId) {
         return beregningsresultatRepository.hentBeregningsresultat(behandlingId);
     }
 }
