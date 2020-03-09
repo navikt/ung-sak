@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,4 +143,9 @@ public class UttaksplanRequest {
         this.tilsynsbehov = tilsynsbehov;
     }
 
+    public Collection<UUID> getAlleBehandlingIder(){
+        var alle = new ArrayList<>(getAndrePartersBehandlinger());
+        alle.add(getBehandlingId());
+        return alle;
+    }
 }
