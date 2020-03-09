@@ -192,9 +192,9 @@ spec:
     - name: ORGANISASJON_V4_URL
       value: https://modapp-q1.adeo.no/ereg/ws/OrganisasjonService/v4
     - name: MEDLEM_V2_URL
-      value: https://app.adeo.no/medl2/ws/Medlemskap/v2
+      value: https://app-q1.adeo.no/medl2/ws/Medlemskap/v2
     - name: ARBEIDSFORDELING_V1_URL
-      value: https://app.adeo.no/norg2/ws/Arbeidsfordeling/v1
+      value: https://app-q1.adeo.no/norg2/ws/Arbeidsfordeling/v1
     - name: KODEVERK_V2_URL
       value: https://kodeverk.nais.preprod.local/ws/kodeverk/v2
 
