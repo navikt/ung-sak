@@ -33,7 +33,7 @@ public class BeregningsresultatTjeneste {
     }
 
     public Optional<BeregningsresultatDto> lagBeregningsresultatMedUttaksplan(Behandling behandling) {
-        Optional<Uttaksplan> uttakResultat = uttakTjeneste.hentUttaksplanHvisEksisterer(behandling.getUuid());
+        Optional<Uttaksplan> uttakResultat = uttakTjeneste.hentUttaksplan(behandling.getUuid());
         Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregatEntitet = beregningsresultatRepository
             .hentBeregningsresultatAggregat(behandling.getId());
         return beregningsresultatAggregatEntitet

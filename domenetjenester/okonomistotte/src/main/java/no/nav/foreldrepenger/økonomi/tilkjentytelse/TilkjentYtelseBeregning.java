@@ -53,7 +53,7 @@ public class TilkjentYtelseBeregning implements YtelseTypeTilkjentYtelseTjeneste
             return null; // ikke relevant //NOSONAR
         }
 
-        var uttakOpt = uttakTjeneste.hentUttaksplanHvisEksisterer(ref.getBehandlingUuid());
+        var uttakOpt = uttakTjeneste.hentUttaksplan(ref.getBehandlingUuid());
         return uttakOpt.map(uttaksplan -> uttaksplan.harInnvilgetPerioder()).orElse(false);
     }
 

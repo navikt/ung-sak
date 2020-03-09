@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.domene.uttak;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,6 +10,8 @@ public interface UttakTjeneste {
 
     boolean harAvslåttUttakPeriode(UUID behandlingUuid);
 
-    Optional<Uttaksplan> hentUttaksplanHvisEksisterer(UUID behandlingUuid);
+    List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid);
+
+    Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid);
 
 }

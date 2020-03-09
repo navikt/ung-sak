@@ -1,9 +1,12 @@
 package no.nav.foreldrepenger.domene.uttak;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
@@ -35,8 +38,13 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     }
 
     @Override
-    public Optional<Uttaksplan> hentUttaksplanHvisEksisterer(UUID behandlingUuid) {
-        return Optional.ofNullable(uttaksplaner.get(behandlingUuid));
+    public Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid) {
+        return hentUttaksplaner(behandlingUuid).stream().findFirst();
+    }
+
+    @Override
+    public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
+        return Arrays.asList(behandlingUuid).stream().map(uuid -> uttaksplaner.get(uuid)).collect(Collectors.toList());
     }
 
     public void lagreUttakResultatPerioder(UUID behandlingId, Uttaksplan uttaksplan) {

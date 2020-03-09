@@ -44,7 +44,7 @@ public class OpphørUttakTjeneste {
     }
 
     private Uttaksplan hentUttakResultatFor(UUID behandlingId) {
-        return uttakTjeneste.hentUttaksplanHvisEksisterer(behandlingId).orElse(null);
+        return uttakTjeneste.hentUttaksplan(behandlingId).orElse(null);
     }
 
     private LocalDate utledOpphørsdatoFraUttak(Uttaksplan uttaksplan, LocalDate skjæringstidspunkt) {

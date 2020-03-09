@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.domene.uttak;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,9 +17,6 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     private UttakRestTjeneste uttakRestTjeneste;
 
-    // bruker inntil vi får koblet inn uttakRestTjeneste kall
-    private UttakInMemoryTjeneste uttakInMemoryTjeneste = new UttakInMemoryTjeneste();
-
     protected DefaultUttakTjeneste() {
     }
 
@@ -29,15 +27,17 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     @Override
     public boolean harAvslåttUttakPeriode(UUID behandlingUuid) {
-        var uttaksplanOpt = hentUttaksplanHvisEksisterer(behandlingUuid);
+        var uttaksplanOpt = hentUttaksplan(behandlingUuid);
         return uttaksplanOpt.map(ut -> ut.harAvslåttePerioder()).orElse(false);
     }
 
     @Override
-    public Optional<Uttaksplan> hentUttaksplanHvisEksisterer(UUID behandlingUuid) {
-        if (true) {
-            return uttakInMemoryTjeneste.hentUttaksplanHvisEksisterer(behandlingUuid); // FIXME K9: Fjern dette
-        }
-        return uttakRestTjeneste.hentUttaksplan(behandlingUuid);
+    public Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid) {
+        return hentUttaksplaner(behandlingUuid).stream().findFirst();
+    }
+
+    @Override
+    public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
+        return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
     }
 }

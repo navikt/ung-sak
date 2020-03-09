@@ -3,15 +3,20 @@ package no.nav.foreldrepenger.domene.uttak.rest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksplanListe;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -34,6 +41,7 @@ public class UttakRestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(UttakRestTjeneste.class);
 
     private ObjectMapper objectMapper = JsonMapper.getMapper();
+    private ObjectReader uttaksplanListReader = objectMapper.readerFor(UttaksplanListe.class);
     private ObjectReader uttaksplanReader = objectMapper.readerFor(Uttaksplan.class);
 
     private OidcRestClient restKlient;
@@ -45,18 +53,31 @@ public class UttakRestTjeneste {
 
     public UttakRestTjeneste(OidcRestClient restKlient, @KonfigVerdi(value = "k9uttak.url") URI endpoint) {
         this.restKlient = restKlient;
-        this.endpointUttaksplan = toUri(endpoint, "/api/uttaksplan/v1");
+        this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
     }
 
-    public Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid) {
+    public Uttaksplan opprettUttaksplan(UttaksplanRequest req) {
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
-        builder.setParameter("behandlingId", behandlingUuid.toString());
-        HttpGet httpGet;
         try {
-            httpGet = new HttpGet(builder.build());
-            return utførOgHent(httpGet, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+            HttpPost kall = new HttpPost(builder.build());
+            var json = objectMapper.writer().writeValueAsString(req);
+            kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            return utførOgHent(kall, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttak(behandlingUuid, e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(req.getAlleBehandlingIder(), e).toException();
+        }
+    }
+
+    public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
+        URIBuilder builder = new URIBuilder(endpointUttaksplan);
+        for (var bid : behandlingUuid) {
+            builder.addParameter("behandlingId", bid.toString());
+        }
+        try {
+            HttpGet kall = new HttpGet(builder.build());
+            return utførOgHent(kall, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanListReader));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(Arrays.asList(behandlingUuid), e).toException();
         }
     }
 
@@ -107,11 +128,11 @@ public class UttakRestTjeneste {
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000002", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttak(String feilmelding);
-        
+
         @TekniskFeil(feilkode = "K9SAK-UT-1000003", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000004", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilUttak(UUID behandlingUuid, Throwable t);
+        Feil feilKallTilUttak(Collection<UUID> behandlingUuid, Throwable t);
     }
 }
