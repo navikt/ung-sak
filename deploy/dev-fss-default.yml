@@ -149,6 +149,8 @@ spec:
       value: https://infotrygd-hendelser-api-q1.nais.preprod.local/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.q1/fpabakus
+    - name: FTKALKULUS_URL
+      value: http://ftkalkulus.q1/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
@@ -195,6 +197,7 @@ spec:
       value: https://app-q1.adeo.no/norg2/ws/Arbeidsfordeling/v1
     - name: KODEVERK_V2_URL
       value: https://kodeverk.nais.preprod.local/ws/kodeverk/v2
+
 
 
     # Sikkerhet:
