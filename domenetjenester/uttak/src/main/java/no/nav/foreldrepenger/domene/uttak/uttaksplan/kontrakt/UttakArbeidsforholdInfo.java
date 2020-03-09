@@ -20,30 +20,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UttakArbeidsforholdInfo {
 
-    @JsonProperty(value="jobberNormalt", required=true)
+    @JsonProperty(value="jobberNormaltPerUke", required=true)
     @NotNull
     @Valid
-    private Duration jobberNormalt;
+    private Duration jobberNormaltPerUke;
     
-    @JsonProperty(value="skalJobbe", required=true)
+    @JsonProperty(value="skalJobbeProsent", required=true)
     @NotNull
     @DecimalMin(value = "0.00")
     @DecimalMax(value="100.00")
-    private BigDecimal skalJobbe;
+    private BigDecimal skalJobbeProsent;
 
-    public Duration getJobberNormalt() {
-        return jobberNormalt;
+    public Duration getJobberNormaltPerUke() {
+        return jobberNormaltPerUke;
     }
 
-    public void setJobberNormalt(Duration jobberNormalt) {
-        this.jobberNormalt = jobberNormalt;
+    public void setJobberNormaltPerUke(Duration jobberNormalt) {
+        this.jobberNormaltPerUke = jobberNormalt;
     }
 
-    public BigDecimal getSkalJobbe() {
-        return skalJobbe;
+    public BigDecimal getSkalJobbeProsent() {
+        return skalJobbeProsent;
     }
 
-    public void setSkalJobbe(BigDecimal skalJobbe) {
-        this.skalJobbe = skalJobbe;
+    public void setSkalJobbeProsent(BigDecimal skalJobbe) {
+        this.skalJobbeProsent = skalJobbe;
     }
 }

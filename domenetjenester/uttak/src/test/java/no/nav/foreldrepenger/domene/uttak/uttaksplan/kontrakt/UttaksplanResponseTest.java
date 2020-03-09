@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo.UttaksperiodeType;
+import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 
 public class UttaksplanResponseTest {
 
@@ -27,13 +27,13 @@ public class UttaksplanResponseTest {
 
     @Test
     public void skal_serialisere_deserialisere_UttaksplanResponse() throws Exception {
-        var uttaksplan = new UttaksplanResponse();
+        var uttaksplan = new Uttaksplan();
         LocalDate fom = LocalDate.now();
         LocalDate tom = fom.plusDays(10);
         
         var uttaksperiodeInfo = new UttaksperiodeInfo();
         uttaksperiodeInfo.setGrad(100);
-        uttaksperiodeInfo.setType(UttaksperiodeType.INNVILGET);
+        uttaksperiodeInfo.setType(PeriodeResultatType.INNVILGET);
         uttaksperiodeInfo.setUtbetalingsgrader(Map.of(UUID.randomUUID(), new UttakUtbetalingsgrad(new BigDecimal("100.00"))));
         uttaksplan.setPerioder(Map.of(new Periode(fom, tom ), uttaksperiodeInfo));
 
@@ -44,7 +44,7 @@ public class UttaksplanResponseTest {
         var reqJson = OM.writeValueAsString(uttaksplan);
         assertThat(reqJson).isNotEmpty();
 
-        var response = OM.readValue(reqJson, UttaksplanResponse.class);
+        var response = OM.readValue(reqJson, Uttaksplan.class);
         assertThat(response.getPerioder()).hasSameSizeAs(uttaksplan.getPerioder());
         
         System.out.println(reqJson);

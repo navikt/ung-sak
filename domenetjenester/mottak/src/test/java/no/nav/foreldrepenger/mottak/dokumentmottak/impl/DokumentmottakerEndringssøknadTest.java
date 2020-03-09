@@ -23,6 +23,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
@@ -43,6 +44,9 @@ public class DokumentmottakerEndringssøknadTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
+
+    @Inject
+    private UttakTjeneste uttakTjeneste;
 
     @Mock
     private Behandlingsoppretter behandlingsoppretter;
@@ -73,30 +77,34 @@ public class DokumentmottakerEndringssøknadTest {
             enhetsTjeneste, historikkinnslagTjeneste, mottatteDokumentTjeneste, behandlingsoppretter);
         dokumentmottakerFelles = Mockito.spy(dokumentmottakerFelles);
 
-        dokumentmottaker = new DokumentmottakerEndringssøknad(repositoryProvider, dokumentmottakerFelles,
-            mottatteDokumentTjeneste, behandlingsoppretter, kompletthetskontroller);
+        dokumentmottaker = new DokumentmottakerEndringssøknad(repositoryProvider,
+            dokumentmottakerFelles,
+            mottatteDokumentTjeneste,
+            behandlingsoppretter,
+            uttakTjeneste,
+            kompletthetskontroller);
         dokumentmottaker = Mockito.spy(dokumentmottaker);
     }
 
     @Test
     public void skal_opprette_task_for_manuell_vurdering_av_endringssøknad_dersom_ingen_behandling_finnes_fra_før() {
-        //Arrange
+        // Arrange
         Fagsak fagsak = nyFagsak();
         Long fagsakId = fagsak.getId();
         DokumentTypeId dokumentTypeEndringssøknad = DokumentTypeId.FORELDREPENGER_ENDRING_SØKNAD;
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeEndringssøknad, fagsakId, "", now(), true, null);
 
-        //Act
+        // Act
         dokumentmottaker.mottaDokument(mottattDokument, fagsak, dokumentTypeEndringssøknad, BehandlingÅrsakType.UDEFINERT);
 
-        //Assert
+        // Assert
         verify(dokumentmottakerFelles).opprettTaskForÅVurdereDokument(fagsak, null, mottattDokument);
     }
 
     @Test
     public void skal_opprette_revurdering_for_endringssøknad_dersom_siste_behandling_er_avsluttet() {
-        //Arrange
+        // Arrange
         Behandling behandling = TestScenarioBuilder
             .builderUtenSøknad()
             .lagre(repositoryProvider);
@@ -115,17 +123,19 @@ public class DokumentmottakerEndringssøknadTest {
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeEndringssøknad, fagsakId, "", now(), true, null);
 
-        //Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeEndringssøknad, BehandlingÅrsakType.UDEFINERT);//Behandlingårsaktype blir aldri satt for mottatt dokument, så input er i udefinert.
+        // Act
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeEndringssøknad, BehandlingÅrsakType.UDEFINERT);// Behandlingårsaktype blir aldri satt for mottatt dokument,
+                                                                                                                                           // så input er i udefinert.
 
-        //Assert
-        verify(behandlingsoppretter).opprettRevurdering(behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER); //Skal ved opprettelse av revurdering fra endringssøknad sette behandlingårsaktype til 'endring fra bruker'.
+        // Assert
+        verify(behandlingsoppretter).opprettRevurdering(behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER); // Skal ved opprettelse av revurdering fra endringssøknad sette
+                                                                                                                            // behandlingårsaktype til 'endring fra bruker'.
         verify(dokumentmottakerFelles).opprettHistorikk(any(Behandling.class), eq(mottattDokument.getJournalpostId()));
     }
 
     @Test
     public void skal_oppdatere_behandling_med_endringssøknad_dersom_siste_behandling_er_åpen() {
-        //Arrange
+        // Arrange
         Behandling behandling = TestScenarioBuilder
             .builderUtenSøknad()
             .lagre(repositoryProvider);
@@ -145,10 +155,10 @@ public class DokumentmottakerEndringssøknadTest {
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, fagsakId, "", now(), true, null);
 
-        //Act
+        // Act
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
 
-        //Assert
+        // Assert
         verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(revurdering, mottattDokument, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurdering, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikk(revurdering, mottattDokument.getJournalpostId());
@@ -156,7 +166,7 @@ public class DokumentmottakerEndringssøknadTest {
 
     @Test
     public void skal_oppdatere_mottatt_dokument_med_behandling_hvis_behandlig_er_på_vent() {
-        //Arrange
+        // Arrange
         Behandling behandling = TestScenarioBuilder
             .builderUtenSøknad()
             .lagre(repositoryProvider);
@@ -176,16 +186,16 @@ public class DokumentmottakerEndringssøknadTest {
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, fagsakId, "", now(), true, null);
 
-        //Act
+        // Act
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.UDEFINERT);
 
-        //Assert
+        // Assert
         verify(mottatteDokumentTjeneste).oppdaterMottattDokumentMedBehandling(mottattDokument, revurdering.getId());
     }
 
     @Test
     public void skal_opprette_vurder_dokument_oppgave_i_gosys_dersom_det_er_åpen_førstegangsbehandling() {
-        //Arrange
+        // Arrange
         Behandling behandling = TestScenarioBuilder
             .builderUtenSøknad()
             .lagre(repositoryProvider);
@@ -195,10 +205,10 @@ public class DokumentmottakerEndringssøknadTest {
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, fagsakId, "", now(), true, null);
 
-        //Act
+        // Act
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
 
-        //Assert
+        // Assert
         verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(behandling, mottattDokument, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         verify(dokumentmottakerFelles).opprettTaskForÅVurdereDokument(behandling.getFagsak(), behandling, mottattDokument);
     }

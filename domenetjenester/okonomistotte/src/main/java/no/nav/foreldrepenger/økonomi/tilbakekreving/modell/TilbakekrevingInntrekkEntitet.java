@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving;
+package no.nav.foreldrepenger.økonomi.tilbakekreving.modell;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

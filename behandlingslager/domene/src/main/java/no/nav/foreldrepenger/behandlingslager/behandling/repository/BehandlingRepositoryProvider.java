@@ -16,7 +16,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
 
 /**
@@ -32,7 +31,6 @@ public class BehandlingRepositoryProvider {
     private MedlemskapRepository medlemskapRepository;
     private HistorikkRepository historikkRepository;
     private SøknadRepository søknadRepository;
-    private UttakRepository uttakRepository;
     private VirksomhetRepository virksomhetRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OpptjeningRepository opptjeningRepository;
@@ -66,7 +64,6 @@ public class BehandlingRepositoryProvider {
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
         this.personopplysningRepository = new PersonopplysningRepository(entityManager);
         this.søknadRepository = new SøknadRepository(entityManager);
-        this.uttakRepository = new UttakRepository(entityManager);
 
         // inntekt arbeid ytelser
         this.virksomhetRepository = new VirksomhetRepository();
@@ -122,10 +119,6 @@ public class BehandlingRepositoryProvider {
 
     public SøknadRepository getSøknadRepository() {
         return søknadRepository;
-    }
-
-    public UttakRepository getUttakRepository() {
-        return uttakRepository;
     }
 
     public VirksomhetRepository getVirksomhetRepository() {

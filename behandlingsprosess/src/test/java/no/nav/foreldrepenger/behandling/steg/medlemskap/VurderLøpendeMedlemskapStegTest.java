@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -35,11 +36,13 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.Vilkår
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -49,7 +52,6 @@ import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -70,6 +72,9 @@ public class VurderLøpendeMedlemskapStegTest {
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    
+    @Inject
+    private UttakInMemoryTjeneste uttakTjeneste;
 
     @Inject
     private VurderLøpendeMedlemskap vurdertLøpendeMedlemskapTjeneste;
@@ -167,21 +172,21 @@ public class VurderLøpendeMedlemskapStegTest {
 
     private void avslutterBehandlingOgFagsak(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        provider.getUttakRepository().lagreOpprinneligUttakResultatPerioder(behandling.getId(), lagUttaksPeriode());
+        uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), lagUttaksPeriode());
 
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, lås);
         fagsakRepository.oppdaterFagsakStatus(behandling.getFagsakId(), FagsakStatus.AVSLUTTET);
     }
 
-    private UttakResultatPerioderEntitet lagUttaksPeriode() {
+    private Uttaksplan lagUttaksPeriode() {
         LocalDate idag = LocalDate.now();
-        UttakResultatPeriodeEntitet periode = new UttakResultatPeriodeEntitet.Builder(idag, idag.plusDays(6))
-            .medPeriodeResultat(PeriodeResultatType.INNVILGET, PeriodeResultatÅrsak.UKJENT)
-            .build();
-        UttakResultatPerioderEntitet perioder = new UttakResultatPerioderEntitet();
-        perioder.leggTilPeriode(periode);
-        return perioder;
+
+        var uttaksplan = new Uttaksplan();
+        var periode = new Periode(idag, idag.plusDays(6));
+        uttaksplan.leggTilPeriode(periode, new UttaksperiodeInfo(PeriodeResultatType.INNVILGET, 100, Map.of()));
+
+        return uttaksplan;
     }
 
     private void oppdaterMedlem(LocalDate datoMedEndring, MedlemskapPerioderEntitet periode, Long behandlingId) {

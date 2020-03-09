@@ -1,13 +1,12 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -15,21 +14,21 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.Kopimaskin;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.foreldrepenger.domene.uttak.OpphørUttakTjeneste;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
@@ -44,58 +43,39 @@ public class BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private OpphørUttakTjeneste opphørUttakTjeneste;
 
     BeregningsresultatMapper() {
         // For inject
     }
 
     @Inject
-    public BeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+    public BeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                    OpphørUttakTjeneste opphørUttakTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.opphørUttakTjeneste = opphørUttakTjeneste;
     }
 
     public BeregningsresultatDto lagBeregningsresultatMedUttaksplan(
                                                                     Behandling behandling,
                                                                     BehandlingBeregningsresultatEntitet beregningsresultatAggregat,
-                                                                    Optional<UttakResultatEntitet> uttakResultat) {
+                                                                    Optional<Uttaksplan> uttakResultat) {
+        var ref = BehandlingReferanse.fra(behandling);
+        LocalDate opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
-            .medOpphoersdato(getOpphørsdato(uttakResultat).orElse(null))
+            .medOpphoersdato(opphørsdato)
             .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttakResultat))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
 
-    private Optional<LocalDate> getOpphørsdato(Optional<UttakResultatEntitet> uttakResultat) {
-        if (!uttakResultat.isPresent() || uttakResultat.get().getGjeldendePerioder().getPerioder().isEmpty()) {
-            return Optional.empty();
-        }
-        Set<PeriodeResultatÅrsak> opphørsAvslagÅrsaker = IkkeOppfyltÅrsak.opphørsAvslagÅrsaker();
-        List<UttakResultatPeriodeEntitet> perioder = uttakResultat.get().getGjeldendePerioder().getPerioder()
-            .stream()
-            .sorted(Comparator.comparing(UttakResultatPeriodeEntitet::getFom).reversed())
-            .collect(Collectors.toList());
-        // Sjekker om siste periode er avslått med en opphørsårsak
-        UttakResultatPeriodeEntitet sistePeriode = perioder.remove(0);
-        if (!opphørsAvslagÅrsaker.contains(sistePeriode.getPeriodeResultatÅrsak())) {
-            return Optional.empty();
-        }
-        LocalDate opphørsdato = sistePeriode.getFom();
-        for (UttakResultatPeriodeEntitet periode : perioder) {
-            if (opphørsAvslagÅrsaker.contains(periode.getPeriodeResultatÅrsak()) && periode.getFom().isBefore(opphørsdato)) {
-                opphørsdato = periode.getFom();
-            } else {
-                return Optional.ofNullable(opphørsdato);
-            }
-        }
-        return Optional.of(opphørsdato);
-    }
-
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat,
-                                                          Optional<UttakResultatEntitet> uttakResultat) {
+                                                          Optional<Uttaksplan> uttakResultat) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
-        List<BeregningsresultatPeriode> beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
-        Map<Tuple<AktivitetStatus, Optional<String>>, Optional<LocalDate>> andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(
+        var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
+        var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(
             beregningsresultatPerioder);
         return beregningsresultatPerioder.stream()
             .sorted(Comparator.comparing(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom))
@@ -108,15 +88,16 @@ public class BeregningsresultatMapper {
             .collect(Collectors.toList());
     }
 
-    List<BeregningsresultatPeriodeAndelDto> lagAndeler(BeregningsresultatPeriode beregningsresultatPeriode, Optional<UttakResultatEntitet> uttakResultat,
+    List<BeregningsresultatPeriodeAndelDto> lagAndeler(BeregningsresultatPeriode beregningsresultatPeriode,
+                                                       Optional<Uttaksplan> uttakResultat,
                                                        Map<Tuple<AktivitetStatus, Optional<String>>, Optional<LocalDate>> andelTilSisteUtbetalingsdatoMap,
                                                        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag) {
 
-        List<BeregningsresultatAndel> beregningsresultatAndelList = beregningsresultatPeriode.getBeregningsresultatAndelList();
+        var beregningsresultatAndelList = beregningsresultatPeriode.getBeregningsresultatAndelList();
 
         // grupper alle andeler som har samme aktivitetstatus og arbeidsforholdId og legg dem i en tuple med hendholdsvis brukers og arbeidsgivers
         // andel
-        List<Tuple<BeregningsresultatAndel, Optional<BeregningsresultatAndel>>> andelListe = genererAndelListe(beregningsresultatAndelList);
+        var andelListe = genererAndelListe(beregningsresultatAndelList);
         return andelListe.stream()
             .map(andelPar -> {
                 BeregningsresultatAndel brukersAndel = andelPar.getElement1();
@@ -133,7 +114,7 @@ public class BeregningsresultatMapper {
                         : null)
                     .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).orElse(null))
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
-                    .medUttak(lagUttak(uttakResultat, beregningsresultatPeriode))
+                    .medUttak(lagUttak(uttakResultat, beregningsresultatPeriode, brukersAndel))
                     .medStillingsprosent(brukersAndel.getStillingsprosent());
                 var internArbeidsforholdId = brukersAndel.getArbeidsforholdRef() != null ? brukersAndel.getArbeidsforholdRef().getReferanse() : null;
                 dtoBuilder.medArbeidsforholdId(internArbeidsforholdId);
@@ -206,36 +187,43 @@ public class BeregningsresultatMapper {
             return andel.getArbeidsgiver().map(Arbeidsgiver::getIdentifikator);
     }
 
-    private UttakDto lagUttak(Optional<UttakResultatEntitet> uttakResultat,
-                              BeregningsresultatPeriode beregningsresultatPeriode) {
+    private UttakDto lagUttak(Optional<Uttaksplan> uttaksplan,
+                              BeregningsresultatPeriode beregningsresultatPeriode, BeregningsresultatAndel brukersAndel) {
 
-        if (!uttakResultat.isPresent()) {
-            return UttakDto.build().create();
+        if (!uttaksplan.isPresent()) {
+            return UttakDto.builder().create();
         }
 
-        List<UttakResultatPeriodeEntitet> perioder = uttakResultat.get().getGjeldendePerioder().getPerioder();
+        var perioder = uttaksplan.get().getPerioder();
 
-        return perioder.stream()
-            .findAny()
-            .map(uttakResultatPerArbeidsforhold -> finnTilhørendeUttakPeriodeAktivitet(perioder, beregningsresultatPeriode))
-            .map(uttakResultatPeriode -> lagUttakDto())
+        return perioder.entrySet().stream()
+            .filter(perPeriode -> finnTilhørendeUttakPeriodeAktivitet(perPeriode, beregningsresultatPeriode))
+            .map(perPeriode -> lagUttakDto(perPeriode, brukersAndel))
+            .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("UttakResultatEntitet inneholder ikke resultater for gitt arbeidsforholdId."));
     }
 
-    private UttakDto lagUttakDto() {
-        return UttakDto.build()
-            // FIXME K9 set korrekt resultat
-            .medPeriodeResultatType(PeriodeResultatType.INNVILGET)
+    private UttakDto lagUttakDto(Entry<Periode, UttaksperiodeInfo> perPeriode, BeregningsresultatAndel brukersAndel) {
+        var info = perPeriode.getValue();
+        var andel = info.getAndel(brukersAndel.getArbeidsforholdRef().getUUIDReferanse());
+
+        return UttakDto.builder()
+            .medUtbetalingsgrad(andel.getUtbetalingsgrad())
+            .medPeriodeResultatType(info.getType())
             .create();
     }
 
-    private UttakResultatPeriodeEntitet finnTilhørendeUttakPeriodeAktivitet(Collection<UttakResultatPeriodeEntitet> uttakResultatPerioder,
-                                                                            BeregningsresultatPeriode beregningsresultatPeriode) {
-        return uttakResultatPerioder.stream()
-            .filter(uttakResultatPeriode -> !uttakResultatPeriode.getFom().isAfter(beregningsresultatPeriode.getBeregningsresultatPeriodeFom()))
-            .filter(uttakResultatPeriode -> !uttakResultatPeriode.getTom().isBefore(beregningsresultatPeriode.getBeregningsresultatPeriodeTom()))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("BeregningsresultatPeriode tilhører ikke noen periode fra UttakResultatEntitet"));
+    private boolean finnTilhørendeUttakPeriodeAktivitet(Entry<Periode, UttaksperiodeInfo> perPeriode,
+                                                        BeregningsresultatPeriode beregningsresultatPeriode) {
+        var periode = perPeriode.getKey();
+        var targetFom = beregningsresultatPeriode.getBeregningsresultatPeriodeFom();
+        var targetTom = beregningsresultatPeriode.getBeregningsresultatPeriodeTom();
+        beregningsresultatPeriode.getBeregningsresultatAndelList().get(0).getAktivitetsnøkkel();
+        if (!periode.getFom().isAfter(targetFom) && !periode.getTom().isBefore(targetTom)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private BeregningsresultatAndel slåSammenAndeler(BeregningsresultatAndel a, BeregningsresultatAndel b) {

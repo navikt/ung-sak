@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -8,9 +8,8 @@ import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
-import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerFelles;
-import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerInntektsmelding;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -27,6 +26,7 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
     public void setup() {
         this.behandlingsoppretterSpied = Mockito.spy(super.behandlingsoppretter);
         this.dokumentmottakerFellesSpied = Mockito.spy(super.dokumentmottakerFelles);
+        UttakTjeneste uttakTjeneste = Mockito.mock(UttakTjeneste.class);
 
         Mockito.doNothing().when(dokumentmottakerFellesSpied).opprettTaskForÅVurdereDokument(any(), any(), any());
         
@@ -35,6 +35,7 @@ public class DokumentmottakerInntektsmeldingHåndteringVedAvslåttBehandlingTest
             mottatteDokumentTjeneste,
             behandlingsoppretterSpied,
             kompletthetskontroller,
+            uttakTjeneste,
             repositoryProvider);
     }
 

@@ -8,13 +8,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
+import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
@@ -39,24 +41,26 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
+@RunWith(CdiRunner.class)
 public class ForeslåBehandlingsresultatTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
     private static final LocalDate TOM = FOM.plusWeeks(6);
@@ -65,16 +69,24 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-    private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-    private BeregningTjeneste kalkulusInMermoryTjeneste = new KalkulusInMermoryTjeneste();
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
 
+    @Inject
+    private UttakInMemoryTjeneste uttakTjeneste;
+    
+    @Inject
+    private BehandlingRepositoryProvider repositoryProvider;
+    
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository ;
+
+    @Inject
+    private BehandlingRepository behandlingRepository;
+    
+    private final BeregningTjeneste kalkulusInMermoryTjeneste = new KalkulusInMermoryTjeneste();
+    
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private ForeslåBehandlingsresultatTjeneste tjeneste;
-
+    
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
     private FordelingRepository fordelingRepository = mock(FordelingRepository.class);
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
@@ -238,12 +250,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     }
 
     private void lagreUttak(Behandling behandling) {
-        UttakResultatPerioderEntitet uttakResultatPerioder = new UttakResultatPerioderEntitet();
-        UttakResultatPeriodeEntitet uttakResultatPeriode = new UttakResultatPeriodeEntitet.Builder(FOM, TOM)
-                .medPeriodeResultat(PeriodeResultatType.INNVILGET, PeriodeResultatÅrsak.UKJENT)
-                .build();
-        uttakResultatPerioder.leggTilPeriode(uttakResultatPeriode);
-        uttakRepository.lagreOpprinneligUttakResultatPerioder(behandling.getId(), uttakResultatPerioder);
+        var uttaksplan = new Uttaksplan();
+        var periode = new Periode(FOM, TOM);
+        uttaksplan.leggTilPeriode(periode, new UttaksperiodeInfo(PeriodeResultatType.INNVILGET, 100, Map.of()));
+
+        uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }
 
     private void lagBehandlingsresultat(Behandling behandling) {

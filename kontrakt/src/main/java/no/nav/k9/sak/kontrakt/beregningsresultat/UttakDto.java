@@ -1,5 +1,10 @@
 package no.nav.k9.sak.kontrakt.beregningsresultat;
 
+import java.math.BigDecimal;
+
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -18,31 +23,34 @@ import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 public class UttakDto {
 
     public static class Builder {
-        private boolean gradering;
         private PeriodeResultatType periodeResultatType;
+        private BigDecimal utbetalingsgrad;
 
         private Builder() {
         }
 
         public UttakDto create() {
             String periodeResultatTypeString = periodeResultatType == null ? null : periodeResultatType.getKode();
-            return new UttakDto(periodeResultatTypeString, gradering);
-        }
-
-        public Builder medGradering(boolean gradering) {
-            this.gradering = gradering;
-            return this;
+            return new UttakDto(periodeResultatTypeString, utbetalingsgrad);
         }
 
         public Builder medPeriodeResultatType(PeriodeResultatType periodeResultatType) {
             this.periodeResultatType = periodeResultatType;
             return this;
         }
+
+        public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
+            this.utbetalingsgrad = utbetalingsgrad;
+            return this;
+        }
     }
 
-    @JsonProperty(value = "gradering", required = true)
+    @JsonProperty(value = "utbetalingsgrad", required = true)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    @Digits(integer = 3, fraction = 2)
     @NotNull
-    private boolean gradering;
+    private BigDecimal utbetalingsgrad;
 
     @JsonProperty(value = "periodeResultatType", required = true)
     @NotNull
@@ -50,16 +58,16 @@ public class UttakDto {
     @Pattern(regexp = "^[\\p{Alnum}_\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String periodeResultatType;
 
-    public UttakDto(String periodeResultatType, boolean gradering) {
+    public UttakDto(String periodeResultatType, BigDecimal utbetalingsgrad) {
         this.periodeResultatType = periodeResultatType;
-        this.gradering = gradering;
+        this.utbetalingsgrad = utbetalingsgrad;
     }
 
     protected UttakDto() {
         //
     }
 
-    public static Builder build() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -67,7 +75,7 @@ public class UttakDto {
         return periodeResultatType;
     }
 
-    public boolean isGradering() {
-        return gradering;
+    public BigDecimal getUtbetalingsgrad() {
+        return utbetalingsgrad;
     }
 }
