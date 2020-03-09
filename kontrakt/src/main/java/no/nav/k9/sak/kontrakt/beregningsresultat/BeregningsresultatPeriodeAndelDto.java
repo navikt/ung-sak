@@ -178,6 +178,10 @@ public class BeregningsresultatPeriodeAndelDto {
     @Valid
     private UttakDto uttak;
 
+    public BeregningsresultatPeriodeAndelDto() {
+        // Deserialisering av JSON
+    }
+
     private BeregningsresultatPeriodeAndelDto(Builder builder) {
         this.arbeidsgiverNavn = builder.arbeidsgiverNavn;
         this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
