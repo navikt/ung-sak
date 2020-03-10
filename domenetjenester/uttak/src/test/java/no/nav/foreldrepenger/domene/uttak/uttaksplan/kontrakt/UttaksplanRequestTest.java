@@ -17,6 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.typer.Saksnummer;
+
 public class UttaksplanRequestTest {
 
     private static final ObjectMapper OM = new ObjectMapper()
@@ -28,18 +31,18 @@ public class UttaksplanRequestTest {
     @Test
     public void skal_serialisere_uttaksplan_request() throws Exception {
         var req = opprettUttaksplanRequest();
-        
+
         var validator = Validation.buildDefaultValidatorFactory().getValidator();
         var violations = validator.validate(req);
         assertThat(violations).isEmpty();
-        
+
         var reqJson = OM.writeValueAsString(req);
         assertThat(reqJson).isNotEmpty();
-        
+
         var response = OM.readValue(reqJson, UttaksplanRequest.class);
-        
+
         assertThat(response.getBehandlingId()).isEqualTo(req.getBehandlingId());
-        
+
         System.out.println(reqJson);
     }
 
@@ -47,35 +50,37 @@ public class UttaksplanRequestTest {
         var fom = LocalDate.now();
         var tom = fom.plusDays(10);
         UUID behandlingId = UUID.randomUUID();
-        
+
         var req = new UttaksplanRequest();
-        req.setSaksnummer("AFC7SAK");
+        req.setSaksnummer(new Saksnummer("AFC7SAK"));
         req.setSøknadsperioder(List.of(new Periode(fom, tom)));
         req.setBehandlingId(behandlingId);
-        
+
         Person barn = new Person();
         barn.setFødselsdato(fom);
         req.setBarn(barn);
-        
+
         Person søker = new Person();
         søker.setFødselsdato(fom.minusYears(18));
         req.setSøker(søker);
-        
-        req.setAndrePartersBehandlinger(List.of(UUID.randomUUID(), UUID.randomUUID()));
-        
-        var arbeidsforhold = new UttakArbeidsforhold();
-        var arbeidsforholdInfo = new UttakArbeidsforholdInfo();
+
+        req.setAndrePartersSaker(List.of(new AndrePartSak(new Saksnummer("HELLO1")), new AndrePartSak(new Saksnummer("HELLO2"))));
+
+        var uttakArbeid = new UttakArbeid();
+        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER.getKode(), UUID.randomUUID().toString());
+        uttakArbeid.setArbeidsforhold(arbeidsforhold);
+        var arbeidsforholdInfo = new UttakArbeidsforholdPeriodeInfo();
         arbeidsforholdInfo.setJobberNormaltPerUke(Duration.parse("P7D"));
         arbeidsforholdInfo.setSkalJobbeProsent(new BigDecimal(50));
-        arbeidsforhold.setPerioder(Map.of(new Periode(fom, tom), arbeidsforholdInfo));
-        req.setArbeid(Map.of(UUID.randomUUID(), arbeidsforhold));
-        
+        uttakArbeid.setPerioder(Map.of(new Periode(fom, tom), arbeidsforholdInfo));
+        req.setArbeid(List.of(uttakArbeid));
+
         var tilsynsbehov = new UttakTilsynsbehov();
         tilsynsbehov.setProsent(100);
         req.setTilsynsbehov(Map.of(new Periode(fom, tom), tilsynsbehov));
-        
+
         req.setMedlemskap(Map.of(new Periode(fom, tom), new UttakMedlemskap()));
         return req;
     }
-    
+
 }

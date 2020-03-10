@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -21,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonInclude(value = Include.NON_ABSENT, content = Include.NON_EMPTY)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class Periode {
+public class Periode implements Comparable<Periode>{
 
     @JsonValue
     @NotNull
@@ -91,4 +92,13 @@ public class Periode {
     public String toString() {
         return getClass().getSimpleName() + "<fom=" + getFom() + ", tom=" + getTom() + ">";
     }
+    
+    @Override
+    public int compareTo(Periode o) {
+        return COMP.compare(this, o);
+    }
+    
+    private static final Comparator<Periode> COMP = Comparator
+            .comparing((Periode dto) -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
+            .thenComparing(dto -> dto.getTom(), Comparator.nullsFirst(Comparator.naturalOrder()));
 }

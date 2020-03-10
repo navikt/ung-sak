@@ -1,17 +1,18 @@
 package no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,36 +20,52 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
+import no.nav.k9.sak.typer.Saksnummer;
+
+@JsonPropertyOrder({ "saksnummer", "behandlingId", "andrePartersSaker", "søker", "barn", "søknadsperioder", "lovbestemtFerie", "arbeid", "tilsynsbehov", "medlemskap" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class UttaksplanRequest {
 
-    @JsonProperty(value = "saksnummer", required = true)
+    @JsonProperty(value = "andrePartersSaker")
+    @JsonInclude(value = Include.NON_EMPTY)
+    @Valid
+    private List<AndrePartSak> andrePartersSaker = new ArrayList<>();
+
+    @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "arbeid")
+    @Valid
+    private List<UttakArbeid> arbeid = new ArrayList<>();
+
+    @JsonAlias("pleietrengende")
+    @JsonProperty(value = "barn", required = true)
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String saksnummer;
+    @Valid
+    private Person barn;
 
     @JsonProperty(value = "behandlingId", required = true)
     @Valid
     @NotNull
     private UUID behandlingId;
 
-    @JsonProperty(value = "andrePartersBehandlinger")
     @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "medlemskap")
     @Valid
-    private List<UUID> andrePartersBehandlinger = new ArrayList<>();
+    private NavigableMap<Periode, UttakMedlemskap> medlemskap = Collections.emptyNavigableMap();
+
+    @JsonProperty(value = "saksnummer", required = true)
+    @NotNull
+    @Valid
+    private Saksnummer saksnummer;
 
     @JsonProperty(value = "søker", required = true)
     @NotNull
     @Valid
     private Person søker;
-
-    @JsonProperty(value = "barn", required = true)
-    @NotNull
-    @Valid
-    private Person barn;
 
     @JsonProperty(value = "søknadsperioder", required = true)
     @Valid
@@ -57,34 +74,21 @@ public class UttaksplanRequest {
     private List<Periode> søknadsperioder = new ArrayList<Periode>();
 
     @JsonInclude(value = Include.NON_EMPTY)
-    @JsonProperty(value = "arbeid")
+    @JsonProperty(value = "lovbestemtFerie", required = true)
     @Valid
-    private Map<UUID, UttakArbeidsforhold> arbeid = new LinkedHashMap<>();
+    private List<LovbestemtFerie> lovbestemtFerie = new ArrayList<>();
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "tilsynsbehov")
     @Valid
-    private Map<Periode, UttakTilsynsbehov> tilsynsbehov = new LinkedHashMap<>();
-    
-    @JsonInclude(value = Include.NON_EMPTY)
-    @JsonProperty(value = "medlemskap")
-    @Valid
-    private Map<Periode, UttakMedlemskap> medlemskap = new LinkedHashMap<>();
+    private NavigableMap<Periode, UttakTilsynsbehov> tilsynsbehov = Collections.emptyNavigableMap();
 
-    public Map<Periode, UttakMedlemskap> getMedlemskap() {
-        return medlemskap;
+    public List<AndrePartSak> getAndrePartersSaker() {
+        return Collections.unmodifiableList(andrePartersSaker);
     }
 
-    public void setMedlemskap(Map<Periode, UttakMedlemskap> medlemskap) {
-        this.medlemskap = medlemskap;
-    }
-
-    public List<UUID> getAndrePartersBehandlinger() {
-        return andrePartersBehandlinger;
-    }
-
-    public void setAndrePartersBehandlinger(List<UUID> andrePartersBehandlinger) {
-        this.andrePartersBehandlinger = andrePartersBehandlinger;
+    public List<UttakArbeid> getArbeid() {
+        return arbeid;
     }
 
     public Person getBarn() {
@@ -95,7 +99,11 @@ public class UttaksplanRequest {
         return behandlingId;
     }
 
-    public String getSaksnummer() {
+    public NavigableMap<Periode, UttakMedlemskap> getMedlemskap() {
+        return medlemskap;
+    }
+
+    public Saksnummer getSaksnummer() {
         return saksnummer;
     }
 
@@ -107,16 +115,30 @@ public class UttaksplanRequest {
         return søknadsperioder;
     }
 
-    public Map<Periode, UttakTilsynsbehov> getTilsynsbehov() {
-        return tilsynsbehov;
+    public NavigableMap<Periode, UttakTilsynsbehov> getTilsynsbehov() {
+        return Collections.unmodifiableNavigableMap(tilsynsbehov);
     }
 
-    public Map<UUID, UttakArbeidsforhold> getArbeid() {
-        return arbeid;
+    public void setLovbestemtFerie(List<LovbestemtFerie> lovbestemtFerie) {
+        if (lovbestemtFerie != null) {
+            this.lovbestemtFerie = new ArrayList<LovbestemtFerie>(lovbestemtFerie);
+            Collections.sort(this.lovbestemtFerie);
+        }
     }
 
-    public void setArbeid(Map<UUID, UttakArbeidsforhold> arbeid) {
-        this.arbeid = arbeid;
+    public void setAndrePartersSaker(List<AndrePartSak> andrePartersSaker) {
+        if (andrePartersSaker != null) {
+            this.andrePartersSaker = new ArrayList<>(andrePartersSaker);
+            Collections.sort(this.andrePartersSaker);
+        }
+    }
+
+    @JsonSetter("arbeid")
+    public void setArbeid(List<UttakArbeid> arbeid) {
+        if (arbeid != null) {
+            this.arbeid = new ArrayList<>(arbeid);
+            Collections.sort(this.arbeid);
+        }
     }
 
     public void setBarn(Person barn) {
@@ -127,7 +149,12 @@ public class UttaksplanRequest {
         this.behandlingId = behandlingId;
     }
 
-    public void setSaksnummer(String saksnummer) {
+    @JsonSetter("medlemskap")
+    public void setMedlemskap(Map<Periode, UttakMedlemskap> medlemskap) {
+        this.medlemskap = medlemskap == null ? Collections.emptyNavigableMap() : new TreeMap<>(medlemskap);
+    }
+
+    public void setSaksnummer(Saksnummer saksnummer) {
         this.saksnummer = saksnummer;
     }
 
@@ -139,13 +166,9 @@ public class UttaksplanRequest {
         this.søknadsperioder = søknadsperioder;
     }
 
+    @JsonSetter("tilsynsbehov")
     public void setTilsynsbehov(Map<Periode, UttakTilsynsbehov> tilsynsbehov) {
-        this.tilsynsbehov = tilsynsbehov;
+        this.tilsynsbehov = tilsynsbehov == null ? Collections.emptyNavigableMap() : new TreeMap<>(tilsynsbehov);
     }
 
-    public Collection<UUID> getAlleBehandlingIder(){
-        var alle = new ArrayList<>(getAndrePartersBehandlinger());
-        alle.add(getBehandlingId());
-        return alle;
-    }
 }

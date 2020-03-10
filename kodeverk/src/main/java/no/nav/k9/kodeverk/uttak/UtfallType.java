@@ -11,51 +11,49 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum PeriodeResultatType implements Kodeverdi {
+public enum UtfallType implements Kodeverdi {
 
-    INNVILGET("INNVILGET", "Innvilget"),
-    AVSLÅTT("AVSLÅTT", "Avslått"),
-    IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
-    MANUELL_BEHANDLING("MANUELL_BEHANDLING", "Til manuell behandling"),
-
+    INNVILGET("Innvilget", "Innvilget"),
+    AVSLÅTT("Avslått", "Avslått"), 
+    UDEFINERT("Udefinert", "Ikke definert"),
     ;
 
-    private static final Map<String, PeriodeResultatType> KODER = new LinkedHashMap<>();
+    private static final Map<String, UtfallType> KODER = new LinkedHashMap<>();
 
-    public static final String KODEVERK = "PERIODE_RESULTAT_TYPE";
-
-    @Deprecated
-    public static final String DISCRIMINATOR = "PERIODE_RESULTAT_TYPE";
+    public static final String KODEVERK = "UTTAK_UTFALL_TYPE";
 
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
+            KODER.putIfAbsent(v.name(), v); // kompatibilitet
         }
     }
 
     @JsonIgnore
     private String navn;
 
+    @JsonValue
     private String kode;
 
-    private PeriodeResultatType(String kode) {
+    private UtfallType(String kode) {
         this.kode = kode;
     }
 
-    private PeriodeResultatType(String kode, String navn) {
+    private UtfallType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
     @JsonCreator
-    public static PeriodeResultatType fraKode(@JsonProperty("kode") String kode) {
+    public static UtfallType fraKode(String kode) {
         if (kode == null) {
             return null;
         }
@@ -66,7 +64,7 @@ public enum PeriodeResultatType implements Kodeverdi {
         return ad;
     }
 
-    public static Map<String, PeriodeResultatType> kodeMap() {
+    public static Map<String, UtfallType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
 
@@ -92,7 +90,4 @@ public enum PeriodeResultatType implements Kodeverdi {
         return getKode();
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
 }

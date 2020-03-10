@@ -12,17 +12,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
-
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum UttakArbeidType implements Kodeverdi {
 
-    ORDINÆRT_ARBEID("ORDINÆRT_ARBEID", "Ordinært arbeid"),
-    SELVSTENDIG_NÆRINGSDRIVENDE("SELVSTENDIG_NÆRINGSDRIVENDE", "Selvstendig næringsdrivende"),
-    FRILANS("FRILANS", "Frilans"),
-    ANNET("ANNET", "Annet"),
+    ARBEIDSTAKER(Inntektskategori.ARBEIDSTAKER.getKode(), "Ordinært arbeid"),
+    SELVSTENDIG_NÆRINGSDRIVENDE(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE.getKode(), "Selvstendig næringsdrivende"),
+    FRILANS(Inntektskategori.FRILANSER.getKode(), "Frilans"),
+    
+    ANNET(Inntektskategori.UDEFINERT.name(), "Annet"),
     ;
+
     private static final Map<String, UttakArbeidType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "UTTAK_ARBEID_TYPE";
@@ -56,6 +58,7 @@ public enum UttakArbeidType implements Kodeverdi {
         }
         return ad;
     }
+
     public static Map<String, UttakArbeidType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -83,6 +86,6 @@ public enum UttakArbeidType implements Kodeverdi {
     }
 
     public boolean erArbeidstakerEllerFrilans() {
-        return ORDINÆRT_ARBEID.equals(this) || FRILANS.equals(this);
+        return ARBEIDSTAKER.equals(this) || FRILANS.equals(this);
     }
 }

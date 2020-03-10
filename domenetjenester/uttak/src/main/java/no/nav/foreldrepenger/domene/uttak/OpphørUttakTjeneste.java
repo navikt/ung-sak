@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.NavigableMap;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,11 +11,9 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
-import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
+import no.nav.k9.kodeverk.uttak.UtfallType;
 
 @ApplicationScoped
 public class OpphørUttakTjeneste {
@@ -48,18 +45,16 @@ public class OpphørUttakTjeneste {
     }
 
     private LocalDate utledOpphørsdatoFraUttak(Uttaksplan uttaksplan, LocalDate skjæringstidspunkt) {
-        Set<PeriodeResultatÅrsak> opphørsårsaker = IkkeOppfyltÅrsak.opphørsAvslagÅrsaker();
-        NavigableMap<Periode, UttaksperiodeInfo> perioder = uttaksplan != null ? uttaksplan.getPerioderReversert() : Collections.emptyNavigableMap();
-        // FIXME K9: mangler årsak. Flytt til uttaksplan?
-
+        // FIXME K9 UTTAK: Mulig dette ikke trengs?  Kan ha flere perioder med avslått/innvilget om hverandre?
+        NavigableMap<Periode, Uttaksplanperiode> perioder = uttaksplan != null ? uttaksplan.getPerioderReversert() : Collections.emptyNavigableMap();
         // Finn fom-dato i første periode av de siste sammenhengende periodene med opphørårsaker
         LocalDate fom = null;
         for (var entry : perioder.entrySet()) {
             var periode = entry.getKey();
             var info = entry.getValue();
-            if (opphørsårsaker.contains(info.getPeriodeResultatÅrsak())) {
+            if (UtfallType.AVSLÅTT.equals(info.getUtfall())) {
                 fom = periode.getFom();
-            } else if (fom != null && PeriodeResultatType.INNVILGET.equals(info.getType())) {
+            } else if (fom != null && UtfallType.INNVILGET.equals(info.getUtfall())) {
                 return fom;
             }
         }
