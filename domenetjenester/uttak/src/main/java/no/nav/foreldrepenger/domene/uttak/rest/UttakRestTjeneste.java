@@ -51,7 +51,7 @@ public class UttakRestTjeneste {
         // for proxying
     }
 
-    public UttakRestTjeneste(OidcRestClient restKlient, @KonfigVerdi(value = "k9uttak.url") URI endpoint) {
+    public UttakRestTjeneste(OidcRestClient restKlient, @KonfigVerdi(value = "ppb.uttak.url") URI endpoint) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
     }
@@ -64,7 +64,7 @@ public class UttakRestTjeneste {
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             return utførOgHent(kall, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttak(req.getAlleBehandlingIder(), e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(req.getBehandlingId(), e).toException();
         }
     }
 
@@ -77,7 +77,7 @@ public class UttakRestTjeneste {
             HttpGet kall = new HttpGet(builder.build());
             return utførOgHent(kall, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanListReader));
         } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttak(Arrays.asList(behandlingUuid), e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlaner(Arrays.asList(behandlingUuid), e).toException();
         }
     }
 
@@ -133,6 +133,9 @@ public class UttakRestTjeneste {
         Feil feilVedJsonParsing(String feilmelding);
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000004", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilUttak(Collection<UUID> behandlingUuid, Throwable t);
+        Feil feilKallTilUttak(UUID behandlingUuid, Throwable t);
+        
+        @TekniskFeil(feilkode = "K9SAK-UT-1000005", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for behandlinger: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilUttakForPlaner(Collection<UUID> behandlingUuid, Throwable t);
     }
 }

@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collector;
@@ -25,10 +25,17 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.foreldrepenger.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.uttak.OpphørUttakTjeneste;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
@@ -72,24 +79,59 @@ public class BeregningsresultatMapper {
     }
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat,
-                                                          Optional<Uttaksplan> uttakResultat) {
+                                                          Optional<Uttaksplan> uttaksplan) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
         var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
         var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(
             beregningsresultatPerioder);
-        return beregningsresultatPerioder.stream()
-            .sorted(Comparator.comparing(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom))
-            .map(beregningsresultatPeriode -> BeregningsresultatPeriodeDto.build()
-                .medFom(beregningsresultatPeriode.getBeregningsresultatPeriodeFom())
-                .medTom(beregningsresultatPeriode.getBeregningsresultatPeriodeTom())
-                .medDagsats(beregningsresultatPeriode.getDagsats())
-                .medAndeler(lagAndeler(beregningsresultatPeriode, uttakResultat, andelTilSisteUtbetalingsdatoMap, iayGrunnlag))
+
+        LocalDateTimeline<BeregningsresultatPeriode> brpTimline = beregningsresultat.getBeregningsresultatTimeline();
+
+        var dtoer = brpTimline.toSegments().stream()
+            .map(seg -> BeregningsresultatPeriodeDto.build(seg.getFom(), seg.getTom())
+                .medDagsats(seg.getValue().getDagsats())
+                .medAndeler(lagAndeler(seg.getValue(), andelTilSisteUtbetalingsdatoMap, iayGrunnlag))
                 .create())
             .collect(Collectors.toList());
+        var resultatTimeline = toTimeline(dtoer);
+
+        if (uttaksplan.isPresent()) {
+            leggTilUttak(uttaksplan, resultatTimeline);
+        }
+
+        return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
+    }
+
+    private void leggTilUttak(Optional<Uttaksplan> uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
+        @SuppressWarnings("unchecked")
+        LocalDateTimeline<Uttaksplanperiode> uttTimeline = uttaksplan.map(Uttaksplan::getTimeline).orElse(LocalDateTimeline.EMPTY_TIMELINE);
+        resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
+    }
+
+    private LocalDateSegment<Void> kombinerMedUttak(@SuppressWarnings("unused") LocalDateInterval interval,
+                                                    LocalDateSegment<BeregningsresultatPeriodeDto> brpDto,
+                                                    LocalDateSegment<Uttaksplanperiode> uttPeriode) {
+        var ut = uttPeriode == null ? null : uttPeriode.getValue();
+        var innvilget = (InnvilgetUttaksplanperiode) ut;
+        brpDto.getValue().getAndeler().forEach(a -> {
+            if (ut != null) {
+                // setter uttak rett på andel 'a' - Ok her
+                a.setUttak(new UttakDto(ut.getUtfall(), BigDecimal.ZERO)); // default uttak, overskrives under
+                if (UtfallType.INNVILGET.equals(ut.getUtfall())) {
+                    var key = toUttakArbeidsforhold(a);
+                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> a.setUttak(new UttakDto(innvilget.getUtfall(), utbet.getUtbetalingsgrad())));
+                }
+            }
+        });
+        return null;
+    }
+
+    private LocalDateTimeline<BeregningsresultatPeriodeDto> toTimeline(List<BeregningsresultatPeriodeDto> resultatDtoListe) {
+        var segments = resultatDtoListe.stream().map(v -> new LocalDateSegment<>(v.getFom(), v.getTom(), v)).collect(Collectors.toList());
+        return new LocalDateTimeline<>(segments);
     }
 
     List<BeregningsresultatPeriodeAndelDto> lagAndeler(BeregningsresultatPeriode beregningsresultatPeriode,
-                                                       Optional<Uttaksplan> uttakResultat,
                                                        Map<Tuple<AktivitetStatus, Optional<String>>, Optional<LocalDate>> andelTilSisteUtbetalingsdatoMap,
                                                        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag) {
 
@@ -114,7 +156,6 @@ public class BeregningsresultatMapper {
                         : null)
                     .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).orElse(null))
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
-                    .medUttak(lagUttak(uttakResultat, beregningsresultatPeriode, brukersAndel))
                     .medStillingsprosent(brukersAndel.getStillingsprosent());
                 var internArbeidsforholdId = brukersAndel.getArbeidsforholdRef() != null ? brukersAndel.getArbeidsforholdRef().getReferanse() : null;
                 dtoBuilder.medArbeidsforholdId(internArbeidsforholdId);
@@ -187,45 +228,6 @@ public class BeregningsresultatMapper {
             return andel.getArbeidsgiver().map(Arbeidsgiver::getIdentifikator);
     }
 
-    private UttakDto lagUttak(Optional<Uttaksplan> uttaksplan,
-                              BeregningsresultatPeriode beregningsresultatPeriode, BeregningsresultatAndel brukersAndel) {
-
-        if (!uttaksplan.isPresent()) {
-            return UttakDto.builder().create();
-        }
-
-        var perioder = uttaksplan.get().getPerioder();
-
-        return perioder.entrySet().stream()
-            .filter(perPeriode -> finnTilhørendeUttakPeriodeAktivitet(perPeriode, beregningsresultatPeriode))
-            .map(perPeriode -> lagUttakDto(perPeriode, brukersAndel))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("UttakResultatEntitet inneholder ikke resultater for gitt arbeidsforholdId."));
-    }
-
-    private UttakDto lagUttakDto(Entry<Periode, UttaksperiodeInfo> perPeriode, BeregningsresultatAndel brukersAndel) {
-        var info = perPeriode.getValue();
-        var andel = info.getAndel(brukersAndel.getArbeidsforholdRef().getUUIDReferanse());
-
-        return UttakDto.builder()
-            .medUtbetalingsgrad(andel.getUtbetalingsgrad())
-            .medPeriodeResultatType(info.getType())
-            .create();
-    }
-
-    private boolean finnTilhørendeUttakPeriodeAktivitet(Entry<Periode, UttaksperiodeInfo> perPeriode,
-                                                        BeregningsresultatPeriode beregningsresultatPeriode) {
-        var periode = perPeriode.getKey();
-        var targetFom = beregningsresultatPeriode.getBeregningsresultatPeriodeFom();
-        var targetTom = beregningsresultatPeriode.getBeregningsresultatPeriodeTom();
-        beregningsresultatPeriode.getBeregningsresultatAndelList().get(0).getAktivitetsnøkkel();
-        if (!periode.getFom().isAfter(targetFom) && !periode.getTom().isBefore(targetTom)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     private BeregningsresultatAndel slåSammenAndeler(BeregningsresultatAndel a, BeregningsresultatAndel b) {
         InternArbeidsforholdRef førsteArbeidsforholdId = a.getArbeidsforholdRef();
         InternArbeidsforholdRef andreArbeidsforholdId = b.getArbeidsforholdRef();
@@ -245,5 +247,25 @@ public class BeregningsresultatMapper {
             .medDagsats(a.getDagsats() + b.getDagsats())
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());
         return ny;
+    }
+
+    private static UttakArbeidsforhold toUttakArbeidsforhold(BeregningsresultatPeriodeAndelDto a) {
+        return new UttakArbeidsforhold(
+            a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
+            a.getAktørId(),
+            mapUttakAktivitet(a.getAktivitetStatus()).toString(),
+            a.getArbeidsforholdId());
+    }
+
+    private static UttakArbeidType mapUttakAktivitet(AktivitetStatus aktivitetStatus) {
+        if (aktivitetStatus.erArbeidstaker()) {
+            return UttakArbeidType.ARBEIDSTAKER;
+        } else if (aktivitetStatus.erSelvstendigNæringsdrivende()) {
+            return UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE;
+        } else if (aktivitetStatus.erFrilanser()) {
+            return UttakArbeidType.FRILANS;
+        } else {
+            return UttakArbeidType.ANNET;
+        }
     }
 }

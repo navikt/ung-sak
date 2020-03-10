@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
@@ -26,7 +28,12 @@ public class UttakInput {
     private Set<BehandlingÅrsakType> behandlingÅrsaker = Collections.emptySet();
     private boolean behandlingManueltOpprettet;
     private boolean opplysningerOmDødEndret;
+    
+    private UttakPersonInfo pleietrengende;
 
+    private Map<AktørId, UUID> relaterteBehandlinger = Collections.emptyMap();
+    private UttakPersonInfo søker;
+    
     public UttakInput(BehandlingReferanse behandlingReferanse,
                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
         this.behandlingReferanse = Objects.requireNonNull(behandlingReferanse, "behandlingReferanse");
@@ -41,6 +48,7 @@ public class UttakInput {
         this.behandlingÅrsaker = input.behandlingÅrsaker;
         this.behandlingManueltOpprettet = input.behandlingManueltOpprettet;
         this.opplysningerOmDødEndret = input.opplysningerOmDødEndret;
+        this.pleietrengende = input.pleietrengende;
     }
 
     public AktørId getAktørId() {
@@ -91,10 +99,6 @@ public class UttakInput {
         return opplysningerOmDødEndret;
     }
 
-    public UttakInput medBeregningsgrunnlagPerioder(BeregningsgrunnlagStatusPeriode... statusPerioder) {
-        return medBeregningsgrunnlagPerioder(List.of(statusPerioder));
-    }
-
     public UttakInput medBeregningsgrunnlagPerioder(Collection<BeregningsgrunnlagStatusPeriode> statusPerioder) {
         var newInput = new UttakInput(this);
         newInput.beregningsgrunnlagStatusPerioder = List.copyOf(statusPerioder);
@@ -133,5 +137,23 @@ public class UttakInput {
         var newInput = new UttakInput(this);
         newInput.opplysningerOmDødEndret = opplysningerOmDødEndret;
         return newInput;
+    }
+    
+    public UttakInput medPleietrengende(UttakPersonInfo pleietrengende) {
+        this.pleietrengende = pleietrengende;
+        return this;
+    }
+
+    public UttakInput medSøker(UttakPersonInfo søker) {
+        this.søker = søker;
+        return this;
+    }
+    
+    public UttakPersonInfo getPleietrengende() {
+        return pleietrengende;
+    }
+
+    public UttakPersonInfo getSøker() {
+        return søker;
     }
 }

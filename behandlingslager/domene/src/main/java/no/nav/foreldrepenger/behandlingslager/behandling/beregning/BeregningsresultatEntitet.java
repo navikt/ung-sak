@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.beregning;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,6 +26,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 @Entity(name = "Beregningsresultat")
 @Table(name = "BR_BEREGNINGSRESULTAT")
@@ -73,7 +75,7 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return regelSporing;
     }
 
-    public Optional<LocalDate> getEndringsdato(){
+    public Optional<LocalDate> getEndringsdato() {
         return Optional.ofNullable(endringsdato);
     }
 
@@ -81,7 +83,14 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return Collections.unmodifiableList(beregningsresultatPerioder);
     }
 
-    public void addBeregningsresultatPeriode(BeregningsresultatPeriode brPeriode){
+    public LocalDateTimeline<BeregningsresultatPeriode> getBeregningsresultatTimeline() {
+        var perioder = getBeregningsresultatPerioder().stream()
+            .map(v -> new LocalDateSegment<>(v.getBeregningsresultatPeriodeFom(), v.getBeregningsresultatPeriodeTom(), v))
+            .collect(Collectors.toList());
+        return new LocalDateTimeline<>(perioder);
+    }
+
+    public void addBeregningsresultatPeriode(BeregningsresultatPeriode brPeriode) {
         Objects.requireNonNull(brPeriode, "beregningsresultatPeriode");
         if (!beregningsresultatPerioder.contains(brPeriode)) { // NOSONAR Class defines List based fields but uses them like Sets: Ingening å tjene på å bytte til Set ettersom det er små lister
             beregningsresultatPerioder.add(brPeriode);
@@ -130,12 +139,12 @@ public class BeregningsresultatEntitet extends BaseEntitet {
             this.beregningsresultatFPMal = beregningsresultat;
         }
 
-        public Builder medRegelInput(String regelInput){
+        public Builder medRegelInput(String regelInput) {
             beregningsresultatFPMal.regelInput = regelInput;
             return this;
         }
 
-        public Builder medRegelSporing(String regelSporing){
+        public Builder medRegelSporing(String regelSporing) {
             beregningsresultatFPMal.regelSporing = regelSporing;
             return this;
         }
@@ -146,7 +155,7 @@ public class BeregningsresultatEntitet extends BaseEntitet {
             return this;
         }
 
-        public Builder medEndringsdato(LocalDate endringsdato){
+        public Builder medEndringsdato(LocalDate endringsdato) {
             beregningsresultatFPMal.endringsdato = endringsdato;
             return this;
         }

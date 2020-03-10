@@ -19,7 +19,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class Saksnummer implements IndexKey {
+public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
 
     @JsonValue
     @NotNull
@@ -71,4 +71,8 @@ public class Saksnummer implements IndexKey {
         return getClass().getSimpleName() + "<" + saksnummer + ">";
     }
 
+    @Override
+    public int compareTo(Saksnummer o) {
+        return this.saksnummer.compareTo(o.saksnummer);
+    }
 }

@@ -25,7 +25,7 @@ public class BeregningsgrunnlagStatusPeriode implements Comparable<Beregningsgru
     private static final List<UttakArbeidTypeMapping> UTTAK_ARBEID_TYPER = List.of(
         new UttakArbeidTypeMapping(UttakArbeidType.FRILANS, (ast) -> ast.erFrilanser()),
         new UttakArbeidTypeMapping(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, (ast) -> ast.erSelvstendigNæringsdrivende()),
-        new UttakArbeidTypeMapping(UttakArbeidType.ORDINÆRT_ARBEID, (ast) -> ast.erArbeidstaker()),
+        new UttakArbeidTypeMapping(UttakArbeidType.ARBEIDSTAKER, (ast) -> ast.erArbeidstaker()),
         new UttakArbeidTypeMapping(UttakArbeidType.ANNET, (ast) -> true));
 
     private static final Comparator<BeregningsgrunnlagStatusPeriode> COMP = Comparator

@@ -16,6 +16,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -39,12 +40,15 @@ public class UttakInputTjeneste {
     private BeregningTjeneste kalkulusTjeneste;
     private SøknadRepository søknadRepository;
     private PersonopplysningRepository personopplysningRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
 
     @Inject
     public UttakInputTjeneste(BehandlingRepositoryProvider repositoryProvider,
+                              MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                               BeregningTjeneste kalkulusTjeneste,
                               InntektArbeidYtelseTjeneste iayTjeneste,
                               MedlemTjeneste medlemTjeneste) {
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
         this.medlemTjeneste = Objects.requireNonNull(medlemTjeneste, "medlemTjeneste");
         this.søknadRepository = repositoryProvider.getSøknadRepository();
@@ -66,6 +70,8 @@ public class UttakInputTjeneste {
 
     private UttakInput lagInput(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate medlemskapOpphørsdato) {
         var mottattDato = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId()).map(SøknadEntitet::getMottattDato).orElse(null);
+        
+        
         var årsaker = finnÅrsaker(ref);
         var statusPerioder = lagBeregningsgrunnlagStatusPerioder(ref);
         return new UttakInput(ref, iayGrunnlag)

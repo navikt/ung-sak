@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,13 +37,12 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScena
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.util.Tuple;
@@ -178,7 +178,7 @@ public class BeregneYtelseStegImplTest {
     private void byggUttakPlanResultat(Behandling behandling) {
         var uttaksplan = new Uttaksplan();
         var periode = new Periode(LocalDate.now().minusDays(3), LocalDate.now().minusDays(1));
-        uttaksplan.leggTilPeriode(periode, new UttaksperiodeInfo(PeriodeResultatType.INNVILGET, 100, Map.of()));
+        uttaksplan.setPerioder(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }

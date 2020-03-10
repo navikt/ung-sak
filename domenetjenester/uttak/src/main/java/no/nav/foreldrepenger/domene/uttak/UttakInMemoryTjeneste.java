@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 
 /**
@@ -49,6 +50,12 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
     public void lagreUttakResultatPerioder(UUID behandlingId, Uttaksplan uttaksplan) {
         uttaksplaner.put(behandlingId, uttaksplan);
+    }
+
+    @Override
+    public Uttaksplan opprettUttaksplan(UttakInput input) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

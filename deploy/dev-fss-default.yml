@@ -169,6 +169,8 @@ spec:
       value: https://app-q1.adeo.no/k9/oppdrag/api
     - name: URL_K9OPPDRAG
       value: http://k9-oppdrag/k9/oppdrag/api
+    - name: PPB_UTTAK_URL
+      value: http://pleiepenger-barn-uttak.default
 
     # Web services
     - name: AKTOER_V2_URL

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,13 +46,12 @@ import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksperiodeInfo;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -72,21 +72,21 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
-    
+
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    
+
     @Inject
-    private BehandlingVedtakRepository behandlingVedtakRepository ;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
     private BehandlingRepository behandlingRepository;
-    
+
     private final BeregningTjeneste kalkulusInMermoryTjeneste = new KalkulusInMermoryTjeneste();
-    
+
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private ForeslåBehandlingsresultatTjeneste tjeneste;
-    
+
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
     private FordelingRepository fordelingRepository = mock(FordelingRepository.class);
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
@@ -97,14 +97,14 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,
-                vedtakVarselRepository,
-                kalkulusInMermoryTjeneste,
-                new HarEtablertYtelseImpl(vedtakVarselRepository),
-                medlemTjeneste));
+            vedtakVarselRepository,
+            kalkulusInMermoryTjeneste,
+            new HarEtablertYtelseImpl(vedtakVarselRepository),
+            medlemTjeneste));
         tjeneste = new ForeslåBehandlingsresultatTjeneste(repositoryProvider,
-                vedtakVarselRepository,
-                fordelingRepository,
-                revurderingBehandlingsresultatutleder);
+            vedtakVarselRepository,
+            fordelingRepository,
+            revurderingBehandlingsresultatutleder);
     }
 
     @Test
@@ -123,12 +123,12 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     private void foreslåBehandlingsresultat(Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling,
-                Skjæringstidspunkt.builder()
-                        .medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT)
-                        .medSkjæringstidspunktBeregning(SKJÆRINGSTIDSPUNKT)
-                        .medUtledetSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)
-                        .medFørsteUttaksdato(SKJÆRINGSTIDSPUNKT.plusDays(1))
-                        .build());
+            Skjæringstidspunkt.builder()
+                .medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT)
+                .medSkjæringstidspunktBeregning(SKJÆRINGSTIDSPUNKT)
+                .medUtledetSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)
+                .medFørsteUttaksdato(SKJÆRINGSTIDSPUNKT.plusDays(1))
+                .build());
         tjeneste.foreslåVedtakVarsel(ref, lagKontekst(behandling));
     }
 
@@ -213,11 +213,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     private Behandling lagRevurdering(Behandling originalBehandling) {
         Behandling revurdering = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING)
-                .medBehandlingÅrsak(
-                        BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)
-                                .medManueltOpprettet(true)
-                                .medOriginalBehandling(originalBehandling))
-                .build();
+            .medBehandlingÅrsak(
+                BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)
+                    .medManueltOpprettet(true)
+                    .medOriginalBehandling(originalBehandling))
+            .build();
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
         return revurdering;
     }
@@ -245,14 +245,14 @@ public class ForeslåBehandlingsresultatTjenesteTest {
                                         Avslagsårsak søkerErUtvandret) {
         final var opptjeningBuilder = vilkårsresultatBuilder.hentBuilderFor(opptjeningsvilkåret);
         opptjeningBuilder
-                .leggTil(opptjeningBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(utfall).medAvslagsårsak(søkerErUtvandret));
+            .leggTil(opptjeningBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(utfall).medAvslagsårsak(søkerErUtvandret));
         vilkårsresultatBuilder.leggTil(opptjeningBuilder);
     }
 
     private void lagreUttak(Behandling behandling) {
         var uttaksplan = new Uttaksplan();
         var periode = new Periode(FOM, TOM);
-        uttaksplan.leggTilPeriode(periode, new UttaksperiodeInfo(PeriodeResultatType.INNVILGET, 100, Map.of()));
+        uttaksplan.setPerioder(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }
@@ -262,14 +262,14 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
         BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
-                .medVedtakResultatType(VedtakResultatType.AVSLAG)
-                .medAnsvarligSaksbehandler("asdf").build();
+            .medVedtakResultatType(VedtakResultatType.AVSLAG)
+            .medAnsvarligSaksbehandler("asdf").build();
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
         final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
         final var vilkårResultat = Vilkårene.builder()
-                .leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(Utfall.IKKE_OPPFYLT)))
-                .build();
+            .leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(Utfall.IKKE_OPPFYLT)))
+            .build();
         repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårResultat);
     }
 
