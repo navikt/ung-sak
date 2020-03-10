@@ -18,8 +18,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.folketrygdloven.kalkulus.UuidDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsgiverOpplysningerDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
@@ -260,12 +262,19 @@ public class KalkulusTjeneste implements BeregningTjeneste {
             .stream()
             .filter(overstyring -> overstyring.getArbeidsgiverNavn() != null) // Vi er kun interessert i overstyringer der SBH har endret navn på arbeidsgiver
             .findFirst()
-            .ifPresent(arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(arbeidsforhold.getArbeidsgiver().getOrgnr(), arbeidsforhold.getArbeidsgiverNavn())));
+            .ifPresent(arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(arbeidsforhold.getArbeidsgiver()), arbeidsforhold.getArbeidsgiverNavn())));
         return arbeidsgiverOpplysningerDtos;
 
     }
 
     public static ArbeidsgiverOpplysningerDto mapOpplysning(Arbeidsgiver key, ArbeidsgiverOpplysninger arbeidsgiverOpplysninger) {
-        return new ArbeidsgiverOpplysningerDto(key.getIdentifikator(), arbeidsgiverOpplysninger.getNavn(), arbeidsgiverOpplysninger.getFødselsdato());
+        return new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(key), arbeidsgiverOpplysninger.getNavn(), arbeidsgiverOpplysninger.getFødselsdato());
+    }
+
+    private static Aktør mapArbeidsgiver(Arbeidsgiver arbeidsgiver) {
+        if (arbeidsgiver.getErVirksomhet()) {
+            return new Organisasjon(arbeidsgiver.getIdentifikator());
+        }
+        return new AktørIdPersonident(arbeidsgiver.getIdentifikator());
     }
 }
