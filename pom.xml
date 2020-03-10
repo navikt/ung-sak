@@ -35,7 +35,7 @@
 
 		<felles.version>1.5-20200209090835-b5ad1b1</felles.version>
 
-        <metrics.version>4.1.4</metrics.version>
+        <metrics.version>4.1.5</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
         <kalkulus.version>1.0-2020.03.06.151151-e384fac</kalkulus.version>
     </properties>
