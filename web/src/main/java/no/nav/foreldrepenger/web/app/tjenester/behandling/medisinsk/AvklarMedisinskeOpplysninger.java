@@ -76,7 +76,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         if (pleiebehov.getPerioderMedTilsynOgPleie() != null) {
             pleiebehov.getPerioderMedTilsynOgPleie()
                 .stream()
-                .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()), it.getBegrunnelse(), 100))
+                .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()),
+                    it.getBegrunnelse(), 100, it.getÅrsaksammenhengBegrunnelse(), it.getÅrsaksammenheng()))
                 .forEach(builder::leggTil);
         }
 

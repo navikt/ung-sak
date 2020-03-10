@@ -5,6 +5,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,10 +26,9 @@ public class PeriodeMedTilsyn {
     @Valid
     private Periode periode;
 
-    public PeriodeMedTilsyn() {
-    }
-
-    public PeriodeMedTilsyn(Periode periode, String begrunnelse) {
+    @JsonCreator
+    public PeriodeMedTilsyn(@JsonProperty(value = "periode", required = true) @Valid Periode periode,
+                            @JsonProperty(value = "begrunnelse", required = true) @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String begrunnelse) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
     }
@@ -41,11 +41,4 @@ public class PeriodeMedTilsyn {
         return periode;
     }
 
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
-    }
-
-    public void setPeriode(Periode periode) {
-        this.periode = periode;
-    }
 }
