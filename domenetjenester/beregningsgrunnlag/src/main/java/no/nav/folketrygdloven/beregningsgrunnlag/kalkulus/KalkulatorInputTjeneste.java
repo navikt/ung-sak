@@ -8,7 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -51,7 +51,7 @@ public class KalkulatorInputTjeneste {
         }
 
         // TODO(OJR) hva skal denne være for k9?
-        kalkulatorInputDto.medYtelsespesifiktGrunnlag(new YtelsespesifiktGrunnlagDto(BigDecimal.valueOf(100), 3));
+        kalkulatorInputDto.medYtelsespesifiktGrunnlag(new PleiepengerSyktBarnGrunnlag(BigDecimal.valueOf(100), 3, List.of()));
         return kalkulatorInputDto;
     }
 }
