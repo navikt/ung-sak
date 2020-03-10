@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.økonomi;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -27,15 +30,26 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
     }
 
     @Inject
-    public SendØkonomiOppdragTask(BehandlingRepositoryProvider repositoryProvider) {
+    public SendØkonomiOppdragTask(BehandlingRepositoryProvider repositoryProvider, K9OppdragRestKlient restKlient, TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
         super(repositoryProvider.getBehandlingLåsRepository());
+        this.restKlient = restKlient;
+        this.tilkjentYtelseTjeneste = tilkjentYtelseTjeneste;
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         TilkjentYtelseOppdrag input = tilkjentYtelseTjeneste.hentTilkjentYtelseOppdrag(behandlingId);
+        input.getBehandlingsinfo().setBehandlingTidspunkt(hentOpprinneligIverksettelseTidspunkt(prosessTaskData));
         restKlient.startIverksettelse(input);
+    }
+
+    private OffsetDateTime hentOpprinneligIverksettelseTidspunkt(ProsessTaskData prosessTaskData) {
+        String tidspunkt = prosessTaskData.getPropertyValue("opprinneligIversettingTidspunkt");
+        if (tidspunkt == null) {
+            throw new IllegalArgumentException("Mangler verdi for opprinneligIversettingTidspunkt");
+        }
+        return OffsetDateTime.parse(tidspunkt, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
 }

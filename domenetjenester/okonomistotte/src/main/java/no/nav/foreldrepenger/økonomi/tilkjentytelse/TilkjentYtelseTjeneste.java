@@ -104,10 +104,11 @@ public class TilkjentYtelseTjeneste {
     }
 
     private String lagHenvisning(Behandling behandling) {
-        //FIXME K9 avklar hvilken verdi som skal burkes i 'henvisning'.
-        //den brukes til 2 formål:
-        // 1 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
-        // 2 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik
+        //FIXME K9 avklar hvilken verdi som skal brukes i 'henvisning'.
+        //den brukes til 3 formål:
+        // 1 kobling til kvitteringer
+        // 2 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
+        // 3 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik
         return behandling.getUuid().toString().substring(0, 30);
     }
 

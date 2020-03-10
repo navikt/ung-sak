@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.domene.iverksett;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +53,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
         parallelle.add(new ProsessTaskData(SendVedtaksbrevTask.TASKTYPE));
-        parallelle.add(new ProsessTaskData(SendØkonomiOppdragTask.TASKTYPE));
+        parallelle.add(opprettTaskSendTilØkonomi());
         avsluttOppgave.ifPresent(parallelle::add);
 
         taskData.addNesteParallell(parallelle);
@@ -68,6 +71,13 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         // Opprettes som egen task da den er uavhengig av de andre
         prosessTaskRepository.lagre(opprettTaskVurderOppgaveTilbakekreving(behandling));
+    }
+
+    private ProsessTaskData opprettTaskSendTilØkonomi() {
+        ProsessTaskData taskdata = new ProsessTaskData(SendØkonomiOppdragTask.TASKTYPE);
+        OffsetDateTime nå = OffsetDateTime.now(ZoneId.of("UTC"));
+        taskdata.setProperty("opprinneligIversettingTidspunkt", nå.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        return taskdata;
     }
 
     private ProsessTaskData opprettTaskVurderOppgaveTilbakekreving(Behandling behandling) {
