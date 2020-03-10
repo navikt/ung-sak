@@ -103,6 +103,7 @@ public class InngangsvilkårOversetter {
     private List<PeriodeMedKontinuerligTilsyn> mapKontinuerligTilsyn(List<KontinuerligTilsynPeriode> relevantKontinuerligTilsyn) {
         return relevantKontinuerligTilsyn.stream()
             .filter(it -> it.getGrad() == 100)
+            .filter(KontinuerligTilsynPeriode::getÅrsaksammenheng)
             .map(it -> new PeriodeMedKontinuerligTilsyn(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
             .collect(Collectors.toList());
     }
