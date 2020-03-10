@@ -175,6 +175,11 @@ public enum VilkårType implements Kodeverdi {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
 
+            // hack for jackson < 2.11. Klarer ikke å serialisere enum key i maps riktig (ignorerer JsonProperty)
+            // fra 2.11 er følgende workaround (respekterer fortsatt ikke JsonProperty på enum)
+            // https://github.com/FasterXML/jackson-databind/issues/2503
+            KODER.putIfAbsent(v.name(), v);
+            
             INDEKS_VILKÅR_AVSLAGSÅRSAKER.put(v, v.avslagsårsaker);
             v.avslagsårsaker.forEach(a -> INDEKS_AVSLAGSÅRSAK_VILKÅR.computeIfAbsent(a, (k) -> new HashSet<>(4)).add(v));
         }
