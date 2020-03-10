@@ -57,7 +57,7 @@ public class SøknadRestTjeneste {
     @Path(SOKNAD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent informasjon om søknad", tags = "søknad", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Søknad, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Søknad, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Deprecated
@@ -73,7 +73,7 @@ public class SøknadRestTjeneste {
     @GET
     @Path(SOKNAD_PATH)
     @Operation(description = "Hent informasjon om søknad", tags = "søknad", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Søknad, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Søknad, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
