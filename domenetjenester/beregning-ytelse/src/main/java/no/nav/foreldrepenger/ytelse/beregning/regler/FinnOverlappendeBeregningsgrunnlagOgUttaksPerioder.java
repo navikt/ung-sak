@@ -28,7 +28,6 @@ import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.vedtak.util.Tuple;
 
 class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecification<BeregningsresultatRegelmodellMellomregning> {
     public static final String ID = "FP_BR 20_1";
@@ -39,8 +38,6 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     private static final String DAGSATS_BRUKER = ".dagsatsBruker";
     private static final String DAGSATS_ARBEIDSGIVER = ".dagsatsArbeidsgiver";
     private static final String ARBEIDSGIVER_ID = ".arbeidsgiverId";
-
-    private static final BigDecimal FULL_STILLING = BigDecimal.valueOf(100);
 
     FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder() {
         super(ID, BESKRIVELSE);
@@ -108,10 +105,8 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         }
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
 
-        // Gradering
-        Tuple<Long, Long> dagsatser = kalkulerDagsatserForGradering(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr(), BigDecimal.ZERO,
-            uttakAktivitet, resultater, periodeNavn);
-        Long dagsatsBruker = dagsatser.getElement1();
+        // Fra dagsats gradert ifht utbetalingsgrad
+        Long dagsatsBruker = årsbeløpTilDagsats(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr());
 
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
@@ -157,12 +152,9 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
         String arbeidsgiverId = arbeidsforhold.getArbeidsgiverId();
 
-        // Gradering
-        Tuple<Long, Long> dagsatser = kalkulerDagsatserForGradering(arbeidsforhold.getRedusertBrukersAndelPrÅr(), arbeidsforhold.getRedusertRefusjonPrÅr(),
-            uttakAktivitet, resultater, periodeNavn);
-
-        Long dagsatsBruker = dagsatser.getElement1();
-        Long dagsatsArbeidsgiver = dagsatser.getElement2();
+        // Fra dagsats gradert ifht utbetalingsgrad
+        Long dagsatsBruker = årsbeløpTilDagsats(arbeidsforhold.getRedusertBrukersAndelPrÅr());
+        Long dagsatsArbeidsgiver = årsbeløpTilDagsats(arbeidsforhold.getRedusertRefusjonPrÅr());
 
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
@@ -206,67 +198,6 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             .stream()
             .filter(uttakAktivitet -> Objects.equals(uttakAktivitet.getArbeidsforhold(), arbeidsforhold.getArbeidsforhold()))
             .findFirst();
-    }
-
-    /*
-     * Returnerer en Tuple (Long dagsatsBruker, Long dagsatsArbeidsgiver) med dagsatser gradert for bruker og arbeidsgiver
-     */
-    private static Tuple<Long, Long> kalkulerDagsatserForGradering(BigDecimal redusertBrukersAndelPrÅr, BigDecimal redusertRefusjonPrÅr,
-                                                                   UttakAktivitet uttakAktivitet, Map<String, Object> resultater, String periodenavn) {
-        if (uttakAktivitet.getUtbetalingsgrad().compareTo(BigDecimal.ZERO) == 0) {
-            resultater.put(periodenavn + ".utbetalingsgrad", uttakAktivitet.getUtbetalingsgrad());
-            return new Tuple<>(0L, 0L);
-        }
-
-        BigDecimal utbetalingsgrad = uttakAktivitet.getUtbetalingsgrad().scaleByPowerOfTen(-2);
-        BigDecimal andelArbeidsgiver = Optional.ofNullable(redusertRefusjonPrÅr).orElse(BigDecimal.ZERO);
-        BigDecimal andelBruker = Optional.ofNullable(redusertBrukersAndelPrÅr).orElse(BigDecimal.ZERO);
-        BigDecimal redusertAndelArb = andelArbeidsgiver.multiply(utbetalingsgrad);
-        BigDecimal redusertAndelBruker = andelBruker.multiply(utbetalingsgrad);
-
-        if (skalGjøreOverkompensasjon(uttakAktivitet)) {
-            BigDecimal permisjonsProsent = finnPermisjonsprosent(uttakAktivitet, utbetalingsgrad);
-            BigDecimal maksimalRefusjon = BigDecimal.ZERO.max(andelArbeidsgiver.multiply(permisjonsProsent));
-            BigDecimal utbetalingBruker = redusertAndelArb.subtract(maksimalRefusjon).add(redusertAndelBruker);
-
-            long dagsatsArbeidsgiver = årsbeløpTilDagsats(maksimalRefusjon);
-            long dagsatsBruker = årsbeløpTilDagsats(utbetalingBruker);
-
-            // Regelsporing
-            resultater.put(periodenavn + ".utbetalingsgrad", uttakAktivitet.getUtbetalingsgrad());
-            resultater.put(periodenavn + ".stillingsprosent", uttakAktivitet.getStillingsgrad());
-
-            return new Tuple<>(dagsatsBruker, dagsatsArbeidsgiver);
-        } else {
-            long dagsatsArbeidsgiver = årsbeløpTilDagsats(redusertAndelArb);
-            long dagsatsBruker = årsbeløpTilDagsats(redusertAndelBruker);
-
-            // Regelsporing
-            resultater.put(periodenavn + ".utbetalingsgrad", uttakAktivitet.getUtbetalingsgrad());
-            resultater.put(periodenavn + ".stillingsprosent", uttakAktivitet.getStillingsgrad());
-
-            return new Tuple<>(dagsatsBruker, dagsatsArbeidsgiver);
-        }
-    }
-
-    private static boolean skalGjøreOverkompensasjon(UttakAktivitet uttakAktivitet) {
-        if (uttakAktivitet.getStillingsgrad().compareTo(FULL_STILLING) > 0) {
-            // Jobber mer enn 100%, skal aldri overkompenseres
-            return false;
-        }
-        return uttakAktivitet.isErGradering();
-    }
-
-    private static BigDecimal finnPermisjonsprosent(UttakAktivitet uttakAktivitet, BigDecimal utbetalingsgrad) {
-        if (!uttakAktivitet.isErGradering()) {
-            return utbetalingsgrad;
-        }
-        BigDecimal stillingsprosent = uttakAktivitet.getStillingsgrad().scaleByPowerOfTen(-2);
-        if (stillingsprosent.compareTo(BigDecimal.ZERO) <= 0) {
-            return BigDecimal.ZERO;
-        }
-        BigDecimal nyStillingsProsent = BigDecimal.ONE.subtract(utbetalingsgrad);
-        return BigDecimal.ONE.subtract(nyStillingsProsent.divide(stillingsprosent, 10, RoundingMode.HALF_UP));
     }
 
     private LocalDateTimeline<BeregningsgrunnlagPeriode> mapGrunnlagTimeline(Beregningsgrunnlag grunnlag) {
