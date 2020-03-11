@@ -21,7 +21,7 @@ import no.nav.k9.sak.typer.AktørId;
 public class UttakInput {
 
     private BehandlingReferanse behandlingReferanse;
-    private Collection<BeregningsgrunnlagStatusPeriode> beregningsgrunnlagStatusPerioder = Collections.emptyList();
+    private Collection<UttakAktivitetStatusPeriode> uttakAktivitetStatusPerioder = Collections.emptyList();
     private final InntektArbeidYtelseGrunnlag iayGrunnlag;
     private LocalDate søknadMottattDato;
     private LocalDate medlemskapOpphørsdato;
@@ -32,6 +32,7 @@ public class UttakInput {
     private UttakPersonInfo pleietrengende;
 
     private Map<AktørId, UUID> relaterteBehandlinger = Collections.emptyMap();
+    
     private UttakPersonInfo søker;
     
     public UttakInput(BehandlingReferanse behandlingReferanse,
@@ -42,7 +43,7 @@ public class UttakInput {
 
     private UttakInput(UttakInput input) {
         this(input.getBehandlingReferanse(), input.getIayGrunnlag());
-        this.beregningsgrunnlagStatusPerioder = List.copyOf(input.beregningsgrunnlagStatusPerioder);
+        this.uttakAktivitetStatusPerioder = List.copyOf(input.uttakAktivitetStatusPerioder);
         this.søknadMottattDato = input.søknadMottattDato;
         this.medlemskapOpphørsdato = input.medlemskapOpphørsdato;
         this.behandlingÅrsaker = input.behandlingÅrsaker;
@@ -59,8 +60,8 @@ public class UttakInput {
         return behandlingReferanse;
     }
 
-    public Collection<BeregningsgrunnlagStatusPeriode> getBeregningsgrunnlagStatusPerioder() {
-        return beregningsgrunnlagStatusPerioder;
+    public Collection<UttakAktivitetStatusPeriode> getUttakAktivitetStatusPerioder() {
+        return uttakAktivitetStatusPerioder;
     }
 
     public FagsakYtelseType getFagsakYtelseType() {
@@ -99,9 +100,9 @@ public class UttakInput {
         return opplysningerOmDødEndret;
     }
 
-    public UttakInput medBeregningsgrunnlagPerioder(Collection<BeregningsgrunnlagStatusPeriode> statusPerioder) {
+    public UttakInput medUttakAktivitetStatusPerioder(Collection<UttakAktivitetStatusPeriode> statusPerioder) {
         var newInput = new UttakInput(this);
-        newInput.beregningsgrunnlagStatusPerioder = List.copyOf(statusPerioder);
+        newInput.uttakAktivitetStatusPerioder = List.copyOf(statusPerioder);
         return newInput;
     }
 
