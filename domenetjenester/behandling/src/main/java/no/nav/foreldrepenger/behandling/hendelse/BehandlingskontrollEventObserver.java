@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandling.hendelse;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +12,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.kontrakt.behandling.prosess.BehandlingProsessEventDto;
+import no.nav.k9.sak.kontrakt.behandling.prosess.EventHendelse;
+import no.nav.k9.sak.kontrakt.behandling.prosess.Fagsystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +27,6 @@ import no.nav.foreldrepenger.behandlingskontroll.events.BehandlingskontrollEvent
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.vedtak.felles.integrasjon.kafka.BehandlingProsessEventDto;
-import no.nav.vedtak.felles.integrasjon.kafka.EventHendelse;
-import no.nav.vedtak.felles.integrasjon.kafka.Fagsystem;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
@@ -112,9 +113,12 @@ public class BehandlingskontrollEventObserver {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
 
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
-
         return BehandlingProsessEventDto.builder()
-            .medFagsystem(Fagsystem.FPSAK)
+            .medEksternId(behandling.getUuid())
+            .medEventTid(LocalDateTime.now())
+            .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
+            .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
+            .medFagsystem(Fagsystem.K9SAK)
             .medBehandlingId(behandling.getId())
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
             .medAktørId(behandling.getAktørId().getId())
