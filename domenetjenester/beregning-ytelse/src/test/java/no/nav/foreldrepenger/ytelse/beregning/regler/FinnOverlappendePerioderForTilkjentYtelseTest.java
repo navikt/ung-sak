@@ -11,7 +11,6 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.ytelse.beregning.adapter.InntektskategoriMapper;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;
@@ -31,7 +30,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 
-@Ignore("EspenVelsvik fikser kalkulus slik at den returnerer uredusert dagsatser også. Deretter håndterer vi kompenssasjon for utbetalingsgrad her som planlagt")
+@Ignore("Espen Velsvik: Venter på at kalkulus returnerer ikke-redusert dagsats")
 public class FinnOverlappendePerioderForTilkjentYtelseTest {
 
     private final String orgnr = "123";
@@ -361,7 +360,10 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         long dagsatsBruker = redusertBrukersAndel.divide(BigDecimal.valueOf(260), 0, RoundingMode.HALF_UP).longValue();
         long redDagsatsBruker = getDagsats(0.50 * redusertBrukersAndel.doubleValue());
         BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.SN,
-            Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, true);
+            Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, 
+            UttakArbeidType.ANNET, 
+            true);
+        
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
         Evaluation evaluation = regel.evaluate(mellomregning);
@@ -423,7 +425,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         long dagsatsBruker = redusertBrukersAndel.divide(BigDecimal.valueOf(260), 0, RoundingMode.HALF_UP).longValue();
         long redDagsatsBruker = getDagsats(0.66 * redusertBrukersAndel.doubleValue());
         BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.DP,
-            Inntektskategori.DAGPENGER, true);
+            Inntektskategori.DAGPENGER, UttakArbeidType.ANNET, 
+            true);
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
         Evaluation evaluation = regel.evaluate(mellomregning);
@@ -530,13 +533,13 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         assertThat(andel.get(1).getDagsatsFraBg()).isEqualTo(dagsatsArbeidsgiver);
     }
 
-    private BeregningsresultatRegelmodellMellomregning lagMellomregning(AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad,
+    private BeregningsresultatRegelmodellMellomregning lagMellomregning(AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, UttakArbeidType uttakArbeidType, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad,
                                                                         BigDecimal redusertBrukersAndel, boolean erGradering) {
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusDays(14);
 
         Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, inntektskategori, redusertBrukersAndel);
-        UttakResultat uttakResultat = new UttakResultat(lagUttakResultatPeriode(fom, tom, stillingsgrad, utbetalingsgrad, inntektskategori, erGradering));
+        UttakResultat uttakResultat = new UttakResultat(lagUttakResultatPeriode(fom, tom, stillingsgrad, utbetalingsgrad, uttakArbeidType, erGradering));
         BeregningsresultatRegelmodell input = new BeregningsresultatRegelmodell(grunnlag, uttakResultat);
         Beregningsresultat output = new Beregningsresultat();
         return new BeregningsresultatRegelmodellMellomregning(input, output);
@@ -553,10 +556,9 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         return new BeregningsresultatRegelmodellMellomregning(input, output);
     }
 
-    private List<UttakResultatPeriode> lagUttakResultatPeriode(LocalDate fom, LocalDate tom, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, Inntektskategori inntektskategori,
+    private List<UttakResultatPeriode> lagUttakResultatPeriode(LocalDate fom, LocalDate tom, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, UttakArbeidType uttakArbeidType,
                                                                boolean erGradering) {
 
-        var uttakArbeidType = UttakArbeidType.mapFra(InntektskategoriMapper.fraRegelTilVL(inntektskategori));
         List<UttakAktivitet> uttakAktiviter = Collections.singletonList( new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, uttakArbeidType, erGradering));
         UttakResultatPeriode periode = new UttakResultatPeriode(fom, tom, uttakAktiviter, false);
         return List.of(periode);
@@ -608,7 +610,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
             .medInntektskategori(inntektskategori)
             .build();
         BigDecimal utbetalingsgrad = BigDecimal.valueOf(100).subtract(BigDecimal.valueOf(nyArbeidstidProsent));
-        return lagMellomregning(AktivitetStatus.ATFL, inntektskategori, stillingsgrad, utbetalingsgrad,
+        return lagMellomregning(AktivitetStatus.ATFL, inntektskategori, UttakArbeidType.ARBEIDSTAKER,
+            stillingsgrad, utbetalingsgrad,
             BigDecimal.valueOf(redBrukersAndelPrÅr), erGradering);
     }
 
@@ -621,8 +624,9 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
     }
 
     private BeregningsresultatRegelmodellMellomregning settOppGraderingScenarioForAndreStatuser(BigDecimal redusertBrukersAndel, BigDecimal stillingsgrad, int utbetalingsgrad,
-                                                                                                AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, boolean erGradering) {
-        return lagMellomregning(aktivitetStatus, inntektskategori, stillingsgrad, BigDecimal.valueOf(utbetalingsgrad), redusertBrukersAndel, erGradering);
+                                                                                                AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, UttakArbeidType uttakArbeidType,
+                                                                                                boolean erGradering) {
+        return lagMellomregning(aktivitetStatus, inntektskategori, uttakArbeidType, stillingsgrad, BigDecimal.valueOf(utbetalingsgrad), redusertBrukersAndel, erGradering);
     }
 
     private BeregningsresultatRegelmodellMellomregning settOppScenarioMedOppholdsperiodeForSN(BigDecimal redusertBrukersAndel) {

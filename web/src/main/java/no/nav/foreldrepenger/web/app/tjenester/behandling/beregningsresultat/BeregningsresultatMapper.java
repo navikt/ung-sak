@@ -254,7 +254,7 @@ public class BeregningsresultatMapper {
         return new UttakArbeidsforhold(
             a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
             a.getAktørId(),
-            UttakArbeidType.mapFra(a.getInntektskategori()),
+            UttakArbeidType.mapFra(a.getAktivitetStatus()),
             a.getArbeidsforholdId());
     }
 

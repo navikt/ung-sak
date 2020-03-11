@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.ytelse.beregning.regler;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.ytelse.beregning.adapter.InntektskategoriMapper;
+import no.nav.foreldrepenger.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;
@@ -127,14 +126,15 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
     private Optional<UttakAktivitet> matchUttakAktivitetMedBeregningsgrunnlagPrStatus(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, List<UttakAktivitet> uttakAktiviteter) {
 
-        var notATFL = EnumSet.complementOf(UttakArbeidType.ATFL);
-
         var match = uttakAktiviteter.stream()
-            .filter(ut -> notATFL.contains(ut.getType()))
             .filter(aktivitet -> {
-                var inntektskategori = beregningsgrunnlagPrStatus.getInntektskategori();
-                return aktivitet.getType().matcher(InntektskategoriMapper.fraRegelTilVL(inntektskategori))
-                    || (aktivitet.getType().equals(UttakArbeidType.ANNET) && !beregningsgrunnlagPrStatus.getAktivitetStatus().erGraderbar());
+                var aktivitetStatus = beregningsgrunnlagPrStatus.getAktivitetStatus();
+                if ((aktivitet.getType().equals(UttakArbeidType.ANNET))) {
+                    return !aktivitetStatus.erGraderbar();
+                } else {
+                    var utAktivitet = AktivitetStatusMapper.fraVLTilRegel(aktivitet.getType().getAktivitetStatus());
+                    return Objects.equals(utAktivitet, aktivitetStatus);
+                }
             })
             .findFirst();
         return match;
