@@ -76,7 +76,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     private ProsessTaskData opprettTaskSendTilØkonomi() {
         ProsessTaskData taskdata = new ProsessTaskData(SendØkonomiOppdragTask.TASKTYPE);
         OffsetDateTime nå = OffsetDateTime.now(ZoneId.of("UTC"));
-        taskdata.setProperty("opprinneligIversettingTidspunkt", nå.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        taskdata.setProperty("opprinneligIverksettingTidspunkt", nå.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         return taskdata;
     }
 

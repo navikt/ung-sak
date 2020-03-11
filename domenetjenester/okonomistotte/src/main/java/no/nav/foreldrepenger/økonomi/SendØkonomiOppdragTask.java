@@ -45,9 +45,9 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
     }
 
     private OffsetDateTime hentOpprinneligIverksettelseTidspunkt(ProsessTaskData prosessTaskData) {
-        String tidspunkt = prosessTaskData.getPropertyValue("opprinneligIversettingTidspunkt");
+        String tidspunkt = prosessTaskData.getPropertyValue("opprinneligIverksettingTidspunkt");
         if (tidspunkt == null) {
-            throw new IllegalArgumentException("Mangler verdi for opprinneligIversettingTidspunkt");
+            throw new IllegalArgumentException("Mangler verdi for opprinneligIverksettingTidspunkt");
         }
         return OffsetDateTime.parse(tidspunkt, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
