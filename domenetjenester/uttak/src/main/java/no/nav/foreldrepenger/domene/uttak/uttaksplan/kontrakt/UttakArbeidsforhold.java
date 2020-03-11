@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.AktørId;
 
 @JsonPropertyOrder({ "type", "organisasjonsnummer", "aktørId", "arbeidsforholdId" })
@@ -45,9 +46,7 @@ public class UttakArbeidsforhold implements Comparable<UttakArbeidsforhold> {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "type")
     @Valid
-    @Size(max = 30)
-    @Pattern(regexp = "^[\\p{Alnum}_\\.]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String type;
+    private UttakArbeidType type;
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "arbeidsforholdId")
@@ -58,11 +57,9 @@ public class UttakArbeidsforhold implements Comparable<UttakArbeidsforhold> {
 
     public UttakArbeidsforhold(@JsonProperty(value = "organisasjonsnummer") @Valid @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String organisasjonsnummer,
                                @JsonProperty(value = "aktørId") @Valid AktørId aktørId,
-                               @JsonProperty(value = "type") @Valid @Size(max = 30) @Pattern(regexp = "^[\\p{Alnum}_\\.]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String type,
+                               @JsonProperty(value = "type") @Valid UttakArbeidType type,
                                @JsonProperty(value = "arbeidsforholdId") @Valid @Size(max = 40) @Pattern(regexp = "^[\\p{Alnum}_\\.\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String arbeidsforholdId) {
-        if (aktørId == null && organisasjonsnummer == null) {
-            throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver uten hverken orgnr eller aktørId");
-        } else if (aktørId != null && organisasjonsnummer != null) {
+        if (aktørId != null && organisasjonsnummer != null) {
             throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver med både orgnr og aktørId");
         }
         this.organisasjonsnummer = organisasjonsnummer;
@@ -93,7 +90,7 @@ public class UttakArbeidsforhold implements Comparable<UttakArbeidsforhold> {
         return aktørId;
     }
 
-    public String getType() {
+    public UttakArbeidType getType() {
         return type;
     }
 

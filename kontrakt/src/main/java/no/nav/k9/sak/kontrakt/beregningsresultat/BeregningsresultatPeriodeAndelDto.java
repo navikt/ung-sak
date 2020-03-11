@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.beregningsresultat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -43,6 +45,7 @@ public class BeregningsresultatPeriodeAndelDto {
         private Integer tilSøker;
         private BigDecimal utbetalingsgrad;
         private UttakDto uttak;
+        private Inntektskategori inntektskategori;
 
         private Builder() {
         }
@@ -115,11 +118,20 @@ public class BeregningsresultatPeriodeAndelDto {
             this.uttak = uttak;
             return this;
         }
+
+        public Builder medInntektskategori(Inntektskategori inntektskategori) {
+            this.inntektskategori = inntektskategori;
+            return this;
+        }
     }
 
     @JsonProperty(value = "aktivitetStatus")
     @Valid
     private AktivitetStatus aktivitetStatus;
+    
+    @JsonProperty(value = "inntektskategori", required = true)
+    @Valid
+    private Inntektskategori inntektskategori;
 
     @JsonProperty(value = "aktørId")
     @Valid
@@ -196,6 +208,7 @@ public class BeregningsresultatPeriodeAndelDto {
         this.aktørId = builder.aktørId;
         this.arbeidsforholdType = builder.arbeidsforholdType;
         this.stillingsprosent = builder.stillingsprosent;
+        this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
     }
 
     public static Builder build() {
@@ -228,6 +241,10 @@ public class BeregningsresultatPeriodeAndelDto {
 
     public String getEksternArbeidsforholdId() {
         return eksternArbeidsforholdId;
+    }
+    
+    public Inntektskategori getInntektskategori() {
+        return inntektskategori;
     }
 
     public Integer getRefusjon() {
@@ -304,5 +321,9 @@ public class BeregningsresultatPeriodeAndelDto {
 
     public void setUttak(UttakDto uttak) {
         this.uttak = uttak;
+    }
+    
+    public void setInntektskategori(Inntektskategori inntektskategori) {
+        this.inntektskategori = inntektskategori;
     }
 }

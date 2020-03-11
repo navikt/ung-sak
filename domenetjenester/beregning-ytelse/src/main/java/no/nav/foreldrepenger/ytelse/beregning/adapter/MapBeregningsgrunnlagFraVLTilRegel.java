@@ -69,27 +69,29 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
     }
 
     // Ikke ATFL og TY, de har separat mapping
-    private static BeregningsgrunnlagPrStatus mapVLBGPStatusForAlleAktivietetStatuser(BeregningsgrunnlagPrStatusOgAndel vlBGPStatus) {
-        final AktivitetStatus regelAktivitetStatus = AktivitetStatusMapper.fraVLTilRegel(vlBGPStatus.getAktivitetStatus());
+    private static BeregningsgrunnlagPrStatus mapVLBGPStatusForAlleAktivietetStatuser(BeregningsgrunnlagPrStatusOgAndel statusOgAndel) {
+        final AktivitetStatus regelAktivitetStatus = AktivitetStatusMapper.fraVLTilRegel(statusOgAndel.getAktivitetStatus());
         return BeregningsgrunnlagPrStatus.builder()
             .medAktivitetStatus(regelAktivitetStatus)
-            .medRedusertBrukersAndelPrÅr(vlBGPStatus.getRedusertBrukersAndelPrÅr())
-            .medInntektskategori(InntektskategoriMapper.fraVLTilRegel(vlBGPStatus.getInntektskategori()))
+            .medRedusertBrukersAndelPrÅr(statusOgAndel.getRedusertBrukersAndelPrÅr())
+            .medInntektskategori(InntektskategoriMapper.fraVLTilRegel(statusOgAndel.getInntektskategori()))
             .build();
     }
 
     // Felles mapping av alle statuser som mapper til ATFL
     private static BeregningsgrunnlagPrStatus mapVLBGPStatusForATFL(no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode vlBGPeriode) {
 
-        BeregningsgrunnlagPrStatus.Builder regelBGPStatusATFL = BeregningsgrunnlagPrStatus.builder().medAktivitetStatus(AktivitetStatus.ATFL);
+        BeregningsgrunnlagPrStatus.Builder regelBGPStatusATFL = BeregningsgrunnlagPrStatus.builder()
+                .medAktivitetStatus(AktivitetStatus.ATFL)
+                ;
 
-        for (BeregningsgrunnlagPrStatusOgAndel vlBGPStatus : vlBGPeriode.getBeregningsgrunnlagPrStatusOgAndelList()) {
-            if (AktivitetStatus.ATFL.equals(AktivitetStatusMapper.fraVLTilRegel(vlBGPStatus.getAktivitetStatus()))) {
+        for (var status : vlBGPeriode.getBeregningsgrunnlagPrStatusOgAndelList()) {
+            if (AktivitetStatus.ATFL.equals(AktivitetStatusMapper.fraVLTilRegel(status.getAktivitetStatus()))) {
                 BeregningsgrunnlagPrArbeidsforhold regelArbeidsforhold = BeregningsgrunnlagPrArbeidsforhold.builder()
-                    .medArbeidsforhold(ArbeidsforholdMapper.mapArbeidsforholdFraBeregningsgrunnlag(vlBGPStatus))
-                    .medRedusertRefusjonPrÅr(vlBGPStatus.getRedusertRefusjonPrÅr())
-                    .medRedusertBrukersAndelPrÅr(vlBGPStatus.getRedusertBrukersAndelPrÅr())
-                    .medInntektskategori(InntektskategoriMapper.fraVLTilRegel(vlBGPStatus.getInntektskategori()))
+                    .medArbeidsforhold(ArbeidsforholdMapper.mapArbeidsforholdFraBeregningsgrunnlag(status))
+                    .medRedusertRefusjonPrÅr(status.getRedusertRefusjonPrÅr())
+                    .medRedusertBrukersAndelPrÅr(status.getRedusertBrukersAndelPrÅr())
+                    .medInntektskategori(InntektskategoriMapper.fraVLTilRegel(status.getInntektskategori()))
                     .build();
                 regelBGPStatusATFL.medArbeidsforhold(regelArbeidsforhold);
             }

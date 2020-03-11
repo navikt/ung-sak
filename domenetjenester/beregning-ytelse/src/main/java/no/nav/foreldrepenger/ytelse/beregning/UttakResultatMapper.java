@@ -1,10 +1,9 @@
 package no.nav.foreldrepenger.ytelse.beregning;
 
-import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultat;
 
 @FunctionalInterface
-public interface UttakResultatRepoMapper {
+public interface UttakResultatMapper {
 
     /**
      * Henter uttaksresultat fra repository og mapper til en felles regelmodell for
@@ -15,5 +14,5 @@ public interface UttakResultatRepoMapper {
      * @return Regelmodell for uttakResultat
      */
 
-    UttakResultat hentOgMapUttakResultat(UttakInput input);
+    UttakResultat hentOgMapUttakResultat(UttakResultatInput input);
 }
