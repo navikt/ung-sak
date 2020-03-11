@@ -151,6 +151,7 @@ public class BeregningsresultatMapper {
                     .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
                     .medSisteUtbetalingsdato(andelTilSisteUtbetalingsdatoMap.getOrDefault(genererAndelKey(brukersAndel), Optional.empty()).orElse(null))
                     .medAktivitetstatus(brukersAndel.getAktivitetStatus())
+                    .medInntektskategori(brukersAndel.getInntektskategori())
                     .medArbeidsforholdId(brukersAndel.getArbeidsforholdRef() != null
                         ? brukersAndel.getArbeidsforholdRef().getReferanse()
                         : null)
@@ -253,19 +254,8 @@ public class BeregningsresultatMapper {
         return new UttakArbeidsforhold(
             a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
             a.getAktørId(),
-            mapUttakAktivitet(a.getAktivitetStatus()).toString(),
+            UttakArbeidType.mapFra(a.getInntektskategori()),
             a.getArbeidsforholdId());
     }
 
-    private static UttakArbeidType mapUttakAktivitet(AktivitetStatus aktivitetStatus) {
-        if (aktivitetStatus.erArbeidstaker()) {
-            return UttakArbeidType.ARBEIDSTAKER;
-        } else if (aktivitetStatus.erSelvstendigNæringsdrivende()) {
-            return UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE;
-        } else if (aktivitetStatus.erFrilanser()) {
-            return UttakArbeidType.FRILANS;
-        } else {
-            return UttakArbeidType.ANNET;
-        }
-    }
 }

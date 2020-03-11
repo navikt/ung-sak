@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import no.nav.foreldrepenger.ytelse.beregning.adapter.InntektskategoriMapper;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;
@@ -23,10 +24,11 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Ber
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrArbeidsforhold;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
+import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Periode;
-import no.nav.foreldrepenger.ytelse.beregning.regler.FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 
 public class FinnOverlappendePerioderForTilkjentYtelseTest {
 
@@ -35,7 +37,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
     private Arbeidsforhold arbeidsforhold;
 
     /*
-    For eksempler brukt i testene under se https://confluence.adeo.no/display/MODNAV/27b.+Beregne+tilkjent+ytelse
+     * For eksempler brukt i testene under se https://confluence.adeo.no/display/MODNAV/27b.+Beregne+tilkjent+ytelse
      */
 
     @Test
@@ -47,7 +49,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 40;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -78,7 +81,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 40;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -109,7 +113,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 50;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -139,7 +144,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 50;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -169,7 +175,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 60;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -199,7 +206,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 60;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -209,7 +217,6 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
 
         // Assert
         long faktiskDagsatBruker = getDagsats(40000.0);
-
 
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
@@ -230,7 +237,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 50;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -240,7 +248,6 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
 
         // Assert
         long faktiskDagsatArbeidsgiver = getDagsats(50000.0);
-
 
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
@@ -261,7 +268,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 50;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -272,7 +280,6 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         // Assert
         long faktiskDagsatBruker = getDagsats(5000.0);
         long faktiskDagsatArbeidsgiver = getDagsats(45000.0);
-
 
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
@@ -293,7 +300,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 40;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -304,7 +312,6 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         // Assert
         long faktiskDagsatBruker = getDagsats(260000.0);
         long faktiskDagsatArbeidsgiver = getDagsats(100000.0);
-
 
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
@@ -325,7 +332,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 0;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, false);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, false);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -350,7 +358,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int utbetalingsgrad = 50;
         long dagsatsBruker = redusertBrukersAndel.divide(BigDecimal.valueOf(260), 0, RoundingMode.HALF_UP).longValue();
         long redDagsatsBruker = getDagsats(0.50 * redusertBrukersAndel.doubleValue());
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.SN, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.SN,
+            Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, true);
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
         Evaluation evaluation = regel.evaluate(mellomregning);
@@ -411,7 +420,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int utbetalingsgrad = 66;
         long dagsatsBruker = redusertBrukersAndel.divide(BigDecimal.valueOf(260), 0, RoundingMode.HALF_UP).longValue();
         long redDagsatsBruker = getDagsats(0.66 * redusertBrukersAndel.doubleValue());
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.DP, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.DP,
+            Inntektskategori.DAGPENGER, true);
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
         Evaluation evaluation = regel.evaluate(mellomregning);
@@ -448,7 +458,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
         assertThat(andel.get(0).erBrukerMottaker()).isTrue();
-        assertThat(andel.get(0).getDagsats()).isEqualTo(dagsatsBruker+dagsatsArbeidsgiver);
+        assertThat(andel.get(0).getDagsats()).isEqualTo(dagsatsBruker + dagsatsArbeidsgiver);
         assertThat(andel.get(0).getDagsatsFraBg()).isEqualTo(dagsatsBruker);
         assertThat(andel.get(1).erBrukerMottaker()).isFalse();
         assertThat(andel.get(1).getDagsats()).isEqualTo(0);
@@ -461,7 +471,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int redBrukersAndelPrÅr = 260000;
         int redRefusjonPrÅr = 130000;
         BigDecimal stillingsgrad = BigDecimal.ZERO;
-        int nyArbeidstidProsent = 50; //Gir 50% utbetalingsgrad
+        int nyArbeidstidProsent = 50; // Gir 50% utbetalingsgrad
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
         BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr,
@@ -477,10 +487,10 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
         assertThat(andel.get(0).erBrukerMottaker()).isTrue();
-        assertThat(andel.get(0).getDagsats()).isEqualTo(dagsatsBruker/2);
+        assertThat(andel.get(0).getDagsats()).isEqualTo(dagsatsBruker / 2);
         assertThat(andel.get(0).getDagsatsFraBg()).isEqualTo(dagsatsBruker);
         assertThat(andel.get(1).erBrukerMottaker()).isFalse();
-        assertThat(andel.get(1).getDagsats()).isEqualTo(dagsatsArbeidsgiver/2);
+        assertThat(andel.get(1).getDagsats()).isEqualTo(dagsatsArbeidsgiver / 2);
         assertThat(andel.get(1).getDagsatsFraBg()).isEqualTo(dagsatsArbeidsgiver);
     }
 
@@ -493,7 +503,8 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         int nyArbeidstidProsent = 40;
         long dagsatsBruker = getDagsats(redBrukersAndelPrÅr);
         long dagsatsArbeidsgiver = getDagsats(redRefusjonPrÅr);
-        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker, dagsatsArbeidsgiver, true);
+        BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenario(redBrukersAndelPrÅr, redRefusjonPrÅr, stillingsgrad, nyArbeidstidProsent, dagsatsBruker,
+            dagsatsArbeidsgiver, true);
 
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
@@ -507,7 +518,6 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         long faktiskDagsatBruker = getDagsats(redusertForDekningsgradBruker.intValue());
         long faktiskDagsatArbeidsgiver = getDagsats(redusertForDekningsgradArbeidsgiver.intValue());
 
-
         List<BeregningsresultatAndel> andel = mellomregning.getOutput().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList();
         assertThat(andel).hasSize(2);
         assertThat(andel.get(0).erBrukerMottaker()).isTrue();
@@ -518,32 +528,34 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         assertThat(andel.get(1).getDagsatsFraBg()).isEqualTo(dagsatsArbeidsgiver);
     }
 
-
-    private BeregningsresultatRegelmodellMellomregning lagMellomregning(AktivitetStatus aktivitetStatus, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, BigDecimal redusertBrukersAndel, boolean erGradering) {
+    private BeregningsresultatRegelmodellMellomregning lagMellomregning(AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad,
+                                                                        BigDecimal redusertBrukersAndel, boolean erGradering) {
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusDays(14);
 
-        Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, redusertBrukersAndel);
-        UttakResultat uttakResultat = new UttakResultat(lagUttakResultatPeriode(fom, tom, stillingsgrad, utbetalingsgrad, aktivitetStatus, erGradering));
+        Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, inntektskategori, redusertBrukersAndel);
+        UttakResultat uttakResultat = new UttakResultat(lagUttakResultatPeriode(fom, tom, stillingsgrad, utbetalingsgrad, inntektskategori, erGradering));
         BeregningsresultatRegelmodell input = new BeregningsresultatRegelmodell(grunnlag, uttakResultat);
         Beregningsresultat output = new Beregningsresultat();
         return new BeregningsresultatRegelmodellMellomregning(input, output);
     }
 
-    private BeregningsresultatRegelmodellMellomregning lagMellomregningForOppholdsPeriode(AktivitetStatus aktivitetStatus, BigDecimal redusertBrukersAndel) {
+    private BeregningsresultatRegelmodellMellomregning lagMellomregningForOppholdsPeriode(AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, BigDecimal redusertBrukersAndel) {
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusDays(14);
 
-        Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, redusertBrukersAndel);
+        Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, inntektskategori, redusertBrukersAndel);
         UttakResultat uttakResultat = new UttakResultat(lagUttakResultatForOppholdsPeriode(fom, tom));
         BeregningsresultatRegelmodell input = new BeregningsresultatRegelmodell(grunnlag, uttakResultat);
         Beregningsresultat output = new Beregningsresultat();
         return new BeregningsresultatRegelmodellMellomregning(input, output);
     }
 
-    private List<UttakResultatPeriode> lagUttakResultatPeriode(LocalDate fom, LocalDate tom, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, AktivitetStatus aktivitetStatus, boolean erGradering) {
+    private List<UttakResultatPeriode> lagUttakResultatPeriode(LocalDate fom, LocalDate tom, BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, Inntektskategori inntektskategori,
+                                                               boolean erGradering) {
 
-        List<UttakAktivitet> uttakAktiviter = Collections.singletonList(new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, aktivitetStatus, erGradering));
+        var uttakArbeidType = UttakArbeidType.mapFra(InntektskategoriMapper.fraRegelTilVL(inntektskategori));
+        List<UttakAktivitet> uttakAktiviter = Collections.singletonList( new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, uttakArbeidType, erGradering));
         UttakResultatPeriode periode = new UttakResultatPeriode(fom, tom, uttakAktiviter, false);
         return List.of(periode);
     }
@@ -554,9 +566,9 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         return List.of(periode);
     }
 
-    private Beregningsgrunnlag lagBeregningsgrunnlag(LocalDate fom, LocalDate tom, AktivitetStatus aktivitetStatus, BigDecimal redusertBrukersAndel) {
+    private Beregningsgrunnlag lagBeregningsgrunnlag(LocalDate fom, LocalDate tom, AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, BigDecimal redusertBrukersAndel) {
 
-        BeregningsgrunnlagPeriode periode1 = lagPeriode(fom, tom, aktivitetStatus, redusertBrukersAndel);
+        BeregningsgrunnlagPeriode periode1 = lagPeriode(fom, tom, aktivitetStatus, inntektskategori, redusertBrukersAndel);
 
         return Beregningsgrunnlag.builder()
             .medSkjæringstidspunkt(LocalDate.now())
@@ -566,13 +578,16 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
 
     }
 
-    private BeregningsgrunnlagPeriode lagPeriode(LocalDate fom, LocalDate tom, AktivitetStatus aktivitetStatus, BigDecimal redusertBrukersAndel) {
+    private BeregningsgrunnlagPeriode lagPeriode(LocalDate fom, LocalDate tom, AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, BigDecimal redusertBrukersAndel) {
         Periode periode = new Periode(fom, tom);
         BeregningsgrunnlagPrStatus.Builder builder = BeregningsgrunnlagPrStatus.builder()
             .medAktivitetStatus(aktivitetStatus)
             .medRedusertBrukersAndelPrÅr(redusertBrukersAndel);
+
         if (AktivitetStatus.ATFL.equals(aktivitetStatus)) {
             builder.medArbeidsforhold(prArbeidsforhold);
+        } else {
+            builder.medInntektskategori(inntektskategori);
         }
 
         BeregningsgrunnlagPrStatus bgPrStatus = builder.build();
@@ -582,14 +597,16 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
     private BeregningsresultatRegelmodellMellomregning settOppGraderingScenario(int redBrukersAndelPrÅr, int redRefusjonPrÅr, BigDecimal stillingsgrad,
                                                                                 int nyArbeidstidProsent, long dagsatsBruker, Long dagsatsArbeidsgiver, boolean erGradering) {
         arbeidsforhold = Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(orgnr);
+        Inntektskategori inntektskategori = Inntektskategori.ARBEIDSTAKER;
         prArbeidsforhold = BeregningsgrunnlagPrArbeidsforhold.builder().medArbeidsforhold(arbeidsforhold)
             .medRedusertBrukersAndelPrÅr(BigDecimal.valueOf(redBrukersAndelPrÅr))
             .medRedusertRefusjonPrÅr(BigDecimal.valueOf(redRefusjonPrÅr))
             .medDagsatsBruker(dagsatsBruker)
             .medDagsatsArbeidsgiver(dagsatsArbeidsgiver)
+            .medInntektskategori(inntektskategori)
             .build();
         BigDecimal utbetalingsgrad = BigDecimal.valueOf(100).subtract(BigDecimal.valueOf(nyArbeidstidProsent));
-        return lagMellomregning(AktivitetStatus.ATFL, stillingsgrad, utbetalingsgrad,
+        return lagMellomregning(AktivitetStatus.ATFL, inntektskategori, stillingsgrad, utbetalingsgrad,
             BigDecimal.valueOf(redBrukersAndelPrÅr), erGradering);
     }
 
@@ -597,30 +614,30 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         return Math.round(årsbeløp / 260.0);
     }
 
-
     private static long getDagsats(double årsbeløp) {
         return Math.round(årsbeløp / 260.0);
     }
 
     private BeregningsresultatRegelmodellMellomregning settOppGraderingScenarioForAndreStatuser(BigDecimal redusertBrukersAndel, BigDecimal stillingsgrad, int utbetalingsgrad,
-                                                                                                AktivitetStatus aktivitetStatus, boolean erGradering) {
-        return lagMellomregning(aktivitetStatus, stillingsgrad, BigDecimal.valueOf(utbetalingsgrad), redusertBrukersAndel, erGradering);
+                                                                                                AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori, boolean erGradering) {
+        return lagMellomregning(aktivitetStatus, inntektskategori, stillingsgrad, BigDecimal.valueOf(utbetalingsgrad), redusertBrukersAndel, erGradering);
     }
 
     private BeregningsresultatRegelmodellMellomregning settOppScenarioMedOppholdsperiodeForSN(BigDecimal redusertBrukersAndel) {
-        return lagMellomregningForOppholdsPeriode(AktivitetStatus.SN, redusertBrukersAndel);
+        return lagMellomregningForOppholdsPeriode(AktivitetStatus.SN, Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, redusertBrukersAndel);
     }
 
     private BeregningsresultatRegelmodellMellomregning settOppScenarioMedOppholdsperiodeForAT(int redBrukersAndelPrÅr, int redRefusjonPrÅr, long dagsatsBruker, Long dagsatsArbeidsgiver) {
         arbeidsforhold = Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(orgnr);
+        Inntektskategori inntektskategori = Inntektskategori.ARBEIDSTAKER;
         prArbeidsforhold = BeregningsgrunnlagPrArbeidsforhold.builder().medArbeidsforhold(arbeidsforhold)
             .medRedusertBrukersAndelPrÅr(BigDecimal.valueOf(redBrukersAndelPrÅr))
             .medRedusertRefusjonPrÅr(BigDecimal.valueOf(redRefusjonPrÅr))
             .medDagsatsBruker(dagsatsBruker)
             .medDagsatsArbeidsgiver(dagsatsArbeidsgiver)
+            .medInntektskategori(inntektskategori)
             .build();
-        return lagMellomregningForOppholdsPeriode(AktivitetStatus.ATFL, BigDecimal.valueOf(redBrukersAndelPrÅr));
+        return lagMellomregningForOppholdsPeriode(AktivitetStatus.ATFL, inntektskategori, BigDecimal.valueOf(redBrukersAndelPrÅr));
     }
-
 
 }

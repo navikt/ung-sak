@@ -32,7 +32,7 @@ public class UttaksplanResponseTest {
         LocalDate fom = LocalDate.now();
         LocalDate tom = fom.plusDays(10);
         
-        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER.getKode(), UUID.randomUUID().toString());
+        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER, UUID.randomUUID().toString());
         var uttaksperiodeInfo = new InnvilgetUttaksplanperiode(100, List.of(new UttakUtbetalingsgrad(arbeidsforhold, new BigDecimal("100.00"))));
         
         uttaksplan.setPerioder(Map.of(new Periode(fom, tom ), uttaksperiodeInfo));

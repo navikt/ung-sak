@@ -2,14 +2,27 @@ package no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
+
+import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivPeriode;
 
 public class BeregningsgrunnlagPrArbeidsforhold {
+
+    /**
+     * NB: arbeidsforhold kan være null for anonyme arbeidsforhold (etterlønn, ventelønn, lønn under utdanning, utdanningspermisjon, ol.). Merk
+     * at disse vil håndteres som inntektskategori ARBEIDSTAKER.
+     * 
+     * @see AktivPeriode#forAndre
+     */
     private Arbeidsforhold arbeidsforhold;
+    
+    /** Skal alltid være satt. */
+    private Inntektskategori inntektskategori;
+
     private BigDecimal redusertRefusjonPrÅr;
     private BigDecimal redusertBrukersAndelPrÅr;
     private Long dagsatsBruker;
     private Long dagsatsArbeidsgiver;
-    private Inntektskategori inntektskategori;
 
     BeregningsgrunnlagPrArbeidsforhold() {
     }
@@ -39,7 +52,7 @@ public class BeregningsgrunnlagPrArbeidsforhold {
     }
 
     public String getArbeidsgiverId() {
-        return arbeidsforhold == null ? null: arbeidsforhold.getIdentifikator();
+        return arbeidsforhold == null ? null : arbeidsforhold.getIdentifikator();
     }
 
     public static Builder builder() {
@@ -90,6 +103,7 @@ public class BeregningsgrunnlagPrArbeidsforhold {
         }
 
         public BeregningsgrunnlagPrArbeidsforhold build() {
+            Objects.requireNonNull(mal.inntektskategori, "inntektskategori");
             return mal;
         }
     }

@@ -67,7 +67,7 @@ public class UttaksplanRequestTest {
         req.setAndrePartersSaker(List.of(new AndrePartSak(new Saksnummer("HELLO1")), new AndrePartSak(new Saksnummer("HELLO2"))));
 
         var uttakArbeid = new UttakArbeid();
-        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER.getKode(), UUID.randomUUID().toString());
+        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER, UUID.randomUUID().toString());
         uttakArbeid.setArbeidsforhold(arbeidsforhold);
         var arbeidsforholdInfo = new UttakArbeidsforholdPeriodeInfo();
         arbeidsforholdInfo.setJobberNormaltPerUke(Duration.parse("P7D"));

@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.ytelse.beregning.regler;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.foreldrepenger.ytelse.beregning.adapter.InntektskategoriMapper;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;
@@ -25,6 +27,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.vedtak.util.Tuple;
 
 class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecification<BeregningsresultatRegelmodellMellomregning> {
@@ -45,7 +48,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
     @Override
     public Evaluation evaluate(BeregningsresultatRegelmodellMellomregning mellomregning) {
-        //Regelsporing
+        // Regelsporing
         Map<String, Object> resultater = new LinkedHashMap<>();
 
         BeregningsresultatRegelmodell regelmodell = mellomregning.getInput();
@@ -65,14 +68,14 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<UttakResultatPeriode> uttakTimeline, Map<String, Object> resultater) {
-        final int[] i = {0}; //Periode-teller til regelsporing
-        return grunnlagTimeline.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) ->
-        {
+    private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<UttakResultatPeriode> uttakTimeline,
+                                                                            Map<String, Object> resultater) {
+        final int[] i = { 0 }; // Periode-teller til regelsporing
+        return grunnlagTimeline.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
             BeregningsresultatPeriode resultatPeriode = BeregningsresultatPeriode.builder()
                 .medPeriode(dateInterval).build();
 
-            //Regelsporing
+            // Regelsporing
             String periodeNavn = "BeregningsresultatPeriode[" + i[0] + "]";
             resultater.put(periodeNavn + ".fom", dateInterval.getFomDato());
             resultater.put(periodeNavn + ".tom", dateInterval.getTomDato());
@@ -105,7 +108,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         }
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
 
-        //Gradering
+        // Gradering
         Tuple<Long, Long> dagsatser = kalkulerDagsatserForGradering(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr(), BigDecimal.ZERO,
             uttakAktivitet, resultater, periodeNavn);
         Long dagsatsBruker = dagsatser.getElement1();
@@ -128,10 +131,18 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     }
 
     private Optional<UttakAktivitet> matchUttakAktivitetMedBeregningsgrunnlagPrStatus(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, List<UttakAktivitet> uttakAktiviteter) {
-        return uttakAktiviteter.stream()
-            .filter(aktivitet -> aktivitet.getAktivitetStatus().equals(beregningsgrunnlagPrStatus.getAktivitetStatus())
-                || (aktivitet.getAktivitetStatus().equals(AktivitetStatus.ANNET) && !beregningsgrunnlagPrStatus.getAktivitetStatus().erGraderbar()))
+
+        var notATFL = EnumSet.complementOf(UttakArbeidType.ATFL);
+
+        var match = uttakAktiviteter.stream()
+            .filter(ut -> notATFL.contains(ut.getType()))
+            .filter(aktivitet -> {
+                var inntektskategori = beregningsgrunnlagPrStatus.getInntektskategori();
+                return aktivitet.getType().matcher(InntektskategoriMapper.fraRegelTilVL(inntektskategori))
+                    || (aktivitet.getType().equals(UttakArbeidType.ANNET) && !beregningsgrunnlagPrStatus.getAktivitetStatus().erGraderbar());
+            })
             .findFirst();
+        return match;
     }
 
     private void opprettBeregningsresultatAndelerATFL(BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, BeregningsresultatPeriode resultatPeriode,
@@ -146,7 +157,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
         String arbeidsgiverId = arbeidsforhold.getArbeidsgiverId();
 
-        //Gradering
+        // Gradering
         Tuple<Long, Long> dagsatser = kalkulerDagsatserForGradering(arbeidsforhold.getRedusertBrukersAndelPrÅr(), arbeidsforhold.getRedusertRefusjonPrÅr(),
             uttakAktivitet, resultater, periodeNavn);
 
@@ -183,7 +194,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                     .medAktivitetStatus(AktivitetStatus.ATFL)
                     .build(resultatPeriode));
 
-            //Regelsporing
+            // Regelsporing
             resultater.put(periodeNavn + ARBEIDSGIVERS_ANDEL + "['" + arbeidsgiverId + "']" + ARBEIDSGIVER_ID, arbeidsgiverId);
             resultater.put(periodeNavn + ARBEIDSGIVERS_ANDEL + "['" + arbeidsgiverId + "']" + DAGSATS_ARBEIDSGIVER, dagsatsArbeidsgiver);
             resultater.put(periodeNavn + ARBEIDSGIVERS_ANDEL + "['" + arbeidsgiverId + "']" + ".dagsatsFraBeregningsgrunnlagArbeidsgiver", arbeidsforhold.getDagsatsArbeidsgiver());
@@ -198,7 +209,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     }
 
     /*
-    Returnerer en Tuple (Long dagsatsBruker, Long dagsatsArbeidsgiver) med dagsatser gradert for bruker og arbeidsgiver
+     * Returnerer en Tuple (Long dagsatsBruker, Long dagsatsArbeidsgiver) med dagsatser gradert for bruker og arbeidsgiver
      */
     private static Tuple<Long, Long> kalkulerDagsatserForGradering(BigDecimal redusertBrukersAndelPrÅr, BigDecimal redusertRefusjonPrÅr,
                                                                    UttakAktivitet uttakAktivitet, Map<String, Object> resultater, String periodenavn) {
