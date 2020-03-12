@@ -44,7 +44,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         logger.info("Foreslår behandlingsresultat for behandling {}", ref);
         
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(foreslåBehandlingsresultatTjeneste, ref.getFagsakYtelseType()).orElseThrow();
-        tjeneste.foreslåBehandlingsresultat(ref);
+        tjeneste.foreslåVedtakVarsel(ref, kontekst);
         
         // TODO (Safir/OSS): Lagre Behandlingsresultat gjennom eget repository
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());

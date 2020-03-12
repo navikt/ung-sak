@@ -1,0 +1,2 @@
+alter table vedtak_varsel rename to behandling_vedtak_varsel;
+alter sequence SEQ_VEDTAK_VARSEL rename to SEQ_BEHANDLING_VEDTAK_VARSEL;

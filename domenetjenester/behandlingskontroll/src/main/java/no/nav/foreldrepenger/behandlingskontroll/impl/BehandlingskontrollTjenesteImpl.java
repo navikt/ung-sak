@@ -43,7 +43,6 @@ import no.nav.foreldrepenger.behandlingskontroll.transisjoner.StegTransisjon;
 import no.nav.foreldrepenger.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
@@ -394,11 +393,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     @Override
     public void opprettBehandling(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         final FagsakLås fagsakLås = serviceProvider.taFagsakLås(behandling.getFagsakId());
-        
-        // FIXME K9: Fjern behandlingsresultat, oppretter inntil videre tomt behandlingsresultat
-        @SuppressWarnings("unused")
-        var resultat = Behandlingsresultat.builder().buildFor(behandling);
-        
+
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         
         serviceProvider.oppdaterLåsVersjon(fagsakLås);
@@ -530,15 +525,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw BehandlingskontrollFeil.FACTORY.kanIkkeHenleggeAvsluttetBehandling(behandling.getId()).toException();
         }
-
-        // sett årsak
-        Behandlingsresultat eksisterende = behandling.getBehandlingsresultat();
-        if (eksisterende == null) {
-            Behandlingsresultat.builder().medBehandlingResultatType(årsak).buildFor(behandling);
-        } else {
-            Behandlingsresultat.builderEndreEksisterende(eksisterende).medBehandlingResultatType(årsak);
-        }
-
+        behandling.setBehandlingResultatType(årsak);
         BehandlingStegType behandlingStegType = null;
         Optional<BehandlingStegTilstand> stegTilstandFør = behandling.getBehandlingStegTilstand();
         if (stegTilstandFør.isPresent()) {

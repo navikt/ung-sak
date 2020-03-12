@@ -82,9 +82,7 @@ public class BehandlingRevurderingRepository {
             "SELECT b.id FROM Behandling b WHERE b.fagsak.id=:fagsakId " +
                 " AND b.behandlingType=:type" +
                 " AND b.opprettetTidspunkt >= :etterTidspunkt" +
-                " AND EXISTS (SELECT r FROM Behandlingsresultat r" +
-                "    WHERE r.behandlingId=b.id " +
-                "    AND r.behandlingResultatType IN :henlagtKoder)" +
+                " AND b.behandlingResultatType IN :henlagtKoder " +
                 " ORDER BY b.opprettetTidspunkt ASC", //$NON-NLS-1$
             Long.class);
         query.setParameter("fagsakId", fagsakId); //$NON-NLS-1$
@@ -127,12 +125,12 @@ public class BehandlingRevurderingRepository {
                 "from Fagsak f join bruker br on f.bruker_id=br.id " +
                 "where f.id in ( " +
                 "  select beh.fagsak_id from behandling beh " +
-                "    join behandling_resultat br on (br.behandling_id=beh.id and br.behandling_resultat_type in (:restyper)) " +
                 "    join GR_BEREGNINGSGRUNNLAG grbg on (grbg.behandling_id=beh.id and grbg.aktiv = TRUE) " +
                 "    join BEREGNINGSGRUNNLAG bglag on grbg.beregningsgrunnlag_id=bglag.id " +
                 "    join BEREGNINGSGRUNNLAG_PERIODE bgper on grbg.beregningsgrunnlag_id=bgper.beregningsgrunnlag_id  " +
                 "    join BR_RESULTAT_BEHANDLING grbr on (grbr.behandling_id=beh.id and grbr.aktiv = TRUE) " +
                 "  where beh.behandling_status in (:avsluttet) " +
+                "    and beh.behandling_resultat_type in (:restyper) " +
                 "    and grbr.BG_BEREGNINGSRESULTAT_FP_ID in ( " +
                 "      select beregningsresultat_fp_id from BR_PERIODE " +
                 "      group by beregningsresultat_fp_id " +
@@ -173,23 +171,23 @@ public class BehandlingRevurderingRepository {
         List<String> ytelseBehandling = BehandlingType.getYtelseBehandlingTyper().stream().map(BehandlingType::getKode).collect(Collectors.toList());
         Query query = getEntityManager().createNativeQuery(
             "SELECT DISTINCT f.id, bru.aktoer_id " +
-                "from Fagsak f join bruker bru on f.bruker_id=bru.id " +
-                "  join behandling b on (fagsak_id = f.id and behandling_status in (:avsluttet) ) " +
-                "  join behandling_resultat brs on (brs.behandling_id=b.id and brs.behandling_resultat_type in (:restyper)) " +
-                "  join GR_BEREGNINGSGRUNNLAG grbg on (grbg.behandling_id=b.id and grbg.aktiv=TRUE) " +
+                "FROM Fagsak f join bruker bru on f.bruker_id=bru.id " +
+                "  JOIN behandling b on (fagsak_id = f.id and behandling_status in (:avsluttet) ) " +
+                "  JOIN GR_BEREGNINGSGRUNNLAG grbg on (grbg.behandling_id=b.id and grbg.aktiv=TRUE) " +
                 "  JOIN BG_AKTIVITET_STATUS bgs ON (bgs.BEREGNINGSGRUNNLAG_ID = grbg.BEREGNINGSGRUNNLAG_ID and bgs.AKTIVITET_STATUS in (:asarena) ) " +
-                "  join ( select grbr.behandling_id, min(brp.br_periode_fom) as fom " +
+                "  JOIN ( select grbr.behandling_id, min(brp.br_periode_fom) as fom " +
                 "         from BR_RESULTAT_BEHANDLING grbr " +
                 "         join BR_PERIODE brp on grbr.BG_BEREGNINGSRESULTAT_FP_ID = brp.beregningsresultat_fp_id " +
                 "         where grbr.aktiv=TRUE " +
                 "         group by grbr.behandling_id " +
                 "         ) ford ON ford.behandling_id = b.id and ford.fom >= :fomdato and ford.fom <= :satsdato " +
-                "where coalesce(b.sist_oppdatert_tidspunkt, b.opprettet_tid) < :satsdato " +
+                "WHERE coalesce(b.sist_oppdatert_tidspunkt, b.opprettet_tid) < :satsdato " +
+                "  and b.behandling_resultat_type in (:restyper) " +
                 "  and b.id not in (select ib.id from behandling ib " +
-                "     join behandling_resultat ibrs on (ibrs.behandling_id=ib.id and ibrs.behandling_resultat_type in (:restyper)) " +
                 "     join GR_BEREGNINGSGRUNNLAG igrbg on (igrbg.behandling_id=ib.id and igrbg.aktiv=TRUE) " +
                 "     JOIN BG_AKTIVITET_STATUS ibgs ON (ibgs.BEREGNINGSGRUNNLAG_ID = igrbg.BEREGNINGSGRUNNLAG_ID and ibgs.AKTIVITET_STATUS in (:asarena) ) " +
                 "    where coalesce(ib.sist_oppdatert_tidspunkt, ib.opprettet_tid) >= :satsdato " +
+                "     and ib.behandling_resultat_type in (:restyper) " +
                 "     and ib.behandling_status in (:avsluttet) ) " +
                 "  and f.id not in (select beh.fagsak_id from behandling beh " +
                 "    where beh.behandling_status not in (:avsluttet) " +

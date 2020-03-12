@@ -13,6 +13,8 @@ import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -29,7 +31,7 @@ public class BasicBehandlingBuilder {
     private final BehandlingRepository behandlingRepository;
 
     private Fagsak fagsak;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VedtakVarselRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     private final AktørId aktørId = AktørId.dummy();
@@ -39,7 +41,7 @@ public class BasicBehandlingBuilder {
     public BasicBehandlingBuilder(EntityManager em) {
         this.em = em;
         behandlingRepository = new BehandlingRepository(em);
-        behandlingsresultatRepository = new BehandlingsresultatRepository(em);
+        behandlingsresultatRepository = new VedtakVarselRepository(em);
         vilkårResultatRepository = new VilkårResultatRepository(em);
     }
 
@@ -58,7 +60,7 @@ public class BasicBehandlingBuilder {
         return behandling;
     }
 
-    public void lagreBehandlingsresultat(Long behandlingId, Behandlingsresultat resultat) {
+    public void lagreBehandlingsresultat(Long behandlingId, VedtakVarsel resultat) {
         behandlingsresultatRepository.lagre(behandlingId, resultat);
     }
 

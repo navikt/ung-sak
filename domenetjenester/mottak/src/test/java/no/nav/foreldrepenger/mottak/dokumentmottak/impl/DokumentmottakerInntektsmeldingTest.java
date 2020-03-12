@@ -30,6 +30,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
@@ -57,9 +58,9 @@ public class DokumentmottakerInntektsmeldingTest {
     private BehandlingRepository behandlingRepository;
     @Inject
     private FagsakRepository fagsakRepository;
-    
+
     private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
-    
+
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
     @Mock
@@ -72,10 +73,11 @@ public class DokumentmottakerInntektsmeldingTest {
     private Behandlingsoppretter behandlingsoppretter;
     @Mock
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
+    @Mock
+    private UttakTjeneste uttakTjeneste;
 
     private DokumentmottakerInntektsmelding dokumentmottaker;
     private DokumentmottakerFelles dokumentmottakerFelles;
-
 
     @Before
     public void oppsett() {
@@ -87,7 +89,9 @@ public class DokumentmottakerInntektsmeldingTest {
         dokumentmottakerFelles = Mockito.spy(dokumentmottakerFelles);
 
         dokumentmottaker = new DokumentmottakerInntektsmelding(dokumentmottakerFelles, mottatteDokumentTjeneste, behandlingsoppretter,
-            kompletthetskontroller, repositoryProvider);
+            kompletthetskontroller,
+            uttakTjeneste,
+            repositoryProvider);
         dokumentmottaker = Mockito.spy(dokumentmottaker);
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
@@ -112,10 +116,10 @@ public class DokumentmottakerInntektsmeldingTest {
         DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, revurderingBehandling.getFagsakId(), "", now(), true, "123");
 
-        //Act
+        // Act
         dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.UDEFINERT);
 
-        //Assert
+        // Assert
         verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), dokumentTypeId);
     }
@@ -132,7 +136,7 @@ public class DokumentmottakerInntektsmeldingTest {
         // Arrange - opprette revurdering som har passert kompletthet
         TestScenarioBuilder revurderingScenario = TestScenarioBuilder.builderMedSøknad()
             .medFagsakId(behandling.getFagsakId())
-                .medBehandlingStegStart(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medBehandlingStegStart(BehandlingStegType.FORESLÅ_VEDTAK)
             .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         Behandling revurderingBehandling = revurderingScenario.lagre(repositoryProvider);
 

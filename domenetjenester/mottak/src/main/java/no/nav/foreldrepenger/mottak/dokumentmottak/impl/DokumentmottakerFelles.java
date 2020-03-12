@@ -135,14 +135,14 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    final Behandling opprettRevurdering(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+    Behandling opprettRevurdering(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettRevurdering(fagsak, behandlingÅrsakType);
         mottatteDokumentTjeneste.persisterDokumentinnhold(revurdering, mottattDokument, Optional.empty());
         opprettTaskForÅStarteBehandling(revurdering);
         return revurdering;
     }
 
-    final Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+    Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettManuellRevurdering(fagsak, behandlingÅrsakType);
         opprettTaskForÅStarteBehandling(revurdering);
         return revurdering;

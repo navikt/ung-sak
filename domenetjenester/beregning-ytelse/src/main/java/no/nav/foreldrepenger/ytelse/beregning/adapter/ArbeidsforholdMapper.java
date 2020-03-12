@@ -15,7 +15,7 @@ public final class ArbeidsforholdMapper {
     private ArbeidsforholdMapper() {}
 
     public static Arbeidsforhold mapArbeidsforholdFraUttakAktivitet(Optional<Arbeidsgiver> arbeidsgiver, Optional<InternArbeidsforholdRef> arbeidsforholdRef, UttakArbeidType uttakArbeidType) {
-        if (UttakArbeidType.FRILANS.equals(uttakArbeidType)) {
+        if (UttakArbeidType.FRILANSER.equals(uttakArbeidType)) {
             return Arbeidsforhold.frilansArbeidsforhold();
         }
         return lagArbeidsforhold(arbeidsgiver, arbeidsforholdRef);

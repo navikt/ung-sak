@@ -15,8 +15,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklærin
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.medisinsk.Legeerklæring;
+import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsyn;
 import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
-import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.PeriodeMedTilsyn;
+import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsynOgÅrsakssammenheng;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
@@ -45,7 +46,8 @@ class SykdomDtoMapper {
                 final var legeerklæringer = grunnlag.getLegeerklæringer();
                 final var kontinuerligTilsyn = grunnlag.getKontinuerligTilsyn();
 
-                return new SykdomsDto(periode, mapLegeerklæringer(legeerklæringer),
+                return new SykdomsDto(periode,
+                    mapLegeerklæringer(legeerklæringer),
                     mapPerioderMedKontinuerligTilsyn(kontinuerligTilsyn),
                     mapPerioderMedUtvidetTilsyn(kontinuerligTilsyn));
             }
@@ -80,14 +82,14 @@ class SykdomDtoMapper {
             .collect(Collectors.toList());
     }
 
-    private List<PeriodeMedTilsyn> mapPerioderMedKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
+    private List<PeriodeMedTilsynOgÅrsakssammenheng> mapPerioderMedKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
         if (kontinuerligTilsyn == null) {
             return List.of();
         }
         return kontinuerligTilsyn.getPerioder()
             .stream()
             .filter(periode -> periode.getGrad() == 100)
-            .map(p -> new PeriodeMedTilsyn(new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()), p.getBegrunnelse()))
+            .map(p -> new PeriodeMedTilsynOgÅrsakssammenheng(new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()), p.getBegrunnelse(), p.getÅrsaksammenheng(), p.getÅrsaksammenhengBegrunnelse()))
             .collect(Collectors.toList());
     }
 
@@ -102,8 +104,8 @@ class SykdomDtoMapper {
     }
 
     private Legeerklæring mapTilLegeerklæring(no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring it) {
-        return new Legeerklæring(it.getPeriode().getFomDato(),
-            it.getPeriode().getTomDato(),
+        return new Legeerklæring(it.getDatert(),
+            it.getDatert(),
             it.getUuid(),
             it.getKilde().getKode(),
             it.getDiagnose(),

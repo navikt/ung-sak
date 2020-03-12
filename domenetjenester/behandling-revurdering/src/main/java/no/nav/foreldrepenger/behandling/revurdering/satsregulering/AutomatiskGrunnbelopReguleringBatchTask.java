@@ -25,6 +25,7 @@ import no.nav.vedtak.util.Tuple;
  * Kriterier for gjenopptagelse: Behandlingen har et åpent aksjonspunkt som er et autopunkt og
  * har en frist som er passert.
  */
+@Deprecated(since = "Kalkulus skal eie satsregulering")
 @ApplicationScoped
 @ProsessTask(AutomatiskGrunnbelopReguleringBatchTask.TASKTYPE)
 public class AutomatiskGrunnbelopReguleringBatchTask implements ProsessTaskHandler {

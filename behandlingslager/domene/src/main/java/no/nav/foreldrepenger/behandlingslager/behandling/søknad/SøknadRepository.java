@@ -9,23 +9,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped
 public class SøknadRepository {
 
     private EntityManager entityManager;
-    private BehandlingRepository behandlingRepository;
 
     protected SøknadRepository() {
     }
 
     @Inject
-    public SøknadRepository(EntityManager entityManager, BehandlingRepository behandlingRepository) {
+    public SøknadRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
-        this.behandlingRepository = behandlingRepository;
     }
 
     public SøknadEntitet hentSøknad(Behandling behandling) {

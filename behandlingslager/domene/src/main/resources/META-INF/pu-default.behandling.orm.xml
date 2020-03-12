@@ -8,13 +8,9 @@
 	<sequence-generator name="SEQ_BEHANDLING_STEG_TILSTAND" allocation-size="50" sequence-name="SEQ_BEHANDLING_STEG_TILSTAND" />
 	<sequence-generator name="SEQ_BEHANDLING_ARSAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_ARSAK" />
 
-	<sequence-generator name="SEQ_BEHANDLING_RESULTAT" allocation-size="50" sequence-name="SEQ_BEHANDLING_RESULTAT" />
-	<sequence-generator name="SEQ_BEHANDLING_RESULTAT_YT" allocation-size="50" sequence-name="SEQ_BEHANDLING_RESULTAT_YT" />
 	<sequence-generator name="SEQ_VILKAR_RESULTAT" allocation-size="50" sequence-name="SEQ_VILKAR_RESULTAT" />
 	<sequence-generator name="SEQ_AKSJONSPUNKT" allocation-size="50" sequence-name="SEQ_AKSJONSPUNKT" />
 	<sequence-generator name="SEQ_VILKAR" allocation-size="50" sequence-name="SEQ_VILKAR" />
-
-	<sequence-generator name="SEQ_MOTTATT_DOKUMENT" allocation-size="50" sequence-name="SEQ_MOTTATT_DOKUMENT" />
 
 	<sequence-generator name="SEQ_BEHANDLING_ARSAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_ARSAK" />
 	<sequence-generator name="SEQ_VILKAR_PERIODE" allocation-size="50" sequence-name="SEQ_VILKAR_PERIODE" />
@@ -24,12 +20,6 @@
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.Behandling" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatKonsekvensForYtelsen" />
-
-	<!-- Hendelser -->
-	<entity class="no.nav.foreldrepenger.behandlingslager.hendelser.MottattHendelse" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument" />
 
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt" />
 

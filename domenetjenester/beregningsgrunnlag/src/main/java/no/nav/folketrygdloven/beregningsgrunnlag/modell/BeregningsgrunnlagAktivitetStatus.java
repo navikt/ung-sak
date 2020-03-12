@@ -2,66 +2,20 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
-import javax.validation.Valid;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.converter.HjemmelKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
 
-@Entity(name = "BeregningsgrunnlagAktivitetStatus")
-@Table(name = "BG_AKTIVITET_STATUS")
-public class BeregningsgrunnlagAktivitetStatus extends BaseEntitet {
+public class BeregningsgrunnlagAktivitetStatus {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BG_AKTIVITET_STATUS")
-    private Long id;
-
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
-    @JsonBackReference
-    @ManyToOne(cascade = {CascadeType.PERSIST}, optional = false)
-    @JoinColumn(name = "beregningsgrunnlag_id", nullable = false, updatable = false)
-    @Valid
-    private BeregningsgrunnlagEntitet beregningsgrunnlag;
-
-    @Convert(converter=AktivitetStatusKodeverdiConverter.class)
-    @Column(name="aktivitet_status", nullable = false)
-    @Valid
+    private Beregningsgrunnlag beregningsgrunnlag;
     private AktivitetStatus aktivitetStatus;
-    
-    @Convert(converter=HjemmelKodeverdiConverter.class)
-    @Column(name="hjemmel", nullable = false)
     private Hjemmel hjemmel;
-
-    public Long getId() {
-        return id;
-    }
-
-    public BeregningsgrunnlagEntitet getBeregningsgrunnlag() {
+    public Beregningsgrunnlag getBeregningsgrunnlag() {
         return beregningsgrunnlag;
     }
-
     public AktivitetStatus getAktivitetStatus() {
         return aktivitetStatus;
     }
-
     public Hjemmel getHjemmel() {
         return hjemmel;
     }
@@ -85,8 +39,7 @@ public class BeregningsgrunnlagAktivitetStatus extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-                "id=" + id + ", " //$NON-NLS-2$
+        return getClass().getSimpleName() + "<" //$NON-NLS-1$
                 + "beregningsgrunnlag=" + beregningsgrunnlag + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "aktivitetStatus=" + aktivitetStatus + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "hjemmel=" + hjemmel + ", " //$NON-NLS-1$ //$NON-NLS-2$
@@ -115,7 +68,7 @@ public class BeregningsgrunnlagAktivitetStatus extends BaseEntitet {
             return this;
         }
 
-        public BeregningsgrunnlagAktivitetStatus build(BeregningsgrunnlagEntitet beregningsgrunnlag) {
+        public BeregningsgrunnlagAktivitetStatus build(Beregningsgrunnlag beregningsgrunnlag) {
             beregningsgrunnlagAktivitetStatusMal.beregningsgrunnlag = beregningsgrunnlag;
             verifyStateForBuild();
             beregningsgrunnlag.leggTilBeregningsgrunnlagAktivitetStatus(beregningsgrunnlagAktivitetStatusMal);

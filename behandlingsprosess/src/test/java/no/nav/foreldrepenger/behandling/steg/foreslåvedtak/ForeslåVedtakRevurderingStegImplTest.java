@@ -17,18 +17,18 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -50,15 +50,15 @@ public class ForeslåVedtakRevurderingStegImplTest {
     @Mock
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VedtakVarselRepository vedtakVarselRepository;
     @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste beregningsgrunnlagTjeneste;
     @Mock
-    private Behandlingsresultat behandlingsresultat;
+    private VedtakVarsel behandlingsresultat;
     @Mock
-    private Behandlingsresultat orginalBehandlingsresultat;
+    private VedtakVarsel orginalBehandlingsresultat;
 
     private BehandlingRepositoryProvider repositoryProvider = mock(BehandlingRepositoryProvider.class);
     private ForeslåVedtakRevurderingStegImpl foreslåVedtakRevurderingStegForeldrepenger;
@@ -71,20 +71,15 @@ public class ForeslåVedtakRevurderingStegImplTest {
     public void before() {
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
         when(repositoryProvider.getBehandlingRevurderingRepository()).thenReturn(behandlingRevurderingRepository);
-        when(repositoryProvider.getBehandlingsresultatRepository()).thenReturn(behandlingsresultatRepository);
 
         orginalBehandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
+        orginalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         orginalBehandling.avsluttBehandling();
         revurdering = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medOriginalBehandling(orginalBehandling, BehandlingÅrsakType.BERØRT_BEHANDLING)
             .lagMocked();
 
-        behandlingsresultat = Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT).buildFor(revurdering);
-        orginalBehandlingsresultat =  Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.INNVILGET).buildFor(orginalBehandling);
-
-        when(behandlingsresultatRepository.hent(orginalBehandling.getId())).thenReturn(orginalBehandlingsresultat);
-        when(behandlingsresultatRepository.hent(revurdering.getId())).thenReturn(behandlingsresultat);
 
         kontekstRevurdering = mock(BehandlingskontrollKontekst.class);
         BehandlingLås behandlingLås = mock(BehandlingLås.class);
@@ -100,8 +95,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
     @Test
     public void skal_ikke_opprette_aksjonspunkt_når_samme_beregningsgrunnlag() {
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
 
         BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingStegForeldrepenger.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe()).isEmpty();
@@ -109,8 +104,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
     @Test
     public void skal_opprette_aksjonspunkt_når_revurdering_har_mindre_beregningsgrunnlag() {
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
-        when(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(900L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(orginalBehandling.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentFastsatt(revurdering.getId())).thenReturn(Optional.of(buildBeregningsgrunnlag(900L)));
 
         BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingStegForeldrepenger.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST);
@@ -125,11 +120,11 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
         // Assert
         revurdering = behandlingRepository.hentBehandling(revurdering.getId());
-        assertThat(behandlingsresultat.getKonsekvenserForYtelsen()).isEmpty();
+        assertThat(revurdering.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.IKKE_FASTSATT);
     }
 
-    private BeregningsgrunnlagEntitet buildBeregningsgrunnlag(Long bruttoPerÅr) {
-        BeregningsgrunnlagEntitet beregningsgrunnlag = BeregningsgrunnlagEntitet.builder()
+    private Beregningsgrunnlag buildBeregningsgrunnlag(Long bruttoPerÅr) {
+        Beregningsgrunnlag beregningsgrunnlag = Beregningsgrunnlag.builder()
             .medSkjæringstidspunkt(LocalDate.now())
             .medGrunnbeløp(BigDecimal.valueOf(91425))
             .build();

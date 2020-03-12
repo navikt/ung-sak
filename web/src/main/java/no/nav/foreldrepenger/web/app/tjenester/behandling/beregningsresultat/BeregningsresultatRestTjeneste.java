@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsresultat;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
 
-import java.util.List;
+import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,14 +21,12 @@ import javax.ws.rs.core.MediaType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
@@ -46,18 +44,17 @@ public class BeregningsresultatRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatTjeneste beregningsresultatTjeneste;
-    private TilkjentYtelseTjeneste tilkjentYtelseTjeneste;
 
     public BeregningsresultatRestTjeneste() {
         // for resteasy
     }
 
     @Inject
-    public BeregningsresultatRestTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider,
-                                          BeregningsresultatTjeneste beregningsresultatMedUttaksplanTjeneste, TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
-        this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+    public BeregningsresultatRestTjeneste(BehandlingRepositoryProvider repositoryProvider,
+                                          BeregningsresultatTjeneste beregningsresultatMedUttaksplanTjeneste,
+                                          TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatTjeneste = beregningsresultatMedUttaksplanTjeneste;
-        this.tilkjentYtelseTjeneste = tilkjentYtelseTjeneste;
     }
 
     // FIXME K9 Erstatt denne tjenesten
@@ -100,21 +97,14 @@ public class BeregningsresultatRestTjeneste {
             throw new IllegalStateException("Behandling må være en revurdering");
         }
 
-        var behandlingsresultat = behandling.getBehandlingsresultat();
-        if (behandlingsresultat == null) {
+        var behandlingResultatType = behandling.getBehandlingResultatType();
+        if (behandlingResultatType.isBehandlingsresultatIkkeEndret() || Objects.equals(BehandlingResultatType.IKKE_FASTSATT, behandlingResultatType)) {
             return false;
         }
 
-        List<KonsekvensForYtelsen> konsekvenserForYtelsen = behandlingsresultat.getKonsekvenserForYtelsen();
-        if (konsekvenserForYtelsen != null) {
-            return konsekvenserForYtelsen.stream().anyMatch(kfy -> KonsekvensForYtelsen.INGEN_ENDRING.getKode().equals(kfy.getKode()));
-        }
-
         Behandling originalBehandling = behandling.getOriginalBehandling().orElseThrow(() -> new IllegalStateException("Revurdering må ha originalbehandling"));
-        Behandlingsresultat originaltBehandlingsresultat = originalBehandling.getBehandlingsresultat();
-        BehandlingResultatType behandlingResultatType = behandlingsresultat.getBehandlingResultatType();
 
-        boolean harSammeResultatType = behandlingResultatType.getKode().equals(originaltBehandlingsresultat.getBehandlingResultatType().getKode());
+        boolean harSammeResultatType = behandlingResultatType.equals(originalBehandling.getBehandlingResultatType());
         return harSammeResultatType;
     }
 }

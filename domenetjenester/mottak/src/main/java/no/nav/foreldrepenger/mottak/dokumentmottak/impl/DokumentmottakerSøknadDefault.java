@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 
@@ -18,11 +19,13 @@ public class DokumentmottakerSøknadDefault extends DokumentmottakerSøknad {
                                          DokumentmottakerFelles dokumentmottakerFelles,
                                          MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                          Behandlingsoppretter behandlingsoppretter,
+                                         UttakTjeneste uttakTjeneste,
                                          Kompletthetskontroller kompletthetskontroller) {
         super(repositoryProvider,
             dokumentmottakerFelles,
             mottatteDokumentTjeneste,
             behandlingsoppretter,
+            uttakTjeneste,
             kompletthetskontroller);
     }
 }

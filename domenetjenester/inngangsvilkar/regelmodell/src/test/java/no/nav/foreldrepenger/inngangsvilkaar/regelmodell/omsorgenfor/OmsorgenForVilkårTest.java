@@ -17,7 +17,7 @@ public class OmsorgenForVilkårTest {
     public void skal_få_avslag_hvis_omsorgsperson_bor_sammen_med() {
         final var grunnlag = new OmsorgenForGrunnlag(null,
             List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "a", null, null, "9999", "NOR")));
+            List.of(new BostedsAdresse("2", "a", null, null, "9999", "NOR")), null);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -29,10 +29,25 @@ public class OmsorgenForVilkårTest {
     }
 
     @Test
-    public void skal_IKKE_få_avslag_hvis_omsorgsperson_bor_sammen_med() {
+    public void skal_få_avslag_hvis_omsorgsperson_bor_sammen_med_og_saksbehandler_ikke_har_vurdert() {
         final var grunnlag = new OmsorgenForGrunnlag(null,
             List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")));
+            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")), null);
+
+        final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
+        EvaluationSummary summary = new EvaluationSummary(evaluation);
+
+        assertThat(summary).isNotNull();
+        final var utfall = getUtfall(summary);
+        assertThat(utfall).isNotNull();
+        assertThat(utfall).isEqualTo(Resultat.NEI);
+    }
+
+    @Test
+    public void skal_IKKE_få_avslag_hvis_omsorgsperson_bor_sammen_med_og_saksbehandler_har_vurdert_til_omsorg() {
+        final var grunnlag = new OmsorgenForGrunnlag(null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
+            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")), true);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -45,7 +60,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_far_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of());
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of(), null);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -58,7 +73,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of());
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of(), null);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -70,8 +85,21 @@ public class OmsorgenForVilkårTest {
     }
 
     @Test
-    public void skal_IKKE_få_avslag_hvis_far_ikke_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of());
+    public void skal_få_avslag_hvis_far_ikke_bor_sammen() {
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of(), null);
+
+        final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
+        EvaluationSummary summary = new EvaluationSummary(evaluation);
+
+        assertThat(summary).isNotNull();
+        final var utfall = getUtfall(summary);
+        assertThat(utfall).isNotNull();
+        assertThat(utfall).isEqualTo(Resultat.NEI);
+    }
+
+    @Test
+    public void skal_IKKE_få_avslag_hvis_far_ikke_bor_sammen_men_saksbehandler_mener_det_er_omsorg() {
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of(), true);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -83,8 +111,8 @@ public class OmsorgenForVilkårTest {
     }
 
     @Test
-    public void skal_IKKE_få_avslag_hvis_mor_ikke_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of());
+    public void skal_få_avslag_hvis_mor_ikke_bor_sammen() {
+        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of(), null);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -92,7 +120,7 @@ public class OmsorgenForVilkårTest {
         assertThat(summary).isNotNull();
         final var utfall = getUtfall(summary);
         assertThat(utfall).isNotNull();
-        assertThat(utfall).isEqualTo(Resultat.JA);
+        assertThat(utfall).isEqualTo(Resultat.NEI);
     }
 
     private Resultat getUtfall(EvaluationSummary summary) {

@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -11,6 +10,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 public class PersonopplysningDtoTjeneste {
 
     private PersonopplysningTjeneste personopplysningTjeneste;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
 
     PersonopplysningDtoTjeneste() {
@@ -37,8 +39,10 @@ public class PersonopplysningDtoTjeneste {
 
     @Inject
     public PersonopplysningDtoTjeneste(PersonopplysningTjeneste personopplysningTjeneste,
+                                       MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                        BehandlingRepositoryProvider repositoryProvider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
@@ -85,12 +89,12 @@ public class PersonopplysningDtoTjeneste {
         if (aggregatOpt.isPresent()) {
             PersonopplysningerAggregat aggregat = aggregatOpt.get();
             return Optional.ofNullable(aggregat.getSøker())
-                .map(søker -> mapPersonopplysningDto(søker, aggregat));
+                .map(søker -> mapPersonopplysningDto(søker, aggregat, behandlingId));
         }
         return Optional.empty();
     }
 
-    private PersonopplysningDto mapPersonopplysningDto(PersonopplysningEntitet søker, PersonopplysningerAggregat aggregat) {
+    private PersonopplysningDto mapPersonopplysningDto(PersonopplysningEntitet søker, PersonopplysningerAggregat aggregat, Long behandlingId) {
 
         PersonopplysningDto dto = enkelMapping(søker, aggregat);
 
@@ -99,7 +103,16 @@ public class PersonopplysningDtoTjeneste {
             .map(e -> enkelMapping(e, aggregat))
             .collect(Collectors.toList()));
 
-        dto.setBarnSoktFor(Collections.emptyList()); // TODO K9: Bør liste opp barne det er søkt og pleie for
+        var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende);
+        if (pleietrengende.isPresent()) {
+            var aktørId = pleietrengende.get().getAktørId();
+            dto.setBarnSoktFor(aggregat.getBarna()
+                .stream()
+                .filter(it -> it.getAktørId().equals(aktørId))
+                .map(e -> enkelMapping(e, aggregat))
+                .collect(Collectors.toList()));
+        }
 
         Optional<PersonopplysningEntitet> ektefelleOpt = aggregat.getEktefelle();
         if (ektefelleOpt.isPresent() && ektefelleOpt.get().equals(søker)) {

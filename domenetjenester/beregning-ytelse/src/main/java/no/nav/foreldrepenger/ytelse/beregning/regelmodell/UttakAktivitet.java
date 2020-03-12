@@ -1,23 +1,24 @@
 package no.nav.foreldrepenger.ytelse.beregning.regelmodell;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
-import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 
 public class UttakAktivitet {
     private BigDecimal stillingsgrad;
     private BigDecimal utbetalingsgrad;
     private Arbeidsforhold arbeidsforhold;
-    private AktivitetStatus aktivitetStatus;
+    private UttakArbeidType type;
     private boolean erGradering;
 
-    public UttakAktivitet(BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, Arbeidsforhold arbeidsforhold, AktivitetStatus aktivitetStatus, boolean erGradering) {
-        this.stillingsgrad = stillingsgrad;
-        this.utbetalingsgrad = utbetalingsgrad;
-        this.arbeidsforhold = arbeidsforhold;
-        this.aktivitetStatus = aktivitetStatus;
+    public UttakAktivitet(BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, Arbeidsforhold arbeidsforhold, UttakArbeidType type, boolean erGradering) {
         this.erGradering = erGradering;
+        this.stillingsgrad = Objects.requireNonNull(stillingsgrad, "stillingsgrad");
+        this.utbetalingsgrad = Objects.requireNonNull(utbetalingsgrad, "utbetalingsgrad");
+        this.arbeidsforhold = arbeidsforhold;
+        this.type = type;
     }
 
     public BigDecimal getStillingsgrad() {
@@ -32,8 +33,8 @@ public class UttakAktivitet {
         return arbeidsforhold;
     }
 
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
+    public UttakArbeidType getType() {
+        return type;
     }
 
     public boolean isErGradering() {

@@ -40,6 +40,11 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>produksjonsstyring</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>beregning-ytelse</artifactId>
+        </dependency>
 
         <!-- Test -->
         <dependency>

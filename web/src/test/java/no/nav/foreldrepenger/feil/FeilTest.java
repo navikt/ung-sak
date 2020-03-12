@@ -46,9 +46,10 @@ public class FeilTest {
     }
 
     private void verifiserFeilPrefiks(AnnotationInstance ai, String feilkode) {
-        if (!(feilkode.startsWith("F-") || feilkode.startsWith("FP-") || feilkode.startsWith("VLKAFKA-"))) {
+        String regex = "[A-Z0-9]+(-[A-Z0-9]+)*";
+        if (!(feilkode.matches(regex))) {
             prefiksFeil
-                .add(String.format("Metode %s har feilkode som ikke begynner med prefiks [\"F-\", \"FP-\"]: %s", ai.target().asMethod().name(), feilkode));
+                .add(String.format("Metode %s har feilkode '%s' som ikke matcher regex: '%s'", ai.target().asMethod().name(), feilkode, regex));
         }
     }
 

@@ -2,13 +2,9 @@ package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,21 +13,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.finn.unleash.FakeUnleash;
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingValg;
+import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
-import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.kontrakt.ResourceLink;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.behandling.UtvidetBehandlingDto;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -44,18 +36,22 @@ public class BehandlingDtoTjenesteImplTest {
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private SøknadRepository søknadRepository;
+
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     @Inject
     private TilbakekrevingRepository tilbakekrevingRepository;
-    
+
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
-    private FakeUnleash unleash = new FakeUnleash();
 
     private BehandlingDtoTjeneste tjeneste;
 
@@ -64,44 +60,8 @@ public class BehandlingDtoTjenesteImplTest {
     @Before
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(repositoryProvider, beregningsgrunnlagTjeneste, tilbakekrevingRepository, skjæringstidspunktTjeneste, null,
-            vilkårResultatRepository,
-            unleash);
-    }
-
-    @Test
-    public void skal_ha_med_simuleringsresultatURL() {
-        Behandling behandling = lagBehandling();
-
-        UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
-
-        assertThat(getLinkRel(dto)).contains("simuleringResultat");
-        assertThat(getLinkHref(dto)).contains(URI.create("/k9/oppdrag/api/simulering/resultat-uten-inntrekk"));
-    }
-
-    @Test
-    public void skal_ha_med_tilbakekrevings_link_når_det_finnes_et_resultat() {
-        Behandling behandling = lagBehandling();
-
-        tilbakekrevingRepository.lagre(behandling,
-            TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, "varsel"));
-
-        UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
-        var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);
-        var link = ResourceLink.getFraMap(href, "", Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString()));
-        assertThat(getLinkRel(dto)).contains("tilbakekrevingvalg");
-        assertThat(getLinkHref(dto)).contains(link.getHref());
-    }
-
-    @Test
-    public void skal_ikke_ha_med_tilbakekrevings_link_når_det_ikke_finnes_et_resultat() {
-        Behandling behandling = lagBehandling();
-
-        UtvidetBehandlingDto dto = tjeneste.lagUtvidetBehandlingDto(behandling, null);
-        var href = RestUtils.getApiPath(TilbakekrevingRestTjeneste.VALG_PATH);
-        var link = ResourceLink.getFraMap(href, "", Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString()));
-        assertThat(getLinkRel(dto)).doesNotContain("tilbakekrevingvalg");
-        assertThat(getLinkHref(dto)).doesNotContain(link.getHref());
+        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, skjæringstidspunktTjeneste,
+            vilkårResultatRepository);
     }
 
     @Test
@@ -137,11 +97,4 @@ public class BehandlingDtoTjenesteImplTest {
             .lagre(repositoryProvider);
     }
 
-    private List<URI> getLinkHref(UtvidetBehandlingDto dto) {
-        return dto.getLinks().stream().map(ResourceLink::getHref).collect(Collectors.toList());
-    }
-
-    private List<String> getLinkRel(UtvidetBehandlingDto dto) {
-        return dto.getLinks().stream().map(ResourceLink::getRel).collect(Collectors.toList());
-    }
 }

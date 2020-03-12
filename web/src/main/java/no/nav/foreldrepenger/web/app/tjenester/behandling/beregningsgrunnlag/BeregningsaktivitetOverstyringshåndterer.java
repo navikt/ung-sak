@@ -1,14 +1,11 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.aksjonspunkt.AvklarAktiviteterHåndterer;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregatEntitet;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
@@ -16,57 +13,36 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
-import no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag.historikk.BeregningsaktivitetHistorikkTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsaktiviteterDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrBeregningsaktiviteterDto.class, adapter = Overstyringshåndterer.class)
 public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyringshåndterer<OverstyrBeregningsaktiviteterDto> {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private BeregningsaktivitetHistorikkTjeneste beregningsaktivitetHistorikkTjeneste;
-    private AvklarAktiviteterHåndterer avklarAktiviteterHåndterer;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     BeregningsaktivitetOverstyringshåndterer() {
         // for CDI proxy
     }
 
     @Inject
-    public BeregningsaktivitetOverstyringshåndterer(HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                                    HistorikkTjenesteAdapter historikkAdapter,
-                                                    BeregningsaktivitetHistorikkTjeneste beregningsaktivitetHistorikkTjeneste,
-                                                    AvklarAktiviteterHåndterer avklarAktiviteterHåndterer) {
+    public BeregningsaktivitetOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
+                                                    KalkulusTjeneste kalkulusTjeneste) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNINGSAKTIVITETER);
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.beregningsaktivitetHistorikkTjeneste = beregningsaktivitetHistorikkTjeneste;
-        this.avklarAktiviteterHåndterer = avklarAktiviteterHåndterer;
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public OppdateringResultat håndterOverstyring(OverstyrBeregningsaktiviteterDto dto, Behandling behandling,
                                                   BehandlingskontrollKontekst kontekst) {
-        avklarAktiviteterHåndterer.håndterOverstyring(dto, behandling.getId());
+        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.mapOverstyring(dto);
+        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, BehandlingReferanse.fra(behandling));
         return OppdateringResultat.utenOveropp();
     }
 
     @Override
     protected void lagHistorikkInnslag(Behandling behandling, OverstyrBeregningsaktiviteterDto dto) {
-        BeregningsgrunnlagGrunnlagEntitet grunnlag = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagGrunnlagEntitet(behandling.getId())
-            .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Mangler BeregningsgrunnlagGrunnlagEntitet"));
-        Optional<Long> originalBehandlingId = behandling.getOriginalBehandling().map(Behandling::getId);
-        Optional<BeregningAktivitetAggregatEntitet> forrige = beregningsgrunnlagTjeneste.hentSisteBeregningsgrunnlagGrunnlagEntitetForBehandlinger(behandling.getId(), originalBehandlingId,
-            BeregningsgrunnlagTilstand.OPPDATERT_MED_ANDELER)
-            .map(BeregningsgrunnlagGrunnlagEntitet::getGjeldendeAktiviteter);
-        BeregningAktivitetAggregatEntitet registerAktiviteter = grunnlag.getRegisterAktiviteter();
-        BeregningAktivitetAggregatEntitet overstyrteAktiviteter = grunnlag.getGjeldendeAktiviteter();
-        beregningsaktivitetHistorikkTjeneste.lagHistorikk(behandling.getId(),
-            getHistorikkAdapter().tekstBuilder().medHendelse(HistorikkinnslagType.OVERSTYRT),
-            registerAktiviteter,
-            overstyrteAktiviteter,
-            dto.getBegrunnelse(),
-            forrige);
+        // TODO Fiks historikk
     }
 }

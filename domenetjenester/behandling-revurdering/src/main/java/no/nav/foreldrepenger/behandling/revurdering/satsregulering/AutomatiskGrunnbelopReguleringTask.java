@@ -26,6 +26,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 /**
  * @Dependent scope for å hente konfig ved hver kjøring.
  */
+@Deprecated(since = "Kalkulus skal eie satsregulering")
 @Dependent
 @ProsessTask(AutomatiskGrunnbelopReguleringTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)

@@ -1,16 +1,14 @@
 package no.nav.foreldrepenger.behandlingslager.behandling.medisinsk;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,7 +21,6 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.LegeerklæringKildeKodeverkConverter;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 
 @Entity(name = "Legeerklæring")
@@ -37,14 +34,10 @@ public class Legeerklæring extends BaseEntitet {
     @Column(name = "referanse", nullable = false)
     private UUID uuid = UUID.randomUUID();
 
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
-    })
-    private DatoIntervallEntitet periode;
+    @Column(name = "fom", nullable = false)
+    private LocalDate datert;
 
-    @OneToMany(mappedBy = "legeerklæring", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "legeerklæring", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<InnleggelsePeriode> innleggelsesPerioder;
 
     @ManyToOne
@@ -66,10 +59,10 @@ public class Legeerklæring extends BaseEntitet {
         // hibernate
     }
 
-    public Legeerklæring(DatoIntervallEntitet periode, Set<InnleggelsePeriode> perioder, LegeerklæringKilde kilde, String diagnose) {
+    public Legeerklæring(LocalDate periode, Set<InnleggelsePeriode> perioder, LegeerklæringKilde kilde, String diagnose) {
         Objects.requireNonNull(periode);
         Objects.requireNonNull(perioder);
-        this.periode = periode;
+        this.datert = periode;
         this.kilde = kilde;
         this.diagnose = diagnose;
         this.innleggelsesPerioder = perioder.stream()
@@ -79,7 +72,7 @@ public class Legeerklæring extends BaseEntitet {
 
     Legeerklæring(Legeerklæring legeerklæring) {
         this.uuid = legeerklæring.uuid;
-        this.periode = legeerklæring.periode;
+        this.datert = legeerklæring.datert;
         this.diagnose = legeerklæring.diagnose;
         this.kilde = legeerklæring.kilde;
         this.innleggelsesPerioder = legeerklæring.getInnleggelsesPerioder()
@@ -89,8 +82,8 @@ public class Legeerklæring extends BaseEntitet {
             .collect(Collectors.toSet());
     }
 
-    public Legeerklæring(UUID identifikator, DatoIntervallEntitet periode, Set<InnleggelsePeriode> innleggelsePerioder, LegeerklæringKilde kilde, String diagnosekode) {
-        this(periode, innleggelsePerioder, kilde, diagnosekode);
+    public Legeerklæring(UUID identifikator, LocalDate datert, Set<InnleggelsePeriode> innleggelsePerioder, LegeerklæringKilde kilde, String diagnosekode) {
+        this(datert, innleggelsePerioder, kilde, diagnosekode);
         if(identifikator != null) {
             this.uuid = identifikator;
         }
@@ -120,8 +113,8 @@ public class Legeerklæring extends BaseEntitet {
         return diagnose;
     }
 
-    public DatoIntervallEntitet getPeriode() {
-        return periode;
+    public LocalDate getDatert() {
+        return datert;
     }
 
     @Override

@@ -1,28 +1,24 @@
 package no.nav.foreldrepenger.behandling.steg.foreslåresultat;
 
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.revurdering.felles.RevurderingBehandlingsresultatutlederFelles;
+import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 
@@ -30,16 +26,15 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 @FagsakYtelseTypeRef
 class ForeslåBehandlingsresultatTjeneste {
 
-    private UttakRepository uttakRepository;
-
-    private RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles;
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder;
+    private VedtakVarselRepository vedtakVarselRepository;
 
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     private FordelingRepository fordelingRepository;
+
+    private BehandlingRepository behandlingRepository;
 
     ForeslåBehandlingsresultatTjeneste() {
         // for CDI proxy
@@ -47,46 +42,46 @@ class ForeslåBehandlingsresultatTjeneste {
 
     @Inject
     public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                              DokumentBehandlingTjeneste dokumentBehandlingTjeneste,
+                                              VedtakVarselRepository vedtakVarselRepository,
                                               FordelingRepository fordelingRepository,
-                                              @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutlederFelles) {
+                                              @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
         this.fordelingRepository = fordelingRepository;
-        this.uttakRepository = repositoryProvider.getUttakRepository();
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
-        this.revurderingBehandlingsresultatutlederFelles = revurderingBehandlingsresultatutlederFelles;
-        this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
+        this.revurderingBehandlingsresultatutleder = revurderingBehandlingsresultatutleder;
+        this.vedtakVarselRepository = vedtakVarselRepository;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
-    protected boolean minstEnGyldigUttaksPeriode(Behandlingsresultat behandlingsresultat) {
-        Optional<UttakResultatEntitet> uttakResultat = uttakRepository.hentUttakResultatHvisEksisterer(behandlingsresultat.getBehandlingId());
-        return uttakResultat.isPresent()
-            && uttakResultat.get().getGjeldendePerioder().getPerioder().stream().anyMatch(UttakResultatPeriodeEntitet::isInnvilget);
-    }
-
-    public Behandlingsresultat foreslåBehandlingsresultat(BehandlingReferanse ref) {
+    public void foreslåVedtakVarsel(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         Long behandlingId = ref.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
         // kun for å sette behandlingsresulattype
-        var behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+        var vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
 
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        VedtakVarsel oppdatertVarsel;
         if (sjekkVilkårAvslått(behandlingId, vilkårene)) {
-            return foreslåBehandlingresultatAvslått(ref, behandlingsresultat);
+            oppdatertVarsel = foreslåVedtakVarselAvslått(ref, behandling, vedtakVarsel);
         } else {
-            return foreslåBehandlingsresultatInnvilget(ref, behandlingsresultat);
+            behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+            oppdatertVarsel = foreslåVedtakVarselInnvilget(ref, vedtakVarsel);
         }
+        vedtakVarselRepository.lagre(behandlingId, oppdatertVarsel);
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    private Behandlingsresultat foreslåBehandlingsresultatInnvilget(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
-        var builder = (behandlingsresultat == null ? Behandlingsresultat.builder() : Behandlingsresultat.builderEndreEksisterende(behandlingsresultat))
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET);
+    private VedtakVarsel foreslåVedtakVarselInnvilget(BehandlingReferanse ref, VedtakVarsel vedtakVarsel) {
         if (ref.erRevurdering()) {
-            boolean erVarselOmRevurderingSendt = erVarselOmRevurderingSendt(ref);
-            return revurderingBehandlingsresultatutlederFelles.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt);
+            return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt(ref));
         }
-        return builder.build();
+        return vedtakVarsel == null ? new VedtakVarsel() : vedtakVarsel;
+    }
+
+    private boolean erVarselOmRevurderingSendt(BehandlingReferanse ref) {
+        return vedtakVarselRepository.hentHvisEksisterer(ref.getId()).orElse(new VedtakVarsel()).getErVarselOmRevurderingSendt();
     }
 
     private boolean sjekkVilkårAvslått(Long behandlingId, Vilkårene vilkårene) {
@@ -109,18 +104,16 @@ class ForeslåBehandlingsresultatTjeneste {
         return timeline.filterValue(vp -> vp.getAvslagsårsak() != null && vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
     }
 
-    private Behandlingsresultat foreslåBehandlingresultatAvslått(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
+    private VedtakVarsel foreslåVedtakVarselAvslått(BehandlingReferanse ref, Behandling behandling, VedtakVarsel vedtakVarsel) {
         if (ref.erRevurdering()) {
-            boolean erVarselOmRevurderingSendt = erVarselOmRevurderingSendt(ref);
-            return revurderingBehandlingsresultatutlederFelles.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt);
+            return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt(ref));
         } else {
-            Behandlingsresultat.Builder resultatBuilder = (behandlingsresultat == null ? Behandlingsresultat.builder()
-                : Behandlingsresultat.builderEndreEksisterende(behandlingsresultat))
-                    .medBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+            behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+
             if (skalTilInfoTrygd(ref)) {
-                resultatBuilder.medVedtaksbrev(Vedtaksbrev.INGEN);
+                vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
             }
-            return resultatBuilder.build();
+            return vedtakVarsel;
         }
     }
 
@@ -129,7 +122,4 @@ class ForeslåBehandlingsresultatTjeneste {
         return fagsak.getSkalTilInfotrygd();
     }
 
-    private boolean erVarselOmRevurderingSendt(BehandlingReferanse ref) {
-        return dokumentBehandlingTjeneste.erDokumentProdusert(ref.getBehandlingId(), DokumentMalType.REVURDERING_DOK);
-    }
 }

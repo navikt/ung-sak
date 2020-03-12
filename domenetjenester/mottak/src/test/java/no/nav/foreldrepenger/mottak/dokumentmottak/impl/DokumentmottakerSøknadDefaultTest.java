@@ -23,7 +23,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -33,6 +32,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.StartBehandlingTask;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
@@ -68,6 +68,8 @@ public class DokumentmottakerSøknadDefaultTest {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     @Mock
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
+    @Mock
+    private UttakTjeneste uttakTjeneste;
 
     private DokumentmottakerSøknad dokumentmottaker;
     private DokumentmottakerFelles dokumentmottakerFelles;
@@ -86,7 +88,9 @@ public class DokumentmottakerSøknadDefaultTest {
         dokumentmottakerFelles = Mockito.spy(dokumentmottakerFelles);
 
         dokumentmottaker = new DokumentmottakerSøknadDefault(repositoryProvider, dokumentmottakerFelles, mottatteDokumentTjeneste,
-            behandlingsoppretter, kompletthetskontroller);
+            behandlingsoppretter, 
+            uttakTjeneste,
+            kompletthetskontroller);
         dokumentmottaker = Mockito.spy(dokumentmottaker);
     }
 
@@ -171,7 +175,7 @@ public class DokumentmottakerSøknadDefaultTest {
     public void skal_lage_manuell_revurdering_fra_opphørt_førstegangsbehandling_på_saken_fra_før() {
         //Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår().medBehandlingResultatType(BehandlingResultatType.OPPHØR));
+        scenario.medBehandlingsresultat(BehandlingResultatType.OPPHØR);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         BehandlingVedtak vedtak = DokumentmottakTestUtil.oppdaterVedtaksresultat(behandling, VedtakResultatType.OPPHØR);

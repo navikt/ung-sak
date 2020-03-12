@@ -1,28 +1,35 @@
 package no.nav.k9.kodeverk.uttak;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
-
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum UttakArbeidType implements Kodeverdi {
 
-    ORDINÆRT_ARBEID("ORDINÆRT_ARBEID", "Ordinært arbeid"),
-    SELVSTENDIG_NÆRINGSDRIVENDE("SELVSTENDIG_NÆRINGSDRIVENDE", "Selvstendig næringsdrivende"),
-    FRILANS("FRILANS", "Frilans"),
+    ARBEIDSTAKER(AktivitetStatus.ARBEIDSTAKER, "Ordinært arbeid"),
+    SELVSTENDIG_NÆRINGSDRIVENDE(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE, "Selvstendig næringsdrivende"),
+    FRILANSER(AktivitetStatus.FRILANSER, "Frilans"),
+
     ANNET("ANNET", "Annet"),
     ;
+
+    public static final EnumSet<UttakArbeidType> ATFL = EnumSet.of(ARBEIDSTAKER, FRILANSER);
+
     private static final Map<String, UttakArbeidType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "UTTAK_ARBEID_TYPE";
@@ -32,13 +39,24 @@ public enum UttakArbeidType implements Kodeverdi {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
+            KODER.putIfAbsent(v.name(), v); // fallback for Jackson enum key i map issue (løses delvis i jackson 2.11)
         }
     }
 
     @JsonIgnore
     private String navn;
 
+    @JsonValue
     private String kode;
+
+    @JsonIgnore
+    private AktivitetStatus aktivitetStatus;
+
+    UttakArbeidType(AktivitetStatus aktivitetStatus, String navn) {
+        this.aktivitetStatus = aktivitetStatus;
+        this.kode = aktivitetStatus.getKode();
+        this.navn = navn;
+    }
 
     UttakArbeidType(String kode, String navn) {
         this.kode = kode;
@@ -46,7 +64,7 @@ public enum UttakArbeidType implements Kodeverdi {
     }
 
     @JsonCreator
-    public static UttakArbeidType fraKode(@JsonProperty("kode") String kode) {
+    public static UttakArbeidType fraKode(String kode) {
         if (kode == null) {
             return null;
         }
@@ -56,6 +74,7 @@ public enum UttakArbeidType implements Kodeverdi {
         }
         return ad;
     }
+
     public static Map<String, UttakArbeidType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -65,13 +84,11 @@ public enum UttakArbeidType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
     @Override
     public String getKode() {
         return kode;
@@ -83,6 +100,28 @@ public enum UttakArbeidType implements Kodeverdi {
     }
 
     public boolean erArbeidstakerEllerFrilans() {
-        return ORDINÆRT_ARBEID.equals(this) || FRILANS.equals(this);
+        return ARBEIDSTAKER.equals(this) || FRILANSER.equals(this);
     }
+
+    public AktivitetStatus getAktivitetStatus() {
+        return aktivitetStatus;
+    }
+
+    public boolean matcher(AktivitetStatus aktivitetStatus) {
+        return Objects.equals(this.kode, aktivitetStatus.getKode());
+    }
+
+    public static UttakArbeidType mapFra(AktivitetStatus aktivitetStatus) {
+        for (var ut : values()) {
+            if (ut.aktivitetStatus != null && ut.aktivitetStatus.equals(aktivitetStatus)) {
+                return ut;
+            }
+        }
+        if (Inntektskategori.UDEFINERT.equals(aktivitetStatus.getInntektskategori())) {
+            throw new IllegalArgumentException(AktivitetStatus.class.getSimpleName() + "AktivitetStatus " + aktivitetStatus + " mangler mapping til " + UttakArbeidType.class.getSimpleName());
+        } else {
+            return UttakArbeidType.ANNET;
+        }
+    }
+
 }

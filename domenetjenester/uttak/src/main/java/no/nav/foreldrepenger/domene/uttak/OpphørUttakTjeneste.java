@@ -2,62 +2,59 @@ package no.nav.foreldrepenger.domene.uttak;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.NavigableMap;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
-import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
+import no.nav.k9.kodeverk.uttak.UtfallType;
 
 @ApplicationScoped
 public class OpphørUttakTjeneste {
 
-    private UttakRepository uttakRepository;
+    private UttakTjeneste uttakTjeneste;
 
     OpphørUttakTjeneste() {
-        //CDI
+        //
     }
 
     @Inject
-    public OpphørUttakTjeneste(UttakRepositoryProvider repositoryProvider) {
-        this.uttakRepository = repositoryProvider.getUttakRepository();
+    public OpphørUttakTjeneste(UttakTjeneste uttakTjeneste) {
+        this.uttakTjeneste = uttakTjeneste;
     }
 
-    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref, Behandlingsresultat behandlingsresultat) {
-        if (!behandlingsresultat.isBehandlingsresultatOpphørt()) {
+    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
+        if (!ref.getBehandlingResultat().isBehandlingsresultatOpphørt()) {
             return Optional.empty();
         }
         LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
-        LocalDate opphørsdato = utledOpphørsdatoFraUttak(hentUttakResultatFor(ref.getBehandlingId()), skjæringstidspunkt);
+        Uttaksplan uttaksplan = hentUttakResultatFor(ref.getBehandlingUuid());
+        LocalDate opphørsdato = utledOpphørsdatoFraUttak(uttaksplan, skjæringstidspunkt);
 
         return Optional.ofNullable(opphørsdato);
     }
 
-    private UttakResultatEntitet hentUttakResultatFor(Long behandlingId) {
-        return uttakRepository.hentUttakResultatHvisEksisterer(behandlingId).orElse(null);
+    private Uttaksplan hentUttakResultatFor(UUID behandlingId) {
+        return uttakTjeneste.hentUttaksplan(behandlingId).orElse(null);
     }
 
-    private LocalDate utledOpphørsdatoFraUttak(UttakResultatEntitet uttakResultat, LocalDate skjæringstidspunkt) {
-        Set<PeriodeResultatÅrsak> opphørsårsaker = IkkeOppfyltÅrsak.opphørsAvslagÅrsaker();
-        List<UttakResultatPeriodeEntitet> perioder = getUttaksperioderIOmvendtRekkefølge(uttakResultat);
-
+    private LocalDate utledOpphørsdatoFraUttak(Uttaksplan uttaksplan, LocalDate skjæringstidspunkt) {
+        // FIXME K9 UTTAK: Mulig dette ikke trengs?  Kan ha flere perioder med avslått/innvilget om hverandre?
+        NavigableMap<Periode, Uttaksplanperiode> perioder = uttaksplan != null ? uttaksplan.getPerioderReversert() : Collections.emptyNavigableMap();
         // Finn fom-dato i første periode av de siste sammenhengende periodene med opphørårsaker
         LocalDate fom = null;
-        for (UttakResultatPeriodeEntitet periode : perioder) {
-            if (opphørsårsaker.contains(periode.getPeriodeResultatÅrsak())) {
+        for (var entry : perioder.entrySet()) {
+            var periode = entry.getKey();
+            var info = entry.getValue();
+            if (UtfallType.AVSLÅTT.equals(info.getUtfall())) {
                 fom = periode.getFom();
-            } else if (fom != null && periode.isInnvilget()) {
+            } else if (fom != null && UtfallType.INNVILGET.equals(info.getUtfall())) {
                 return fom;
             }
         }
@@ -65,11 +62,4 @@ public class OpphørUttakTjeneste {
         return skjæringstidspunkt;
     }
 
-    private List<UttakResultatPeriodeEntitet> getUttaksperioderIOmvendtRekkefølge(UttakResultatEntitet uttakResultat) {
-        return Optional.ofNullable(uttakResultat)
-            .map(UttakResultatEntitet::getGjeldendePerioder)
-            .map(UttakResultatPerioderEntitet::getPerioder).orElse(Collections.emptyList()).stream()
-            .sorted(Comparator.comparing(UttakResultatPeriodeEntitet::getFom).reversed())
-            .collect(Collectors.toList());
-    }
 }

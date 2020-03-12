@@ -84,4 +84,5 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType fagsakYtelseType, NavBruker navBruker) {
         return new TestScenarioBuilder(fagsakYtelseType, navBruker);
     }
+
 }

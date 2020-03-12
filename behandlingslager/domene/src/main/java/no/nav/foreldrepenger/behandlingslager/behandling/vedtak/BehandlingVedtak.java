@@ -15,7 +15,6 @@ import javax.persistence.Version;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.IverksettingStatusKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.VedtakResultatTypeKodeverdiConverter;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 

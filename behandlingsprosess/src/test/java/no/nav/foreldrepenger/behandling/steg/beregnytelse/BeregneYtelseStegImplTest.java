@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -18,10 +20,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
-import no.nav.foreldrepenger.behandling.revurdering.ytelse.UttakInputTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -33,15 +33,15 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPeriodeEntitet;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatPerioderEntitet;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatÅrsak;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.util.Tuple;
@@ -56,17 +56,16 @@ public class BeregneYtelseStegImplTest {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     @Inject
-    private UttakInputTjeneste uttakInputTjeneste;
+    private UttakInMemoryTjeneste uttakTjeneste;
 
     @Inject
-    private HentBeregningsgrunnlagTjeneste hentBeregningsgrunnlagTjeneste;
+    private BeregningTjeneste beregningTjeneste;
 
     @Inject
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private final BeregningsresultatRepository beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
-    private final UttakRepository uttakRepository = repositoryProvider.getUttakRepository();
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
     @Mock
@@ -82,9 +81,10 @@ public class BeregneYtelseStegImplTest {
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
             .build();
-        steg = new BeregneYtelseStegImpl(repositoryProvider, hentBeregningsgrunnlagTjeneste,
-            uttakInputTjeneste,
+        steg = new BeregneYtelseStegImpl(repositoryProvider, beregningTjeneste,
+            uttakTjeneste,
             fastsettBeregningsresultatTjeneste,
+            skjæringstidspunktTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
     }
 
@@ -164,21 +164,17 @@ public class BeregneYtelseStegImplTest {
     }
 
     private void medBeregningsgrunnlag(Behandling behandling) {
-        var beregningsgrunnlagBuilder = BeregningsgrunnlagEntitet.builder()
+        var beregningsgrunnlagBuilder = Beregningsgrunnlag.builder()
             .medSkjæringstidspunkt(LocalDate.now())
             .medGrunnbeløp(BigDecimal.valueOf(90000));
-        BeregningsgrunnlagEntitet beregningsgrunnlag = beregningsgrunnlagBuilder.build();
-        beregningsgrunnlagTjeneste.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag, BeregningsgrunnlagTilstand.OPPRETTET);
+        Beregningsgrunnlag beregningsgrunnlag = beregningsgrunnlagBuilder.build();
+        beregningTjeneste.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag, BeregningsgrunnlagTilstand.OPPRETTET);
     }
 
     private void byggUttakPlanResultat(Behandling behandling) {
-        var periode = new UttakResultatPeriodeEntitet.Builder(LocalDate.now().minusDays(3), LocalDate.now().minusDays(1))
-            .medPeriodeResultat(PeriodeResultatType.INNVILGET, PeriodeResultatÅrsak.UKJENT)
-            .build();
+        var periode = new Periode(LocalDate.now().minusDays(3), LocalDate.now().minusDays(1));
+        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
-        var perioder = new UttakResultatPerioderEntitet();
-        perioder.leggTilPeriode(periode);
-
-        uttakRepository.lagreOpprinneligUttakResultatPerioder(behandling.getId(), perioder);
+        uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }
 }

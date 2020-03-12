@@ -19,7 +19,7 @@ public class Pleiebehov {
     @JsonProperty(value = "perioderMedKontinuerligTilsynOgPleie")
     @Valid
     @Size(max = 100)
-    private List<PeriodeMedTilsyn> perioderMedTilsynOgPleie;
+    private List<PeriodeMedTilsynOgÅrsakssammenheng> perioderMedTilsynOgPleie;
 
     @JsonProperty(value = "perioderMedUtvidetKontinuerligTilsynOgPleie")
     @Valid
@@ -29,12 +29,12 @@ public class Pleiebehov {
     public Pleiebehov() {
     }
 
-    public Pleiebehov(List<PeriodeMedTilsyn> perioderMedTilsynOgPleie, List<PeriodeMedTilsyn> perioderMedUtvidetTilsynOgPleie) {
+    public Pleiebehov(List<PeriodeMedTilsynOgÅrsakssammenheng> perioderMedTilsynOgPleie, List<PeriodeMedTilsyn> perioderMedUtvidetTilsynOgPleie) {
         this.perioderMedTilsynOgPleie = List.copyOf(perioderMedTilsynOgPleie);
         this.perioderMedUtvidetTilsynOgPleie = List.copyOf(perioderMedUtvidetTilsynOgPleie);
     }
 
-    public List<PeriodeMedTilsyn> getPerioderMedTilsynOgPleie() {
+    public List<PeriodeMedTilsynOgÅrsakssammenheng> getPerioderMedTilsynOgPleie() {
         if (perioderMedTilsynOgPleie == null) {
             return List.of();
         }
@@ -48,7 +48,7 @@ public class Pleiebehov {
         return Collections.unmodifiableList(perioderMedUtvidetTilsynOgPleie);
     }
 
-    public void setPerioderMedTilsynOgPleie(List<PeriodeMedTilsyn> perioderMedTilsynOgPleie) {
+    public void setPerioderMedTilsynOgPleie(List<PeriodeMedTilsynOgÅrsakssammenheng> perioderMedTilsynOgPleie) {
         this.perioderMedTilsynOgPleie = List.copyOf(perioderMedTilsynOgPleie);
     }
 

@@ -114,9 +114,9 @@ public class Vilkårene extends BaseEntitet {
         return Objects.hash(getVilkårene());
     }
 
-    public ResultatType getResultatType() {
+    public VilkårResultatType getResultatType() {
         if (getHarVilkårTilVurdering()) {
-            return ResultatType.IKKE_FASTSATT;
+            return VilkårResultatType.IKKE_FASTSATT;
         } else if (getHarAvslåtteVilkårsPerioder()) {
             final var utfall = getVilkårene()
                 .stream()
@@ -125,12 +125,12 @@ public class Vilkårene extends BaseEntitet {
                 .map(VilkårPeriode::getGjeldendeUtfall)
                 .collect(Collectors.toSet());
             if (utfall.containsAll(Set.of(Utfall.IKKE_OPPFYLT, Utfall.OPPFYLT))) {
-                return ResultatType.DELEVIS_AVSLÅTT;
+                return VilkårResultatType.DELEVIS_AVSLÅTT;
             } else if (Set.of(Utfall.IKKE_OPPFYLT).equals(utfall)) {
-                return ResultatType.AVSLÅTT;
+                return VilkårResultatType.AVSLÅTT;
             }
         }
-        return ResultatType.INNVILGET;
+        return VilkårResultatType.INNVILGET;
     }
 
     private boolean getHarVilkårTilVurdering() {

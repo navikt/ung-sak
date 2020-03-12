@@ -23,10 +23,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,6 +77,11 @@ public class BehandlingDto {
     @JsonProperty(value = "behandlingsresultat")
     @Valid
     private BehandlingsresultatDto behandlingsresultat;
+
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty(value = "behandlingResultatType")
+    @Valid
+    private BehandlingResultatType behandlingResultatType;
 
     @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "endret")
@@ -143,6 +150,11 @@ public class BehandlingDto {
     @Valid
     private BehandlingStatus status;
 
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty(value = "stegTilstand")
+    @Valid
+    private BehandlingStegTilstandDto stegTilstand;
+
     @JsonProperty(value = "toTrinnsBehandling")
     private boolean toTrinnsBehandling;
 
@@ -155,8 +167,13 @@ public class BehandlingDto {
     @NotNull
     private UUID uuid;
 
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty("venteårsak")
+    @Valid
+    private Venteårsak venteårsak;
+
     /** @deprecated bruk #venteÅrsak */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @JsonInclude(value = Include.NON_NULL)
     @JsonAlias("venteÅrsakKode")
     @JsonProperty("venteArsakKode")
@@ -165,20 +182,25 @@ public class BehandlingDto {
     private String venteÅrsakKode;
 
     @JsonInclude(value = Include.NON_NULL)
-    @JsonProperty("venteårsak")
+    @JsonProperty("ansvarligBeslutter")
+    @Size(max = 100000)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String ansvarligBeslutter;
+
+    @JsonProperty(value = "behandlingHenlagt")
+    private boolean behandlingHenlagt;
+
+    /** Eventuelt async status på tasks. */
+    @JsonInclude(value = Include.NON_NULL)
+    @JsonProperty("taskStatus")
     @Valid
-    private Venteårsak venteårsak;
+    private AsyncPollingStatus taskStatus;
 
     @JsonProperty(value = "versjon", required = true)
     @NotNull
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long versjon;
-
-    @JsonInclude(value = Include.NON_NULL)
-    @JsonProperty(value = "stegTilstand")
-    @Valid
-    private BehandlingStegTilstandDto stegTilstand;
 
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
@@ -324,8 +346,12 @@ public class BehandlingDto {
         this.behandlingsfristTid = behandlingsfristTid;
     }
 
-    public void setBehandlingsresultat(BehandlingsresultatDto behandlingsresultat) {
-        this.behandlingsresultat = behandlingsresultat;
+    public void setBehandlingsresultat(BehandlingsresultatDto dto) {
+        this.behandlingsresultat = dto;
+    }
+
+    public void setBehandlingStegTilstand(BehandlingStegTilstandDto stegTilstand) {
+        this.stegTilstand = stegTilstand;
     }
 
     public void setEndret(LocalDateTime endret) {
@@ -401,11 +427,35 @@ public class BehandlingDto {
         this.versjon = versjon;
     }
 
-    void setBehandlingKøet(boolean behandlingKøet) {
+    public void setBehandlingKøet(boolean behandlingKøet) {
         this.behandlingKøet = behandlingKøet;
     }
+    
+    public String getAnsvarligBeslutter() {
+        return ansvarligBeslutter;
+    }
 
-    public void setBehandlingStegTilstand(BehandlingStegTilstandDto stegTilstand) {
-        this.stegTilstand = stegTilstand;
+    public AsyncPollingStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public boolean isBehandlingHenlagt() {
+        return behandlingHenlagt;
+    }
+
+    public void setAnsvarligBeslutter(String ansvarligBeslutter) {
+        this.ansvarligBeslutter = ansvarligBeslutter;
+    }
+
+    public void setAsyncStatus(AsyncPollingStatus asyncStatus) {
+        this.taskStatus = asyncStatus;
+    }
+
+    public void setBehandlingHenlagt(boolean behandlingHenlagt) {
+        this.behandlingHenlagt = behandlingHenlagt;
+    }
+
+    public void setTaskStatus(AsyncPollingStatus taskStatus) {
+        this.taskStatus = taskStatus;
     }
 }

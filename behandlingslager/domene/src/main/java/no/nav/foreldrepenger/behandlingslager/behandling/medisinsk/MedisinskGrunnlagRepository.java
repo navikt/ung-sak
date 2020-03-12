@@ -43,17 +43,31 @@ public class MedisinskGrunnlagRepository {
 
         final var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
         final var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
-        lagre(behandling, kontinuerligTilsyn, legeerklæringer, pleietrengende);
+        final var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
+        lagre(behandling, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
+    }
+
+    public void lagre(Behandling behandling, OmsorgenFor omsorgenFor) {
+        final var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+
+        final var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
+        final var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
+        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
+        lagre(behandling, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
     }
 
     public void lagre(Behandling behandling, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
         Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
         Objects.requireNonNull(kontinuerligTilsyn, "kontinuerligTilsyn"); // NOSONAR $NON-NLS-1$
 
-        lagre(behandling, kontinuerligTilsyn.build(), legeerklæringer, null);
+        final var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+        final var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
+        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
+
+        lagre(behandling, kontinuerligTilsyn.build(), legeerklæringer, pleietrengende, omsorgenFor);
     }
 
-    private void lagre(Behandling behandling, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, Pleietrengende pleietrengende) {
+    private void lagre(Behandling behandling, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, Pleietrengende pleietrengende, OmsorgenFor omsorgenFor) {
 
         final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
         var pleie = pleietrengende;
@@ -67,12 +81,15 @@ public class MedisinskGrunnlagRepository {
             entityManager.flush();
         }
 
-        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, pleie, kontinuerligTilsyn, legeerklæringer);
+        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, pleie, kontinuerligTilsyn, legeerklæringer, omsorgenFor);
         if (kontinuerligTilsyn != null) {
             entityManager.persist(kontinuerligTilsyn);
         }
         if (legeerklæringer != null) {
             entityManager.persist(legeerklæringer);
+        }
+        if (omsorgenFor != null) {
+            entityManager.persist(omsorgenFor);
         }
         if (pleie != null) {
             entityManager.persist(pleie);
@@ -96,6 +113,8 @@ public class MedisinskGrunnlagRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Behandling gammelBehandling, Behandling nyBehandling) {
         Optional<MedisinskGrunnlag> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandling.getId());
-        søknadEntitet.ifPresent(entitet -> lagre(nyBehandling, new KontinuerligTilsyn(entitet.getKontinuerligTilsyn()), entitet.getLegeerklæringer(), entitet.getPleietrengende()));
+        søknadEntitet.ifPresent(entitet -> lagre(nyBehandling, new KontinuerligTilsyn(entitet.getKontinuerligTilsyn()),
+            entitet.getLegeerklæringer(),
+            entitet.getPleietrengende(), entitet.getOmsorgenFor()));
     }
 }

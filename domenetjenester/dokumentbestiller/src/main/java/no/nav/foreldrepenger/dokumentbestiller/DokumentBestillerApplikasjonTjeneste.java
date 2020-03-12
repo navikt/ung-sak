@@ -5,11 +5,11 @@ import static no.nav.foreldrepenger.dokumentbestiller.vedtak.VedtaksbrevUtleder.
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.dokumentbestiller.kafka.DokumentKafkaBestiller;
-import no.nav.foreldrepenger.dokumentbestiller.klient.FormidlingRestKlient;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
@@ -19,11 +19,9 @@ import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 public class DokumentBestillerApplikasjonTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private FormidlingRestKlient formidlingRestKlient;
 
-    private BrevHistorikkinnslag brevHistorikkinnslag;
     private DokumentKafkaBestiller dokumentKafkaBestiller;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
+    private VedtakVarselRepository behandlingsresultatRepository;
 
 
     public DokumentBestillerApplikasjonTjeneste() {
@@ -32,25 +30,21 @@ public class DokumentBestillerApplikasjonTjeneste {
 
     @Inject
     public DokumentBestillerApplikasjonTjeneste(BehandlingRepository behandlingRepository,
-                                                BehandlingsresultatRepository behandlingsresultatRepository,
-                                                BrevHistorikkinnslag brevHistorikkinnslag,
-                                                FormidlingRestKlient formidlingRestKlient,
+                                                VedtakVarselRepository behandlingsresultatRepository,
                                                 DokumentKafkaBestiller dokumentKafkaBestiller) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.brevHistorikkinnslag = brevHistorikkinnslag;
         this.dokumentKafkaBestiller = dokumentKafkaBestiller;
-        this.formidlingRestKlient = formidlingRestKlient;
     }
 
-    public void produserVedtaksbrev(BehandlingVedtak behandlingVedtak) {
+    public void produserVedtaksbrev(BehandlingReferanse ref, BehandlingVedtak behandlingVedtak) {
         Long behandlingId = behandlingVedtak.getBehandlingId();
         var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
         if (Vedtaksbrev.INGEN.equals(behandlingsresultat.getVedtaksbrev())) {
             return;
         }
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        DokumentMalType dokumentMal = velgDokumentMalForVedtak(behandlingsresultat, behandlingVedtak);
+        DokumentMalType dokumentMal = velgDokumentMalForVedtak(ref, behandlingsresultat, behandlingVedtak);
         dokumentKafkaBestiller.bestillBrev(behandling, dokumentMal, null, null, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 

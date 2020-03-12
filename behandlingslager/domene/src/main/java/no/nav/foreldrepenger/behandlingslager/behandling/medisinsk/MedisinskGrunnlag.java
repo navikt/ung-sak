@@ -41,6 +41,11 @@ public class MedisinskGrunnlag extends BaseEntitet {
 
     @OneToOne
     @Immutable
+    @JoinColumn(name = "omsorgenfor_id", updatable = false, unique = true)
+    private OmsorgenFor omsorgenFor;
+
+    @OneToOne
+    @Immutable
     @JoinColumn(name = "kontinuerlig_tilsyn_id", nullable = false, updatable = false, unique = true)
     private KontinuerligTilsyn kontinuerligTilsyn;
 
@@ -54,11 +59,14 @@ public class MedisinskGrunnlag extends BaseEntitet {
     MedisinskGrunnlag() {
     }
 
-    MedisinskGrunnlag(Behandling behandling, Pleietrengende pleietrengende, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
+    MedisinskGrunnlag(Behandling behandling, Pleietrengende pleietrengende,
+                      KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer,
+                      OmsorgenFor omsorgenFor) {
         this.behandling = behandling;
         this.pleietrengende = pleietrengende;
         this.kontinuerligTilsyn = kontinuerligTilsyn; // NOSONAR
         this.legeerklæringer = legeerklæringer;
+        this.omsorgenFor = omsorgenFor;
     }
 
     void setAktiv(boolean aktiv) {
@@ -77,6 +85,10 @@ public class MedisinskGrunnlag extends BaseEntitet {
         return pleietrengende;
     }
 
+    public OmsorgenFor getOmsorgenFor() {
+        return omsorgenFor;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,12 +96,13 @@ public class MedisinskGrunnlag extends BaseEntitet {
         MedisinskGrunnlag that = (MedisinskGrunnlag) o;
         return Objects.equals(kontinuerligTilsyn, that.kontinuerligTilsyn) &&
             Objects.equals(pleietrengende, that.pleietrengende) &&
+            Objects.equals(omsorgenFor, that.omsorgenFor) &&
             Objects.equals(legeerklæringer, that.legeerklæringer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kontinuerligTilsyn, pleietrengende, legeerklæringer);
+        return Objects.hash(kontinuerligTilsyn, pleietrengende, omsorgenFor, legeerklæringer);
     }
 
     @Override
@@ -99,6 +112,7 @@ public class MedisinskGrunnlag extends BaseEntitet {
             ", behandling=" + behandling +
             ", kontinuerligTilsyn=" + kontinuerligTilsyn +
             ", legeerklæringer=" + legeerklæringer +
+            ", omsorgenFor=" + omsorgenFor +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
             '}';

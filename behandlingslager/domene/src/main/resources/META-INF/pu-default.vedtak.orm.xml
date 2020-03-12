@@ -3,10 +3,13 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
       http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
 
+	<sequence-generator name="SEQ_BEHANDLING_VEDTAK_VARSEL" allocation-size="50" sequence-name="SEQ_BEHANDLING_VEDTAK_VARSEL" />
 	<sequence-generator name="SEQ_BEHANDLING_VEDTAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_VEDTAK" />
 	<sequence-generator name="SEQ_BEH_OVERLAPP_INFOTRYGD" allocation-size="50" sequence-name="SEQ_BEH_OVERLAPP_INFOTRYGD" />
 
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak" />
 	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygd" />
+	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel" />
+	
 
 </entity-mappings>

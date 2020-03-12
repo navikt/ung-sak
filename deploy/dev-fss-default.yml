@@ -60,14 +60,14 @@ spec:
       value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-sak
 
     # Appdynamics
-#    - name: APPDYNAMICS_CONTROLLER_HOST_NAME
-#      value: appdynamics.adeo.no
-#    - name: APPDYNAMICS_CONTROLLER_PORT
-#      value: "443"
-#    - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
-#      value: "true"
-#    - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
-#      value: NON-PROD
+    - name: APPDYNAMICS_CONTROLLER_HOST_NAME
+      value: appdynamics.adeo.no
+    - name: APPDYNAMICS_CONTROLLER_PORT
+      value: "443"
+    - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
+      value: "true"
+    - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
+      value: NON-PROD
 
     - name: OPENIDCONNECT_ISSOHOST
       value: https://isso-q.adeo.no:443/isso/oauth2
@@ -149,6 +149,8 @@ spec:
       value: https://infotrygd-hendelser-api-q1.nais.preprod.local/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.q1/fpabakus
+    - name: FTKALKULUS_URL
+      value: http://ftkalkulus.q1/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
@@ -167,6 +169,8 @@ spec:
       value: https://app-q1.adeo.no/k9/oppdrag/api
     - name: URL_K9OPPDRAG
       value: http://k9-oppdrag/k9/oppdrag/api
+    - name: PPB_UTTAK_URL
+      value: http://pleiepenger-barn-uttak.default
 
     # Web services
     - name: AKTOER_V2_URL
@@ -195,6 +199,7 @@ spec:
       value: https://app-q1.adeo.no/norg2/ws/Arbeidsfordeling/v1
     - name: KODEVERK_V2_URL
       value: https://kodeverk.nais.preprod.local/ws/kodeverk/v2
+
 
 
     # Sikkerhet:

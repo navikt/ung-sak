@@ -12,6 +12,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligT
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.OmsorgenFor;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -29,8 +30,12 @@ import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.OmsorgenFor
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.Relasjon;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.omsorgenfor.RelasjonsRolle;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -60,12 +65,19 @@ public class InngangsvilkårOversetter {
 
         final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
         if (medisinskGrunnlag.isPresent()) {
-            final var grunnlag = medisinskGrunnlag.get();
-            final var relevanteLegeerklæringer = grunnlag.getLegeerklæringer()
+            var grunnlag = medisinskGrunnlag.get();
+            var legeerkleringer = grunnlag.getLegeerklæringer()
                 .getLegeerklæringer()
                 .stream()
-                .filter(it -> it.getPeriode().overlapper(periode))
+                .map(le -> new LocalDateSegment<>(le.getDatert(), Tid.TIDENES_ENDE, le))
                 .collect(Collectors.toList());
+            final var timeline = new LocalDateTimeline<>(legeerkleringer);
+            var relevanteLegeerklæringer = timeline.intersection(new LocalDateInterval(periode.getFomDato(), periode.getTomDato()))
+                .toSegments()
+                .stream()
+                .map(LocalDateSegment::getValue)
+                .collect(Collectors.toList());
+
             final var relevantKontinuerligTilsyn = grunnlag.getKontinuerligTilsyn()
                 .getPerioder()
                 .stream()
@@ -91,6 +103,7 @@ public class InngangsvilkårOversetter {
     private List<PeriodeMedKontinuerligTilsyn> mapKontinuerligTilsyn(List<KontinuerligTilsynPeriode> relevantKontinuerligTilsyn) {
         return relevantKontinuerligTilsyn.stream()
             .filter(it -> it.getGrad() == 100)
+            .filter(KontinuerligTilsynPeriode::getÅrsaksammenheng)
             .map(it -> new PeriodeMedKontinuerligTilsyn(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
             .collect(Collectors.toList());
     }
@@ -108,7 +121,7 @@ public class InngangsvilkårOversetter {
             .filter(it -> it.getDiagnose() != null)
             .filter(it -> !it.getDiagnose().isEmpty())
             .filter(it -> !it.getDiagnose().isBlank())
-            .min(Comparator.comparing(Legeerklæring::getPeriode, Comparator.nullsLast(Comparator.reverseOrder())))
+            .min(Comparator.comparing(Legeerklæring::getDatert, Comparator.nullsLast(Comparator.reverseOrder())))
             .map(Legeerklæring::getDiagnose)
             .orElse(null);
     }
@@ -132,7 +145,8 @@ public class InngangsvilkårOversetter {
 
     public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periodeTilVurdering).orElseThrow();
-        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId).orElseThrow();
+        final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId).orElseThrow();
         final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
@@ -142,7 +156,7 @@ public class InngangsvilkårOversetter {
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .collect(Collectors.toList());
         return new OmsorgenForGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
-            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser));
+            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null));
     }
 
     private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {

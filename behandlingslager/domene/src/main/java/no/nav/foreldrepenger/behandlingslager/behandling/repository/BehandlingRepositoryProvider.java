@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -17,7 +16,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
 import no.nav.foreldrepenger.behandlingslager.virksomhet.VirksomhetRepository;
 
 /**
@@ -33,14 +31,12 @@ public class BehandlingRepositoryProvider {
     private MedlemskapRepository medlemskapRepository;
     private HistorikkRepository historikkRepository;
     private SøknadRepository søknadRepository;
-    private UttakRepository uttakRepository;
     private VirksomhetRepository virksomhetRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OpptjeningRepository opptjeningRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     private BehandlingRepository behandlingRepository;
@@ -67,9 +63,7 @@ public class BehandlingRepositoryProvider {
         this.medlemskapRepository = new MedlemskapRepository(entityManager);
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
         this.personopplysningRepository = new PersonopplysningRepository(entityManager);
-        this.søknadRepository = new SøknadRepository(entityManager, this.behandlingRepository);
-        this.uttakRepository = new UttakRepository(entityManager);
-        this.behandlingsresultatRepository = new BehandlingsresultatRepository(entityManager);
+        this.søknadRepository = new SøknadRepository(entityManager);
 
         // inntekt arbeid ytelser
         this.virksomhetRepository = new VirksomhetRepository();
@@ -127,10 +121,6 @@ public class BehandlingRepositoryProvider {
         return søknadRepository;
     }
 
-    public UttakRepository getUttakRepository() {
-        return uttakRepository;
-    }
-
     public VirksomhetRepository getVirksomhetRepository() {
         return virksomhetRepository;
     }
@@ -157,10 +147,6 @@ public class BehandlingRepositoryProvider {
 
     public FagsakLåsRepository getFagsakLåsRepository() {
         return fagsakLåsRepository;
-    }
-
-    public BehandlingsresultatRepository getBehandlingsresultatRepository() {
-        return behandlingsresultatRepository;
     }
 
 }

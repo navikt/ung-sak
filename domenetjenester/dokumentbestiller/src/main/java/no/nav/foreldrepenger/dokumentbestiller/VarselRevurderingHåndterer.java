@@ -7,6 +7,8 @@ import java.util.List;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.foreldrepenger.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -25,26 +27,38 @@ class VarselRevurderingHåndterer {
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private OppgaveTjeneste oppgaveTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private VedtakVarselRepository vedtakVarselRepository;
 
-    VarselRevurderingHåndterer(Period defaultVenteFrist, OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
+    VarselRevurderingHåndterer(Period defaultVenteFrist,
+                               OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
+                               VedtakVarselRepository vedtakVarselRepository,
                                OppgaveTjeneste oppgaveTjeneste,
                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.defaultVenteFrist = defaultVenteFrist;
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
+        this.vedtakVarselRepository = vedtakVarselRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
     void oppdater(Behandling behandling, VarselRevurderingAksjonspunkt adapter) {
-        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandling.getId(), DokumentMalType.REVURDERING_DOK, adapter.getFritekst());
+        Long behandlingId = behandling.getId();
+        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, DokumentMalType.REVURDERING_DOK, adapter.getFritekst());
         bestillBrevDto.setÅrsakskode(RevurderingVarslingÅrsak.ANNET.getKode());
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.SAKSBEHANDLER);
-        settBehandlingPaVent(behandling, adapter.getFrist(), fraDto(adapter.getVenteÅrsakKode()));
+        settBehandlingPåVent(behandling, adapter.getFrist(), fraDto(adapter.getVenteÅrsakKode()));
+        registrerVarselOmRevurdering(behandlingId);
     }
 
-    private void settBehandlingPaVent(Behandling behandling, LocalDate frist, Venteårsak venteårsak) {
+    private void registrerVarselOmRevurdering(Long behandlingId) {
+        var varsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
+        varsel.setHarSendtVarselOmRevurdering(true);
+        vedtakVarselRepository.lagre(behandlingId, varsel);
+    }
+
+    private void settBehandlingPåVent(Behandling behandling, LocalDate frist, Venteårsak venteårsak) {
         opprettTaskAvsluttOppgave(behandling);
         behandlingskontrollTjeneste.settBehandlingPåVentUtenSteg(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT,
             bestemFristForBehandlingVent(frist), venteårsak);

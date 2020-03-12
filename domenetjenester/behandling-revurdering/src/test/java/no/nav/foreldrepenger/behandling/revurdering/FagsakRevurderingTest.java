@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
@@ -66,7 +65,6 @@ public class FagsakRevurderingTest {
 
     @Test
     public void kanIkkeOppretteRevurderingNårÅpenBehandling() throws Exception {
-        Behandlingsresultat.opprettFor(behandling);
         when(behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(anyLong())).thenReturn(Arrays.asList(behandling));
 
         FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
@@ -76,7 +74,7 @@ public class FagsakRevurderingTest {
 
     @Test
     public void kanIkkeOppretteRevurderingNårBehandlingErHenlagt() {
-        Behandlingsresultat.builder().medBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET).buildFor(behandling);
+        behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET);
 
         FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
         Boolean kanRevurderingOpprettes = tjeneste.kanRevurderingOpprettes(fagsak);

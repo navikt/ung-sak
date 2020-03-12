@@ -8,6 +8,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -23,11 +24,13 @@ public abstract class DokumentmottakerSøknad extends DokumentmottakerYtelsesesr
                                   DokumentmottakerFelles dokumentmottakerFelles,
                                   MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                   Behandlingsoppretter behandlingsoppretter,
+                                  UttakTjeneste uttakTjeneste,
                                   Kompletthetskontroller kompletthetskontroller) {
         super(dokumentmottakerFelles,
             mottatteDokumentTjeneste,
             behandlingsoppretter,
             kompletthetskontroller,
+            uttakTjeneste,
             repositoryProvider);
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();

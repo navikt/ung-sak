@@ -35,7 +35,7 @@ public class IAYRepositoryProvider {
 
         // behandling aggregater
         this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
-        this.søknadRepository = new SøknadRepository(entityManager, this.behandlingRepository);
+        this.søknadRepository = new SøknadRepository(entityManager);
 
         // inntekt arbeid ytelser
         this.virksomhetRepository = new VirksomhetRepository();

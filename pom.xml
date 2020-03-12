@@ -35,9 +35,10 @@
 
 		<felles.version>1.5-20200209090835-b5ad1b1</felles.version>
 
-        <metrics.version>4.1.4</metrics.version>
+        <metrics.version>4.1.5</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-	</properties>
+        <kalkulus.version>1.0-2020.03.10.133613-6ab96fc</kalkulus.version>
+    </properties>
 
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det har uheldige virkninger ved bruk av import og dependency (bruk composition
 		over arv) da de overstyrer andre scope definisjoner. Sett det heller der det brukes. -->
@@ -86,7 +87,7 @@
 			<dependency>
 				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
 				<artifactId>oppdrag-kontrakter</artifactId>
-				<version>1.1-20200224104826-29ca10f</version>
+				<version>1.1-20200310050553-c0a5306</version>
 			</dependency>
 
             <dependency>
@@ -121,11 +122,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>fp-formidling-v1</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
                 <artifactId>behandlingsprosess-vedtak-v1</artifactId>
                 <version>${fp-kontrakter.version}</version>
             </dependency>
@@ -149,6 +145,12 @@
                 <artifactId>abakus-kontrakt</artifactId>
                 <version>1.1-20200224134804-69d48ae</version>
             </dependency>
+
+			<dependency>
+				<groupId>no.nav.folketrygdloven.kalkulus</groupId>
+				<artifactId>kontrakt</artifactId>
+				<version>${kalkulus.version}</version>
+			</dependency>
 
 			<dependency>
   			    <groupId>no.nav.folketrygdloven</groupId>
@@ -326,7 +328,7 @@
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-pleiepenger-barn</artifactId>
-                <version>2.0.0.518a9c5</version>
+                <version>2.0.2.d31ae67</version>
             </dependency>
 
 			<!-- Prosjektets egne TEST AVHENGIGHETER -->
@@ -383,7 +385,7 @@
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-streams</artifactId>
-                <version>2.4.0</version>
+                <version>2.4.1</version>
             </dependency>
 
             <!-- Transitive avhengighet resolution for å sikre bestemt versjon -->
@@ -451,7 +453,7 @@
             <dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.10</version>
+				<version>42.2.11</version>
 			</dependency>
 			<dependency>
 	            <groupId>no.nav</groupId>
@@ -515,7 +517,7 @@
 				<plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

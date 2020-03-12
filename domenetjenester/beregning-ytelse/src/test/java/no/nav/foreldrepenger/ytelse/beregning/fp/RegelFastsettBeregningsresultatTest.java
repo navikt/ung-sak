@@ -26,9 +26,11 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Ber
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrArbeidsforhold;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
+import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Periode;
 import no.nav.foreldrepenger.ytelse.beregning.regler.RegelFastsettBeregningsresultat;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 
 public class RegelFastsettBeregningsresultatTest {
     private static final LocalDate TRE_UKER_FØR_FØDSEL_DT = LocalDate.now().minusWeeks(3);
@@ -89,7 +91,7 @@ public class RegelFastsettBeregningsresultatTest {
             FELLESPERIODE_FØR_FØDSEL,
             MØDREKVOTE_PERIODE
         );
-        BeregningsresultatRegelmodell modell = opprettRegelmodell(intervalList, AktivitetStatus.ATFL);
+        BeregningsresultatRegelmodell modell = opprettRegelmodell(intervalList, AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER);
         Beregningsresultat output = new Beregningsresultat();
 
         // Act
@@ -255,12 +257,12 @@ public class RegelFastsettBeregningsresultatTest {
 
     private BeregningsresultatRegelmodell opprettRegelmodellEnPeriode() {
         List<LocalDateInterval> perioder = Collections.singletonList(MØDREKVOTE_PERIODE);
-        return opprettRegelmodell(perioder, AktivitetStatus.ATFL);
+        return opprettRegelmodell(perioder, AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER);
     }
 
-    private BeregningsresultatRegelmodell opprettRegelmodell(List<LocalDateInterval> perioder, AktivitetStatus aktivitetsStatus) {
+    private BeregningsresultatRegelmodell opprettRegelmodell(List<LocalDateInterval> perioder, AktivitetStatus aktivitetsStatus, UttakArbeidType uttakArbeidType) {
         Beregningsgrunnlag beregningsgrunnlag = opprettBeregningsgrunnlag();
-        UttakResultat uttakResultat = opprettUttak(perioder, aktivitetsStatus, Collections.emptyList());
+        UttakResultat uttakResultat = opprettUttak(perioder, aktivitetsStatus, uttakArbeidType, Collections.emptyList());
         return new BeregningsresultatRegelmodell(beregningsgrunnlag, uttakResultat);
     }
 
@@ -272,20 +274,21 @@ public class RegelFastsettBeregningsresultatTest {
             FELLESPERIODE
         );
         List<Arbeidsforhold> arbeidsforholdList = List.of(ARBEIDSFORHOLD_1, ARBEIDSFORHOLD_2);
-        UttakResultat uttakResultat = opprettUttak(uttakPerioder, AktivitetStatus.ATFL, arbeidsforholdList);
+        UttakResultat uttakResultat = opprettUttak(uttakPerioder, AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER, arbeidsforholdList);
         return new BeregningsresultatRegelmodell(beregningsgrunnlag, uttakResultat);
     }
 
     private BeregningsresultatRegelmodell opprettRegelmodellMedArbeidsforhold(BeregningsgrunnlagPrArbeidsforhold... arbeidsforhold) {
         Beregningsgrunnlag beregningsgrunnlag = opprettBeregningsgrunnlag(arbeidsforhold);
         List<Arbeidsforhold> arbeidsforholdList = Arrays.stream(arbeidsforhold).map(BeregningsgrunnlagPrArbeidsforhold::getArbeidsforhold).collect(Collectors.toList());
-        UttakResultat uttakResultat = opprettUttak(Collections.singletonList(MØDREKVOTE_PERIODE), AktivitetStatus.ATFL, arbeidsforholdList);
+        UttakResultat uttakResultat = opprettUttak(Collections.singletonList(MØDREKVOTE_PERIODE), AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER, arbeidsforholdList);
         return new BeregningsresultatRegelmodell(beregningsgrunnlag, uttakResultat);
     }
 
     private BeregningsgrunnlagPrArbeidsforhold lagPrArbeidsforhold(double dagsatsBruker, double dagsatsArbeidsgiver, Arbeidsforhold arbeidsforhold) {
         return BeregningsgrunnlagPrArbeidsforhold.builder()
             .medArbeidsforhold(arbeidsforhold)
+            .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
             .medRedusertRefusjonPrÅr(BigDecimal.valueOf(260 * dagsatsArbeidsgiver))
             .medRedusertBrukersAndelPrÅr(BigDecimal.valueOf(260 * dagsatsBruker))
             .build();
@@ -338,25 +341,25 @@ public class RegelFastsettBeregningsresultatTest {
             .build();
     }
 
-    private UttakResultat opprettUttak(List<LocalDateInterval> perioder, AktivitetStatus aktivitetsStatus, List<Arbeidsforhold> arbeidsforhold) {
+    private UttakResultat opprettUttak(List<LocalDateInterval> perioder, AktivitetStatus aktivitetsStatus, UttakArbeidType uttakArbeidType, List<Arbeidsforhold> arbeidsforhold) {
         List<UttakResultatPeriode> periodeListe = new ArrayList<>();
         for (LocalDateInterval periode : perioder) {
-            List<UttakAktivitet> uttakAktiviteter = lagUttakAktiviteter(BigDecimal.valueOf(100), BigDecimal.valueOf(100), aktivitetsStatus, arbeidsforhold);
+            List<UttakAktivitet> uttakAktiviteter = lagUttakAktiviteter(BigDecimal.valueOf(100), BigDecimal.valueOf(100), aktivitetsStatus, uttakArbeidType, arbeidsforhold);
             periodeListe.add(new UttakResultatPeriode(periode.getFomDato(), periode.getTomDato(), uttakAktiviteter, false));
         }
         return new UttakResultat(periodeListe);
     }
 
-    private List<UttakAktivitet> lagUttakAktiviteter(BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, AktivitetStatus aktivitetsStatus, List<Arbeidsforhold> arbeidsforholdList) {
+    private List<UttakAktivitet> lagUttakAktiviteter(BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, AktivitetStatus aktivitetsStatus, UttakArbeidType uttakArbeidType, List<Arbeidsforhold> arbeidsforholdList) {
         boolean erGradering = false;
         if (arbeidsforholdList.isEmpty()) {
-            return Collections.singletonList(new UttakAktivitet(stillingsgrad, utbetalingsgrad, aktivitetsStatus.equals(AktivitetStatus.ATFL) ? ARBEIDSFORHOLD_1 : null, aktivitetsStatus, erGradering));
+            return Collections.singletonList(new UttakAktivitet(stillingsgrad, utbetalingsgrad, aktivitetsStatus.equals(AktivitetStatus.ATFL) ? ARBEIDSFORHOLD_1 : null, uttakArbeidType, erGradering));
         }
         return arbeidsforholdList.stream()
             .map(arb ->
             {
                 Arbeidsforhold arbeidsforhold = aktivitetsStatus.equals(AktivitetStatus.ATFL) ? arb : null;
-                return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, aktivitetsStatus, erGradering);
+                return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, uttakArbeidType, erGradering);
             }).collect(Collectors.toList());
     }
 }

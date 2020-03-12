@@ -87,7 +87,7 @@ public class KompletthetsjekkerTest {
 
         kompletthetssjekkerSøknadImpl = new KompletthetssjekkerSøknadFørstegangsbehandlingImpl(dokumentArkivTjeneste, repositoryProvider, Period.parse("P4W"));
         kompletthetssjekkerInntektsmelding = new KompletthetssjekkerInntektsmeldingImpl(inntektsmeldingArkivTjeneste);
-        kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock, dokumentBehandlingTjenesteMock);
+        kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
         kompletthetsjekkerImpl = new KompletthetsjekkerImpl(kompletthetssjekkerSøknadImpl, kompletthetssjekkerInntektsmelding, inntektsmeldingTjeneste, kompletthetsjekkerFelles, søknadRepository);
     }
 

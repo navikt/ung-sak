@@ -1,25 +1,23 @@
 package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @FagsakYtelseTypeRef("*")
 @BehandlingStegRef(kode = "FASTSETT_STP_BER")
@@ -27,55 +25,45 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 @ApplicationScoped
 public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg {
 
+    private KalkulusTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste;
-    private BeregningsgrunnlagInputProvider beregningsgrunnlagInputTjeneste;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
 
     protected FastsettBeregningsaktiviteterSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public FastsettBeregningsaktiviteterSteg(BehandlingRepository behandlingRepository,
-                                             BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                             BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste,
-                                             BeregningsgrunnlagInputProvider inputTjenesteProvider) {
+    public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste,
+                                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                             Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                                             BehandlingRepository behandlingRepository) {
+
+        this.kalkulusTjeneste = kalkulusTjeneste;
+        this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.beregningInfotrygdsakTjeneste = beregningInfotrygdsakTjeneste;
-        this.beregningsgrunnlagInputTjeneste = Objects.requireNonNull(inputTjenesteProvider, "inputTjenestene");
+        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var input = getInputTjeneste(behandling.getFagsakYtelseType()).lagInput(behandling);
-
-        if (beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(behandling, input.getBehandlingReferanse())) {
-            return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-        } else {
-            List<BeregningAksjonspunktResultat> aksjonspunktResultater = beregningsgrunnlagTjeneste.fastsettBeregningsaktiviteter(input);
-            if (aksjonspunktResultater == null) {
-                return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-            } else {
-                // hent på nytt i tilfelle lagret og flushet
-                return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
-            }
-        }
+        var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ref.getFagsakYtelseType()).orElseThrow();
+        
+        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
+        var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
+        
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
     }
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
-            beregningsgrunnlagTjeneste.getRyddBeregningsgrunnlag(kontekst).gjenopprettFastsattBeregningAktivitetBeregningsgrunnlag();
-        } else {
-            beregningsgrunnlagTjeneste.getRyddBeregningsgrunnlag(kontekst).ryddFastsettSkjæringstidspunktVedTilbakeføring();
+        if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
+            kalkulusTjeneste.deaktiverBeregningsgrunnlag(kontekst.getBehandlingId());
         }
-    }
-
-    private BeregningsgrunnlagInputFelles getInputTjeneste(FagsakYtelseType ytelseType) {
-        return beregningsgrunnlagInputTjeneste.getTjeneste(ytelseType);
     }
 }

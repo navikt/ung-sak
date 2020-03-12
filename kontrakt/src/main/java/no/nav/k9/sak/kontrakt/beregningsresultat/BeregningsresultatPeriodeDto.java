@@ -81,8 +81,16 @@ public class BeregningsresultatPeriodeDto {
         andeler = List.copyOf(builder.andeler);
     }
 
+    public BeregningsresultatPeriodeDto() {
+        // Deserialisering av JSON
+    }
+
     public static Builder build() {
         return new Builder();
+    }
+    
+    public static Builder build(LocalDate fom, LocalDate tom) {
+        return new Builder().medFom(fom).medTom(tom);
     }
 
     public List<BeregningsresultatPeriodeAndelDto> getAndeler() {

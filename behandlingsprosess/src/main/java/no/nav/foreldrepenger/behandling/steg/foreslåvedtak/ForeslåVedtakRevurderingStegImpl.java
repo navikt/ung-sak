@@ -7,47 +7,40 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.HentBeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 @BehandlingStegRef(kode = "FORVEDSTEG")
 @BehandlingTypeRef("BT-004") //Revurdering
 @FagsakYtelseTypeRef
-
 @ApplicationScoped
 public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
-    private HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
 
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                                     HentBeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
+                                     BeregningTjeneste kalkulusTjeneste,
                                      BehandlingRepositoryProvider repositoryProvider) {
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
     @Override
@@ -72,17 +65,15 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     }
 
     private boolean isBehandlingsresultatAvslått(Behandling orginalBehandling) {
-        return getSistBehandlingsresultatUtenIngenEndring(orginalBehandling).isBehandlingsresultatAvslått();
+        return getSistBehandlingUtenIngenEndring(orginalBehandling).getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
-    private Behandlingsresultat getSistBehandlingsresultatUtenIngenEndring(Behandling behandling) {
-        Behandlingsresultat sisteBehandlingResultat = getBehandlingsresultat(behandling);
-
-        while (sisteBehandlingResultat.isBehandlingsresultatIkkeEndret()) {
-            sisteBehandlingResultat = getBehandlingsresultat(getOriginalBehandling(behandling));
+    private Behandling getSistBehandlingUtenIngenEndring(Behandling behandling) {
+        var beh = behandling;
+        while (beh.getBehandlingResultatType().isBehandlingsresultatIkkeEndret()) {
+            beh = getOriginalBehandling(beh);
         }
-
-        return sisteBehandlingResultat;
+        return beh;
     }
 
     private Behandling getOriginalBehandling(Behandling behandling) {
@@ -90,18 +81,14 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Revurdering skal alltid ha orginal behandling"));
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling orginalBehandling) {
-        return behandlingsresultatRepository.hent(orginalBehandling.getId());
-    }
-
     private boolean beregningsgrunnlagEksisterer(Behandling behandling) {
-        return beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(behandling.getId()).isPresent();
+        return kalkulusTjeneste.hentFastsatt(behandling.getId()).isPresent();
     }
 
     private boolean erRevurderingensBeregningsgrunnlagMindreEnnOrginal(Behandling orginalBehandling, Behandling revurdering) {
-        BeregningsgrunnlagEntitet orginalBeregning = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(orginalBehandling.getId())
+        Beregningsgrunnlag orginalBeregning = kalkulusTjeneste.hentFastsatt(orginalBehandling.getId())
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Skal ha Beregningsgrunnlag på orginalbehandling vedtak"));
-        BeregningsgrunnlagEntitet revurderingsBeregning = beregningsgrunnlagTjeneste.hentBeregningsgrunnlagForBehandling(revurdering.getId())
+        Beregningsgrunnlag revurderingsBeregning = kalkulusTjeneste.hentFastsatt(revurdering.getId())
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Skal ha Beregningsgrunnlag på positivt vedtak"));
 
         BigDecimal orginalBeregningSumBruttoPrÅr = orginalBeregning.getBeregningsgrunnlagPerioder().stream()
@@ -112,13 +99,4 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         return revurderingsBeregningSumBruttoPrÅr.compareTo(orginalBeregningSumBruttoPrÅr) < 0;
     }
 
-    @Override
-    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        Behandlingsresultat.builderEndreEksisterende(behandlingsresultat)
-            .fjernKonsekvenserForYtelsen()
-            .buildFor(behandling);
-        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-    }
 }

@@ -13,7 +13,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentBehandlingTjeneste;
 import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -37,7 +36,6 @@ public class KompletthetsjekkerFelles {
 
     private SøknadRepository søknadRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
     private BehandlingRepository behandlingRepository;
 
     KompletthetsjekkerFelles() {
@@ -46,12 +44,10 @@ public class KompletthetsjekkerFelles {
 
     @Inject
     public KompletthetsjekkerFelles(BehandlingRepositoryProvider provider,
-                                    DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
-                                    DokumentBehandlingTjeneste dokumentBehandlingTjeneste) {
+                                    DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.søknadRepository = provider.getSøknadRepository();
         this.behandlingRepository = provider.getBehandlingRepository();
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
-        this.dokumentBehandlingTjeneste = dokumentBehandlingTjeneste;
     }
 
     public Behandling hentBehandling(Long behandlingId) {
@@ -84,7 +80,4 @@ public class KompletthetsjekkerFelles {
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
-    public boolean erSendtBrev(Long behandlingId, DokumentMalType dokumentMalType) {
-        return dokumentBehandlingTjeneste.erDokumentProdusert(behandlingId, dokumentMalType);
-    }
 }

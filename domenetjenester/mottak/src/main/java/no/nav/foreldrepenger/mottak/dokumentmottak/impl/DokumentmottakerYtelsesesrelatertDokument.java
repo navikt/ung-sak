@@ -5,20 +5,16 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakRepository;
-import no.nav.foreldrepenger.behandlingslager.uttak.UttakResultatEntitet;
+import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
-import no.nav.k9.kodeverk.uttak.PeriodeResultatType;
 
 // Dokumentmottaker for ytelsesrelaterte dokumenter har felles protokoll som fanges her
 // Variasjoner av protokollen håndteres utenfro
@@ -30,9 +26,8 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     Kompletthetskontroller kompletthetskontroller;
     
     private BehandlingRepository behandlingRepository;
-    private UttakRepository uttakRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private BehandlingRevurderingRepository revurderingRepository;
+    private UttakTjeneste uttakTjeneste;
 
     protected DokumentmottakerYtelsesesrelatertDokument() {
         // For CDI proxy
@@ -43,15 +38,15 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
                                                      MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                                      Behandlingsoppretter behandlingsoppretter,
                                                      Kompletthetskontroller kompletthetskontroller,
+                                                     UttakTjeneste uttakTjeneste,
                                                      BehandlingRepositoryProvider repositoryProvider) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlingsoppretter = behandlingsoppretter;
         this.kompletthetskontroller = kompletthetskontroller;
+        this.uttakTjeneste = uttakTjeneste;
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.uttakRepository = repositoryProvider.getUttakRepository();
-        this.behandlingsresultatRepository = repositoryProvider.getBehandlingsresultatRepository();
     }
 
     /* TEMPLATE-metoder som må håndteres spesifikt for hver type av ytelsesdokumenter - START */
@@ -93,13 +88,10 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     }
 
     protected final boolean erAvslag(Behandling avsluttetBehandling) {
-        Optional<Behandlingsresultat> behandlingsresultat = behandlingsresultatRepository.hentHvisEksisterer(avsluttetBehandling.getId());
-        return behandlingsresultat.isPresent() && behandlingsresultat.get().isBehandlingsresultatAvslått();
+        return avsluttetBehandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
-    boolean harAvslåttPeriode(Behandling avsluttetBehandling) {
-        final Optional<UttakResultatEntitet> uttakResultat = uttakRepository.hentUttakResultatHvisEksisterer(avsluttetBehandling.getId());
-        return uttakResultat.map(uttakResultatEntitet -> uttakResultatEntitet.getGjeldendePerioder().getPerioder().stream()
-            .anyMatch(periode -> PeriodeResultatType.AVSLÅTT.equals(periode.getPeriodeResultatType()))).orElse(false);
+    protected boolean harAvslåttPeriode(Behandling avsluttetBehandling) {
+        return uttakTjeneste.harAvslåttUttakPeriode(avsluttetBehandling.getUuid());
     }
 }

@@ -9,15 +9,14 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingsresultatRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingInntrekkEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
+import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
@@ -30,7 +29,6 @@ public class TilkjentYtelseTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private BehandlingsresultatRepository behandlingsresultatRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse;
 
@@ -41,12 +39,10 @@ public class TilkjentYtelseTjeneste {
     @Inject
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
-                                  BehandlingsresultatRepository behandlingsresultatRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
                                   @Any Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.tilkjentYtelse = tilkjentYtelse;
     }
@@ -61,14 +57,13 @@ public class TilkjentYtelseTjeneste {
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
-
-        YtelseTypeTilkjentYtelseTjeneste tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, behandling.getFagsakYtelseType()).orElseThrow();
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        YtelseTypeTilkjentYtelseTjeneste tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
 
         List<TilkjentYtelsePeriodeV1> perioder = tjeneste.hentTilkjentYtelsePerioder(behandlingId);
 
-        boolean erOpphør = tjeneste.erOpphør(behandlingsresultat);
-        Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(behandling, behandlingsresultat);
+        boolean erOpphør = tjeneste.erOpphør(ref);
+        Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(ref);
         LocalDate endringsdato = tjeneste.hentEndringstidspunkt(behandlingId);
         return new TilkjentYtelse(endringsdato, perioder)
             .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)
@@ -109,10 +104,11 @@ public class TilkjentYtelseTjeneste {
     }
 
     private String lagHenvisning(Behandling behandling) {
-        //FIXME K9 avklar hvilken verdi som skal burkes i 'henvisning'.
-        //den brukes til 2 formål:
-        // 1 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
-        // 2 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik
+        //FIXME K9 avklar hvilken verdi som skal brukes i 'henvisning'.
+        //den brukes til 3 formål:
+        // 1 kobling til kvitteringer
+        // 2 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
+        // 3 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik
         return behandling.getUuid().toString().substring(0, 30);
     }
 

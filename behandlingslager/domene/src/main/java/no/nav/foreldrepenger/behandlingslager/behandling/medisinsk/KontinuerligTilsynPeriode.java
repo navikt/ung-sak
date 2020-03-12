@@ -36,6 +36,12 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
+    @Column(name = "aarsaksammenheng")
+    private Boolean årsaksammenheng;
+
+    @Column(name = "aarsaksammenheng_begrunnelse")
+    private String årsaksammenhengBegrunnelse;
+
     @Column(name = "grad", nullable = false)
     private int grad;
 
@@ -50,16 +56,24 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
     KontinuerligTilsynPeriode() {
     }
 
-    public KontinuerligTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, int grad) {
-        this.periode = periode;
-        this.begrunnelse = begrunnelse;
-        this.grad = validerGrad(grad);
+    public KontinuerligTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, int grad, String årsaksammenhengBegrunnelse, Boolean årsaksammenheng) {
+        this(periode, begrunnelse, grad);
+        this.årsaksammenhengBegrunnelse = årsaksammenhengBegrunnelse;
+        this.årsaksammenheng = årsaksammenheng;
     }
 
     KontinuerligTilsynPeriode(KontinuerligTilsynPeriode kontinuerligTilsynPeriode) {
         this.periode = kontinuerligTilsynPeriode.periode;
         this.begrunnelse = kontinuerligTilsynPeriode.begrunnelse;
         this.grad = kontinuerligTilsynPeriode.grad;
+        this.årsaksammenheng = kontinuerligTilsynPeriode.årsaksammenheng;
+        this.årsaksammenhengBegrunnelse = kontinuerligTilsynPeriode.årsaksammenhengBegrunnelse;
+    }
+
+    public KontinuerligTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, int grad) {
+        this.periode = periode;
+        this.begrunnelse = begrunnelse;
+        this.grad = validerGrad(grad);
     }
 
     private int validerGrad(int grad) {
@@ -85,6 +99,14 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
         return grad;
     }
 
+    public Boolean getÅrsaksammenheng() {
+        return årsaksammenheng;
+    }
+
+    public String getÅrsaksammenhengBegrunnelse() {
+        return årsaksammenhengBegrunnelse;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,6 +114,8 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
         KontinuerligTilsynPeriode that = (KontinuerligTilsynPeriode) o;
         return grad == that.grad &&
             Objects.equals(periode, that.periode) &&
+            Objects.equals(årsaksammenheng, that.årsaksammenheng) &&
+            Objects.equals(årsaksammenhengBegrunnelse, that.årsaksammenhengBegrunnelse) &&
             Objects.equals(begrunnelse, that.begrunnelse);
     }
 
@@ -105,6 +129,7 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
         return "KontinuerligTilsynPeriode{" +
             "id=" + id +
             ", periode=" + periode +
+            ", årsaksammenheng=" + årsaksammenheng +
             ", versjon=" + versjon +
             '}';
     }

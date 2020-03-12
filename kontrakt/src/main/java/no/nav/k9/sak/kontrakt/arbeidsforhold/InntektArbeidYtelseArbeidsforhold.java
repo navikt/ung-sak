@@ -108,7 +108,7 @@ public class InntektArbeidYtelseArbeidsforhold {
     @JsonProperty(value = "kilde", required = true)
     @NotNull
     @Valid
-    private ArbeidsforholdKildeDto kilde;
+    private ArbeidsforholdKilde kilde;
 
     @JsonProperty(value = "lagtTilAvSaksbehandler")
     private boolean lagtTilAvSaksbehandler;
@@ -226,7 +226,7 @@ public class InntektArbeidYtelseArbeidsforhold {
         return inntektMedTilBeregningsgrunnlag;
     }
 
-    public ArbeidsforholdKildeDto getKilde() {
+    public ArbeidsforholdKilde getKilde() {
         return kilde;
     }
 
@@ -359,10 +359,6 @@ public class InntektArbeidYtelseArbeidsforhold {
     }
 
     public void setKilde(ArbeidsforholdKilde kilde) {
-        this.kilde = new ArbeidsforholdKildeDto(kilde.getNavn());
-    }
-
-    public void setKilde(ArbeidsforholdKildeDto kilde) {
         this.kilde = kilde;
     }
 

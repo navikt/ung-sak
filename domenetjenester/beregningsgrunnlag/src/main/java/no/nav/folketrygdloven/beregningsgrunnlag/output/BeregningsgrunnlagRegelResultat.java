@@ -2,19 +2,19 @@ package no.nav.folketrygdloven.beregningsgrunnlag.output;
 
 import java.util.List;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagEntitet;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 
 public class BeregningsgrunnlagRegelResultat {
-    private BeregningsgrunnlagEntitet beregningsgrunnlag;
+    private Beregningsgrunnlag beregningsgrunnlag;
     private List<BeregningAksjonspunktResultat> aksjonspunkter;
     private Boolean vilkårOppfylt;
 
-    public BeregningsgrunnlagRegelResultat(BeregningsgrunnlagEntitet beregningsgrunnlag, List<BeregningAksjonspunktResultat> aksjonspunktResultatListe) {
+    public BeregningsgrunnlagRegelResultat(Beregningsgrunnlag beregningsgrunnlag, List<BeregningAksjonspunktResultat> aksjonspunktResultatListe) {
         this.beregningsgrunnlag = beregningsgrunnlag;
         this.aksjonspunkter = aksjonspunktResultatListe;
     }
 
-    public BeregningsgrunnlagEntitet getBeregningsgrunnlag() {
+    public Beregningsgrunnlag getBeregningsgrunnlag() {
         return beregningsgrunnlag;
     }
 

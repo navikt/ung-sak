@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -45,18 +44,12 @@ public class RyddVilkårTyper {
     }
 
     private void nullstillVedtaksresultat() {
-        Behandlingsresultat behandlingsresultat = getBehandlingsresultat(behandling);
-        if (behandlingsresultat == null ||
-            Objects.equals(behandlingsresultat.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
+        if ( Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
             return;
         }
 
-        Behandlingsresultat.builderEndreEksisterende(getBehandlingsresultat(behandling)).medBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
+        behandling.setBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-    }
-
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandling.getBehandlingsresultat();
     }
 
 }

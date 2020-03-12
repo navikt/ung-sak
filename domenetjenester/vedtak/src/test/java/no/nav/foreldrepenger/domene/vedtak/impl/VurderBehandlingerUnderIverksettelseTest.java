@@ -11,7 +11,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -26,14 +25,12 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.vedtak.felles.testutilities.Whitebox;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class VurderBehandlingerUnderIverksettelseTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final EntityManager entityManager = repoRule.getEntityManager();
-    private final Repository repository = repoRule.getRepository();
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private final BehandlingVedtakRepository behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
@@ -46,9 +43,7 @@ public class VurderBehandlingerUnderIverksettelseTest {
     @Before
     public void setup() {
         TestScenarioBuilder førstegangScenario = TestScenarioBuilder.builderMedSøknad();
-        førstegangScenario.medBehandlingsresultat(Behandlingsresultat.builderForInngangsvilkår());
         førstegangBehandling = førstegangScenario.lagre(repositoryProvider);
-        repository.lagre(getBehandlingsresultat(førstegangBehandling));
     }
 
     @Test
@@ -106,8 +101,6 @@ public class VurderBehandlingerUnderIverksettelseTest {
         Behandling revurdering = Behandling.fraTidligereBehandling(førstegangBehandling, BehandlingType.REVURDERING).build();
         BehandlingLås lås = new BehandlingLås(revurdering.getId());
         behandlingRepository.lagre(revurdering, lås);
-        Behandlingsresultat behandlingsresultat = Behandlingsresultat.builderForInngangsvilkår().buildFor(revurdering);
-        repository.lagre(behandlingsresultat);
         vilkårResultatRepository.lagre(revurdering.getId(), Vilkårene.builder().build());
         return revurdering;
     }
@@ -129,7 +122,4 @@ public class VurderBehandlingerUnderIverksettelseTest {
         return behandlingVedtak;
     }
 
-    private Behandlingsresultat getBehandlingsresultat(Behandling behandling) {
-        return behandling.getBehandlingsresultat();
-    }
 }

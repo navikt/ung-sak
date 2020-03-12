@@ -1,5 +1,6 @@
 package no.nav.k9.kodeverk.vilkår;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,10 +14,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
 
+@JsonSerialize(keyUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårType implements Kodeverdi {
@@ -175,9 +182,30 @@ public enum VilkårType implements Kodeverdi {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
 
+            // hack for jackson < 2.11. Klarer ikke å serialisere enum key i maps riktig (ignorerer JsonProperty)
+            // fra 2.11 er følgende workaround (respekterer fortsatt ikke JsonProperty på enum)
+            // https://github.com/FasterXML/jackson-databind/issues/2503
+            KODER.putIfAbsent(v.name(), v);
+            
             INDEKS_VILKÅR_AVSLAGSÅRSAKER.put(v, v.avslagsårsaker);
             v.avslagsårsaker.forEach(a -> INDEKS_AVSLAGSÅRSAK_VILKÅR.computeIfAbsent(a, (k) -> new HashSet<>(4)).add(v));
         }
+    }
+
+
+    static class Serializer extends StdSerializer<VilkårType> {
+
+        public Serializer() {
+            super(VilkårType.class);
+        }
+        @Override
+        public void serialize(VilkårType value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+            jgen.writeStartObject();
+            jgen.writeStringField("kode", value.getKode());
+            jgen.writeStringField("kodeverk", value.getKodeverk());
+            jgen.writeEndObject();
+        }
+
     }
 
 }

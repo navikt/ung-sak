@@ -123,7 +123,7 @@ public class MedlemTjeneste {
      * <p>
      * Metoden gjelder revurdering foreldrepenger
      */
-    // TODO Diamant (Denne gjelder kun revurdering og foreldrepenger, bør eksponeres som egen tjeneste for FP + BT004)
+    // TODO Diamant (Denne gjelder kun revurdering og foreldrepenger, bør eksponeres som egen tjeneste for behandling type BT004)
     public EndringsresultatPersonopplysningerForMedlemskap søkerHarEndringerIPersonopplysninger(Behandling revurderingBehandling) {
 
         EndringsresultatPersonopplysningerForMedlemskap.Builder builder = EndringsresultatPersonopplysningerForMedlemskap.builder();
@@ -184,8 +184,8 @@ public class MedlemTjeneste {
      * @param behandling
      * @return opphørsdato
      */
-    public Optional<LocalDate> hentOpphørsdatoHvisEksisterer(Behandling behandling) {
-        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+    public Optional<LocalDate> hentOpphørsdatoHvisEksisterer(Long behandlingId) {
+        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isEmpty()) {
             return Optional.empty();
         }

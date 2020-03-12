@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.ResultatType;
+import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatType;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -57,7 +57,7 @@ public class RegelOrkestrererImplTest {
         Behandling behandling = byggBehandlingMedVilkårresultat(vilkårType);
 
         // Act
-        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling), List.of(intervall));
+        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), BehandlingReferanse.fra(behandling), List.of(intervall));
 
         // Assert
         assertThat(regelResultat.getVilkårene().getVilkårene()).hasSize(1);
@@ -80,7 +80,7 @@ public class RegelOrkestrererImplTest {
         when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b, periode) -> vilkårData);
 
         // Act
-        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling), List.of(intervall));
+        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), BehandlingReferanse.fra(behandling), List.of(intervall));
 
         // Assert
         assertThat(regelResultat.getAksjonspunktDefinisjoner()).isEmpty();
@@ -102,7 +102,7 @@ public class RegelOrkestrererImplTest {
         when(inngangsvilkårTjeneste.finnVilkår(vilkårType, YTELSE_TYPE)).thenReturn((b, periode) -> vilkårData);
 
         // Act
-        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), behandling, BehandlingReferanse.fra(behandling), List.of(intervall));
+        RegelResultat regelResultat = orkestrerer.vurderInngangsvilkår(Set.of(vilkårType), BehandlingReferanse.fra(behandling), List.of(intervall));
 
         // Assert
         assertThat(regelResultat.getAksjonspunktDefinisjoner()).containsExactly(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
@@ -112,15 +112,15 @@ public class RegelOrkestrererImplTest {
     public void skal_sammenstille_individuelle_vilkårsutfall_til_ett_samlet_vilkårresultat() {
         orkestrerer = new RegelOrkestrerer(inngangsvilkårTjeneste, null);
         // Enkelt vilkårutfall
-        assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(IKKE_OPPFYLT))).isEqualTo(ResultatType.AVSLÅTT);
-        assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(IKKE_VURDERT))).isEqualTo(ResultatType.IKKE_FASTSATT);
-        assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(OPPFYLT))).isEqualTo(ResultatType.INNVILGET);
+        assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(IKKE_OPPFYLT))).isEqualTo(VilkårResultatType.AVSLÅTT);
+        assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(IKKE_VURDERT))).isEqualTo(VilkårResultatType.IKKE_FASTSATT);
+        assertThat(orkestrerer.utledInngangsvilkårUtfall(Set.of(OPPFYLT))).isEqualTo(VilkårResultatType.INNVILGET);
 
         // Sammensatt vilkårutfall
-        assertThat(orkestrerer.utledInngangsvilkårUtfall(asList(IKKE_OPPFYLT, IKKE_VURDERT))).isEqualTo(ResultatType.AVSLÅTT);
-        assertThat(orkestrerer.utledInngangsvilkårUtfall(asList(IKKE_OPPFYLT, OPPFYLT))).isEqualTo(ResultatType.AVSLÅTT);
+        assertThat(orkestrerer.utledInngangsvilkårUtfall(asList(IKKE_OPPFYLT, IKKE_VURDERT))).isEqualTo(VilkårResultatType.AVSLÅTT);
+        assertThat(orkestrerer.utledInngangsvilkårUtfall(asList(IKKE_OPPFYLT, OPPFYLT))).isEqualTo(VilkårResultatType.AVSLÅTT);
 
-        assertThat(orkestrerer.utledInngangsvilkårUtfall(asList(IKKE_VURDERT, OPPFYLT))).isEqualTo(ResultatType.IKKE_FASTSATT);
+        assertThat(orkestrerer.utledInngangsvilkårUtfall(asList(IKKE_VURDERT, OPPFYLT))).isEqualTo(VilkårResultatType.IKKE_FASTSATT);
     }
 
     @Test

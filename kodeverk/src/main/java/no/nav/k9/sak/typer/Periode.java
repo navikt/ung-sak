@@ -2,6 +2,7 @@ package no.nav.k9.sak.typer;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -14,12 +15,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder({ "fom", "tom" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonInclude(value = Include.NON_ABSENT, content = Include.NON_EMPTY)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class Periode {
+public class Periode implements Comparable<Periode> {
 
     @JsonProperty(value = "fom", required = true)
     @NotNull
@@ -88,4 +91,13 @@ public class Periode {
     public String toString() {
         return getClass().getSimpleName() + "<fom=" + getFom() + ", tom=" + getTom() + ">";
     }
+
+    @Override
+    public int compareTo(Periode o) {
+        return COMP.compare(this, o);
+    }
+
+    private static final Comparator<Periode> COMP = Comparator
+        .comparing((Periode dto) -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
+        .thenComparing(dto -> dto.getTom(), Comparator.nullsFirst(Comparator.naturalOrder()));
 }

@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
@@ -140,9 +139,6 @@ public class OpptjeningRepositoryImplTest {
 
     private Behandling opprettBehandling() {
         Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
-        var resultat = Behandlingsresultat.builder().build();
-        behandlingBuilder.lagreBehandlingsresultat(behandling.getId(), resultat);
-
         var vilkårResultat = Vilkårene.builder().build();
         behandlingBuilder.lagreVilkårResultat(behandling.getId(), vilkårResultat);
         return behandling;

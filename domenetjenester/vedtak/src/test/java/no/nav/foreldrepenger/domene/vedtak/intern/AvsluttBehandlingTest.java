@@ -25,7 +25,6 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandlingsresultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -59,7 +58,7 @@ public class AvsluttBehandlingTest {
 
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
-    
+
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
 
     private AvsluttBehandling avsluttBehandling;
@@ -235,7 +234,9 @@ public class AvsluttBehandlingTest {
     }
 
     private Behandling lagBehandling(LocalDateTime opprettet, LocalDateTime vedtaksdato) {
-        var scenario = TestScenarioBuilder.builderMedSøknad();
+        var scenario = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+
         if (fagsak != null) {
             scenario.medFagsakId(fagsak.getId());
             scenario.medSaksnummer(fagsak.getSaksnummer());
@@ -245,12 +246,8 @@ public class AvsluttBehandlingTest {
             behandlingRepository = repositoryProvider.getBehandlingRepository();
         }
         Behandling behandling = scenario.lagMocked();
-        
+
         when(behandlingRepository.hentBehandlingHvisFinnes(behandling.getId())).thenReturn(Optional.of(behandling));
-        
-        Behandlingsresultat.builder()
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-            .buildFor(behandling);
 
         if (vedtaksdato != null) {
             BehandlingVedtak vedtak = lagMockedBehandlingVedtak(opprettet, vedtaksdato, behandling);
@@ -274,4 +271,3 @@ public class AvsluttBehandlingTest {
     }
 
 }
-    

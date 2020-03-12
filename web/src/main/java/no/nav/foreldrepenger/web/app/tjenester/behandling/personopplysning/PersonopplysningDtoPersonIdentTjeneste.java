@@ -74,6 +74,10 @@ public class PersonopplysningDtoPersonIdentTjeneste {
             dtoBarn.setFnr(findFnr(dtoBarn.getAktørId(), tpsFnrFinder));
             dtoBarn.setDiskresjonskode(findKode(dtoBarn.getFnr(), tpsKodeFinder));
         }
+        for (PersonopplysningDto dtoBarn : dto.getBarnSoktFor()) {
+            dtoBarn.setFnr(findFnr(dtoBarn.getAktørId(), tpsFnrFinder));
+            dtoBarn.setDiskresjonskode(findKode(dtoBarn.getFnr(), tpsKodeFinder));
+        }
     }
 
     private Diskresjonskode findKode(String fnr, Function<String, Optional<String>> tpsKodeFinder) {

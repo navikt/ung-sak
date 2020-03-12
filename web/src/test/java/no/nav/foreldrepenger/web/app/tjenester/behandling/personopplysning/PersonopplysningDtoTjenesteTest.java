@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
@@ -32,11 +33,12 @@ public class PersonopplysningDtoTjenesteTest {
     @Inject
     PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository = new MedisinskGrunnlagRepository(repoRule.getEntityManager());
     private PersonopplysningDtoTjeneste tjeneste;
 
     @Before
     public void setUp() {
-        tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, repositoryProvider);
+        tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, medisinskGrunnlagRepository, repositoryProvider);
     }
 
     @Test

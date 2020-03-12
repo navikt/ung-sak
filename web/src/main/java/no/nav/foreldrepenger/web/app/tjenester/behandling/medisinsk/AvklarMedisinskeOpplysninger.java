@@ -76,7 +76,8 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         if (pleiebehov.getPerioderMedTilsynOgPleie() != null) {
             pleiebehov.getPerioderMedTilsynOgPleie()
                 .stream()
-                .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()), it.getBegrunnelse(), 100))
+                .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()),
+                    it.getBegrunnelse(), 100, it.getÅrsaksammenhengBegrunnelse(), it.getÅrsaksammenheng()))
                 .forEach(builder::leggTil);
         }
 
@@ -95,12 +96,11 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
         dtoLegeerklæringer.stream()
             .map(it -> {
-                final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom());
                 final var innleggelsePerioder = it.getInnleggelsesperioder()
                     .stream()
                     .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
                     .collect(Collectors.toSet());
-                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), periode, innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
+                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), it.getFom(), innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
             })
             .forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
 

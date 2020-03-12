@@ -62,10 +62,10 @@ public class SykdomRestTjeneste {
         })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public SykdomsDto getInntektArbeidYtelser(@NotNull @QueryParam(BehandlingUuidDto.NAME)
-                                              @Parameter(description = BehandlingUuidDto.DESC)
-                                              @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                                  BehandlingUuidDto behandlingUuid) {
+    public SykdomsDto hentSykdomsInformasjonFor(@NotNull @QueryParam(BehandlingUuidDto.NAME)
+                                                @Parameter(description = BehandlingUuidDto.DESC)
+                                                @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+                                                    BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).map(Behandling::getId);
         return behandling.map(behandlingId -> dtoMapper.map(behandlingId)).orElse(null);
     }
