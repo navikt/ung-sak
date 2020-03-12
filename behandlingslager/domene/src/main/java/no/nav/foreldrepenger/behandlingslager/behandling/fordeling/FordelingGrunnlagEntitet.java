@@ -25,9 +25,8 @@ class FordelingGrunnlagEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_FORDELING")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false, unique = true)
-    private Behandling behandling;
+    @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
+    private Long behandlingId;
 
     @OneToOne
     @Immutable
@@ -45,7 +44,7 @@ class FordelingGrunnlagEntitet extends BaseEntitet {
     }
 
     FordelingGrunnlagEntitet(Behandling behandling, Fordeling fordeling) {
-        this.behandling = behandling;
+        this.behandlingId = behandling.getId();
         this.oppgittFordeling = fordeling; // NOSONAR
     }
 
@@ -76,12 +75,12 @@ class FordelingGrunnlagEntitet extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "FordelingGrunnlagEntitet{" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
-            ", behandling=" + behandling +
+            ", behandling=" + behandlingId +
             ", oppgittFordeling=" + oppgittFordeling +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
-            '}';
+            '>';
     }
 }

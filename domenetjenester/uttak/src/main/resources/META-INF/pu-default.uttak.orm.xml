@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+      http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
+
+	<sequence-generator name="SEQ_GR_UTTAK" allocation-size="50" sequence-name="SEQ_GR_UTTAK" />
+	<sequence-generator name="SEQ_UT_UTTAK" allocation-size="50" sequence-name="SEQ_UT_UTTAK" />
+	<sequence-generator name="SEQ_UT_UTTAK_PERIODE" allocation-size="50" sequence-name="SEQ_UT_UTTAK_PERIODE" />
+
+	<entity class="no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.Uttak" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.UttakPeriode" />
+
+</entity-mappings>

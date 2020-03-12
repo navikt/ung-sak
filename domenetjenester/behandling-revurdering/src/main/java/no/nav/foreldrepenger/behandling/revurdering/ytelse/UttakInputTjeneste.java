@@ -27,9 +27,9 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDiff;
-import no.nav.foreldrepenger.domene.uttak.input.UttakAktivitetStatusPeriode;
-import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.sak.domene.uttak.input.UttakAktivitetStatusPeriode;
+import no.nav.k9.sak.domene.uttak.input.UttakInput;
 
 @ApplicationScoped
 public class UttakInputTjeneste {

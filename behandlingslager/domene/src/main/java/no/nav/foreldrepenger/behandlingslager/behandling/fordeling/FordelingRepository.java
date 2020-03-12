@@ -60,7 +60,7 @@ public class FordelingRepository {
     private Optional<FordelingGrunnlagEntitet> hentEksisterendeGrunnlag(Long id) {
         final TypedQuery<FordelingGrunnlagEntitet> query = entityManager.createQuery(
             "FROM FordelingGrunnlag s " +
-                "WHERE s.behandling.id = :behandlingId AND s.aktiv = true", FordelingGrunnlagEntitet.class);
+                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", FordelingGrunnlagEntitet.class);
 
         query.setParameter("behandlingId", id);
 

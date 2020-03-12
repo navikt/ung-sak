@@ -71,11 +71,11 @@ public class FordelingPeriode extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "FordelingPeriode{" +
+        return getClass().getSimpleName() +"<" +
             "id=" + id +
             ", periode=" + periode +
             ", versjon=" + versjon +
-            '}';
+            '>';
     }
 
 }

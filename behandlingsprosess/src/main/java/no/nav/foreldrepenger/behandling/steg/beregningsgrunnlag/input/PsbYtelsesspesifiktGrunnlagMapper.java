@@ -22,12 +22,12 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.domene.uttak.UttakTjeneste;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
 import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.sak.domene.uttak.UttakTjeneste;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
