@@ -1,11 +1,16 @@
 package no.nav.k9.sak.domene.iverksett;
 
+import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -17,7 +22,8 @@ public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksett
 
     @Inject
     public OpprettProsessTaskIverksettImpl(ProsessTaskRepository prosessTaskRepository,
-                                         OppgaveTjeneste oppgaveTjeneste) {
-        super(prosessTaskRepository, oppgaveTjeneste);
+                                         OppgaveTjeneste oppgaveTjeneste,
+                                         InfotrygdFeedService infotrygdFeedService) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
     }
 }
