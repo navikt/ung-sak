@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDiff;
-import no.nav.foreldrepenger.domene.uttak.input.BeregningsgrunnlagStatusPeriode;
+import no.nav.foreldrepenger.domene.uttak.input.UttakAktivitetStatusPeriode;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 
@@ -75,7 +75,7 @@ public class UttakInputTjeneste {
         var årsaker = finnÅrsaker(ref);
         var statusPerioder = lagBeregningsgrunnlagStatusPerioder(ref);
         return new UttakInput(ref, iayGrunnlag)
-            .medBeregningsgrunnlagPerioder(statusPerioder)
+            .medUttakAktivitetStatusPerioder(statusPerioder)
             .medSøknadMottattDato(mottattDato)
             .medBehandlingÅrsaker(map(årsaker))
             .medBehandlingManueltOpprettet(erManueltOpprettet(årsaker))
@@ -95,7 +95,7 @@ public class UttakInputTjeneste {
         return new HashSet<>(behandling.getBehandlingÅrsaker());
     }
 
-    private Collection<BeregningsgrunnlagStatusPeriode> lagBeregningsgrunnlagStatusPerioder(BehandlingReferanse ref) {
+    private Collection<UttakAktivitetStatusPeriode> lagBeregningsgrunnlagStatusPerioder(BehandlingReferanse ref) {
         var beregningsgrunnlag = kalkulusTjeneste.hentFastsatt(ref.getBehandlingId());
         if (beregningsgrunnlag.isPresent()) {
             var andeler = beregningsgrunnlag.get().getBeregningsgrunnlagPerioder().stream()
@@ -106,12 +106,12 @@ public class UttakInputTjeneste {
         return Collections.emptyList();
     }
 
-    private BeregningsgrunnlagStatusPeriode mapAndel(BeregningsgrunnlagPrStatusOgAndel a) {
+    private UttakAktivitetStatusPeriode mapAndel(BeregningsgrunnlagPrStatusOgAndel a) {
         var arbeidsforholdRef = a.getBgAndelArbeidsforhold().map(BGAndelArbeidsforhold::getArbeidsforholdRef).orElse(null);
         var arbeidsgiver = a.getArbeidsgiver().orElse(null);
         LocalDate fom = a.getBeregningsperiodeFom();
         LocalDate tom = a.getBeregningsperiodeTom();
-        return new BeregningsgrunnlagStatusPeriode(a.getAktivitetStatus(), fom, tom, arbeidsgiver, arbeidsforholdRef);
+        return new UttakAktivitetStatusPeriode(a.getAktivitetStatus(), fom, tom, arbeidsgiver, arbeidsforholdRef);
     }
 
     private boolean erOpplysningerOmDødEndret(BehandlingReferanse ref) {

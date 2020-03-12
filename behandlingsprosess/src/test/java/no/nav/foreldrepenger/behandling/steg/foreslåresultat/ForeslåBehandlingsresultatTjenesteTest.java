@@ -250,9 +250,8 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     }
 
     private void lagreUttak(Behandling behandling) {
-        var uttaksplan = new Uttaksplan();
         var periode = new Periode(FOM, TOM);
-        uttaksplan.setPerioder(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
+        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }

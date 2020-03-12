@@ -181,9 +181,8 @@ public class VurderLøpendeMedlemskapStegTest {
     private Uttaksplan lagUttaksPeriode() {
         LocalDate idag = LocalDate.now();
 
-        var uttaksplan = new Uttaksplan();
         var periode = new Periode(idag, idag.plusDays(6));
-        uttaksplan.setPerioder(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
+        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
         return uttaksplan;
     }

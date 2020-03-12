@@ -1,6 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,7 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -35,7 +34,7 @@ public class KalkulatorInputTjeneste {
         // for CDI proxy
     }
 
-    public KalkulatorInputDto byggDto(BehandlingReferanse referanse) {
+    public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
         var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
         var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, referanse.getAktørId(), referanse.getSkjæringstidspunktOpptjening());
@@ -50,8 +49,7 @@ public class KalkulatorInputTjeneste {
             kalkulatorInputDto.medRefusjonskravDatoer(TilKalkulusMapper.mapTilDto(refusjonskravDatoes));
         }
 
-        // TODO(OJR) hva skal denne være for k9?
-        kalkulatorInputDto.medYtelsespesifiktGrunnlag(new PleiepengerSyktBarnGrunnlag(BigDecimal.valueOf(100), 3, List.of()));
+        kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
         return kalkulatorInputDto;
     }
 }

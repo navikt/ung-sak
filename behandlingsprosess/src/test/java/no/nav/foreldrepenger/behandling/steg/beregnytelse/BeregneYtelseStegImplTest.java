@@ -172,9 +172,8 @@ public class BeregneYtelseStegImplTest {
     }
 
     private void byggUttakPlanResultat(Behandling behandling) {
-        var uttaksplan = new Uttaksplan();
         var periode = new Periode(LocalDate.now().minusDays(3), LocalDate.now().minusDays(1));
-        uttaksplan.setPerioder(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
+        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }
