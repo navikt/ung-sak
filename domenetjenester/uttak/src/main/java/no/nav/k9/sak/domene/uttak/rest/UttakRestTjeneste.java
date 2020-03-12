@@ -51,7 +51,7 @@ public class UttakRestTjeneste {
         // for proxying
     }
 
-    public UttakRestTjeneste(OidcRestClient restKlient, @KonfigVerdi(value = "ppb.uttak.url") URI endpoint) {
+    public UttakRestTjeneste(OidcRestClient restKlient, @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
     }

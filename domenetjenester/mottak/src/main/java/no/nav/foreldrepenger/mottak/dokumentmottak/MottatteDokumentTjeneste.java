@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -23,6 +22,7 @@ import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.MottattDokumentWrapp
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -34,7 +34,7 @@ public class MottatteDokumentTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     private VilkårResultatRepository vilkårResultatRepository;
-    private FordelingRepository fordelingRepository;
+    private UttakRepository uttakRepository;
 
     protected MottatteDokumentTjeneste() {
         // for CDI proxy
@@ -49,13 +49,13 @@ public class MottatteDokumentTjeneste {
                                     DokumentPersistererTjeneste dokumentPersistererTjeneste,
                                     MottatteDokumentRepository mottatteDokumentRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
-                                    FordelingRepository fordelingRepository,
+                                    UttakRepository uttakRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.fristForInnsendingAvDokumentasjon = fristForInnsendingAvDokumentasjon;
         this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.fordelingRepository = fordelingRepository;
+        this.uttakRepository = uttakRepository;
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
@@ -120,11 +120,11 @@ public class MottatteDokumentTjeneste {
 
     private boolean erAvsluttetPgaManglendeDokumentasjon(Behandling behandling) {
         Objects.requireNonNull(behandling, "Behandling");
-        var fordeling = fordelingRepository.hentHvisEksisterer(behandling.getId());
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandling.getId());
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
-        if (fordeling.isPresent() && vilkår.isPresent()) {
+        if (søknadsperioder.isPresent() && vilkår.isPresent()) {
             var v = vilkår.get();
-            var maksPeriode = fordeling.get().getMaksPeriode();
+            var maksPeriode = søknadsperioder.get().getMaksPeriode();
             var vt = v.getVilkårTimeline(VilkårType.SØKERSOPPLYSNINGSPLIKT, maksPeriode.getFomDato(), maksPeriode.getTomDato());
             return !vt.filterValue(p -> Objects.equals(p.getAvslagsårsak(), Avslagsårsak.MANGLENDE_DOKUMENTASJON)).isEmpty();
         } else {

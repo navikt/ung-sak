@@ -25,33 +25,72 @@ public class UttakRepository {
         this.entityManager = entityManager;
     }
 
-    public Uttak hent(Long behandlingId) {
-        return hentHvisEksisterer(behandlingId).orElseThrow();
+    public Uttak hentOppgittUttak(Long behandlingId) {
+        return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow();
     }
 
-    public Optional<Uttak> hentHvisEksisterer(Long behandlingId) {
+    public Søknadsperioder hentOppgittSøknadsperioder(Long behandlingId) {
+        return hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElseThrow();
+    }
+
+    public Optional<Uttak> hentOppittUttakHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
         }
-        final var fordelingGrunnlagEntitet = hentEksisterendeGrunnlag(behandlingId);
+        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
 
-        return fordelingGrunnlagEntitet.map(UttakGrunnlag::getOppgittFordeling);
+        return grunnlag.map(UttakGrunnlag::getOppgittUttak);
     }
 
-    public void lagreOgFlush(Long behandlingId, Uttak uttak) {
+    public Optional<Søknadsperioder> hentOppgittSøknadsperioderHvisEksisterer(Long behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
+        }
+        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+
+        return grunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder);
+    }
+
+    public void lagreOgFlushOppgittUttak(Long behandlingId, Uttak oppgittUttak) {
+        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
+        var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
+        var grunnlagEntitet = new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder);
+        entityManager.persist(oppgittUttak);
+        entityManager.persist(grunnlagEntitet);
+        entityManager.flush();
+    }
+
+    private Optional<UttakGrunnlag> deaktiverEksisterendeGrunnlag(Long behandlingId) {
         Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR $NON-NLS-1$
-        final Optional<UttakGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
 
-            final UttakGrunnlag eksisterendeGrunnlagEntitet = eksisterendeGrunnlag.get();
-            eksisterendeGrunnlagEntitet.setAktiv(false);
-            entityManager.persist(eksisterendeGrunnlagEntitet);
+            var eksisterende = eksisterendeGrunnlag.get();
+            eksisterende.setAktiv(false);
+            entityManager.persist(eksisterende);
             entityManager.flush();
         }
+        return eksisterendeGrunnlag;
+    }
 
-        final UttakGrunnlag grunnlagEntitet = new UttakGrunnlag(behandlingId, uttak);
-        entityManager.persist(uttak);
+    public void lagreOgFlushFastsattUttak(Long behandlingId, Uttak fastsattUttak) {
+        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
+        var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
+        var grunnlagEntitet = new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder);
+        entityManager.persist(fastsattUttak);
+        entityManager.persist(grunnlagEntitet);
+        entityManager.flush();
+    }
+
+    public void lagreOgFlushSøknadsperioder(Long behandlingId, Søknadsperioder søknadsperioder) {
+        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
+        var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
+        var grunnlagEntitet = new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder);
+        entityManager.persist(søknadsperioder);
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
     }
@@ -59,7 +98,8 @@ public class UttakRepository {
     private Optional<UttakGrunnlag> hentEksisterendeGrunnlag(Long id) {
         final TypedQuery<UttakGrunnlag> query = entityManager.createQuery(
             "FROM UttakGrunnlag s " +
-                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", UttakGrunnlag.class);
+                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true",
+            UttakGrunnlag.class);
 
         query.setParameter("behandlingId", id);
 
@@ -70,7 +110,8 @@ public class UttakRepository {
      * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<Uttak> søknadEntitet = hentHvisEksisterer(gammelBehandlingId);
-        søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandlingId, entitet));
+        Optional<Uttak> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
+        søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittUttak(nyBehandlingId, entitet));
     }
+
 }

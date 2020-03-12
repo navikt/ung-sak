@@ -46,9 +46,9 @@ public class UttakRepositoryTest {
         var perioder = Set.of(p1, p2);
         var uttak = new Uttak(perioder);
 
-        uttakRepository.lagreOgFlush(behandlingId, uttak);
+        uttakRepository.lagreOgFlushOppgittUttak(behandlingId, uttak);
 
-        var uttak2 = uttakRepository.hent(behandlingId);
+        var uttak2 = uttakRepository.hentOppgittUttak(behandlingId);
         assertThat(uttak2).isNotNull();
         assertThat(uttak2.getPerioder()).hasSameSizeAs(uttak.getPerioder());
     }

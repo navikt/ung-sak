@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.behandling.fordeling;
+package no.nav.k9.sak.domene.uttak.repo;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -18,26 +18,26 @@ import javax.persistence.Version;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "Fordeling")
-@Table(name = "FO_FORDELING")
-public class Fordeling extends BaseEntitet {
+@Entity(name = "Søknadsperioder")
+@Table(name = "UT_SOEKNADPERIODER")
+public class Søknadsperioder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_FO_FORDELING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_SOEKNADSPERIODE")
     private Long id;
 
-    @OneToMany(mappedBy = "fordeling", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<FordelingPeriode> perioder;
+    @OneToMany(mappedBy = "søknadsperioder", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    private Set<Søknadsperiode> perioder;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    Fordeling() {
+    Søknadsperioder() {
         // hibernate
     }
 
-    public Fordeling(Set<FordelingPeriode> perioder) {
+    public Søknadsperioder(Set<Søknadsperiode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
             .peek(it -> it.setFordeling(this))
@@ -48,19 +48,19 @@ public class Fordeling extends BaseEntitet {
         return id;
     }
 
-    public Set<FordelingPeriode> getPerioder() {
+    public Set<Søknadsperiode> getPerioder() {
         return perioder;
     }
 
     public DatoIntervallEntitet getMaksPeriode() {
         var perioder = getPerioder();
         var fom = perioder.stream()
-            .map(FordelingPeriode::getPeriode)
+            .map(Søknadsperiode::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
             .min(LocalDate::compareTo)
             .orElseThrow();
         var tom = perioder.stream()
-            .map(FordelingPeriode::getPeriode)
+            .map(Søknadsperiode::getPeriode)
             .map(DatoIntervallEntitet::getTomDato)
             .max(LocalDate::compareTo)
             .orElseThrow();
@@ -70,7 +70,7 @@ public class Fordeling extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "Fordeling{" +
+        return "Søknadsperioder{" +
             "id=" + id +
             ", perioder=" + perioder +
             '}';
@@ -82,7 +82,7 @@ public class Fordeling extends BaseEntitet {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        Fordeling fordeling = (Fordeling) o;
+        Søknadsperioder fordeling = (Søknadsperioder) o;
         return Objects.equals(perioder, fordeling.perioder);
     }
 

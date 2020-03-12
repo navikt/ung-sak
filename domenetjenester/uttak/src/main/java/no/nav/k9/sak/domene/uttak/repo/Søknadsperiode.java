@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.behandlingslager.behandling.fordeling;
+package no.nav.k9.sak.domene.uttak.repo;
 
 import java.util.Objects;
 
@@ -18,12 +18,12 @@ import javax.persistence.Version;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "FordelingPeriode")
-@Table(name = "FO_FORDELING_PERIODE")
-public class FordelingPeriode extends BaseEntitet {
+@Entity(name = "Søknadsperiode")
+@Table(name = "UT_SOEKNADSPERIODE")
+public class Søknadsperiode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_FO_FORDELING_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_SOEKNADSPERIODE")
     private Long id;
 
     @Embedded
@@ -34,17 +34,17 @@ public class FordelingPeriode extends BaseEntitet {
     private DatoIntervallEntitet periode;
 
     @ManyToOne
-    @JoinColumn(name = "fordeling_id", nullable = false, updatable = false, unique = true)
-    private Fordeling fordeling;
+    @JoinColumn(name = "soeknadsperiode_id", nullable = false, updatable = false, unique = true)
+    private Søknadsperioder søknadsperioder;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    FordelingPeriode() {
+    Søknadsperiode() {
     }
 
-    public FordelingPeriode(DatoIntervallEntitet periode) {
+    public Søknadsperiode(DatoIntervallEntitet periode) {
         this.periode = periode;
     }
 
@@ -52,15 +52,15 @@ public class FordelingPeriode extends BaseEntitet {
         return periode;
     }
 
-    void setFordeling(Fordeling fordeling) {
-        this.fordeling = fordeling;
+    void setFordeling(Søknadsperioder fordeling) {
+        this.søknadsperioder = fordeling;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FordelingPeriode that = (FordelingPeriode) o;
+        Søknadsperiode that = (Søknadsperiode) o;
         return Objects.equals(periode, that.periode);
     }
 

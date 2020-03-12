@@ -12,8 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.Immutable;
-
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
 @Entity(name = "UttakGrunnlag")
@@ -28,9 +26,16 @@ class UttakGrunnlag extends BaseEntitet {
     private Long behandlingId;
 
     @ManyToOne
-    @Immutable
-    @JoinColumn(name = "oppgitt_uttak_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "oppgitt_uttak_id", nullable = false, updatable = false)
     private Uttak oppgittUttak;
+
+    @ManyToOne
+    @JoinColumn(name = "fastsatt_uttak_id")
+    private Uttak fastsattUttak;
+
+    @ManyToOne
+    @JoinColumn(name = "soeknadsperioder_id")
+    private Søknadsperioder søknadsperioder;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -42,17 +47,27 @@ class UttakGrunnlag extends BaseEntitet {
     UttakGrunnlag() {
     }
 
-    UttakGrunnlag(Long behandlingId, Uttak uttak) {
+    UttakGrunnlag(Long behandlingId, Uttak oppgittUttak, Uttak fastsattUttak, Søknadsperioder søknadsperioder) {
         this.behandlingId = behandlingId;
-        this.oppgittUttak = uttak; // NOSONAR
+        this.oppgittUttak = oppgittUttak;
+        this.fastsattUttak = fastsattUttak;
+        this.søknadsperioder = søknadsperioder;
     }
 
     void setAktiv(boolean aktiv) {
         this.aktiv = aktiv;
     }
 
-    public Uttak getOppgittFordeling() {
+    public Uttak getOppgittUttak() {
         return oppgittUttak;
+    }
+
+    public Uttak getFastsattUttak() {
+        return fastsattUttak;
+    }
+
+    public Søknadsperioder getOppgittSøknadsperioder() {
+        return søknadsperioder;
     }
 
     void setOppgittFordeling(Uttak oppgittFordeling) {
@@ -61,8 +76,10 @@ class UttakGrunnlag extends BaseEntitet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof UttakGrunnlag)) return false;
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof UttakGrunnlag))
+            return false;
         var that = this.getClass().cast(o);
         return Objects.equals(oppgittUttak, that.oppgittUttak);
     }
