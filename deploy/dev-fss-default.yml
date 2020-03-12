@@ -170,7 +170,7 @@ spec:
     - name: URL_K9OPPDRAG
       value: http://k9-oppdrag/k9/oppdrag/api
     - name: K9_PSB_UTTAK_URL
-      value: http://pleiepenger-barn-uttak.default/pleiepenger-barn-uttak
+      value: http://pleiepenger-barn-uttak/pleiepenger-barn-uttak
 
     # Web services
     - name: AKTOER_V2_URL
