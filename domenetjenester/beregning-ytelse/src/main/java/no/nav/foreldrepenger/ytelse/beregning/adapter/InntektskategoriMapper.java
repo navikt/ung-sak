@@ -7,7 +7,7 @@ import java.util.Map;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 
-final class InntektskategoriMapper {
+public final class InntektskategoriMapper {
 
     private static final Map<no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori, Inntektskategori> REGEL_TIL_VL_MAP;
     private static final Map<Inntektskategori, no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori> VL_TIL_REGEL_MAP;
@@ -37,11 +37,11 @@ final class InntektskategoriMapper {
         VL_TIL_REGEL_MAP = Collections.unmodifiableMap(vLTilRegelMap);
     }
 
-    static Inntektskategori fraRegelTilVL(no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori inntektskategori) {
+    public static Inntektskategori fraRegelTilVL(no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori inntektskategori) {
         return REGEL_TIL_VL_MAP.getOrDefault(inntektskategori, Inntektskategori.UDEFINERT);
     }
 
-    static no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori fraVLTilRegel(Inntektskategori inntektskategori) {
+    public static no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori fraVLTilRegel(Inntektskategori inntektskategori) {
         return VL_TIL_REGEL_MAP.getOrDefault(inntektskategori, no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori.UDEFINERT);
     }
 }

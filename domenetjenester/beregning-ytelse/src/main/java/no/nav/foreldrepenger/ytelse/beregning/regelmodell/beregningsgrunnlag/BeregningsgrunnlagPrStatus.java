@@ -35,44 +35,49 @@ public class BeregningsgrunnlagPrStatus {
     }
 
     public static class Builder {
-        private BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatusMal;
+        private BeregningsgrunnlagPrStatus mal;
 
         public Builder() {
-            beregningsgrunnlagPrStatusMal = new BeregningsgrunnlagPrStatus();
+            mal = new BeregningsgrunnlagPrStatus();
         }
 
         public Builder medAktivitetStatus(AktivitetStatus aktivitetStatus) {
-            beregningsgrunnlagPrStatusMal.aktivitetStatus = aktivitetStatus;
+            mal.aktivitetStatus = aktivitetStatus;
             return this;
         }
 
         public Builder medArbeidsforhold(BeregningsgrunnlagPrArbeidsforhold beregningsgrunnlagPrArbeidsforhold) {
-            beregningsgrunnlagPrStatusMal.arbeidsforhold.add(beregningsgrunnlagPrArbeidsforhold);
+            mal.arbeidsforhold.add(beregningsgrunnlagPrArbeidsforhold);
             return this;
         }
 
         public Builder medRedusertBrukersAndelPrÅr(BigDecimal redusertBrukersAndelPrÅr) {
-            beregningsgrunnlagPrStatusMal.redusertBrukersAndelPrÅr = redusertBrukersAndelPrÅr;
+            mal.redusertBrukersAndelPrÅr = redusertBrukersAndelPrÅr;
             return this;
         }
 
         public Builder medInntektskategori(Inntektskategori inntektskategori) {
-            beregningsgrunnlagPrStatusMal.inntektskategori = inntektskategori;
+            mal.inntektskategori = inntektskategori;
             return this;
         }
 
         public BeregningsgrunnlagPrStatus build() {
             verifyStateForBuild();
-            return beregningsgrunnlagPrStatusMal;
+            return mal;
         }
 
         private void verifyStateForBuild() {
-            Objects.requireNonNull(beregningsgrunnlagPrStatusMal.aktivitetStatus, "aktivitetStatus");
+            Objects.requireNonNull(mal.aktivitetStatus, "aktivitetStatus");
+            if(AktivitetStatus.ATFL!=mal.aktivitetStatus) {
+                Objects.requireNonNull(mal.inntektskategori, "inntektskategori");
+            } else {
+                Objects.requireNonNull(mal.arbeidsforhold, "arbeidsforhold");
+            }
         }
 
         public Builder medArbeidsforhold(List<Arbeidsforhold> arbeidsforhold) {
             if (arbeidsforhold != null) {
-                arbeidsforhold.forEach(af -> beregningsgrunnlagPrStatusMal.arbeidsforhold.add(BeregningsgrunnlagPrArbeidsforhold.builder().medArbeidsforhold(af).build()));
+                arbeidsforhold.forEach(af -> mal.arbeidsforhold.add(BeregningsgrunnlagPrArbeidsforhold.builder().medArbeidsforhold(af).build()));
             }
             return this;
         }

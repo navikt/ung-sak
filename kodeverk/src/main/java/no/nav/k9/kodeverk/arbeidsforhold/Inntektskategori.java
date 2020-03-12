@@ -3,7 +3,6 @@ package no.nav.k9.kodeverk.arbeidsforhold;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
-
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -31,6 +29,7 @@ public enum Inntektskategori implements Kodeverdi {
     ARBEIDSTAKER_UTEN_FERIEPENGER("ARBEIDSTAKER_UTEN_FERIEPENGER", "Arbeidstaker uten feriepenger"),
     UDEFINERT("-", "Ingen inntektskategori (default)"),
     ;
+
     private static final Map<String, Inntektskategori> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "INNTEKTSKATEGORI";
@@ -64,6 +63,7 @@ public enum Inntektskategori implements Kodeverdi {
         }
         return ad;
     }
+
     public static Map<String, Inntektskategori> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -89,8 +89,5 @@ public enum Inntektskategori implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
-    
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
-    }
+
 }

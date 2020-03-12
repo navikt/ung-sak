@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatAnde
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 
-final class AktivitetStatusMapper {
+public final class AktivitetStatusMapper {
 
     private static final Map<no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus, AktivitetStatus> REGEL_TIL_VL_MAP;
     private static final Map<AktivitetStatus, no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus> VL_TIL_REGEL_MAP;
@@ -41,7 +41,7 @@ final class AktivitetStatusMapper {
         VL_TIL_REGEL_MAP = Collections.unmodifiableMap(map);
     }
 
-    static AktivitetStatus fraRegelTilVl(BeregningsresultatAndel andel) {
+    public static AktivitetStatus fraRegelTilVl(BeregningsresultatAndel andel) {
         if (andel.getAktivitetStatus().equals(no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.ATFL)) {
             Arbeidsforhold arbeidsforhold = andel.getArbeidsforhold();
             return arbeidsforhold != null && arbeidsforhold.erFrilanser() ? AktivitetStatus.FRILANSER : AktivitetStatus.ARBEIDSTAKER;
@@ -52,7 +52,7 @@ final class AktivitetStatusMapper {
         throw new IllegalArgumentException("Ukjent AktivitetStatus " + andel.getAktivitetStatus().name());
     }
 
-    static no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus fraVLTilRegel(AktivitetStatus vlAktivitetStatus) {
+    public static no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus fraVLTilRegel(AktivitetStatus vlAktivitetStatus) {
         if (VL_TIL_REGEL_MAP.containsKey(vlAktivitetStatus)) {
             return VL_TIL_REGEL_MAP.get(vlAktivitetStatus);
         }

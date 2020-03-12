@@ -28,15 +28,13 @@ public class UttaksplanResponseTest {
 
     @Test
     public void skal_serialisere_deserialisere_UttaksplanResponse() throws Exception {
-        var uttaksplan = new Uttaksplan();
         LocalDate fom = LocalDate.now();
         LocalDate tom = fom.plusDays(10);
         
-        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER.getKode(), UUID.randomUUID().toString());
+        var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER, UUID.randomUUID().toString());
         var uttaksperiodeInfo = new InnvilgetUttaksplanperiode(100, List.of(new UttakUtbetalingsgrad(arbeidsforhold, new BigDecimal("100.00"))));
+        var uttaksplan = new Uttaksplan(Map.of(new Periode(fom, tom ), uttaksperiodeInfo));
         
-        uttaksplan.setPerioder(Map.of(new Periode(fom, tom ), uttaksperiodeInfo));
-
         var validator = Validation.buildDefaultValidatorFactory().getValidator();
         var violations = validator.validate(uttaksplan);
         assertThat(violations).isEmpty();

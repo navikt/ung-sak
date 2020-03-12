@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.domene.uttak;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,8 +11,10 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
-
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 
 /**
@@ -27,6 +30,7 @@ import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 @Alternative
 public class UttakInMemoryTjeneste implements UttakTjeneste {
 
+    private static final BigDecimal _100 = BigDecimal.valueOf(100L);
     private final Map<UUID, Uttaksplan> uttaksplaner = new LinkedHashMap<>();
 
     @Override
@@ -54,8 +58,20 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
     @Override
     public Uttaksplan opprettUttaksplan(UttakInput input) {
-        // TODO Auto-generated method stub
-        return null;
+        
+        // FAKE UTTAKSPLAN - 3 måneder innvilget fra søknadsdato for angitte arbeisforhold
+        
+        var start = input.getSøknadMottattDato();
+        var periode = new Periode(start, start.plusMonths(3));
+        var utbetalingsgrader = input.getUttakAktivitetStatusPerioder()
+            .stream().map(uasp -> new UttakUtbetalingsgrad(uasp.getUttakArbeidsforhold(), _100)).collect(Collectors.toList());
+
+        var uttaksplanPeriode = new InnvilgetUttaksplanperiode(100, utbetalingsgrader);
+        var uttaksplan = new Uttaksplan(Map.of(periode, uttaksplanPeriode));
+
+        lagreUttakResultatPerioder(input.getBehandlingReferanse().getBehandlingUuid(), uttaksplan);
+        
+        return uttaksplan;
     }
 
 }

@@ -9,12 +9,13 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-public class BeregningsgrunnlagStatusPeriode implements Comparable<BeregningsgrunnlagStatusPeriode> {
+public class UttakAktivitetStatusPeriode implements Comparable<UttakAktivitetStatusPeriode> {
 
     private static class UttakArbeidTypeMapping extends SimpleEntry<UttakArbeidType, Predicate<AktivitetStatus>> {
 
@@ -22,44 +23,41 @@ public class BeregningsgrunnlagStatusPeriode implements Comparable<Beregningsgru
             super(key, value);
         }
     }
+
     private static final List<UttakArbeidTypeMapping> UTTAK_ARBEID_TYPER = List.of(
-        new UttakArbeidTypeMapping(UttakArbeidType.FRILANS, (ast) -> ast.erFrilanser()),
+        new UttakArbeidTypeMapping(UttakArbeidType.FRILANSER, (ast) -> ast.erFrilanser()),
         new UttakArbeidTypeMapping(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, (ast) -> ast.erSelvstendigNæringsdrivende()),
         new UttakArbeidTypeMapping(UttakArbeidType.ARBEIDSTAKER, (ast) -> ast.erArbeidstaker()),
         new UttakArbeidTypeMapping(UttakArbeidType.ANNET, (ast) -> true));
 
-    private static final Comparator<BeregningsgrunnlagStatusPeriode> COMP = Comparator
-        .comparing((BeregningsgrunnlagStatusPeriode dto) -> dto.arbeidsgiver == null ? null : dto.arbeidsgiver.getIdentifikator(),
-            Comparator.nullsLast(Comparator.naturalOrder()))
-        .thenComparing((BeregningsgrunnlagStatusPeriode dto) -> dto.arbeidsforholdRef == null ? null : dto.arbeidsforholdRef.getReferanse(),
-            Comparator.nullsLast(Comparator.naturalOrder()))
+    private static final Comparator<UttakAktivitetStatusPeriode> COMP = Comparator
+        .comparing(UttakAktivitetStatusPeriode::getUttakArbeidsforhold, Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 
     private final LocalDate fom;
 
     private final LocalDate tom;
-    private final InternArbeidsforholdRef arbeidsforholdRef;
-    private final Arbeidsgiver arbeidsgiver;
-    private UttakArbeidType uttakArbeidType;
-    private AktivitetStatus aktivitetStatus;
 
-    public BeregningsgrunnlagStatusPeriode(AktivitetStatus aktivitetStatus,
-                                           LocalDate fom,
-                                           LocalDate tom,
-                                           Arbeidsgiver arbeidsgiver,
-                                           InternArbeidsforholdRef arbeidsforholdRef) {
+    private final UttakArbeidsforhold arbeidsforhold;
+
+    public UttakAktivitetStatusPeriode(AktivitetStatus aktivitetStatus,
+                                       LocalDate fom,
+                                       LocalDate tom,
+                                       Arbeidsgiver arbeidsgiver,
+                                       InternArbeidsforholdRef arbeidsforholdRef) {
         this.fom = fom;
         this.tom = tom;
-        this.arbeidsforholdRef = arbeidsforholdRef;
-        this.arbeidsgiver = arbeidsgiver;
-        this.aktivitetStatus = aktivitetStatus;
-        this.uttakArbeidType = UTTAK_ARBEID_TYPER.stream().filter(p -> p.getValue().test(aktivitetStatus)).findFirst().map(UttakArbeidTypeMapping::getKey)
-            .orElse(null);
+
+        var uttakArbeidType = UTTAK_ARBEID_TYPER.stream()
+            .filter(p -> p.getValue().test(aktivitetStatus)).findFirst().map(UttakArbeidTypeMapping::getKey)
+            .orElse(UttakArbeidType.ANNET);
+
+        this.arbeidsforhold = new UttakArbeidsforhold(arbeidsgiver.getOrgnr(), arbeidsgiver.getAktørId(), uttakArbeidType, arbeidsforholdRef.getReferanse());
     }
 
     /** Andel uten arbeidsgiver. (eks frilanser, selvstendig næringsdrivende). */
-    public BeregningsgrunnlagStatusPeriode(AktivitetStatus aktivitetStatus, LocalDate fom, LocalDate tom) {
+    public UttakAktivitetStatusPeriode(AktivitetStatus aktivitetStatus, LocalDate fom, LocalDate tom) {
         this(aktivitetStatus, fom, tom, null, null);
     }
 
@@ -71,20 +69,34 @@ public class BeregningsgrunnlagStatusPeriode implements Comparable<Beregningsgru
         return tom;
     }
 
+    public UttakArbeidsforhold getUttakArbeidsforhold() {
+        return arbeidsforhold;
+    }
+
     public Optional<InternArbeidsforholdRef> getArbeidsforholdRef() {
-        return Optional.ofNullable(arbeidsforholdRef);
+        return Optional.ofNullable(arbeidsforhold).map(ua -> InternArbeidsforholdRef.ref(ua.getArbeidsforholdId()));
     }
 
     public Optional<Arbeidsgiver> getArbeidsgiver() {
-        return Optional.ofNullable(arbeidsgiver);
+        return Optional.ofNullable(arbeidsforhold).flatMap(ua -> toArbeidsgiver(ua));
+    }
+
+    private Optional<Arbeidsgiver> toArbeidsgiver(UttakArbeidsforhold ua) {
+        if (ua.getAktørId() != null) {
+            return Optional.of(Arbeidsgiver.fra(ua.getAktørId()));
+        } else if (ua.getOrganisasjonsnummer() != null) {
+            return Optional.of(Arbeidsgiver.virksomhet(ua.getOrganisasjonsnummer()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     public UttakArbeidType getUttakArbeidType() {
-        return uttakArbeidType;
+        return arbeidsforhold.getType();
     }
 
     public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
+        return getUttakArbeidType().getAktivitetStatus();
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -96,9 +108,7 @@ public class BeregningsgrunnlagStatusPeriode implements Comparable<Beregningsgru
         return getClass().getSimpleName() + "<"
             + "fom=" + fom
             + ", tom=" + tom
-            + ", aktivitetStatus=" + aktivitetStatus
-            + (arbeidsgiver == null ? "" : ", arbeidsgiver=" + arbeidsgiver)
-            + (arbeidsforholdRef == null ? "" : ", arbeidsforholdRef=" + arbeidsforholdRef)
+            + ", arbeidsforhold=" + arbeidsforhold
             + ">";
     }
 
@@ -109,22 +119,19 @@ public class BeregningsgrunnlagStatusPeriode implements Comparable<Beregningsgru
         } else if (obj == null || !obj.getClass().equals(this.getClass())) {
             return false;
         }
-        BeregningsgrunnlagStatusPeriode other = (BeregningsgrunnlagStatusPeriode) obj;
-        return Objects.equals(this.arbeidsforholdRef, other.arbeidsforholdRef)
-            && Objects.equals(this.arbeidsgiver, other.arbeidsgiver)
-            && Objects.equals(this.uttakArbeidType, other.uttakArbeidType)
-            && Objects.equals(this.aktivitetStatus, other.aktivitetStatus)
+        UttakAktivitetStatusPeriode other = (UttakAktivitetStatusPeriode) obj;
+        return Objects.equals(this.arbeidsforhold, other.arbeidsforhold)
             && Objects.equals(this.fom, other.fom)
             && Objects.equals(this.tom, other.tom);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(arbeidsgiver, arbeidsforholdRef, uttakArbeidType, fom, tom);
+        return Objects.hash(arbeidsforhold, fom, tom);
     }
 
     @Override
-    public int compareTo(BeregningsgrunnlagStatusPeriode o) {
+    public int compareTo(UttakAktivitetStatusPeriode o) {
         return COMP.compare(this, o);
     }
 }

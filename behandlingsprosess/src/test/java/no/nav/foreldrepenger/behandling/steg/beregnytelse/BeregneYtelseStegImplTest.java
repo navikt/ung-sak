@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
-import no.nav.foreldrepenger.behandling.revurdering.ytelse.UttakInputTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -36,8 +35,8 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractT
 import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
 import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
@@ -55,9 +54,6 @@ public class BeregneYtelseStegImplTest {
 
     @Inject
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-
-    @Inject
-    private UttakInputTjeneste uttakInputTjeneste;
 
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
@@ -86,7 +82,7 @@ public class BeregneYtelseStegImplTest {
             .medRegelSporing("regelSporing")
             .build();
         steg = new BeregneYtelseStegImpl(repositoryProvider, beregningTjeneste,
-            uttakInputTjeneste,
+            uttakTjeneste,
             fastsettBeregningsresultatTjeneste,
             skjæringstidspunktTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
@@ -176,9 +172,8 @@ public class BeregneYtelseStegImplTest {
     }
 
     private void byggUttakPlanResultat(Behandling behandling) {
-        var uttaksplan = new Uttaksplan();
         var periode = new Periode(LocalDate.now().minusDays(3), LocalDate.now().minusDays(1));
-        uttaksplan.setPerioder(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
+        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
     }

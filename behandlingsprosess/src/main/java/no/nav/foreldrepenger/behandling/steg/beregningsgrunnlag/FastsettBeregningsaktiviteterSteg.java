@@ -1,15 +1,13 @@
 package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
@@ -30,16 +28,20 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private KalkulusTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
 
     protected FastsettBeregningsaktiviteterSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste, SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+    public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste,
+                                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                             Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
+        this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
@@ -48,15 +50,13 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-
-        List<BeregningAksjonspunktResultat> beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref);
-
-        //TODO(OJR) hva er dette for nooo
-//        if (beregningAksjonspunktResultat.isEmpty()) {
-//            return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-//        } else {
+        var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ref.getFagsakYtelseType()).orElseThrow();
+        
+        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
+        var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
+        
         return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
     }
 

@@ -30,7 +30,7 @@ public class UttakYrkesaktiviteter {
         if (grunnlag == null) {
             return Collections.emptyList();
         }
-        Collection<BeregningsgrunnlagStatusPeriode> andeler = input.getBeregningsgrunnlagStatusPerioder();
+        Collection<UttakAktivitetStatusPeriode> andeler = input.getUttakAktivitetStatusPerioder();
         var ref = input.getBehandlingReferanse();
         LocalDate skjæringstidspunkt = ref.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
 
@@ -46,7 +46,7 @@ public class UttakYrkesaktiviteter {
     private List<Yrkesaktivitet> hentYrkesAktiviteterFrilans(UttakInput input) {
         var ref = input.getBehandlingReferanse();
         var grunnlag = input.getIayGrunnlag();
-        var andeler = input.getBeregningsgrunnlagStatusPerioder();
+        var andeler = input.getUttakAktivitetStatusPerioder();
 
         if (grunnlag == null || (andeler == null || andeler.isEmpty())) {
             return Collections.emptyList();
@@ -67,11 +67,11 @@ public class UttakYrkesaktiviteter {
         return aktiviteter;
     }
 
-    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, Collection<BeregningsgrunnlagStatusPeriode> statusPerioder) {
+    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, Collection<UttakAktivitetStatusPeriode> statusPerioder) {
         return statusPerioder.stream().anyMatch(bsp -> skalYrkesaktivitetTasMed(yrkesaktivitet, bsp));
     }
 
-    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, BeregningsgrunnlagStatusPeriode bsp) {
+    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, UttakAktivitetStatusPeriode bsp) {
         var arbeidsgiver = bsp.getArbeidsgiver().orElse(null);
         var arbeidsforhold = bsp.getArbeidsforholdRef().orElse(InternArbeidsforholdRef.nullRef());
         var arbeidsgiver2 = yrkesaktivitet.getArbeidsgiver();

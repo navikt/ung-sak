@@ -18,6 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.folketrygdloven.kalkulus.UuidDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
@@ -86,8 +87,8 @@ public class KalkulusTjeneste implements BeregningTjeneste {
 
 
     @Override
-    public List<BeregningAksjonspunktResultat> startBeregning(BehandlingReferanse referanse) {
-        StartBeregningRequest startBeregningRequest = initStartRequest(referanse);
+    public List<BeregningAksjonspunktResultat> startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
+        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag);
         TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
     }
@@ -219,12 +220,12 @@ public class KalkulusTjeneste implements BeregningTjeneste {
         return restTjeneste.erEndringIBeregning(request);
     }
 
-    private StartBeregningRequest initStartRequest(BehandlingReferanse referanse) {
+    private StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
         Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
-        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse);
+        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag);
 
         return new StartBeregningRequest(
                 new UuidDto(behandling.getUuid()),

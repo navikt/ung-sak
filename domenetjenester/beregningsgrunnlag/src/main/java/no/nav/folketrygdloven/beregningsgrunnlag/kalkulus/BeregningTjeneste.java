@@ -7,6 +7,7 @@ import java.util.UUID;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
@@ -21,9 +22,10 @@ public interface BeregningTjeneste {
     /** Starter en ny beregning eller starter en beregning på nytt fra starten av
      * Steg 1. FASTSETT_STP_BER
      * @param referanse {@link BehandlingReferanse}
+     * @param ytelseGrunnlag - ytelsespesifikt grunnlag
      * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
      */
-    List<BeregningAksjonspunktResultat> startBeregning(BehandlingReferanse referanse);
+    List<BeregningAksjonspunktResultat> startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag);
 
     /** Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
@@ -59,4 +61,5 @@ public interface BeregningTjeneste {
     void deaktiverBeregningsgrunnlag(Long behandlingId);
 
     Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2);
+
 }

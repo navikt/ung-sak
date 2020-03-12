@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
+import no.finn.unleash.Unleash;
 import no.nav.foreldrepenger.domene.uttak.input.UttakInput;
 import no.nav.foreldrepenger.domene.uttak.input.UttakPersonInfo;
 import no.nav.foreldrepenger.domene.uttak.rest.UttakRestTjeneste;
@@ -18,28 +19,38 @@ import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
 @ApplicationScoped
 @Default
 public class DefaultUttakTjeneste implements UttakTjeneste {
-
+    private static final String FEATURE_TOGGLE = "k9.uttak.rest";
+    
     private UttakRestTjeneste uttakRestTjeneste;
+    private Unleash unleash;
+
+    private UttakInMemoryTjeneste uttakInMemoryTjeneste = new UttakInMemoryTjeneste();
 
     protected DefaultUttakTjeneste() {
     }
 
     @Inject
-    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste) {
+    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste, Unleash unleash) {
         this.uttakRestTjeneste = uttakRestTjeneste;
+        this.unleash = unleash;
     }
-    
+
     @Override
     public Uttaksplan opprettUttaksplan(UttakInput input) {
         var ref = input.getBehandlingReferanse();
-        
+
         var utReq = new UttaksplanRequest();
         utReq.setBarn(mapPerson(input.getPleietrengende()));
         utReq.setSøker(mapPerson(input.getSøker()));
         utReq.setBehandlingId(ref.getBehandlingUuid());
         utReq.setSaksnummer(ref.getSaksnummer());
-        
-        return uttakRestTjeneste.opprettUttaksplan(utReq);
+
+        if (unleash.isEnabled(FEATURE_TOGGLE)) {
+            // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
+            return uttakRestTjeneste.opprettUttaksplan(utReq);
+        } else {
+            return uttakInMemoryTjeneste.opprettUttaksplan(input);
+        }
     }
 
     private Person mapPerson(UttakPersonInfo uttakPerson) {
@@ -63,6 +74,11 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     @Override
     public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
-        return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
+        if (unleash.isEnabled(FEATURE_TOGGLE)) {
+            // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
+            return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
+        } else {
+            return uttakInMemoryTjeneste.hentUttaksplaner(behandlingUuid);
+        }
     }
 }
