@@ -89,6 +89,10 @@ public @interface FagsakYtelseTypeRef {
         public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode) {
             return find(cls, instances, ytelseTypeKode.getKode());
         }
+        
+        public static <I> Optional<I> find(Instance<I> instances, String ytelseTypeKode) {
+            return find(null, instances, ytelseTypeKode);
+        }
 
         /**
          * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være

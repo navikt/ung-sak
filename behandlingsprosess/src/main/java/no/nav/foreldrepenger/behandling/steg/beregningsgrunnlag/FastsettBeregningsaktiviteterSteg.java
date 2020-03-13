@@ -3,8 +3,11 @@ package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+
+import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
@@ -37,7 +40,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     @Inject
     public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste,
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                             Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -52,12 +55,19 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ref.getFagsakYtelseType()).orElseThrow();
-        
+        var mapper = getYtelsesspesifikkMapper(ref);
+
         var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
         var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
-        
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+    }
+
+    private BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(BehandlingReferanse ref) {
+        String ytelseTypeKode = ref.getFagsakYtelseType().getKode();
+        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ref.getFagsakYtelseType().getKode()));
+        return mapper;
     }
 
     @Override

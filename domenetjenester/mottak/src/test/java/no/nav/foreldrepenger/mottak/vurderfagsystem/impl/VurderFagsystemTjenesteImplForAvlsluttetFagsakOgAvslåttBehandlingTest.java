@@ -16,7 +16,6 @@ import org.junit.Test;
 import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -36,6 +35,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
@@ -56,7 +56,7 @@ public class VurderFagsystemTjenesteImplForAvlsluttetFagsakOgAvslåttBehandlingT
     private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste;
     private VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-    private FordelingRepository fordelingrepository = new FordelingRepository(entityManager);
+    private UttakRepository uttakRepository= new UttakRepository(entityManager);
 
     @Before
     public void setUp() {
@@ -64,7 +64,7 @@ public class VurderFagsystemTjenesteImplForAvlsluttetFagsakOgAvslåttBehandlingT
         DokumentPersistererTjeneste dokumentPersistererTjeneste = new DokumentPersistererTjeneste(mock(MottattDokumentPersistertPubliserer.class));
 
         MottatteDokumentTjeneste mottatteDokumentTjeneste =
-            new MottatteDokumentTjeneste(FRIST_INNSENDING_PERIODE, dokumentPersistererTjeneste, mottatteDokumentRepository, vilkårResultatRepository, fordelingrepository, repositoryProvider);
+            new MottatteDokumentTjeneste(FRIST_INNSENDING_PERIODE, dokumentPersistererTjeneste, mottatteDokumentRepository, vilkårResultatRepository, uttakRepository, repositoryProvider);
 
         VurderFagsystemFellesUtils fellesUtils = new VurderFagsystemFellesUtils(behandlingRepository, mottatteDokumentTjeneste, null);
 

@@ -2,24 +2,24 @@ package no.nav.foreldrepenger.inngangsvilkaar.perioder;
 
 import java.util.Set;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
 
-    private FordelingRepository fordelingRepository;
+    private UttakRepository uttakRepository;
 
-    MaksSøktePeriode(FordelingRepository fordelingRepository) {
-        this.fordelingRepository = fordelingRepository;
+    MaksSøktePeriode(UttakRepository uttakRepository) {
+        this.uttakRepository = uttakRepository;
     }
 
     @Override
     public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var fordeling = fordelingRepository.hentHvisEksisterer(behandlingId);
-        if (fordeling.isEmpty()) {
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
+        if (søknadsperioder.isEmpty()) {
             return Set.of();
         } else {
-            return Set.of(fordeling.get().getMaksPeriode());
+            return Set.of(søknadsperioder.get().getMaksPeriode());
         }
     }
 }
