@@ -19,9 +19,9 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum UtfallType implements Kodeverdi {
 
-    INNVILGET("Innvilget", "Innvilget"),
-    AVSLÅTT("Avslått", "Avslått"), 
-    UDEFINERT("Udefinert", "Ikke definert"),
+    INNVILGET("INNVILGET", "Innvilget"),
+    AVSLÅTT("AVSLÅTT", "Avslått"), 
+    UDEFINERT("UDEFINERT", "Ikke definert"),
     ;
 
     private static final Map<String, UtfallType> KODER = new LinkedHashMap<>();

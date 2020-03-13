@@ -7,39 +7,39 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæringer;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.medisinsk.Legeerklæring;
 import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsyn;
-import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
 import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsynOgÅrsakssammenheng;
+import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 class SykdomDtoMapper {
 
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-    private FordelingRepository fordelingRepository;
+    private UttakRepository uttakRepository;
 
     SykdomDtoMapper() {
         // CDI
     }
 
     @Inject
-    public SykdomDtoMapper(MedisinskGrunnlagRepository medisinskGrunnlagRepository, FordelingRepository fordelingRepository) {
+    public SykdomDtoMapper(MedisinskGrunnlagRepository medisinskGrunnlagRepository, UttakRepository uttakRepository) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
-        this.fordelingRepository = fordelingRepository;
+        this.uttakRepository = uttakRepository;
     }
 
     SykdomsDto map(Long behandlingId) {
-        final var fordelingGrunnlag = fordelingRepository.hentHvisEksisterer(behandlingId);
-        if (fordelingGrunnlag.isPresent()) {
-            var periode = mapTilPeriode(fordelingGrunnlag.get());
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
+        if (søknadsperioder.isPresent()) {
+            var periode = mapTilPeriode(søknadsperioder.get());
             final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
             if (medisinskGrunnlag.isPresent()) {
                 final var grunnlag = medisinskGrunnlag.get();
@@ -56,15 +56,15 @@ class SykdomDtoMapper {
         return null;
     }
 
-    private Periode mapTilPeriode(Fordeling fordeling) {
+    private Periode mapTilPeriode(Søknadsperioder fordeling) {
         final var perioder = fordeling.getPerioder();
         final var fom = perioder.stream()
-            .map(FordelingPeriode::getPeriode)
+            .map(Søknadsperiode::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
             .min(LocalDate::compareTo)
             .orElseThrow();
         final var tom = perioder.stream()
-            .map(FordelingPeriode::getPeriode)
+            .map(Søknadsperiode::getPeriode)
             .map(DatoIntervallEntitet::getTomDato)
             .max(LocalDate::compareTo)
             .orElseThrow();

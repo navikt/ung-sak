@@ -71,10 +71,6 @@ public enum BehandlingStatus implements Kodeverdi {
     public String getNavn() {
         return navn;
     }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
     
     public static Set<BehandlingStatus> getFerdigbehandletStatuser() {
         return FERDIGBEHANDLET_STATUS;

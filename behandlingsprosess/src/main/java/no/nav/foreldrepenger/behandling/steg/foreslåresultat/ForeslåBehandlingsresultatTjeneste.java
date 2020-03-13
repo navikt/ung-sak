@@ -8,7 +8,6 @@ import no.nav.foreldrepenger.behandling.revurdering.felles.RevurderingBehandling
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -21,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -32,7 +32,7 @@ class ForeslåBehandlingsresultatTjeneste {
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    private FordelingRepository fordelingRepository;
+    private UttakRepository uttakRepository;
 
     private BehandlingRepository behandlingRepository;
 
@@ -43,9 +43,9 @@ class ForeslåBehandlingsresultatTjeneste {
     @Inject
     public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                               VedtakVarselRepository vedtakVarselRepository,
-                                              FordelingRepository fordelingRepository,
+                                              UttakRepository uttakRepository,
                                               @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
-        this.fordelingRepository = fordelingRepository;
+        this.uttakRepository = uttakRepository;
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.revurderingBehandlingsresultatutleder = revurderingBehandlingsresultatutleder;
         this.vedtakVarselRepository = vedtakVarselRepository;
@@ -85,7 +85,7 @@ class ForeslåBehandlingsresultatTjeneste {
     }
 
     private boolean sjekkVilkårAvslått(Long behandlingId, Vilkårene vilkårene) {
-        var f = fordelingRepository.hent(behandlingId);
+        var f = uttakRepository.hentOppgittUttak(behandlingId);
         var maksPeriode = f.getMaksPeriode();
 
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);

@@ -39,10 +39,6 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScena
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.foreldrepenger.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -53,6 +49,10 @@ import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 

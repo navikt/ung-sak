@@ -4,30 +4,30 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
 
-    private FordelingRepository fordelingRepository;
+    private UttakRepository uttakRepository;
 
-    SøktePerioder(FordelingRepository fordelingRepository) {
-        this.fordelingRepository = fordelingRepository;
+    SøktePerioder(UttakRepository uttakRepository) {
+        this.uttakRepository = uttakRepository;
     }
 
     @Override
     public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        final var fordeling = fordelingRepository.hentHvisEksisterer(behandlingId);
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
 
 
-        if (fordeling.isEmpty()) {
+        if (søknadsperioder.isEmpty()) {
             return Set.of();
         } else {
-            final var perioder = fordeling.map(Fordeling::getPerioder).orElse(Collections.emptySet()).stream().map(FordelingPeriode::getPeriode).collect(Collectors.toSet());
+            final var perioder = søknadsperioder.map(Søknadsperioder::getPerioder).orElse(Collections.emptySet()).stream().map(Søknadsperiode::getPeriode).collect(Collectors.toSet());
 
             final var timeline = new LocalDateTimeline<>(perioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).collect(Collectors.toList())).compress();
 
