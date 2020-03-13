@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
@@ -62,6 +63,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
         
         // FAKE UTTAKSPLAN - 3 måneder innvilget fra søknadsdato for angitte arbeisforhold
         
+        BehandlingReferanse ref = input.getBehandlingReferanse();
         var start = input.getSøknadMottattDato();
         var periode = new Periode(start, start.plusMonths(3));
         var utbetalingsgrader = input.getUttakAktivitetStatusPerioder()
@@ -70,7 +72,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
         var uttaksplanPeriode = new InnvilgetUttaksplanperiode(100, utbetalingsgrader);
         var uttaksplan = new Uttaksplan(Map.of(periode, uttaksplanPeriode));
 
-        lagreUttakResultatPerioder(input.getBehandlingReferanse().getBehandlingUuid(), uttaksplan);
+        lagreUttakResultatPerioder(ref.getBehandlingUuid(), uttaksplan);
         
         return uttaksplan;
     }
