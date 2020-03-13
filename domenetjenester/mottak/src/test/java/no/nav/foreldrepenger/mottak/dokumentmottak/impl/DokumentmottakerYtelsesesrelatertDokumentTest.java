@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
 import static java.time.LocalDate.now;
-import static no.nav.vedtak.felles.testutilities.Whitebox.setInternalState;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -28,7 +27,6 @@ import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -75,17 +73,19 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
     public void oppsett() {
         MockitoAnnotations.initMocks(this);
 
-        dokumentmottakerFelles = new DokumentmottakerFelles(repositoryProvider, prosessTaskRepository, behandlendeEnhetTjeneste,
-            historikkinnslagTjeneste, mottatteDokumentTjeneste, behandlingsoppretter);
+        dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(repositoryProvider,
+            prosessTaskRepository,
+            behandlendeEnhetTjeneste,
+            historikkinnslagTjeneste,
+            mottatteDokumentTjeneste,
+            behandlingsoppretter));
 
-        dokumentmottakerFelles = Mockito.spy(dokumentmottakerFelles);
-
-        dokumentmottaker = new DokumentmottakerSøknadDefault(repositoryProvider, dokumentmottakerFelles, mottatteDokumentTjeneste,
+        dokumentmottaker = Mockito.spy(new DokumentmottakerInntektsmelding(dokumentmottakerFelles,
+            mottatteDokumentTjeneste,
             behandlingsoppretter,
+            kompletthetskontroller,
             uttakTjeneste,
-            kompletthetskontroller);
-
-        dokumentmottaker = Mockito.spy(dokumentmottaker);
+            repositoryProvider));
 
         var enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFraSøker(any(Fagsak.class))).thenReturn(enhet);
@@ -101,43 +101,16 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         behandling = behandlingRepository.hentBehandling(behandling.getId());
 
         var dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
+        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", dokumentTypeId);
         when(behandlingsoppretter.erAvslåttBehandling(behandling)).thenReturn(true);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
         verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
             BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(dokumentmottakerFelles).opprettTaskForÅVurdereDokument(behandling.getFagsak(), behandling, mottattDokument);
-    }
-
-    @Test
-    public void skal_opprette_førstegangsbehandling_dersom_avslått_behandling_har_entydig_avslag() {
-        // Arrange - opprette avsluttet førstegangsbehandling
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilVilkår(VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_OPPFYLT);
-        var behandling = scenario.lagre(repositoryProvider);
-        behandling.avsluttBehandling();
-        avsluttBehandling(behandling, VedtakResultatType.AVSLAG);
-        behandling = behandlingRepository.hentBehandling(behandling.getId());
-
-        var dokumentTypeId = DokumentTypeId.LEGEERKLÆRING;
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
-        doReturn(true).when(behandlingsoppretter).erAvslåttBehandling(behandling);
-
-        var nyBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.FØRSTEGANGSSØKNAD).build();
-        // Hack, men det blir feil å lagre Behandlingen før Act da det påvirker scenarioet, og mock(Behandling) er heller ikke pent...
-        setInternalState(nyBehandling, "id", 9999L);
-        doReturn(nyBehandling).when(behandlingsoppretter).opprettFørstegangsbehandling(any(), any(), any());
-
-        // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-
-        // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
-            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottakerFelles).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
     }
 
     @Test
@@ -150,16 +123,16 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         behandling = behandlingRepository.hentBehandling(behandling.getId());
 
         var dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
+        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", dokumentTypeId);
         when(behandlingsoppretter.harBehandlingsresultatOpphørt(behandling)).thenReturn(true);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
         verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
             BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(dokumentmottakerFelles).opprettTaskForÅVurdereDokument(behandling.getFagsak(), behandling, mottattDokument);
+        verify(dokumentmottakerFelles).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
     }
 
     @Test
@@ -173,11 +146,11 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         behandling = behandlingRepository.hentBehandling(behandling.getId());
 
         var dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
+        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", dokumentTypeId);
         doReturn(true).when(behandlingsoppretter).harBehandlingsresultatOpphørt(behandling);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), dokumentTypeId, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
         verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,

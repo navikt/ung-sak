@@ -19,7 +19,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -27,7 +26,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepo
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.DokumentPersistererTjeneste;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
 import no.nav.foreldrepenger.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -44,7 +43,6 @@ public class Behandlingsoppretter {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private DokumentPersistererTjeneste dokumentPersistererTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
@@ -67,7 +65,6 @@ public class Behandlingsoppretter {
         this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
-        this.mottatteDokumentRepository = behandlingRepositoryProvider.getMottatteDokumentRepository();
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
@@ -103,7 +100,6 @@ public class Behandlingsoppretter {
             .orElseThrow(() -> new IllegalStateException("Fant ingen behandling som passet for saksnummer: " + fagsak.getSaksnummer()));
         Behandling nyFørstegangsbehandling = opprettFørstegangsbehandling(fagsak, behandlingÅrsakType, Optional.of(forrigeBehandling));
         opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(fagsak.getSaksnummer(), nyFørstegangsbehandling);
-        kopierVedlegg(nyFørstegangsbehandling, nyFørstegangsbehandling);
         return nyFørstegangsbehandling;
     }
 
@@ -127,7 +123,6 @@ public class Behandlingsoppretter {
         Behandling revurdering = opprettRevurdering(sisteYtelseBehandling.getFagsak(), revurderingsÅrsak);
 
         opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling.getFagsak().getSaksnummer(), revurdering);
-        kopierVedlegg(sisteYtelseBehandling, revurdering);
 
         // Kopier behandlingsårsaker fra forrige behandling
         new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
@@ -154,24 +149,8 @@ public class Behandlingsoppretter {
 
     }
 
-    private void kopierVedlegg(Behandling opprinneligBehandling, Behandling nyBehandling) {
-        List<MottattDokument> vedlegg = mottatteDokumentTjeneste.hentMottatteDokumentVedlegg(opprinneligBehandling.getId());
-
-        if (!vedlegg.isEmpty()) {
-            vedlegg.forEach(vedlegget -> {
-                MottattDokument dokument = new MottattDokument.Builder(vedlegget)
-                    .medBehandlingId(nyBehandling.getId())
-                    .build();
-                mottatteDokumentRepository.lagre(dokument);
-            });
-        }
-    }
-
     private List<MottattDokument> hentAlleInntektsmeldingdokumenter(Long fagsakId) {
-        DokumentTypeId dokumenttypeIM = DokumentTypeId.INNTEKTSMELDING;
-        return mottatteDokumentTjeneste.hentMottatteDokumentFagsak(fagsakId).stream()
-            .filter(dok -> dok.getDokumentType().equals(dokumenttypeIM))
-            .collect(toList());
+        return mottatteDokumentTjeneste.hentMottatteDokumentFagsak(fagsakId).stream().collect(toList());
     }
 
     private OrganisasjonsEnhet finnBehandlendeEnhet(Behandling behandling) {
@@ -192,15 +171,15 @@ public class Behandlingsoppretter {
         return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
-    public Behandling opprettNyFørstegangsbehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
+    public Behandling opprettNyFørstegangsbehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, DokumentTypeId dokumentTypeId) {
         Behandling behandling;
         // Ny førstegangssøknad
-        if (mottattDokument.getDokumentType().erSøknadType()) {
+        if (dokumentTypeId == null) {
             behandling = opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.of(avsluttetBehandling));
             historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, mottattDokument.getJournalpostId());
         } else {
             behandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
-            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getDokumentType());
+            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), dokumentTypeId);
         }
         mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, Optional.empty());
         return behandling;

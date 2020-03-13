@@ -326,6 +326,7 @@ public class BehandlingRepository {
             "from Behandling where fagsak.id=:fagsakId order by opprettetTidspunkt desc",
             Behandling.class);
         query.setParameter(FAGSAK_ID, fagsakId);
+        query.setMaxResults(1);
         if (readOnly) {
             query.setHint(QueryHints.HINT_READONLY, "true");
         }
@@ -343,6 +344,7 @@ public class BehandlingRepository {
                 " ORDER BY b.opprettetTidspunkt DESC",
             Behandling.class);
 
+        query.setMaxResults(1);
         query.setParameter(FAGSAK_ID, fagsakId);
         query.setParameter("behandlingType", behandlingType);
         query.setParameter("henlagtKoder", BehandlingResultatType.getAlleHenleggelseskoder());

@@ -14,7 +14,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.ppbsøknad.PleiepengerBarnSoknadOversetter;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.søknad.psb.PleiepengerBarnSoknadOversetter;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.PersonIdent;

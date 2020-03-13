@@ -348,11 +348,11 @@ public class BehandlingRestTjeneste {
             return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.of(gruppe));
 
         } else if (BehandlingType.FØRSTEGANGSSØKNAD.getKode().equals(kode)) {
-            behandlingsoppretterApplikasjonTjeneste.opprettNyFørstegangsbehandling(fagsak.getId(), saksnummer, dto.getNyBehandlingEtterKlage());
+            throw new UnsupportedOperationException("Ikke implementert støtte for å opprette ny førstegangsbehandling for " + fagsak);
             // ved førstegangssønad opprettes egen task for vurdere denne,
             // sender derfor ikke viderer til prosesser behandling (i motsetning til de andre).
             // må også oppfriske hele sakskomplekset, så sender til fagsak poll url
-            return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
+            //return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + kode);
         }

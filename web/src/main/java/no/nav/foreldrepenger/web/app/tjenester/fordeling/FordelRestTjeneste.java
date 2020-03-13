@@ -23,13 +23,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.behandling.BehandlendeFagsystem;
 import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
-import no.nav.foreldrepenger.kontrakter.fordel.BehandlendeFagsystemDto;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
 import no.nav.foreldrepenger.kontrakter.fordel.OpprettSakDto;
@@ -37,13 +35,10 @@ import no.nav.foreldrepenger.kontrakter.fordel.VurderFagsystemDto;
 import no.nav.foreldrepenger.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.foreldrepenger.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerPleiepengerBarnSoknad;
-import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystem;
-import no.nav.foreldrepenger.mottak.vurderfagsystem.VurderFagsystemFellesTjeneste;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakOrchestrator;
 import no.nav.foreldrepenger.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
@@ -80,7 +75,6 @@ public class FordelRestTjeneste {
     private static final String POST_OPPRETT_PATH = "/fagsak/opprett";
     private static final String POST_KNYTT_JOURNALPOST_PATH = "/fagsak/knyttJournalpost";
     private static final String POST_JOURNALPOST_PATH = "/journalpost";
-    private static final String POST_VURDER_FAGSYSTEM = "/vurderFagsystem";
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
@@ -88,7 +82,6 @@ public class FordelRestTjeneste {
     private FagsakTjeneste fagsakTjeneste;
     private OpprettSakOrchestrator opprettSakOrchestrator;
     private OpprettSakTjeneste opprettSakTjeneste;
-    private VurderFagsystemFellesTjeneste vurderFagsystemTjeneste;
     private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
 
     public FordelRestTjeneste() {// For Rest-CDI
@@ -98,28 +91,13 @@ public class FordelRestTjeneste {
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               JournalTjeneste journalTjeneste, FagsakTjeneste fagsakTjeneste,
                               OpprettSakOrchestrator opprettSakOrchestrator, OpprettSakTjeneste opprettSakTjeneste,
-                              VurderFagsystemFellesTjeneste vurderFagsystemFellesTjeneste,
                               DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.journalTjeneste = journalTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.opprettSakOrchestrator = opprettSakOrchestrator;
         this.opprettSakTjeneste = opprettSakTjeneste;
-        this.vurderFagsystemTjeneste = vurderFagsystemFellesTjeneste;
         this.dokumentmottakerPleiepengerBarnSoknad = dokumentmottakerPleiepengerBarnSoknad;
-    }
-
-    @POST
-    @Path(POST_VURDER_FAGSYSTEM)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(JSON_UTF8)
-    @Operation(description = "Informasjon om en fagsak", tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public BehandlendeFagsystemDto vurderFagsystem(@Parameter(description = "Krever behandlingstemaOffisiellKode", required = true) @Valid AbacVurderFagsystemDto vurderFagsystemDto) {
-        VurderFagsystem vurderFagsystem = map(vurderFagsystemDto);
-        BehandlendeFagsystem behandlendeFagsystem = vurderFagsystemTjeneste.vurderFagsystem(vurderFagsystem);
-        return map(behandlendeFagsystem);
-
     }
 
     @POST
@@ -196,95 +174,30 @@ public class FordelRestTjeneste {
         dokumentmottakTjeneste.dokumentAnkommet(saksdokument);
     }
 
-    private VurderFagsystem map(VurderFagsystemDto dto) {
-        VurderFagsystem v = new VurderFagsystem();
-        dto.getJournalpostId().map(jpi -> new JournalpostId(jpi)).ifPresent(v::setJournalpostId);
-        v.setStrukturertSøknad(dto.isStrukturertSøknad());
-        v.setAktørId(new AktørId(dto.getAktørId()));
-        BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(dto.getBehandlingstemaOffisiellKode());
-
-        v.setBehandlingTema(behandlingTema);
-        dto.getÅrsakInnsendingInntektsmelding().ifPresent(v::setÅrsakInnsendingInntektsmelding);
-        dto.getVirksomhetsnummer().ifPresent(v::setVirksomhetsnummer);
-        dto.getArbeidsgiverAktørId().map(AktørId::new).ifPresent(v::setArbeidsgiverAktørId);
-        dto.getArbeidsforholdsid().ifPresent(v::setArbeidsforholdsid);
-        dto.getForsendelseMottattTidspunkt().ifPresent(v::setForsendelseMottattTidspunkt);
-        dto.getStartDatoForeldrepengerInntektsmelding().ifPresent(v::setStartDatoInntektsmelding);
-
-        dto.getSaksnummer().ifPresent(sn -> v.setSaksnummer(new Saksnummer(sn)));
-
-        v.setDokumentTypeId(DokumentTypeId.UDEFINERT);
-        v.setDokumentKategori(DokumentKategori.UDEFINERT);
-        if (dto.getDokumentTypeIdOffisiellKode() != null) {
-            v.setDokumentTypeId(DokumentTypeId.finnForKodeverkEiersKode(dto.getDokumentTypeIdOffisiellKode()));
-        }
-        if (dto.getDokumentKategoriOffisiellKode() != null) {
-            v.setDokumentKategori(
-                DokumentKategori.finnForKodeverkEiersKode(dto.getDokumentKategoriOffisiellKode()));
-        }
-
-        return v;
-    }
-
-    private BehandlendeFagsystemDto map(BehandlendeFagsystem behandlendeFagsystem) {
-        BehandlendeFagsystemDto dto;
-        if (behandlendeFagsystem.getSaksnummer().isPresent()) {
-            dto = new BehandlendeFagsystemDto(behandlendeFagsystem.getSaksnummer().get().getVerdi()); // NOSONAR
-        } else {
-            dto = new BehandlendeFagsystemDto();
-        }
-        switch (behandlendeFagsystem.getBehandlendeSystem()) {
-            case VEDTAKSLØSNING:
-                dto.setBehandlesIVedtaksløsningen(true);
-                break;
-            case VURDER_INFOTRYGD:
-                dto.setSjekkMotInfotrygd(true);
-                break;
-            case MANUELL_VURDERING:
-                dto.setManuellVurdering(true);
-                break;
-            case PRØV_IGJEN:
-                dto.setPrøvIgjen(true);
-                dto.setPrøvIgjenTidspunkt(behandlendeFagsystem.getPrøvIgjenTidspunkt());
-                break;
-            default:
-                throw new IllegalArgumentException("Utviklerfeil, manglende mapping");
-        }
-        return dto;
-    }
-
     private InngåendeSaksdokument map(AbacJournalpostMottakDto mottattJournalpost) {
-        BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(mottattJournalpost.getBehandlingstemaOffisiellKode());
         JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
 
         Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
         Optional<Fagsak> fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false);
         if (!fagsak.isPresent()) {
-            // FIXME (u139158): PK- hvordan skal dette håndteres?
             throw new IllegalStateException("Finner ingen fagsak for saksnummer " + saksnummer);
         }
-
-        DokumentTypeId dokumentTypeId = mottattJournalpost.getDokumentTypeIdOffisiellKode().isPresent()
-            ? DokumentTypeId.finnForKodeverkEiersKode(mottattJournalpost.getDokumentTypeIdOffisiellKode().get())
-            : DokumentTypeId.UDEFINERT; // NOSONAR
 
         DokumentKategori dokumentKategori = mottattJournalpost.getDokumentKategoriOffisiellKode() != null
             ? DokumentKategori.finnForKodeverkEiersKode(mottattJournalpost.getDokumentKategoriOffisiellKode())
             : DokumentKategori.UDEFINERT; // NOSONAR
 
-        dokumentKategori = utledDokumentKategori(dokumentKategori, dokumentTypeId);
-
         Optional<String> payloadXml = mottattJournalpost.getPayloadXml();
+        String dokumentTypeId = mottattJournalpost.getDokumentTypeIdOffisiellKode().orElse(null);
         InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
             .medFagsakId(fagsak.get().getId())
-            .medBehandlingTema(behandlingTema)
             .medElektroniskSøknad(payloadXml.isPresent())
+            .medDokumentTypeId(dokumentTypeId)
             .medJournalpostId(mottattJournalpost.getJournalpostId())
-            .medDokumentTypeId(dokumentTypeId.getKode())
             .medDokumentKategori(dokumentKategori)
             .medJournalførendeEnhet(mottattJournalpost.getJournalForendeEnhet());
 
-        if (DokumentTypeId.INNTEKTSMELDING.getKode().equals(dokumentTypeId.getKode())) {
+        if (DokumentTypeId.INNTEKTSMELDING.getOffisiellKode().equals(dokumentTypeId)) {
             String referanseFraJournalpost = utledAltinnReferanseFraInntektsmelding(journalpostId);
             builder.medKanalreferanse(referanseFraJournalpost);
         }
@@ -292,20 +205,13 @@ public class FordelRestTjeneste {
         mottattJournalpost.getForsendelseId().ifPresent(builder::medForsendelseId);
 
         if (payloadXml.isPresent()) {
-            builder.medPayloadXml(payloadXml.get()); // NOSONAR
+            builder.medPayload(payloadXml.get()); // NOSONAR
         }
 
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(LocalDate.now())); // NOSONAR
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottattTidspunkt()); // NOSONAR
 
         return builder.build();
-    }
-
-    private DokumentKategori utledDokumentKategori(DokumentKategori dokumentKategori, Kodeverdi dokumentTypeId) {
-        if (DokumentTypeId.getSøknadTyper().contains(dokumentTypeId.getKode())) {
-            return DokumentKategori.SØKNAD;
-        }
-        return dokumentKategori;
     }
 
     private String utledAltinnReferanseFraInntektsmelding(JournalpostId journalpostId) {

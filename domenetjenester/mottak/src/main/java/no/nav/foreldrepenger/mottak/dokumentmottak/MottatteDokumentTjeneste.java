@@ -5,7 +5,6 @@ import java.time.Period;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,8 +16,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.MottatteDoku
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.DokumentPersistererTjeneste;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.MottattDokumentWrapper;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.MottattDokumentWrapper;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -61,7 +60,7 @@ public class MottatteDokumentTjeneste {
 
     public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument, Optional<LocalDate> gjelderFra) {
         oppdaterMottattDokumentMedBehandling(dokument, behandling.getId());
-        if (dokument.getPayloadXml() != null) {
+        if (dokument.getPayload() != null) {
             @SuppressWarnings("rawtypes")
             MottattDokumentWrapper dokumentWrapper = dokumentPersistererTjeneste.xmlTilWrapper(dokument);
             dokumentPersistererTjeneste.persisterDokumentinnhold(dokumentWrapper, dokument, behandling, gjelderFra);
@@ -81,16 +80,8 @@ public class MottatteDokumentTjeneste {
         return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId);
     }
 
-    public boolean harMottattDokumentSet(Long behandlingId, Set<String> dokumentTypeIdSet) {
-        return hentMottatteDokument(behandlingId).stream().anyMatch(dok -> dokumentTypeIdSet.contains(dok.getDokumentType().getKode()));
-    }
-
     public boolean harMottattDokumentKat(Long behandlingId, DokumentKategori dokumentKategori) {
         return hentMottatteDokument(behandlingId).stream().anyMatch(dok -> dokumentKategori.equals(dok.getDokumentKategori()));
-    }
-
-    public List<MottattDokument> hentMottatteDokumentVedlegg(Long behandlingId) {
-        return mottatteDokumentRepository.hentMottatteDokumentAndreTyperPåBehandlingId(behandlingId);
     }
 
     public void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {

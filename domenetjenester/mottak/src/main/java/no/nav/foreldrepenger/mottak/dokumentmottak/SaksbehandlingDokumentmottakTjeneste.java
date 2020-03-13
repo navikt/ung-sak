@@ -11,7 +11,6 @@ import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.HåndterMottattDokumentTaskProperties;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
@@ -23,7 +22,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
 
     public SaksbehandlingDokumentmottakTjeneste() {
-        //for CDI, jaja
+        // for CDI, jaja
     }
 
     @Inject
@@ -34,14 +33,11 @@ public class SaksbehandlingDokumentmottakTjeneste {
     }
 
     public void dokumentAnkommet(InngåendeSaksdokument saksdokument) {
-        boolean erElektroniskSøknad = saksdokument.getPayloadXml() != null;
 
         MottattDokument.Builder builder = new MottattDokument.Builder()
-            .medDokumentType(saksdokument.getDokumentTypeId())
             .medDokumentKategori(saksdokument.getDokumentKategori() != null ? saksdokument.getDokumentKategori() : DokumentKategori.UDEFINERT)
             .medMottattDato(LocalDate.parse(saksdokument.getForsendelseMottatt().toString()))
-            .medXmlPayload(saksdokument.getPayloadXml())
-            .medElektroniskRegistrert(erElektroniskSøknad)
+            .medPayload(saksdokument.getPayload())
             .medFagsakId(saksdokument.getFagsakId())
             .medJournalFørendeEnhet(saksdokument.getJournalEnhet());
 
@@ -57,6 +53,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         if (saksdokument.getJournalpostId() != null) {
             builder.medJournalPostId(new JournalpostId(saksdokument.getJournalpostId().getVerdi()));
         }
+        builder.medDokumentTypeId(saksdokument.getDokumentTypeId());
         if (saksdokument.getForsendelseId() != null) {
             builder.medForsendelseId(UUID.fromString(saksdokument.getForsendelseId().toString()));
         }
@@ -72,28 +69,8 @@ public class SaksbehandlingDokumentmottakTjeneste {
         prosessTaskRepository.lagre(prosessTaskData);
     }
 
-    public void opprettFraTidligereBehandling(MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType, AktørId aktørId) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTaskProperties.TASKTYPE);
-
-        prosessTaskData.setBehandling(mottattDokument.getFagsakId(), mottattDokument.getBehandlingId(), aktørId.getId());
-        prosessTaskData.setProperty(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY, mottattDokument.getId().toString());
-        settÅrsakHvisDefinert(behandlingÅrsakType, prosessTaskData);
-        prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
-    }
-
-    public void mottaUbehandletSøknad(MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTaskProperties.TASKTYPE);
-
-        prosessTaskData.setFagsakId(mottattDokument.getFagsakId());
-        prosessTaskData.setProperty(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY, mottattDokument.getId().toString());
-        settÅrsakHvisDefinert(behandlingÅrsakType, prosessTaskData);
-        prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
-    }
-
     private void settÅrsakHvisDefinert(BehandlingÅrsakType behandlingÅrsakType, ProsessTaskData prosessTaskData) {
-        if (behandlingÅrsakType !=null && !BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
+        if (behandlingÅrsakType != null && !BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
             prosessTaskData.setProperty(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY, behandlingÅrsakType.getKode());
         }
     }

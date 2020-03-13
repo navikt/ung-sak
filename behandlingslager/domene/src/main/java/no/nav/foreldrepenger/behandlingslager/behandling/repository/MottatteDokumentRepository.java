@@ -8,11 +8,9 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
@@ -95,44 +93,6 @@ public class MottatteDokumentRepository {
             strQueryTemplate, MottattDokument.class)
             .setParameter(PARAM_KEY, forsendelseId)
             .getResultList();
-    }
-
-    /**
-     * Returnerer liste av MottattDokument.
-     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
-     * ikke å anbefale å bruke.
-     */
-    @SuppressWarnings("unchecked")
-    public List<MottattDokument> hentMottatteDokumentVedleggPåBehandlingId(long behandlingId) {
-        Query query = entityManager.createNativeQuery(
-            "SELECT md.* FROM MOTTATT_DOKUMENT md WHERE md.behandling_id = :param AND md.type IN (:dokumentTyper)", //$NON-NLS-1$
-            MottattDokument.class)
-            .setParameter("dokumentTyper", DokumentTypeId.getVedleggTyper())
-            .setParameter(PARAM_KEY, behandlingId); //$NON-NLS-1$
-
-        return query.getResultList();
-    }
-
-    /**
-     * Returnerer liste av MottattDokument.
-     * 
-     * Henter alle dokument med type som ikke er søknad, endringssøknad, klage, IM (eller udefinert)
-     * 
-     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
-     * ikke å anbefale å bruke.
-     */
-    @SuppressWarnings("unchecked")
-    public List<MottattDokument> hentMottatteDokumentAndreTyperPåBehandlingId(long behandlingId) {
-        Query query = entityManager.createNativeQuery(
-            "SELECT md.* FROM MottattDokument md WHERE md.behandling_id = :param " +
-                "AND md.type NOT IN (:dokumentTyper) " +
-                "AND md.type != :udefinert", //$NON-NLS-1$
-            MottattDokument.class)
-            .setParameter("dokumentTyper", DokumentTypeId.getSpesialTyperKoder())
-            .setParameter("udefinert", DokumentTypeId.UDEFINERT.getKode())
-            .setParameter(PARAM_KEY, behandlingId); //$NON-NLS-1$
-
-        return query.getResultList();
     }
 
     public void oppdaterMedBehandling(MottattDokument mottattDokument, long behandlingId) {
