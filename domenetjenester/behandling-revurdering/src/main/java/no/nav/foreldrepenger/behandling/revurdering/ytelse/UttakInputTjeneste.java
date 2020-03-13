@@ -16,7 +16,9 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
@@ -26,10 +28,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
+import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.domene.uttak.input.UttakAktivitetStatusPeriode;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
+import no.nav.k9.sak.domene.uttak.input.UttakPersonInfo;
 
 @ApplicationScoped
 public class UttakInputTjeneste {
@@ -41,14 +45,17 @@ public class UttakInputTjeneste {
     private SøknadRepository søknadRepository;
     private PersonopplysningRepository personopplysningRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
+    private BasisPersonopplysningTjeneste personopplysningTjeneste;
 
     @Inject
     public UttakInputTjeneste(BehandlingRepositoryProvider repositoryProvider,
                               MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                               BeregningTjeneste kalkulusTjeneste,
                               InntektArbeidYtelseTjeneste iayTjeneste,
+                              BasisPersonopplysningTjeneste personopplysningTjeneste,
                               MedlemTjeneste medlemTjeneste) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
+        this.personopplysningTjeneste = personopplysningTjeneste;
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
         this.medlemTjeneste = Objects.requireNonNull(medlemTjeneste, "medlemTjeneste");
         this.søknadRepository = repositoryProvider.getSøknadRepository();
@@ -69,17 +76,36 @@ public class UttakInputTjeneste {
     }
 
     private UttakInput lagInput(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate medlemskapOpphørsdato) {
-        var mottattDato = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId()).map(SøknadEntitet::getMottattDato).orElse(null);
-        
-        
+        SøknadEntitet søknad = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId())
+            .orElseThrow(() -> new IllegalStateException("Har ikke søknad for behandling " + ref));
+        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(ref.getBehandlingId())
+            .orElseThrow(() -> new IllegalStateException("Har ikke Medisinsk Grunnlag for behandling " + ref));
+
         var årsaker = finnÅrsaker(ref);
-        var statusPerioder = lagBeregningsgrunnlagStatusPerioder(ref);
+        var statusPerioder = lagUttakAktivitetPerioder(ref);
+
+        var personGrunnlag = personopplysningRepository.hentPersonopplysninger(ref.getBehandlingId());
+        var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
+        
+        UttakPersonInfo søker = lagPerson(personopplysninger.getSøker());
+
+        var pleietrengendeAktørId =medisinskGrunnlag.getPleietrengende().getAktørId();
+        UttakPersonInfo pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
+
         return new UttakInput(ref, iayGrunnlag)
+            .medSøker(søker)
+            .medPleietrengende(pleietrengende)
             .medUttakAktivitetStatusPerioder(statusPerioder)
-            .medSøknadMottattDato(mottattDato)
+            .medSøknadMottattDato(søknad.getMottattDato())
             .medBehandlingÅrsaker(map(årsaker))
+            .medMedlemskapOpphørsdato(medlemskapOpphørsdato)
             .medBehandlingManueltOpprettet(erManueltOpprettet(årsaker))
-            .medErOpplysningerOmDødEndret(erOpplysningerOmDødEndret(ref));
+            .medErOpplysningerOmDødEndret(erOpplysningerOmDødEndret(ref, personGrunnlag));
+    }
+
+    private UttakPersonInfo lagPerson(PersonopplysningEntitet person) {
+        UttakPersonInfo søker = new UttakPersonInfo(person.getAktørId(), person.getFødselsdato(), person.getDødsdato());
+        return søker;
     }
 
     private Set<BehandlingÅrsakType> map(Set<BehandlingÅrsak> årsaker) {
@@ -95,7 +121,7 @@ public class UttakInputTjeneste {
         return new HashSet<>(behandling.getBehandlingÅrsaker());
     }
 
-    private Collection<UttakAktivitetStatusPeriode> lagBeregningsgrunnlagStatusPerioder(BehandlingReferanse ref) {
+    private Collection<UttakAktivitetStatusPeriode> lagUttakAktivitetPerioder(BehandlingReferanse ref) {
         var beregningsgrunnlag = kalkulusTjeneste.hentFastsatt(ref.getBehandlingId());
         if (beregningsgrunnlag.isPresent()) {
             var andeler = beregningsgrunnlag.get().getBeregningsgrunnlagPerioder().stream()
@@ -114,10 +140,9 @@ public class UttakInputTjeneste {
         return new UttakAktivitetStatusPeriode(a.getAktivitetStatus(), fom, tom, arbeidsgiver, arbeidsforholdRef);
     }
 
-    private boolean erOpplysningerOmDødEndret(BehandlingReferanse ref) {
+    private boolean erOpplysningerOmDødEndret(BehandlingReferanse ref, PersonopplysningGrunnlagEntitet nåværendeGrunnlag) {
         Long behandlingId = ref.getBehandlingId();
         PersonopplysningGrunnlagEntitet originaltGrunnlag = personopplysningRepository.hentFørsteVersjonAvPersonopplysninger(behandlingId);
-        PersonopplysningGrunnlagEntitet nåværendeGrunnlag = personopplysningRepository.hentPersonopplysninger(behandlingId);
         PersonopplysningGrunnlagDiff poDiff = new PersonopplysningGrunnlagDiff(ref.getAktørId(), nåværendeGrunnlag, originaltGrunnlag);
 
         boolean barnDødt = poDiff.erBarnDødsdatoEndret();
