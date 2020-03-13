@@ -49,7 +49,12 @@ public class KalkulatorInputTjeneste {
             kalkulatorInputDto.medRefusjonskravDatoer(TilKalkulusMapper.mapTilDto(refusjonskravDatoes));
         }
 
+<<<<<<< Updated upstream
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
+=======
+        // TODO(OJR) hva skal denne være for k9?
+        kalkulatorInputDto.medYtelsespesifiktGrunnlag(new PleiepengerSyktBarnGrunnlag(BigDecimal.valueOf(100), List.of()));
+>>>>>>> Stashed changes
         return kalkulatorInputDto;
     }
 }
