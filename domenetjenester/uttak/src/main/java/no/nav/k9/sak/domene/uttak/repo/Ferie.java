@@ -18,29 +18,29 @@ import javax.persistence.Version;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "Uttak")
-@Table(name = "UT_UTTAK")
-public class Uttak extends BaseEntitet {
+@Entity(name = "Ferie")
+@Table(name = "UT_FERIE")
+public class Ferie extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_UTTAK")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_FERIE")
     private Long id;
 
-    @OneToMany(mappedBy = "uttak", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<UttakPeriode> perioder;
+    @OneToMany(mappedBy = "ferie", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    private Set<FeriePeriode> perioder;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    Uttak() {
+    Ferie() {
         // hibernate
     }
 
-    public Uttak(Set<UttakPeriode> perioder) {
+    public Ferie(Set<FeriePeriode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
-            .peek(it -> it.setUttak(this))
+            .peek(it -> it.setFerie(this))
             .collect(Collectors.toSet());
     }
 
@@ -48,19 +48,19 @@ public class Uttak extends BaseEntitet {
         return id;
     }
 
-    public Set<UttakPeriode> getPerioder() {
+    public Set<FeriePeriode> getPerioder() {
         return perioder;
     }
 
     public DatoIntervallEntitet getMaksPeriode() {
         var perioder = getPerioder();
         var fom = perioder.stream()
-            .map(UttakPeriode::getPeriode)
+            .map(FeriePeriode::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
             .min(LocalDate::compareTo)
             .orElseThrow();
         var tom = perioder.stream()
-            .map(UttakPeriode::getPeriode)
+            .map(FeriePeriode::getPeriode)
             .map(DatoIntervallEntitet::getTomDato)
             .max(LocalDate::compareTo)
             .orElseThrow();
@@ -78,10 +78,12 @@ public class Uttak extends BaseEntitet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof Uttak)) return false;
-        var other = this.getClass().cast(o);
-        return Objects.equals(perioder, other.perioder);
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof Ferie))
+            return false;
+        Ferie fordeling = (Ferie) o;
+        return Objects.equals(perioder, fordeling.perioder);
     }
 
     @Override

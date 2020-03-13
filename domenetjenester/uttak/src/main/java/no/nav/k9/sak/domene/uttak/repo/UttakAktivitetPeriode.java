@@ -22,12 +22,12 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-@Entity(name = "UttakPeriode")
-@Table(name = "UT_UTTAK_PERIODE")
-public class UttakPeriode extends BaseEntitet {
+@Entity(name = "UttakAktivitetPeriode")
+@Table(name = "UT_UTTAK_AKTIVITET_PERIODE")
+public class UttakAktivitetPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_UTTAK_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_UTTAK_AKTIVITET_PERIODE")
     private Long id;
 
     @Embedded
@@ -38,10 +38,10 @@ public class UttakPeriode extends BaseEntitet {
     private DatoIntervallEntitet periode;
 
     @ManyToOne
-    @JoinColumn(name = "uttak_id", nullable = false, updatable = false, unique = true)
-    private Uttak uttak;
+    @JoinColumn(name = "aktivitet_id", nullable = false, updatable = false, unique = true)
+    private UttakAktivitet uttak;
 
-    @Column(name = "uttak_aktivitet_type", nullable = false, updatable = false)
+    @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
     
     @Embedded
@@ -54,22 +54,22 @@ public class UttakPeriode extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    UttakPeriode() {
+    UttakAktivitetPeriode() {
     }
 
-    public UttakPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType) {
+    public UttakAktivitetPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType) {
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
-    public UttakPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
+    public UttakAktivitetPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
-    public UttakPeriode(DatoIntervallEntitet periode) {
+    public UttakAktivitetPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
     }
 
@@ -77,7 +77,7 @@ public class UttakPeriode extends BaseEntitet {
         return periode;
     }
 
-    void setUttak(Uttak uttak) {
+    void setUttak(UttakAktivitet uttak) {
         this.uttak = uttak;
     }
 
@@ -97,9 +97,9 @@ public class UttakPeriode extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof UttakPeriode))
+        if (o == null || !(o instanceof UttakAktivitetPeriode))
             return false;
-        UttakPeriode that = (UttakPeriode) o;
+        UttakAktivitetPeriode that = (UttakAktivitetPeriode) o;
         return Objects.equals(periode, that.periode);
     }
 

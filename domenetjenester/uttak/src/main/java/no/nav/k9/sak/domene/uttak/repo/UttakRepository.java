@@ -25,7 +25,7 @@ public class UttakRepository {
         this.entityManager = entityManager;
     }
 
-    public Uttak hentOppgittUttak(Long behandlingId) {
+    public UttakAktivitet hentOppgittUttak(Long behandlingId) {
         return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow();
     }
 
@@ -33,7 +33,7 @@ public class UttakRepository {
         return hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElseThrow();
     }
 
-    public Optional<Uttak> hentOppittUttakHvisEksisterer(Long behandlingId) {
+    public Optional<UttakAktivitet> hentOppittUttakHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
         }
@@ -51,7 +51,7 @@ public class UttakRepository {
         return grunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder);
     }
 
-    public void lagreOgFlushOppgittUttak(Long behandlingId, Uttak oppgittUttak) {
+    public void lagreOgFlushOppgittUttak(Long behandlingId, UttakAktivitet oppgittUttak) {
         var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
@@ -75,7 +75,7 @@ public class UttakRepository {
         return eksisterendeGrunnlag;
     }
 
-    public void lagreOgFlushFastsattUttak(Long behandlingId, Uttak fastsattUttak) {
+    public void lagreOgFlushFastsattUttak(Long behandlingId, UttakAktivitet fastsattUttak) {
         var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
@@ -110,7 +110,7 @@ public class UttakRepository {
      * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<Uttak> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
+        Optional<UttakAktivitet> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
         søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittUttak(nyBehandlingId, entitet));
     }
 

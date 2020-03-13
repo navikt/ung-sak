@@ -53,8 +53,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
-import no.nav.k9.sak.domene.uttak.repo.Uttak;
-import no.nav.k9.sak.domene.uttak.repo.UttakPeriode;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
@@ -97,7 +97,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Before
     public void setup() {
         when(uttakRepository.hentOppgittSøknadsperioder(any())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
-        when(uttakRepository.hentOppgittUttak(any())).thenReturn(new Uttak(Set.of(new UttakPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER))));
+        when(uttakRepository.hentOppgittUttak(any())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,

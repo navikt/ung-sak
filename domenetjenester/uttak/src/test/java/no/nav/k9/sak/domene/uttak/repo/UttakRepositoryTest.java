@@ -40,11 +40,11 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new UttakPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER);
-        var p2 = new UttakPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER);
+        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER);
+        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER);
 
         var perioder = Set.of(p1, p2);
-        var uttak = new Uttak(perioder);
+        var uttak = new UttakAktivitet(perioder);
 
         uttakRepository.lagreOgFlushOppgittUttak(behandlingId, uttak);
 

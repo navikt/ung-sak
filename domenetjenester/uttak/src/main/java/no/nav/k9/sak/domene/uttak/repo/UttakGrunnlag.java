@@ -27,11 +27,11 @@ class UttakGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @JoinColumn(name = "oppgitt_uttak_id", nullable = false, updatable = false)
-    private Uttak oppgittUttak;
+    private UttakAktivitet oppgittUttak;
 
     @ManyToOne
     @JoinColumn(name = "fastsatt_uttak_id")
-    private Uttak fastsattUttak;
+    private UttakAktivitet fastsattUttak;
 
     @ManyToOne
     @JoinColumn(name = "soeknadsperioder_id")
@@ -47,7 +47,7 @@ class UttakGrunnlag extends BaseEntitet {
     UttakGrunnlag() {
     }
 
-    UttakGrunnlag(Long behandlingId, Uttak oppgittUttak, Uttak fastsattUttak, Søknadsperioder søknadsperioder) {
+    UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder) {
         this.behandlingId = behandlingId;
         this.oppgittUttak = oppgittUttak;
         this.fastsattUttak = fastsattUttak;
@@ -58,11 +58,11 @@ class UttakGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    public Uttak getOppgittUttak() {
+    public UttakAktivitet getOppgittUttak() {
         return oppgittUttak;
     }
 
-    public Uttak getFastsattUttak() {
+    public UttakAktivitet getFastsattUttak() {
         return fastsattUttak;
     }
 
@@ -70,7 +70,7 @@ class UttakGrunnlag extends BaseEntitet {
         return søknadsperioder;
     }
 
-    void setOppgittFordeling(Uttak oppgittFordeling) {
+    void setOppgittFordeling(UttakAktivitet oppgittFordeling) {
         this.oppgittUttak = oppgittFordeling;
     }
 
