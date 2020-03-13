@@ -12,10 +12,10 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @ApplicationScoped
-public class PleiepengerBarnModellProducer {
+public class ToBeDeletedFPModellProducer {
 
-    private static final String YTELSE = "PSB";
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+    private static final String YTELSE = "FP";
+    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.FORELDREPENGER;
 
     @FagsakYtelseTypeRef(YTELSE)
     @BehandlingTypeRef("BT-002")
@@ -38,14 +38,11 @@ public class PleiepengerBarnModellProducer {
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
             BehandlingStegType.VURDER_SAMLET,
-            BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-            BehandlingStegType.VURDER_UTTAK,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
             BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
             BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG,
             BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG,
-
             BehandlingStegType.BEREGN_YTELSE,
             BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT,
             BehandlingStegType.SIMULER_OPPDRAG,
