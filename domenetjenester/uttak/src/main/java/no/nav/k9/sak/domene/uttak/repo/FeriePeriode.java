@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.AttributeOverride;
@@ -19,7 +20,7 @@ import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "FeriePeriode")
-@Table(name = "UT_FERIEPERIODE")
+@Table(name = "UT_FERIE_PERIODE")
 public class FeriePeriode extends BaseEntitet {
 
     @Id
@@ -46,6 +47,10 @@ public class FeriePeriode extends BaseEntitet {
 
     public FeriePeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
+    }
+    
+    public FeriePeriode(LocalDate fom, LocalDate tom) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
     public DatoIntervallEntitet getPeriode() {
