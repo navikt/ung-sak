@@ -122,21 +122,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>behandlingsprosess-vedtak-v1</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>behandlingsprosess-vedtak-v2</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
-                <artifactId>soeknad-v3</artifactId>
-                <version>${fp-kontrakter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
                 <artifactId>inntektsmelding-v1</artifactId>
                 <version>${fp-kontrakter.version}</version>
             </dependency>
@@ -155,7 +140,7 @@
 			<dependency>
   			    <groupId>no.nav.folketrygdloven</groupId>
 			    <artifactId>beregningsgrunnlag-regelmodell</artifactId>
-			    <version>2.1-2019-12-11-070713.9414504</version>
+			    <version>2.1-20200304122043-f794ebb</version>
 			</dependency>
 
 			<!-- Prosjektets egne biblioteker -->
@@ -328,7 +313,7 @@
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-pleiepenger-barn</artifactId>
-                <version>2.0.2.d31ae67</version>
+                <version>2.0.2.30e5036</version>
             </dependency>
 
 			<!-- Prosjektets egne TEST AVHENGIGHETER -->

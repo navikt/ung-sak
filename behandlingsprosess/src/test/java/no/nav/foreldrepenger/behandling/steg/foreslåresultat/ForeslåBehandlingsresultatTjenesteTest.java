@@ -29,9 +29,6 @@ import no.nav.foreldrepenger.behandling.revurdering.ytelse.RevurderingBehandling
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -45,17 +42,23 @@ import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScena
 import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
@@ -88,12 +91,13 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private ForeslåBehandlingsresultatTjeneste tjeneste;
 
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
-    private FordelingRepository fordelingRepository = mock(FordelingRepository.class);
+    private UttakRepository uttakRepository = mock(UttakRepository.class);
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
 
     @Before
     public void setup() {
-        when(fordelingRepository.hent(any())).thenReturn(new Fordeling(Set.of(new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
+        when(uttakRepository.hentOppgittSøknadsperioder(any())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
+        when(uttakRepository.hentOppgittUttak(any())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,
@@ -103,7 +107,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
             medlemTjeneste));
         tjeneste = new ForeslåBehandlingsresultatTjeneste(repositoryProvider,
             vedtakVarselRepository,
-            fordelingRepository,
+            uttakRepository,
             revurderingBehandlingsresultatutleder);
     }
 

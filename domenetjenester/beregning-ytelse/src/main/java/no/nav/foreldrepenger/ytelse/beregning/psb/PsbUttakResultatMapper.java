@@ -9,16 +9,16 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
-import no.nav.foreldrepenger.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
 import no.nav.foreldrepenger.ytelse.beregning.UttakResultatInput;
 import no.nav.foreldrepenger.ytelse.beregning.UttakResultatMapper;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped

@@ -6,6 +6,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.jboss.weld.exceptions.UnsupportedOperationException;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
@@ -52,12 +54,18 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ref.getFagsakYtelseType()).orElseThrow();
-        
+        var mapper = getYtelsesspesifikkMapper(ref);
+
         var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
         var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
-        
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+    }
+
+    private BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(BehandlingReferanse ref) {
+        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ref.getFagsakYtelseType()).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ref.getFagsakYtelseType()));
+        return mapper;
     }
 
     @Override

@@ -35,6 +35,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
+            <artifactId>uttak</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
             <artifactId>inngangsvilkar-regelmodell</artifactId>
         </dependency>
         <dependency>

@@ -6,6 +6,6 @@
     <alternatives>
         <class>no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
         <class>no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste</class>
-        <class>no.nav.foreldrepenger.domene.uttak.UttakInMemoryTjeneste</class>
+        <class>no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste</class>
     </alternatives>
 </beans>

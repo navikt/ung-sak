@@ -9,9 +9,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.Fordeling;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.fordeling.FordelingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
@@ -26,6 +23,9 @@ import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.felles.Barn;
 import no.nav.k9.søknad.felles.Bosteder;
@@ -39,7 +39,7 @@ public class PleiepengerBarnSoknadOversetter {
     private VirksomhetTjeneste virksomhetTjeneste;
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
-    private FordelingRepository fordelingRepository;
+    private UttakRepository uttakRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private TpsTjeneste tpsTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -52,14 +52,14 @@ public class PleiepengerBarnSoknadOversetter {
     public PleiepengerBarnSoknadOversetter(BehandlingRepositoryProvider repositoryProvider,
                                            VirksomhetTjeneste virksomhetTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
-                                           FordelingRepository fordelingRepository,
+                                           UttakRepository uttakRepository,
                                            MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                            TpsTjeneste tpsTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.virksomhetTjeneste = virksomhetTjeneste;
-        this.fordelingRepository = fordelingRepository;
+        this.uttakRepository = uttakRepository;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
     }
@@ -85,9 +85,9 @@ public class PleiepengerBarnSoknadOversetter {
 
         byggPleietrengende(behandling, soknad.barn);
 
-        final Set<FordelingPeriode> perioder = mapTilPerioder(soknad);
-        final var fordeling = new Fordeling(perioder);
-        fordelingRepository.lagreOgFlush(behandling, fordeling);
+        final Set<Søknadsperiode> perioder = mapTilPerioder(soknad);
+        final var søknadsperioder = new Søknadsperioder(perioder);
+        uttakRepository.lagreOgFlushSøknadsperioder(behandlingId, søknadsperioder);
 
         final SøknadEntitet søknadEntitet = søknadBuilder
             .build();
@@ -104,9 +104,9 @@ public class PleiepengerBarnSoknadOversetter {
         }
     }
 
-    private Set<FordelingPeriode> mapTilPerioder(PleiepengerBarnSøknad soknad) {
+    private Set<Søknadsperiode> mapTilPerioder(PleiepengerBarnSøknad soknad) {
         return soknad.perioder.keySet().stream()
-            .map(periode -> new FordelingPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.fraOgMed, periode.tilOgMed)))
+            .map(periode -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.fraOgMed, periode.tilOgMed)))
             .collect(Collectors.toSet());
     }
 
