@@ -37,6 +37,10 @@ class UttakGrunnlag extends BaseEntitet {
     @JoinColumn(name = "soeknadsperioder_id")
     private Søknadsperioder søknadsperioder;
 
+    @ManyToOne
+    @JoinColumn(name = "ferie_id")
+    private Ferie oppgittFerie;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -47,11 +51,12 @@ class UttakGrunnlag extends BaseEntitet {
     UttakGrunnlag() {
     }
 
-    UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder) {
+    UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder, Ferie ferie) {
         this.behandlingId = behandlingId;
         this.oppgittUttak = oppgittUttak;
         this.fastsattUttak = fastsattUttak;
         this.søknadsperioder = søknadsperioder;
+        this.oppgittFerie = ferie;
     }
 
     void setAktiv(boolean aktiv) {
@@ -70,8 +75,16 @@ class UttakGrunnlag extends BaseEntitet {
         return søknadsperioder;
     }
 
+    public Ferie getOppgittFerie() {
+        return oppgittFerie;
+    }
+
     void setOppgittFordeling(UttakAktivitet oppgittFordeling) {
         this.oppgittUttak = oppgittFordeling;
+    }
+    
+    void setOppgittFerie(Ferie ferie) {
+        this.oppgittFerie = ferie;
     }
 
     @Override
@@ -81,12 +94,15 @@ class UttakGrunnlag extends BaseEntitet {
         if (o == null || !(o instanceof UttakGrunnlag))
             return false;
         var that = this.getClass().cast(o);
-        return Objects.equals(oppgittUttak, that.oppgittUttak);
+        return Objects.equals(oppgittUttak, that.oppgittUttak)
+            && Objects.equals(fastsattUttak, that.fastsattUttak)
+            && Objects.equals(søknadsperioder, that.søknadsperioder)
+            && Objects.equals(oppgittFerie, that.oppgittFerie);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgittUttak);
+        return Objects.hash(oppgittUttak, fastsattUttak, søknadsperioder, oppgittFerie);
     }
 
     @Override
@@ -95,6 +111,9 @@ class UttakGrunnlag extends BaseEntitet {
             "id=" + id +
             ", behandling=" + behandlingId +
             ", oppgittUttak=" + oppgittUttak +
+            ", fastsattUttak=" + fastsattUttak +
+            ", oppgittFerie = " + oppgittFerie +
+            ", søknadsperioder = " + søknadsperioder +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
             '}';

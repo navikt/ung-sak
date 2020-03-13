@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.AttributeOverride;
@@ -34,7 +35,7 @@ public class Søknadsperiode extends BaseEntitet {
     private DatoIntervallEntitet periode;
 
     @ManyToOne
-    @JoinColumn(name = "soeknadsperiode_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "soeknadsperioder_id", nullable = false, updatable = false, unique = true)
     private Søknadsperioder søknadsperioder;
 
     @Version
@@ -46,6 +47,10 @@ public class Søknadsperiode extends BaseEntitet {
 
     public Søknadsperiode(DatoIntervallEntitet periode) {
         this.periode = periode;
+    }
+
+    public Søknadsperiode(LocalDate fom, LocalDate tom) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
     public DatoIntervallEntitet getPeriode() {
