@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.behandling.steg.beregningsgrunnlag;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
@@ -39,7 +40,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     @Inject
     public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste,
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                             Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -63,8 +64,9 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     }
 
     private BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(BehandlingReferanse ref) {
-        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ref.getFagsakYtelseType()).orElseThrow(
-            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ref.getFagsakYtelseType()));
+        String ytelseTypeKode = ref.getFagsakYtelseType().getKode();
+        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ref.getFagsakYtelseType().getKode()));
         return mapper;
     }
 
