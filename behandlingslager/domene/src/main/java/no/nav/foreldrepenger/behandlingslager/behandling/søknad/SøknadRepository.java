@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -76,5 +77,20 @@ public class SøknadRepository {
     public void kopierGrunnlagFraEksisterendeBehandling(Behandling gammelBehandling, Behandling nyBehandling) {
         Optional<SøknadEntitet> søknadEntitet = hentSøknadHvisEksisterer(gammelBehandling.getId());
         søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandling, entitet));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<Long> hentBehandlingIdForSisteMottattSøknad(Long fagsakId) {
+        Query query = entityManager.createNativeQuery(""
+            + "select gr.behandlingId from GR_SOEKNAD gr "
+            + " inner join SO_SOEKNAD so ON so.id = gr.soeknad_id "
+            + " inner join BEHANDLING b on b.id = gr.behandling_id "
+            + " where b.fagsak_id = :fagsakId"
+            + "   AND gr.aktiv=TRUE"
+            + " order by so.mottatt_dato desc");
+        query.setMaxResults(1);
+        query.setParameter("fagsakId", fagsakId);
+
+        return query.getResultStream().findFirst().map(v -> Long.valueOf(((Number) v).longValue()));
     }
 }

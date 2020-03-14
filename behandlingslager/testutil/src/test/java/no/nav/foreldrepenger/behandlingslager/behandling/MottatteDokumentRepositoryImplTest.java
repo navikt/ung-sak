@@ -44,11 +44,11 @@ public class MottatteDokumentRepositoryImplTest {
         lagreBehandling(beh2);
 
         //Opprett og lagre MottateDokument
-        dokument1 = lagMottatteDokument(beh1.getId(), beh1.getFagsakId());
+        dokument1 = lagMottatteDokument(beh1.getId(), beh1.getFagsakId(), DokumentTypeId.INNTEKTSMELDING);
         mottatteDokumentRepository.lagre(dokument1);
 
         //Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
-        dokument2 = lagMottatteDokument(beh2.getId(), beh2.getFagsakId());
+        dokument2 = lagMottatteDokument(beh2.getId(), beh2.getFagsakId(), DokumentTypeId.INNTEKTSMELDING);
         mottatteDokumentRepository.lagre(dokument2);
     }
 
@@ -88,13 +88,12 @@ public class MottatteDokumentRepositoryImplTest {
         behandlingRepository.lagre(behandling, lås);
     }
 
-    public static MottattDokument lagMottatteDokument(long behandlingId, long fagsakId) {
+    public static MottattDokument lagMottatteDokument(long behandlingId, long fagsakId, DokumentTypeId dokumentTypeId) {
         return new MottattDokument.Builder()
             .medBehandlingId(behandlingId)
             .medJournalPostId(new JournalpostId("123"))
-            .medDokumentType(DokumentTypeId.SØKNAD_ENGANGSSTØNAD_FØDSEL)
+            .medDokumentTypeId(dokumentTypeId)
             .medMottattDato(LocalDate.now())
-            .medElektroniskRegistrert(true)
             .medFagsakId(fagsakId)
             .build();
     }

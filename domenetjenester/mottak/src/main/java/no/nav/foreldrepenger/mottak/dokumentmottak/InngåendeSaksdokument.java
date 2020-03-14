@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -13,17 +12,16 @@ public class InngåendeSaksdokument {
 
     private Long fagsakId;
     private JournalpostId journalpostId;
-    private BehandlingTema behandlingTema;
-    private String dokumentTypeId;
     private LocalDate forsendelseMottatt;
     private LocalDateTime forsendelseMottattTidspunkt;
     private Boolean elektroniskSøknad;
-    private String payloadXml;
+    private String payload;
     private BehandlingÅrsakType behandlingÅrsakType;
     private UUID forsendelseId;
     private DokumentKategori dokumentKategori;
     private String kanalreferanse;
     private String journalEnhet;
+    private String dokumentTypeId;
 
     private InngåendeSaksdokument() {
         // Skjult.
@@ -35,14 +33,6 @@ public class InngåendeSaksdokument {
 
     public JournalpostId getJournalpostId() {
         return journalpostId;
-    }
-
-    public BehandlingTema getBehandlingTema() {
-        return behandlingTema;
-    }
-
-    public String getDokumentTypeId() {
-        return dokumentTypeId;
     }
 
     public LocalDate getForsendelseMottatt() {
@@ -57,8 +47,8 @@ public class InngåendeSaksdokument {
         return elektroniskSøknad;
     }
 
-    public String getPayloadXml() {
-        return payloadXml;
+    public String getPayload() {
+        return payload;
     }
 
     public BehandlingÅrsakType getBehandlingÅrsakType() {
@@ -69,7 +59,14 @@ public class InngåendeSaksdokument {
         return forsendelseId;
     }
 
-    public DokumentKategori getDokumentKategori() { return dokumentKategori; }
+    public DokumentKategori getDokumentKategori() {
+        return dokumentKategori;
+    }
+
+    public String getDokumentTypeId() {
+        return dokumentTypeId;
+
+    }
 
     public String getKanalreferanse() {
         return kanalreferanse;
@@ -103,16 +100,6 @@ public class InngåendeSaksdokument {
 
         public InngåendeSaksdokument.Builder medForsendelseId(UUID forsendelseId) {
             this.kladd.forsendelseId = forsendelseId;
-            return this;
-        }
-
-        public InngåendeSaksdokument.Builder medBehandlingTema(BehandlingTema behandlingTema) {
-            this.kladd.behandlingTema = behandlingTema;
-            return this;
-        }
-
-        public InngåendeSaksdokument.Builder medDokumentTypeId(String dokumentTypeId) {
-            this.kladd.dokumentTypeId = dokumentTypeId;
             return this;
         }
 
@@ -151,8 +138,13 @@ public class InngåendeSaksdokument {
             return this;
         }
 
-        public InngåendeSaksdokument.Builder medPayloadXml(String payloadXml) {
-            this.kladd.payloadXml = payloadXml;
+        public InngåendeSaksdokument.Builder medPayload(String payloadXml) {
+            this.kladd.payload = payloadXml;
+            return this;
+        }
+
+        public InngåendeSaksdokument.Builder medDokumentTypeId(String dokumentTypeId) {
+            this.kladd.dokumentTypeId = dokumentTypeId;
             return this;
         }
 

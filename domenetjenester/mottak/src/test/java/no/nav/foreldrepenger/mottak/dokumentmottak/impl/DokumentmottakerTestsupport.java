@@ -100,17 +100,8 @@ public abstract class DokumentmottakerTestsupport {
 
     protected MottattDokument dummyInntektsmeldingDokument(Behandling behandling) {
         DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        return DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "123");
+        return DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "<"+dokumentTypeId+">", now(), "123", DokumentTypeId.INNTEKTSMELDING);
     }
 
-    protected MottattDokument dummyVedleggDokument(Behandling behandling) {
-        DokumentTypeId dokumentTypeId = DokumentTypeId.LEGEERKLÆRING;
-        return DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "456");
-    }
-
-    protected MottattDokument dummySøknadDokument(Behandling behandling) {
-        DokumentTypeId dokumentTypeId = DokumentTypeId.SØKNAD_ENGANGSSTØNAD_FØDSEL;
-        return DokumentmottakTestUtil.byggMottattDokument(dokumentTypeId, behandling.getFagsakId(), "", now(), true, "456");
-    }
 
 }

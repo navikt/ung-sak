@@ -15,7 +15,6 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakRepository;
 import no.nav.foreldrepenger.behandlingslager.testutilities.aktør.NavBrukerBuilder;
 import no.nav.foreldrepenger.behandlingslager.testutilities.fagsak.FagsakBuilder;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.typer.AktørId;
@@ -40,28 +39,10 @@ public class DokumentmottakTestUtil {
         return behandlingskontrollTjeneste;
     }
 
-    static MottattDokument byggMottattDokument(DokumentTypeId dokumentTypeId, Long fagsakId, String xml, LocalDate mottattDato, boolean elektroniskRegistrert,
-                                               String journalpostId) {
+    static MottattDokument byggMottattDokument(Long fagsakId, String xml, LocalDate mottattDato, String journalpostId, DokumentTypeId dokumentTypeId) {
         MottattDokument.Builder builder = new MottattDokument.Builder();
-        builder.medDokumentType(dokumentTypeId);
         builder.medMottattDato(mottattDato);
-        builder.medXmlPayload(xml);
-        builder.medElektroniskRegistrert(elektroniskRegistrert);
-        builder.medFagsakId(fagsakId);
-        if (journalpostId != null) {
-            builder.medJournalPostId(new JournalpostId(journalpostId));
-        }
-        return builder.build();
-    }
-
-    static MottattDokument byggMottattPapirsøknad(DokumentTypeId dokumentTypeId, Long fagsakId, String xml, LocalDate mottattDato,
-                                                  boolean elektroniskRegistrert, String journalpostId) {
-        MottattDokument.Builder builder = new MottattDokument.Builder();
-        builder.medDokumentType(dokumentTypeId);
-        builder.medDokumentKategori(DokumentKategori.SØKNAD);
-        builder.medMottattDato(mottattDato);
-        builder.medXmlPayload(xml);
-        builder.medElektroniskRegistrert(elektroniskRegistrert);
+        builder.medPayload(xml);
         builder.medFagsakId(fagsakId);
         if (journalpostId != null) {
             builder.medJournalPostId(new JournalpostId(journalpostId));

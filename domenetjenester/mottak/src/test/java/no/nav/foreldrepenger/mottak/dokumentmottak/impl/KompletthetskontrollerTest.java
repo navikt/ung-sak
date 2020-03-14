@@ -90,7 +90,7 @@ public class KompletthetskontrollerTest {
             behandlingProsesseringTjeneste,
             skjæringstidspunktTjeneste);
 
-        mottattDokument = DokumentmottakTestUtil.byggMottattDokument(DokumentTypeId.INNTEKTSMELDING, behandling.getFagsakId(), "", now(), true, null);
+        mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, DokumentTypeId.INNTEKTSMELDING);
 
     }
 

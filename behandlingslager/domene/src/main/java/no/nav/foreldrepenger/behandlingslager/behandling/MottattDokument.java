@@ -23,7 +23,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentKategoriKodeverdiConverter;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.DokumentTypeIdKodeverdiConverter;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -58,33 +57,31 @@ public class MottattDokument extends BaseEntitet {
     @Column(name = "journal_enhet")
     private String journalEnhet;
 
-    @Convert(converter = DokumentTypeIdKodeverdiConverter.class)
-    @Column(name="type", nullable = false)
-    private DokumentTypeId dokumentTypeId = DokumentTypeId.UDEFINERT;
-
     @Convert(converter = DokumentKategoriKodeverdiConverter.class)
-    @Column(name="dokument_kategori", nullable = false)
+    @Column(name = "dokument_kategori", nullable = false, updatable = false)
     private DokumentKategori dokumentKategori = DokumentKategori.UDEFINERT;
 
     @Column(name = "behandling_id", updatable = false)
     private Long behandlingId;
 
-    @Column(name = "mottatt_dato")
+    @Column(name = "mottatt_dato", updatable = false)
     private LocalDate mottattDato;
 
-    @Column(name = "mottatt_tidspunkt")
+    @Column(name = "mottatt_tidspunkt", updatable = false)
     private LocalDateTime mottattTidspunkt;
 
-    @Column(name = "kanalreferanse")
+    @Column(name = "kanalreferanse", updatable = false)
     private String kanalreferanse;
 
-    @Lob
-    @Column(name = "xml_payload")
-    private String xmlPayload;
+    @Column(name = "type", updatable = false)
+    private String dokumentTypeId;
 
-    
-    @Column(name = "elektronisk_registrert", nullable = false)
-    private boolean elektroniskRegistrert;
+    @Lob
+    @Column(name = "payload", updatable = false)
+    private String payload;
+
+    @Column(name = "payload_type", updatable = false)
+    private String payloadType;
 
     @Column(name = "fagsak_id", nullable = false)
     private Long fagsakId;
@@ -93,31 +90,12 @@ public class MottattDokument extends BaseEntitet {
         // Hibernate
     }
 
-    MottattDokument(MottattDokument mottatteDokument) {
-        this.journalpostId = mottatteDokument.journalpostId;
-        this.dokumentTypeId = mottatteDokument.dokumentTypeId;
-        this.dokumentKategori = mottatteDokument.dokumentKategori;
-        this.behandlingId = mottatteDokument.behandlingId;
-        this.elektroniskRegistrert = mottatteDokument.elektroniskRegistrert;
-        this.fagsakId = mottatteDokument.fagsakId;
-        this.forsendelseId = mottatteDokument.forsendelseId;
-        this.mottattDato = mottatteDokument.mottattDato;
-        this.mottattTidspunkt = mottatteDokument.mottattTidspunkt;
-        this.kanalreferanse = mottatteDokument.kanalreferanse;
-        this.xmlPayload = mottatteDokument.xmlPayload;
-        this.journalEnhet = mottatteDokument.journalEnhet;
-    }
-
     public Long getId() {
         return id;
     }
 
     public JournalpostId getJournalpostId() {
         return journalpostId;
-    }
-
-    public DokumentTypeId getDokumentType() {
-        return dokumentTypeId;
     }
 
     public DokumentKategori getDokumentKategori() {
@@ -144,12 +122,13 @@ public class MottattDokument extends BaseEntitet {
         return kanalreferanse;
     }
 
-    public String getPayloadXml() {
-        return xmlPayload;
+    public String getPayload() {
+        return payload;
     }
 
-    public boolean getElektroniskRegistrert() {
-        return elektroniskRegistrert;
+    /** @return "XML", "JSON", null. */
+    public String getPayloadType() {
+        return this.payloadType;
     }
 
     void setJournalpostId(JournalpostId journalpostId) {
@@ -172,12 +151,32 @@ public class MottattDokument extends BaseEntitet {
         this.mottattTidspunkt = mottattTidspunkt;
     }
 
+    void setPayload(String payload) {
+        this.payload = payload;
+        if (payload != null && !payload.isEmpty()) {
+            switch (payload.charAt(0)) {
+                case '<':
+                    this.payloadType = "XML";
+                    break;
+                case '{':
+                    this.payloadType = "JSON";
+                    break;
+                default:
+                    this.payloadType = null;
+            }
+        }
+    }
+
+    void setDokumentType(String dokumentIdType) {
+        this.dokumentTypeId = dokumentIdType;
+    }
+
     public void setKanalreferanse(String kanalreferanse) {
         this.kanalreferanse = kanalreferanse;
     }
 
-    void setElektroniskRegistrert(boolean elektroniskRegistrert) {
-        this.elektroniskRegistrert = elektroniskRegistrert;
+    public String getDokumentTypeId() {
+        return dokumentTypeId;
     }
 
     public Long getFagsakId() {
@@ -200,15 +199,6 @@ public class MottattDokument extends BaseEntitet {
         this.journalEnhet = enhet;
     }
 
-    public boolean erSøknadsDokument() {
-        return (dokumentTypeId != null && (getDokumentType().erSøknadType() || getDokumentType().erEndringsSøknadType())) ||
-            DokumentKategori.SØKNAD.equals(dokumentKategori);
-    }
-
-    public boolean erUstrukturertDokument() {
-        return xmlPayload == null;
-    }
-
     public static class Builder {
         private MottattDokument mottatteDokumentMal;
 
@@ -216,26 +206,8 @@ public class MottattDokument extends BaseEntitet {
             mottatteDokumentMal = new MottattDokument();
         }
 
-        public Builder(MottattDokument mottatteDokument) {
-            if (mottatteDokument != null) {
-                mottatteDokumentMal = new MottattDokument(mottatteDokument);
-            } else {
-                mottatteDokumentMal = new MottattDokument();
-            }
-        }
-
         public static Builder ny() {
             return new Builder();
-        }
-
-        public Builder medDokumentType(DokumentTypeId dokumentTypeId) {
-            mottatteDokumentMal.dokumentTypeId = dokumentTypeId==null?DokumentTypeId.UDEFINERT : dokumentTypeId;
-            return this;
-        }
-
-        public Builder medDokumentType(String dokumentTypeId) {
-            mottatteDokumentMal.dokumentTypeId = dokumentTypeId == null ? DokumentTypeId.UDEFINERT : DokumentTypeId.fraKode(dokumentTypeId);
-            return this;
         }
 
         public Builder medDokumentKategori(DokumentKategori dokumentKategori) {
@@ -273,13 +245,8 @@ public class MottattDokument extends BaseEntitet {
             return this;
         }
 
-        public Builder medXmlPayload(String xmlPayload) {
-            mottatteDokumentMal.xmlPayload = xmlPayload;
-            return this;
-        }
-
-        public Builder medElektroniskRegistrert(boolean elektroniskRegistrert) {
-            mottatteDokumentMal.elektroniskRegistrert = elektroniskRegistrert;
+        public Builder medPayload(String payload) {
+            mottatteDokumentMal.setPayload(payload);
             return this;
         }
 
@@ -298,9 +265,18 @@ public class MottattDokument extends BaseEntitet {
             return this;
         }
 
+        public Builder medDokumentTypeId(String dokumentTypeId) {
+            mottatteDokumentMal.dokumentTypeId = dokumentTypeId;
+            return this;
+        }
+
         public MottattDokument build() {
             Objects.requireNonNull(mottatteDokumentMal.fagsakId, "Trenger fagsak id for å opprette MottatteDokument.");
             return mottatteDokumentMal;
+        }
+
+        public Builder medDokumentTypeId(DokumentTypeId dokumentTypeId) {
+            return medDokumentTypeId(dokumentTypeId.getOffisiellKode());
         }
     }
 
@@ -312,15 +288,22 @@ public class MottattDokument extends BaseEntitet {
             return false;
         }
         MottattDokument other = (MottattDokument) obj;
-        return Objects.equals(this.dokumentTypeId, other.dokumentTypeId)
-            && Objects.equals(this.dokumentKategori, other.dokumentKategori)
+        return Objects.equals(this.dokumentKategori, other.dokumentKategori)
+            && Objects.equals(this.dokumentTypeId, other.dokumentTypeId)
             && Objects.equals(this.journalpostId, other.journalpostId)
-            && Objects.equals(this.xmlPayload, other.xmlPayload)
-            && Objects.equals(this.elektroniskRegistrert, other.elektroniskRegistrert);
+            && Objects.equals(this.payload, other.payload);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dokumentTypeId, dokumentKategori, journalpostId, xmlPayload, elektroniskRegistrert);
+        return Objects.hash(dokumentKategori, dokumentTypeId, journalpostId, payload);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<journalpostId=" + journalpostId
+            + ", mottattDato" + mottattDato + "[" + mottattTidspunkt + "]"
+            + ", dokumentKategori=" + dokumentKategori
+            + (payload != null ? ", payload=\\n" + payload + "\\n>" : ">");
     }
 }

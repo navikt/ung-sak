@@ -20,8 +20,6 @@ public enum DokumentGruppe implements Kodeverdi {
 
     SØKNAD("SØKNAD", "Søknad"),
     INNTEKTSMELDING("INNTEKTSMELDING", "Inntektsmelding"),
-    ENDRINGSSØKNAD("ENDRINGSSØKNAD", "Endringssøknad"),
-    KLAGE("KLAGE", "Klage"),
     VEDLEGG("VEDLEGG", "Vedlegg"),
     UDEFINERT("-", "Ikke definert"),
 
