@@ -326,8 +326,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
             .medJournalPostId(new JournalpostId("123"))
-            .medElektroniskRegistrert(true)
-            .medDokumentType(DokumentTypeId.INNTEKTSMELDING)
+            .medDokumentTypeId(DokumentTypeId.INNTEKTSMELDING)
             .medMottattDato(IDAG).build();
         repositoryProvider.getMottatteDokumentRepository().lagre(mottattDokument);
 

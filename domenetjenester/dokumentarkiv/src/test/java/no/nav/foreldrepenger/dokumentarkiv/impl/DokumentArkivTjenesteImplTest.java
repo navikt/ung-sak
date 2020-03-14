@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -39,7 +38,6 @@ import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentJournalpostIkkeFunnet;
 import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Arkivfiltyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Dokumentkategorier;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.DokumenttypeIder;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -57,7 +55,6 @@ public class DokumentArkivTjenesteImplTest {
     private static final Saksnummer KJENT_SAK = new Saksnummer("123456");
     private static final LocalDateTime NOW = LocalDateTime.of(LocalDate.now(), LocalTime.of(10, 10));
     private static final LocalDateTime YESTERDAY = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(10, 10));
-    private static DokumentTypeId DOK_TYPE = DokumentTypeId.INNTEKTSMELDING;
 
     private DokumentArkivTjeneste dokumentApplikasjonTjeneste;
     private JournalConsumer mockJournalProxyService;
@@ -164,35 +161,31 @@ public class DokumentArkivTjenesteImplTest {
 
     @Test
     public void skalRetunereAlleDokumentTyper() throws Exception {
-        DokumentTypeId lege = DokumentTypeId.LEGEERKLÆRING;
         HentKjerneJournalpostListeResponse hentJournalpostListeResponse = new HentKjerneJournalpostListeResponse();
         hentJournalpostListeResponse.getJournalpostListe().addAll(Arrays.asList(
             createJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, NOW, NOW, "U"),
             createJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, YESTERDAY.minusDays(1), YESTERDAY, "I")));
-        hentJournalpostListeResponse.getJournalpostListe().get(0).withVedleggListe(createDokumentinfoRelasjon(ArkivFilType.PDFA.getOffisiellKode(), VariantFormat.ARKIV.getOffisiellKode(), lege.getOffisiellKode()));
+        hentJournalpostListeResponse.getJournalpostListe().get(0).withVedleggListe(createDokumentinfoRelasjon(ArkivFilType.PDFA.getOffisiellKode(), VariantFormat.ARKIV.getOffisiellKode()));
         when(mockJournalProxyService.hentKjerneJournalpostListe(any(HentKjerneJournalpostListeRequest.class))).thenReturn(hentJournalpostListeResponse);
 
-        Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, LocalDate.MIN, Collections.emptyList());
+        Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, LocalDate.MIN);
 
-        assertThat(arkivDokumentTypeIds).hasSize(2);
-        assertThat(arkivDokumentTypeIds).contains(DokumentTypeId.LEGEERKLÆRING);
+        assertThat(arkivDokumentTypeIds).hasSize(1);
     }
 
     @Test
     public void skalRetunereDokumentTyperSiden() throws Exception {
-        DokumentTypeId lege = DokumentTypeId.LEGEERKLÆRING;
         HentKjerneJournalpostListeResponse hentJournalpostListeResponse = new HentKjerneJournalpostListeResponse();
         hentJournalpostListeResponse.getJournalpostListe().addAll(Arrays.asList(
             createJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, NOW, NOW, "U"),
             createJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, YESTERDAY.minusDays(1), YESTERDAY, "I")));
-        hentJournalpostListeResponse.getJournalpostListe().get(0).withVedleggListe(createDokumentinfoRelasjon(ArkivFilType.PDFA.getOffisiellKode(), VariantFormat.ARKIV.getOffisiellKode(), lege.getOffisiellKode()));
+        hentJournalpostListeResponse.getJournalpostListe().get(0).withVedleggListe(createDokumentinfoRelasjon(ArkivFilType.PDFA.getOffisiellKode(), VariantFormat.ARKIV.getOffisiellKode()));
 
         when(mockJournalProxyService.hentKjerneJournalpostListe(any(HentKjerneJournalpostListeRequest.class))).thenReturn(hentJournalpostListeResponse);
 
-        Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, NOW.toLocalDate(), List.of(DokumentTypeId.SØKNAD_ENGANGSSTØNAD_FØDSEL));
+        Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, NOW.toLocalDate());
 
-        assertThat(arkivDokumentTypeIds).hasSize(2);
-        assertThat(arkivDokumentTypeIds).contains(DokumentTypeId.LEGEERKLÆRING);
+        assertThat(arkivDokumentTypeIds).hasSize(1);
     }
 
     @Test
@@ -219,7 +212,7 @@ public class DokumentArkivTjenesteImplTest {
     private Journalpost createJournalpost(ArkivFilType arkivFilTypeKonst, VariantFormat variantFormatKonst, LocalDateTime sendt, LocalDateTime mottatt, String kommunikasjonsretning) throws DatatypeConfigurationException {
         Journalpost journalpost = new Journalpost();
         journalpost.setJournalpostId(JOURNAL_ID.getVerdi());
-        journalpost.setHoveddokument(createDokumentinfoRelasjon(arkivFilTypeKonst.getOffisiellKode(), variantFormatKonst.getOffisiellKode(), DOK_TYPE.getOffisiellKode()));
+        journalpost.setHoveddokument(createDokumentinfoRelasjon(arkivFilTypeKonst.getOffisiellKode(), variantFormatKonst.getOffisiellKode()));
         Journalposttyper kommunikasjonsretninger = new Journalposttyper();
         kommunikasjonsretninger.setValue(kommunikasjonsretning);
         journalpost.setJournalposttype(kommunikasjonsretninger);
@@ -228,12 +221,9 @@ public class DokumentArkivTjenesteImplTest {
         return journalpost;
     }
 
-    private DetaljertDokumentinformasjon createDokumentinfoRelasjon(String filtype, String variantformat, String dokumentTypeId) {
+    private DetaljertDokumentinformasjon createDokumentinfoRelasjon(String filtype, String variantformat) {
         DetaljertDokumentinformasjon dokumentinfoRelasjon = new DetaljertDokumentinformasjon();
         dokumentinfoRelasjon.setDokumentId(DOKUMENT_ID);
-        DokumenttypeIder dokumenttyper = new DokumenttypeIder();
-        dokumenttyper.setValue(dokumentTypeId);
-        dokumentinfoRelasjon.setDokumentTypeId(dokumenttyper);
         Dokumentkategorier dokumentkategorier = new Dokumentkategorier();
         dokumentkategorier.setValue(DokumentKategori.SØKNAD.getOffisiellKode());
         dokumentinfoRelasjon.setDokumentkategori(dokumentkategorier);

@@ -52,7 +52,6 @@ public class DokumentArkivTjeneste {
     private final Set<ArkivFilType> filTyperPdf = byggArkivFilTypeSet();
     private final VariantFormat variantFormatArkiv = VariantFormat.ARKIV;
 
-
     DokumentArkivTjeneste() {
         // for CDI proxy
     }
@@ -139,27 +138,13 @@ public class DokumentArkivTjeneste {
         return journalPosts.stream().filter(jpost -> journalpostId.equals(jpost.getJournalpostId())).findFirst();
     }
 
-    public Set<DokumentTypeId> hentDokumentTypeIdForSak(Saksnummer saksnummer, LocalDate mottattEtterDato, List<DokumentTypeId> eksisterende) {
+    public Set<DokumentTypeId> hentDokumentTypeIdForSak(Saksnummer saksnummer, LocalDate mottattEtterDato) {
         List<ArkivJournalPost> journalPosts = hentAlleJournalposterForSak(saksnummer);
-        Set<DokumentTypeId> alleDTID = new HashSet<>();
-        journalPosts.forEach(jpost -> {
-            ekstraherDTID(alleDTID, jpost.getHovedDokument());
-            jpost.getAndreDokument().forEach(dok -> ekstraherDTID(alleDTID, dok));
-        });
-        if (LocalDate.MIN.equals(mottattEtterDato)) {
-            return alleDTID;
-        }
         Set<DokumentTypeId> etterDato = new HashSet<>();
-        journalPosts.stream().filter(jpost -> jpost.getTidspunkt() != null && !jpost.getTidspunkt().toLocalDate().isBefore(mottattEtterDato))
+        journalPosts.stream().filter(jpost -> (LocalDate.MIN.equals(mottattEtterDato)) || (jpost.getTidspunkt() != null && !jpost.getTidspunkt().toLocalDate().isBefore(mottattEtterDato)))
             .forEach(jpost -> {
                 ekstraherDTID(etterDato, jpost.getHovedDokument());
                 jpost.getAndreDokument().forEach(dok -> ekstraherDTID(etterDato, dok));
-            });
-        alleDTID.stream().filter(dtid -> !etterDato.contains(dtid))
-            .forEach(dtid -> {
-                if (eksisterende.contains(dtid)) {
-                    etterDato.add(dtid);
-                }
             });
         return etterDato;
     }

@@ -43,11 +43,11 @@ public class OpprettOppgaveVurderDokumentTask extends FagsakProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandlendeEnhet = prosessTaskData.getPropertyValue(KEY_BEHANDLENDE_ENHET);
-        DokumentTypeId dokumentTypeId = Optional.ofNullable(prosessTaskData.getPropertyValue(KEY_DOKUMENT_TYPE))
+        DokumentTypeId dokumentGruppe = Optional.ofNullable(prosessTaskData.getPropertyValue(KEY_DOKUMENT_TYPE))
             .map(dtid -> DokumentTypeId.fraKode(dtid)).orElse(DokumentTypeId.UDEFINERT);
-        String beskrivelse = dokumentTypeId.getNavn();
+        String beskrivelse = dokumentGruppe.getNavn();
         if (beskrivelse == null) {
-            beskrivelse = dokumentTypeId.getKode();
+            beskrivelse = dokumentGruppe.getKode();
         }
 
         String oppgaveId = oppgaveTjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(prosessTaskData.getFagsakId(),

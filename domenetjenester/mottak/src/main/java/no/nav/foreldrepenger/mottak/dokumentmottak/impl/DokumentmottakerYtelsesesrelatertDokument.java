@@ -13,7 +13,6 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 
 // Dokumentmottaker for ytelsesrelaterte dokumenter har felles protokoll som fanges her
@@ -62,7 +61,7 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     /* TEMPLATE-metoder SLUTT */
 
     @Override
-    public final void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak, DokumentTypeId dokumentTypeId, BehandlingÅrsakType behandlingÅrsakType) {
+    public final void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
 
         if (!sisteYtelsesbehandling.isPresent()) {

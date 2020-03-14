@@ -104,8 +104,8 @@ public class HistorikkinnslagTjenesteTest {
         builderHoveddok.medJournalpostId(journalpostId);
         builderHoveddok.medDokumentId(dokumentId);
         builderHoveddok.medVariantFormat(variantFormat);
-        builderHoveddok.medDokumentType(DokumentTypeId.SØKNAD_ENGANGSSTØNAD_FØDSEL);
-        builderHoveddok.medDokumentKategori(DokumentKategori.SØKNAD);
+        builderHoveddok.medDokumentType(DokumentTypeId.LEGEERKLÆRING);
+        builderHoveddok.medDokumentKategori(DokumentKategori.BRV);
         builderHoveddok.medArkivFilType(arkivFiltype);
         builderHoveddok.medErHoveddokument(hoveddokument);
         builderHoveddok.medForsendelseMottatt(LocalDate.now());

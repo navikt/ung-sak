@@ -13,6 +13,7 @@ import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 
 @ApplicationScoped
@@ -20,6 +21,7 @@ import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 @DokumentGruppeRef("INNTEKTSMELDING")
 class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertDokument {
 
+    private static final DokumentTypeId INNTEKTSMELDING = DokumentTypeId.INNTEKTSMELDING;
 
     @Inject
     public DokumentmottakerInntektsmelding(DokumentmottakerFelles dokumentmottakerFelles,
@@ -42,22 +44,22 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
         Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
         mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, Optional.empty());
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
-        dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), mottattDokument.getDokumentType());
+        dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), null);
     }
 
     @Override
     public void håndterAvsluttetTidligereBehandling(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         if (behandlingsoppretter.erBehandlingOgFørstegangsbehandlingHenlagt(fagsak)) { //#I6
-            dokumentmottakerFelles.opprettTaskForÅVurdereDokument(fagsak, null, mottattDokument);
+            dokumentmottakerFelles.opprettTaskForÅVurdereInntektsmelding(fagsak, null, mottattDokument);
         } else {
             dokumentmottakerFelles.opprettRevurdering(mottattDokument, fagsak, getBehandlingÅrsakType());
-            dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), mottattDokument.getDokumentType());
+            dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), null);
         }
     }
 
     @Override
     public void oppdaterÅpenBehandlingMedDokument(Behandling behandling, MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) { //#I2
-        dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getDokumentType());
+        dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), null);
         dokumentmottakerFelles.leggTilBehandlingsårsak(behandling, getBehandlingÅrsakType());
         dokumentmottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT);
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
@@ -69,9 +71,9 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
             opprettNyFørstegangsbehandlingForMottattInntektsmelding(mottattDokument, fagsak, avsluttetBehandling);
         } else if (harAvslåttPeriode(avsluttetBehandling) && behandlingsoppretter.harBehandlingsresultatOpphørt(avsluttetBehandling)) { //#I4
             dokumentmottakerFelles.opprettRevurdering(mottattDokument, fagsak, getBehandlingÅrsakType());
-            dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), mottattDokument.getDokumentType());
+            dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), null);
         } else { //#I5
-            dokumentmottakerFelles.opprettTaskForÅVurdereDokument(fagsak, avsluttetBehandling, mottattDokument);
+            dokumentmottakerFelles.opprettTaskForÅVurdereInntektsmelding(fagsak, avsluttetBehandling, mottattDokument);
         }
     }
 
@@ -81,6 +83,6 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
     }
 
     private void opprettNyFørstegangsbehandlingForMottattInntektsmelding(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
-        dokumentmottakerFelles.opprettNyFørstegangFraAvslag(mottattDokument, fagsak, avsluttetBehandling);
+        dokumentmottakerFelles.opprettNyFørstegangFraAvslag(mottattDokument, fagsak, avsluttetBehandling, INNTEKTSMELDING);
     }
 }
