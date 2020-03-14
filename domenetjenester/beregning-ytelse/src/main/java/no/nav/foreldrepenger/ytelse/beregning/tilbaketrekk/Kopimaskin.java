@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag;
+package no.nav.foreldrepenger.ytelse.beregning.tilbaketrekk;
 
 import java.lang.reflect.Field;
 import java.security.AccessController;
