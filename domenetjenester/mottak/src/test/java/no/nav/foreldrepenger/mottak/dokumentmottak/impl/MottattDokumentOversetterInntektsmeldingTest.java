@@ -42,10 +42,9 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.foreldrepenger.domene.iay.modell.NaturalYtelse;
 import no.nav.foreldrepenger.domene.iay.modell.Refusjon;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.inntektsmelding.v1.MottattDokumentOversetterInntektsmelding;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.inntektsmelding.v1.MottattDokumentOversetterInntektsmelding;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.xml.MottattDokumentXmlParser;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.Organisasjon;
@@ -139,7 +138,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         final Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml");
 
-        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayloadXml());
+        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         // Act
         oversetter.trekkUtDataOgPersister(wrapper, mottattDokument, behandling, Optional.empty());
@@ -162,7 +161,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         // Arrange
         final Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml");
-        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayloadXml());
+        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         MottattDokumentWrapperInntektsmelding wrapperSpied = Mockito.spy(wrapper);
 
@@ -197,7 +196,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         // Arrange
         final Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml");
-        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayloadXml());
+        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         MottattDokumentWrapperInntektsmelding wrapperSpied = Mockito.spy(wrapper);
 
@@ -230,7 +229,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         final Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, inntektsmeldingFilnavn);
 
-        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayloadXml());
+        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         oversetter.trekkUtDataOgPersister(wrapper, mottattDokument, behandling, Optional.empty());
         return behandling;
@@ -247,13 +246,12 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         final String xml = fileToStringUtil.readFile(inntektsmeldingFilnavn);
         final MottattDokument.Builder builder = new MottattDokument.Builder();
 
-        MottattDokument mottattDokument = builder.medDokumentType(DokumentTypeId.INNTEKTSMELDING)
+        MottattDokument mottattDokument = builder
             .medFagsakId(behandling.getFagsakId())
             .medMottattDato(LocalDate.now())
             .medBehandlingId(behandling.getId())
-            .medElektroniskRegistrert(true)
             .medJournalPostId(new JournalpostId("123123123"))
-            .medXmlPayload(xml)
+            .medPayload(xml)
             .build();
 
         mottatteDokumentRepository.lagre(mottattDokument);

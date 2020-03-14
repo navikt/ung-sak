@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.MottattDokumentWrapper;
 
 public interface MottattDokumentOversetter<T extends MottattDokumentWrapper<?>> {
 

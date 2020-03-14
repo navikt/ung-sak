@@ -12,7 +12,7 @@ import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRe
 import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.foreldrepenger.behandlingslager.task.FagsakProsessTask;
 import no.nav.foreldrepenger.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.foreldrepenger.mottak.dokumentpersiterer.impl.DokumentPersistererTjeneste;
+import no.nav.foreldrepenger.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -55,10 +55,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
         if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
             behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY));
-        }
-        if (prosessTaskData.getBehandlingId() != null) {
-            innhentDokumentTjeneste.opprettFraTidligereBehandling(mottattDokument, behandlingÅrsakType);
-        } else if (mottattDokument.getPayloadXml() != null) {
+        } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.getPayload() != null) {
              dokumentPersistererTjeneste.xmlTilWrapper(mottattDokument);
         }
         innhentDokumentTjeneste.utfør(mottattDokument, behandlingÅrsakType);

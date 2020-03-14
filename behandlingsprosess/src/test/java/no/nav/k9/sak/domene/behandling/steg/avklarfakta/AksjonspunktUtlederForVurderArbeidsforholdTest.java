@@ -43,7 +43,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
-import no.nav.k9.sak.domene.behandling.steg.avklarfakta.AksjonspunktUtlederForVurderArbeidsforhold;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -304,12 +303,11 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
 
     private void sendInnInntektsmeldingPå(Behandling behandling, String virksomhetOrgnr, InternArbeidsforholdRef arbeidsforholdId) {
         MottattDokument mottattDokument = new MottattDokument.Builder()
-            .medDokumentType(DokumentTypeId.INNTEKTSMELDING)
             .medFagsakId(behandling.getFagsakId())
             .medMottattDato(LocalDate.now())
             .medBehandlingId(behandling.getId())
-            .medElektroniskRegistrert(true)
             .medJournalPostId(new JournalpostId("2"))
+            .medDokumentTypeId(DokumentTypeId.INNTEKTSMELDING)
             .build();
         repositoryProvider.getMottatteDokumentRepository().lagre(mottattDokument);
         final InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()

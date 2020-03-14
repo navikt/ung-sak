@@ -20,7 +20,6 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -45,13 +44,10 @@ import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.iay.modell.Inntektsmelding;
 import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.DokumentDto;
 import no.nav.k9.sak.kontrakt.dokument.DokumentIdDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
-import no.nav.k9.sak.kontrakt.dokument.MottattDokumentDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.exception.ManglerTilgangException;
@@ -64,7 +60,6 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @Transactional
 public class DokumentRestTjeneste {
 
-    public static final String MOTTATT_DOKUMENTER_PATH = "/dokument/hent-mottattdokumentliste";
     public static final String DOKUMENTER_PATH = "/dokument/hent-dokumentliste";
     public static final String DOKUMENT_PATH = "/dokument/hent-dokument";
 
@@ -94,51 +89,6 @@ public class DokumentRestTjeneste {
         this.behandlingRepository = behandlingRepository;
     }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path(MOTTATT_DOKUMENTER_PATH)
-    @Operation(description = "Henter listen av mottatte dokumenter knyttet til en fagsak", tags = "dokument")
-    @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
-    @Deprecated
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
-        Long behandlingId = behandlingIdDto.getBehandlingId();
-        Behandling behandling = behandlingId != null
-            ? behandlingRepository.hentBehandling(behandlingId)
-            : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
-            
-        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
-            .stream()
-            .map(m -> {
-                var dto = new MottattDokumentDto();
-                dto.setMottattDato(m.getMottattDato());
-                dto.setDokumentTypeId(m.getDokumentType());
-                dto.setDokumentKategori(m.getDokumentKategori());
-                return dto;
-            })
-            .collect(Collectors.toList());
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path(MOTTATT_DOKUMENTER_PATH)
-    @Operation(description = "Henter listen av mottatte dokumenter knyttet til en fagsak", tags = "dokument")
-    @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Collection<MottattDokumentDto> hentAlleMottatteDokumenterForBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());    
-        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
-            .stream()
-            .map(m -> {
-                var dto = new MottattDokumentDto();
-                dto.setMottattDato(m.getMottattDato());
-                dto.setDokumentTypeId(m.getDokumentType());
-                dto.setDokumentKategori(m.getDokumentKategori());
-                return dto;
-            })
-            .collect(Collectors.toList());
-    }
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path(DOKUMENTER_PATH)
@@ -160,9 +110,9 @@ public class DokumentRestTjeneste {
             Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger = inntektsmeldingTjeneste
                 .hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
                 .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
+
             // Burde brukt map på dokumentid, men den lagres ikke i praksis.
             Map<JournalpostId, List<MottattDokument>> mottatteIMDokument = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId).stream()
-                .filter(mdok -> DokumentTypeId.INNTEKTSMELDING.getKode().equals(mdok.getDokumentType().getKode()))
                 .collect(Collectors.groupingBy(MottattDokument::getJournalpostId));
 
             List<ArkivJournalPost> journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);

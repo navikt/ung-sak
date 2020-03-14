@@ -40,7 +40,6 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.Tilbake
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.brev.BrevRestTjeneste;
-import no.nav.foreldrepenger.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -278,7 +277,6 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(VilkårRestTjeneste.V2_PATH, "vilkar", uuidQueryParams));
 
         dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidQueryParams));
-        dto.leggTil(getFraMap(DokumentRestTjeneste.MOTTATT_DOKUMENTER_PATH, "mottattdokument", uuidQueryParams));
 
         dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidQueryParams));
 
