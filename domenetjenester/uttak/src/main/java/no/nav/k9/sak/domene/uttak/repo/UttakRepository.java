@@ -26,19 +26,23 @@ public class UttakRepository {
     }
 
     public UttakAktivitet hentOppgittUttak(Long behandlingId) {
-        return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow();
+        return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
     }
-    
+
     public Ferie hentOppgittFerie(Long behandlingId) {
-        return hentOppgittFerieHvisEksisterer(behandlingId).orElseThrow();
+        return hentOppgittFerieHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt ferie for behandlingId=" + behandlingId));
     }
 
     public Søknadsperioder hentOppgittSøknadsperioder(Long behandlingId) {
-        return hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElseThrow();
+        return hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt søknadsperioder for behandlingId=" + behandlingId));
     }
-    
+
+    public OppgittTilsynsordning hentOppgittTilsynsordning(Long behandlingId) {
+        return hentOppgittTilsynsordningHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler tilsynsordning for behandlingId=" + behandlingId));
+    }
+
     public UttakAktivitet hentFastsattUttak(Long behandlingId) {
-        return hentFastsattUttakHvisEksisterer(behandlingId).orElseThrow();
+        return hentFastsattUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler fastsatt uttak for behandlingId=" + behandlingId));
     }
 
     public Optional<UttakAktivitet> hentOppittUttakHvisEksisterer(Long behandlingId) {
@@ -49,7 +53,7 @@ public class UttakRepository {
 
         return grunnlag.map(UttakGrunnlag::getOppgittUttak);
     }
-    
+
     public Optional<UttakAktivitet> hentFastsattUttakHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
@@ -68,7 +72,6 @@ public class UttakRepository {
         return grunnlag.map(UttakGrunnlag::getOppgittFerie);
     }
 
-    
     public Optional<Søknadsperioder> hentOppgittSøknadsperioderHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
@@ -78,50 +81,90 @@ public class UttakRepository {
         return grunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder);
     }
 
+    public Optional<OppgittTilsynsordning> hentOppgittTilsynsordningHvisEksisterer(Long behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
+        }
+        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+
+        return grunnlag.map(UttakGrunnlag::getOppgittTilsynsordning);
+    }
+
+    public void lagreOgFlushNyttGrunnlag(Long behandlingId, UttakGrunnlag grunnlag) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+
+        entityManager.persist(grunnlag);
+        entityManager.flush();
+    }
+
     public void lagreOgFlushOppgittUttak(Long behandlingId, UttakAktivitet input) {
-        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
-        var grunnlagEntitet = new UttakGrunnlag(behandlingId, input, fastsattUttak, søknadsperioder, ferie);
+        var tilsynsordning = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittTilsynsordning).orElse(null);
         entityManager.persist(input);
-        entityManager.persist(grunnlagEntitet);
-        entityManager.flush();
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new UttakGrunnlag(behandlingId, input, fastsattUttak, søknadsperioder, ferie, tilsynsordning));
     }
 
     public void lagreOgFlushFastsattUttak(Long behandlingId, UttakAktivitet input) {
-        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
-        var grunnlagEntitet = new UttakGrunnlag(behandlingId, oppgittUttak, input, søknadsperioder, ferie);
+        var tilsynsordning = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittTilsynsordning).orElse(null);
         entityManager.persist(input);
-        entityManager.persist(grunnlagEntitet);
-        entityManager.flush();
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new UttakGrunnlag(behandlingId, oppgittUttak, input, søknadsperioder, ferie, tilsynsordning));
     }
 
     public void lagreOgFlushSøknadsperioder(Long behandlingId, Søknadsperioder input) {
-        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
-        var grunnlagEntitet = new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, input, ferie);
+        var tilsynsordning = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittTilsynsordning).orElse(null);
         entityManager.persist(input);
-        entityManager.persist(grunnlagEntitet);
-        entityManager.flush();
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, input, ferie, tilsynsordning));
     }
-    
+
     public void lagreOgFlushOppgittFerie(Long behandlingId, Ferie input) {
-        var eksisterendeGrunnlag = deaktiverEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
-        var grunnlagEntitet = new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder, input);
+        var tilsynsordning = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittTilsynsordning).orElse(null);
         entityManager.persist(input);
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder, input, tilsynsordning));
+    }
+
+    public void lagreOgFlushOppgittTilsynsordning(Long behandlingId, OppgittTilsynsordning input) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
+        var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
+        var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
+        var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
+        entityManager.persist(input);
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new UttakGrunnlag(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder, ferie, input));
+    }
+
+    /**
+     * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
+     */
+    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
+        Optional<UttakAktivitet> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
+        søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittUttak(nyBehandlingId, entitet));
+    }
+
+    private void lagreOgFlushNyttGrunnlag(UttakGrunnlag grunnlagEntitet) {
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
     }
-
 
     private Optional<UttakGrunnlag> hentEksisterendeGrunnlag(Long id) {
         final TypedQuery<UttakGrunnlag> query = entityManager.createQuery(
@@ -134,26 +177,12 @@ public class UttakRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    private Optional<UttakGrunnlag> deaktiverEksisterendeGrunnlag(Long behandlingId) {
-        Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR $NON-NLS-1$
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        if (eksisterendeGrunnlag.isPresent()) {
-            // deaktiver eksisterende grunnlag
-    
-            var eksisterende = eksisterendeGrunnlag.get();
-            eksisterende.setAktiv(false);
-            entityManager.persist(eksisterende);
-            entityManager.flush();
+    private void deaktiverEksisterendeGrunnlag(UttakGrunnlag eksisterende) {
+        if (eksisterende == null) {
+            return;
         }
-        return eksisterendeGrunnlag;
-    }
-
-    /**
-     * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
-     */
-    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<UttakAktivitet> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
-        søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittUttak(nyBehandlingId, entitet));
+        eksisterende.setAktiv(false);
+        lagreOgFlushNyttGrunnlag(eksisterende);
     }
 
 }

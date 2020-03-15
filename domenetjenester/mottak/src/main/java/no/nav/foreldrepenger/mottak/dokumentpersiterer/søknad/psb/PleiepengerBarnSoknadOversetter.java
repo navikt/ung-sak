@@ -2,8 +2,6 @@ package no.nav.foreldrepenger.mottak.dokumentpersiterer.søknad.psb;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,11 +18,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadReposito
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.foreldrepenger.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.felles.Barn;
@@ -64,73 +59,67 @@ public class PleiepengerBarnSoknadOversetter {
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    //@Override
+    // @Override
     public void persister(PleiepengerBarnSøknad soknad, Behandling behandling) {
+        var behandlingId = behandling.getId();
+
         // TODO:
         final boolean elektroniskSøknad = false;
-        final SøknadEntitet.Builder søknadBuilder = new SøknadEntitet.Builder()
+        var søknadBuilder = new SøknadEntitet.Builder()
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(soknad.mottattDato.toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(soknad.mottattDato.toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
             .medSpråkkode(getSpraakValg(soknad.språk));
+        var søknadEntitet = søknadBuilder.build();
+        søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
         // Utgår for K9-ytelsene?
-        //.medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
-        //.medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
+        // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
+        // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
 
-        final Long behandlingId = behandling.getId();
 
-        byggMedlemskap(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
+        lagreMedlemskapinfo(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
+        lagrePleietrengende(behandlingId, soknad.barn);
+        
+        lagreUttakOgPerioder(soknad, behandlingId);
 
-        byggPleietrengende(behandling, soknad.barn);
-
-        final Set<Søknadsperiode> perioder = mapTilPerioder(soknad);
-        final var søknadsperioder = new Søknadsperioder(perioder);
-        uttakRepository.lagreOgFlushSøknadsperioder(behandlingId, søknadsperioder);
-
-        final SøknadEntitet søknadEntitet = søknadBuilder
-            .build();
-        søknadRepository.lagreOgFlush(behandling, søknadEntitet);
     }
 
-    private void byggPleietrengende(Behandling behandling, Barn barn) {
+    private void lagreUttakOgPerioder(PleiepengerBarnSøknad soknad, final Long behandlingId) {
+        var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
+        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
+    }
+
+    private void lagrePleietrengende(Long behandlingId, Barn barn) {
         final var norskIdentitetsnummer = barn.norskIdentitetsnummer;
         if (norskIdentitetsnummer != null) {
             final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.verdi));
-            medisinskGrunnlagRepository.lagre(behandling, new Pleietrengende(aktørId.orElseThrow()));
+            medisinskGrunnlagRepository.lagre(behandlingId, new Pleietrengende(aktørId.orElseThrow()));
         } else {
             throw new IllegalArgumentException();
         }
     }
 
-    private Set<Søknadsperiode> mapTilPerioder(PleiepengerBarnSøknad soknad) {
-        return soknad.perioder.keySet().stream()
-            .map(periode -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.fraOgMed, periode.tilOgMed)))
-            .collect(Collectors.toSet());
-    }
-
-    private void byggMedlemskap(Bosteder bosteder, Long behandlingId, LocalDate forsendelseMottatt) {
+    private void lagreMedlemskapinfo(Bosteder bosteder, Long behandlingId, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
 
         // TODO: Hva skal vi ha som "oppholdNå"?
-        //Boolean iNorgeVedFoedselstidspunkt = medlemskap.isINorgeVedFoedselstidspunkt();
-        //oppgittTilknytningBuilder.medOppholdNå(Boolean.TRUE.equals(iNorgeVedFoedselstidspunkt));
+        // Boolean iNorgeVedFoedselstidspunkt = medlemskap.isINorgeVedFoedselstidspunkt();
+        // oppgittTilknytningBuilder.medOppholdNå(Boolean.TRUE.equals(iNorgeVedFoedselstidspunkt));
 
         if (bosteder != null) {
             bosteder.perioder.forEach((periode, opphold) -> {
                 // TODO: "tidligereOpphold" må fjernes fra database og domeneobjekter. Ved bruk må skjæringstidspunkt spesifikt oppgis.
-                //boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
+                // boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
                 oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
                     .medLand(finnLandkode(opphold.land.landkode))
                     .medPeriode(
                         Objects.requireNonNull(periode.fraOgMed),
-                        Objects.requireNonNullElse(periode.tilOgMed, Tid.TIDENES_ENDE)
-                    )
-                    //.erTidligereOpphold(tidligereOpphold)
-                    .build()
-                );
+                        Objects.requireNonNullElse(periode.tilOgMed, Tid.TIDENES_ENDE))
+                    // .erTidligereOpphold(tidligereOpphold)
+                    .build());
             });
             medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
         }

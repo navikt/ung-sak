@@ -14,8 +14,10 @@ import javax.enterprise.inject.Alternative;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 
@@ -60,21 +62,33 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
     @Override
     public Uttaksplan opprettUttaksplan(UttakInput input) {
-        
+
         // FAKE UTTAKSPLAN - 3 måneder innvilget fra søknadsdato for angitte arbeisforhold
-        
+
         BehandlingReferanse ref = input.getBehandlingReferanse();
         var start = input.getSøknadMottattDato();
         var periode = new Periode(start, start.plusMonths(3));
-        var utbetalingsgrader = input.getUttakAktivitetStatusPerioder()
-            .stream().map(uasp -> new UttakUtbetalingsgrad(uasp.getUttakArbeidsforhold(), _100)).collect(Collectors.toList());
+        var utbetalingsgrader = input.getUttakAktivitetPerioder()
+            .stream().map(uasp -> new UttakUtbetalingsgrad(mapUttakArbeidsforhold(uasp), _100)).collect(Collectors.toList());
 
         var uttaksplanPeriode = new InnvilgetUttaksplanperiode(100, utbetalingsgrader);
         var uttaksplan = new Uttaksplan(Map.of(periode, uttaksplanPeriode));
 
         lagreUttakResultatPerioder(ref.getBehandlingUuid(), uttaksplan);
-        
+
         return uttaksplan;
+    }
+
+    private UttakArbeidsforhold mapUttakArbeidsforhold(UttakAktivitetPeriode uttakAktivitetPeriode) {
+        var arb = uttakAktivitetPeriode.getArbeidsgiver();
+        var aktivitetType = uttakAktivitetPeriode.getAktivitetType();
+        var arbRef = uttakAktivitetPeriode.getArbeidsforholdRef();
+        var internArbRef = arbRef == null ? null : arbRef.getReferanse();
+        return new UttakArbeidsforhold(
+            arb == null ? null : arb.getOrgnr(),
+            arb == null ? null : arb.getAktørId(),
+            aktivitetType,
+            internArbRef);
     }
 
 }
