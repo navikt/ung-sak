@@ -163,7 +163,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattDokument
                 builder.medRefusjon(refusjon.getRefusjonsbeloepPrMnd().getValue());
             }
 
-            //Map endring i refusjon
+            // Map endring i refusjon
             Optional.ofNullable(refusjon.getEndringIRefusjonListe())
                 .map(JAXBElement::getValue)
                 .map(EndringIRefusjonsListe::getEndringIRefusjon)

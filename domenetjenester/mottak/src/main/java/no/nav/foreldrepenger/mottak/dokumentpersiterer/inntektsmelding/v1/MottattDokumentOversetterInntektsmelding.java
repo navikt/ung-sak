@@ -170,8 +170,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattDokument
 
     private void mapFerie(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
         for (Periode periode : wrapper.getAvtaltFerie()) {
-            builder.leggTil(UtsettelsePeriode.ferie(periode.getFom().getValue(),
-                periode.getTom().getValue()));
+            builder.leggTil(UtsettelsePeriode.ferie(periode.getFom().getValue(), periode.getTom().getValue()));
         }
     }
 

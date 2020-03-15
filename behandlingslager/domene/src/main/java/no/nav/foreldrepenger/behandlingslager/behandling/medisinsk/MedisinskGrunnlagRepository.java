@@ -38,38 +38,38 @@ public class MedisinskGrunnlagRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(Behandling behandling, Pleietrengende pleietrengende) {
-        final var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+    public void lagre(Long behandlingId, Pleietrengende pleietrengende) {
+        var medisinskGrunnlag = hentEksisterendeGrunnlag(behandlingId);
 
-        final var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
-        final var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
-        final var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
-        lagre(behandling, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
+        var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
+        var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
+        var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
+        lagre(behandlingId, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
     }
 
     public void lagre(Behandling behandling, OmsorgenFor omsorgenFor) {
-        final var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+        var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
 
-        final var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
-        final var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
-        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
-        lagre(behandling, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
+        var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
+        var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
+        var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
+        lagre(behandling.getId(), kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
     }
 
-    public void lagre(Behandling behandling, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
-        Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
+    public void lagre(Long behandlingId, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
+        Objects.requireNonNull(behandlingId, "behandling"); // NOSONAR $NON-NLS-1$
         Objects.requireNonNull(kontinuerligTilsyn, "kontinuerligTilsyn"); // NOSONAR $NON-NLS-1$
 
-        final var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
-        final var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
-        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
+        var medisinskGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
+        var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
 
-        lagre(behandling, kontinuerligTilsyn.build(), legeerklæringer, pleietrengende, omsorgenFor);
+        lagre(behandlingId, kontinuerligTilsyn.build(), legeerklæringer, pleietrengende, omsorgenFor);
     }
 
-    private void lagre(Behandling behandling, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, Pleietrengende pleietrengende, OmsorgenFor omsorgenFor) {
+    private void lagre(Long behandlingId, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, Pleietrengende pleietrengende, OmsorgenFor omsorgenFor) {
 
-        final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+        final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var pleie = pleietrengende;
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
@@ -81,7 +81,7 @@ public class MedisinskGrunnlagRepository {
             entityManager.flush();
         }
 
-        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandling, pleie, kontinuerligTilsyn, legeerklæringer, omsorgenFor);
+        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandlingId, pleie, kontinuerligTilsyn, legeerklæringer, omsorgenFor);
         if (kontinuerligTilsyn != null) {
             entityManager.persist(kontinuerligTilsyn);
         }
@@ -112,9 +112,15 @@ public class MedisinskGrunnlagRepository {
      * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Behandling gammelBehandling, Behandling nyBehandling) {
-        Optional<MedisinskGrunnlag> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandling.getId());
-        søknadEntitet.ifPresent(entitet -> lagre(nyBehandling, new KontinuerligTilsyn(entitet.getKontinuerligTilsyn()),
-            entitet.getLegeerklæringer(),
-            entitet.getPleietrengende(), entitet.getOmsorgenFor()));
+        kopierGrunnlagFraEksisterendeBehandling(gammelBehandling.getId(), nyBehandling.getId());
+    }
+
+    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
+        Optional<MedisinskGrunnlag> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandlingId);
+        søknadEntitet.ifPresent(entitet -> {
+            lagre(nyBehandlingId, new KontinuerligTilsyn(entitet.getKontinuerligTilsyn()),
+                entitet.getLegeerklæringer(),
+                entitet.getPleietrengende(), entitet.getOmsorgenFor());
+        });
     }
 }

@@ -10,7 +10,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 
 @Entity(name = "SøknadGrunnlag")
@@ -21,9 +20,8 @@ class SøknadGrunnlagEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_SOEKNAD")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false, unique = true)
-    private Behandling behandling;
+    @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
+    private Long behandlingId;
 
     @OneToOne
     @JoinColumn(name = "soeknad_id", nullable = false, updatable = false, unique = true)
@@ -39,8 +37,8 @@ class SøknadGrunnlagEntitet extends BaseEntitet {
     SøknadGrunnlagEntitet() {
     }
 
-    SøknadGrunnlagEntitet(Behandling behandling, SøknadEntitet søknad) {
-        this.behandling = behandling;
+    SøknadGrunnlagEntitet(Long behandlingId, SøknadEntitet søknad) {
+        this.behandlingId = behandlingId;
         this.søknad = søknad; // NOSONAR
     }
 

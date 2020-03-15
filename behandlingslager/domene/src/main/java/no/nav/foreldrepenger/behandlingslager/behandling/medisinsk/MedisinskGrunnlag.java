@@ -15,7 +15,6 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
 @Entity(name = "MedisinskGrunnlag")
 @Table(name = "GR_MEDISINSK")
@@ -58,10 +57,10 @@ public class MedisinskGrunnlag extends BaseEntitet {
     MedisinskGrunnlag() {
     }
 
-    MedisinskGrunnlag(Behandling behandling, Pleietrengende pleietrengende,
+    MedisinskGrunnlag(Long behandlingId, Pleietrengende pleietrengende,
                       KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer,
                       OmsorgenFor omsorgenFor) {
-        this.behandlingId = behandling.getId();
+        this.behandlingId = behandlingId;
         this.pleietrengende = pleietrengende;
         this.kontinuerligTilsyn = kontinuerligTilsyn; // NOSONAR
         this.legeerklæringer = legeerklæringer;
@@ -91,8 +90,8 @@ public class MedisinskGrunnlag extends BaseEntitet {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MedisinskGrunnlag that = (MedisinskGrunnlag) o;
+        if (!(o instanceof MedisinskGrunnlag)) return false;
+        var that = (MedisinskGrunnlag) o;
         return Objects.equals(kontinuerligTilsyn, that.kontinuerligTilsyn) &&
             Objects.equals(pleietrengende, that.pleietrengende) &&
             Objects.equals(omsorgenFor, that.omsorgenFor) &&
@@ -106,7 +105,7 @@ public class MedisinskGrunnlag extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "MedisinskGrunnlag{" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", behandling=" + behandlingId +
             ", kontinuerligTilsyn=" + kontinuerligTilsyn +
@@ -114,6 +113,6 @@ public class MedisinskGrunnlag extends BaseEntitet {
             ", omsorgenFor=" + omsorgenFor +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
-            '}';
+            '>';
     }
 }

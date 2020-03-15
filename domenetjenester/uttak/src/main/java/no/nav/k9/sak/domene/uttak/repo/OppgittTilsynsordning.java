@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,29 +22,34 @@ import javax.persistence.Version;
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "Ferie")
-@Table(name = "UT_FERIE")
-public class Ferie extends BaseEntitet {
+@Entity(name = "OppgittTilsynsordning")
+@Table(name = "UT_TILSYNSORDNING")
+public class OppgittTilsynsordning extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_FERIE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_TILSYNSORDNING")
     private Long id;
 
-    @OneToMany(mappedBy = "ferie", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
-    private Set<FeriePeriode> perioder;
+    @OneToMany(mappedBy = "tilsynsordning", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    private Set<TilsynsordningPeriode> perioder;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tilsynsordning_svar", nullable = false, updatable = false)
+    private OppgittTilsynSvar oppgittTilsynSvar;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    Ferie() {
+    OppgittTilsynsordning() {
         // hibernate
     }
 
-    public Ferie(Collection<FeriePeriode> perioder) {
-        Objects.requireNonNull(perioder);
-        this.perioder = perioder.stream()
-            .peek(it -> it.setFerie(this))
+    public OppgittTilsynsordning(Collection<TilsynsordningPeriode> perioder, OppgittTilsynSvar svar) {
+        this.oppgittTilsynSvar = Objects.requireNonNull(svar, "oppgittTilsynSvar");
+        this.perioder = Objects.requireNonNull(perioder)
+            .stream()
+            .peek(it -> it.setTilsynsordning(this))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -50,19 +57,27 @@ public class Ferie extends BaseEntitet {
         return id;
     }
 
-    public Set<FeriePeriode> getPerioder() {
+    public Set<TilsynsordningPeriode> getPerioder() {
         return perioder;
+    }
+    
+    public OppgittTilsynSvar getOppgittTilsynSvar() {
+        return oppgittTilsynSvar;
+    }
+    
+    public boolean erTilsynsordning() {
+        return OppgittTilsynSvar.JA == oppgittTilsynSvar;
     }
 
     public DatoIntervallEntitet getMaksPeriode() {
         var perioder = getPerioder();
         var fom = perioder.stream()
-            .map(FeriePeriode::getPeriode)
+            .map(TilsynsordningPeriode::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
             .min(LocalDate::compareTo)
             .orElseThrow();
         var tom = perioder.stream()
-            .map(FeriePeriode::getPeriode)
+            .map(TilsynsordningPeriode::getPeriode)
             .map(DatoIntervallEntitet::getTomDato)
             .max(LocalDate::compareTo)
             .orElseThrow();
@@ -72,7 +87,7 @@ public class Ferie extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() +"<" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", perioder=" + perioder +
             '>';
@@ -82,14 +97,21 @@ public class Ferie extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof Ferie))
+        if (!(o instanceof OppgittTilsynsordning))
             return false;
-        Ferie fordeling = (Ferie) o;
+        OppgittTilsynsordning fordeling = (OppgittTilsynsordning) o;
         return Objects.equals(perioder, fordeling.perioder);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(perioder);
+    }
+
+    public enum OppgittTilsynSvar {
+        JA,
+        NEI,
+        VET_IKKE;
+
     }
 }
