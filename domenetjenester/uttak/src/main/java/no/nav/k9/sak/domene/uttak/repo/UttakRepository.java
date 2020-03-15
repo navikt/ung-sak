@@ -93,6 +93,13 @@ public class UttakRepository {
     public void lagreOgFlushNyttGrunnlag(Long behandlingId, UttakGrunnlag grunnlag) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        
+        Optional.ofNullable(grunnlag.getOppgittUttak()).ifPresent(entityManager::persist);
+        Optional.ofNullable(grunnlag.getOppgittFerie()).ifPresent(entityManager::persist);
+        Optional.ofNullable(grunnlag.getOppgittSøknadsperioder()).ifPresent(entityManager::persist);
+        Optional.ofNullable(grunnlag.getOppgittTilsynsordning()).ifPresent(entityManager::persist);
+        
+        Optional.ofNullable(grunnlag.getFastsattUttak()).ifPresent(entityManager::persist);
 
         entityManager.persist(grunnlag);
         entityManager.flush();
