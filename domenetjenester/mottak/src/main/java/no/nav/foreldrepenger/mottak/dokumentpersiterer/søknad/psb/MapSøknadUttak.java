@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.mottak.dokumentpersiterer.søknad.psb;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -48,16 +50,19 @@ class MapSøknadUttak {
         return new UttakGrunnlag(behandlingId, oppgittUttak, søknadsperioder, ferie, tilsynsordning);
     }
 
-    private OppgittTilsynsordning mapOppgittTilsynsordning(Tilsynsordning tilsynsordning) {
-        var tilsynSvar = mapTilsynSvar(tilsynsordning.iTilsynsordning);
-        var mappedPerioder = tilsynsordning.opphold.entrySet().stream()
+    private OppgittTilsynsordning mapOppgittTilsynsordning(Tilsynsordning input) {
+        if (input == null || input.opphold == null || input.opphold.isEmpty()) {
+            return null;
+        }
+        var tilsynSvar = mapTilsynSvar(input.iTilsynsordning);
+        var mappedPerioder = input.opphold.entrySet().stream()
             .map(entry -> lagTilsynsordningPeriode(entry.getKey(), entry.getValue()))
             .collect(Collectors.toList());
         return new OppgittTilsynsordning(mappedPerioder, tilsynSvar);
     }
 
     private TilsynsordningPeriode lagTilsynsordningPeriode(Periode periode, TilsynsordningOpphold opphold) {
-       return new TilsynsordningPeriode(periode.fraOgMed, periode.tilOgMed, opphold == null ? Duration.ofHours(0) : opphold.lengde);
+        return new TilsynsordningPeriode(periode.fraOgMed, periode.tilOgMed, opphold == null ? Duration.ofHours(0) : opphold.lengde);
     }
 
     private OppgittTilsynSvar mapTilsynSvar(TilsynsordningSvar iTilsynsordning) {
@@ -77,61 +82,86 @@ class MapSøknadUttak {
     }
 
     private UttakAktivitet mapOppgittUttak(Arbeid arbeid) {
-        var mappedArbeid = arbeid.arbeidstaker.stream()
+        if (arbeid == null) {
+            return null;
+        }
+        var mappedArbeid = nullableList(arbeid.arbeidstaker).stream()
             .flatMap(a -> lagUttakAktivitetPeriode(a).stream()).collect(Collectors.toList());
-        var mappedFrilanser = arbeid.frilanser.stream()
+        var mappedFrilanser = nullableList(arbeid.frilanser).stream()
             .flatMap(f -> lagUttakAktivitetPeriode(f).stream()).collect(Collectors.toList());
-        var mappedSelvstendigNæringsdrivende = arbeid.selvstendigNæringsdrivende.stream()
+        var mappedSelvstendigNæringsdrivende = nullableList(arbeid.selvstendigNæringsdrivende).stream()
             .flatMap(sn -> lagUttakAktivitetPeriode(sn).stream()).collect(Collectors.toList());
 
         var mappedPerioder = new ArrayList<UttakAktivitetPeriode>();
         mappedPerioder.addAll(mappedArbeid);
         mappedPerioder.addAll(mappedFrilanser);
         mappedPerioder.addAll(mappedSelvstendigNæringsdrivende);
+        if (mappedPerioder.isEmpty()) {
+            return null;
+        }
         return new UttakAktivitet(mappedPerioder);
     }
 
-    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(SelvstendigNæringsdrivende selvstendigNæringsdrivende) {
-        var mappedPerioder = selvstendigNæringsdrivende.perioder.entrySet().stream()
-            .map(input -> new UttakAktivitetPeriode(input.getKey().fraOgMed, input.getKey().tilOgMed, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE))
+    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(SelvstendigNæringsdrivende input) {
+        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
+            return Collections.emptyList();
+        }
+        var mappedPerioder = input.perioder.entrySet().stream()
+            .map(entry -> new UttakAktivitetPeriode(entry.getKey().fraOgMed, entry.getKey().tilOgMed, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE))
             .collect(Collectors.toList());
         return mappedPerioder;
     }
 
-    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Frilanser frilanser) {
-        var mappedPerioder = frilanser.perioder.entrySet().stream()
-            .map(input -> new UttakAktivitetPeriode(input.getKey().fraOgMed, input.getKey().tilOgMed, UttakArbeidType.FRILANSER))
+    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Frilanser input) {
+        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
+            return Collections.emptyList();
+        }
+        var mappedPerioder = input.perioder.entrySet().stream()
+            .map(entry -> new UttakAktivitetPeriode(entry.getKey().fraOgMed, entry.getKey().tilOgMed, UttakArbeidType.FRILANSER))
             .collect(Collectors.toList());
         return mappedPerioder;
     }
 
-    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Arbeidstaker arbeidstaker) {
+    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Arbeidstaker input) {
+        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
+            return Collections.emptyList();
+        }
         InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsettelse
-        var arbeidsgiver = arbeidstaker.organisasjonsnummer != null
-            ? Arbeidsgiver.virksomhet(arbeidstaker.organisasjonsnummer.verdi)
-            : (arbeidstaker.norskIdentitetsnummer != null
-                ? Arbeidsgiver.fra(new AktørId(arbeidstaker.norskIdentitetsnummer.verdi))
+        var arbeidsgiver = input.organisasjonsnummer != null
+            ? Arbeidsgiver.virksomhet(input.organisasjonsnummer.verdi)
+            : (input.norskIdentitetsnummer != null
+                ? Arbeidsgiver.fra(new AktørId(input.norskIdentitetsnummer.verdi))
                 : null);
 
-        var mappedPerioder = arbeidstaker.perioder.entrySet().stream()
-            .map(input -> new UttakAktivitetPeriode(input.getKey().fraOgMed, input.getKey().tilOgMed, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef))
+        var mappedPerioder = input.perioder.entrySet().stream()
+            .map(entry -> new UttakAktivitetPeriode(entry.getKey().fraOgMed, entry.getKey().tilOgMed, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef))
             .collect(Collectors.toList());
         return mappedPerioder;
     }
 
-    private Ferie mapFerie(LovbestemtFerie oppgittFerie) {
-        var mappedPerioder = oppgittFerie.perioder.entrySet().stream()
-            .map(input -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(input.getKey().fraOgMed, input.getKey().tilOgMed)))
+    private Ferie mapFerie(LovbestemtFerie input) {
+        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
+            return null;
+        }
+        var mappedPerioder = input.perioder.entrySet().stream()
+            .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().fraOgMed, entry.getKey().tilOgMed)))
             .collect(Collectors.toSet());
 
         return new Ferie(mappedPerioder);
     }
 
-    private Søknadsperioder mapSøknadsperioder(Map<Periode, SøknadsperiodeInfo> perioder) {
-        var mappedPerioder = perioder.entrySet().stream()
-            .map(input -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(input.getKey().fraOgMed, input.getKey().tilOgMed)))
+    private Søknadsperioder mapSøknadsperioder(Map<Periode, SøknadsperiodeInfo> input) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+        var mappedPerioder = input.entrySet().stream()
+            .map(entry -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().fraOgMed, entry.getKey().tilOgMed)))
             .collect(Collectors.toSet());
 
         return new Søknadsperioder(mappedPerioder);
+    }
+
+    private static <T> List<T> nullableList(List<T> input) {
+        return input != null ? input : Collections.emptyList();
     }
 }
