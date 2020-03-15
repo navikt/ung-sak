@@ -15,12 +15,13 @@ import no.nav.k9.sak.domene.uttak.rest.UttakRestTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 @Default
 public class DefaultUttakTjeneste implements UttakTjeneste {
     private static final String FEATURE_TOGGLE = "k9.uttak.rest";
-    
+
     private UttakRestTjeneste uttakRestTjeneste;
     private Unleash unleash;
 
@@ -55,7 +56,8 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     private Person mapPerson(UttakPersonInfo uttakPerson) {
         var person = new Person();
-        person.setAktørId(uttakPerson.getAktørId().getId());
+        AktørId aktørId = uttakPerson.getAktørId();
+        person.setAktørId(aktørId == null ? null : aktørId.getId());
         person.setFødselsdato(uttakPerson.getFødselsdato());
         person.setDødsdato(uttakPerson.getDødsdato());
         return person;

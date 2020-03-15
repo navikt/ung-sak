@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.uttak.input;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 import no.nav.k9.sak.typer.AktørId;
 
@@ -12,7 +11,9 @@ public class UttakPersonInfo {
     private AktørId aktørId;
 
     public UttakPersonInfo(AktørId aktørId, LocalDate fødselsdato, LocalDate dødsdato) {
-        this.aktørId = Objects.requireNonNull(aktørId, "aktørId");
+        if (aktørId == null && fødselsdato == null) {
+            throw new IllegalArgumentException("Kan ikke identifisere person dersom både aktørId og fødselsdato begge er null");
+        }
         this.fødselsdato = fødselsdato;
         this.dødsdato = dødsdato;
     }
