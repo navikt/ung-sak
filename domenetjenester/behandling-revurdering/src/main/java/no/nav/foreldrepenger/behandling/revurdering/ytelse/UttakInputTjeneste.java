@@ -83,7 +83,10 @@ public class UttakInputTjeneste {
     }
 
     private Collection<UttakAktivitetPeriode> lagUttakAktivitetPerioder(BehandlingReferanse ref) {
-        var fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
+        // FIXME K9: etabler alltid fastsatt uttak i fakta om uttak steg i sted fallback
+        Long behandlingId = ref.getBehandlingId();
+        var fastsattUttak = uttakRepository.hentFastsattUttakHvisEksisterer(behandlingId)
+            .orElse(uttakRepository.hentOppgittUttak(behandlingId));
         return fastsattUttak.getPerioder();
     }
 
