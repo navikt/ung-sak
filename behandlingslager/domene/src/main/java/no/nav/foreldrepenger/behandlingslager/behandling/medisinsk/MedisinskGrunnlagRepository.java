@@ -101,7 +101,7 @@ public class MedisinskGrunnlagRepository {
     private Optional<MedisinskGrunnlag> hentEksisterendeGrunnlag(Long id) {
         final TypedQuery<MedisinskGrunnlag> query = entityManager.createQuery(
             "FROM MedisinskGrunnlag s " +
-                "WHERE s.behandling.id = :behandlingId AND s.aktiv = true", MedisinskGrunnlag.class);
+                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", MedisinskGrunnlag.class);
 
         query.setParameter("behandlingId", id);
 
