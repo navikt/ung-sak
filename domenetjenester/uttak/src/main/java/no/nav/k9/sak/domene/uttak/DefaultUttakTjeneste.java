@@ -55,7 +55,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     private Person mapPerson(UttakPersonInfo uttakPerson) {
         var person = new Person();
-        person.setAktørId(uttakPerson.getAktørId().toString());
+        person.setAktørId(uttakPerson.getAktørId().getId());
         person.setFødselsdato(uttakPerson.getFødselsdato());
         person.setDødsdato(uttakPerson.getDødsdato());
         return person;
