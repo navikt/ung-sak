@@ -27,7 +27,7 @@ public class Person {
     @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String aktørId;
 
-    @JsonProperty(value = "fødseldato", required = true)
+    @JsonProperty(value = "fødselsdato", required = true)
     @NotNull
     @PastOrPresent
     private LocalDate fødselsdato;

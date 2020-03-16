@@ -14,6 +14,7 @@ public class UttakPersonInfo {
         if (aktørId == null && fødselsdato == null) {
             throw new IllegalArgumentException("Kan ikke identifisere person dersom både aktørId og fødselsdato begge er null");
         }
+        this.aktørId = aktørId;
         this.fødselsdato = fødselsdato;
         this.dødsdato = dødsdato;
     }
