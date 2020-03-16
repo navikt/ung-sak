@@ -23,7 +23,7 @@ public class KontinuerligTilsynBuilder {
         this.kontinuerligTilsynTidslinje = new LocalDateTimeline<>(kladd.getPerioder()
             .stream()
             .filter(it -> it.getGrad() == 100)
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new GradOgBegrunnelse(it.getGrad(), it.getBegrunnelse())))
+            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new GradOgBegrunnelse(it.getGrad(), it.getBegrunnelse(), it.getÅrsaksammenheng(), it.getÅrsaksammenhengBegrunnelse())))
             .collect(Collectors.toList()));
         this.utvidetTilsynTidslinje = new LocalDateTimeline<>(kladd.getPerioder()
             .stream()
@@ -59,7 +59,7 @@ public class KontinuerligTilsynBuilder {
 
     public KontinuerligTilsynBuilder leggTil(KontinuerligTilsynPeriode periode) {
         validerBuilder();
-        final var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new GradOgBegrunnelse(periode.getGrad(), periode.getBegrunnelse()));
+        final var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new GradOgBegrunnelse(periode.getGrad(), periode.getBegrunnelse(), periode.getÅrsaksammenheng(), periode.getÅrsaksammenhengBegrunnelse()));
         final var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
 
         if (periode.getGrad() == 100) {
@@ -89,7 +89,7 @@ public class KontinuerligTilsynBuilder {
             .toSegments()
             .stream()
             .filter(it -> it.getValue() != null)
-            .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue().getBegrunnelse(), it.getValue().getGrad()))
+            .map(it -> new KontinuerligTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue().getBegrunnelse(), it.getValue().getGrad(), it.getValue().getÅrsaksammenhengBegrunnelse(), it.getValue().getÅrsaksammenheng()))
             .collect(Collectors.toCollection(ArrayList::new));
 
         perioder.addAll(utvidetTilsynTidslinje.compress()

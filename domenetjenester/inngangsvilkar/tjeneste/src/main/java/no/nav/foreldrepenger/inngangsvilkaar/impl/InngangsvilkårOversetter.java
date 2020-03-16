@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.inngangsvilkaar.impl;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -103,7 +104,7 @@ public class InngangsvilkårOversetter {
     private List<PeriodeMedKontinuerligTilsyn> mapKontinuerligTilsyn(List<KontinuerligTilsynPeriode> relevantKontinuerligTilsyn) {
         return relevantKontinuerligTilsyn.stream()
             .filter(it -> it.getGrad() == 100)
-            .filter(KontinuerligTilsynPeriode::getÅrsaksammenheng)
+            .filter(it -> Objects.equals(it.getÅrsaksammenheng(), true))
             .map(it -> new PeriodeMedKontinuerligTilsyn(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()))
             .collect(Collectors.toList());
     }
