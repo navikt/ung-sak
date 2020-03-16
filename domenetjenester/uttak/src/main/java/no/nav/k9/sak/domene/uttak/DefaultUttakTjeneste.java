@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import no.finn.unleash.Unleash;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
@@ -29,7 +31,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     private UttakInMemoryTjeneste uttakInMemoryTjeneste = new UttakInMemoryTjeneste();
 
     private boolean fallbackFeatureToggleForRestEnabled;
-
+    
     protected DefaultUttakTjeneste() {
     }
 
@@ -51,7 +53,9 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         utReq.setSøker(mapPerson(input.getSøker()));
         utReq.setBehandlingId(ref.getBehandlingUuid());
         utReq.setSaksnummer(ref.getSaksnummer());
-
+        
+        Validate.INSTANCE.validate(utReq);
+        
         if (isRestEnabled()) {
             // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
             return uttakRestTjeneste.opprettUttaksplan(utReq);
@@ -91,6 +95,23 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
         } else {
             return uttakInMemoryTjeneste.hentUttaksplaner(behandlingUuid);
+        }
+    }
+    
+    static class Validate {
+        // late initialize pattern - see Josh Bloch effective java
+        private static final Validate INSTANCE = new Validate();
+        private Validator validator;
+        Validate() {
+            try(var validatorFactory = Validation.buildDefaultValidatorFactory()){
+                this.validator = validatorFactory.getValidator();
+            }
+        }
+         void validate(Object obj) {
+           var constraints = this.validator.validate(obj);
+           if(!constraints.isEmpty()) {
+               throw new IllegalArgumentException("Kan ikke validate obj="+ obj + "\n\tValidation errors:"+constraints);
+           }
         }
     }
 }
