@@ -41,6 +41,7 @@ public class UttakInput {
         this.UttakAktivitetPerioder = List.copyOf(input.UttakAktivitetPerioder);
         this.søknadMottattDato = input.søknadMottattDato;
         this.pleietrengende = input.pleietrengende;
+        this.søker = input.søker;
     }
 
     public AktørId getAktørId() {

@@ -79,7 +79,7 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
 
     private UtbetalingsgradArbeidsforholdDto lagArbeidsforhold(UttakArbeidsforhold arb) {
         return new UtbetalingsgradArbeidsforholdDto(lagAktør(arb),
-            new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()),
+            arb.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()) : null,
             new UttakArbeidType(arb.getType().getKode()));
     }
 
