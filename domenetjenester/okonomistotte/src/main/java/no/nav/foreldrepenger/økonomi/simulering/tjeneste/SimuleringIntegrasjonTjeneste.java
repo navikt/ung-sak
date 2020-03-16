@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.økonomi.simulering.tjeneste;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,6 +32,7 @@ public class SimuleringIntegrasjonTjeneste {
 
     public void startSimulering(Behandling behandling) {
         TilkjentYtelseOppdrag input = tilkjentYtelseTjeneste.hentTilkjentYtelseOppdrag(behandling);
+        input.getBehandlingsinfo().setBehandlingTidspunkt(OffsetDateTime.now(ZoneId.of("UTC")));
         restKlient.startSimulering(input);
     }
 

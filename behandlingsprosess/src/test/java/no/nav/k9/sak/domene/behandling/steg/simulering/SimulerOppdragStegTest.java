@@ -7,7 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -33,7 +36,10 @@ import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.domene.behandling.steg.simulering.SimulerOppdragSteg;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class SimulerOppdragStegTest {
@@ -62,6 +68,12 @@ public class SimulerOppdragStegTest {
         behandling = scenario.lagre(repositoryProvider);
         kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling));
         simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjeneste(tilkjentYtelseTjenesteMock, k9OppdragRestKlientMock);
+
+        TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
+        TilkjentYtelse ty = new TilkjentYtelse(LocalDate.now(), Collections.emptyList());
+        InntrekkBeslutning ib = new InntrekkBeslutning(true);
+        TilkjentYtelseOppdrag tyo = new TilkjentYtelseOppdrag(ty, info, UUID.randomUUID(), ib);
+        when(tilkjentYtelseTjenesteMock.hentTilkjentYtelseOppdrag(behandling)).thenReturn(tyo);
     }
 
     @Test
