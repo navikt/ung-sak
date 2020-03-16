@@ -45,17 +45,22 @@ public class SøknadRepository {
 
     public void lagreOgFlush(Behandling behandling, SøknadEntitet søknad) {
         Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
-        final Optional<SøknadGrunnlagEntitet> søknadGrunnlagEntitet = hentEksisterendeGrunnlag(behandling.getId());
+        Long behandlingId = behandling.getId();
+        lagreOgFlush(behandlingId, søknad);
+    }
+
+    public void lagreOgFlush(Long behandlingId, SøknadEntitet søknad) {
+        Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR $NON-NLS-1$
+        Optional<SøknadGrunnlagEntitet> søknadGrunnlagEntitet = hentEksisterendeGrunnlag(behandlingId);
         if (søknadGrunnlagEntitet.isPresent()) {
             // deaktiver eksisterende grunnlag
-
-            final SøknadGrunnlagEntitet søknadGrunnlagEntitet1 = søknadGrunnlagEntitet.get();
-            søknadGrunnlagEntitet1.setAktiv(false);
-            entityManager.persist(søknadGrunnlagEntitet1);
+            var eksisterende = søknadGrunnlagEntitet.get();
+            eksisterende.setAktiv(false);
+            entityManager.persist(eksisterende);
             entityManager.flush();
         }
 
-        final SøknadGrunnlagEntitet grunnlagEntitet = new SøknadGrunnlagEntitet(behandling, søknad);
+        var grunnlagEntitet = new SøknadGrunnlagEntitet(behandlingId, søknad);
         entityManager.persist(søknad);
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
@@ -64,7 +69,7 @@ public class SøknadRepository {
     private Optional<SøknadGrunnlagEntitet> hentEksisterendeGrunnlag(Long behandlingId) {
         final TypedQuery<SøknadGrunnlagEntitet> query = entityManager.createQuery(
             "FROM SøknadGrunnlag s " +
-                "WHERE s.behandling.id = :behandlingId AND s.aktiv = true", SøknadGrunnlagEntitet.class);
+                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", SøknadGrunnlagEntitet.class);
 
         query.setParameter("behandlingId", behandlingId);
 
@@ -82,7 +87,7 @@ public class SøknadRepository {
     @SuppressWarnings("unchecked")
     public Optional<Long> hentBehandlingIdForSisteMottattSøknad(Long fagsakId) {
         Query query = entityManager.createNativeQuery(""
-            + "select gr.behandlingId from GR_SOEKNAD gr "
+            + "select gr.behandling_id from GR_SOEKNAD gr "
             + " inner join SO_SOEKNAD so ON so.id = gr.soeknad_id "
             + " inner join BEHANDLING b on b.id = gr.behandling_id "
             + " where b.fagsak_id = :fagsakId"

@@ -8,14 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
 @Entity(name = "MedisinskGrunnlag")
 @Table(name = "GR_MEDISINSK")
@@ -25,26 +24,25 @@ public class MedisinskGrunnlag extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_MEDISINSK")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false, unique = true)
-    private Behandling behandling;
+    @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
+    private Long behandlingId;
 
-    @OneToOne
+    @ManyToOne
     @Immutable
     @JoinColumn(name = "legeerklaeringer_id", nullable = false, updatable = false, unique = true)
     private Legeerklæringer legeerklæringer;
 
-    @OneToOne
+    @ManyToOne
     @Immutable
     @JoinColumn(name = "pleietrengende_id", nullable = false, updatable = false, unique = true)
     private Pleietrengende pleietrengende;
 
-    @OneToOne
+    @ManyToOne
     @Immutable
     @JoinColumn(name = "omsorgenfor_id", updatable = false, unique = true)
     private OmsorgenFor omsorgenFor;
 
-    @OneToOne
+    @ManyToOne
     @Immutable
     @JoinColumn(name = "kontinuerlig_tilsyn_id", nullable = false, updatable = false, unique = true)
     private KontinuerligTilsyn kontinuerligTilsyn;
@@ -59,10 +57,10 @@ public class MedisinskGrunnlag extends BaseEntitet {
     MedisinskGrunnlag() {
     }
 
-    MedisinskGrunnlag(Behandling behandling, Pleietrengende pleietrengende,
+    MedisinskGrunnlag(Long behandlingId, Pleietrengende pleietrengende,
                       KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer,
                       OmsorgenFor omsorgenFor) {
-        this.behandling = behandling;
+        this.behandlingId = behandlingId;
         this.pleietrengende = pleietrengende;
         this.kontinuerligTilsyn = kontinuerligTilsyn; // NOSONAR
         this.legeerklæringer = legeerklæringer;
@@ -92,8 +90,8 @@ public class MedisinskGrunnlag extends BaseEntitet {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MedisinskGrunnlag that = (MedisinskGrunnlag) o;
+        if (!(o instanceof MedisinskGrunnlag)) return false;
+        var that = (MedisinskGrunnlag) o;
         return Objects.equals(kontinuerligTilsyn, that.kontinuerligTilsyn) &&
             Objects.equals(pleietrengende, that.pleietrengende) &&
             Objects.equals(omsorgenFor, that.omsorgenFor) &&
@@ -107,14 +105,14 @@ public class MedisinskGrunnlag extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "MedisinskGrunnlag{" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
-            ", behandling=" + behandling +
+            ", behandling=" + behandlingId +
             ", kontinuerligTilsyn=" + kontinuerligTilsyn +
             ", legeerklæringer=" + legeerklæringer +
             ", omsorgenFor=" + omsorgenFor +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
-            '}';
+            '>';
     }
 }

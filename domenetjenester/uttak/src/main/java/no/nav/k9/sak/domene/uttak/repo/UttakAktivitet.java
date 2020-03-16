@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,11 +39,11 @@ public class UttakAktivitet extends BaseEntitet {
         // hibernate
     }
 
-    public UttakAktivitet(Set<UttakAktivitetPeriode> perioder) {
+    public UttakAktivitet(Collection<UttakAktivitetPeriode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
             .peek(it -> it.setUttak(this))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Long getId() {
