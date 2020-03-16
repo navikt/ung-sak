@@ -16,6 +16,7 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @Default
@@ -27,13 +28,18 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     private UttakInMemoryTjeneste uttakInMemoryTjeneste = new UttakInMemoryTjeneste();
 
+    private boolean fallbackFeatureToggleForRestEnabled;
+
     protected DefaultUttakTjeneste() {
     }
 
     @Inject
-    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste, Unleash unleash) {
+    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste,
+                                Unleash unleash,
+                                @KonfigVerdi(value = FEATURE_TOGGLE, required = false, defaultVerdi = "false") Boolean fallbackFeatureToggleForRestEnabled) {
         this.uttakRestTjeneste = uttakRestTjeneste;
         this.unleash = unleash;
+        this.fallbackFeatureToggleForRestEnabled = fallbackFeatureToggleForRestEnabled;
     }
 
     @Override
@@ -46,12 +52,16 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         utReq.setBehandlingId(ref.getBehandlingUuid());
         utReq.setSaksnummer(ref.getSaksnummer());
 
-        if (unleash.isEnabled(FEATURE_TOGGLE)) {
+        if (isRestEnabled()) {
             // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
             return uttakRestTjeneste.opprettUttaksplan(utReq);
         } else {
             return uttakInMemoryTjeneste.opprettUttaksplan(input);
         }
+    }
+
+    private boolean isRestEnabled() {
+        return fallbackFeatureToggleForRestEnabled || unleash.isEnabled(FEATURE_TOGGLE);
     }
 
     private Person mapPerson(UttakPersonInfo uttakPerson) {
@@ -76,7 +86,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     @Override
     public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
-        if (unleash.isEnabled(FEATURE_TOGGLE)) {
+        if (isRestEnabled()) {
             // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
             return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
         } else {
