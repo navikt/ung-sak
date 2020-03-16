@@ -37,7 +37,7 @@
 
         <metrics.version>4.1.5</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-        <kalkulus.version>1.0-2020.03.16.014957-7fe1ea3</kalkulus.version>
+        <kalkulus.version>1.0-2020.03.16.102248-62a8195</kalkulus.version>
     </properties>
 
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det har uheldige virkninger ved bruk av import og dependency (bruk composition
