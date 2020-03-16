@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.behandling.prosess;
+package no.nav.foreldrepenger.behandling.hendelse.prosess;
 
 public enum EventHendelse {
     AKSJONSPUNKT_OPPRETTET,

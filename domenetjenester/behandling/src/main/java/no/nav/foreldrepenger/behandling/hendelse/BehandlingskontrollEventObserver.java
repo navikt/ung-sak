@@ -12,9 +12,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.kontrakt.behandling.prosess.BehandlingProsessEventDto;
-import no.nav.k9.sak.kontrakt.behandling.prosess.EventHendelse;
-import no.nav.k9.sak.kontrakt.behandling.prosess.Fagsystem;
+import no.nav.foreldrepenger.behandling.hendelse.prosess.BehandlingProsessEventDto;
+import no.nav.foreldrepenger.behandling.hendelse.prosess.EventHendelse;
+import no.nav.foreldrepenger.behandling.hendelse.prosess.Fagsystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

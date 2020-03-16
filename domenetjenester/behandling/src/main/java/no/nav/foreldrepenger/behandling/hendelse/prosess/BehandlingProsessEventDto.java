@@ -1,10 +1,9 @@
-package no.nav.k9.sak.kontrakt.behandling.prosess;
+package no.nav.foreldrepenger.behandling.hendelse.prosess;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 import java.time.LocalDateTime;
 import java.util.Map;
