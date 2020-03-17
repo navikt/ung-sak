@@ -7,6 +7,7 @@ import java.util.UUID;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
@@ -38,7 +39,7 @@ public interface BeregningTjeneste {
      * @param stegType {@link BehandlingStegType}
      * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
      */
-    List<BeregningAksjonspunktResultat> fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType);
+    KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt

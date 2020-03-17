@@ -44,7 +44,7 @@ public class ForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
-        List<AksjonspunktResultat> aksjonspunkter = kalkulusTjeneste.fortsettBeregning(ref, FORESLÅ_BEREGNINGSGRUNNLAG).stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
+        List<AksjonspunktResultat> aksjonspunkter = kalkulusTjeneste.fortsettBeregning(ref, FORESLÅ_BEREGNINGSGRUNNLAG).getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
     }
 
