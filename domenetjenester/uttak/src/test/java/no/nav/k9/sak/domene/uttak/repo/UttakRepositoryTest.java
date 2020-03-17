@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.uttak.repo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Set;
@@ -24,6 +25,10 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 @RunWith(CdiRunner.class)
 public class UttakRepositoryTest {
 
+    private static final Duration KORT_UKE = Duration.ofHours(10);
+
+    private static final BigDecimal FULLTID_STILLING = BigDecimal.valueOf(100L);
+
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
@@ -42,8 +47,8 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER);
-        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER);
+        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING);
+        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER, KORT_UKE, FULLTID_STILLING);
 
         var perioder = Set.of(p1, p2);
         var data = new UttakAktivitet(perioder);
@@ -60,8 +65,8 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER);
-        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER);
+        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING);
+        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER, KORT_UKE, FULLTID_STILLING);
 
         var perioder = Set.of(p1, p2);
         var data = new UttakAktivitet(perioder);

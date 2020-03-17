@@ -9,6 +9,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -37,28 +38,25 @@ public class Person {
     @PastOrPresent
     private LocalDate dødsdato;
 
-    public String getAktørId() {
-        return aktørId;
+    @JsonCreator
+    public Person(@JsonProperty(value = "aktørId") @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String aktørId,
+                  @JsonProperty(value = "fødselsdato", required = true) @NotNull @PastOrPresent LocalDate fødselsdato,
+                  @JsonProperty(value = "dødsdato") @PastOrPresent LocalDate dødsdato) {
+        this.aktørId = aktørId;
+        this.fødselsdato = fødselsdato;
+        this.dødsdato = dødsdato;
     }
 
-    public void setAktørId(String aktørId) {
-        this.aktørId = aktørId;
+    public String getAktørId() {
+        return aktørId;
     }
 
     public LocalDate getFødselsdato() {
         return fødselsdato;
     }
 
-    public void setFødselsdato(LocalDate fødselsdato) {
-        this.fødselsdato = fødselsdato;
-    }
-
     public LocalDate getDødsdato() {
         return dødsdato;
-    }
-
-    public void setDødsdato(LocalDate dødsdato) {
-        this.dødsdato = dødsdato;
     }
 
 }

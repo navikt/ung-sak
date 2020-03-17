@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.behandling.revurdering.ytelse;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -17,9 +18,12 @@ import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
-import no.nav.k9.sak.domene.uttak.input.UttakPersonInfo;
+import no.nav.k9.sak.domene.uttak.repo.Ferie;
+import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
 
 @ApplicationScoped
 public class UttakInputTjeneste {
@@ -62,32 +66,58 @@ public class UttakInputTjeneste {
         MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(ref.getBehandlingId())
             .orElseThrow(() -> new IllegalStateException("Har ikke Medisinsk Grunnlag for behandling " + ref));
 
-        var statusPerioder = lagUttakAktivitetPerioder(ref);
+        var fastsattUttak = lagFastsattUttakAktivitetPerioder(ref);
+        var søknadsperioder = lagSøknadsperioder(ref);
+        var ferie = lagFerie(ref);
+        var tilsynsordning = lagTilsynsordning(ref);
         var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
-
-        UttakPersonInfo søker = lagPerson(personopplysninger.getSøker());
+        Person søker = lagPerson(personopplysninger.getSøker());
 
         var pleietrengendeAktørId = medisinskGrunnlag.getPleietrengende().getAktørId();
-        UttakPersonInfo pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
+        Person pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
 
         return new UttakInput(ref, iayGrunnlag)
             .medSøker(søker)
             .medPleietrengende(pleietrengende)
-            .medUttakAktivitetPerioder(statusPerioder)
+            .medUttakAktivitetPerioder(fastsattUttak)
+            .medSøknadsperioder(søknadsperioder)
+            .medFerie(ferie)
+            .medTilsynsordning(tilsynsordning)
             .medSøknadMottattDato(søknad.getMottattDato());
     }
 
-    private UttakPersonInfo lagPerson(PersonopplysningEntitet person) {
-        UttakPersonInfo søker = new UttakPersonInfo(person.getAktørId(), person.getFødselsdato(), person.getDødsdato());
-        return søker;
+    private Person lagPerson(PersonopplysningEntitet pe) {
+        return new Person(pe.getAktørId() == null ? null : pe.getAktørId().getId(),
+            pe.getFødselsdato(),
+            pe.getDødsdato());
     }
 
-    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPerioder(BehandlingReferanse ref) {
+    private Collection<UttakAktivitetPeriode> lagFastsattUttakAktivitetPerioder(BehandlingReferanse ref) {
         // FIXME K9: etabler alltid fastsatt uttak i fakta om uttak steg i sted fallback
         Long behandlingId = ref.getBehandlingId();
-        var fastsattUttak = uttakRepository.hentFastsattUttakHvisEksisterer(behandlingId)
-            .orElse(uttakRepository.hentOppgittUttak(behandlingId));
-        return fastsattUttak.getPerioder();
+        var res = uttakRepository.hentFastsattUttakHvisEksisterer(behandlingId).orElse(null);
+        return res == null ? Collections.emptyList() : res.getPerioder();
+    }
+
+    private Søknadsperioder lagSøknadsperioder(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+        var res = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElse(null);
+        if (res.getPerioder() == null || res.getPerioder().isEmpty()) {
+            throw new IllegalStateException("Mangler søkndadsperioder for behandling: " + ref);
+        }
+        return res;
+    }
+
+    private Ferie lagFerie(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+        Ferie res = uttakRepository.hentOppgittFerieHvisEksisterer(behandlingId).orElse(null);
+        return res;
+    }
+
+    private OppgittTilsynsordning lagTilsynsordning(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+        var res = uttakRepository.hentOppgittTilsynsordningHvisEksisterer(behandlingId).orElse(null);
+        return res;
     }
 
 }

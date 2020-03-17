@@ -6,14 +6,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.domene.uttak.repo.Ferie;
+import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 /** Inputstruktur for uttak tjenester. */
 public class UttakInput {
@@ -24,11 +28,15 @@ public class UttakInput {
     private Collection<UttakAktivitetPeriode> UttakAktivitetPerioder = Collections.emptyList();
     private LocalDate søknadMottattDato;
 
-    private UttakPersonInfo pleietrengende;
+    private Person pleietrengende;
 
-    private Map<AktørId, UUID> relaterteBehandlinger = Collections.emptyMap();
+    /** Map av relaterte saker i sakskomplekset. */
+    private Map<AktørId, Saksnummer> relaterteSaker = Collections.emptyMap();
 
-    private UttakPersonInfo søker;
+    private Person søker;
+    private Søknadsperioder søknadsperioder;
+    private Ferie ferie;
+    private OppgittTilsynsordning tilsynsordning;
 
     public UttakInput(BehandlingReferanse behandlingReferanse,
                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
@@ -68,6 +76,10 @@ public class UttakInput {
         return behandlingReferanse.getSkjæringstidspunkt();
     }
 
+    public Map<AktørId, Saksnummer> getRelaterteSaker() {
+        return relaterteSaker;
+    }
+
     public LocalDate getSøknadMottattDato() {
         return søknadMottattDato;
     }
@@ -92,21 +104,48 @@ public class UttakInput {
         return newInput;
     }
 
-    public UttakInput medPleietrengende(UttakPersonInfo pleietrengende) {
+    public UttakInput medPleietrengende(Person pleietrengende) {
         this.pleietrengende = pleietrengende;
         return this;
     }
 
-    public UttakInput medSøker(UttakPersonInfo søker) {
+    public UttakInput medSøker(Person søker) {
         this.søker = søker;
         return this;
     }
 
-    public UttakPersonInfo getPleietrengende() {
+    public Person getPleietrengende() {
         return pleietrengende;
     }
 
-    public UttakPersonInfo getSøker() {
+    public Søknadsperioder getSøknadsperioder() {
+        return søknadsperioder;
+    }
+
+    public Ferie getFerie() {
+        return ferie;
+    }
+
+    public OppgittTilsynsordning getTilsynsordning() {
+        return tilsynsordning;
+    }
+
+    public Person getSøker() {
         return søker;
+    }
+
+    public UttakInput medSøknadsperioder(Søknadsperioder søknadsperioder) {
+        this.søknadsperioder = søknadsperioder;
+        return this;
+    }
+
+    public UttakInput medFerie(Ferie ferie) {
+        this.ferie = ferie;
+        return this;
+    }
+
+    public UttakInput medTilsynsordning(OppgittTilsynsordning tilsynsordning) {
+        this.tilsynsordning = tilsynsordning;
+        return this;
     }
 }
