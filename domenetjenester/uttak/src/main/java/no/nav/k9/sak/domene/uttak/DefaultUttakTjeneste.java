@@ -126,10 +126,10 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         }
 
         private List<LovbestemtFerie> lagLovbestemtFerie(UttakInput input) {
-            return input.getFerie().getPerioder().stream()
+            return input.getFerie() != null ? input.getFerie().getPerioder().stream()
                 .map(FeriePeriode::getPeriode)
                 .map(p -> new LovbestemtFerie(tilPeriode(p)))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : List.of();
         }
 
         private List<Periode> lagSøknadsperioder(UttakInput input) {

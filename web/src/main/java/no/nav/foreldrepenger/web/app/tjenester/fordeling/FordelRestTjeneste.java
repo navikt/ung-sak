@@ -13,19 +13,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -85,7 +79,6 @@ public class FordelRestTjeneste {
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
     private JournalTjeneste journalTjeneste;
     private FagsakTjeneste fagsakTjeneste;
-    private OpprettSakOrchestrator opprettSakOrchestrator;
     private OpprettSakTjeneste opprettSakTjeneste;
     private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
 
@@ -100,7 +93,6 @@ public class FordelRestTjeneste {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.journalTjeneste = journalTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
-        this.opprettSakOrchestrator = opprettSakOrchestrator;
         this.opprettSakTjeneste = opprettSakTjeneste;
         this.dokumentmottakerPleiepengerBarnSoknad = dokumentmottakerPleiepengerBarnSoknad;
     }
@@ -130,7 +122,7 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public SaksnummerDto opprettSak(@Parameter(description = "Oppretter fagsak") @Valid FordelRestTjeneste.AbacOpprettSakSakDto opprettSakDto) {
+    public SaksnummerDto opprettSak(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnEllerOpprettSak opprettSakDto) {
         BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(opprettSakDto.getBehandlingstemaOffisiellKode());
 
         AktørId aktørId = new AktørId(opprettSakDto.getAktørId());
@@ -285,21 +277,6 @@ public class FordelRestTjeneste {
             return AbacDataAttributter.opprett()
                 .leggTil(AppAbacAttributtType.JOURNALPOST_ID, new JournalpostId(getJournalpostId()))
                 .leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer(getSaksnummer()));
-        }
-    }
-
-    public static class AbacOpprettSakSakDto extends FinnEllerOpprettSak implements AbacDto {
-
-        @JsonCreator
-        public AbacOpprettSakSakDto(@JsonProperty("journalpostId") @Digits(integer = 18, fraction = 0) String journalpostId,
-                                   @JsonProperty(value = "behandlingstemaOffisiellKode", required = true) @NotNull @Size(max = 8) @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*$") String behandlingstemaOffisiellKode,
-                                   @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0)String aktørId) {
-            super(journalpostId, behandlingstemaOffisiellKode, aktørId);
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
         }
     }
 }

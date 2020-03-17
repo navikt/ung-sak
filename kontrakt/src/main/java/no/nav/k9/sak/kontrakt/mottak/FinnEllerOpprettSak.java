@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.abac.AbacAttributt;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -50,6 +52,7 @@ public class FinnEllerOpprettSak {
         return behandlingstemaOffisiellKode;
     }
 
+    @AbacAttributt(value = "aktorId", masker = true)
     public String getAktørId() {
         return aktørId;
     }
