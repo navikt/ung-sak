@@ -5,12 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -35,7 +33,6 @@ import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
 import no.nav.k9.sak.kontrakt.søknad.AvklarSaksopplysningerDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
@@ -73,12 +70,10 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     @Test
     public void skal_sette_aksjonspunkt_til_utført_og_lagre_behandling() {
         // Arrange
-        // Bruker BekreftTerminbekreftelseAksjonspunktDto som konkret case
-        var scenario = lagScenarioMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP);
-        var behandling = scenario.lagre(repositoryProvider);
+        var behandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
 
-        var dto = new AvklarFortsattMedlemskapDto(BEGRUNNELSE, List.of());
-
+        var dto = new AvklarSaksopplysningerDto(BEGRUNNELSE + "2", PersonstatusType.BOSA, true);
+        
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), behandling.getId());
 
@@ -86,24 +81,6 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         Behandling oppdatertBehandling = behandlingRepository.hentBehandling(behandling.getId());
         Assertions.assertThat(oppdatertBehandling.getAksjonspunkter()).first().matches(a -> a.erUtført());
 
-    }
-
-    @Test
-    public void skal_sette_ansvarlig_saksbehandler() {
-        // Arrange
-        // Bruker BekreftTerminbekreftelseAksjonspunktDto som konkret case
-        AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjenesteImpl = aksjonspunktApplikasjonTjeneste;
-        AbstractTestScenario<?> scenario = lagScenarioMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        Behandling behandlingSpy = spy(behandling);
-
-        var dto = new AvklarFortsattMedlemskapDto(BEGRUNNELSE, List.of());
-
-        // Act
-        aksjonspunktApplikasjonTjenesteImpl.setAnsvarligSaksbehandler(singletonList(dto), behandlingSpy);
-
-        // Assert
-        verify(behandlingSpy, times(1)).setAnsvarligSaksbehandler(any());
     }
 
     @Test

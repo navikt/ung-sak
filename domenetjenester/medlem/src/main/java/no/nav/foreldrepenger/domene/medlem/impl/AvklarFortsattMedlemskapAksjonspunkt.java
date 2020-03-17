@@ -1,26 +1,39 @@
 package no.nav.foreldrepenger.domene.medlem.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderAdapter;
 
 public class AvklarFortsattMedlemskapAksjonspunkt {
 
+    interface HåndterAksjonspunkt {
+        void håndter(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId);
+    }
+
     private MedlemskapRepository medlemskapRepository;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
+    
+    private final Map<String, HåndterAksjonspunkt> håndterMedlemskapAksjonspunkt = Map.of(
+        AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD.getKode(), this::håndterAksjonspunkt5019_AvklarLovligOpphold,
+        AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT.getKode(), this::håndterAksjonspunkt5023_AvklarOppholdsrett,
+        AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT.getKode(), this::håndterAksjonspunkt5020_AvklarErBosatt,
+        AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE.getKode(), this::håndterAksjonspunkt5021_AvklarGyldigMedlemskapsperiode);
 
     public AvklarFortsattMedlemskapAksjonspunkt(BehandlingRepositoryProvider repositoryProvider, HistorikkTjenesteAdapter historikkTjenesteAdapter) {
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -28,32 +41,29 @@ public class AvklarFortsattMedlemskapAksjonspunkt {
     }
 
     public void oppdater(Long behandlingId, AvklarFortsattMedlemskapAksjonspunktDto adapter) {
-        List<BekreftedePerioderAdapter> perioder = adapter.getPerioder();
-        VurdertMedlemskapPeriodeEntitet.Builder vurdertMedlemskapPeriode = medlemskapRepository.hentBuilderFor(behandlingId);
+        var perioder = adapter.getPerioder();
+        validerMinstEnPeriode(adapter);
 
+        var medlemskapBuilder = medlemskapRepository.hentBuilderFor(behandlingId);
+        
         perioder.forEach(vurderingsperiode -> {
-            VurdertLøpendeMedlemskapBuilder løpendeBuilder = vurdertMedlemskapPeriode.getBuilderFor(vurderingsperiode.getVurderingsdato());
+            validerAksjonspunktForAvklarFortsattMedlemskap(vurderingsperiode);
+
             List<String> aksjonspunkter = vurderingsperiode.getAksjonspunkter();
-            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD.getKode())) {
-                håndterAksjonspunkt5019(løpendeBuilder, vurderingsperiode, behandlingId);
+            validerIngenEkstraMedlemskapAksjonspunkter(aksjonspunkter, håndterMedlemskapAksjonspunkt.keySet());
+
+            var løpendeBuilder = medlemskapBuilder.getBuilderFor(vurderingsperiode.getVurderingsdato());
+            for (var aks : aksjonspunkter) {
+                håndterMedlemskapAksjonspunkt.get(aks).håndter(løpendeBuilder, vurderingsperiode, behandlingId);
             }
-            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT.getKode())) {
-                håndterAksjonspunkt5023(løpendeBuilder, vurderingsperiode, behandlingId);
-            }
-            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT.getKode())) {
-                håndterAksjonspunkt5020(løpendeBuilder, vurderingsperiode, behandlingId);
-            }
-            if (aksjonspunkter.contains(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE.getKode())) {
-                håndterAksjonspunkt5021(løpendeBuilder, vurderingsperiode, behandlingId);
-            }
+
             løpendeBuilder.medBegrunnelse(vurderingsperiode.getBegrunnelse());
-            vurdertMedlemskapPeriode.leggTil(løpendeBuilder);
+            medlemskapBuilder.leggTil(løpendeBuilder);
         });
-        medlemskapRepository.lagreLøpendeMedlemskapVurdering(behandlingId, vurdertMedlemskapPeriode.build());
+        medlemskapRepository.lagreLøpendeMedlemskapVurdering(behandlingId, medlemskapBuilder.build());
     }
 
-    // AVKLAR_LOVLIG_OPPHOLD
-    private void håndterAksjonspunkt5019(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
+    private void håndterAksjonspunkt5019_AvklarLovligOpphold(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
         Boolean nyVerdi = data.getLovligOppholdVurdering();
         Boolean tidligereVerdi = builder.build().getLovligOppholdVurdering();
 
@@ -68,8 +78,7 @@ public class AvklarFortsattMedlemskapAksjonspunkt {
         historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
     }
 
-    // AVKLAR_OPPHOLDSRETT
-    private void håndterAksjonspunkt5023(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
+    private void håndterAksjonspunkt5023_AvklarOppholdsrett(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
         Boolean nyVerdi = data.getOppholdsrettVurdering();
         Boolean tidligereVerdi = builder.build().getOppholdsrettVurdering();
 
@@ -82,8 +91,7 @@ public class AvklarFortsattMedlemskapAksjonspunkt {
         historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
     }
 
-    // AVKLAR_OM_ER_BOSATT
-    private void håndterAksjonspunkt5020(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
+    private void håndterAksjonspunkt5020_AvklarErBosatt(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
         Boolean tidligereVerdi = builder.build().getBosattVurdering();
         Boolean nyVerdi = data.getBosattVurdering();
 
@@ -92,9 +100,8 @@ public class AvklarFortsattMedlemskapAksjonspunkt {
         historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
     }
 
-    // AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE
-    private void håndterAksjonspunkt5021(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
-        MedlemskapManuellVurderingType manuellVurdering = builder.build().getMedlemsperiodeManuellVurdering();
+    private void håndterAksjonspunkt5021_AvklarGyldigMedlemskapsperiode(VurdertLøpendeMedlemskapBuilder builder, BekreftedePerioderAdapter data, Long behandlingId) {
+        var manuellVurdering = builder.build().getMedlemsperiodeManuellVurdering();
         String tidligereVerdi = manuellVurdering != null ? manuellVurdering.getNavn() : null;
         String nyVerdi = data.getMedlemskapManuellVurderingType().getNavn();
 
@@ -121,5 +128,33 @@ public class AvklarFortsattMedlemskapAksjonspunkt {
             return null;
         }
         return harLovligOpphold ? HistorikkEndretFeltVerdiType.LOVLIG_OPPHOLD : HistorikkEndretFeltVerdiType.IKKE_LOVLIG_OPPHOLD;
+    }
+
+    private void validerIngenEkstraMedlemskapAksjonspunkter(Collection<String> aksjonspunkter, Set<String> forventet) {
+        if (!forventet.containsAll(aksjonspunkter)) {
+            List<String> ekstras = new ArrayList<>(aksjonspunkter);
+            ekstras.removeAll(forventet);
+            throw new IllegalArgumentException("Støtter ikke ekstra medlemskap aksjonspunkter : " + ekstras);
+        }
+    }
+
+    private void validerMinstEnPeriode(AvklarFortsattMedlemskapAksjonspunktDto adapter) {
+        if (adapter.getPerioder().isEmpty()) {
+            throw new IllegalArgumentException("Må angi minst 1 periode for å håndtere "
+                + AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE);
+        }
+    }
+
+    private void validerAksjonspunktForAvklarFortsattMedlemskap(BekreftedePerioderAdapter vurderingsperiode) {
+        if (vurderingsperiode.getAksjonspunkter().isEmpty()) {
+            throw new IllegalArgumentException("Må angi minst 1 aksjonspunkt i tillegg for å håndtere "
+                + AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE);
+        }
+        if (vurderingsperiode.getAksjonspunkter().contains(AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE)) {
+            throw new IllegalArgumentException(
+                AvklarFortsattMedlemskapAksjonspunktDto.class.getSimpleName()
+                    + " kan ikke være selv-referende, må inneholde annet medlemskap aksjonspunkt enn "
+                    + AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE);
+        }
     }
 }
