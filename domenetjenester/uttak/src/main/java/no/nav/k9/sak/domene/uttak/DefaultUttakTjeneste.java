@@ -77,12 +77,14 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     @Override
     public Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid) {
-        return hentUttaksplaner(behandlingUuid).stream().findFirst();
+        return hentUttaksplaner(behandlingUuid).values().stream().findFirst();
     }
 
     @Override
-    public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
-        return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
+    public Map<UUID, Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
+        var uttaksplaner = uttakRestTjeneste.hentUttaksplaner(behandlingUuid).getUttaksplaner()
+            .entrySet().stream().collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
+        return new TreeMap<>(uttaksplaner);
     }
 
     static class MapUttakRequest {

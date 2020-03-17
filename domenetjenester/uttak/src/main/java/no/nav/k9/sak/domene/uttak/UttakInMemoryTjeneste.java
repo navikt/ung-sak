@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.uttak;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,12 +47,12 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
 
     @Override
     public Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid) {
-        return hentUttaksplaner(behandlingUuid).stream().findFirst();
+        return hentUttaksplaner(behandlingUuid).values().stream().findFirst();
     }
 
     @Override
-    public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
-        return Arrays.asList(behandlingUuid).stream().map(uuid -> uttaksplaner.get(uuid)).collect(Collectors.toList());
+    public Map<UUID, Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
+        return Arrays.asList(behandlingUuid).stream().collect(Collectors.toMap(uuid -> uuid, uuid -> uttaksplaner.get(uuid)));
     }
 
     public void lagreUttakResultatPerioder(UUID behandlingId, Uttaksplan uttaksplan) {

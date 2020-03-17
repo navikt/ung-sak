@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -24,16 +23,16 @@ public class UttaksplanListe {
     @JsonProperty(value = "uttaksplaner", required = true)
     @Valid
     @NotNull
-    private NavigableMap<UUID, Uttaksplan> uttaksplaner = Collections.emptyNavigableMap();
+    private NavigableMap<String, Uttaksplan> uttaksplaner = Collections.emptyNavigableMap();
 
     @JsonCreator
-    public UttaksplanListe(@JsonProperty(value = "uttaksplaner", required = true) @NotNull @Valid Map<UUID, Uttaksplan> uttaksplaner) {
+    public UttaksplanListe(@JsonProperty(value = "uttaksplaner", required = true) @NotNull @Valid Map<String, Uttaksplan> uttaksplaner) {
         if (uttaksplaner != null) {
             this.uttaksplaner = new TreeMap<>(uttaksplaner);
         }
     }
 
-    public NavigableMap<UUID, Uttaksplan> getUttaksplaner() {
+    public NavigableMap<String, Uttaksplan> getUttaksplaner() {
         return Collections.unmodifiableNavigableMap(uttaksplaner);
     }
 }
