@@ -88,7 +88,7 @@ public class UttakRestTjeneste {
     private <T> T utførOgHent(HttpUriRequest request, String jsonInput, ObjectReaderResponseHandler<T> responseHandler) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
-            if (responseCode == HttpStatus.SC_OK) {
+            if (isOk(responseCode)) {
                 return responseHandler.handleResponse(httpResponse);
             } else {
                 if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
@@ -101,7 +101,7 @@ public class UttakRestTjeneste {
                     return null;
                 }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                String feilmelding = "Kunne ikke hente grunnlag fra "
+                String feilmelding = "Kunne ikke hente utføre kall til "
                     + TJENESTE_NAVN
                     + ", HTTP status=" + httpResponse.getStatusLine()
                     + ". HTTP Errormessage=" + responseBody;
@@ -112,10 +112,14 @@ public class UttakRestTjeneste {
                 }
             }
         } catch (RuntimeException re) {
-            log.warn("Feil ved henting av data. uri=" + request.getURI()
-                + (jsonInput == null ? null : ". jsonInput=" + jsonInput), re);
+            log.warn("Feil ved henting av data. uri=" + request.getURI() + (jsonInput == null ? null : ". jsonInput=" + jsonInput), re);
             throw re;
         }
+    }
+
+    private boolean isOk(int responseCode) {
+        return responseCode == HttpStatus.SC_OK
+            || responseCode == HttpStatus.SC_CREATED;
     }
 
     private URI toUri(URI baseUri, String relativeUri) {
