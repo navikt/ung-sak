@@ -19,10 +19,8 @@ import no.nav.foreldrepenger.mottak.dokumentpersiterer.søknad.psb.PleiepengerBa
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
-import no.nav.tjeneste.virksomhet.sak.v1.informasjon.Sak;
 
 @Dependent
 public class DokumentmottakerPleiepengerBarnSoknad {

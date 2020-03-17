@@ -163,7 +163,12 @@ public class UttaksplanRequest {
     }
 
     public void setSøknadsperioder(List<Periode> søknadsperioder) {
-        this.søknadsperioder = søknadsperioder;
+        if (søknadsperioder == null) {
+            this.søknadsperioder = Collections.emptyList();
+        } else {
+            this.søknadsperioder = new ArrayList<>(søknadsperioder);
+            Collections.sort(this.søknadsperioder);
+        }
     }
 
     @JsonSetter("tilsynsbehov")

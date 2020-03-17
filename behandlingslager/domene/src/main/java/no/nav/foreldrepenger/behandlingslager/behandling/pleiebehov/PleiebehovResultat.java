@@ -8,14 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 
 @Entity(name = "PleiebehovResultat")
 @Table(name = "RS_PLEIEBEHOV")
@@ -25,11 +24,10 @@ public class PleiebehovResultat extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_RS_PLEIEBEHOV")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false, unique = true)
-    private Behandling behandling;
+    @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
+    private Long behandlingId;
 
-    @OneToOne
+    @ManyToOne
     @Immutable
     @JoinColumn(name = "pleieperioder_id", nullable = false, updatable = false, unique = true)
     private Pleieperioder pleieperioder;
@@ -44,8 +42,8 @@ public class PleiebehovResultat extends BaseEntitet {
     PleiebehovResultat() {
     }
 
-    PleiebehovResultat(Behandling behandling, Pleieperioder pleieperioder) {
-        this.behandling = behandling;
+    PleiebehovResultat(Long behandlingId, Pleieperioder pleieperioder) {
+        this.behandlingId = behandlingId;
         this.pleieperioder = pleieperioder; // NOSONAR
     }
 
@@ -59,21 +57,25 @@ public class PleiebehovResultat extends BaseEntitet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         PleiebehovResultat that = (PleiebehovResultat) o;
-        return Objects.equals(pleieperioder, that.pleieperioder);
+        return Objects.equals(behandlingId, that.behandlingId)
+            && Objects.equals(pleieperioder, that.pleieperioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pleieperioder);
+        return Objects.hash(behandlingId, pleieperioder);
     }
 
     @Override
     public String toString() {
         return "PleiebehovResultat{" +
             "id=" + id +
+            ", behandling=" + behandlingId +
             ", kontinuerligTilsyn=" + pleieperioder +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +

@@ -71,8 +71,7 @@ public class UttaksplanRequestTest {
         uttakArbeid.setPerioder(Map.of(new Periode(fom, tom), arbeidsforholdInfo));
         req.setArbeid(List.of(uttakArbeid));
 
-        var tilsynsbehov = new UttakTilsynsbehov();
-        tilsynsbehov.setProsent(100);
+        var tilsynsbehov = new UttakTilsynsbehov(100);
         req.setTilsynsbehov(Map.of(new Periode(fom, tom), tilsynsbehov));
 
         req.setMedlemskap(Map.of(new Periode(fom, tom), new UttakMedlemskap()));

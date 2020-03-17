@@ -41,7 +41,8 @@ public class PleiebehovResultatRepository {
     public void lagreOgFlush(Behandling behandling, PleiebehovBuilder pleiebehovBuilder) {
         Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
         Objects.requireNonNull(pleiebehovBuilder, "pleiebehovBuilder"); // NOSONAR $NON-NLS-1$
-        final Optional<PleiebehovResultat> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+        Long behandlingId = behandling.getId();
+        final Optional<PleiebehovResultat> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
 
@@ -52,7 +53,7 @@ public class PleiebehovResultatRepository {
         }
 
         final var tilsyn = pleiebehovBuilder.build();
-        final PleiebehovResultat grunnlagEntitet = new PleiebehovResultat(behandling, tilsyn);
+        final PleiebehovResultat grunnlagEntitet = new PleiebehovResultat(behandlingId, tilsyn);
         entityManager.persist(tilsyn);
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
@@ -61,7 +62,7 @@ public class PleiebehovResultatRepository {
     private Optional<PleiebehovResultat> hentEksisterendeGrunnlag(Long id) {
         final TypedQuery<PleiebehovResultat> query = entityManager.createQuery(
             "FROM PleiebehovResultat s " +
-                "WHERE s.behandling.id = :behandlingId AND s.aktiv = true", PleiebehovResultat.class);
+                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", PleiebehovResultat.class);
 
         query.setParameter("behandlingId", id);
 

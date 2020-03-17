@@ -1,10 +1,15 @@
 package no.nav.k9.sak.domene.uttak;
 
+import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,7 +21,10 @@ import javax.validation.Validator;
 
 import no.finn.unleash.Unleash;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.FeriePeriode;
@@ -28,6 +36,7 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeid;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforholdPeriodeInfo;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakMedlemskap;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakTilsynsbehov;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
@@ -101,6 +110,12 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     static class MapUttakRequest {
 
+        // TODO K9: blir dette riktig?
+        private static final Set<MedlemskapManuellVurderingType> IGNORE_PERIODER = Set.of(
+            MedlemskapManuellVurderingType.SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS,
+            MedlemskapManuellVurderingType.IKKE_RELEVANT,
+            MedlemskapManuellVurderingType.UDEFINERT);
+
         UttaksplanRequest nyRequest(BehandlingReferanse ref, UttakInput input) {
             var utReq = new UttaksplanRequest();
             utReq.setBarn(input.getPleietrengende());
@@ -113,23 +128,78 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             utReq.setLovbestemtFerie(lagLovbestemtFerie(input));
             utReq.setTilsynsbehov(lagTilsynsbehov(input));
 
+            utReq.setMedlemskap(lagMedlemskap(input));
+
             // TODO K9: Er ikke implementert støtte for SN/Frilans i uttak tjeneste ennå
 
+            // gjør en forhåndsvalidering av request
             Validate.INSTANCE.validate(utReq);
 
             return utReq;
         }
 
+        private Map<Periode, UttakMedlemskap> lagMedlemskap(UttakInput input) {
+            if (input.getMedlemskap() == null) {
+                return Collections.emptyMap();
+            }
+            var maksPeriode = input.getSøknadsperioder().getMaksPeriode();
+
+            var maksDato = maksPeriode.getTomDato();
+            var perioder = input.getMedlemskap().getPerioder();
+            var mapVurderingsdato = new TreeMap<>(perioder.stream()
+                .map(p -> new AbstractMap.SimpleEntry<>(p.getVurderingsdato(), p))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            var mapVurderingsperioder = mapVurderingsdato.entrySet().stream()
+                .map(e -> new AbstractMap.SimpleEntry<>(datoTilPeriode(mapVurderingsdato, e.getKey(), maksDato), lagUttakMedlemskap(e.getValue())))
+                .filter(e -> e.getKey() != null)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return mapVurderingsperioder;
+        }
+
+        private UttakMedlemskap lagUttakMedlemskap(@SuppressWarnings("unused") VurdertLøpendeMedlemskapEntitet value) {
+            // TODO K9: Har ikke data her foreløpig
+            return new UttakMedlemskap();
+        }
+
+        private Periode datoTilPeriode(NavigableMap<LocalDate, VurdertLøpendeMedlemskapEntitet> alleDatoer, LocalDate vurderingsdato, LocalDate maksDato) {
+            LocalDate tom = alleDatoer.higherKey(vurderingsdato);
+            if (tom == null) {
+                tom = maksDato;
+            } else {
+                tom = tom.minusDays(1);
+            }
+
+            var vurdering = alleDatoer.get(vurderingsdato);
+            if (IGNORE_PERIODER.contains(vurdering.getMedlemsperiodeManuellVurdering())) {
+                // håndter som opphør
+                return null;
+            }
+            return new Periode(vurderingsdato, tom);
+        }
+
         private Map<Periode, UttakTilsynsbehov> lagTilsynsbehov(UttakInput input) {
-            // TODO K9: hvordan skal dette håndters ? fra fastsatt uttak?
-            return Map.of();
+            if (input.getPleieperioder() == null) {
+                return Collections.emptyMap();
+            }
+
+            var res = input.getPleieperioder().getPerioder().stream()
+                .map(uap -> new AbstractMap.SimpleEntry<>(tilPeriode(uap.getPeriode()), tilUttakTilsynsbehov(uap)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return new TreeMap<>(res);
+        }
+
+        private UttakTilsynsbehov tilUttakTilsynsbehov(Pleieperiode uap) {
+            return new UttakTilsynsbehov(uap.getGrad().getProsent());
         }
 
         private List<LovbestemtFerie> lagLovbestemtFerie(UttakInput input) {
-            return input.getFerie() != null ? input.getFerie().getPerioder().stream()
+            if (input.getFerie() == null || input.getFerie().getPerioder() == null) {
+                return Collections.emptyList();
+            }
+            return input.getFerie().getPerioder().stream()
                 .map(FeriePeriode::getPeriode)
                 .map(p -> new LovbestemtFerie(tilPeriode(p)))
-                .collect(Collectors.toList()) : List.of();
+                .collect(Collectors.toList());
         }
 
         private List<Periode> lagSøknadsperioder(UttakInput input) {
@@ -180,6 +250,9 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         }
 
         private Map<Tuple<Arbeidsgiver, InternArbeidsforholdRef>, List<UttakAktivitetPeriode>> mappedAktivitet(UttakInput input) {
+            if (input.getUttakAktivitetPerioder() == null) {
+                return Collections.emptyMap();
+            }
             return input.getUttakAktivitetPerioder()
                 .stream().filter(a -> UttakArbeidType.ARBEIDSTAKER.equals(a.getAktivitetType()) && a.getArbeidsgiver() != null)
                 .collect(Collectors.groupingBy(a -> new Tuple<>(a.getArbeidsgiver(), a.getArbeidsforholdRef() != null ? a.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef())));
