@@ -39,6 +39,8 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class UttakRestTjeneste {
+    private static final String TJENESTE_NAVN = "pleiepenger-barn-uttak";
+
     private static final Logger log = LoggerFactory.getLogger(UttakRestTjeneste.class);
 
     private ObjectMapper objectMapper = JsonMapper.getMapper();
@@ -64,7 +66,7 @@ public class UttakRestTjeneste {
             HttpPost kall = new HttpPost(builder.build());
             var json = objectMapper.writer().writeValueAsString(req);
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-            return utførOgHent(kall, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(req.getBehandlingId(), e).toException();
         }
@@ -77,13 +79,13 @@ public class UttakRestTjeneste {
         }
         try {
             HttpGet kall = new HttpGet(builder.build());
-            return utførOgHent(kall, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanListReader));
+            return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanListReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlaner(Arrays.asList(behandlingUuid), e).toException();
         }
     }
 
-    private <T> T utførOgHent(HttpUriRequest request, ObjectReaderResponseHandler<T> responseHandler) throws IOException {
+    private <T> T utførOgHent(HttpUriRequest request, String jsonInput, ObjectReaderResponseHandler<T> responseHandler) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode == HttpStatus.SC_OK) {
@@ -99,8 +101,10 @@ public class UttakRestTjeneste {
                     return null;
                 }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                String feilmelding = "Kunne ikke hente grunnlag fra kalkulus: " + request.getURI()
-                    + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+                String feilmelding = "Kunne ikke hente grunnlag fra "
+                    + TJENESTE_NAVN
+                    + ", HTTP status=" + httpResponse.getStatusLine()
+                    + ". HTTP Errormessage=" + responseBody;
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
                     throw RestTjenesteFeil.FEIL.feilKallTilUttak(feilmelding).toException();
                 } else {
@@ -108,7 +112,8 @@ public class UttakRestTjeneste {
                 }
             }
         } catch (RuntimeException re) {
-            log.warn("Feil ved henting av data fra kalkulus: endpoint=" + request.getURI(), re);
+            log.warn("Feil ved henting av data. uri=" + request.getURI()
+                + (jsonInput == null ? null : ". jsonInput=" + jsonInput), re);
             throw re;
         }
     }
@@ -136,7 +141,7 @@ public class UttakRestTjeneste {
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000004", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttak(UUID behandlingUuid, Throwable t);
-        
+
         @TekniskFeil(feilkode = "K9SAK-UT-1000005", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for behandlinger: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttakForPlaner(Collection<UUID> behandlingUuid, Throwable t);
     }
