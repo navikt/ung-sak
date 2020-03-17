@@ -313,7 +313,7 @@
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-pleiepenger-barn</artifactId>
-                <version>3.0.0.049156d</version>
+                <version>3.0.0.f341850</version>
             </dependency>
 
 			<!-- Prosjektets egne TEST AVHENGIGHETER -->
