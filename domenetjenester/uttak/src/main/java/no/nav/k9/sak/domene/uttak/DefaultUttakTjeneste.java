@@ -112,12 +112,8 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             utReq.setArbeid(mapArbeid(input));
             utReq.setLovbestemtFerie(lagLovbestemtFerie(input));
             utReq.setTilsynsbehov(lagTilsynsbehov(input));
-            
-            // TODO K9: Er ikke implementert støtte for i uttak tjeneste ennå
-            @SuppressWarnings("unused")
-            var mappedSnPerioder = mappedAktivitet(input, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
-            @SuppressWarnings("unused")
-            var mappedFrilanserPerioder = mappedAktivitet(input, UttakArbeidType.FRILANSER);
+
+            // TODO K9: Er ikke implementert støtte for SN/Frilans i uttak tjeneste ennå
 
             Validate.INSTANCE.validate(utReq);
 
@@ -125,7 +121,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         }
 
         private Map<Periode, UttakTilsynsbehov> lagTilsynsbehov(UttakInput input) {
-            // TODO K9: hvordan skal dette håndters ?  fra fastsatt uttak?
+            // TODO K9: hvordan skal dette håndters ? fra fastsatt uttak?
             return Map.of();
         }
 
@@ -144,7 +140,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         }
 
         private List<UttakArbeid> mapArbeid(UttakInput input) {
-            var mappedArbeidPerioder = mappedAktivitet(input, UttakArbeidType.ARBEIDSTAKER);
+            var mappedArbeidPerioder = mappedAktivitet(input);
             var arbeid = mappedArbeidPerioder.entrySet().stream()
                 .map(e -> mapArbeid(e.getKey().getElement1(), e.getKey().getElement2(), UttakArbeidType.ARBEIDSTAKER, e.getValue()))
                 .collect(Collectors.toList());
@@ -183,10 +179,10 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
                 internArbRef);
         }
 
-        private Map<Tuple<Arbeidsgiver, InternArbeidsforholdRef>, List<UttakAktivitetPeriode>> mappedAktivitet(UttakInput input, UttakArbeidType uttakArbeidType) {
+        private Map<Tuple<Arbeidsgiver, InternArbeidsforholdRef>, List<UttakAktivitetPeriode>> mappedAktivitet(UttakInput input) {
             return input.getUttakAktivitetPerioder()
-                .stream().filter(a -> uttakArbeidType.equals(a.getAktivitetType()))
-                .collect(Collectors.groupingBy(a -> new Tuple<>(a.getArbeidsgiver(), a.getArbeidsforholdRef())));
+                .stream().filter(a -> UttakArbeidType.ARBEIDSTAKER.equals(a.getAktivitetType()) && a.getArbeidsgiver() != null)
+                .collect(Collectors.groupingBy(a -> new Tuple<>(a.getArbeidsgiver(), a.getArbeidsforholdRef() != null ? a.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef())));
         }
 
     }
