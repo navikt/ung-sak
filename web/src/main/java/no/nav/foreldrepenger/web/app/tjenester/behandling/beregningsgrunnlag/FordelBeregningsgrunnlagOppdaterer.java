@@ -33,7 +33,7 @@ public class FordelBeregningsgrunnlagOppdaterer implements AksjonspunktOppdatere
     @Override
     public OppdateringResultat oppdater(FordelBeregningsgrunnlagDto dto, AksjonspunktOppdaterParameter param) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        List<BeregningAksjonspunktResultat> resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
         return OppdateringResultat.utenOveropp();
     }
 

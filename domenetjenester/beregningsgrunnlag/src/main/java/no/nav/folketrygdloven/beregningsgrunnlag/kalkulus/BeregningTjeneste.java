@@ -7,6 +7,7 @@ import java.util.UUID;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
@@ -42,9 +43,9 @@ public interface BeregningTjeneste {
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
      * @param referanse Behandlingreferanse
-     * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
+     * @return OppdaterBeregningResultat {@link OppdaterBeregningResultat}
      */
-    List<BeregningAksjonspunktResultat> oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse);
+    OppdaterBeregningResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse);
 
     Beregningsgrunnlag hentEksaktFastsatt(Long behandlingId);
 

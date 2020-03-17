@@ -33,7 +33,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     @Override
     public OppdateringResultat oppdater(AvklarteAktiviteterDto dto, AksjonspunktOppdaterParameter param) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        List<BeregningAksjonspunktResultat> resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
         // TODO Ta i bruk respons for historikk når dette er klart på kalkulus
         return OppdateringResultat.utenOveropp();
     }
