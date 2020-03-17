@@ -19,7 +19,9 @@ import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import no.finn.unleash.Unleash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
@@ -42,31 +44,21 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
 @Default
 public class DefaultUttakTjeneste implements UttakTjeneste {
-    private static final String FEATURE_TOGGLE = "k9.uttak.rest";
-
+    private static final Logger log = LoggerFactory.getLogger(DefaultUttakTjeneste.class);
+    
     private UttakRestTjeneste uttakRestTjeneste;
-    private Unleash unleash;
-
-    private UttakInMemoryTjeneste uttakInMemoryTjeneste = new UttakInMemoryTjeneste();
-
-    private boolean fallbackFeatureToggleForRestEnabled;
 
     protected DefaultUttakTjeneste() {
     }
 
     @Inject
-    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste,
-                                Unleash unleash,
-                                @KonfigVerdi(value = FEATURE_TOGGLE, required = false, defaultVerdi = "false") Boolean fallbackFeatureToggleForRestEnabled) {
+    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste) {
         this.uttakRestTjeneste = uttakRestTjeneste;
-        this.unleash = unleash;
-        this.fallbackFeatureToggleForRestEnabled = fallbackFeatureToggleForRestEnabled;
     }
 
     @Override
@@ -74,17 +66,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         var ref = input.getBehandlingReferanse();
 
         var utReq = new MapUttakRequest().nyRequest(ref, input);
-
-        if (isRestEnabled()) {
-            // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
-            return uttakRestTjeneste.opprettUttaksplan(utReq);
-        } else {
-            return uttakInMemoryTjeneste.opprettUttaksplan(input);
-        }
-    }
-
-    private boolean isRestEnabled() {
-        return fallbackFeatureToggleForRestEnabled || unleash.isEnabled(FEATURE_TOGGLE);
+        return uttakRestTjeneste.opprettUttaksplan(utReq);
     }
 
     @Override
@@ -100,12 +82,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     @Override
     public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
-        if (isRestEnabled()) {
-            // FIXME K9: Fjern feature toggle når uttak tjeneste er oppe
-            return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
-        } else {
-            return uttakInMemoryTjeneste.hentUttaksplaner(behandlingUuid);
-        }
+        return uttakRestTjeneste.hentUttaksplaner(behandlingUuid);
     }
 
     static class MapUttakRequest {
@@ -140,7 +117,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
         private Map<Periode, UttakMedlemskap> lagMedlemskap(UttakInput input) {
             if (input.getMedlemskap() == null) {
-                return Collections.emptyMap();
+                return null;
             }
             var maksPeriode = input.getSøknadsperioder().getMaksPeriode();
 
@@ -171,8 +148,9 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
             var vurdering = alleDatoer.get(vurderingsdato);
             if (IGNORE_PERIODER.contains(vurdering.getMedlemsperiodeManuellVurdering())) {
+                log.warn("Fikk medlemskapperiode: " + vurdering);
                 // håndter som opphør
-                return null;
+//                return null;
             }
             return new Periode(vurderingsdato, tom);
         }

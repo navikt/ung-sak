@@ -62,7 +62,7 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     private String begrunnelse;
 
     @Convert(converter = MedlemskapManuellVurderingTypeKodeverdiConverter.class)
-    @Column(name="manuell_vurd", nullable = false)
+    @Column(name = "manuell_vurd", nullable = false)
     private MedlemskapManuellVurderingType medlemsperiodeManuellVurdering = MedlemskapManuellVurderingType.UDEFINERT;
 
     VurdertLøpendeMedlemskapEntitet() {
@@ -82,7 +82,6 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         this.begrunnelse = medlemskap.getBegrunnelse();
     }
 
-
     @Override
     public Boolean getOppholdsrettVurdering() {
         return oppholdsrettVurdering;
@@ -96,7 +95,6 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         this.vurderingsdato = vuderingsdato;
     }
 
-
     @Override
     public Boolean getLovligOppholdVurdering() {
         return lovligOppholdVurdering;
@@ -106,11 +104,9 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         this.lovligOppholdVurdering = lovligOppholdVurdering;
     }
 
-
     public LocalDate getVurderingsdato() {
         return vurderingsdato;
     }
-
 
     @Override
     public String getBegrunnelse() {
@@ -121,7 +117,6 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         this.begrunnelse = begrunnelse;
     }
 
-
     @Override
     public Boolean getBosattVurdering() {
         return bosattVurdering;
@@ -130,7 +125,6 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     void setBosattVurdering(Boolean bosattVurdering) {
         this.bosattVurdering = bosattVurdering;
     }
-
 
     @Override
     public MedlemskapManuellVurderingType getMedlemsperiodeManuellVurdering() {
@@ -143,6 +137,17 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
             : medlemsperiodeManuellVurdering;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<"
+            + "vurderingsdato=" + vurderingsdato
+            + ", medlemsperiodeManuellVurdering=" + medlemsperiodeManuellVurdering
+            + ", oppholdsrettVurdering=" + oppholdsrettVurdering
+            + ", lovligOppholdVurdering=" + lovligOppholdVurdering
+            + ", erEøsBorger=" + erEøsBorger
+            + ", begrunnelse=" + begrunnelse
+            + ">";
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -155,18 +160,15 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         return Objects.equals(this.vurderingsdato, other.vurderingsdato);
     }
 
-
     @Override
     public int hashCode() {
         return Objects.hashCode(vurderingsdato);
     }
 
-
     @Override
     public Boolean getErEøsBorger() {
         return erEøsBorger;
     }
-
 
     void setErEøsBorger(Boolean erEøsBorger) {
         this.erEøsBorger = erEøsBorger;
@@ -179,7 +181,6 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     void setPeriodeHolder(VurdertMedlemskapPeriodeEntitet periodeHolder) {
         this.periodeHolder = periodeHolder;
     }
-
 
     @Override
     public String getIndexKey() {
