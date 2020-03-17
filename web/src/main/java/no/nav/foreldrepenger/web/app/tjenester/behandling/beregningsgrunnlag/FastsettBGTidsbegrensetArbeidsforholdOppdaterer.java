@@ -38,7 +38,7 @@ public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements Aksjonsp
     public OppdateringResultat oppdater(FastsettBGTidsbegrensetArbeidsforholdDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        List<BeregningAksjonspunktResultat> resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
         // TODO FIKS HISTORIKK
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         håndterEventueltOverflødigAksjonspunkt(behandling)

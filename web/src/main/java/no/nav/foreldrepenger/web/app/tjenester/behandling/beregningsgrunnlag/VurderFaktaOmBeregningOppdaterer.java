@@ -33,7 +33,7 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
     @Override
     public OppdateringResultat oppdater(VurderFaktaOmBeregningDto dto, AksjonspunktOppdaterParameter param) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        List<BeregningAksjonspunktResultat> resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
         // TODO Fiks historikk
 
         return OppdateringResultat.utenOveropp();
