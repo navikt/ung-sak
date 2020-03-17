@@ -17,6 +17,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.MapFraKalkulusTilK9
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningResultat;
 import no.nav.folketrygdloven.kalkulus.UuidDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
@@ -40,7 +41,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
@@ -97,9 +97,15 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public List<BeregningAksjonspunktResultat> fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType) {
+    public KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType) {
         TilstandResponse tilstandResponse = restTjeneste.fortsettBeregning(new FortsettBeregningRequest(referanse.getBehandlingUuid(), YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN, new StegType(stegType.getKode())));
-        return mapFraTilstand(tilstandResponse);
+        List<BeregningAksjonspunktResultat> beregningAksjonspunktResultats = mapFraTilstand(tilstandResponse);
+
+        KalkulusResultat kalkulusResultat = new KalkulusResultat(beregningAksjonspunktResultats);
+        if (tilstandResponse.getVilkarOppfylt() != null) {
+            return kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
+        }
+        return kalkulusResultat;
     }
 
     @Override

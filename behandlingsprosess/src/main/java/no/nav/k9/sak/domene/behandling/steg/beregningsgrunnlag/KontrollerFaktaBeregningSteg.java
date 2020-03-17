@@ -2,14 +2,13 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
@@ -44,8 +43,8 @@ public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        List<BeregningAksjonspunktResultat> aksjonspunkter = kalkulusTjeneste.fortsettBeregning(BehandlingReferanse.fra(behandling), KONTROLLER_FAKTA_BEREGNING);
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+        KalkulusResultat kalkulusResultat = kalkulusTjeneste.fortsettBeregning(BehandlingReferanse.fra(behandling), KONTROLLER_FAKTA_BEREGNING);
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
     }
 
 }
