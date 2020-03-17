@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,30 +21,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UttakArbeidsforholdPeriodeInfo {
 
-    @JsonProperty(value="jobberNormaltPerUke", required=true)
+    @JsonProperty(value = "jobberNormaltPerUke", required = true)
     @NotNull
     @Valid
     private Duration jobberNormaltPerUke;
-    
-    @JsonProperty(value="skalJobbeProsent", required=true)
+
+    @JsonProperty(value = "skalJobbeProsent", required = true)
     @NotNull
     @DecimalMin(value = "0.00")
-    @DecimalMax(value="100.00")
+    @DecimalMax(value = "100.00")
     private BigDecimal skalJobbeProsent;
+
+    @JsonCreator
+    public UttakArbeidsforholdPeriodeInfo(@JsonProperty(value = "jobberNormaltPerUke", required = true) @NotNull @Valid Duration jobberNormaltPerUke,
+                                          @JsonProperty(value = "skalJobbeProsent", required = true) @NotNull @DecimalMin("0.00") @DecimalMax("100.00") BigDecimal skalJobbeProsent) {
+        this.jobberNormaltPerUke = jobberNormaltPerUke;
+        this.skalJobbeProsent = skalJobbeProsent;
+    }
 
     public Duration getJobberNormaltPerUke() {
         return jobberNormaltPerUke;
     }
 
-    public void setJobberNormaltPerUke(Duration jobberNormalt) {
-        this.jobberNormaltPerUke = jobberNormalt;
-    }
-
     public BigDecimal getSkalJobbeProsent() {
         return skalJobbeProsent;
-    }
-
-    public void setSkalJobbeProsent(BigDecimal skalJobbe) {
-        this.skalJobbeProsent = skalJobbe;
     }
 }

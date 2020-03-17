@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -15,6 +17,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+
+import org.hibernate.annotations.Immutable;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
@@ -24,6 +30,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @Entity(name = "UttakAktivitetPeriode")
 @Table(name = "UT_UTTAK_AKTIVITET_PERIODE")
+@Immutable
 public class UttakAktivitetPeriode extends BaseEntitet {
 
     @Id
@@ -43,12 +50,22 @@ public class UttakAktivitetPeriode extends BaseEntitet {
 
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
-    
+
     @Embedded
     private Arbeidsgiver arbeidsgiver;
 
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
+
+    /** prosent av normatl man kommer til å jobbe når man har denne ytelsen. */
+    @Column(name = "skal_jobbe_prosent", updatable = false)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    private BigDecimal skalJobbeProsent;
+
+    /** tid jobber normalt per uke (timer etc.) til vanlig (hvis man ikke hadde hatt denne ytelsen). */
+    @Column(name = "jobber_normalt_per_uke")
+    private Duration jobberNormaltPerUke;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -57,16 +74,25 @@ public class UttakAktivitetPeriode extends BaseEntitet {
     UttakAktivitetPeriode() {
     }
 
-    public UttakAktivitetPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType) {
-        this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
+    public UttakAktivitetPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Duration jobberNormaltPerUke, BigDecimal skalJobbeProsent) {
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
+        this.jobberNormaltPerUke = jobberNormaltPerUke;
+        this.skalJobbeProsent = skalJobbeProsent;
+        validerTilstand();
     }
 
-    public UttakAktivitetPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
+    public UttakAktivitetPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration jobberNormaltPerUke,
+                                 BigDecimal skalJobbeProsent) {
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
+        this.jobberNormaltPerUke = jobberNormaltPerUke;
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+
+        // sett og valider til slutt
+        this.skalJobbeProsent = skalJobbeProsent;
+        validerTilstand();
     }
 
     public UttakAktivitetPeriode(DatoIntervallEntitet periode) {
@@ -93,6 +119,14 @@ public class UttakAktivitetPeriode extends BaseEntitet {
         return aktivitetType;
     }
 
+    public BigDecimal getSkalJobbeProsent() {
+        return skalJobbeProsent;
+    }
+
+    public Duration getJobberNormaltPerUke() {
+        return jobberNormaltPerUke;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -100,12 +134,15 @@ public class UttakAktivitetPeriode extends BaseEntitet {
         if (o == null || !(o instanceof UttakAktivitetPeriode))
             return false;
         UttakAktivitetPeriode that = (UttakAktivitetPeriode) o;
-        return Objects.equals(periode, that.periode);
+        return Objects.equals(periode, that.periode)
+            && Objects.equals(aktivitetType, that.aktivitetType)
+            && Objects.equals(arbeidsgiver, that.arbeidsgiver)
+            && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode);
+        return Objects.hash(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override
@@ -113,8 +150,28 @@ public class UttakAktivitetPeriode extends BaseEntitet {
         return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", periode=" + periode +
+            ", aktivitetType=" + arbeidsgiver +
+            (arbeidsgiver != null ? ", arbeidsgiver=" + arbeidsgiver : "") +
+            (arbeidsforholdRef != null ? ", arbeidsforholdRef=" + arbeidsforholdRef : "") +
+            (skalJobbeProsent != null ? ", skalJobbe=" + skalJobbeProsent + "%" : "") +
+            (jobberNormaltPerUke != null ? ", jobberNormaltPerUke=" + jobberNormaltPerUke : "") +
             ", versjon=" + versjon +
             '>';
+    }
+
+    private void validerTilstand() {
+        if (skalJobbeProsent != null) {
+            if (skalJobbeProsent.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("skalJobbeProsent [" + skalJobbeProsent + "]kan ikke være <0 for periode= " + periode + ", aktivitetType=" + aktivitetType);
+            } else if (skalJobbeProsent.compareTo(BigDecimal.valueOf(100L)) > 0) {
+                throw new IllegalArgumentException("skalJobbeProsent [" + skalJobbeProsent + "]kan ikke være >100 for periode= " + periode + ", aktivitetType=" + aktivitetType);
+            } else if (skalJobbeProsent.compareTo(BigDecimal.ZERO) != 0) {
+                if (this.jobberNormaltPerUke == null) {
+                    // må ha satt jobberNormaltPerUke
+                    throw new IllegalArgumentException("Kan ikke jobberNormaltPerUke==null når skalJobbeProsent=" + skalJobbeProsent + " i periode=" + periode);
+                }
+            }
+        }
     }
 
 }

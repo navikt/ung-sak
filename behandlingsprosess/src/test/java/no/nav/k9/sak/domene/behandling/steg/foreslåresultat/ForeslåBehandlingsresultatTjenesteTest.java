@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +52,6 @@ import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
@@ -98,7 +99,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Before
     public void setup() {
         when(uttakRepository.hentOppgittSøknadsperioder(any())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
-        when(uttakRepository.hentOppgittUttak(any())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER))));
+        when(uttakRepository.hentOppgittUttak(any())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,

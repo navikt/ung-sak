@@ -17,11 +17,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Immutable;
+
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "UttakAktivitet")
 @Table(name = "UT_UTTAK_AKTIVITET")
+@Immutable
 public class UttakAktivitet extends BaseEntitet {
 
     @Id

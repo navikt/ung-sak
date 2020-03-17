@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.mottak.dokumentpersiterer.søknad.psb;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,9 +108,17 @@ class MapSøknadUttak {
             return Collections.emptyList();
         }
         var mappedPerioder = input.perioder.entrySet().stream()
-            .map(entry -> new UttakAktivitetPeriode(entry.getKey().fraOgMed, entry.getKey().tilOgMed, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE))
+            .map(entry -> {
+                Periode k = entry.getKey();
+                var v = entry.getValue();
+                // TODO prosent, normal uke:
+                var skalJobbeProsent = BigDecimal.valueOf(100L);
+                var jobberNormaltPerUke = Duration.parse("PT37H30M");
+                return new UttakAktivitetPeriode(k.fraOgMed, k.tilOgMed, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, jobberNormaltPerUke, skalJobbeProsent);
+            })
             .collect(Collectors.toList());
         return mappedPerioder;
+
     }
 
     private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Frilanser input) {
@@ -117,7 +126,14 @@ class MapSøknadUttak {
             return Collections.emptyList();
         }
         var mappedPerioder = input.perioder.entrySet().stream()
-            .map(entry -> new UttakAktivitetPeriode(entry.getKey().fraOgMed, entry.getKey().tilOgMed, UttakArbeidType.FRILANSER))
+            .map(entry -> {
+                Periode k = entry.getKey();
+                var v = entry.getValue();
+             // TODO prosent, normal uke:
+                var skalJobbeProsent = BigDecimal.valueOf(100L);
+                var jobberNormaltPerUke = Duration.parse("PT37H30M");
+                return new UttakAktivitetPeriode(k.fraOgMed, k.tilOgMed, UttakArbeidType.FRILANSER, jobberNormaltPerUke, skalJobbeProsent);
+            })
             .collect(Collectors.toList());
         return mappedPerioder;
     }
@@ -126,7 +142,7 @@ class MapSøknadUttak {
         if (input == null || input.perioder == null || input.perioder.isEmpty()) {
             return Collections.emptyList();
         }
-        InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsettelse
+        InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
         var arbeidsgiver = input.organisasjonsnummer != null
             ? Arbeidsgiver.virksomhet(input.organisasjonsnummer.verdi)
             : (input.norskIdentitetsnummer != null
@@ -134,7 +150,11 @@ class MapSøknadUttak {
                 : null);
 
         var mappedPerioder = input.perioder.entrySet().stream()
-            .map(entry -> new UttakAktivitetPeriode(entry.getKey().fraOgMed, entry.getKey().tilOgMed, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef))
+            .map(entry -> {
+                Periode k = entry.getKey();
+                var v = entry.getValue();
+                return new UttakAktivitetPeriode(k.fraOgMed, k.tilOgMed, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, v.jobberNormaltPerUke, v.skalJobbeProsent);
+            })
             .collect(Collectors.toList());
         return mappedPerioder;
     }
