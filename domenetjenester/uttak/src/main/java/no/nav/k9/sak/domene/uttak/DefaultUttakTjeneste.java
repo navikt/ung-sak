@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.uttak;
 
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,11 +110,11 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             utReq.setSaksnummer(ref.getSaksnummer());
 
             utReq.setSøknadsperioder(lagSøknadsperioder(input));
-            utReq.setArbeid(mapArbeid(input));
             utReq.setLovbestemtFerie(lagLovbestemtFerie(input));
             utReq.setTilsynsbehov(lagTilsynsbehov(input));
 
             // TODO K9: Er ikke implementert støtte for SN/Frilans i uttak tjeneste ennå
+            utReq.setArbeid(mapArbeid(input));
 
             Validate.INSTANCE.validate(utReq);
 
@@ -121,8 +122,13 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         }
 
         private Map<Periode, UttakTilsynsbehov> lagTilsynsbehov(UttakInput input) {
-            // TODO K9: hvordan skal dette håndters ? fra fastsatt uttak?
-            return Map.of();
+            if (input.getKontinuerligTilsyn() == null) {
+                return Collections.emptyMap();
+            }
+            var res = input.getKontinuerligTilsyn().getPerioder().stream()
+                .map(p -> new AbstractMap.SimpleEntry<>(tilPeriode(p.getPeriode()), new UttakTilsynsbehov(p.getGrad())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return res;
         }
 
         private List<LovbestemtFerie> lagLovbestemtFerie(UttakInput input) {

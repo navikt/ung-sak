@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
+import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.uttak.repo.Ferie;
@@ -37,6 +38,7 @@ public class UttakInput {
     private Søknadsperioder søknadsperioder;
     private Ferie ferie;
     private OppgittTilsynsordning tilsynsordning;
+    private KontinuerligTilsyn kontinuerligTilsyn;
 
     public UttakInput(BehandlingReferanse behandlingReferanse,
                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
@@ -53,6 +55,7 @@ public class UttakInput {
         this.søknadsperioder = input.søknadsperioder;
         this.ferie = input.ferie;
         this.tilsynsordning = input.tilsynsordning;
+        this.kontinuerligTilsyn = input.kontinuerligTilsyn;
         this.relaterteSaker = input.relaterteSaker;
     }
 
@@ -66,6 +69,10 @@ public class UttakInput {
 
     public Collection<UttakAktivitetPeriode> getUttakAktivitetPerioder() {
         return uttakAktivitetPerioder;
+    }
+
+    public KontinuerligTilsyn getKontinuerligTilsyn() {
+        return kontinuerligTilsyn;
     }
 
     public FagsakYtelseType getFagsakYtelseType() {
@@ -155,6 +162,12 @@ public class UttakInput {
     public UttakInput medTilsynsordning(OppgittTilsynsordning tilsynsordning) {
         var newInput = new UttakInput(this);
         newInput.tilsynsordning = tilsynsordning;
+        return newInput;
+    }
+
+    public UttakInput medTilsynbehov(KontinuerligTilsyn tilsyn) {
+        var newInput = new UttakInput(this);
+        this.kontinuerligTilsyn = tilsyn;
         return newInput;
     }
 }

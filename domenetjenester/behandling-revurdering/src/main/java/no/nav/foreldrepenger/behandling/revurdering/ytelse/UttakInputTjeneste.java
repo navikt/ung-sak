@@ -75,7 +75,9 @@ public class UttakInputTjeneste {
 
         var pleietrengendeAktørId = medisinskGrunnlag.getPleietrengende().getAktørId();
         Person pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
-
+        
+        var tilsynbehov = medisinskGrunnlag.getKontinuerligTilsyn();
+        
         return new UttakInput(ref, iayGrunnlag)
             .medSøker(søker)
             .medPleietrengende(pleietrengende)
@@ -83,6 +85,7 @@ public class UttakInputTjeneste {
             .medSøknadsperioder(søknadsperioder)
             .medFerie(ferie)
             .medTilsynsordning(tilsynsordning)
+            .medTilsynbehov(tilsynbehov)
             .medSøknadMottattDato(søknad.getMottattDato());
     }
 
