@@ -50,7 +50,7 @@ import no.nav.vedtak.util.Tuple;
 @Default
 public class DefaultUttakTjeneste implements UttakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(DefaultUttakTjeneste.class);
-    
+
     private UttakRestTjeneste uttakRestTjeneste;
 
     protected DefaultUttakTjeneste() {
@@ -90,8 +90,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         // TODO K9: blir dette riktig?
         private static final Set<MedlemskapManuellVurderingType> IGNORE_PERIODER = Set.of(
             MedlemskapManuellVurderingType.SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS,
-            MedlemskapManuellVurderingType.IKKE_RELEVANT,
-            MedlemskapManuellVurderingType.UDEFINERT);
+            MedlemskapManuellVurderingType.IKKE_RELEVANT);
 
         UttaksplanRequest nyRequest(BehandlingReferanse ref, UttakInput input) {
             var utReq = new UttaksplanRequest();
@@ -147,10 +146,9 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             }
 
             var vurdering = alleDatoer.get(vurderingsdato);
-            if (IGNORE_PERIODER.contains(vurdering.getMedlemsperiodeManuellVurdering())) {
+            if (vurdering.getMedlemsperiodeManuellVurdering() != null && IGNORE_PERIODER.contains(vurdering.getMedlemsperiodeManuellVurdering())) {
                 log.warn("Fikk medlemskapperiode: " + vurdering);
-                // håndter som opphør
-//                return null;
+                // håndter som opphør // return null;
             }
             return new Periode(vurderingsdato, tom);
         }
