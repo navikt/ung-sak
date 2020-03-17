@@ -304,9 +304,6 @@ public class FordelRestTjeneste {
     }
 
     public static class AbacOpprettSakSakDto extends FinnEllerOpprettSak implements AbacDto {
-        public AbacOpprettSakSakDto() {
-            super();
-        }
 
         public AbacOpprettSakSakDto(String journalpostId, String behandlingstemaOffisiellKode, String aktørId) {
             super(journalpostId, behandlingstemaOffisiellKode, aktørId);
