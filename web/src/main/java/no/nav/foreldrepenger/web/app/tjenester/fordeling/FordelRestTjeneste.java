@@ -13,13 +13,19 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +36,6 @@ import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
-import no.nav.foreldrepenger.kontrakter.fordel.VurderFagsystemDto;
 import no.nav.foreldrepenger.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.foreldrepenger.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
 import no.nav.foreldrepenger.mottak.dokumentmottak.impl.DokumentmottakerPleiepengerBarnSoknad;
@@ -283,29 +288,12 @@ public class FordelRestTjeneste {
         }
     }
 
-    public static class AbacVurderFagsystemDto extends VurderFagsystemDto implements AbacDto {
-        public AbacVurderFagsystemDto() {
-            super();
-        }
-
-        public AbacVurderFagsystemDto(String journalpostId, boolean strukturertSøknad, String aktørId, String behandlingstemaOffisiellKode) {
-            super(journalpostId, strukturertSøknad, aktørId, behandlingstemaOffisiellKode);
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            AbacDataAttributter abacDataAttributter = AbacDataAttributter.opprett()
-                .leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
-
-            getJournalpostId().ifPresent(id -> abacDataAttributter.leggTil(AppAbacAttributtType.JOURNALPOST_ID, new JournalpostId(id)));
-            getSaksnummer().ifPresent(sn -> abacDataAttributter.leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer(sn)));
-            return abacDataAttributter;
-        }
-    }
-
     public static class AbacOpprettSakSakDto extends FinnEllerOpprettSak implements AbacDto {
 
-        public AbacOpprettSakSakDto(String journalpostId, String behandlingstemaOffisiellKode, String aktørId) {
+        @JsonCreator
+        public AbacOpprettSakSakDto(@JsonProperty("journalpostId") @Digits(integer = 18, fraction = 0) String journalpostId,
+                                   @JsonProperty(value = "behandlingstemaOffisiellKode", required = true) @NotNull @Size(max = 8) @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*$") String behandlingstemaOffisiellKode,
+                                   @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0)String aktørId) {
             super(journalpostId, behandlingstemaOffisiellKode, aktørId);
         }
 
