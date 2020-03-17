@@ -99,8 +99,8 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
         return grad;
     }
 
-    public Boolean getÅrsaksammenheng() {
-        return årsaksammenheng;
+    public boolean getÅrsaksammenheng() {
+        return årsaksammenheng != null ? årsaksammenheng : false;
     }
 
     public String getÅrsaksammenhengBegrunnelse() {

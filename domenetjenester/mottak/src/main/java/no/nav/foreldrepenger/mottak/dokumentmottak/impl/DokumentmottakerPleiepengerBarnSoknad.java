@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.mottak.dokumentmottak.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
@@ -17,9 +18,11 @@ import no.nav.foreldrepenger.mottak.Behandlingsoppretter;
 import no.nav.foreldrepenger.mottak.dokumentpersiterer.søknad.psb.PleiepengerBarnSoknadOversetter;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
+import no.nav.tjeneste.virksomhet.sak.v1.informasjon.Sak;
 
 @Dependent
 public class DokumentmottakerPleiepengerBarnSoknad {
@@ -54,11 +57,10 @@ public class DokumentmottakerPleiepengerBarnSoknad {
     }
 
 
-    public Behandling mottaSoknad(PleiepengerBarnSøknad soknad) {
-        if (soknad == null) {
-            throw new IllegalArgumentException("soknad == null");
-        }
-        final Behandling behandling = tilknyttBehandling(soknad);
+    public Behandling mottaSoknad(Saksnummer saksnummer, PleiepengerBarnSøknad soknad) {
+        Objects.requireNonNull(saksnummer);
+        Objects.requireNonNull(soknad);
+        final Behandling behandling = tilknyttBehandling(saksnummer);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
         // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av historikk.
         // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
@@ -66,20 +68,23 @@ public class DokumentmottakerPleiepengerBarnSoknad {
         return behandling;
     }
 
-    private Behandling tilknyttBehandling(PleiepengerBarnSøknad soknad) {
+    private Behandling tilknyttBehandling(Saksnummer saksnummer) {
         // FIXME K9 Legg til logikk for valg av fagsak
-        final Fagsak fagsak = createNyFagsakFor(soknad);
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
 
         // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType
         return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
     }
 
-    private Fagsak createNyFagsakFor(PleiepengerBarnSøknad soknad) {
+    public Fagsak createNyFagsakFor(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent) {
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        final Optional<Personinfo> optionalBruker = tpsTjeneste.hentBrukerForFnr(PersonIdent.fra(soknad.søker.norskIdentitetsnummer.verdi));
+        final Optional<Personinfo> optionalBruker = tpsTjeneste.hentBrukerForAktør(brukerIdent);
         // FIXME K9 Håndter feilsituasjonen når man ikke finner brukeren.
         final Personinfo bruker = optionalBruker.get();
-        final FagsakYtelseType ytelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+        return opprettSakFor(saksnummer, bruker, fagsakYtelseType);
+    }
+
+    private Fagsak opprettSakFor(Saksnummer saksnummer, Personinfo bruker, FagsakYtelseType ytelseType) {
         final NavBruker navBruker = brukerTjeneste.hentEllerOpprettFraAktorId(bruker);
         final Fagsak fagsak = Fagsak.opprettNy(ytelseType, navBruker, saksnummer);
         fagsakTjeneste.opprettFagsak(fagsak);

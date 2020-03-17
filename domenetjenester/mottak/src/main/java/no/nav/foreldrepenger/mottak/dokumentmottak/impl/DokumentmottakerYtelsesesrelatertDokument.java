@@ -23,7 +23,7 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     MottatteDokumentTjeneste mottatteDokumentTjeneste;
     Behandlingsoppretter behandlingsoppretter;
     Kompletthetskontroller kompletthetskontroller;
-    
+
     private BehandlingRepository behandlingRepository;
     private BehandlingRevurderingRepository revurderingRepository;
     private UttakTjeneste uttakTjeneste;
@@ -64,7 +64,7 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     public final void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
 
-        if (!sisteYtelsesbehandling.isPresent()) {
+        if (sisteYtelsesbehandling.isEmpty()) {
             håndterIngenTidligereBehandling(fagsak, mottattDokument, behandlingÅrsakType);
             return;
         }

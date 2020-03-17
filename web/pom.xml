@@ -50,7 +50,7 @@
 		    <groupId>no.nav.vedtak.prosesstask</groupId>
 		    <artifactId>prosesstask-legacy</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>kontrakt</artifactId>

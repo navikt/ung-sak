@@ -30,7 +30,6 @@ import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
-import no.nav.foreldrepenger.kontrakter.fordel.OpprettSakDto;
 import no.nav.foreldrepenger.kontrakter.fordel.VurderFagsystemDto;
 import no.nav.foreldrepenger.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.foreldrepenger.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
@@ -43,12 +42,13 @@ import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
+import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSøknadInnsending;
 import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSøknadMottatt;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
@@ -108,7 +108,7 @@ public class FordelRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
     public FagsakInfomasjonDto fagsak(@Parameter(description = "Saksnummeret det skal hentes saksinformasjon om") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummerDto.getVerdi(), false);
-        if (!optFagsak.isPresent() || optFagsak.get().getSkalTilInfotrygd()) {
+        if (optFagsak.isEmpty() || optFagsak.get().getSkalTilInfotrygd()) {
             return null;
         }
         var behandlingTemaFraKodeverksRepo = optFagsak.get().getBehandlingTema();
@@ -125,19 +125,14 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public SaksnummerDto opprettSak(@Parameter(description = "Oppretter fagsak") @Valid AbacOpprettSakDto opprettSakDto) {
-        Optional<String> journalpostId = opprettSakDto.getJournalpostId();
+    public SaksnummerDto opprettSak(@Parameter(description = "Oppretter fagsak") @Valid FordelRestTjeneste.AbacOpprettSakSakDto opprettSakDto) {
         BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(opprettSakDto.getBehandlingstemaOffisiellKode());
 
         AktørId aktørId = new AktørId(opprettSakDto.getAktørId());
 
-        Saksnummer s;
-        if (journalpostId.isPresent()) {
-            s = opprettSakOrchestrator.opprettSak(new JournalpostId(journalpostId.get()), behandlingTema, aktørId);
-        } else {
-            s = opprettSakOrchestrator.opprettSak(behandlingTema, aktørId);
-        }
-        return new SaksnummerDto(s.getVerdi());
+        var nyFagsakFor = dokumentmottakerPleiepengerBarnSoknad.createNyFagsakFor(behandlingTema.getFagsakYtelseType(), aktørId);
+
+        return new SaksnummerDto(nyFagsakFor.getSaksnummer().getVerdi());
     }
 
     @POST
@@ -157,8 +152,8 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public PleiepengerBarnSøknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknad pleiepengerBarnSoknad) {
-        final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad);
+    public PleiepengerBarnSøknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknadInnsending pleiepengerBarnSoknad) {
+        final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad.getSaksnummer(), pleiepengerBarnSoknad.getSøknad());
         return new PleiepengerBarnSøknadMottatt(behandling.getFagsak().getSaksnummer());
     }
 
@@ -179,7 +174,7 @@ public class FordelRestTjeneste {
 
         Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
         Optional<Fagsak> fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false);
-        if (!fagsak.isPresent()) {
+        if (fagsak.isEmpty()) {
             throw new IllegalStateException("Finner ingen fagsak for saksnummer " + saksnummer);
         }
 
@@ -308,12 +303,12 @@ public class FordelRestTjeneste {
         }
     }
 
-    public static class AbacOpprettSakDto extends OpprettSakDto implements AbacDto {
-        public AbacOpprettSakDto() {
+    public static class AbacOpprettSakSakDto extends FinnEllerOpprettSak implements AbacDto {
+        public AbacOpprettSakSakDto() {
             super();
         }
 
-        public AbacOpprettSakDto(String journalpostId, String behandlingstemaOffisiellKode, String aktørId) {
+        public AbacOpprettSakSakDto(String journalpostId, String behandlingstemaOffisiellKode, String aktørId) {
             super(journalpostId, behandlingstemaOffisiellKode, aktørId);
         }
 
