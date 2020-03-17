@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -72,7 +71,7 @@ public class UttakRestTjeneste {
         }
     }
 
-    public List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
+    public UttaksplanListe hentUttaksplaner(UUID... behandlingUuid) {
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
         for (var bid : behandlingUuid) {
             builder.addParameter("behandlingId", bid.toString());

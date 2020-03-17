@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.uttak;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,7 +11,7 @@ public interface UttakTjeneste {
 
     boolean harAvslåttUttakPeriode(UUID behandlingUuid);
 
-    List<Uttaksplan> hentUttaksplaner(UUID... behandlingUuid);
+    Map<UUID, Uttaksplan> hentUttaksplaner(UUID... behandlingUuid);
 
     Optional<Uttaksplan> hentUttaksplan(UUID behandlingUuid);
 
