@@ -9,6 +9,8 @@ import java.util.Objects;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperioder;
 import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.uttak.repo.Ferie;
@@ -23,10 +25,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class UttakInput {
 
     private final BehandlingReferanse behandlingReferanse;
-    private final InntektArbeidYtelseGrunnlag iayGrunnlag;
+    private Ferie ferie;
 
-    private Collection<UttakAktivitetPeriode> uttakAktivitetPerioder = Collections.emptyList();
-    private LocalDate søknadMottattDato;
+    private final InntektArbeidYtelseGrunnlag iayGrunnlag;
+    private Pleieperioder pleieperioder;
 
     private Person pleietrengende;
 
@@ -34,9 +36,11 @@ public class UttakInput {
     private Map<AktørId, Saksnummer> relaterteSaker = Collections.emptyMap();
 
     private Person søker;
+    private LocalDate søknadMottattDato;
     private Søknadsperioder søknadsperioder;
-    private Ferie ferie;
     private OppgittTilsynsordning tilsynsordning;
+    private Collection<UttakAktivitetPeriode> uttakAktivitetPerioder = Collections.emptyList();
+    private VurdertMedlemskapPeriodeEntitet medlemskap;
 
     public UttakInput(BehandlingReferanse behandlingReferanse,
                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
@@ -54,6 +58,8 @@ public class UttakInput {
         this.ferie = input.ferie;
         this.tilsynsordning = input.tilsynsordning;
         this.relaterteSaker = input.relaterteSaker;
+        this.pleieperioder = input.pleieperioder;
+        this.medlemskap= input.medlemskap;
     }
 
     public AktørId getAktørId() {
@@ -64,47 +70,75 @@ public class UttakInput {
         return behandlingReferanse;
     }
 
-    public Collection<UttakAktivitetPeriode> getUttakAktivitetPerioder() {
-        return uttakAktivitetPerioder;
-    }
-
     public FagsakYtelseType getFagsakYtelseType() {
         return behandlingReferanse.getFagsakYtelseType();
+    }
+
+    public Ferie getFerie() {
+        return ferie;
     }
 
     public InntektArbeidYtelseGrunnlag getIayGrunnlag() {
         return iayGrunnlag;
     }
+    
+    public VurdertMedlemskapPeriodeEntitet getMedlemskap() {
+        return medlemskap;
+    }
 
-    public Skjæringstidspunkt getSkjæringstidspunkt() {
-        return behandlingReferanse.getSkjæringstidspunkt();
+    public Pleieperioder getPleieperioder() {
+        return pleieperioder;
+    }
+
+    public Person getPleietrengende() {
+        return pleietrengende;
     }
 
     public Map<AktørId, Saksnummer> getRelaterteSaker() {
         return relaterteSaker;
     }
 
+    public Skjæringstidspunkt getSkjæringstidspunkt() {
+        return behandlingReferanse.getSkjæringstidspunkt();
+    }
+
+    public Person getSøker() {
+        return søker;
+    }
+
     public LocalDate getSøknadMottattDato() {
         return søknadMottattDato;
+    }
+
+    public Søknadsperioder getSøknadsperioder() {
+        return søknadsperioder;
+    }
+
+    public OppgittTilsynsordning getTilsynsordning() {
+        return tilsynsordning;
+    }
+
+    public Collection<UttakAktivitetPeriode> getUttakAktivitetPerioder() {
+        return uttakAktivitetPerioder;
     }
 
     public UttakYrkesaktiviteter getYrkesaktiviteter() {
         return new UttakYrkesaktiviteter(this);
     }
 
-    public UttakInput medUttakAktivitetPerioder(Collection<UttakAktivitetPeriode> statusPerioder) {
-        var newInput = new UttakInput(this);
-        newInput.uttakAktivitetPerioder = List.copyOf(statusPerioder);
-        return newInput;
-    }
-
     public boolean harAktørArbeid() {
         return iayGrunnlag != null && iayGrunnlag.getAktørArbeidFraRegister(getAktørId()).isPresent();
     }
 
-    public UttakInput medSøknadMottattDato(LocalDate mottattDato) {
+    public UttakInput medFerie(Ferie ferie) {
         var newInput = new UttakInput(this);
-        newInput.søknadMottattDato = mottattDato;
+        newInput.ferie = ferie;
+        return newInput;
+    }
+
+    public UttakInput medPleieperioder(Pleieperioder pleieperioder) {
+        var newInput = new UttakInput(this);
+        newInput.pleieperioder = pleieperioder;
         return newInput;
     }
 
@@ -120,24 +154,10 @@ public class UttakInput {
         return newInput;
     }
 
-    public Person getPleietrengende() {
-        return pleietrengende;
-    }
-
-    public Søknadsperioder getSøknadsperioder() {
-        return søknadsperioder;
-    }
-
-    public Ferie getFerie() {
-        return ferie;
-    }
-
-    public OppgittTilsynsordning getTilsynsordning() {
-        return tilsynsordning;
-    }
-
-    public Person getSøker() {
-        return søker;
+    public UttakInput medSøknadMottattDato(LocalDate mottattDato) {
+        var newInput = new UttakInput(this);
+        newInput.søknadMottattDato = mottattDato;
+        return newInput;
     }
 
     public UttakInput medSøknadsperioder(Søknadsperioder søknadsperioder) {
@@ -146,15 +166,21 @@ public class UttakInput {
         return newInput;
     }
 
-    public UttakInput medFerie(Ferie ferie) {
-        var newInput = new UttakInput(this);
-        newInput.ferie = ferie;
-        return newInput;
-    }
-
     public UttakInput medTilsynsordning(OppgittTilsynsordning tilsynsordning) {
         var newInput = new UttakInput(this);
         newInput.tilsynsordning = tilsynsordning;
+        return newInput;
+    }
+
+    public UttakInput medUttakAktivitetPerioder(Collection<UttakAktivitetPeriode> statusPerioder) {
+        var newInput = new UttakInput(this);
+        newInput.uttakAktivitetPerioder = List.copyOf(statusPerioder);
+        return newInput;
+    }
+
+    public UttakInput medMedlemskap(VurdertMedlemskapPeriodeEntitet medlemskap) {
+        var newInput = new UttakInput(this);
+        newInput.medlemskap = medlemskap;
         return newInput;
     }
 }

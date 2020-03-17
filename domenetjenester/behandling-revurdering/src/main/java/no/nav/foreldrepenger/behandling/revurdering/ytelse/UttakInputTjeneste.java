@@ -10,7 +10,13 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
+import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultatRepository;
+import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperioder;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -33,16 +39,19 @@ public class UttakInputTjeneste {
     private SøknadRepository søknadRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
+    private PleiebehovResultatRepository pleiebehovResultatRepository;
     private UttakRepository uttakRepository;
 
     @Inject
     public UttakInputTjeneste(SøknadRepository søknadRepository,
                               MedisinskGrunnlagRepository medisinskGrunnlagRepository,
+                              PleiebehovResultatRepository pleiebehovResultatRepository,
                               UttakRepository uttakRepository,
                               InntektArbeidYtelseTjeneste iayTjeneste,
                               BasisPersonopplysningTjeneste personopplysningTjeneste,
                               MedlemTjeneste medlemTjeneste) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
+        this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakRepository = uttakRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
@@ -61,29 +70,56 @@ public class UttakInputTjeneste {
     }
 
     private UttakInput lagInput(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        SøknadEntitet søknad = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId())
+        Long behandlingId = ref.getBehandlingId();
+        SøknadEntitet søknad = søknadRepository.hentSøknadHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Har ikke søknad for behandling " + ref));
-        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(ref.getBehandlingId())
+        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Har ikke Medisinsk Grunnlag for behandling " + ref));
+        var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
 
         var fastsattUttak = lagFastsattUttakAktivitetPerioder(ref);
         var søknadsperioder = lagSøknadsperioder(ref);
         var ferie = lagFerie(ref);
         var tilsynsordning = lagTilsynsordning(ref);
-        var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
-        Person søker = lagPerson(personopplysninger.getSøker());
 
-        var pleietrengendeAktørId = medisinskGrunnlag.getPleietrengende().getAktørId();
-        Person pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
+        Person søker = hentSøker(personopplysninger);
+        Person pleietrengende = hentPleietrengende(medisinskGrunnlag, personopplysninger);
+        var pleieperioder = hentPleieperioder(behandlingId);
+        
+        var medlemskapsperioder = hentMedlemskapsperioder(behandlingId);
 
-        return new UttakInput(ref, iayGrunnlag)
+        var uttakInput =  new UttakInput(ref, iayGrunnlag)
             .medSøker(søker)
             .medPleietrengende(pleietrengende)
             .medUttakAktivitetPerioder(fastsattUttak)
             .medSøknadsperioder(søknadsperioder)
             .medFerie(ferie)
             .medTilsynsordning(tilsynsordning)
+            .medPleieperioder(pleieperioder)
+            .medMedlemskap(medlemskapsperioder)
             .medSøknadMottattDato(søknad.getMottattDato());
+        
+        return uttakInput;
+    }
+
+    private VurdertMedlemskapPeriodeEntitet hentMedlemskapsperioder(Long behandlingId) {
+        var medlem = medlemTjeneste.hentMedlemskap(behandlingId).flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap).orElse(null);
+        return medlem;
+    }
+
+    private Person hentSøker(PersonopplysningerAggregat personopplysninger) {
+        Person søker = lagPerson(personopplysninger.getSøker());
+        return søker;
+    }
+
+    private Person hentPleietrengende(MedisinskGrunnlag medisinskGrunnlag, PersonopplysningerAggregat personopplysninger) {
+        var pleietrengendeAktørId = medisinskGrunnlag.getPleietrengende().getAktørId();
+        Person pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
+        return pleietrengende;
+    }
+
+    private Pleieperioder hentPleieperioder(Long behandlingId) {
+        return pleiebehovResultatRepository.hentHvisEksisterer(behandlingId).map(PleiebehovResultat::getPleieperioder).orElse(null);
     }
 
     private Person lagPerson(PersonopplysningEntitet pe) {

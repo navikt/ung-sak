@@ -17,11 +17,11 @@ public enum Pleiegrad implements Kodeverdi {
     /**
      * Alle kodeverk må ha en verdi, det kan ikke være null i databasen. Denne koden gjør samme nytten.
      */
-    KONTINUERLIG_TILSYN("KONTINUERLIG_TILSYN", "Kontinuerlig tilsyn", null),
-    UTVIDET_KONTINUERLIG_TILSYN("UTVIDET_KONTINUERLIG_TILSYN", "Utvidet kontinuerlig tilsyn", null),
-    INNLEGGELSE("INNLEGGELSE", "Innleggelse", null),
-    INGEN("INGEN","Ingen kontinuerlig tilsyn", null),
-    UDEFINERT("-", "Ikke definert", null),
+    KONTINUERLIG_TILSYN("KONTINUERLIG_TILSYN", "Kontinuerlig tilsyn", null, 100),
+    UTVIDET_KONTINUERLIG_TILSYN("UTVIDET_KONTINUERLIG_TILSYN", "Utvidet kontinuerlig tilsyn", null, 200),
+    INNLEGGELSE("INNLEGGELSE", "Innleggelse", null, 200),
+    INGEN("INGEN","Ingen kontinuerlig tilsyn", null, 0),
+    UDEFINERT("-", "Ikke definert", null, 0),
     ;
 
     public static final String KODEVERK = "PLEIEGRAD";
@@ -42,6 +42,8 @@ public enum Pleiegrad implements Kodeverdi {
     private String offisiellKode;
     private String kode;
 
+    private int prosent;
+
     Pleiegrad() {
         // Hibernate trenger den
     }
@@ -50,10 +52,11 @@ public enum Pleiegrad implements Kodeverdi {
         this.kode = kode;
     }
 
-    private Pleiegrad(String kode, String navn, String offisiellKode) {
+    private Pleiegrad(String kode, String navn, String offisiellKode, int prosent) {
         this.kode = kode;
         this.navn = navn;
         this.offisiellKode = offisiellKode;
+        this.prosent = prosent;
     }
 
     @JsonCreator
@@ -74,6 +77,10 @@ public enum Pleiegrad implements Kodeverdi {
         return kode;
     }
 
+    public int getProsent() {
+        return prosent;
+    }
+    
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
