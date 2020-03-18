@@ -1,12 +1,9 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;

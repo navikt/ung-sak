@@ -19,6 +19,7 @@ import no.nav.foreldrepenger.web.app.tjenester.behandling.personopplysning.Perso
 import no.nav.foreldrepenger.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
+import no.nav.foreldrepenger.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.foreldrepenger.web.app.tjenester.brev.BrevRestTjeneste;
@@ -38,34 +39,35 @@ public class RestImplementationClasses {
 
     public Collection<Class<?>> getImplementationClasses() {
         Set<Class<?>> classes = new HashSet<>();
-        classes.add(FagsakRestTjeneste.class);
-        classes.add(NavAnsattRestTjeneste.class);
-        classes.add(FeatureToggleRestTjeneste.class);
-        classes.add(BehandlingRestTjeneste.class);
-        classes.add(BehandlingBackendRestTjeneste.class);
-        classes.add(BeregningsgrunnlagRestTjeneste.class);
         classes.add(AksjonspunktRestTjeneste.class);
+        classes.add(AktørRestTjeneste.class);
+        classes.add(BehandlingBackendRestTjeneste.class);
+        classes.add(BehandlingRestTjeneste.class);
+        classes.add(BeregningsgrunnlagRestTjeneste.class);
+        classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(DokumentRestTjeneste.class);
+        classes.add(FagsakRestTjeneste.class);
+        classes.add(FeatureToggleRestTjeneste.class);
+        classes.add(FordelRestTjeneste.class);
+        classes.add(ForsendelseStatusRestTjeneste.class);
         classes.add(HistorikkRestTjeneste.class);
+        classes.add(IAYRegisterdataCallbackRestTjeneste.class);
+        classes.add(InntektArbeidYtelseRestTjeneste.class);
+        classes.add(IntegrasjonstatusRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
         classes.add(KonfigRestTjeneste.class);
-        classes.add(ProsessTaskRestTjeneste.class);
-        classes.add(FordelRestTjeneste.class);
-        classes.add(BeregningsresultatRestTjeneste.class);
-        classes.add(TotrinnskontrollRestTjeneste.class);
-        classes.add(ForsendelseStatusRestTjeneste.class);
-        classes.add(PersonRestTjeneste.class);
-        classes.add(SøknadRestTjeneste.class);
-        classes.add(OpptjeningRestTjeneste.class);
-        classes.add(InntektArbeidYtelseRestTjeneste.class);
-        classes.add(VilkårRestTjeneste.class);
-        classes.add(IntegrasjonstatusRestTjeneste.class);
-        classes.add(PipRestTjeneste.class);
-        classes.add(TilbakekrevingRestTjeneste.class);
-        classes.add(AktørRestTjeneste.class);
-        classes.add(SykdomRestTjeneste.class);
         classes.add(KontrollRestTjeneste.class);
-        classes.add(IAYRegisterdataCallbackRestTjeneste.class);
+        classes.add(NavAnsattRestTjeneste.class);
+        classes.add(OpptjeningRestTjeneste.class);
+        classes.add(PersonRestTjeneste.class);
+        classes.add(PipRestTjeneste.class);
+        classes.add(ProsessTaskRestTjeneste.class);
+        classes.add(SykdomRestTjeneste.class);
+        classes.add(SøknadRestTjeneste.class);
+        classes.add(TilbakekrevingRestTjeneste.class);
+        classes.add(TotrinnskontrollRestTjeneste.class);
+        classes.add(UttakRestTjeneste.class);
+        classes.add(VilkårRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 

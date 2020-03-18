@@ -58,9 +58,9 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
@@ -259,7 +259,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         var periode = new Periode(FOM, TOM);
         var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
-        uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
+        uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }
 
     private void lagBehandlingsresultat(Behandling behandling) {

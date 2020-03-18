@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonPropertyOrder({ "saksnummer", "behandlingId", "andrePartersSaker", "søker", "barn", "søknadsperioder", "lovbestemtFerie", "arbeid", "tilsynsbehov", "medlemskap" })

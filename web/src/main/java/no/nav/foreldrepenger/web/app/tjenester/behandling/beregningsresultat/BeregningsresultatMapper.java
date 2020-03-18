@@ -32,14 +32,15 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.OpphørUttakTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -104,7 +105,7 @@ public class BeregningsresultatMapper {
 
     private void leggTilUttak(Optional<Uttaksplan> uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
         @SuppressWarnings("unchecked")
-        LocalDateTimeline<Uttaksplanperiode> uttTimeline = uttaksplan.map(Uttaksplan::getTimeline).orElse(LocalDateTimeline.EMPTY_TIMELINE);
+        LocalDateTimeline<Uttaksplanperiode> uttTimeline = uttaksplan.map(this::getTimeline).orElse(LocalDateTimeline.EMPTY_TIMELINE);
         resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
     }
 
@@ -257,5 +258,14 @@ public class BeregningsresultatMapper {
             UttakArbeidType.mapFra(a.getAktivitetStatus()),
             a.getArbeidsforholdId());
     }
+    
+    private LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
+        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
+    }
+
+    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
+        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
+    }
+    
 
 }

@@ -51,9 +51,9 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.domene.behandling.steg.medlemskap.VurderMedlemskapSteg;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
@@ -72,7 +72,7 @@ public class VurderLøpendeMedlemskapStegTest {
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    
+
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
 
@@ -96,7 +96,8 @@ public class VurderLøpendeMedlemskapStegTest {
 
         Behandling behandling = scenario.lagre(provider);
         PersonInformasjonBuilder personInformasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandling.getId());
-        PersonInformasjonBuilder.PersonstatusBuilder personstatusBuilder = personInformasjonBuilder.getPersonstatusBuilder(scenario.getDefaultBrukerAktørId(), DatoIntervallEntitet.fraOgMed(ettÅrSiden));
+        PersonInformasjonBuilder.PersonstatusBuilder personstatusBuilder = personInformasjonBuilder.getPersonstatusBuilder(scenario.getDefaultBrukerAktørId(),
+            DatoIntervallEntitet.fraOgMed(ettÅrSiden));
         personstatusBuilder.medPersonstatus(PersonstatusType.BOSA);
         personInformasjonBuilder.leggTil(personstatusBuilder);
 
@@ -131,7 +132,6 @@ public class VurderLøpendeMedlemskapStegTest {
 
         // Act
         steg.utførSteg(kontekst);
-
 
         final var nyeVilkårene = provider.getVilkårResultatRepository().hentHvisEksisterer(revudering.getId());
         assertThat(nyeVilkårene).isPresent();
@@ -172,7 +172,9 @@ public class VurderLøpendeMedlemskapStegTest {
 
     private void avslutterBehandlingOgFagsak(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), lagUttaksPeriode());
+        uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(),
+            behandling.getUuid(),
+            lagUttaksPeriode());
 
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, lås);

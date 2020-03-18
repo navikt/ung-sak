@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt;
+package no.nav.k9.sak.kontrakt.uttak.uttaksplan;
 
 import java.time.LocalDate;
 import java.util.Comparator;

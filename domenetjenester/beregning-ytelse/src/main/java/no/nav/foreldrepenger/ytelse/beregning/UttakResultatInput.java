@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.ytelse.beregning;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 
 public class UttakResultatInput {
     private Uttaksplan uttaksplan;
