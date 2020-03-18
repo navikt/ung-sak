@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -24,23 +26,26 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanListe;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttaksplanListe;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
+import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler.StringResponseHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
-public class UttakRestTjeneste {
+public class UttakRestKlient {
     private static final String TJENESTE_NAVN = "pleiepenger-barn-uttak";
 
-    private static final Logger log = LoggerFactory.getLogger(UttakRestTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(UttakRestKlient.class);
 
     private ObjectMapper objectMapper = JsonMapper.getMapper();
     private ObjectReader uttaksplanListReader = objectMapper.readerFor(UttaksplanListe.class);
@@ -49,12 +54,12 @@ public class UttakRestTjeneste {
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;
 
-    protected UttakRestTjeneste() {
+    protected UttakRestKlient() {
         // for proxying
     }
 
     @Inject
-    public UttakRestTjeneste(OidcRestClient restKlient, @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint) {
+    public UttakRestKlient(OidcRestClient restKlient, @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
     }
@@ -71,20 +76,71 @@ public class UttakRestTjeneste {
         }
     }
 
-    public UttaksplanListe hentUttaksplaner(UUID... behandlingUuid) {
+    public UttaksplanListe hentUttaksplaner(UUID... behandlingIder) {
+        if (behandlingIder == null || behandlingIder.length == 0) {
+            return new UttaksplanListe(Collections.emptyMap());
+        }
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
-        for (var bid : behandlingUuid) {
+        for (var bid : behandlingIder) {
             builder.addParameter("behandlingId", bid.toString());
         }
         try {
             HttpGet kall = new HttpGet(builder.build());
             return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanListReader));
         } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlaner(Arrays.asList(behandlingUuid), e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlaner(Arrays.asList(behandlingIder), e).toException();
         }
     }
 
-    private <T> T utførOgHent(HttpUriRequest request, String jsonInput, ObjectReaderResponseHandler<T> responseHandler) throws IOException {
+    public UttaksplanListe hentUttaksplaner(List<Saksnummer> saksnummere) {
+        if (saksnummere == null || saksnummere.isEmpty()) {
+            return new UttaksplanListe(Collections.emptyMap());
+        }
+        URIBuilder builder = new URIBuilder(endpointUttaksplan);
+        for (var s : saksnummere) {
+            builder.addParameter("saksnummer", s.toString());
+        }
+        try {
+            HttpGet kall = new HttpGet(builder.build());
+            return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanListReader));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlanerForSaker(saksnummere, e).toException();
+        }
+    }
+
+    public String hentUttaksplanerRaw(UUID... behandlingIder) {
+        if (behandlingIder == null || behandlingIder.length == 0) {
+            return null;
+        }
+        URIBuilder builder = new URIBuilder(endpointUttaksplan);
+        for (var uuid : behandlingIder) {
+            builder.addParameter("behandlingId", uuid.toString());
+        }
+        try {
+            HttpGet kall = new HttpGet(builder.build());
+            return utførOgHent(kall, null, new StringResponseHandler(endpointUttaksplan));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlaner(Arrays.asList(behandlingIder), e).toException();
+        }
+    }
+
+    public String hentUttaksplanerRaw(List<Saksnummer> saksnummere) {
+        if (saksnummere == null || saksnummere.isEmpty()) {
+            return null;
+        }
+        URIBuilder builder = new URIBuilder(endpointUttaksplan);
+        for (var s : saksnummere) {
+            builder.addParameter("saksnummer", s.toString());
+        }
+        try {
+            HttpGet kall = new HttpGet(builder.build());
+            return utførOgHent(kall, null, new StringResponseHandler(endpointUttaksplan));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttakForPlanerForSaker(saksnummere, e).toException();
+        }
+    }
+
+    private <T> T utførOgHent(HttpUriRequest request, String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {
@@ -147,5 +203,9 @@ public class UttakRestTjeneste {
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000005", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for behandlinger: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttakForPlaner(Collection<UUID> behandlingUuid, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-UT-1000006", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for saker: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilUttakForPlanerForSaker(Collection<Saksnummer> saksnummere, Throwable t);
     }
+
 }

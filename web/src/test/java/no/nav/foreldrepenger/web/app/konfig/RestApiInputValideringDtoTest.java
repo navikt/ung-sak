@@ -47,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.foreldrepenger.web.app.IndexClasses;
@@ -192,8 +193,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             return;
         }
 
-        String codeSourceStr = codeSource.getLocation().toExternalForm();
-        if (!codeSourceStr.matches("^.*[/\\\\]kontrakt-[^/\\\\]+.jar$") && !codeSourceStr.matches("^.*[\\\\/]classes[\\\\/].*$")) {
+        if (erImportertBibliotek(codeSource)) {
             // skip importerte biblioteker for nå
             return;
         }
@@ -210,6 +210,9 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         for (Field field : getRelevantFields(klasse)) {
             if (field.getAnnotation(JsonIgnore.class) != null) {
                 continue; // feltet blir hverken serialisert elle deserialisert, unntas fra sjekk
+            }
+            if(field.getAnnotation(JsonRawValue.class)!=null) {
+                continue; // feltet importeres/eksporteres rått - må valideres annen plass.
             }
             if (field.getType().isEnum()) {
                 continue; // enum er OK
@@ -230,6 +233,11 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
                 }
             }
         }
+    }
+
+    private static boolean erImportertBibliotek(CodeSource codeSource) {
+        String codeSourceStr = codeSource.getLocation().toExternalForm();
+        return !codeSourceStr.matches("^.*[/\\\\]kontrakt-[^/\\\\]+.jar$") && !codeSourceStr.matches("^.*[\\\\/]classes[\\\\/].*$");
     }
 
     private static boolean erKodeverk(Class<?> klasse) {

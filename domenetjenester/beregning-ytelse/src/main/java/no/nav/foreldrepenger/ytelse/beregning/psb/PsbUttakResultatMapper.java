@@ -15,10 +15,13 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplanperiode;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakUtbetalingsgrad;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplanperiode;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -70,7 +73,7 @@ public class PsbUttakResultatMapper implements UttakResultatMapper {
     }
 
     private List<UttakResultatPeriode> mapUttakResultatPeriodes(Uttaksplan uttaksplan) {
-        var uttakTimeline = uttaksplan.getTimeline();
+        var uttakTimeline = getTimeline(uttaksplan);
         List<UttakResultatPeriode> res = new ArrayList<>();
 
         uttakTimeline.toSegments().forEach(seg -> {
@@ -78,5 +81,14 @@ public class PsbUttakResultatMapper implements UttakResultatMapper {
         });
         return res;
     }
+    
+    private static LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
+        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
+    }
+
+    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
+        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
+    }
+    
 
 }

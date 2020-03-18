@@ -1,10 +1,9 @@
-package no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt;
+package no.nav.k9.sak.kontrakt.uttak.uttaksplan;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -15,8 +14,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,14 +32,6 @@ public class Uttaksplan {
 
     public NavigableMap<Periode, Uttaksplanperiode> getPerioder() {
         return Collections.unmodifiableNavigableMap(perioder);
-    }
-
-    public LocalDateTimeline<Uttaksplanperiode> getTimeline() {
-        return new LocalDateTimeline<>(getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
-    }
-
-    private LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
     }
 
     /** sjekk om uttaksplanen har noen innvilgede perioder. */

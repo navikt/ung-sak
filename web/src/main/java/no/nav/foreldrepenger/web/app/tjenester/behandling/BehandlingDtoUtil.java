@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.web.app.tjenester.behandling;
 
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -7,7 +8,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import org.apache.http.client.utils.URIBuilder;
 
 import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
@@ -17,6 +21,7 @@ import no.nav.foreldrepenger.web.app.ApplicationConfig;
 import no.nav.foreldrepenger.web.server.jetty.JettyWebKonfigurasjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.kontrakt.ResourceLink;
+import no.nav.k9.sak.kontrakt.ResourceLink.HttpMethod;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingStegTilstandDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
@@ -106,6 +111,17 @@ public class BehandlingDtoUtil {
     static ResourceLink getFraMap(String path, String rel, Map<String, String> queryParams) {
         return ResourceLink.get(getApiPath(path), rel, queryParams);
     }
+    
+    static ResourceLink buildLink(String path, String rel, HttpMethod method, Consumer<URIBuilder> uriBuilder) {
+        String apiPath = BehandlingDtoUtil.getApiPath(path);
+        try {
+            URIBuilder builder = new URIBuilder(apiPath);
+            uriBuilder.accept(builder);
+            return new ResourceLink(builder.build(), rel, method);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Kan ikke bygge uri for: " + path + ", rel=" + rel, e);
+        }
+    }
 
     static ResourceLink post(String path, String rel, Object dto) {
         return ResourceLink.post(getApiPath(path), rel, dto);
@@ -117,7 +133,7 @@ public class BehandlingDtoUtil {
         return contextPath + apiUri;
     }
 
-    private static String getApiPath(String segment) {
+    public static String getApiPath(String segment) {
         return getApiPath() + segment;
     }
 

@@ -40,9 +40,9 @@ import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseStegImpl;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.util.Tuple;
@@ -176,6 +176,6 @@ public class BeregneYtelseStegImplTest {
         var periode = new Periode(LocalDate.now().minusDays(3), LocalDate.now().minusDays(1));
         var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
 
-        uttakTjeneste.lagreUttakResultatPerioder(behandling.getUuid(), uttaksplan);
+        uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }
 }

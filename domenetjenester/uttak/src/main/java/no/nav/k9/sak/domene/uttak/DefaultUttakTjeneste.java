@@ -32,18 +32,19 @@ import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.FeriePeriode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
-import no.nav.k9.sak.domene.uttak.rest.UttakRestTjeneste;
+import no.nav.k9.sak.domene.uttak.rest.UttakRestKlient;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.LovbestemtFerie;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeid;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforholdPeriodeInfo;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakMedlemskap;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakTilsynsbehov;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakArbeidsforholdPeriodeInfo;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -51,14 +52,14 @@ import no.nav.vedtak.util.Tuple;
 public class DefaultUttakTjeneste implements UttakTjeneste {
     private static final Logger log = LoggerFactory.getLogger(DefaultUttakTjeneste.class);
 
-    private UttakRestTjeneste uttakRestTjeneste;
+    private UttakRestKlient restKlient;
 
     protected DefaultUttakTjeneste() {
     }
 
     @Inject
-    public DefaultUttakTjeneste(UttakRestTjeneste uttakRestTjeneste) {
-        this.uttakRestTjeneste = uttakRestTjeneste;
+    public DefaultUttakTjeneste(UttakRestKlient uttakRestTjeneste) {
+        this.restKlient = uttakRestTjeneste;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         var ref = input.getBehandlingReferanse();
 
         var utReq = new MapUttakRequest().nyRequest(ref, input);
-        return uttakRestTjeneste.opprettUttaksplan(utReq);
+        return restKlient.opprettUttaksplan(utReq);
     }
 
     @Override
@@ -82,11 +83,28 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
     @Override
     public Map<UUID, Uttaksplan> hentUttaksplaner(UUID... behandlingUuid) {
-        var uttaksplaner = uttakRestTjeneste.hentUttaksplaner(behandlingUuid).getUttaksplaner()
+        var uttaksplaner = restKlient.hentUttaksplaner(behandlingUuid).getUttaksplaner()
             .entrySet().stream().collect(Collectors.toMap(e -> UUID.fromString(e.getKey()), Map.Entry::getValue));
         return new TreeMap<>(uttaksplaner);
     }
 
+    @Override
+    public Map<Saksnummer, Uttaksplan> hentUttaksplaner(List<Saksnummer> saksnummere) {
+        var uttaksplaner = restKlient.hentUttaksplaner(saksnummere).getUttaksplaner()
+            .entrySet().stream().collect(Collectors.toMap(e -> new Saksnummer(e.getKey()), Map.Entry::getValue));
+        return new TreeMap<>(uttaksplaner);
+    }
+    
+    @Override
+    public String hentUttaksplanerRaw(List<Saksnummer> saksnummere) {
+        return restKlient.hentUttaksplanerRaw(saksnummere);
+    }
+    
+    @Override
+    public String hentUttaksplanerRaw(UUID behandlingId) {
+        return restKlient.hentUttaksplanerRaw(behandlingId);
+    }
+    
     static class MapUttakRequest {
 
         // TODO K9: blir dette riktig?

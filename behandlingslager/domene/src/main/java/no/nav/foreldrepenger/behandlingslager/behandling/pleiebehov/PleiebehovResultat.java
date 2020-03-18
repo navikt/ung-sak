@@ -73,12 +73,12 @@ public class PleiebehovResultat extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "PleiebehovResultat{" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", behandling=" + behandlingId +
             ", kontinuerligTilsyn=" + pleieperioder +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
-            '}';
+            '>';
     }
 }

@@ -38,6 +38,7 @@ import no.nav.vedtak.feil.LogLevel;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
@@ -233,7 +234,7 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    private <T> T utførOgHent(URI endpoint, String json, ObjectReaderResponseHandler<T> responseHandler) throws IOException {
+    private <T> T utførOgHent(URI endpoint, String json, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 

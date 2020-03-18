@@ -31,13 +31,12 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
-@Path("")
+@Path(BehandlingBackendRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class BehandlingBackendRestTjeneste {
 
     static final String BASE_PATH = "/behandling";
     private static final String BACKEND_ROOT_PATH = "/backend-root";
-    public static final String BEHANDLINGER_BACKEND_ROOT_PATH = BASE_PATH + BACKEND_ROOT_PATH;
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
@@ -54,7 +53,7 @@ public class BehandlingBackendRestTjeneste {
     }
 
     @GET
-    @Path(BEHANDLINGER_BACKEND_ROOT_PATH)
+    @Path(BACKEND_ROOT_PATH)
     @Operation(description = "Hent behandling gitt id for backend", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer behandling", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = BehandlingDto.class))
