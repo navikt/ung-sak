@@ -81,7 +81,7 @@ public class PleiepengerBarnSoknadOversetter {
 
         lagreMedlemskapinfo(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
         lagrePleietrengende(behandlingId, soknad.barn);
-        
+
         lagreUttakOgPerioder(soknad, behandlingId);
 
     }
@@ -121,8 +121,8 @@ public class PleiepengerBarnSoknadOversetter {
                     // .erTidligereOpphold(tidligereOpphold)
                     .build());
             });
-            medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
         }
+        medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
     }
 
     private Språkkode getSpraakValg(Språk spraak) {

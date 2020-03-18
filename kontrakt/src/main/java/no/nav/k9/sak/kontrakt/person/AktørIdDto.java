@@ -28,8 +28,8 @@ public class AktørIdDto {
     }
 
     @JsonCreator
-    public AktørIdDto(@JsonProperty("aktørId") @NotNull @Valid AktørId aktørId) {
-        this.aktørId = aktørId;
+    public AktørIdDto(@JsonProperty("aktørId") @NotNull @Valid String aktørId) {
+        this.aktørId = new AktørId(aktørId);
     }
 
     @AbacAttributt(value = "aktorId", masker = true)
