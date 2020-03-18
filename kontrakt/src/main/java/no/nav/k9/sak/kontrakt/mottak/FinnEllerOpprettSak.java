@@ -1,6 +1,6 @@
 package no.nav.k9.sak.kontrakt.mottak;
 
-import java.util.Optional;
+import java.time.LocalDate;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
@@ -20,10 +20,6 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FinnEllerOpprettSak {
 
-    @JsonProperty("journalpostId")
-    @Digits(integer = 18, fraction = 0)
-    private String journalpostId;
-
     @JsonProperty(value = "behandlingstemaOffisiellKode", required = true)
     @NotNull
     @Size(max = 8)
@@ -35,26 +31,39 @@ public class FinnEllerOpprettSak {
     @Digits(integer = 19, fraction = 0)
     private String aktørId;
 
+    @JsonProperty(value = "pleietrengendeAktørId")
+    @Digits(integer = 19, fraction = 0)
+    private String pleietrengendeAktørId;
+
+    @JsonProperty(value = "periodeStart")
+    private LocalDate periodeStart;
+
     @JsonCreator
-    public FinnEllerOpprettSak(@JsonProperty("journalpostId") @Digits(integer = 18, fraction = 0) String journalpostId,
-                               @JsonProperty(value = "behandlingstemaOffisiellKode", required = true) @NotNull @Size(max = 8) @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*$") String behandlingstemaOffisiellKode,
-                               @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0)String aktørId) {
-        this.journalpostId = journalpostId;
+    public FinnEllerOpprettSak(@JsonProperty(value = "behandlingstemaOffisiellKode", required = true) @NotNull @Size(max = 8) @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*$") String behandlingstemaOffisiellKode,
+                               @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0) String aktørId,
+                               @JsonProperty(value = "pleietrengendeAktørId") @Digits(integer = 19, fraction = 0) String pleietrengendeAktørId,
+                               @JsonProperty(value = "periodeStart") LocalDate periodeStart) {
         this.behandlingstemaOffisiellKode = behandlingstemaOffisiellKode;
         this.aktørId = aktørId;
-    }
-
-    public Optional<String> getJournalpostId() {
-        return Optional.ofNullable(journalpostId);
+        this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.periodeStart = periodeStart;
     }
 
     public String getBehandlingstemaOffisiellKode() {
         return behandlingstemaOffisiellKode;
     }
 
+    public LocalDate getPeriodeStart() {
+        return periodeStart;
+    }
+
     @AbacAttributt(value = "aktorId", masker = true)
     public String getAktørId() {
         return aktørId;
+    }
+
+    public String getPleietrengendeAktørId() {
+        return pleietrengendeAktørId;
     }
 
 }
