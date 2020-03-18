@@ -31,9 +31,9 @@ import no.nav.foreldrepenger.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
 import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -63,9 +63,10 @@ public class AktørRestTjeneste {
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @Path("/aktoer-info")
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørId aktørId) {
+    public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
         AktørInfoDto aktoerInfoDto = new AktørInfoDto();
-        if (aktørId != null) {
+        if (aktørIdDto != null) {
+            var aktørId = aktørIdDto.getAktørId();
             Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(aktørId);
             if (personinfo.isPresent()) {
                 Personinfo pi = personinfo.get();
