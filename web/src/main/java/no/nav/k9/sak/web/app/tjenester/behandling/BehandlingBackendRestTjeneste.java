@@ -31,12 +31,12 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
-@Path(BehandlingBackendRestTjeneste.BASE_PATH)
+@Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class BehandlingBackendRestTjeneste {
 
     static final String BASE_PATH = "/behandling";
-    private static final String BACKEND_ROOT_PATH = "/backend-root";
+    private static final String BACKEND_ROOT_PATH = BASE_PATH + "/backend-root";
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;

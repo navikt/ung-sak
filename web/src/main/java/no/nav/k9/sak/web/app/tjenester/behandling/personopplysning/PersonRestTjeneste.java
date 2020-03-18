@@ -35,7 +35,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
-@Path(PersonRestTjeneste.BASE_PATH)
+@Path("")
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Transactional
@@ -67,7 +67,7 @@ public class PersonRestTjeneste {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/medlemskap-v2")
+    @Path(MEDLEMSKAP_V2_PATH)
     @Operation(description = "Hent informasjon om medlemskap i Folketrygden for søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Medlemskap, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MedlemV2Dto.class)))
     })
@@ -82,7 +82,7 @@ public class PersonRestTjeneste {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/personopplysninger")
+    @Path(PERSONOPPLYSNINGER_PATH)
     @Operation(description = "Hent informasjon om personopplysninger søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Personopplysninger, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonopplysningDto.class)))
     })
@@ -102,7 +102,7 @@ public class PersonRestTjeneste {
     }
 
     @GET
-    @Path("/personopplysninger")
+    @Path(PERSONOPPLYSNINGER_PATH)
     @Operation(description = "Hent informasjon om personopplysninger søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Personopplysninger, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonopplysningDto.class)))
     })
@@ -122,7 +122,7 @@ public class PersonRestTjeneste {
     }
 
     @GET
-    @Path("/medlemskap-v2")
+    @Path(MEDLEMSKAP_V2_PATH)
     @Operation(description = "Hent informasjon om medlemskap i Folketrygden for søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Medlemskap, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MedlemV2Dto.class)))
     })

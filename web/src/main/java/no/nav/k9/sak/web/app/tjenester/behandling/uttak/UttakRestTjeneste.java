@@ -37,7 +37,7 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
-@Path(UttakRestTjeneste.BASE_PATH)
+@Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class UttakRestTjeneste {
 
@@ -63,7 +63,7 @@ public class UttakRestTjeneste {
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/oppgitt")
+    @Path(UTTAK_OPPGITT)
     @Operation(description = "Hent oppgitt uttak for behandling", tags = "behandling - uttak", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Oppgitt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
     })
@@ -80,7 +80,7 @@ public class UttakRestTjeneste {
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/fastsatt")
+    @Path(UTTAK_FASTSATT)
     @Operation(description = "Hent Fastsatt uttak for behandling", tags = "behandling - uttak", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Fastsatt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
     })
@@ -98,7 +98,7 @@ public class UttakRestTjeneste {
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/uttaksplaner")
+    @Path(UTTAKSPLANER)
     @Operation(description = "Hent uttaksplaner", tags = "behandling - uttak", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Uttaksplaner, tom liste hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
     })
