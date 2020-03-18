@@ -2,6 +2,8 @@ package no.nav.k9.sak.kontrakt.person;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -21,27 +23,24 @@ public class AktørIdDto {
     @JsonProperty("aktørId")
     @NotNull
     @Valid
-    private AktørId aktørId;
-
-    public AktørIdDto() {
-        //
-    }
+    private String aktørId;
 
     @JsonCreator
-    public AktørIdDto(@JsonProperty("aktørId") @NotNull @Valid AktørId aktørId) {
+    public AktørIdDto(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String aktørId) {
         this.aktørId = aktørId;
+    }
+    
+    public AktørIdDto(AktørId aktørId) {
+        this.aktørId = aktørId.getId();
     }
 
     @AbacAttributt(value = "aktorId", masker = true)
     public String getAktorId() {
-        return aktørId.getId();
-    }
-
-    public AktørId getAktørId() {
         return aktørId;
     }
 
-    public void setAktørId(AktørId aktørId) {
-        this.aktørId = aktørId;
+    public AktørId getAktørId() {
+        return new AktørId(aktørId);
     }
+
 }
