@@ -60,24 +60,18 @@
 			<artifactId>risikoklassifisering</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak.kontrakter</groupId>
-			<artifactId>soeknad-v3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.k9.sak.kontrakter</groupId>
-			<artifactId>abonnent-v1</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.k9.sak.kontrakter</groupId>
+			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			<artifactId>fordel-v1</artifactId>
 		</dependency>
+		
 		<dependency>
-			<groupId>no.nav.k9.sak.abakus</groupId>
+			<groupId>no.nav.foreldrepenger.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
+		
 		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde vært her da de trekkes inn av server. -->
         <dependency>
-            <groupId>no.nav.k9.sak.felles.sikkerhet</groupId>
+            <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
             <artifactId>felles-sikkerhet</artifactId>
             <exclusions>
                 <exclusion>
@@ -87,7 +81,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak.felles</groupId>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
             <artifactId>felles-util</artifactId>
             <exclusions>
                 <exclusion>
@@ -103,7 +97,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak.felles.integrasjon</groupId>
+			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
 			<artifactId>ldap-klient</artifactId>
 		</dependency>
 		<dependency>
@@ -129,7 +123,7 @@
 
 		<!-- REST + WebService -->
 		<dependency>
-			<groupId>no.nav.k9.sak.felles.integrasjon</groupId>
+			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
 			<artifactId>felles-integrasjon-rest</artifactId>
 		</dependency>
 
