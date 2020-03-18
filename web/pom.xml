@@ -333,7 +333,7 @@
 			</dependency>
 
 			<dependency>
-				<groupId>no.nav.k9.sak.felles</groupId>
+				<groupId>no.nav.foreldrepenger.felles</groupId>
 				<artifactId>felles-testutilities</artifactId>
 				<scope>test</scope>
 				<exclusions>
@@ -344,7 +344,7 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>no.nav.k9.sak.felles</groupId>
+				<groupId>no.nav.foreldrepenger.felles</groupId>
 				<artifactId>felles-sikkerhet-testutilities</artifactId>
 				<scope>test</scope>
 			</dependency>
