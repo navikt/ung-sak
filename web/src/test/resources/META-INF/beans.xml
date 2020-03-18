@@ -4,7 +4,7 @@
 	version="2.0"
 	bean-discovery-mode="all">
 	<alternatives>
-        <class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
+        <class>no.nav.foreldrepenger.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
         <class>no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste</class>
     </alternatives>
 </beans>
