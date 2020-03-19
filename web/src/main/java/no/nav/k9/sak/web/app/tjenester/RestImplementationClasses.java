@@ -14,6 +14,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.Beregningsg
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
@@ -51,6 +52,7 @@ public class RestImplementationClasses {
         classes.add(KodeverkRestTjeneste.class);
         classes.add(KonfigRestTjeneste.class);
         classes.add(ProsessTaskRestTjeneste.class);
+        classes.add(OmsorgenForRestTjeneste.class);
         classes.add(FordelRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
@@ -68,7 +70,7 @@ public class RestImplementationClasses {
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(UttakRestTjeneste.class);
-        
+
         deprecatedServicesForBrev(classes);
 
         return Set.copyOf(classes);
