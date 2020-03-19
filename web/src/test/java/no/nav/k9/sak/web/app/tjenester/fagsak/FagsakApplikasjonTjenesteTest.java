@@ -11,8 +11,8 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;

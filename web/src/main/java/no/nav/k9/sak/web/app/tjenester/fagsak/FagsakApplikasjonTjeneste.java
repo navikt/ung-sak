@@ -10,8 +10,8 @@ import java.util.function.Predicate;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;

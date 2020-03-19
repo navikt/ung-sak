@@ -11,12 +11,12 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.foreldrepenger.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;

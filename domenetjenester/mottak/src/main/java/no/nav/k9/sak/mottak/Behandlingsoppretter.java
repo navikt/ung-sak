@@ -9,7 +9,6 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.revurdering.RevurderingTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
@@ -19,6 +18,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;

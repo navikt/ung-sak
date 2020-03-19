@@ -21,7 +21,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
 import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
 import no.nav.foreldrepenger.kompletthet.KompletthetsjekkerProvider;
@@ -30,6 +29,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;

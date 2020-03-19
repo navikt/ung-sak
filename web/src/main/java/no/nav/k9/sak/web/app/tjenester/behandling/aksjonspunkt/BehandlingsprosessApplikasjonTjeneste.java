@@ -9,15 +9,15 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.ProsesseringAsynkTjeneste;
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.FortsettBehandlingTaskProperties;
 import no.nav.foreldrepenger.domene.registerinnhenting.impl.ÅpneBehandlingForEndringerTask;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
+import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;

@@ -6,12 +6,12 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.task.StartBehandlingTask;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
