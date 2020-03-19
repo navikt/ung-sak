@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.behandling.hendelse.FinnAnsvarligSaksbehandler;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class FinnAnsvarligSaksbehandlerTest {
 

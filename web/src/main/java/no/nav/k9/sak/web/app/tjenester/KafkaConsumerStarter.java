@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester;
 
-import no.nav.foreldrepenger.domene.risikoklassifisering.konsument.RisikoklassifiseringConsumer;
 import no.nav.foreldrepenger.historikk.kafka.HistorikkConsumer;
+import no.nav.k9.sak.domene.risikoklassifisering.konsument.RisikoklassifiseringConsumer;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;

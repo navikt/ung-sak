@@ -11,9 +11,9 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakStegImpl;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakTjeneste;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class ForeslåVedtakStegImplTest {
 

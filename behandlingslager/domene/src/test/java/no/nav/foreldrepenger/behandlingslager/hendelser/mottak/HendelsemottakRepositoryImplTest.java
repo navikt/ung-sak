@@ -6,7 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandlingslager.hendelser.HendelsemottakRepository;
-import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class HendelsemottakRepositoryImplTest {
 

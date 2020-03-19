@@ -10,8 +10,8 @@ import no.nav.foreldrepenger.behandlingslager.behandling.GrunnlagRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
-import no.nav.foreldrepenger.domene.medlem.MedlemEndringIdentifiserer;
 import no.nav.foreldrepenger.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.medlem.MedlemEndringIdentifiserer;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")

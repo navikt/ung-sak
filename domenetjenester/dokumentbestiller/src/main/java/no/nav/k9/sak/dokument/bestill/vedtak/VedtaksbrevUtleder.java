@@ -1,0 +1,60 @@
+package no.nav.k9.sak.dokument.bestill.vedtak;
+
+import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.sak.dokument.bestill.BrevFeil;
+
+public class VedtaksbrevUtleder {
+
+    private VedtaksbrevUtleder() {
+    }
+
+    static boolean erAvlåttEllerOpphørt(BehandlingVedtak behandlingVedtak) {
+        return VedtakResultatType.AVSLAG.equals(behandlingVedtak.getVedtakResultatType());
+    }
+
+    static boolean erKlageBehandling(BehandlingVedtak behandlingVedtak) {
+        return VedtakResultatType.VEDTAK_I_KLAGEBEHANDLING.equals(behandlingVedtak.getVedtakResultatType());
+    }
+
+    static boolean erAnkeBehandling(BehandlingVedtak behandlingVedtak) {
+        return VedtakResultatType.VEDTAK_I_ANKEBEHANDLING.equals(behandlingVedtak.getVedtakResultatType());
+    }
+
+    static boolean erInnvilget(BehandlingVedtak behandlingVedtak) {
+        return VedtakResultatType.INNVILGET.equals(behandlingVedtak.getVedtakResultatType());
+    }
+
+    static boolean erLagetFritekstBrev(VedtakVarsel behandlingsresultat) {
+        return Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
+    }
+
+    public static DokumentMalType velgDokumentMalForVedtak(BehandlingReferanse ref, 
+                                                           VedtakVarsel behandlingsresultat,
+                                                           BehandlingVedtak behandlingVedtak) {
+        DokumentMalType dokumentMal = null;
+
+        if (erLagetFritekstBrev(behandlingsresultat)) {
+            dokumentMal = DokumentMalType.FRITEKST_DOK;
+        } else if (erRevurderingMedUendretUtfall(behandlingVedtak)) {
+            dokumentMal = DokumentMalType.UENDRETUTFALL_DOK;
+        } else if (erInnvilget(behandlingVedtak)) {
+            dokumentMal = DokumentMalType.INNVILGELSE_DOK;
+        } else if (erAvlåttEllerOpphørt(behandlingVedtak)) {
+            dokumentMal = ref.getBehandlingResultat().isBehandlingsresultatOpphørt() ? DokumentMalType.OPPHØR_DOK : DokumentMalType.AVSLAG__DOK;
+        }
+        if (dokumentMal == null) {
+            throw BrevFeil.FACTORY.ingenBrevmalKonfigurert(behandlingsresultat.getBehandlingId()).toException();
+        }
+        return dokumentMal;
+    }
+
+    static boolean erRevurderingMedUendretUtfall(BehandlingVedtak vedtak) {
+        return vedtak.isBeslutningsvedtak();
+    }
+
+}

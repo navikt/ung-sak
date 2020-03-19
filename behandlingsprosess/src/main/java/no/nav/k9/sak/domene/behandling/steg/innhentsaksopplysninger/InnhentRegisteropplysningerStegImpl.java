@@ -12,9 +12,9 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
-import no.nav.foreldrepenger.domene.risikoklassifisering.RisikoklassifiseringEventPubliserer;
-import no.nav.foreldrepenger.domene.risikoklassifisering.tjeneste.RisikoklassifiseringEvent;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.sak.domene.risikoklassifisering.RisikoklassifiseringEventPubliserer;
+import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikoklassifiseringEvent;
 
 
 @BehandlingStegRef(kode = "INREG")
