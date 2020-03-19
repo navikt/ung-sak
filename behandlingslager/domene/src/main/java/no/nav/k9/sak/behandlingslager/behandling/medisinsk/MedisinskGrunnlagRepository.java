@@ -47,13 +47,13 @@ public class MedisinskGrunnlagRepository {
         lagre(behandlingId, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
     }
 
-    public void lagre(Behandling behandling, OmsorgenFor omsorgenFor) {
-        var medisinskGrunnlag = hentEksisterendeGrunnlag(behandling.getId());
+    public void lagre(Long behandlingId, OmsorgenFor omsorgenFor) {
+        var medisinskGrunnlag = hentEksisterendeGrunnlag(behandlingId);
 
         var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
         var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
         var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
-        lagre(behandling.getId(), kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
+        lagre(behandlingId, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
     }
 
     public void lagre(Long behandlingId, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
