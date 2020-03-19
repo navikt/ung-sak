@@ -1,17 +1,20 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.OmsorgenFor;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende;
-import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -52,12 +55,27 @@ class OmsorgenForDtoMapper {
 
                     var morEllerFar = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
                     var sammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
+                    var harOmsorgenFor = utledOmsorgenFor(medisinskGrunnlag, morEllerFar, sammeBosted);
 
-                    return new OmsorgenForDto(morEllerFar, sammeBosted);
+                    return new OmsorgenForDto(morEllerFar, sammeBosted, harOmsorgenFor);
                 }
             }
         }
         return null;
+    }
+
+    private Boolean utledOmsorgenFor(Optional<MedisinskGrunnlag> medisinskGrunnlag, boolean morEllerFar, boolean sammeBosted) {
+        var saksbehandlersOmsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null);
+        if (morEllerFar && sammeBosted) {
+            return true;
+        } else if (morEllerFar && Objects.equals(true, saksbehandlersOmsorgenFor)) {
+            return true;
+        } else if (sammeBosted && Objects.equals(true, saksbehandlersOmsorgenFor)) {
+            return true;
+        } else if ((morEllerFar || sammeBosted) && saksbehandlersOmsorgenFor == null) {
+            return null;
+        }
+        return false;
     }
 
     private DatoIntervallEntitet mapTilPeriode(Søknadsperioder fordeling) {

@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet;
@@ -94,23 +95,27 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             .entrySet().stream().collect(Collectors.toMap(e -> new Saksnummer(e.getKey()), Map.Entry::getValue));
         return new TreeMap<>(uttaksplaner);
     }
-    
+
     @Override
     public String hentUttaksplanerRaw(List<Saksnummer> saksnummere) {
         return restKlient.hentUttaksplanerRaw(saksnummere);
     }
-    
+
     @Override
     public String hentUttaksplanerRaw(UUID behandlingId) {
         return restKlient.hentUttaksplanerRaw(behandlingId);
     }
-    
+
     static class MapUttakRequest {
 
         // TODO K9: blir dette riktig?
         private static final Set<MedlemskapManuellVurderingType> IGNORE_PERIODER = Set.of(
             MedlemskapManuellVurderingType.SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS,
             MedlemskapManuellVurderingType.IKKE_RELEVANT);
+
+        private static Periode tilPeriode(DatoIntervallEntitet key) {
+            return new Periode(key.getFomDato(), key.getTomDato());
+        }
 
         UttaksplanRequest nyRequest(BehandlingReferanse ref, UttakInput input) {
             var utReq = new UttaksplanRequest();
@@ -179,9 +184,14 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             }
 
             var res = input.getPleieperioder().getPerioder().stream()
+                .filter(this::erPleiegradRelevantForUttak)
                 .map(uap -> new AbstractMap.SimpleEntry<>(tilPeriode(uap.getPeriode()), tilUttakTilsynsbehov(uap)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             return new TreeMap<>(res);
+        }
+
+        private boolean erPleiegradRelevantForUttak(Pleieperiode it) {
+            return !Set.of(Pleiegrad.INGEN, Pleiegrad.UDEFINERT).contains(it.getGrad());
         }
 
         private UttakTilsynsbehov tilUttakTilsynsbehov(Pleieperiode uap) {
@@ -230,10 +240,6 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
 
         private UttakArbeidsforholdPeriodeInfo tilArbeidsforholdPeriodeInfo(UttakAktivitetPeriode uap) {
             return new UttakArbeidsforholdPeriodeInfo(uap.getJobberNormaltPerUke(), uap.getSkalJobbeProsent());
-        }
-
-        private static Periode tilPeriode(DatoIntervallEntitet key) {
-            return new Periode(key.getFomDato(), key.getTomDato());
         }
 
         private UttakArbeidsforhold mapUttakArbeidsforhold(Arbeidsgiver arb, InternArbeidsforholdRef arbeidsforholdRef, UttakArbeidType aktivitetType) {

@@ -17,10 +17,16 @@ public class OmsorgenForDto {
     @JsonProperty(value = "sammeBosted")
     private Boolean sammeBosted;
 
+    @JsonProperty(value = "harOmsorgenFor")
+    private Boolean harOmsorgenFor;
+
     @JsonCreator
-    public OmsorgenForDto(@JsonProperty(value = "sammeBosted") Boolean morEllerFar, @JsonProperty(value = "sammeBosted") Boolean sammeBosted) {
+    public OmsorgenForDto(@JsonProperty(value = "morEllerFar") Boolean morEllerFar,
+                          @JsonProperty(value = "sammeBosted") Boolean sammeBosted,
+                          @JsonProperty(value = "harOmsorgenFor") Boolean harOmsorgenFor) {
         this.morEllerFar = morEllerFar;
         this.sammeBosted = sammeBosted;
+        this.harOmsorgenFor = harOmsorgenFor;
     }
 
     public Boolean getMorEllerFar() {
@@ -29,5 +35,9 @@ public class OmsorgenForDto {
 
     public Boolean getSammeBosted() {
         return sammeBosted;
+    }
+
+    public Boolean getHarOmsorgenFor() {
+        return harOmsorgenFor;
     }
 }
