@@ -5,7 +5,7 @@ import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import java.time.LocalDate;
 import java.util.Collection;
 
-import no.nav.foreldrepenger.domene.iay.modell.Inntektspost;
+import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 
 class ErInntektNærSkjæringstidspunkt {
 

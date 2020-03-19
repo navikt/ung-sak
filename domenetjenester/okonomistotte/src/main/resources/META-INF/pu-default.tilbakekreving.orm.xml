@@ -8,7 +8,7 @@
     <sequence-generator name="SEQ_TILBAKEKREVING_INNTREKK" allocation-size="50"
                         sequence-name="SEQ_TILBAKEKREVING_INNTREKK"/>
 
-    <entity class="no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingValgEntitet"/>
-    <entity class="no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet"/>
+    <entity class="no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValgEntitet"/>
+    <entity class="no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet"/>
 
 </entity-mappings>

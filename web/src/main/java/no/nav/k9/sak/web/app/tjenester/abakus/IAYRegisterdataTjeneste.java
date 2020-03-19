@@ -12,9 +12,9 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.foreldrepenger.domene.arbeidsforhold.RegisterdataCallback;
 import no.nav.foreldrepenger.domene.registerinnhenting.task.InnhentIAYIAbakusTask;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.RegisterdataCallback;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHendelseMottak;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;

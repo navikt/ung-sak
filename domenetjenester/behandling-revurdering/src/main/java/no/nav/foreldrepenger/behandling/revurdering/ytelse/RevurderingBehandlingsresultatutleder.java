@@ -10,7 +10,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
-import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
+import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 
 @Dependent
 @FagsakYtelseTypeRef

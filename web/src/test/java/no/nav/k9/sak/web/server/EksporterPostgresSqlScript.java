@@ -11,7 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
-import no.nav.foreldrepenger.dbstoette.DatasourceConfiguration;
+import no.nav.k9.sak.db.util.DatasourceConfiguration;
 import no.nav.vedtak.felles.lokal.dbstoette.ConnectionHandler;
 import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
 import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;

@@ -6,9 +6,9 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
+import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
 
 public class SimulerOppdragAksjonspunktUtlederTest {
 

@@ -13,13 +13,13 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.produksjonsstyring.totrinn.TotrinnTjeneste;
-import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
-import no.nav.foreldrepenger.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollSkjermlenkeContextDto;
+import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
+import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
+import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
 @ApplicationScoped
 public class TotrinnskontrollAksjonspunkterTjeneste {

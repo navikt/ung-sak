@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class VirksomhetRepositoryImplTest {
 

@@ -11,12 +11,12 @@ import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
-import no.nav.foreldrepenger.dokumentbestiller.DokumentBestillerTjeneste;
-import no.nav.foreldrepenger.dokumentbestiller.VarselRevurderingAksjonspunkt;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.dokument.bestill.DokumentBestillerTjeneste;
+import no.nav.k9.sak.dokument.bestill.VarselRevurderingAksjonspunkt;
 import no.nav.k9.sak.kontrakt.behandling.revurdering.VarselRevurderingDto;
 
 @ApplicationScoped

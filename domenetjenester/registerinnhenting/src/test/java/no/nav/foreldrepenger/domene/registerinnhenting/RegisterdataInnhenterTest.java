@@ -15,12 +15,12 @@ import org.mockito.junit.MockitoRule;
 
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.AbstractTestScenario;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.domene.medlem.MedlemTjeneste;
 import no.nav.foreldrepenger.domene.person.tps.PersoninfoAdapter;
-import no.nav.foreldrepenger.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
-import no.nav.foreldrepenger.skjæringstidspunkt.SkjæringstidspunktRegisterinnhentingTjeneste;
+import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
+import no.nav.k9.sak.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktRegisterinnhentingTjeneste;
+import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class RegisterdataInnhenterTest {
 

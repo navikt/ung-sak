@@ -10,9 +10,9 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
-import no.nav.foreldrepenger.domene.vedtak.VedtakTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
