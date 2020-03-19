@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.behandling;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.FagsakEvent;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakEvent;
 import no.nav.k9.sak.typer.AktørId;
 
 /**

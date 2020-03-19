@@ -4,9 +4,9 @@ import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
 
 public class NavBrukerBuilder {

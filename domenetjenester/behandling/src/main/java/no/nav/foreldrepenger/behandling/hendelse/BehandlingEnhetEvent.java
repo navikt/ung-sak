@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.behandling.hendelse;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.k9.sak.typer.AktørId;
 
 public class BehandlingEnhetEvent implements BehandlingEvent {

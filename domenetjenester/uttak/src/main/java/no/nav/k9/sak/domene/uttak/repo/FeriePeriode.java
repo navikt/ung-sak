@@ -18,8 +18,8 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "FeriePeriode")
 @Table(name = "UT_FERIE_PERIODE")

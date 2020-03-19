@@ -5,8 +5,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAktivitetsnøkkel;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAktivitetsnøkkel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 
 public class FinnKorresponderendeBeregningsresultatAndel {
     private FinnKorresponderendeBeregningsresultatAndel() {

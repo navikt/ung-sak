@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.iay.modell;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class RefusjonskravDato {

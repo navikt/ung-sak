@@ -6,8 +6,8 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AvklarAktivitetsPerioderOppdaterer;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class AvklarAktivitetsPerioderOppdatererTest {
 

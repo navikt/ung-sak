@@ -49,7 +49,7 @@ import no.nav.vedtak.util.Tuple;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager). Brukes under forflytting til Abakus til å erstatte tester som går mot
- * {@link no.nav.foreldrepenger.behandlingslager.abakus.inntektarbeidytelse.InntektArbeidYtelseRepository}.
+ * {@link no.nav.k9.sak.behandlingslager.abakus.inntektarbeidytelse.InntektArbeidYtelseRepository}.
  * NB: Skal kun brukes for tester.
  * <p>
  * Definer som alternative i beans.xml (i src/test/resources/META-INF) i modul som skal bruke<p>

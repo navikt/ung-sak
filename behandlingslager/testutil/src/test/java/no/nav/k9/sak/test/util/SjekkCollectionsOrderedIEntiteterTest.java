@@ -24,8 +24,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.db.util.DatasourceConfiguration;
 import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
 import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;

@@ -3,12 +3,12 @@ package no.nav.foreldrepenger.inngangsvilkaar;
 import java.util.List;
 import java.util.Properties;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårData {
     private final DatoIntervallEntitet periode;

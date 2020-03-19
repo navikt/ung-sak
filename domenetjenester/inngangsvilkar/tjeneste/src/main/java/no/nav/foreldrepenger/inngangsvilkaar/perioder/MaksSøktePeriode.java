@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.inngangsvilkaar.perioder;
 
 import java.util.Set;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {

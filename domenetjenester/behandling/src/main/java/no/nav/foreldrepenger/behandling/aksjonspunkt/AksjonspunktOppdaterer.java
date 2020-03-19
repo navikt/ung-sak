@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.behandling.aksjonspunkt;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 /** Interface for å oppdatere aksjonspunkter. */
 public interface AksjonspunktOppdaterer<T> {

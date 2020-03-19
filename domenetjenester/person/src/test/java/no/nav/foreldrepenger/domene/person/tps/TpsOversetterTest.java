@@ -21,14 +21,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.FødtBarnInfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
@@ -355,7 +355,7 @@ public class TpsOversetterTest {
         Personhistorikkinfo personhistorikkinfo = tpsOversetter.tilPersonhistorikkInfo(aktørIdString, response);
 
         assertThat(personhistorikkinfo.getAktørId()).isEqualTo(aktør.getAktoerId());
-        List<no.nav.foreldrepenger.behandlingslager.aktør.historikk.StatsborgerskapPeriode> statsborgerskaphistorikk = personhistorikkinfo
+        List<no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode> statsborgerskaphistorikk = personhistorikkinfo
             .getStatsborgerskaphistorikk();
         assertThat(statsborgerskaphistorikk.get(0).getGyldighetsperiode().getFom()).isEqualTo(Tid.TIDENES_BEGYNNELSE);
         assertThat(statsborgerskaphistorikk.get(0).getGyldighetsperiode().getTom()).isEqualTo(Tid.TIDENES_ENDE);
@@ -399,7 +399,7 @@ public class TpsOversetterTest {
         Personhistorikkinfo personhistorikkinfo = tpsOversetter.tilPersonhistorikkInfo(aktørIdString, response);
 
         assertThat(personhistorikkinfo.getAktørId()).isEqualTo(aktør.getAktoerId());
-        List<no.nav.foreldrepenger.behandlingslager.aktør.historikk.PersonstatusPeriode> personstatushistorikk = personhistorikkinfo.getPersonstatushistorikk();
+        List<no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode> personstatushistorikk = personhistorikkinfo.getPersonstatushistorikk();
         assertThat(personstatushistorikk.get(0).getGyldighetsperiode().getFom()).isEqualTo(Tid.TIDENES_BEGYNNELSE);
         assertThat(personstatushistorikk.get(0).getGyldighetsperiode().getTom()).isEqualTo(tomPeriode1);
         assertThat(personstatushistorikk.get(0).getPersonstatus().getKode()).isEqualTo(PersonstatusType.FØDR.getKode());

@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.iay.modell;
 
 import java.math.BigDecimal;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.Stillingsprosent;
 

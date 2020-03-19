@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
 import no.nav.foreldrepenger.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraRegelTilVL;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
@@ -19,6 +18,7 @@ import no.nav.foreldrepenger.ytelse.beregning.regelmodell.beregningsgrunnlag.Inn
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
@@ -37,7 +37,7 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
     public void skal_ikkje_lage_feriepengeresultat_om_årsbeløp_avrundes_til_0() {
         // Arrange
         BeregningsresultatPeriode periode = lagPeriodeMedAndel(BigDecimal.valueOf(0.1));
-        no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
+        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
         BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(List.of(periode))
             .medFeriepengerPeriode(STP, STP.plusMonths(10))
@@ -48,7 +48,7 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
         MapBeregningsresultatFeriepengerFraRegelTilVL.mapFra(beregningsresultat, regelmodell, beregningsresultatFeriepenger);
 
         // Assert
-        List<no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
+        List<no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
         assertThat(beregningsresultatFeriepengerPrÅrListe.size()).isEqualTo(0);
     }
 
@@ -56,7 +56,7 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
     public void skal_lage_feriepengeresultat_om_årsbeløp_ikkje_avrundes_til_0() {
         // Arrange
         BeregningsresultatPeriode periode = lagPeriodeMedAndel(BigDecimal.valueOf(1.5));
-        no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
+        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
         BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(List.of(periode))
             .medFeriepengerPeriode(STP, STP.plusMonths(10))
@@ -67,20 +67,20 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
         MapBeregningsresultatFeriepengerFraRegelTilVL.mapFra(beregningsresultat, regelmodell, beregningsresultatFeriepenger);
 
         // Assert
-        List<no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
+        List<no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
         assertThat(beregningsresultatFeriepengerPrÅrListe.size()).isEqualTo(1);
     }
 
-    private no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet lagVlBeregningsresultat() {
-        no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet.builder()
+    private no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet lagVlBeregningsresultat() {
+        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet.builder()
             .medRegelInput("Regelinput")
             .medRegelSporing("Regelsporing")
             .build();
-        no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode vlBeregningsresultatPeriode = no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
+        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode vlBeregningsresultatPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(PERIODE.getFomDato(), PERIODE.getTomDato())
             .build(beregningsresultat);
 
-        no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel
+        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel
             .builder()
             .medBrukerErMottaker(true)
             .medDagsats((int) DAGSATS)

@@ -2,9 +2,9 @@ package no.nav.k9.sak.domene.iay.modell;
 
 import java.io.Serializable;
 
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 
 /**
  * Hibernate entitet som modellerer en utenlandsk virksomhet.

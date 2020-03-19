@@ -6,6 +6,6 @@
 	<sequence-generator name="SEQ_ETTERKONTROLL" allocation-size="50" sequence-name="SEQ_ETTERKONTROLL" />
 
 	<!-- Etterkontroll -->	
-    <entity class="no.nav.foreldrepenger.behandling.revurdering.etterkontroll.Etterkontroll"/>
+    <entity class="no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll"/>
 
 </entity-mappings>

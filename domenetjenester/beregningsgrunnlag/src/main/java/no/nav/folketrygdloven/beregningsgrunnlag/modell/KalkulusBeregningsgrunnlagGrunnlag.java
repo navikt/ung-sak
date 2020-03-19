@@ -3,7 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 import java.util.Optional;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 public class KalkulusBeregningsgrunnlagGrunnlag extends BeregningsgrunnlagGrunnlag {
 

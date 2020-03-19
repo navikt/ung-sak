@@ -8,8 +8,8 @@
 
 	<sequence-generator name="SEQ_SOEKNAD_VEDLEGG" allocation-size="50" sequence-name="SEQ_SOEKNAD_VEDLEGG" />
 
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadGrunnlagEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadVedleggEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadGrunnlagEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet" />
 
 </entity-mappings>

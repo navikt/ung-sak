@@ -2,13 +2,13 @@ package no.nav.k9.sak.domene.arbeidsforhold;
 
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.diff.DiffEntity;
-import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraphConfig;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.historikk.Saksnummer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
+import no.nav.k9.sak.behandlingslager.diff.DiffResult;
+import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.k9.sak.behandlingslager.diff.TraverseGraphConfig;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;

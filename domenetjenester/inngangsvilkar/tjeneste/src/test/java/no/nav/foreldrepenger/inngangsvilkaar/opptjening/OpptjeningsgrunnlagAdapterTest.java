@@ -21,8 +21,8 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 
 public class OpptjeningsgrunnlagAdapterTest {
 

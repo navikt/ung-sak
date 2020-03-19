@@ -19,8 +19,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
-import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
-import no.nav.foreldrepenger.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
+import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.kontrakt.abac.PipDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;

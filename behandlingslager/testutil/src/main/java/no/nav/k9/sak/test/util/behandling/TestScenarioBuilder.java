@@ -2,9 +2,9 @@ package no.nav.k9.sak.test.util.behandling;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.typer.AktørId;
 
 /**

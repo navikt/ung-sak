@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.k9.sak.typer.AktørId;
 
 public class BehandlingStegTilstandEndringEvent implements BehandlingEvent {

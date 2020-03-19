@@ -12,12 +12,12 @@
 	<sequence-generator name="SEQ_PO_ADRESSE" allocation-size="50" sequence-name="SEQ_PO_ADRESSE" />
 
 	<!-- Personopplysning aggregat og grunnlag -->
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet" />
 
 </entity-mappings>

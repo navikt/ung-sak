@@ -10,10 +10,10 @@
 	
 	<sequence-generator name="SEQ_BRUKER" allocation-size="50" sequence-name="SEQ_BRUKER" />
 	
-    <entity class="no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak" />
-    <entity class="no.nav.foreldrepenger.behandlingslager.fagsak.Journalpost"/>
+    <entity class="no.nav.k9.sak.behandlingslager.fagsak.Fagsak" />
+    <entity class="no.nav.k9.sak.behandlingslager.fagsak.Journalpost"/>
 
-    <entity class="no.nav.foreldrepenger.behandlingslager.aktør.NavBruker" />
+    <entity class="no.nav.k9.sak.behandlingslager.aktør.NavBruker" />
     
 
 	
