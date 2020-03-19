@@ -5,10 +5,10 @@ import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 

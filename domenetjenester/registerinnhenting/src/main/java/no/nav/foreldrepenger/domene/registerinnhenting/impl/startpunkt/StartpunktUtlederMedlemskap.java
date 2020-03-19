@@ -6,11 +6,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.GrunnlagRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
 import no.nav.foreldrepenger.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.behandlingslager.behandling.GrunnlagRef;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.medlem.MedlemEndringIdentifiserer;
 
 @ApplicationScoped

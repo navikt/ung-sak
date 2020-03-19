@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 public class BeregningsgrunnlagGrunnlag {
 

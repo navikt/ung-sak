@@ -5,11 +5,11 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;

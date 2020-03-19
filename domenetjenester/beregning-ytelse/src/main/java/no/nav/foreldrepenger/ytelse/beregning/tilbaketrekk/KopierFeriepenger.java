@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 
 public class KopierFeriepenger {
     private KopierFeriepenger() {

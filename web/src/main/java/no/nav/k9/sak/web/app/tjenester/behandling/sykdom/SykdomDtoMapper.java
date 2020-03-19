@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæringer;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæringer;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -103,7 +103,7 @@ class SykdomDtoMapper {
             .collect(Collectors.toList());
     }
 
-    private Legeerklæring mapTilLegeerklæring(no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring it) {
+    private Legeerklæring mapTilLegeerklæring(no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring it) {
         return new Legeerklæring(it.getDatert(),
             it.getDatert(),
             it.getUuid(),

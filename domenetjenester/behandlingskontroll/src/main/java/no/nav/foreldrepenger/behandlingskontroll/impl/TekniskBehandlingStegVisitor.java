@@ -6,7 +6,7 @@ import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.foreldrepenger.behandlingskontroll.StegProsesseringResultat;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.vedtak.felles.jpa.savepoint.Work;
 import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 

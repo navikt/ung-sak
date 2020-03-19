@@ -19,15 +19,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.Familierelasjon;
-import no.nav.foreldrepenger.behandlingslager.aktør.FødtBarnInfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.GeografiskTilknytning;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Gyldighetsperiode;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.PersonstatusPeriode;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -35,6 +26,15 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
+import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
+import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Aktoer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
@@ -113,7 +113,7 @@ public class TpsOversetter {
             .medDødsdato(dødsdato)
             .medKjønn(kjønn)
             .medPersonstatusType(personstatus)
-            .medStatsborgerskap(new no.nav.foreldrepenger.behandlingslager.aktør.Statsborgerskap(landkoder.getKode()))
+            .medStatsborgerskap(new no.nav.k9.sak.behandlingslager.aktør.Statsborgerskap(landkoder.getKode()))
             .medRegion(region)
             .medFamilierelasjon(familierelasjoner)
             .medUtlandsadresse(utlandsadresse)
@@ -171,7 +171,7 @@ public class TpsOversetter {
 
                 no.nav.k9.kodeverk.geografisk.Landkoder landkoder = Landkoder.fraKode(e.getStatsborgerskap().getLand().getValue());
                 StatsborgerskapPeriode element = new StatsborgerskapPeriode(gyldighetsperiode,
-                    new no.nav.foreldrepenger.behandlingslager.aktør.Statsborgerskap(landkoder.getKode()));
+                    new no.nav.k9.sak.behandlingslager.aktør.Statsborgerskap(landkoder.getKode()));
                 builder.leggTil(element);
             });
         });

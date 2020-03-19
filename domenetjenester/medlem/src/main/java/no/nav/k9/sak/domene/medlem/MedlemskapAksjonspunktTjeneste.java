@@ -3,8 +3,8 @@ package no.nav.k9.sak.domene.medlem;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.medlem.impl.AvklarFortsattMedlemskapAksjonspunkt;
 import no.nav.k9.sak.domene.medlem.impl.BekreftBosattVurderingAksjonspunkt;
 import no.nav.k9.sak.domene.medlem.impl.BekreftErMedlemVurderingAksjonspunkt;

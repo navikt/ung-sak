@@ -11,9 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @Table(name = "TILBAKEKREVING_VALG")
 @Entity(name = "TilbakekrevingValgEntitet")

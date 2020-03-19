@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Aktivitet;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Aktivitet.ReferanseType;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.AktivitetPeriode;
@@ -21,6 +20,7 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.util.Tuple;
 
 class OpptjeningsgrunnlagAdapter {

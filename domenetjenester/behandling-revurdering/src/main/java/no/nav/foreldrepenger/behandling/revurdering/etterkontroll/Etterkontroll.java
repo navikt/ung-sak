@@ -12,8 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "Etterkontroll")
 @Table(name = "ETTERKONTROLL")

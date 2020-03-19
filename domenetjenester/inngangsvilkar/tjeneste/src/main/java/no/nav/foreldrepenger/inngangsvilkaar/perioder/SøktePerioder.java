@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;

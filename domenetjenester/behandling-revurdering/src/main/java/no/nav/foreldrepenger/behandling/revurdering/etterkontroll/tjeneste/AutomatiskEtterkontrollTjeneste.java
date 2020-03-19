@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 
 import no.nav.foreldrepenger.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.foreldrepenger.behandling.revurdering.etterkontroll.task.AutomatiskEtterkontrollTask;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.TaskStatus;

@@ -2,8 +2,8 @@ package no.nav.k9.sak.test.util.behandling.personopplysning;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
 

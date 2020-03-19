@@ -6,7 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingEvent;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikoklassifiseringEvent;
 
 /**

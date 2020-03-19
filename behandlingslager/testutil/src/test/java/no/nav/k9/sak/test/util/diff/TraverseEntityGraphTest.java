@@ -14,19 +14,19 @@ import javax.persistence.OneToMany;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.DiffEntity;
-import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
-import no.nav.foreldrepenger.behandlingslager.diff.Node;
-import no.nav.foreldrepenger.behandlingslager.diff.Pair;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseJpaEntityGraphConfig;
-import no.nav.foreldrepenger.behandlingslager.diff.TraverseGraph.TraverseResult;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
+import no.nav.k9.sak.behandlingslager.diff.DiffResult;
+import no.nav.k9.sak.behandlingslager.diff.Node;
+import no.nav.k9.sak.behandlingslager.diff.Pair;
+import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.k9.sak.behandlingslager.diff.TraverseJpaEntityGraphConfig;
+import no.nav.k9.sak.behandlingslager.diff.TraverseGraph.TraverseResult;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class TraverseEntityGraphTest {

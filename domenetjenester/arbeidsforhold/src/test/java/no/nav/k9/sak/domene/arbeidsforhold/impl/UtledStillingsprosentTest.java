@@ -10,13 +10,13 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.UtledStillingsprosent;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class UtledStillingsprosentTest {
 

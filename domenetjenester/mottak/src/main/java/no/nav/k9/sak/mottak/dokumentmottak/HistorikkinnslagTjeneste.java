@@ -10,10 +10,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalMetadata;
 import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
@@ -28,6 +24,10 @@ import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped

@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.domene.personopplysning;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class PersonopplysningAksjonspunkt {
 

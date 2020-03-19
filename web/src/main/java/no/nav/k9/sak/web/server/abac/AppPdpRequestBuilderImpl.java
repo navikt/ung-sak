@@ -16,9 +16,9 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.pip.PipBehandlingsData;
-import no.nav.foreldrepenger.behandlingslager.pip.PipRepository;
 import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
+import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
+import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;

@@ -9,17 +9,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.RegisterdataDiffsjekker;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
 public class PersonopplysningGrunnlagDiff {

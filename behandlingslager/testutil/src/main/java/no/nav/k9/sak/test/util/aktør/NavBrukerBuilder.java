@@ -1,8 +1,8 @@
 package no.nav.k9.sak.test.util.aktør;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
 
 public class NavBrukerBuilder {

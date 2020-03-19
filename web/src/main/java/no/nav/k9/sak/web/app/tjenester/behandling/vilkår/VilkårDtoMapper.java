@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårDto;
 
 class VilkårDtoMapper {

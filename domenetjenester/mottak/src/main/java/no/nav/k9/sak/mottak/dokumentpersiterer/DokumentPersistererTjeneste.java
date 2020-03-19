@@ -9,8 +9,8 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentpersiterer.xml.MottattDokumentXmlParser;
 
 @SuppressWarnings("rawtypes")

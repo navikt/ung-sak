@@ -12,9 +12,9 @@ import javax.inject.Inject;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 
 /**
  * Aksjonspunkt for avklaring v tilleggopplysninger som oppgis i søknad.

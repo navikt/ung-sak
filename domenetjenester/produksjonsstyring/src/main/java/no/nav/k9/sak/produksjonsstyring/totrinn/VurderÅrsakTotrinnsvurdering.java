@@ -12,11 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.behandlingslager.kodeverk.VurderÅrsakKodeverdiConverter;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.sak.behandlingslager.kodeverk.VurderÅrsakKodeverdiConverter;
 
 
 /**

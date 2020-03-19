@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.personopplysning;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 
 @ApplicationScoped
 public class BasisPersonopplysningTjeneste extends AbstractPersonopplysningTjenesteImpl {

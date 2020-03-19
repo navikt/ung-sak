@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.behandling.revurdering.felles;
 
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 
 
 public interface HarEtablertYtelse {

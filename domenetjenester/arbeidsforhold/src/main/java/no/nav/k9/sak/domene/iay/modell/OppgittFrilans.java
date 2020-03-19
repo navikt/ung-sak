@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 
 public class OppgittFrilans {

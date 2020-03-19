@@ -3,7 +3,7 @@ package no.nav.k9.sak.test.util.behandling.personopplysning;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 
 public final class PersonInformasjon {
 

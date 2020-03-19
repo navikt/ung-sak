@@ -7,8 +7,8 @@
     <sequence-generator name="SEQ_OPPTJENING_AKTIVITET" allocation-size="50" sequence-name="SEQ_OPPTJENING_AKTIVITET" />
 
     <!-- Opptjening -->
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet"/>
 
 
 </entity-mappings>

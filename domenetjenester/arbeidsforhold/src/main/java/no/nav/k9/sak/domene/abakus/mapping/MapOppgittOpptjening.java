@@ -17,7 +17,6 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittEgenNæringDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
@@ -29,6 +28,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 
 class MapOppgittOpptjening {

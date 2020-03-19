@@ -5,17 +5,17 @@ import static java.util.Collections.singletonList;
 import java.util.List;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.RegelResultat;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårStegImpl;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public abstract class FastsettOpptjeningsperiodeStegFelles extends InngangsvilkårStegImpl {
 

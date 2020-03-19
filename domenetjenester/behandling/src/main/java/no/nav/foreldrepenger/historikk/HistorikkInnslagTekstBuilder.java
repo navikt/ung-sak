@@ -15,11 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagDel;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -43,6 +38,11 @@ import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
 import no.nav.vedtak.feil.Feil;
 
 public class HistorikkInnslagTekstBuilder {

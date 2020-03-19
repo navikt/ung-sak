@@ -7,9 +7,9 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
+import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.mottak.dokumentmottak.impl.HåndterMottattDokumentTaskProperties;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;

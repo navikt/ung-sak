@@ -2,7 +2,7 @@ package no.nav.k9.sak.mottak;
 
 import java.util.Comparator;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 
 class MottattDokumentSorterer {
     private static Comparator<String> nullSafeStringComparator = Comparator.nullsFirst(String::compareToIgnoreCase);

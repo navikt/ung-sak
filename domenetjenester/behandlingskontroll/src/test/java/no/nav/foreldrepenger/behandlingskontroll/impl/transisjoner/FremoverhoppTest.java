@@ -28,12 +28,6 @@ import no.nav.foreldrepenger.behandlingskontroll.impl.BehandlingModellRepository
 import no.nav.foreldrepenger.behandlingskontroll.impl.observer.BehandlingskontrollFremoverhoppTransisjonEventObserver;
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.foreldrepenger.behandlingskontroll.testutilities.TestScenario;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -41,6 +35,12 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class FremoverhoppTest {

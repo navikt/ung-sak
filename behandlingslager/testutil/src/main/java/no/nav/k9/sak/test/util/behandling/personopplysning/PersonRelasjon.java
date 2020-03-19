@@ -1,7 +1,7 @@
 package no.nav.k9.sak.test.util.behandling.personopplysning;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.HarAktørId;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.HarAktørId;
 import no.nav.k9.sak.typer.AktørId;
 
 public final class PersonRelasjon implements HarAktørId {

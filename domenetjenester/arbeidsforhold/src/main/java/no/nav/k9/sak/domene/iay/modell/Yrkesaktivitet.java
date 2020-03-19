@@ -10,11 +10,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;

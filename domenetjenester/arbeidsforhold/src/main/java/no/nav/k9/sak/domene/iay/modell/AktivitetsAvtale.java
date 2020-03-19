@@ -3,10 +3,10 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
-import no.nav.foreldrepenger.behandlingslager.diff.IndexKeyComposer;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
 import no.nav.vedtak.konfig.Tid;
 

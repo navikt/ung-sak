@@ -9,10 +9,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 
 /**
  * Tjeneste som setter opp tidslinjen som brukes til å sammenligne beregningsresultatet mellom originalbehandlingen og revurderingen.

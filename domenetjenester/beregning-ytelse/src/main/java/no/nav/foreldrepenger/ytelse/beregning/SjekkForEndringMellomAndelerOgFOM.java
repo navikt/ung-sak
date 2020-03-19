@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.ytelse.beregning;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 
 @ApplicationScoped
 public class SjekkForEndringMellomAndelerOgFOM {

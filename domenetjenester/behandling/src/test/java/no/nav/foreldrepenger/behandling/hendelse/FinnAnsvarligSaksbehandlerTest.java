@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.behandling.hendelse.FinnAnsvarligSaksbehandler;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class FinnAnsvarligSaksbehandlerTest {

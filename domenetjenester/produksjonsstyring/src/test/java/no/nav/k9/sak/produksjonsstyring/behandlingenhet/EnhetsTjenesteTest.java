@@ -16,14 +16,14 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Familierelasjon;
-import no.nav.foreldrepenger.behandlingslager.aktør.GeografiskTilknytning;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
+import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.produksjonsstyring.arbeidsfordeling.ArbeidsfordelingTjeneste;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.EnhetsTjeneste;
 import no.nav.k9.sak.typer.AktørId;

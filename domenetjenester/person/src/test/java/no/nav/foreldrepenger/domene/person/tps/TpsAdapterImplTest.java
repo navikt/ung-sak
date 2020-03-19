@@ -14,12 +14,12 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.GeografiskTilknytning;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektsmeldingAggregat {

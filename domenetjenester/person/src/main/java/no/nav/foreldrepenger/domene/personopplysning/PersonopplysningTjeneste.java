@@ -5,12 +5,12 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
-import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.foreldrepenger.behandlingslager.diff.DiffResult;
+import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
+import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped

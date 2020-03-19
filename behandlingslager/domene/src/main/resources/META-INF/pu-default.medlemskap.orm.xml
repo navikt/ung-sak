@@ -17,12 +17,12 @@
     <sequence-generator name="SEQ_GR_MEDLEMSKAP" allocation-size="50" sequence-name="SEQ_GR_MEDLEMSKAP"/>
 
     <!-- Medlemskap aggregat og grunnlag -->
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRegistrertEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapBehandlingsgrunnlagEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRegistrertEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapBehandlingsgrunnlagEntitet"/>
 
 </entity-mappings>

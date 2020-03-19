@@ -15,9 +15,9 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedDto;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
 

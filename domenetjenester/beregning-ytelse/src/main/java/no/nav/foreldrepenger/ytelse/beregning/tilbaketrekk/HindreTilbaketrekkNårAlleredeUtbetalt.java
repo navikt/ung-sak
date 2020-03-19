@@ -4,10 +4,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregningsgrunnlag;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.foreldrepenger.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 
 @ApplicationScoped
 public class HindreTilbaketrekkNårAlleredeUtbetalt {

@@ -12,12 +12,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -26,6 +20,12 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
 
 public class AvklarOmErBosatt {

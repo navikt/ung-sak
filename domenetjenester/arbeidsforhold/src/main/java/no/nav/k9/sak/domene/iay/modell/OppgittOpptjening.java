@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 public class OppgittOpptjening {
 

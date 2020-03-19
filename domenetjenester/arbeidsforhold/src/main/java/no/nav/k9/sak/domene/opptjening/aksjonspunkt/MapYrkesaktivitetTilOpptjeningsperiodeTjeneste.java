@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
@@ -21,6 +20,7 @@ import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Stillingsprosent;
 

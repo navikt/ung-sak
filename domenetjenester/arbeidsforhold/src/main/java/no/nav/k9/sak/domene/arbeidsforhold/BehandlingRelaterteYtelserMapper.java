@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.RelaterteYtelserDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;

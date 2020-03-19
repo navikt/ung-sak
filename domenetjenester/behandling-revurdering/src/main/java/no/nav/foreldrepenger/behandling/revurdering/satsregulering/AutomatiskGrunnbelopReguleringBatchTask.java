@@ -9,10 +9,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSats;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;

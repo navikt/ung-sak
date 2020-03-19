@@ -14,12 +14,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Adresseinfo;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.AdressePeriode;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Gyldighetsperiode;
-import no.nav.foreldrepenger.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
+import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kodeverdi;

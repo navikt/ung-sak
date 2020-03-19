@@ -5,10 +5,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.HistorikkRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.foreldrepenger.historikk.kafka.json.SerialiseringUtil;
 import no.nav.historikk.v1.HistorikkInnslagV1;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;

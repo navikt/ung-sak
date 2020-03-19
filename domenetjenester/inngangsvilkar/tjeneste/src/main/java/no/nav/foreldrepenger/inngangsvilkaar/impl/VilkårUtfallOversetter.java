@@ -11,8 +11,6 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.VilkårGrunnlag;
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -23,6 +21,8 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårUtfallOversetter {
 

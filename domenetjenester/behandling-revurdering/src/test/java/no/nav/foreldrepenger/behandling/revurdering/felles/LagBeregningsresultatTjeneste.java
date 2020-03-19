@@ -3,11 +3,11 @@ package no.nav.foreldrepenger.behandling.revurdering.felles;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public  class LagBeregningsresultatTjeneste {

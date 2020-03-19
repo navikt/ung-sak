@@ -3,8 +3,8 @@ package no.nav.k9.sak.mottak.dokumentpersiterer;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 
 public interface MottattDokumentOversetter<T extends MottattDokumentWrapper<?>> {
 

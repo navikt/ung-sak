@@ -14,9 +14,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 /**
  * Oppdatering av tilstand for etterkontroll av behandling.
  */

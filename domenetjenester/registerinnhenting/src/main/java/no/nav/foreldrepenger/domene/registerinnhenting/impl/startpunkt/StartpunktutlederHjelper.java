@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 
 class StartpunktutlederHjelper {
 

@@ -5,8 +5,8 @@ import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 
 @ApplicationScoped
 public class SjekkOmPerioderInneholderSammeAndeler {

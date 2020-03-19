@@ -3,8 +3,8 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

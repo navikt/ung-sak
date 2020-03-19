@@ -6,11 +6,11 @@ import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.RegisterdataDiffsjekker;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
-import no.nav.foreldrepenger.behandlingslager.diff.Node;
-import no.nav.foreldrepenger.behandlingslager.diff.Pair;
+import no.nav.k9.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
+import no.nav.k9.sak.behandlingslager.diff.Node;
+import no.nav.k9.sak.behandlingslager.diff.Pair;
 
 @Dependent
 public class MedlemEndringIdentifiserer {

@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 class FellesStartpunktUtlederLogger {
 

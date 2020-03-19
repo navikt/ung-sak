@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.registerinnhenting.impl;
 
-import static no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType.UDEFINERT;
+import static no.nav.k9.sak.behandlingslager.hendelser.StartpunktType.UDEFINERT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -23,15 +23,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
-import no.nav.foreldrepenger.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.foreldrepenger.behandlingslager.hendelser.StartpunktType;
 import no.nav.foreldrepenger.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.foreldrepenger.domene.registerinnhenting.StartpunktTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
+import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;

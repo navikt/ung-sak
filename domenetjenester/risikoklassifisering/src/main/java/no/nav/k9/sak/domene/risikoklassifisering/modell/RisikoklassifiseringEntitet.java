@@ -10,9 +10,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "RisikoklassifiseringEntitet")
 @Table(name = "RISIKOKLASSIFISERING")

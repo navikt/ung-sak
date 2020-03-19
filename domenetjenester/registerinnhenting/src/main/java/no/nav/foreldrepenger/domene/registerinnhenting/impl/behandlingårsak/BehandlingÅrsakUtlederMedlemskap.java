@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.GrunnlagRef;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.sak.behandlingslager.behandling.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")

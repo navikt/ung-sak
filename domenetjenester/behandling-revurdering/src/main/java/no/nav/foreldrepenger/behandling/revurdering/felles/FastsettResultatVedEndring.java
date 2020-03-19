@@ -3,11 +3,11 @@ package no.nav.foreldrepenger.behandling.revurdering.felles;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 
 class FastsettResultatVedEndring {
 

@@ -7,10 +7,10 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.DefaultVilkårUtleder;
 import no.nav.foreldrepenger.inngangsvilkaar.impl.UtledeteVilkår;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 @ApplicationScoped

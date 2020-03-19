@@ -11,16 +11,16 @@ import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParamet
 import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.InnleggelsePeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæringer;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.InnleggelsePeriode;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæringer;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Legeerklæring;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Pleiebehov;
@@ -100,7 +100,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                     .stream()
                     .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
                     .collect(Collectors.toSet());
-                return new no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), it.getFom(), innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
+                return new no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), it.getFom(), innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
             })
             .forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
 

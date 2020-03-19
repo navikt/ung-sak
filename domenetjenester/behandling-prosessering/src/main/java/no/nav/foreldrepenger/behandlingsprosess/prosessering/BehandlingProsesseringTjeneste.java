@@ -3,12 +3,12 @@ package no.nav.foreldrepenger.behandlingsprosess.prosessering;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatDiff;
-import no.nav.foreldrepenger.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
+import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 
 /**

@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.ytelse.beregning;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 
 public interface FinnEndringsdatoBeregningsresultatTjeneste {
 

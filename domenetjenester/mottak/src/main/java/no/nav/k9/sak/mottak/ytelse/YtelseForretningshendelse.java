@@ -2,8 +2,8 @@ package no.nav.k9.sak.mottak.ytelse;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.behandlingslager.hendelser.Forretningshendelse;
-import no.nav.foreldrepenger.behandlingslager.hendelser.ForretningshendelseType;
+import no.nav.k9.sak.behandlingslager.hendelser.Forretningshendelse;
+import no.nav.k9.sak.behandlingslager.hendelser.ForretningshendelseType;
 import no.nav.k9.sak.typer.AktørId;
 
 public class YtelseForretningshendelse extends Forretningshendelse {

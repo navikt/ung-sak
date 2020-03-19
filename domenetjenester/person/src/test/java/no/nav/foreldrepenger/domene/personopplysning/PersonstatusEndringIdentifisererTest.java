@@ -12,15 +12,15 @@ import java.util.stream.IntStream;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningGrunnlagDiff;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
 public class PersonstatusEndringIdentifisererTest {

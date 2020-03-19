@@ -5,11 +5,11 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.revurdering.felles.HarEtablertYtelse;
 import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef

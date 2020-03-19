@@ -10,8 +10,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.tjeneste.virksomhet.behandlesak.v2.WSAktor;
 import no.nav.tjeneste.virksomhet.behandlesak.v2.WSOpprettSakRequest;

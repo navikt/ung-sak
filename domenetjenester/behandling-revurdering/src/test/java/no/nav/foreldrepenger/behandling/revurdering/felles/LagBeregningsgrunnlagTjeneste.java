@@ -7,8 +7,8 @@ import java.util.List;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagAktivitetStatus;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
-import no.nav.foreldrepenger.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 
 public class LagBeregningsgrunnlagTjeneste {
     public static Beregningsgrunnlag lagBeregningsgrunnlag(LocalDate skjæringstidspunktBeregning,

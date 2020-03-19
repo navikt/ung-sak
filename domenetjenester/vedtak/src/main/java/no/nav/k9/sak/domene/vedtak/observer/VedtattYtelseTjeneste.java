@@ -17,14 +17,14 @@ import no.nav.abakus.vedtak.ytelse.v1.YtelseStatus;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseType;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped

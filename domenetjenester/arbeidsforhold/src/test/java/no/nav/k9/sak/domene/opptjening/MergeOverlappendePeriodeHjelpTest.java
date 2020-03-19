@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.domene.arbeidsforhold.MergeOverlappendePeriodeHjelp;
 import no.nav.k9.sak.kontrakt.opptjening.FastsattOpptjeningAktivitetDto;
 

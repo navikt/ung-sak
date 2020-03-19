@@ -1,8 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.kontroll;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalGruppeWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;

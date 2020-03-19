@@ -10,8 +10,8 @@ import java.util.Optional;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
 import no.nav.foreldrepenger.behandlingsprosess.prosessering.ProsesseringAsynkTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus.Status;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

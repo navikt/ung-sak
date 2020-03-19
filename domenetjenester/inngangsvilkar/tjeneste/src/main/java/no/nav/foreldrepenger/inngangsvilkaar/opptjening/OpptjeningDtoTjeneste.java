@@ -10,8 +10,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.Opptjening;
-import no.nav.foreldrepenger.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.MergeOverlappendePeriodeHjelp;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;

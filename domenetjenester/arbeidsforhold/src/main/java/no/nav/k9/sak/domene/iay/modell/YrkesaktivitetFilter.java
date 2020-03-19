@@ -1,8 +1,8 @@
 package no.nav.k9.sak.domene.iay.modell;
 
-import no.nav.foreldrepenger.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

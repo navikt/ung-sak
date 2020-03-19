@@ -7,9 +7,9 @@
 	<sequence-generator name="SEQ_BEHANDLING_VEDTAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_VEDTAK" />
 	<sequence-generator name="SEQ_BEH_OVERLAPP_INFOTRYGD" allocation-size="50" sequence-name="SEQ_BEH_OVERLAPP_INFOTRYGD" />
 
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingVedtak" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygd" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.vedtak.VedtakVarsel" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygd" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel" />
 	
 
 </entity-mappings>

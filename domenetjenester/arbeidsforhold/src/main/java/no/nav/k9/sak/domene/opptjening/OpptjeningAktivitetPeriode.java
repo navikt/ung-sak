@@ -2,9 +2,9 @@ package no.nav.k9.sak.domene.opptjening;
 
 import java.util.Objects;
 
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class OpptjeningAktivitetPeriode {

@@ -8,16 +8,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Legeerklæring;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.OmsorgenFor;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.foreldrepenger.inngangsvilkaar.VilkårData;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.VilkårGrunnlag;
 import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medisinsk.DiagnoseKilde;
@@ -37,6 +28,15 @@ import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.OmsorgenFor;
+import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped

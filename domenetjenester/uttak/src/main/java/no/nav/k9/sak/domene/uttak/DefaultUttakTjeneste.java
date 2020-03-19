@@ -23,11 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.Pleieperiode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.FeriePeriode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
