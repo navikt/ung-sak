@@ -18,7 +18,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Fagsystem implements Kodeverdi {
     
-    K9SAK("K9SAK", "Vedtaksløsning K9 - Pleiepenger", ""),
+    K9SAK("K9SAK", "Vedtaksløsning K9 - Pleiepenger", "K9"),
     FPSAK("FPSAK", "Vedtaksløsning Foreldrepenger", "FS36"),
     TPS("TPS", "TPS", "FS03"),
     JOARK("JOARK", "Joark", "AS36"),
