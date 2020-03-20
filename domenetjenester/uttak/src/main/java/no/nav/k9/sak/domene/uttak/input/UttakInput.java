@@ -12,6 +12,8 @@ import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.Pleieperioder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.Ferie;
 import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
@@ -40,7 +42,7 @@ public class UttakInput {
     private Søknadsperioder søknadsperioder;
     private OppgittTilsynsordning tilsynsordning;
     private Collection<UttakAktivitetPeriode> uttakAktivitetPerioder = Collections.emptyList();
-    private VurdertMedlemskapPeriodeEntitet medlemskap;
+    private Vilkår medlemskapVilkår;
 
     public UttakInput(BehandlingReferanse behandlingReferanse,
                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
@@ -59,7 +61,7 @@ public class UttakInput {
         this.tilsynsordning = input.tilsynsordning;
         this.relaterteSaker = input.relaterteSaker;
         this.pleieperioder = input.pleieperioder;
-        this.medlemskap= input.medlemskap;
+        this.medlemskapVilkår= input.medlemskapVilkår;
     }
 
     public AktørId getAktørId() {
@@ -81,9 +83,9 @@ public class UttakInput {
     public InntektArbeidYtelseGrunnlag getIayGrunnlag() {
         return iayGrunnlag;
     }
-    
-    public VurdertMedlemskapPeriodeEntitet getMedlemskap() {
-        return medlemskap;
+
+    public Vilkår getMedlemskap() {
+        return medlemskapVilkår;
     }
 
     public Pleieperioder getPleieperioder() {
@@ -178,9 +180,9 @@ public class UttakInput {
         return newInput;
     }
 
-    public UttakInput medMedlemskap(VurdertMedlemskapPeriodeEntitet medlemskap) {
+    public UttakInput medMedlemskapVilkår(Vilkår medlemskap) {
         var newInput = new UttakInput(this);
-        newInput.medlemskap = medlemskap;
+        newInput.medlemskapVilkår = medlemskap;
         return newInput;
     }
 }

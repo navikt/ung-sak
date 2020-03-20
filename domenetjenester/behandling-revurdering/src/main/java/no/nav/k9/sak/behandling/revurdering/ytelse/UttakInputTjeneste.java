@@ -9,10 +9,8 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.foreldrepenger.domene.personopplysning.BasisPersonopplysningTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
@@ -20,6 +18,8 @@ import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.PleiebehovResultatRe
 import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.Pleieperioder;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
@@ -38,6 +38,7 @@ public class UttakInputTjeneste {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private MedlemTjeneste medlemTjeneste;
     private SøknadRepository søknadRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
@@ -50,7 +51,8 @@ public class UttakInputTjeneste {
                               UttakRepository uttakRepository,
                               InntektArbeidYtelseTjeneste iayTjeneste,
                               BasisPersonopplysningTjeneste personopplysningTjeneste,
-                              MedlemTjeneste medlemTjeneste) {
+                              MedlemTjeneste medlemTjeneste,
+                              VilkårResultatRepository vilkårResultatRepository) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakRepository = uttakRepository;
@@ -58,6 +60,7 @@ public class UttakInputTjeneste {
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
         this.medlemTjeneste = Objects.requireNonNull(medlemTjeneste, "medlemTjeneste");
         this.søknadRepository = Objects.requireNonNull(søknadRepository, "søknadRepository");
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     UttakInputTjeneste() {
@@ -95,15 +98,15 @@ public class UttakInputTjeneste {
             .medFerie(ferie)
             .medTilsynsordning(tilsynsordning)
             .medPleieperioder(pleieperioder)
-            .medMedlemskap(medlemskapsperioder)
+            .medMedlemskapVilkår(medlemskapsperioder)
             .medSøknadMottattDato(søknad.getMottattDato());
 
         return uttakInput;
     }
 
-    private VurdertMedlemskapPeriodeEntitet hentMedlemskapsperioder(Long behandlingId) {
-        var medlem = medlemTjeneste.hentMedlemskap(behandlingId).flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap).orElse(null);
-        return medlem;
+    private Vilkår hentMedlemskapsperioder(Long behandlingId) {
+        var medlemskapsVilkår = vilkårResultatRepository.hent(behandlingId).getVilkår(VilkårType.MEDLEMSKAPSVILKÅRET).orElse(null);
+        return medlemskapsVilkår;
     }
 
     private Person hentSøker(PersonopplysningerAggregat personopplysninger) {

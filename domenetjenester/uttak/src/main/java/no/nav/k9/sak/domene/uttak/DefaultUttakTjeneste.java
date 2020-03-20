@@ -1,12 +1,10 @@
 package no.nav.k9.sak.domene.uttak;
 
-import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -26,8 +24,9 @@ import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertLøpendeMedlemskapEntitet;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.Pleieperiode;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.FeriePeriode;
@@ -143,39 +142,18 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             if (input.getMedlemskap() == null) {
                 return null;
             }
-            var maksPeriode = input.getSøknadsperioder().getMaksPeriode();
-
-            var maksDato = maksPeriode.getTomDato();
             var perioder = input.getMedlemskap().getPerioder();
-            var mapVurderingsdato = new TreeMap<>(perioder.stream()
-                .map(p -> new AbstractMap.SimpleEntry<>(p.getVurderingsdato(), p))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            var mapVurderingsperioder = mapVurderingsdato.entrySet().stream()
-                .map(e -> new AbstractMap.SimpleEntry<>(datoTilPeriode(mapVurderingsdato, e.getKey(), maksDato), lagUttakMedlemskap(e.getValue())))
+            var mapPerioderMedMedlemskap = perioder.stream()
+                .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
+                .map(e -> new AbstractMap.SimpleEntry<>(tilPeriode(e.getPeriode()), lagUttakMedlemskap(e)))
                 .filter(e -> e.getKey() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            return mapVurderingsperioder;
+            return mapPerioderMedMedlemskap;
         }
 
-        private UttakMedlemskap lagUttakMedlemskap(@SuppressWarnings("unused") VurdertLøpendeMedlemskapEntitet value) {
+        private UttakMedlemskap lagUttakMedlemskap(@SuppressWarnings("unused") VilkårPeriode value) {
             // TODO K9: Har ikke data her foreløpig
             return new UttakMedlemskap();
-        }
-
-        private Periode datoTilPeriode(NavigableMap<LocalDate, VurdertLøpendeMedlemskapEntitet> alleDatoer, LocalDate vurderingsdato, LocalDate maksDato) {
-            LocalDate tom = alleDatoer.higherKey(vurderingsdato);
-            if (tom == null) {
-                tom = maksDato;
-            } else {
-                tom = tom.minusDays(1);
-            }
-
-            var vurdering = alleDatoer.get(vurderingsdato);
-            if (vurdering.getMedlemsperiodeManuellVurdering() != null && IGNORE_PERIODER.contains(vurdering.getMedlemsperiodeManuellVurdering())) {
-                log.warn("Fikk medlemskapperiode: " + vurdering);
-                // håndter som opphør // return null;
-            }
-            return new Periode(vurderingsdato, tom);
         }
 
         private Map<Periode, UttakTilsynsbehov> lagTilsynsbehov(UttakInput input) {
