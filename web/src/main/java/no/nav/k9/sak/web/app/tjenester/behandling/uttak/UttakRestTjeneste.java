@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.uttak.FastsattUttakDto;
 import no.nav.k9.sak.kontrakt.uttak.OppgittUttakDto;
@@ -63,13 +63,14 @@ public class UttakRestTjeneste {
      * Hent oppgitt uttak for angitt behandling.
      */
     @GET
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path(UTTAK_OPPGITT)
     @Operation(description = "Hent oppgitt uttak for behandling", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Oppgitt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Oppgitt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OppgittUttakDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public OppgittUttakDto getOppgittUttak(@NotNull @QueryParam("behandlingId") @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+    public OppgittUttakDto getOppgittUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
 
         return new OppgittUttakDto(behandlingId);
@@ -80,12 +81,13 @@ public class UttakRestTjeneste {
      */
     @GET
     @Path(UTTAK_FASTSATT)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent Fastsatt uttak for behandling", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Fastsatt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Fastsatt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FastsattUttakDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public FastsattUttakDto getFastsattUttak(@NotNull @QueryParam("behandlingId") @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+    public FastsattUttakDto getFastsattUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
 
         return new FastsattUttakDto(behandlingId);
@@ -97,12 +99,13 @@ public class UttakRestTjeneste {
      */
     @GET
     @Path(UTTAKSPLANER)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent uttaksplaner", tags = "behandling - uttak", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Uttaksplaner, tom liste hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public UttaksplanDto getUttaksplaner(@NotNull @QueryParam("behandlingId") @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto,
+    public UttaksplanDto getUttaksplaner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)  @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto,
                                          @QueryParam("saksnummer") @Parameter(description = "Saksnummer for tilknyttede saker") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) List<SaksnummerDto> andreParterSaker) {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
         List<Saksnummer> andrePartersSaknummer = andreParterSaker == null ? Collections.emptyList() : andreParterSaker.stream().map(SaksnummerDto::getVerdi).collect(Collectors.toList());
