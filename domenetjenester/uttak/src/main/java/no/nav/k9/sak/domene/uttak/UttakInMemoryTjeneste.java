@@ -16,7 +16,7 @@ import javax.enterprise.inject.Alternative;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.rest.JsonMapper;

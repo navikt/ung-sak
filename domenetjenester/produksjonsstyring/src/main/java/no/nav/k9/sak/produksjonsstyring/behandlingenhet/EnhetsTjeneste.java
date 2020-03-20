@@ -7,11 +7,11 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
+import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.produksjonsstyring.arbeidsfordeling.ArbeidsfordelingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;

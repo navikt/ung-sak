@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Aktivitet;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.ReferanseType;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Aktivitet;
 
 public class MapTilOpptjeningAktiviteter {
 

@@ -8,10 +8,10 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.InntektskategoriEndring;
-import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 /**
  * Historikktjeneste for endring av inntektskategori

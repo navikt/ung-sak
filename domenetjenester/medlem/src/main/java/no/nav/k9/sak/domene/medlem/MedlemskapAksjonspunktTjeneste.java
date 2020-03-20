@@ -3,13 +3,13 @@ package no.nav.k9.sak.domene.medlem;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.medlem.impl.AvklarFortsattMedlemskapAksjonspunkt;
 import no.nav.k9.sak.domene.medlem.impl.BekreftBosattVurderingAksjonspunkt;
 import no.nav.k9.sak.domene.medlem.impl.BekreftErMedlemVurderingAksjonspunkt;
 import no.nav.k9.sak.domene.medlem.impl.BekreftErMedlemVurderingAksjonspunktOppdaterer;
 import no.nav.k9.sak.domene.medlem.impl.BekreftOppholdsrettVurderingAksjonspunkt;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftBosattVurderingAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftOppholdVurderingAksjonspunktDto;

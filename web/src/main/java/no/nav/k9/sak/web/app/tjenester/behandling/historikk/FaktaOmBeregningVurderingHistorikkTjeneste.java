@@ -21,13 +21,13 @@ import no.nav.folketrygdloven.beregningsgrunnlag.output.ErTidsbegrensetArbeidsfo
 import no.nav.folketrygdloven.beregningsgrunnlag.output.FaktaOmBeregningVurderinger;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.RefusjonskravGyldighetEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.ToggleEndring;
-import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 /**
  * Lager historikk for radioknapp-vurderinger i fakta om beregning.

@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.InntektEndring;
-import no.nav.foreldrepenger.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -21,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

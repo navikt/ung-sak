@@ -2,7 +2,7 @@ package no.nav.k9.sak.behandling.revurdering.ytelse;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 /**
  * Sjekk om revurdering endrer utfall.

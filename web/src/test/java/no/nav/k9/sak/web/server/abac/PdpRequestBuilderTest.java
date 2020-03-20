@@ -14,11 +14,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.web.server.abac.AbacAttributter;

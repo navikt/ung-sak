@@ -1,8 +1,8 @@
 
 package no.nav.k9.sak.domene.medlem.impl;
 
-import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.JA;
-import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.NEI;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.JA;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.NEI;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
-import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -20,6 +18,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
+import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
@@ -27,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEn
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 
 public class AvklarOmErBosatt {
     //Setter den til 364 for å unngå skuddårproblemer, (365 og 366 blir da "større" enn et år)

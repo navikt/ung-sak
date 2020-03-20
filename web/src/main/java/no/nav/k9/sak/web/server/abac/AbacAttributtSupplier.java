@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 
-import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.vedtak.sikkerhet.abac.AbacAttributtType;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.StandardAbacAttributtType;

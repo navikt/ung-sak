@@ -8,24 +8,24 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegRef;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.ytelse.beregning.BeregnFeriepengerTjeneste;
-import no.nav.foreldrepenger.ytelse.beregning.BeregningsresultatVerifiserer;
-import no.nav.foreldrepenger.ytelse.beregning.FastsettBeregningsresultatTjeneste;
-import no.nav.foreldrepenger.ytelse.beregning.UttakResultatInput;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
+import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
+import no.nav.k9.sak.ytelse.beregning.UttakResultatInput;
 
 /** Felles steg for å beregne tilkjent ytelse */
 
