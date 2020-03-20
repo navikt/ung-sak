@@ -18,7 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
@@ -58,7 +58,7 @@ public class KalkulusInMermoryTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public OppdaterBeregningResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse) {
+    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 

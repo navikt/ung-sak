@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeids
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -25,6 +27,16 @@ public class ArbeidsgiverHistorikkinnslag {
     @Inject
     public ArbeidsgiverHistorikkinnslag(ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
+    }
+
+    public String lagHistorikkinnslagTekstForBeregningsgrunnlag(AktivitetStatus aktivitetStatus,
+                                                                Optional<Arbeidsgiver> arbeidsgiver,
+                                                                Optional<InternArbeidsforholdRef> arbeidsforholdRef,
+                                                                List<ArbeidsforholdOverstyring> overstyringer) {
+        return arbeidsgiver.map(arbGiv -> arbeidsforholdRef.isPresent() && arbeidsforholdRef.get().gjelderForSpesifiktArbeidsforhold()
+            ? lagArbeidsgiverHistorikkinnslagTekst(arbGiv, arbeidsforholdRef.get(), overstyringer)
+            : lagArbeidsgiverHistorikkinnslagTekst(arbGiv, overstyringer))
+            .orElse(aktivitetStatus.getNavn());
     }
 
     public String lagArbeidsgiverHistorikkinnslagTekst(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, List<ArbeidsforholdOverstyring> overstyringer) {

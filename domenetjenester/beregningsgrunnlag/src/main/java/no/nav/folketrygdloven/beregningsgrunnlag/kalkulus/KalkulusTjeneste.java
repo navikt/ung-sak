@@ -18,7 +18,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.MapEndringsresultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.UuidDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -109,15 +110,12 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public OppdaterBeregningResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse) {
+    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse) {
         HåndterBeregningRequest håndterBeregningRequest = new HåndterBeregningRequest(håndterBeregningDto, referanse.getBehandlingUuid());
         OppdateringRespons oppdateringRespons = restTjeneste.oppdaterBeregning(håndterBeregningRequest);
-        return mapFraOppdateringRespons(oppdateringRespons);
+        return MapEndringsresultat.mapFraOppdateringRespons(oppdateringRespons);
     }
 
-    private OppdaterBeregningResultat mapFraOppdateringRespons(OppdateringRespons oppdateringRespons) {
-        return null;
-    }
 
     @Override
     public Beregningsgrunnlag hentEksaktFastsatt(Long behandlingId) {
