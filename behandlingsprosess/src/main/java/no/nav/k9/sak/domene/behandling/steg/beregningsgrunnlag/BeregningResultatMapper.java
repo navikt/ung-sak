@@ -1,9 +1,9 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
-import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 
 class BeregningResultatMapper {
 

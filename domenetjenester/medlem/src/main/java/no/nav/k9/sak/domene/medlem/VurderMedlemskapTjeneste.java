@@ -7,8 +7,7 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -18,6 +17,7 @@ import no.nav.k9.sak.domene.medlem.impl.AvklarOmErBosatt;
 import no.nav.k9.sak.domene.medlem.impl.AvklarOmSøkerOppholderSegINorge;
 import no.nav.k9.sak.domene.medlem.impl.AvklaringFaktaMedlemskap;
 import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 
 @ApplicationScoped
 public class VurderMedlemskapTjeneste {

@@ -6,12 +6,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
-import no.nav.foreldrepenger.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -20,9 +14,15 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
+import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.søknad.BekreftSokersOpplysningspliktManuDto;
 import no.nav.vedtak.konfig.Tid;
 

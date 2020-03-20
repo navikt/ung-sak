@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.domene.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -22,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEn
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kontrakt.person.AvklartPersonstatus;
 import no.nav.k9.sak.kontrakt.person.PersonadresseDto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;

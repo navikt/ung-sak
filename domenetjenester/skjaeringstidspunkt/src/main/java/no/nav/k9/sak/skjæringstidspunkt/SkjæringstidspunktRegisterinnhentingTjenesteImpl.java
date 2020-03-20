@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 /** Brukes som factory for å gi spesifikk tjeneste avh. av ytelse. */
 public class SkjæringstidspunktRegisterinnhentingTjenesteImpl implements SkjæringstidspunktRegisterinnhentingTjeneste {

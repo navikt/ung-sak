@@ -12,18 +12,18 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingTypeRef;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
-import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
-import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.kompletthet.KompletthetResultat;
+import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerSøknad;
 

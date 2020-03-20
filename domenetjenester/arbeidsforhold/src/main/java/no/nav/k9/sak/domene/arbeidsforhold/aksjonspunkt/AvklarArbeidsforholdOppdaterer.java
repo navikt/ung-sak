@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
+import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;

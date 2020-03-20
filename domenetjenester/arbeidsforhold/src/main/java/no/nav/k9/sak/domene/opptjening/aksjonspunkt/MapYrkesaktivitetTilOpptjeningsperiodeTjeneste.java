@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;

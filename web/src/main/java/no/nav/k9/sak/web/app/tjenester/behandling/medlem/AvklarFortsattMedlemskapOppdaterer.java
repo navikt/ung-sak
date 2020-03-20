@@ -6,11 +6,11 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktOppdaterer;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.DtoTilServiceAdapter;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
+import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;

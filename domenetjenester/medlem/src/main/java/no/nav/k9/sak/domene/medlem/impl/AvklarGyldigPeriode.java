@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.medlem.impl;
 
-import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.JA;
-import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.NEI;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.JA;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.NEI;
 import static no.nav.k9.sak.domene.medlem.impl.MedlemResultat.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
 
 import java.time.LocalDate;
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
+import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;

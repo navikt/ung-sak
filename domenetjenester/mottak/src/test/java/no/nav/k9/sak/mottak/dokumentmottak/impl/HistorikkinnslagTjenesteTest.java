@@ -15,8 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.foreldrepenger.dokumentarkiv.journal.JournalMetadata;
-import no.nav.foreldrepenger.dokumentarkiv.journal.JournalTjeneste;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
@@ -27,6 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
+import no.nav.k9.sak.dokument.arkiv.journal.JournalMetadata;
+import no.nav.k9.sak.dokument.arkiv.journal.JournalTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;

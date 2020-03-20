@@ -17,15 +17,15 @@ import java.util.function.BiFunction;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
-import no.nav.foreldrepenger.kompletthet.Kompletthetsjekker;
-import no.nav.foreldrepenger.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.k9.sak.kompletthet.KompletthetResultat;
+import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
+import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 
 @ApplicationScoped
 public class KompletthetModell {

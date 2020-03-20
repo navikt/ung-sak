@@ -1,9 +1,9 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import static java.util.Collections.emptyList;
-import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.JA;
-import static no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall.NEI;
-import static no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.JA;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.NEI;
+import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,14 +19,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtleder;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.AksjonspunktUtlederInput;
-import no.nav.foreldrepenger.behandling.aksjonspunkt.Utfall;
-import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.Skjæringstidspunkt;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
+import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
+import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;

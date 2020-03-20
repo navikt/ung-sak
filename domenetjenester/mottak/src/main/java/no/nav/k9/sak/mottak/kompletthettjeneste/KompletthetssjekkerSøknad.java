@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 public interface KompletthetssjekkerSøknad {
 

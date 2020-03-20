@@ -2,8 +2,8 @@ package no.nav.k9.sak.mottak.kompletthettjeneste;
 
 import java.util.List;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 public interface KompletthetssjekkerInntektsmelding {
 

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.skjæringstidspunkt;
 
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
+import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 
 public interface SkjæringstidspunktTjeneste {
 

@@ -29,9 +29,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.dokumentarkiv.ArkivDokument;
-import no.nav.foreldrepenger.dokumentarkiv.ArkivJournalPost;
-import no.nav.foreldrepenger.dokumentarkiv.DokumentArkivTjeneste;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
@@ -40,6 +37,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.MottatteDokumentRepo
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.dokument.arkiv.ArkivDokument;
+import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
+import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;

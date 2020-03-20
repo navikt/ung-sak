@@ -5,7 +5,7 @@ import javax.inject.Inject;
 
 import org.apache.kafka.streams.KafkaStreams;
 
-import no.nav.foreldrepenger.historikk.kafka.HistorikkConsumer;
+import no.nav.k9.sak.historikk.kafka.HistorikkConsumer;
 
 @ApplicationScoped
 public class HistorikkConsumerHealthCheck extends ExtHealthCheck {

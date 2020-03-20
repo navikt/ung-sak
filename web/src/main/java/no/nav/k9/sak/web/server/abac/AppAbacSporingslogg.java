@@ -5,7 +5,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.interceptor.Interceptor;
 
-import no.nav.foreldrepenger.sikkerhet.abac.AppAbacAttributtType;
+import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.vedtak.log.sporingslogg.Sporingsdata;
 import no.nav.vedtak.sikkerhet.abac.DefaultAbacSporingslogg;
 import no.nav.vedtak.sikkerhet.abac.PdpRequest;
