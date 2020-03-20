@@ -13,21 +13,17 @@ import org.junit.Test;
 
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.test.util.aktør.NavBrukerBuilder;
 import no.nav.k9.sak.test.util.aktør.NavPersoninfoBuilder;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakApplikasjonTjeneste;
-import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakSamlingForBruker;
 
 public class FagsakApplikasjonTjenesteTest {
 
@@ -59,10 +55,9 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_hente_saker_på_fnr() {
         // Arrange
         Personinfo personinfo = new NavPersoninfoBuilder().medAktørId(AKTØR_ID).build();
-        NavBruker navBruker = new NavBrukerBuilder().medPersonInfo(personinfo).build();
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.of(personinfo));
 
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(navBruker).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentForBruker(AKTØR_ID)).thenReturn(Collections.singletonList(fagsak));
         when(behandlingRepository.hentSisteBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
 
@@ -80,8 +75,7 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_hente_saker_på_saksreferanse() {
         // Arrange
         Personinfo personinfo = new NavPersoninfoBuilder().medAktørId(AKTØR_ID).build();
-        NavBruker navBruker = new NavBrukerBuilder().medPersonInfo(personinfo).build();
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(navBruker).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
         when(behandlingRepository.hentSisteBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
@@ -100,8 +94,7 @@ public class FagsakApplikasjonTjenesteTest {
     @Test
     public void skal_returnere_tomt_view_når_fagsakens_bruker_er_ukjent_for_tps() {
         // Arrange
-        NavBruker navBruker = new NavBrukerBuilder().medAktørId(AKTØR_ID).build();
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(navBruker).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.empty()); // Ingen treff i TPS
 

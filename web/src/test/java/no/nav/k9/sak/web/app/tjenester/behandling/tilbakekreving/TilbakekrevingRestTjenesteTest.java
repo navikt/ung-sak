@@ -17,7 +17,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -27,7 +26,6 @@ import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.TilbakekrevingValgDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 
@@ -68,16 +66,8 @@ public class TilbakekrevingRestTjenesteTest {
     }
 
     private Behandling lagBehandling() {
-        Personinfo personinfo = new Personinfo.Builder()
-            .medAktørId(AktørId.dummy())
-            .medPersonIdent(new PersonIdent("22321412444"))
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medNavn("navn")
-            .medFødselsdato(LocalDate.now().minusYears(25))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-        NavBruker navBruker = NavBruker.opprettNy(personinfo);
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, navBruker, new Saksnummer("123456"));
+
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy(), new Saksnummer("123456"));
         return Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD).build();
     }
 

@@ -126,8 +126,12 @@ public class FordelRestTjeneste {
         BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(opprettSakDto.getBehandlingstemaOffisiellKode());
 
         AktørId aktørId = new AktørId(opprettSakDto.getAktørId());
+        AktørId pleietrengendeAktørId = null;
+        if (opprettSakDto.getPleietrengendeAktørId() != null) {
+            pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
+        }
 
-        var nyFagsakFor = dokumentmottakerPleiepengerBarnSoknad.createNyFagsakFor(behandlingTema.getFagsakYtelseType(), aktørId);
+        var nyFagsakFor = dokumentmottakerPleiepengerBarnSoknad.createNyFagsakFor(behandlingTema.getFagsakYtelseType(), aktørId, pleietrengendeAktørId);
 
         return new SaksnummerDto(nyFagsakFor.getSaksnummer().getVerdi());
     }

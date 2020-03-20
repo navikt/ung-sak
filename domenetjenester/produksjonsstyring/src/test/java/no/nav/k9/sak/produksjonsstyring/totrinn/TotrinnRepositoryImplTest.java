@@ -20,16 +20,12 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnRepository;
-import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
-import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -38,10 +34,10 @@ public class TotrinnRepositoryImplTest {
     private static final AksjonspunktDefinisjon AKSDEF_01 = AksjonspunktDefinisjon.values()[0];
     private static final AksjonspunktDefinisjon AKSDEF_02 = AksjonspunktDefinisjon.values()[1];
     private static final AksjonspunktDefinisjon AKSDEF_03 = AksjonspunktDefinisjon.values()[2];
-    
+
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    
+
     private final EntityManager entityManager = repoRule.getEntityManager();
     private final TotrinnRepository totrinnRepository = new TotrinnRepository(entityManager);
     private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
@@ -50,7 +46,7 @@ public class TotrinnRepositoryImplTest {
     @Test
     public void skal_finne_ett_inaktivt_totrinnsgrunnlag_og_ett_aktivt_totrinnsgrunnlag() {
 
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(lagPerson()));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
@@ -86,7 +82,7 @@ public class TotrinnRepositoryImplTest {
     @Test
     public void skal_finne_flere_inaktive_totrinnsvurderinger_og_flere_aktive_totrinnsvurdering() {
 
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(lagPerson()));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
@@ -148,17 +144,4 @@ public class TotrinnRepositoryImplTest {
             .medVurderÅrsak(vurderÅrsak)
             .build();
     }
-
-    private Personinfo lagPerson() {
-        return new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AktørId.dummy())
-            .medFødselsdato(LocalDate.now().minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12345678901"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-    }
-
 }

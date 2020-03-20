@@ -34,11 +34,6 @@ public class MedisinskGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "pleietrengende_id", nullable = false, updatable = false, unique = true)
-    private Pleietrengende pleietrengende;
-
-    @ManyToOne
-    @Immutable
     @JoinColumn(name = "omsorgenfor_id", updatable = false, unique = true)
     private OmsorgenFor omsorgenFor;
 
@@ -57,11 +52,9 @@ public class MedisinskGrunnlag extends BaseEntitet {
     MedisinskGrunnlag() {
     }
 
-    MedisinskGrunnlag(Long behandlingId, Pleietrengende pleietrengende,
-                      KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer,
+    MedisinskGrunnlag(Long behandlingId, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer,
                       OmsorgenFor omsorgenFor) {
         this.behandlingId = behandlingId;
-        this.pleietrengende = pleietrengende;
         this.kontinuerligTilsyn = kontinuerligTilsyn; // NOSONAR
         this.legeerklæringer = legeerklæringer;
         this.omsorgenFor = omsorgenFor;
@@ -79,10 +72,6 @@ public class MedisinskGrunnlag extends BaseEntitet {
         return legeerklæringer;
     }
 
-    public Pleietrengende getPleietrengende() {
-        return pleietrengende;
-    }
-
     public OmsorgenFor getOmsorgenFor() {
         return omsorgenFor;
     }
@@ -93,14 +82,13 @@ public class MedisinskGrunnlag extends BaseEntitet {
         if (!(o instanceof MedisinskGrunnlag)) return false;
         var that = (MedisinskGrunnlag) o;
         return Objects.equals(kontinuerligTilsyn, that.kontinuerligTilsyn) &&
-            Objects.equals(pleietrengende, that.pleietrengende) &&
             Objects.equals(omsorgenFor, that.omsorgenFor) &&
             Objects.equals(legeerklæringer, that.legeerklæringer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(kontinuerligTilsyn, pleietrengende, omsorgenFor, legeerklæringer);
+        return Objects.hash(kontinuerligTilsyn, omsorgenFor, legeerklæringer);
     }
 
     @Override

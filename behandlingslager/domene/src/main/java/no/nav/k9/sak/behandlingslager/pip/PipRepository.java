@@ -100,9 +100,11 @@ public class PipRepository {
             "JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id " +
             "WHERE fag.id in (:fagsakIder) AND grp.aktiv = TRUE " +
             " UNION ALL " + // NOSONAR
-            "SELECT br.AKTOER_ID FROM Fagsak fag " +
-            "JOIN Bruker br ON fag.BRUKER_ID = br.ID " +
-            "WHERE fag.id in (:fagsakIder) AND br.AKTOER_ID IS NOT NULL "
+            "SELECT fag.bruker_aktoer_id FROM Fagsak fag " +
+            "WHERE fag.id in (:fagsakIder) AND fag.bruker_aktoer_id IS NOT NULL " +
+            " UNION ALL " + // NOSONAR
+            "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
+            "WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL "
             ;
 
         Query query = entityManager.createNativeQuery(sql); // NOSONAR
@@ -123,9 +125,11 @@ public class PipRepository {
             "JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id " +
             "WHERE fag.SAKSNUMMER = (:saksnummer) AND grp.aktiv = TRUE " +
             " UNION ALL " + // NOSONAR
-            "SELECT br.AKTOER_ID FROM Fagsak fag " +
-            "JOIN Bruker br ON fag.BRUKER_ID = br.ID " +
-            "WHERE fag.SAKSNUMMER = (:saksnummer) AND br.AKTOER_ID IS NOT NULL ";
+            "SELECT fag.bruker_aktoer_id FROM Fagsak fag " +
+            "WHERE fag.id in (:fagsakIder) AND fag.bruker_aktoer_id IS NOT NULL " +
+            " UNION ALL " + // NOSONAR
+            "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
+            "WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL ";
 
         Query query = entityManager.createNativeQuery(sql); // NOSONAR
         query.setParameter(SAKSNUMMER, saksnummer.getVerdi());
@@ -177,8 +181,7 @@ public class PipRepository {
         }
         String sql = "SELECT f.id " +
             "from FAGSAK f " +
-            "join BRUKER b on (f.bruker_id = b.id) " +
-            "where b.aktoer_id in (:aktørId)";
+            "where f.bruker_aktoer_id in (:aktørId)";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("aktørId", aktørId.stream().map(AktørId::getId).collect(Collectors.toList()));
         var result = (List<BigInteger>) query.getResultList();

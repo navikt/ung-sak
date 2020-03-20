@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -13,7 +12,7 @@ class FagsakBuilder {
 
     private Saksnummer saksnummer;
 
-    private NavBrukerBuilder brukerBuilder = new NavBrukerBuilder();
+    private AktørId bruker = AktørId.dummy();
 
     private Fagsak fagsak;
 
@@ -21,6 +20,10 @@ class FagsakBuilder {
 
     private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;
+    }
+
+    static FagsakBuilder nyFagsak(FagsakYtelseType fagsakYtelseType) {
+        return new FagsakBuilder(fagsakYtelseType);
     }
 
     FagsakBuilder medSaksnummer(Saksnummer saksnummer) {
@@ -37,29 +40,19 @@ class FagsakBuilder {
 
     FagsakBuilder medBrukerAktørId(AktørId aktørId) {
         validerFagsakIkkeSatt();
-        brukerBuilder.medAktørId(aktørId);
+        this.bruker = aktørId;
         return this;
     }
 
-    NavBrukerBuilder getBrukerBuilder() {
-        return brukerBuilder;
-    }
-
-    FagsakBuilder medBruker(NavBruker bruker) {
-        validerFagsakIkkeSatt();
-        brukerBuilder.medBruker(bruker);
-        return this;
-    }
-
-    static FagsakBuilder nyFagsak(FagsakYtelseType fagsakYtelseType) {
-        return new FagsakBuilder(fagsakYtelseType);
+    public AktørId getBruker() {
+        return bruker;
     }
 
     Fagsak build() {
         if (fagsak != null) {
             return fagsak;
         } else {
-            fagsak = Fagsak.opprettNy(fagsakYtelseType, brukerBuilder.build(), saksnummer);
+            fagsak = Fagsak.opprettNy(fagsakYtelseType, bruker, saksnummer);
             return fagsak;
         }
     }

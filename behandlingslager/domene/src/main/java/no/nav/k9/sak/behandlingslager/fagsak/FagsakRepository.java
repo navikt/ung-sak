@@ -52,7 +52,7 @@ public class FagsakRepository {
     }
 
     public List<Fagsak> hentForBruker(AktørId aktørId) {
-        TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak where navBruker.aktørId=:aktørId and skalTilInfotrygd=:ikkestengt", Fagsak.class);
+        TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak f where f.brukerAktørId=:aktørId and f.skalTilInfotrygd=:ikkestengt", Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
         query.setParameter("ikkestengt", false); // NOSONAR
         return query.getResultList();
@@ -82,10 +82,16 @@ public class FagsakRepository {
         if (fagsak.getId() != null) {
             throw new IllegalStateException("Fagsak [" + fagsak.getId() + "] eksisterer. Kan ikke opprette på ny");
         }
-        entityManager.persist(fagsak.getNavBruker());
         entityManager.persist(fagsak);
         entityManager.flush();
         return fagsak.getId();
+    }
+
+    public void oppdaterPleietrengende(Long fagsakId, AktørId pleietrengendeAktørId) {
+        Fagsak fagsak = finnEksaktFagsak(fagsakId);
+        fagsak.setPleietrengende(pleietrengendeAktørId);
+        entityManager.persist(fagsak);
+        entityManager.flush();
     }
 
     public void oppdaterSaksnummer(Long fagsakId, Saksnummer saksnummer) {

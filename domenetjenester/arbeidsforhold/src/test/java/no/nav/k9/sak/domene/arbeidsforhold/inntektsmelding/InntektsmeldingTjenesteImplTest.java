@@ -39,7 +39,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
@@ -476,7 +475,7 @@ public class InntektsmeldingTjenesteImplTest {
             .medPersonIdent(new PersonIdent("12312312312"))
             .medForetrukketSpråk(Språkkode.nb)
             .build();
-        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo), new Saksnummer("123"));
+        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, personinfo.getAktørId(), new Saksnummer("123"));
         fagsakRepository.opprettNy(fagsak);
         return fagsak;
     }

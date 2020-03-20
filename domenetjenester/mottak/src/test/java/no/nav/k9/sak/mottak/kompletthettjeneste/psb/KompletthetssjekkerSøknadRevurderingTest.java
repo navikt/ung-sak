@@ -28,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerTestUtil;
-import no.nav.k9.sak.mottak.kompletthettjeneste.psb.KompletthetssjekkerSøknadRevurderingImpl;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class KompletthetssjekkerSøknadRevurderingTest {

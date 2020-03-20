@@ -34,7 +34,6 @@ public class OppgaveBehandlingKoblingTest {
 
     @Before
     public void setup() {
-        repository.lagre(fagsak.getNavBruker());
         repository.lagre(fagsak);
         repository.flush();
     }

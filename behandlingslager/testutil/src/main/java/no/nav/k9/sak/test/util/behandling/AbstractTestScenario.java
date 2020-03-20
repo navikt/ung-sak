@@ -17,8 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.persistence.EntityManager;
-
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -33,16 +31,11 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingslager.aktør.BrukerTjeneste;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
-import no.nav.k9.sak.behandlingslager.aktør.NavBrukerRepository;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
@@ -78,12 +71,10 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.test.util.aktør.NavBrukerBuilder;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personstatus;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 
@@ -147,14 +138,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         this.fagsakBuilder = FagsakBuilder
             .nyFagsak(fagsakYtelseType)
             .medSaksnummer(new Saksnummer(nyId() + ""))
-            .medBruker(new NavBrukerBuilder().medAktørId(aktørId).build());
-    }
-
-    protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType, NavBruker navBruker) {
-        this.fagsakBuilder = FagsakBuilder
-            .nyFagsak(fagsakYtelseType)
-            .medSaksnummer(new Saksnummer(nyId() + ""))
-            .medBruker(navBruker);
+            .medBruker(aktørId);
     }
 
     static long nyId() {
@@ -610,7 +594,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
         Long behandlingId = behandling.getId();
-        
+
         lagrePersonopplysning(repositoryProvider, behandling);
         lagreMedlemskapOpplysninger(repositoryProvider, behandlingId);
         lagreSøknad(repositoryProvider);
@@ -681,22 +665,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     private void lagFagsak(FagsakRepository fagsakRepo) {
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
-        if (!Mockito.mockingDetails(fagsakRepo).isMock()) {
-            final EntityManager entityManager = (EntityManager) Whitebox.getInternalState(fagsakRepo, "entityManager");
-            if (entityManager != null) {
-                BrukerTjeneste brukerTjeneste = new BrukerTjeneste(new NavBrukerRepository(entityManager));
-                final Personinfo personinfo = new Personinfo.Builder()
-                    .medFødselsdato(LocalDate.now())
-                    .medPersonIdent(PersonIdent.fra("123451234123"))
-                    .medNavn("asdf")
-                    .medAktørId(fagsakBuilder.getBrukerBuilder().getAktørId())
-                    .medForetrukketSpråk(
-                        fagsakBuilder.getBrukerBuilder().getSpråkkode() != null ? fagsakBuilder.getBrukerBuilder().getSpråkkode() : Språkkode.nb)
-                    .build();
-                final NavBruker navBruker = brukerTjeneste.hentEllerOpprettFraAktorId(personinfo);
-                fagsakBuilder.medBruker(navBruker);
-            }
-        }
         fagsak = fagsakBuilder.build();
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
@@ -730,7 +698,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     public AktørId getDefaultBrukerAktørId() {
-        return fagsakBuilder.getBrukerBuilder().getAktørId();
+        return fagsakBuilder.getAktørId();
     }
 
     public Behandling getBehandling() {
@@ -833,7 +801,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     @SuppressWarnings("unchecked")
     public S medBruker(AktørId aktørId) {
         fagsakBuilder
-            .medBrukerAktørId(aktørId);
+            .medBruker(aktørId);
 
         return (S) this;
     }

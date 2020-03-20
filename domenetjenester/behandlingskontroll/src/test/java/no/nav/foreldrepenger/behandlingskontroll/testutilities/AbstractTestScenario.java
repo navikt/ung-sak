@@ -1,13 +1,8 @@
 package no.nav.foreldrepenger.behandlingskontroll.testutilities;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.persistence.EntityManager;
-
-import org.mockito.Mockito;
 
 import no.nav.foreldrepenger.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -16,22 +11,16 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.BrukerTjeneste;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
-import no.nav.k9.sak.behandlingslager.aktør.NavBrukerRepository;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling.Builder;
+import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.felles.testutilities.Whitebox;
 
 /**
  * Default test scenario builder for å definere opp testdata med enkle defaults.
@@ -108,23 +97,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     private void lagFagsak(FagsakRepository fagsakRepo) {
-        // opprett og lagre fagsak. Må gjøres før kan opprette behandling
-        if (!Mockito.mockingDetails(fagsakRepo).isMock()) {
-            final EntityManager entityManager = (EntityManager) Whitebox.getInternalState(fagsakRepo, "entityManager");
-            if (entityManager != null) {
-                BrukerTjeneste brukerTjeneste = new BrukerTjeneste(new NavBrukerRepository(entityManager));
-                final Personinfo personinfo = new Personinfo.Builder()
-                    .medFødselsdato(LocalDate.now())
-                    .medPersonIdent(PersonIdent.fra("123451234123"))
-                    .medNavn("asdf")
-                    .medAktørId(fagsakBuilder.getBrukerBuilder().getAktørId())
-                    .medForetrukketSpråk(
-                        fagsakBuilder.getBrukerBuilder().getSpråkkode() != null ? fagsakBuilder.getBrukerBuilder().getSpråkkode() : Språkkode.nb)
-                    .build();
-                final NavBruker navBruker = brukerTjeneste.hentEllerOpprettFraAktorId(personinfo);
-                fagsakBuilder.medBruker(navBruker);
-            }
-        }
         fagsak = fagsakBuilder.build();
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
@@ -141,69 +113,30 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             });
     }
 
-    public static class NavBrukerBuilder {
-
-        private NavBruker bruker;
-
-        private AktørId aktørId = AktørId.dummy();
-        private NavBrukerKjønn kjønn;
-
-        public NavBrukerBuilder() {
-            // default ctor
-        }
-
-        public NavBrukerBuilder medBruker(NavBruker bruker) {
-            this.bruker = bruker;
-            return this;
-        }
-
-        public NavBrukerBuilder medKjønn(NavBrukerKjønn kjønn) {
-            this.kjønn = kjønn;
-            return this;
-        }
-
-        public NavBrukerKjønn getKjønn() {
-            return kjønn;
-        }
-
-        public Språkkode getSpråkkode() {
-            return Språkkode.nb;
-        }
-
-        public AktørId getAktørId() {
-            return aktørId;
-        }
-
-        public NavBruker build() {
-            return bruker;
-        }
-    }
-
     public static class FagsakBuilder {
 
-        private NavBrukerBuilder brukerBuilder = new NavBrukerBuilder();
-
         private FagsakYtelseType fagsakYtelseType;
+        private AktørId aktørId = AktørId.dummy();
 
         private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
             this.fagsakYtelseType = fagsakYtelseType;
-        }
-
-        public NavBrukerBuilder getBrukerBuilder() {
-            return brukerBuilder;
-        }
-
-        public FagsakBuilder medBruker(NavBruker bruker) {
-            brukerBuilder.medBruker(bruker);
-            return this;
         }
 
         public static FagsakBuilder nyFagsak(FagsakYtelseType fagsakYtelseType) {
             return new FagsakBuilder(fagsakYtelseType);
         }
 
+        public AktørId getAktørId() {
+            return aktørId;
+        }
+
+        public FagsakBuilder medBruker(AktørId aktørId) {
+            this.aktørId = aktørId;
+            return this;
+        }
+
         public Fagsak build() {
-            return Fagsak.opprettNy(fagsakYtelseType, brukerBuilder.build(), new Saksnummer("" + FAKE_ID.getAndIncrement()));
+            return Fagsak.opprettNy(fagsakYtelseType, aktørId, new Saksnummer("" + FAKE_ID.getAndIncrement()));
         }
     }
 

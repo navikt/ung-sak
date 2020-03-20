@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class UttakInputTjeneste {
@@ -73,8 +74,6 @@ public class UttakInputTjeneste {
         Long behandlingId = ref.getBehandlingId();
         SøknadEntitet søknad = søknadRepository.hentSøknadHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Har ikke søknad for behandling " + ref));
-        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Har ikke Medisinsk Grunnlag for behandling " + ref));
         var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
 
         var fastsattUttak = lagFastsattUttakAktivitetPerioder(ref);
@@ -83,9 +82,9 @@ public class UttakInputTjeneste {
         var tilsynsordning = lagTilsynsordning(ref);
 
         Person søker = hentSøker(personopplysninger);
-        Person pleietrengende = hentPleietrengende(medisinskGrunnlag, personopplysninger);
+        Person pleietrengende = hentPleietrengende(ref.getPleietrengendeAktørId(), personopplysninger);
         var pleieperioder = hentPleieperioder(behandlingId);
-        
+
         var medlemskapsperioder = hentMedlemskapsperioder(behandlingId);
 
         var uttakInput =  new UttakInput(ref, iayGrunnlag)
@@ -98,7 +97,7 @@ public class UttakInputTjeneste {
             .medPleieperioder(pleieperioder)
             .medMedlemskap(medlemskapsperioder)
             .medSøknadMottattDato(søknad.getMottattDato());
-        
+
         return uttakInput;
     }
 
@@ -112,8 +111,7 @@ public class UttakInputTjeneste {
         return søker;
     }
 
-    private Person hentPleietrengende(MedisinskGrunnlag medisinskGrunnlag, PersonopplysningerAggregat personopplysninger) {
-        var pleietrengendeAktørId = medisinskGrunnlag.getPleietrengende().getAktørId();
+    private Person hentPleietrengende(AktørId pleietrengendeAktørId, PersonopplysningerAggregat personopplysninger) {
         Person pleietrengende = lagPerson(personopplysninger.getPersonopplysning(pleietrengendeAktørId));
         return pleietrengende;
     }

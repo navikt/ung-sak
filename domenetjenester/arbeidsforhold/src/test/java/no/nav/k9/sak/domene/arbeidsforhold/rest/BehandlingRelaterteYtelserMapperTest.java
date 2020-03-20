@@ -18,10 +18,8 @@ import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper;
-import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.NavBrukerBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -36,8 +34,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class BehandlingRelaterteYtelserMapperTest {
     private static final LocalDate I_DAG = LocalDate.now();
     private static final Saksnummer SAKSNUMMER_42 = new Saksnummer("42");
-    private NavBruker navBruker = new NavBrukerBuilder().medAktørId(AktørId.dummy()).build();
-    private Fagsak fagsakFødsel = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, navBruker, new Saksnummer("66"));
+    private Fagsak fagsakFødsel = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, AktørId.dummy(), new Saksnummer("66"));
 
     @Test
     public void skal_returnerer_tilgrensende_ytelser_for_soker() {

@@ -11,13 +11,13 @@ import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -38,6 +38,7 @@ public class PleiepengerBarnSoknadOversetter {
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private TpsTjeneste tpsTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private FagsakRepository fagsakRepository;
 
     PleiepengerBarnSoknadOversetter() {
         // for CDI proxy
@@ -51,6 +52,7 @@ public class PleiepengerBarnSoknadOversetter {
                                            MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                            TpsTjeneste tpsTjeneste) {
         this.iayTjeneste = iayTjeneste;
+        this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.virksomhetTjeneste = virksomhetTjeneste;
@@ -80,7 +82,7 @@ public class PleiepengerBarnSoknadOversetter {
 
 
         lagreMedlemskapinfo(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
-        lagrePleietrengende(behandlingId, soknad.barn);
+        lagrePleietrengende(behandling.getFagsakId(), soknad.barn);
 
         lagreUttakOgPerioder(soknad, behandlingId);
 
@@ -91,11 +93,11 @@ public class PleiepengerBarnSoknadOversetter {
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
     }
 
-    private void lagrePleietrengende(Long behandlingId, Barn barn) {
+    private void lagrePleietrengende(Long fagsakId, Barn barn) {
         final var norskIdentitetsnummer = barn.norskIdentitetsnummer;
         if (norskIdentitetsnummer != null) {
-            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.verdi));
-            medisinskGrunnlagRepository.lagre(behandlingId, new Pleietrengende(aktørId.orElseThrow()));
+            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.verdi)).orElseThrow();
+            fagsakRepository.oppdaterPleietrengende(fagsakId, aktørId);
         } else {
             throw new IllegalArgumentException();
         }

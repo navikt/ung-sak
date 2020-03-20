@@ -26,7 +26,6 @@ import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -46,8 +45,6 @@ import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.BekreftOpptjeningPeriodeAksjonspunkt;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.opptjening.BekreftOpptjeningPeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
@@ -248,7 +245,7 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
             .medPersonIdent(new PersonIdent("12312312312"))
             .medForetrukketSpråk(Språkkode.nb)
             .build();
-        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo));
+        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, personinfo.getAktørId());
         fagsakRepository.opprettNy(fagsak);
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         final Behandling behandling = builder.build();

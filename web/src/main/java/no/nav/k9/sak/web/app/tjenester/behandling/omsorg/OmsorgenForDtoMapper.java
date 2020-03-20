@@ -13,7 +13,6 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.OmsorgenFor;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
@@ -39,17 +38,17 @@ class OmsorgenForDtoMapper {
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
-    public OmsorgenForDto map(Long behandlingId, AktørId aktørId) {
+    public OmsorgenForDto map(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
         var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
         if (søknadsperioder.isPresent()) {
             var periode = mapTilPeriode(søknadsperioder.get());
             var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
-            var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende);
+            var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
             if (pleietrengende.isPresent()) {
                 var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
                 if (optAggregat.isPresent()) {
                     var aggregat = optAggregat.get();
-                    var pleietrengendeAktørId = pleietrengende.map(Pleietrengende::getAktørId).get();
+                    var pleietrengendeAktørId = pleietrengende.get();
 
                     var relasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengendeAktørId)).collect(Collectors.toList());
 

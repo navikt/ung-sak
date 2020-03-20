@@ -10,8 +10,6 @@ import no.nav.foreldrepenger.behandling.FagsakTjeneste;
 import no.nav.foreldrepenger.domene.person.tps.TpsTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingslager.aktør.BrukerTjeneste;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
@@ -32,34 +30,29 @@ public class OpprettSakTjeneste {
     private TpsTjeneste tpsTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private OpprettGSakTjeneste opprettGSakTjeneste;
-    private BrukerTjeneste brukerTjeneste;
 
     public OpprettSakTjeneste() {
         //For CDI
     }
 
     @Inject
-    public OpprettSakTjeneste(TpsTjeneste tpsTjeneste, 
+    public OpprettSakTjeneste(TpsTjeneste tpsTjeneste,
                               FagsakTjeneste fagsakTjeneste,
-                              OpprettGSakTjeneste opprettGSakTjeneste, 
-                              BrukerTjeneste brukerTjeneste) {
+                              OpprettGSakTjeneste opprettGSakTjeneste) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.opprettGSakTjeneste = opprettGSakTjeneste;
-        this.brukerTjeneste = brukerTjeneste;
     }
 
     public Fagsak opprettSakVL(Personinfo bruker, FagsakYtelseType ytelseType) {
-        NavBruker navBruker = brukerTjeneste.hentEllerOpprettFraAktorId(bruker);
-        Fagsak fagsak = Fagsak.opprettNy(ytelseType, navBruker);
+        Fagsak fagsak = Fagsak.opprettNy(ytelseType, bruker.getAktørId());
         fagsakTjeneste.opprettFagsak(fagsak);
 
         return fagsak;
     }
 
     public Fagsak opprettSakVL(Personinfo bruker, FagsakYtelseType ytelseType, JournalpostId journalpostId) {
-        NavBruker navBruker = brukerTjeneste.hentEllerOpprettFraAktorId(bruker);
-        Fagsak fagsak = Fagsak.opprettNy(ytelseType, navBruker);
+        Fagsak fagsak = Fagsak.opprettNy(ytelseType, bruker.getAktørId());
         fagsakTjeneste.opprettFagsak(fagsak);
         knyttFagsakOgJournalpost(fagsak.getId(), journalpostId);
 

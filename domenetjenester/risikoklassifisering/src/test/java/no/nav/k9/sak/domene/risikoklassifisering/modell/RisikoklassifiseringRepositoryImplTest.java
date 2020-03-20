@@ -4,7 +4,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -12,8 +11,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
-import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -168,19 +165,8 @@ public class RisikoklassifiseringRepositoryImplTest {
     }
 
     private Fagsak opprettFagsak() {
-        NavBruker bruker = NavBruker.opprettNy(
-            new Personinfo.Builder()
-                .medAktørId(AktørId.dummy())
-                .medPersonIdent(new PersonIdent("12345678901"))
-                .medNavn("Kari Nordmann")
-                .medFødselsdato(LocalDate.of(1990, JANUARY, 1))
-                .medForetrukketSpråk(Språkkode.nb)
-                .medKjønn(KVINNE)
-                .build());
-
         // Opprett fagsak
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, bruker, new Saksnummer("1000"));
-        repository.lagre(bruker);
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, AktørId.dummy(), new Saksnummer("1000"));
         repository.lagre(fagsak);
         repository.flush();
         return fagsak;

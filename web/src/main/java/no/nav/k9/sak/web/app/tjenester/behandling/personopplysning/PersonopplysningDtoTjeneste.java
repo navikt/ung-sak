@@ -103,10 +103,10 @@ public class PersonopplysningDtoTjeneste {
             .map(e -> enkelMapping(e, aggregat))
             .collect(Collectors.toList()));
 
-        var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
-        var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
-            var aktørId = pleietrengende.get().getAktørId();
+            var aktørId = pleietrengende.get();
             dto.setBarnSoktFor(aggregat.getBarna()
                 .stream()
                 .filter(it -> it.getAktørId().equals(aktørId))

@@ -10,7 +10,6 @@ import javax.persistence.EntityManager;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -29,8 +28,6 @@ public class BasicBehandlingBuilder {
     private Fagsak fagsak;
 
     private final AktørId aktørId = AktørId.dummy();
-
-    private Map<AktørId, NavBruker> lagredeBrukere = new HashMap<>();
 
     public BasicBehandlingBuilder(EntityManager em) {
         this.em = em;
@@ -71,22 +68,9 @@ public class BasicBehandlingBuilder {
 
     private Fagsak opprettFagsak(FagsakYtelseType ytelse, AktørId aktørId) {
 
-        var bruker = lagredeBrukere.computeIfAbsent(aktørId, aid -> {
-            return NavBruker.opprettNy(
-                new Personinfo.Builder()
-                    .medAktørId(aid)
-                    .medPersonIdent(new PersonIdent("12345678901"))
-                    .medNavn("Kari Nordmann")
-                    .medForetrukketSpråk(Språkkode.nb)
-                    .medFødselsdato(LocalDate.now().minusYears(20))
-                    .medKjønn(KVINNE)
-                    .build());
-        });
-        em.persist(bruker);
-
         // Opprett fagsak
         String randomSaksnummer = System.nanoTime() + "";
-        this.fagsak = Fagsak.opprettNy(ytelse, bruker, new Saksnummer(randomSaksnummer));
+        this.fagsak = Fagsak.opprettNy(ytelse, aktørId, new Saksnummer(randomSaksnummer));
         em.persist(fagsak);
         em.flush();
         return fagsak;

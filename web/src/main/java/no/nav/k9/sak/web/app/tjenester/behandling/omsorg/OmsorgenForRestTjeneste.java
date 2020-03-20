@@ -67,6 +67,6 @@ public class OmsorgenForRestTjeneste {
                                                     @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
                                                         BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid());
-        return behandling.map(it -> dtoMapper.map(it.getId(), it.getAktørId())).orElse(null);
+        return behandling.map(it -> dtoMapper.map(it.getId(), it.getAktørId(), it.getFagsak().getPleietrengendeAktørId())).orElse(null);
     }
 }

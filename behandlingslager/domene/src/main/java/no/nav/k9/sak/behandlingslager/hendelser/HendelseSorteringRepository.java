@@ -54,9 +54,8 @@ public class HendelseSorteringRepository {
 
     private TypedQuery<AktørId> getAktørIderMedRelevantSak(Set<AktørId> aktørIdListe) {
         TypedQuery<AktørId> query = entityManager.createQuery(
-            "select b.aktørId from Bruker b " +
-                "inner join Fagsak f on b = f.navBruker " +
-                "where b.aktørId in (:aktørIder) " +
+            "select f.brukerAktørId from Fagsak f " +
+                "where f.brukerAktørId in (:aktørIder) " +
                 "and ((f.fagsakStatus != :fagsakStatus " +
                 "and f.ytelseType != :ytelseType) " +
                 "or f.ytelseType = :ytelseType) ", //$NON-NLS-1$

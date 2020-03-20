@@ -7,13 +7,11 @@
 	<sequence-generator name="SEQ_MD_INNLEGGELSE" allocation-size="50" sequence-name="SEQ_MD_INNLEGGELSE" />
 	<sequence-generator name="SEQ_MD_LEGEERKLAERING" allocation-size="50" sequence-name="SEQ_MD_LEGEERKLAERING" />
 	<sequence-generator name="SEQ_MD_LEGEERKLAERINGER" allocation-size="50" sequence-name="SEQ_MD_LEGEERKLAERINGER" />
-	<sequence-generator name="SEQ_MD_PLEIETRENGENDE" allocation-size="50" sequence-name="SEQ_MD_PLEIETRENGENDE" />
 	<sequence-generator name="SEQ_MD_OMSORGENFOR" allocation-size="50" sequence-name="SEQ_MD_OMSORGENFOR" />
 	<sequence-generator name="SEQ_MD_KONTINUERLIG_TILSYN" allocation-size="50" sequence-name="SEQ_MD_KONTINUERLIG_TILSYN" />
 	<sequence-generator name="SEQ_MD_KONTINUERLIG_TILSYN_PERIODE" allocation-size="50" sequence-name="SEQ_MD_KONTINUERLIG_TILSYN_PERIODE" />
 
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag" />
-	<entity class="no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.medisinsk.OmsorgenFor" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæringer" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring" />

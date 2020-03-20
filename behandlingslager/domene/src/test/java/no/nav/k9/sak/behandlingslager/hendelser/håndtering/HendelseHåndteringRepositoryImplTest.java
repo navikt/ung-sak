@@ -14,7 +14,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
@@ -53,9 +52,7 @@ public class HendelseHåndteringRepositoryImplTest {
             .medForetrukketSpråk(Språkkode.nb)
             .build();
 
-        NavBruker navBruker = NavBruker.opprettNy(personinfo);
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, navBruker);
-        repository.lagre(navBruker);
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, personinfo.getAktørId());
         repository.lagre(fagsak);
 
         Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);

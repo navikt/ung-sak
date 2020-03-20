@@ -32,7 +32,6 @@ public class BehandlingLåsTest {
     @Before
     public void setup() {
         fagsak = FagsakBuilder.nyEngangstønad().medSaksnummer(saksnummer).build();
-        em.persist(fagsak.getNavBruker());
         em.persist(fagsak);
         em.flush();
 

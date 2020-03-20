@@ -24,7 +24,6 @@ import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -51,8 +50,6 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -64,7 +61,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
     public static final String ORG_NUMMER = "974760673";
-    
+
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final LocalDate skjæringstidspunkt = LocalDate.now();
@@ -385,16 +382,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     }
 
     private Behandling opprettBehandling(LocalDate iDag) {
-        Personinfo personinfo = new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AKTØRID)
-            .medFødselsdato(iDag.minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12312312312"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AKTØRID);
         fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = builder.build();

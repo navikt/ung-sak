@@ -5,10 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.persistence.EntityManager;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -17,11 +14,6 @@ import org.mockito.stubbing.Answer;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.behandlingslager.aktør.BrukerTjeneste;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
-import no.nav.k9.sak.behandlingslager.aktør.NavBrukerRepository;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling.Builder;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -31,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 
@@ -185,29 +176,13 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
     }
 
     private void lagFagsak(FagsakRepository fagsakRepo) {
-        // opprett og lagre fagsak. Må gjøres før kan opprette behandling
-        if (!Mockito.mockingDetails(fagsakRepo).isMock()) {
-            final EntityManager entityManager = (EntityManager) Whitebox.getInternalState(fagsakRepo, "entityManager");
-            if (entityManager != null) {
-                BrukerTjeneste brukerTjeneste = new BrukerTjeneste(new NavBrukerRepository(entityManager));
-                final Personinfo personinfo = new Personinfo.Builder()
-                    .medFødselsdato(LocalDate.now())
-                    .medPersonIdent(PersonIdent.fra("123451234123"))
-                    .medNavn("asdf")
-                    .medAktørId(fagsakBuilder.getBrukerBuilder().getAktørId())
-                    .medForetrukketSpråk(Språkkode.nb)
-                    .build();
-                final NavBruker navBruker = brukerTjeneste.hentEllerOpprettFraAktorId(personinfo);
-                fagsakBuilder.medBruker(navBruker);
-            }
-        }
         fagsak = fagsakBuilder.build();
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
     }
 
     public AktørId getDefaultBrukerAktørId() {
-        return fagsakBuilder.getBrukerBuilder().getAktørId();
+        return fagsakBuilder.getBruker();
     }
 
 }

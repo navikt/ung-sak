@@ -13,13 +13,10 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
@@ -44,7 +41,7 @@ public class SøknadRepositoryImplTest {
 
     @Test
     public void skal_finne_endringssøknad_for_behandling() {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(lagPerson()));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
@@ -71,7 +68,7 @@ public class SøknadRepositoryImplTest {
 
     @Test
     public void skal_ikke_finne_endringssøknad_for_behandling() {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(lagPerson()));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
@@ -90,7 +87,7 @@ public class SøknadRepositoryImplTest {
 
     @Test
     public void skal_kopiere_søknadsgrunnlaget_fra_behandling1_til_behandling2() {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(lagPerson()));
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling1 = Behandling.forFørstegangssøknad(fagsak).build();
@@ -114,18 +111,5 @@ public class SøknadRepositoryImplTest {
             .medSøknadsdato(LocalDate.now().minusDays(1))
             .medErEndringssøknad(erEndringssøknad)
             .build();
-    }
-
-    private Personinfo lagPerson() {
-        final Personinfo personinfo = new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AktørId.dummy())
-            .medFødselsdato(LocalDate.now().minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12345678901"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-        return personinfo;
     }
 }

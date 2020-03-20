@@ -86,7 +86,7 @@ public class OpprettOppgaveForBehandlingTaskTest {
 
         // Sett opp default mock-oppførsel
         Personinfo personinfo = new Personinfo.Builder()
-            .medAktørId(fagsak.getNavBruker().getAktørId())
+            .medAktørId(fagsak.getAktørId())
             .medPersonIdent(new PersonIdent(FNR))
             .medNavn(FORNAVN_ETTERNAVN)
             .medFødselsdato(FØDSELSDATO)

@@ -28,7 +28,7 @@ public class HistorikkRepositoryImplTest {
     private final Repository repository = repoRule.getRepository();
 
     private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
-    
+
 
     private final EntityManager entityManager = repoRule.getEntityManager();
     private final HistorikkRepository historikkRepository = new HistorikkRepository(entityManager);
@@ -38,10 +38,9 @@ public class HistorikkRepositoryImplTest {
     public void setup() {
         fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
     }
-    
+
     @Test
     public void lagrerHistorikkinnslag() {
-        repository.lagre(fagsak.getNavBruker());
         repository.lagre(fagsak);
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
         repository.lagre(behandling);
@@ -68,7 +67,6 @@ public class HistorikkRepositoryImplTest {
 
     @Test
     public void henterAlleHistorikkinnslagForBehandling() {
-        repository.lagre(fagsak.getNavBruker());
         repository.lagre(fagsak);
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
         repository.lagre(behandling);

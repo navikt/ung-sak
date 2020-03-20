@@ -18,7 +18,6 @@ import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -71,16 +70,7 @@ public class MedlemskapTjenesteImplTest {
     }
 
     private Behandling lagBehandling() {
-        final Personinfo personinfo = new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AktørId.dummy())
-            .medFødselsdato(LocalDate.now().minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12345678901"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo));
+        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         final Behandling behandling = builder.build();

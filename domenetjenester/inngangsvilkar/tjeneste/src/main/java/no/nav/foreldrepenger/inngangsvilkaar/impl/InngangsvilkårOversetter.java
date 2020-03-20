@@ -33,15 +33,16 @@ import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.OmsorgenFor;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class InngangsvilkårOversetter {
 
+    private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
 
@@ -51,8 +52,10 @@ public class InngangsvilkårOversetter {
 
     @Inject
     public InngangsvilkårOversetter(MedisinskGrunnlagRepository medisinskGrunnlagRepository,
+                                    BehandlingRepository behandlingRepository,
                                     BasisPersonopplysningTjeneste personopplysningTjeneste) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
+        this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
@@ -146,7 +149,7 @@ public class InngangsvilkårOversetter {
     public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periodeTilVurdering).orElseThrow();
         final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
-        final var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId).orElseThrow();
+        final var pleietrengende = behandlingRepository.hentBehandling(behandlingId).getFagsak().getPleietrengendeAktørId();
         final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))

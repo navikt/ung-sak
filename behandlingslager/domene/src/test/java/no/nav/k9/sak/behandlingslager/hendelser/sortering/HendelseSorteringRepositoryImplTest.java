@@ -17,7 +17,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
@@ -46,7 +45,7 @@ public class HendelseSorteringRepositoryImplTest {
         var personer = genererFagsaker(1);
 
         AktørId aktørId = personer.get(0).getAktørId();
-        
+
         List<AktørId> finnAktørIder = List.of(aktørId);
         List<AktørId> resultat = sorteringRepository.hentEksisterendeAktørIderMedSak(finnAktørIder);
 
@@ -83,21 +82,18 @@ public class HendelseSorteringRepositoryImplTest {
     public void skal_ikke_publisere_videre_hendelser_på_avsluttede_saker() {
         List<Personinfo> personinfoList = genererPersonInfo(3);
 
-        NavBruker navBrukerMedAvsluttetSak = NavBruker.opprettNy(personinfoList.get(0));
-        Fagsak fagsak1 = opprettFagsak(navBrukerMedAvsluttetSak, FagsakYtelseType.FORELDREPENGER);
+        var aktørId = personinfoList.get(0).getAktørId();
+        Fagsak fagsak1 = opprettFagsak(aktørId, FagsakYtelseType.FORELDREPENGER);
         fagsak1.setAvsluttet();
 
-        NavBruker navBrukerMedÅpenSak = NavBruker.opprettNy(personinfoList.get(1));
-        Fagsak fagsak2 = opprettFagsak(navBrukerMedÅpenSak, FagsakYtelseType.FORELDREPENGER);
+        var aktørId1 = personinfoList.get(1).getAktørId();
+        Fagsak fagsak2 = opprettFagsak(aktørId1, FagsakYtelseType.FORELDREPENGER);
 
-        NavBruker navBrukerMedÅpenOgAvsluttetSak = NavBruker.opprettNy(personinfoList.get(2));
-        Fagsak fagsak3 = opprettFagsak(navBrukerMedÅpenOgAvsluttetSak, FagsakYtelseType.FORELDREPENGER);
-        Fagsak fagsak4 = opprettFagsak(navBrukerMedÅpenOgAvsluttetSak, FagsakYtelseType.FORELDREPENGER);
+        var aktørId2 = personinfoList.get(2).getAktørId();
+        Fagsak fagsak3 = opprettFagsak(aktørId2, FagsakYtelseType.FORELDREPENGER);
+        Fagsak fagsak4 = opprettFagsak(aktørId2, FagsakYtelseType.FORELDREPENGER);
         fagsak4.setAvsluttet();
 
-        repository.lagre(navBrukerMedAvsluttetSak);
-        repository.lagre(navBrukerMedÅpenSak);
-        repository.lagre(navBrukerMedÅpenOgAvsluttetSak);
         repository.lagre(fagsak1);
         repository.lagre(fagsak2);
         repository.lagre(fagsak3);
@@ -108,48 +104,46 @@ public class HendelseSorteringRepositoryImplTest {
         List<AktørId> resultat = sorteringRepository.hentEksisterendeAktørIderMedSak(aktørList);
 
         assertThat(resultat).hasSize(2);
-        assertThat(resultat).contains(navBrukerMedÅpenSak.getAktørId());
-        assertThat(resultat).contains(navBrukerMedÅpenOgAvsluttetSak.getAktørId());
+        assertThat(resultat).contains(aktørId1);
+        assertThat(resultat).contains(aktørId2);
     }
 
     @Test
     public void skal_publisere_videre_hendelser_på_saker_om_engangsstønad() {
         // Arrange
         List<Personinfo> personinfoList = genererPersonInfo(1);
-        NavBruker navBruker = NavBruker.opprettNy(personinfoList.get(0));
-        Fagsak fagsak = opprettFagsak(navBruker, FagsakYtelseType.ENGANGSTØNAD);
+        var aktørId = personinfoList.get(0).getAktørId();
+        Fagsak fagsak = opprettFagsak(aktørId, FagsakYtelseType.ENGANGSTØNAD);
 
-        repository.lagre(navBruker);
         repository.lagre(fagsak);
         repository.flushAndClear();
 
-        List<AktørId> finnAktørIder = List.of(navBruker.getAktørId());
+        List<AktørId> finnAktørIder = List.of(aktørId);
 
         // Act
         List<AktørId> resultat = sorteringRepository.hentEksisterendeAktørIderMedSak(finnAktørIder);
 
         // Assert
-        assertThat(resultat).contains(navBruker.getAktørId());
+        assertThat(resultat).contains(aktørId);
     }
 
     @Test
     public void skal_publisere_videre_hendelser_på_saker_om_svangerskapspenger() {
         // Arrange
         List<Personinfo> personinfoList = genererPersonInfo(1);
-        NavBruker navBruker = NavBruker.opprettNy(personinfoList.get(0));
-        Fagsak fagsak = opprettFagsak(navBruker, FagsakYtelseType.SVANGERSKAPSPENGER);
+        var aktørId = personinfoList.get(0).getAktørId();
+        Fagsak fagsak = opprettFagsak(aktørId, FagsakYtelseType.SVANGERSKAPSPENGER);
 
-        repository.lagre(navBruker);
         repository.lagre(fagsak);
         repository.flushAndClear();
 
-        List<AktørId> finnAktørIder = List.of(navBruker.getAktørId());
+        List<AktørId> finnAktørIder = List.of(aktørId);
 
         // Act
         List<AktørId> resultat = sorteringRepository.hentEksisterendeAktørIderMedSak(finnAktørIder);
 
         // Assert
-        assertThat(resultat).contains(navBruker.getAktørId());
+        assertThat(resultat).contains(aktørId);
     }
 
     @Test
@@ -159,10 +153,8 @@ public class HendelseSorteringRepositoryImplTest {
         LocalDate fødselsdato = LocalDate.now();
 
         List<Personinfo> personinfoList = genererPersonInfo(1);
-        NavBruker navBruker = NavBruker.opprettNy(personinfoList.get(0));
-        AktørId morAktørId = navBruker.getAktørId();
-        Fagsak fagsak = opprettFagsak(navBruker, FagsakYtelseType.FORELDREPENGER);
-        repository.lagre(navBruker);
+        AktørId morAktørId = personinfoList.get(0).getAktørId();
+        Fagsak fagsak = opprettFagsak(morAktørId, FagsakYtelseType.FORELDREPENGER);
         repository.lagre(fagsak);
         repository.flushAndClear();
 
@@ -211,11 +203,9 @@ public class HendelseSorteringRepositoryImplTest {
         LocalDate fødselsdato = LocalDate.now();
 
         List<Personinfo> personinfoList = genererPersonInfo(1);
-        NavBruker navBruker = NavBruker.opprettNy(personinfoList.get(0));
-        AktørId morAktørId = navBruker.getAktørId();
-        
-        Fagsak fagsak = opprettFagsak(navBruker, FagsakYtelseType.FORELDREPENGER);
-        repository.lagre(navBruker);
+        AktørId morAktørId = personinfoList.get(0).getAktørId();
+
+        Fagsak fagsak = opprettFagsak(morAktørId, FagsakYtelseType.FORELDREPENGER);
         repository.lagre(fagsak);
         repository.flushAndClear();
 
@@ -250,7 +240,7 @@ public class HendelseSorteringRepositoryImplTest {
         assertThat(resultat2).isEmpty();
     }
 
-    private Fagsak opprettFagsak(NavBruker bruker, FagsakYtelseType fagsakYtelseType) {
+    private Fagsak opprettFagsak(AktørId bruker, FagsakYtelseType fagsakYtelseType) {
         return Fagsak.opprettNy(fagsakYtelseType, bruker);
     }
 
@@ -258,17 +248,12 @@ public class HendelseSorteringRepositoryImplTest {
         List<Personinfo> personinfoList = genererPersonInfo(antall);
 
         List<Fagsak> fagsaker = new ArrayList<>();
-        List<NavBruker> navBrukere = new ArrayList<>();
 
         for (Personinfo pInfo : personinfoList) {
-            NavBruker bruker = NavBruker.opprettNy(pInfo);
-            navBrukere.add(bruker);
-
-            fagsaker.add(opprettFagsak(bruker, FagsakYtelseType.FORELDREPENGER));
+            fagsaker.add(opprettFagsak(pInfo.getAktørId(), FagsakYtelseType.FORELDREPENGER));
         }
 
         if (!fagsaker.isEmpty()) {
-            repository.lagre(navBrukere);
             repository.lagre(fagsaker);
             repository.flushAndClear();
         }
@@ -279,7 +264,6 @@ public class HendelseSorteringRepositoryImplTest {
     private List<Personinfo> genererPersonInfo(int antall) {
         String fnr = "123456678901";
 
-        
         List<Personinfo> personinfoList = new ArrayList<>();
         for (int i = 0; i < antall; i++) {
             personinfoList.add(

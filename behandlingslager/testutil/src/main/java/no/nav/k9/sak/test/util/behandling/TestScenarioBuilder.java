@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.typer.AktørId;
 
 /**
@@ -27,11 +26,6 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
 
     private TestScenarioBuilder(FagsakYtelseType ytelseType, AktørId aktørId) {
         super(ytelseType, aktørId);
-        settDefaultSøknad();
-    }
-
-    private TestScenarioBuilder(FagsakYtelseType ytelseType, NavBruker navBruker) {
-        super(ytelseType, navBruker);
         settDefaultSøknad();
     }
 
@@ -58,7 +52,7 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     public static TestScenarioBuilder builderUtenSøknad(AktørId aktørId) {
         return builderUtenSøknad(DEFAULT_TEST_YTELSE, aktørId);
     }
-    
+
     public static TestScenarioBuilder builderUtenSøknad(FagsakYtelseType ytelseType, AktørId aktørId) {
         var scenario = new TestScenarioBuilder(ytelseType, aktørId);
         scenario.utenSøknad();
@@ -73,16 +67,9 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
         return new TestScenarioBuilder(ytelseType, aktørId);
     }
 
-    public static TestScenarioBuilder builderMedSøknad(NavBruker navBruker) {
-        return builderMedSøknad(DEFAULT_TEST_YTELSE, navBruker);
-    }
-
     public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType fagsakYtelseType) {
         return new TestScenarioBuilder(fagsakYtelseType);
     }
 
-    public static TestScenarioBuilder builderMedSøknad(FagsakYtelseType fagsakYtelseType, NavBruker navBruker) {
-        return new TestScenarioBuilder(fagsakYtelseType, navBruker);
-    }
 
 }

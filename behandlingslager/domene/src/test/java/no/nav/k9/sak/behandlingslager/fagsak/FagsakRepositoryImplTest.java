@@ -14,11 +14,7 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -105,19 +101,8 @@ public class FagsakRepositoryImplTest {
     }
 
     private Fagsak opprettFagsak(Saksnummer saksnummer, AktørId aktørId) {
-        NavBruker bruker = NavBruker.opprettNy(
-            new Personinfo.Builder()
-                .medAktørId(aktørId)
-                .medPersonIdent(new PersonIdent("12345678901"))
-                .medNavn("Kari Nordmann")
-                .medFødselsdato(LocalDate.of(1990, JANUARY, 1))
-                .medKjønn(KVINNE)
-                .medForetrukketSpråk(Språkkode.nb)
-                .build());
-
         // Opprett fagsak
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, bruker, saksnummer);
-        repository.lagre(bruker);
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, aktørId, saksnummer);
         repository.lagre(fagsak);
         repository.flushAndClear();
         return fagsak;

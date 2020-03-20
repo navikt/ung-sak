@@ -23,7 +23,6 @@ import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -54,8 +53,6 @@ import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -465,16 +462,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     private Behandling opprettBehandling(LocalDate skjæringstidspunkt) {
-        final Personinfo personinfo = new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AKTØRID)
-            .medFødselsdato(skjæringstidspunkt.minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12312312312"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, NavBruker.opprettNy(personinfo));
+        final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AKTØRID);
         @SuppressWarnings("unused")
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);

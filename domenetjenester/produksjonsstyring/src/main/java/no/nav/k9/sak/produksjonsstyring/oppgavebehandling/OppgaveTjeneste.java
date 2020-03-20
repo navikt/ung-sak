@@ -89,7 +89,7 @@ public class OppgaveTjeneste {
     public String opprettBasertPåBehandlingId(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
         return opprettBasertPåBehandlingId(String.valueOf(behandlingId), oppgaveÅrsak);
     }
-    
+
     public String opprettBasertPåBehandlingId(String behandlingId, OppgaveÅrsak oppgaveÅrsak) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return opprettOppgave(behandling, oppgaveÅrsak, DEFAULT_OPPGAVEBESKRIVELSE, PrioritetKode.NORM_FOR, DEFAULT_OPPGAVEFRIST_DAGER);
@@ -165,7 +165,7 @@ public class OppgaveTjeneste {
             .medAktivFra(LocalDate.now())
             .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
             .medBrukerTypeKode(BrukerType.PERSON)
-            .medFnr(hentPersonInfo(behandling.getNavBruker().getAktørId()).getPersonIdent().getIdent())
+            .medFnr(hentPersonInfo(behandling.getAktørId()).getPersonIdent().getIdent())
             .medSaksnummer(saksnummer.getVerdi())
             .build();
 
@@ -200,7 +200,7 @@ public class OppgaveTjeneste {
             .medAktivFra(LocalDate.now())
             .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
             .medBrukerTypeKode(BrukerType.PERSON)
-            .medFnr(hentPersonInfo(behandling.getNavBruker().getAktørId()).getPersonIdent().getIdent())
+            .medFnr(hentPersonInfo(behandling.getAktørId()).getPersonIdent().getIdent())
             .medSaksnummer(saksnummer.getVerdi())
             .build();
         WSOpprettOppgaveResponse response = service.opprettOppgave(request);
@@ -214,7 +214,7 @@ public class OppgaveTjeneste {
             .medOpprettetAvEnhetId(Integer.parseInt(behandling.getBehandlendeEnhet()))
             .medAnsvarligEnhetId(behandling.getBehandlendeEnhet())
             .medFagomradeKode(FagomradeKode.FOR.getKode())
-            .medFnr(hentPersonInfo(behandling.getNavBruker().getAktørId()).getPersonIdent().getIdent())
+            .medFnr(hentPersonInfo(behandling.getAktørId()).getPersonIdent().getIdent())
             .medAktivFra(LocalDate.now())
             .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
             .medOppgavetypeKode(OppgaveÅrsak.BEHANDLE_SAK_INFOTRYGD.getKode())

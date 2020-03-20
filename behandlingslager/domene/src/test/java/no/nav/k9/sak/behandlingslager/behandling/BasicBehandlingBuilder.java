@@ -11,9 +11,7 @@ import javax.persistence.EntityManager;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -25,19 +23,17 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 
-/** Enkel builder for å lage en enkel behandling for internt bruk her. */
+/**
+ * Enkel builder for å lage en enkel behandling for internt bruk her.
+ */
 public class BasicBehandlingBuilder {
 
-    private EntityManager em;
     private final BehandlingRepository behandlingRepository;
-
+    private final AktørId aktørId = AktørId.dummy();
+    private EntityManager em;
     private Fagsak fagsak;
     private VedtakVarselRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-
-    private final AktørId aktørId = AktørId.dummy();
-
-    private Map<AktørId, NavBruker> lagredeBrukere = new HashMap<>();
 
     public BasicBehandlingBuilder(EntityManager em) {
         this.em = em;
@@ -84,22 +80,9 @@ public class BasicBehandlingBuilder {
 
     public Fagsak opprettFagsak(FagsakYtelseType ytelse, AktørId aktørId) {
 
-        var bruker = lagredeBrukere.computeIfAbsent(aktørId, aid -> {
-            return NavBruker.opprettNy(
-                new Personinfo.Builder()
-                    .medAktørId(aid)
-                    .medPersonIdent(new PersonIdent("12345678901"))
-                    .medNavn("Kari Nordmann")
-                    .medFødselsdato(LocalDate.of(1990, JANUARY, 1))
-                    .medForetrukketSpråk(Språkkode.nb)
-                    .medKjønn(KVINNE)
-                    .build());
-        });
-        em.persist(bruker);
-
         // Opprett fagsak
         String randomSaksnummer = System.nanoTime() + "";
-        this.fagsak = Fagsak.opprettNy(ytelse, bruker, new Saksnummer(randomSaksnummer));
+        this.fagsak = Fagsak.opprettNy(ytelse, aktørId, new Saksnummer(randomSaksnummer));
         em.persist(fagsak);
         em.flush();
         return fagsak;

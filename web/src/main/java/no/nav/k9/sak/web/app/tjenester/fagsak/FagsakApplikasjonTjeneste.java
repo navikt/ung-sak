@@ -86,7 +86,7 @@ public class FagsakApplikasjonTjeneste {
             return FagsakSamlingForBruker.emptyView();
         }
         List<Fagsak> fagsaker = Collections.singletonList(fagsak.get());
-        AktørId aktørId = fagsak.get().getNavBruker().getAktørId();
+        AktørId aktørId = fagsak.get().getAktørId();
 
         Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForAktør(aktørId);
         if (!funnetNavBruker.isPresent()) {

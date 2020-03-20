@@ -106,7 +106,7 @@ public class BehandlingDtoTjeneste {
         if (søknadOpt.isPresent()) {
             return søknadOpt.get().getSpråkkode();
         } else {
-            return behandling.getFagsak().getNavBruker().getSpråkkode();
+            return Språkkode.nb; // Defaulter
         }
     }
 

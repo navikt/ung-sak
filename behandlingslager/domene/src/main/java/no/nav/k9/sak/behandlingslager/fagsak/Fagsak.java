@@ -11,8 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -21,7 +19,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.k9.sak.typer.AktørId;
@@ -40,12 +37,16 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "ytelse_type", nullable = false, updatable = false)
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "bruker_id", nullable = false)
-    private NavBruker navBruker;
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
+    private AktørId brukerAktørId;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id", unique = true, nullable = true, updatable = true)))
+    private AktørId pleietrengendeAktørId;
 
     @Convert(converter = FagsakStatusKodeverdiConverter.class)
-    @Column(name="fagsak_status", nullable = false)
+    @Column(name = "fagsak_status", nullable = false)
     private FagsakStatus fagsakStatus = FagsakStatus.DEFAULT;
 
     /**
@@ -60,31 +61,48 @@ public class Fagsak extends BaseEntitet {
 
     @Version
     @Column(name = "versjon", nullable = false)
-    private long versjon;       
+    private long versjon;
 
     Fagsak() {
         // Hibernate
     }
 
-    private Fagsak(FagsakYtelseType ytelseType, NavBruker søker) {
+    private Fagsak(FagsakYtelseType ytelseType, AktørId søker) {
         this(ytelseType, søker, null);
     }
 
-    public Fagsak(FagsakYtelseType ytelseType, NavBruker søker, Saksnummer saksnummer) {
+    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, Saksnummer saksnummer) {
         Objects.requireNonNull(ytelseType, "ytelseType");
         this.ytelseType = ytelseType;
-        this.navBruker = søker;
+        this.brukerAktørId = søker;
         if (saksnummer != null) {
             setSaksnummer(saksnummer);
         }
     }
 
-    public static Fagsak opprettNy(FagsakYtelseType ytelseType, NavBruker bruker) {
+    public Fagsak(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer) {
+        this(ytelseType, bruker, saksnummer);
+        this.pleietrengendeAktørId = pleietrengende;
+    }
+
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker) {
         return new Fagsak(ytelseType, bruker);
     }
 
-    public static Fagsak opprettNy(FagsakYtelseType ytelseType, NavBruker bruker, Saksnummer saksnummer) {
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer) {
         return new Fagsak(ytelseType, bruker, saksnummer);
+    }
+
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer) {
+        return new Fagsak(ytelseType, bruker, pleietrengende, saksnummer);
+    }
+
+    public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
+        // FIXME K9 kodeverk/logikk
+        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelseType)) {
+            return BehandlingTema.PLEIEPENGER_SYKT_BARN;
+        }
+        return BehandlingTema.UDEFINERT;
     }
 
     public Long getId() {
@@ -107,8 +125,22 @@ public class Fagsak extends BaseEntitet {
         this.saksnummer = saksnummer;
     }
 
-    public NavBruker getNavBruker() {
-        return navBruker;
+    public void setPleietrengende(AktørId pleietrengendeAktørId) {
+        if (pleietrengendeAktørId != null && this.pleietrengendeAktørId != null && !this.pleietrengendeAktørId.equals(pleietrengendeAktørId)) {
+            throw new IllegalArgumentException("Kan ikke oppdatere pleietrengende til en annen person. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + pleietrengendeAktørId);
+        }
+        if (pleietrengendeAktørId == null && this.pleietrengendeAktørId != null) {
+            throw new IllegalArgumentException("Kan ikke nullstille pleietrengende. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + pleietrengendeAktørId);
+        }
+        this.pleietrengendeAktørId = pleietrengendeAktørId;
+    }
+
+    public AktørId getBrukerAktørId() {
+        return brukerAktørId;
+    }
+
+    public AktørId getPleietrengendeAktørId() {
+        return pleietrengendeAktørId;
     }
 
     public boolean erÅpen() {
@@ -142,7 +174,7 @@ public class Fagsak extends BaseEntitet {
         Fagsak fagsak = (Fagsak) object;
         return Objects.equals(saksnummer, fagsak.saksnummer)
             && Objects.equals(ytelseType, fagsak.ytelseType)
-            && Objects.equals(navBruker, fagsak.navBruker)
+            && Objects.equals(brukerAktørId, fagsak.brukerAktørId)
             && Objects.equals(getYtelseType(), fagsak.getYtelseType());
     }
 
@@ -150,17 +182,17 @@ public class Fagsak extends BaseEntitet {
     public String toString() {
         return getClass().getSimpleName() + "<" //$NON-NLS-1$
             + (id == null ? "" : "id=" + id + ",") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            + " bruker=" + navBruker //$NON-NLS-1$
+            + " bruker=" + brukerAktørId //$NON-NLS-1$
             + ">"; //$NON-NLS-1$
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ytelseType, navBruker);
+        return Objects.hash(ytelseType, brukerAktørId);
     }
 
     public AktørId getAktørId() {
-        return getNavBruker().getAktørId();
+        return brukerAktørId;
     }
 
     private FagsakStatus getFagsakStatus() {
@@ -192,13 +224,5 @@ public class Fagsak extends BaseEntitet {
     public BehandlingTema getBehandlingTema() {
         // FIXME K9 kodeverk/logikk
         return fraFagsakHendelse(this.getYtelseType());
-    }
-
-    public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
-        // FIXME K9 kodeverk/logikk
-        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelseType)) {
-            return BehandlingTema.PLEIEPENGER_SYKT_BARN;
-        }
-        return BehandlingTema.UDEFINERT;
     }
 }

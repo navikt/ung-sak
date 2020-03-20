@@ -48,9 +48,6 @@ import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Pleietrengende;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -101,7 +98,6 @@ public class RegisterdataInnhenter {
     private PersonopplysningRepository personopplysningRepository;
     private BehandlingRepository behandlingRepository;
     private MedlemskapRepository medlemskapRepository;
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste;
     private AbakusTjeneste abakusTjeneste;
 
@@ -117,7 +113,6 @@ public class RegisterdataInnhenter {
                                  MedlemTjeneste medlemTjeneste,
                                  BehandlingRepositoryProvider repositoryProvider,
                                  MedlemskapRepository medlemskapRepository,
-                                 MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                  OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste,
                                  AbakusTjeneste abakusTjeneste,
                                  @KonfigVerdi(value = "etterkontroll.førsøknad.periode", defaultVerdi = "P1W") Period etterkontrollTidsromFørSøknadsdato) {
@@ -126,7 +121,6 @@ public class RegisterdataInnhenter {
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.medlemskapRepository = medlemskapRepository;
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.opplysningsPeriodeTjeneste = opplysningsPeriodeTjeneste;
         this.abakusTjeneste = abakusTjeneste;
     }
@@ -137,7 +131,7 @@ public class RegisterdataInnhenter {
 
     public Personinfo innhentPersonopplysninger(Behandling behandling) {
         // Innhent data fra TPS for søker
-        AktørId søkerAktørId = behandling.getNavBruker().getAktørId();
+        AktørId søkerAktørId = behandling.getAktørId();
         Personinfo søkerInfo = innhentSaksopplysningerForSøker(søkerAktørId);
 
         if (søkerInfo == null) {
@@ -161,7 +155,7 @@ public class RegisterdataInnhenter {
         Long behandlingId = behandling.getId();
 
         // Innhent medl for søker
-        Personinfo søkerInfo = innhentSaksopplysningerForSøker(behandling.getNavBruker().getAktørId());
+        Personinfo søkerInfo = innhentSaksopplysningerForSøker(behandling.getAktørId());
         List<MedlemskapPerioderEntitet> medlemskapsperioder = innhentMedlemskapsopplysninger(søkerInfo, behandling);
         medlemskapRepository.lagreMedlemskapRegisterOpplysninger(behandlingId, medlemskapsperioder);
     }
@@ -193,7 +187,7 @@ public class RegisterdataInnhenter {
     }
 
     private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
-        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId);
+        final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
             final var aktørId = pleietrengende.get();
             final var personinfo = personinfoAdapter.innhentSaksopplysningerForSøker(aktørId);
@@ -366,7 +360,7 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        final var pleietrengende = medisinskGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(MedisinskGrunnlag::getPleietrengende).map(Pleietrengende::getAktørId);
+        final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
 
         if (pleietrengende.isEmpty()) {
             return List.of();

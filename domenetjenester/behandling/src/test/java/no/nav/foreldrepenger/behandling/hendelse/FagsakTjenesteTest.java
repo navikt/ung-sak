@@ -19,9 +19,6 @@ import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.BrukerTjeneste;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
-import no.nav.k9.sak.behandlingslager.aktør.NavBrukerRepository;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
@@ -34,28 +31,22 @@ import no.nav.vedtak.felles.testutilities.Whitebox;
 @SuppressWarnings("deprecation")
 public class FagsakTjenesteTest {
 
+    private final AktørId forelderAktørId = AktørId.dummy();
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final EntityManager entityManager = repoRule.getEntityManager();
     private FagsakTjeneste tjeneste;
-    private BrukerTjeneste brukerTjeneste;
-
     @Mock
     private SøknadRepository søknadRepository;
-
     private Fagsak fagsak;
     private Personinfo personinfo;
-
-    private final AktørId forelderAktørId = AktørId.dummy();
     private LocalDate forelderFødselsdato = LocalDate.of(1990, JANUARY, 1);
 
     @Before
     public void oppsett() {
         tjeneste = new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null);
-
-        brukerTjeneste = new BrukerTjeneste(new NavBrukerRepository(entityManager));
 
         personinfo = new Personinfo.Builder()
             .medAktørId(forelderAktørId)
@@ -67,13 +58,12 @@ public class FagsakTjenesteTest {
             .build();
 
         Fagsak fagsak = lagNyFagsak(personinfo);
-        
-        this.fagsak  = fagsak;
+
+        this.fagsak = fagsak;
     }
 
     private Fagsak lagNyFagsak(Personinfo personinfo) {
-        NavBruker søker = NavBruker.opprettNy(personinfo);
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, søker);
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, personinfo.getAktørId());
         tjeneste.opprettFagsak(fagsak);
         return fagsak;
     }
@@ -84,11 +74,10 @@ public class FagsakTjenesteTest {
         Whitebox.setInternalState(fagsak, "fagsakStatus", FagsakStatus.LØPENDE); // dirty, men eksponerer ikke status nå
 
         // Ifølgeregler i mottak skal vi opprette en nyTerminbekreftelse sak hvis vi ikke har sak nyere enn 10 mnd:
-        NavBruker søker = brukerTjeneste.hentEllerOpprettFraAktorId(personinfo);
-        Fagsak fagsakNy = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, søker);
+        Fagsak fagsakNy = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, personinfo.getAktørId());
         tjeneste.opprettFagsak(fagsakNy);
-        assertThat(fagsak.getNavBruker().getId()).as("Forventer at fagsakene peker til samme bruker")
-            .isEqualTo(fagsakNy.getNavBruker().getId());
+        assertThat(fagsak.getAktørId()).as("Forventer at fagsakene peker til samme bruker")
+            .isEqualTo(fagsakNy.getAktørId());
     }
 
 }

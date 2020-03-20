@@ -38,22 +38,12 @@ public class MedisinskGrunnlagRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(Long behandlingId, Pleietrengende pleietrengende) {
-        var medisinskGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-
-        var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
-        var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
-        var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
-        lagre(behandlingId, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
-    }
-
     public void lagre(Long behandlingId, OmsorgenFor omsorgenFor) {
         var medisinskGrunnlag = hentEksisterendeGrunnlag(behandlingId);
 
         var legeerklæringer = medisinskGrunnlag.map(MedisinskGrunnlag::getLegeerklæringer).orElse(null);
         var kontinuerligTilsyn = medisinskGrunnlag.map(MedisinskGrunnlag::getKontinuerligTilsyn).orElse(null);
-        var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
-        lagre(behandlingId, kontinuerligTilsyn, legeerklæringer, pleietrengende, omsorgenFor);
+        lagre(behandlingId, kontinuerligTilsyn, legeerklæringer, omsorgenFor);
     }
 
     public void lagre(Long behandlingId, KontinuerligTilsynBuilder kontinuerligTilsyn, Legeerklæringer legeerklæringer) {
@@ -62,26 +52,23 @@ public class MedisinskGrunnlagRepository {
 
         var medisinskGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var omsorgenFor = medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).orElse(null);
-        var pleietrengende = medisinskGrunnlag.map(MedisinskGrunnlag::getPleietrengende).orElse(null);
 
-        lagre(behandlingId, kontinuerligTilsyn.build(), legeerklæringer, pleietrengende, omsorgenFor);
+        lagre(behandlingId, kontinuerligTilsyn.build(), legeerklæringer, omsorgenFor);
     }
 
-    private void lagre(Long behandlingId, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, Pleietrengende pleietrengende, OmsorgenFor omsorgenFor) {
+    private void lagre(Long behandlingId, KontinuerligTilsyn kontinuerligTilsyn, Legeerklæringer legeerklæringer, OmsorgenFor omsorgenFor) {
 
         final Optional<MedisinskGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var pleie = pleietrengende;
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
 
             final MedisinskGrunnlag eksisterendeGrunnlagEntitet = eksisterendeGrunnlag.get();
-            pleie = eksisterendeGrunnlagEntitet.getPleietrengende();
             eksisterendeGrunnlagEntitet.setAktiv(false);
             entityManager.persist(eksisterendeGrunnlagEntitet);
             entityManager.flush();
         }
 
-        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandlingId, pleie, kontinuerligTilsyn, legeerklæringer, omsorgenFor);
+        final MedisinskGrunnlag grunnlagEntitet = new MedisinskGrunnlag(behandlingId, kontinuerligTilsyn, legeerklæringer, omsorgenFor);
         if (kontinuerligTilsyn != null) {
             entityManager.persist(kontinuerligTilsyn);
         }
@@ -90,9 +77,6 @@ public class MedisinskGrunnlagRepository {
         }
         if (omsorgenFor != null) {
             entityManager.persist(omsorgenFor);
-        }
-        if (pleie != null) {
-            entityManager.persist(pleie);
         }
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
@@ -119,8 +103,7 @@ public class MedisinskGrunnlagRepository {
         Optional<MedisinskGrunnlag> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandlingId);
         søknadEntitet.ifPresent(entitet -> {
             lagre(nyBehandlingId, new KontinuerligTilsyn(entitet.getKontinuerligTilsyn()),
-                entitet.getLegeerklæringer(),
-                entitet.getPleietrengende(), entitet.getOmsorgenFor());
+                entitet.getLegeerklæringer(), entitet.getOmsorgenFor());
         });
     }
 }

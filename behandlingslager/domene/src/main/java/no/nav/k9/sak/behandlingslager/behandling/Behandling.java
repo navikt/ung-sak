@@ -54,7 +54,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.aktør.NavBruker;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -305,7 +304,7 @@ public class Behandling extends BaseEntitet {
     }
 
     public AktørId getAktørId() {
-        return getFagsak().getNavBruker().getAktørId();
+        return getFagsak().getAktørId();
     }
 
     public BehandlingStatus getStatus() {
@@ -446,10 +445,6 @@ public class Behandling extends BaseEntitet {
             + "steg=" + (getBehandlingStegTilstand().orElse(null)) + "," //$NON-NLS-1$ //$NON-NLS-2$
             + "opprettetTs=" + getOpprettetTidspunkt() //$NON-NLS-1$
             + ">"; //$NON-NLS-1$
-    }
-
-    public NavBruker getNavBruker() {
-        return getFagsak().getNavBruker();
     }
 
     public String getBehandlendeEnhetÅrsak() {
