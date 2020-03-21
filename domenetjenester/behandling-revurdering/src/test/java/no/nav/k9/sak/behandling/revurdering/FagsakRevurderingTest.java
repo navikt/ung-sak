@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.sak.behandling.revurdering.FagsakRevurdering;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;

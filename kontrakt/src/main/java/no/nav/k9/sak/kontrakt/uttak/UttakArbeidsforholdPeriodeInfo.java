@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.uttak.uttaksplan;
+package no.nav.k9.sak.kontrakt.uttak;
 
 import java.math.BigDecimal;
 import java.time.Duration;

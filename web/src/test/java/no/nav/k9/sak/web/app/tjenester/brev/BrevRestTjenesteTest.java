@@ -18,7 +18,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
-import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 
 public class BrevRestTjenesteTest {
 

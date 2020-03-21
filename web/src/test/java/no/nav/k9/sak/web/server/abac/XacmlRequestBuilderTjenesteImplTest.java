@@ -21,8 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.k9.sak.web.server.abac.AbacAttributter;
-import no.nav.k9.sak.web.server.abac.AppXacmlRequestBuilderTjenesteImpl;
 import no.nav.vedtak.sikkerhet.abac.AbacIdToken;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;

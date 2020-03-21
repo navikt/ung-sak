@@ -10,11 +10,6 @@ import org.junit.Test;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.omsorgenfor.BostedsAdresse;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.omsorgenfor.OmsorgenForGrunnlag;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.omsorgenfor.OmsorgenForVilkår;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.omsorgenfor.Relasjon;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.omsorgenfor.RelasjonsRolle;
 
 public class OmsorgenForVilkårTest {
 

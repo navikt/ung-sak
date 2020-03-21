@@ -16,8 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening.FastsettOpptjeningsperiodeSteg;
-import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening.VurderOpptjeningsvilkårSteg;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;

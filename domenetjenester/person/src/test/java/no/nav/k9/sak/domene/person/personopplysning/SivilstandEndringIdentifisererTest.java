@@ -11,7 +11,6 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformas
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.sak.typer.AktørId;
 
 public class SivilstandEndringIdentifisererTest {

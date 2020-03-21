@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveForBehandlingSendtTilbakeTask;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;

@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
-import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
 
 public class NavAnsattRestTjenesteTest {

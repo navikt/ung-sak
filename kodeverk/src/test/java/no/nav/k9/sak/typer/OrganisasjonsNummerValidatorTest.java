@@ -4,9 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
-
 public class OrganisasjonsNummerValidatorTest {
 
     @Test

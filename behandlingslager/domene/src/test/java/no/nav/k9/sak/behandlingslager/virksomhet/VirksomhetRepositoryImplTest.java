@@ -8,9 +8,6 @@ import java.util.Optional;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class VirksomhetRepositoryImplTest {

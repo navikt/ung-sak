@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.uttak.repo;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -28,18 +29,36 @@ public class UttakRepository {
     public UttakAktivitet hentOppgittUttak(Long behandlingId) {
         return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
     }
+    
+    public UttakAktivitet hentOppgittUttak(UUID behandlingId) {
+        return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
+    }
 
     public Ferie hentOppgittFerie(Long behandlingId) {
+        return hentOppgittFerieHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt ferie for behandlingId=" + behandlingId));
+    }
+    
+    public Ferie hentOppgittFerie(UUID behandlingId) {
         return hentOppgittFerieHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt ferie for behandlingId=" + behandlingId));
     }
 
     public Søknadsperioder hentOppgittSøknadsperioder(Long behandlingId) {
         return hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt søknadsperioder for behandlingId=" + behandlingId));
     }
+    
+    public Søknadsperioder hentOppgittSøknadsperioder(UUID behandlingId) {
+        return hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt søknadsperioder for behandlingId=" + behandlingId));
+    }
+
 
     public OppgittTilsynsordning hentOppgittTilsynsordning(Long behandlingId) {
         return hentOppgittTilsynsordningHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler tilsynsordning for behandlingId=" + behandlingId));
     }
+    
+    public OppgittTilsynsordning hentOppgittTilsynsordning(UUID behandlingId) {
+        return hentOppgittTilsynsordningHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler tilsynsordning for behandlingId=" + behandlingId));
+    }
+
 
     public UttakAktivitet hentFastsattUttak(Long behandlingId) {
         return hentFastsattUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler fastsatt uttak for behandlingId=" + behandlingId));
@@ -49,7 +68,16 @@ public class UttakRepository {
         if (behandlingId == null) {
             return Optional.empty();
         }
-        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+        final var grunnlag = hentGrunnlag(behandlingId);
+
+        return grunnlag.map(UttakGrunnlag::getOppgittUttak);
+    }
+    
+    public Optional<UttakAktivitet> hentOppittUttakHvisEksisterer(UUID behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId);
 
         return grunnlag.map(UttakGrunnlag::getOppgittUttak);
     }
@@ -58,7 +86,7 @@ public class UttakRepository {
         if (behandlingId == null) {
             return Optional.empty();
         }
-        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+        final var grunnlag = hentGrunnlag(behandlingId);
 
         return grunnlag.map(UttakGrunnlag::getFastsattUttak);
     }
@@ -67,16 +95,34 @@ public class UttakRepository {
         if (behandlingId == null) {
             return Optional.empty();
         }
-        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+        final var grunnlag = hentGrunnlag(behandlingId);
 
         return grunnlag.map(UttakGrunnlag::getOppgittFerie);
     }
 
+    public Optional<Ferie> hentOppgittFerieHvisEksisterer(UUID behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId);
+
+        return grunnlag.map(UttakGrunnlag::getOppgittFerie);
+    }
+    
     public Optional<Søknadsperioder> hentOppgittSøknadsperioderHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
         }
-        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+        final var grunnlag = hentGrunnlag(behandlingId);
+
+        return grunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder);
+    }
+    
+    public Optional<Søknadsperioder> hentOppgittSøknadsperioderHvisEksisterer(UUID behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId);
 
         return grunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder);
     }
@@ -85,13 +131,22 @@ public class UttakRepository {
         if (behandlingId == null) {
             return Optional.empty();
         }
-        final var grunnlag = hentEksisterendeGrunnlag(behandlingId);
+        final var grunnlag = hentGrunnlag(behandlingId);
 
         return grunnlag.map(UttakGrunnlag::getOppgittTilsynsordning);
     }
 
+    public Optional<OppgittTilsynsordning> hentOppgittTilsynsordningHvisEksisterer(UUID behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId);
+
+        return grunnlag.map(UttakGrunnlag::getOppgittTilsynsordning);
+    }
+    
     public void lagreOgFlushNyttGrunnlag(Long behandlingId, UttakGrunnlag grunnlag) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
         
         Optional.ofNullable(grunnlag.getOppgittUttak()).ifPresent(entityManager::persist);
@@ -106,7 +161,7 @@ public class UttakRepository {
     }
 
     public void lagreOgFlushOppgittUttak(Long behandlingId, UttakAktivitet input) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
@@ -117,7 +172,7 @@ public class UttakRepository {
     }
 
     public void lagreOgFlushFastsattUttak(Long behandlingId, UttakAktivitet input) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
@@ -128,7 +183,7 @@ public class UttakRepository {
     }
 
     public void lagreOgFlushSøknadsperioder(Long behandlingId, Søknadsperioder input) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
@@ -139,7 +194,7 @@ public class UttakRepository {
     }
 
     public void lagreOgFlushOppgittFerie(Long behandlingId, Ferie input) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var søknadsperioder = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittSøknadsperioder).orElse(null);
@@ -150,7 +205,7 @@ public class UttakRepository {
     }
 
     public void lagreOgFlushOppgittTilsynsordning(Long behandlingId, OppgittTilsynsordning input) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var oppgittUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittUttak).orElse(null);
         var fastsattUttak = eksisterendeGrunnlag.map(UttakGrunnlag::getFastsattUttak).orElse(null);
         var ferie = eksisterendeGrunnlag.map(UttakGrunnlag::getOppgittFerie).orElse(null);
@@ -173,13 +228,24 @@ public class UttakRepository {
         entityManager.flush();
     }
 
-    private Optional<UttakGrunnlag> hentEksisterendeGrunnlag(Long id) {
+    public Optional<UttakGrunnlag> hentGrunnlag(Long behandlingId) {
         final TypedQuery<UttakGrunnlag> query = entityManager.createQuery(
             "FROM UttakGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId AND s.aktiv = true",
             UttakGrunnlag.class);
 
-        query.setParameter("behandlingId", id);
+        query.setParameter("behandlingId", behandlingId);
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+    
+    public Optional<UttakGrunnlag> hentGrunnlag(UUID behandlingId) {
+        final TypedQuery<UttakGrunnlag> query = entityManager.createQuery(
+            "FROM UttakGrunnlag s INNER JOIN Behandling b on b.id=s.behandlingId " +
+                "WHERE b.uuid = :behandlingId AND s.aktiv = true",
+            UttakGrunnlag.class);
+
+        query.setParameter("behandlingId", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
@@ -191,5 +257,6 @@ public class UttakRepository {
         eksisterende.setAktiv(false);
         lagreOgFlushNyttGrunnlag(eksisterende);
     }
+
 
 }

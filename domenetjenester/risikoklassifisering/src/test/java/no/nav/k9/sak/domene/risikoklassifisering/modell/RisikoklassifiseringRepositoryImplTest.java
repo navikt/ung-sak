@@ -1,10 +1,8 @@
 package no.nav.k9.sak.domene.risikoklassifisering.modell;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -12,7 +10,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
@@ -20,11 +17,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDate;
 import java.util.Optional;
 
-import static java.time.Month.JANUARY;
-import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RisikoklassifiseringRepositoryImplTest {

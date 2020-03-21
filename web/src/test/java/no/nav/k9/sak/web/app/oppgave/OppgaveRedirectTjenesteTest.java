@@ -22,8 +22,6 @@ import no.nav.k9.sak.kontrakt.produksjonsstyring.OppgaveIdDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.oppgave.OppgaveRedirectTjeneste;
-import no.nav.k9.sak.web.app.oppgave.RedirectFactory;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 import no.nav.vedtak.sikkerhet.ContextPathHolder;
 

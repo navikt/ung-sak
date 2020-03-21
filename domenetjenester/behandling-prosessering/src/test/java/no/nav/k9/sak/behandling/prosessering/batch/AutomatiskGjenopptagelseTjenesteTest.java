@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
-import no.nav.k9.sak.behandling.prosessering.batch.AutomatiskGjenopptagelseTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingKandidaterRepository;

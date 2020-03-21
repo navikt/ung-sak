@@ -7,7 +7,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
-import no.nav.k9.sak.behandlingskontroll.impl.BehandlingStegModellImpl;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl.TriFunction;
 
 /** Modell for testing som lar oss endre på referansedata uten å eksponere vanlig api. */

@@ -50,13 +50,17 @@ public class UttakRestTjeneste {
 
     private UttakTjeneste uttakTjeneste;
 
+
+    private MapUttak mapUttak;
+
     public UttakRestTjeneste() {
         // for proxying
     }
 
     @Inject
-    public UttakRestTjeneste(UttakTjeneste uttakTjeneste) {
+    public UttakRestTjeneste(UttakTjeneste uttakTjeneste, MapUttak mapOppgittUttak) {
         this.uttakTjeneste = uttakTjeneste;
+        this.mapUttak = mapOppgittUttak;
     }
 
     /**
@@ -72,8 +76,7 @@ public class UttakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public OppgittUttakDto getOppgittUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
-
-        return new OppgittUttakDto(behandlingId);
+        return mapUttak.mapOppgittUttak(behandlingId);
     }
 
     /**
@@ -83,14 +86,13 @@ public class UttakRestTjeneste {
     @Path(UTTAK_FASTSATT)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent Fastsatt uttak for behandling", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Fastsatt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FastsattUttakDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer uttak fastsatt av saksbehandler (fakta avklart før vurdering av uttak), null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FastsattUttakDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public FastsattUttakDto getFastsattUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
-
-        return new FastsattUttakDto(behandlingId);
+        return mapUttak.mapFastsattUttak(behandlingId);
     }
 
     /**
@@ -101,7 +103,7 @@ public class UttakRestTjeneste {
     @Path(UTTAKSPLANER)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent uttaksplaner", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Uttaksplaner, tom liste hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Uttaksplaner, tom liste hvis ikke finnes noe. Dette er faktisk uttaksplan fastsatt og vurdert.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
     })
     @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")

@@ -19,8 +19,6 @@ import org.mockito.Mockito;
 import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.HealthCheckRegistry;
 
-import no.nav.k9.sak.web.app.healthchecks.SelftestResultat;
-import no.nav.k9.sak.web.app.healthchecks.Selftests;
 import no.nav.k9.sak.web.app.healthchecks.checks.ExtHealthCheck;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 

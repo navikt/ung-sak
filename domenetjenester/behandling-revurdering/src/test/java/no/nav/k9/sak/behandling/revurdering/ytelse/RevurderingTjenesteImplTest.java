@@ -22,7 +22,6 @@ import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandling.revurdering.BeregningRevurderingTestUtil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingEndring;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;

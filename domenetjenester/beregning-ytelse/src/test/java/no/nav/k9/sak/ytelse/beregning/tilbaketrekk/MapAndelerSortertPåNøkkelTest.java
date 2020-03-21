@@ -8,9 +8,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPer
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BRNøkkelMedAndeler;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.MapAndelerSortertPåNøkkel;
-
 import org.junit.Test;
 
 import java.math.BigDecimal;

@@ -11,14 +11,6 @@ import org.junit.Test;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.DiagnoseKilde;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.InnleggelsesPeriode;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.MedisinskVilkårResultat;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.Medisinskvilkår;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.MedisinskvilkårGrunnlag;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.PeriodeMedKontinuerligTilsyn;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.PeriodeMedUtvidetBehov;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medisinsk.Pleiegrad;
 
 public class MedisinskvilkårTest {
 

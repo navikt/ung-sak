@@ -11,8 +11,6 @@ import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.sak.dokument.arkiv.journal.JournalMetadata;
-import no.nav.k9.sak.dokument.arkiv.journal.JournalMetadata.Builder;
-import no.nav.k9.sak.dokument.arkiv.journal.JournalMetadata.Journaltilstand;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class JournalMetadataTest {

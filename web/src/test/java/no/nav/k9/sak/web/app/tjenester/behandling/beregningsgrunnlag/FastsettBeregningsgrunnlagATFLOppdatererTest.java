@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
-import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.FastsettBeregningsgrunnlagATFLOppdaterer;
 
 public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     private FastsettBeregningsgrunnlagATFLOppdaterer oppdaterer;

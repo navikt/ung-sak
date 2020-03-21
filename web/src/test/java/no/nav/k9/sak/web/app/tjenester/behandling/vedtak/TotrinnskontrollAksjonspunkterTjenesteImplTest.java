@@ -34,8 +34,6 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnsaksjonspunktDtoTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollAksjonspunkterTjeneste;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

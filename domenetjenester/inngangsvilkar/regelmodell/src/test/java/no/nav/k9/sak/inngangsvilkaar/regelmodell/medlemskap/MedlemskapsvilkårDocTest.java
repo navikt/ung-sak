@@ -5,8 +5,6 @@ import org.junit.Test;
 
 import no.nav.fpsak.nare.doc.RuleDescriptionDigraph;
 import no.nav.fpsak.nare.specification.Specification;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
 
 public class MedlemskapsvilkårDocTest {
 

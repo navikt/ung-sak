@@ -11,10 +11,6 @@ import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.HarAktørId;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.typer.AktørId;
 
 public class PersonInformasjonBuilderTest {

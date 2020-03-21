@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
-import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.UtledBekreftetPermisjon;
 import no.nav.k9.sak.domene.iay.modell.BekreftetPermisjon;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;

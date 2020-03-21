@@ -36,7 +36,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotr
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.IverksetteVedtakStegFørstegang;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;

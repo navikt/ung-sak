@@ -21,7 +21,6 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonopplysningDtoTjeneste;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 

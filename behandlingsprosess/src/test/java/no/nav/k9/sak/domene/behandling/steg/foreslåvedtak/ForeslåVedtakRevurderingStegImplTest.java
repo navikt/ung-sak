@@ -34,8 +34,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderin
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakRevurderingStegImpl;
-import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 public class ForeslåVedtakRevurderingStegImplTest {

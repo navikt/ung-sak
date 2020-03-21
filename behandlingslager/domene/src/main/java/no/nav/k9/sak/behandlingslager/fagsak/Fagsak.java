@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.AttributeOverride;
@@ -21,6 +22,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -55,6 +57,13 @@ public class Fagsak extends BaseEntitet {
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "saksnummer")))
     private Saksnummer saksnummer;
+    
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "fomDato", column = @Column(name = "gjelder_fom")),
+            @AttributeOverride(name = "tomDato", column = @Column(name = "gjelder_tom"))
+    })
+    private DatoIntervallEntitet periode= DatoIntervallEntitet.fraOgMed(LocalDate.now());
 
     @Column(name = "til_infotrygd", nullable = false)
     private boolean skalTilInfotrygd = false;
@@ -103,6 +112,10 @@ public class Fagsak extends BaseEntitet {
             return BehandlingTema.PLEIEPENGER_SYKT_BARN;
         }
         return BehandlingTema.UDEFINERT;
+    }
+    
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
     }
 
     public Long getId() {

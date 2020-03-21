@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.iay.modell;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class OpptjeningsnøkkelTest {

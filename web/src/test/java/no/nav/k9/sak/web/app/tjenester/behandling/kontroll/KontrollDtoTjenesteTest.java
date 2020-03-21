@@ -9,8 +9,6 @@ import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.k9.sak.kontrakt.kontroll.KontrollresultatDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollDtoTjeneste;
-
 import org.junit.Before;
 import org.junit.Test;
 

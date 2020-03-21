@@ -30,7 +30,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
-import no.nav.k9.sak.behandlingskontroll.impl.observer.BehandlingskontrollTransisjonTilbakeføringEventObserver;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingskontroll.testutilities.TestScenario;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;

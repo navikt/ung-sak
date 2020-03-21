@@ -12,8 +12,6 @@ import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.ytelse.beregning.SjekkForEndringMellomAndelerOgFOM;
-import no.nav.k9.sak.ytelse.beregning.SjekkOmPerioderInneholderSammeAndeler;
 
 public class SjekkForEndringMellomAndelerOgFOMImplTest {
 

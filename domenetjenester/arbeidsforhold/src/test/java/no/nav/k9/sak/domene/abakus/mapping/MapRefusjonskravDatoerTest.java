@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.abakus.mapping.MapRefusjonskravDatoer;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.abakus.iaygrunnlag.Organisasjon;

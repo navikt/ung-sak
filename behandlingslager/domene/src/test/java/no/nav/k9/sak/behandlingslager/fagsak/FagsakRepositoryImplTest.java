@@ -1,10 +1,7 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
-import static java.time.Month.JANUARY;
-import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,12 +10,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 

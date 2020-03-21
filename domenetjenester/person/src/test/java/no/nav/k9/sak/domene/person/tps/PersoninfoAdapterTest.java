@@ -14,8 +14,6 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
-import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
-import no.nav.k9.sak.domene.person.tps.TpsAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 

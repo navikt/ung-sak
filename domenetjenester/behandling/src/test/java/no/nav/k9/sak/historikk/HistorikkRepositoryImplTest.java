@@ -19,7 +19,6 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class HistorikkRepositoryImplTest {

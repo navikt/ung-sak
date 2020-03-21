@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.uttak.uttaksplan;
+package no.nav.k9.sak.kontrakt.uttak;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -7,6 +7,7 @@ import java.util.Objects;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -27,6 +28,7 @@ public class Periode implements Comparable<Periode>{
     @JsonValue
     @NotNull
     @Size(max = 10 + 1 + 10)
+    @Pattern(regexp = "^[\\p{Alnum}:\\-/]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     @Valid
     private String iso8601Periode;
 

@@ -10,13 +10,6 @@ import java.util.List;
 import org.junit.Test;
 
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdAnnulert;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdEndret;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdHendelse;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdHendelseMapper;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdInnvilget;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdOpphørt;
-import no.nav.k9.sak.domene.vedtak.infotrygd.Innhold;
 
 public class InfotrygdHendelseMapperTest {
 

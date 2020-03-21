@@ -13,8 +13,6 @@ import org.junit.Test;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygd;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygdRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.db.Repository;

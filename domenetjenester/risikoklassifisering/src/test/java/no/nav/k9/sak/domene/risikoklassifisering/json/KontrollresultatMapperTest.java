@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.risikoklassifisering.json;
 
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.risikoklassifisering.json.KontrollresultatMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;

@@ -29,6 +29,8 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.ResourceLink.HttpMethod;
@@ -74,25 +76,28 @@ import no.nav.vedtak.konfig.PropertyUtil;
 @ApplicationScoped
 public class BehandlingDtoTjeneste {
 
-    private TilbakekrevingRepository tilbakekrevingRepository;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private SøknadRepository søknadRepository;
+    private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private SøknadRepository søknadRepository;
+    private TilbakekrevingRepository tilbakekrevingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-
+    
     BehandlingDtoTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public BehandlingDtoTjeneste(BehandlingRepository behandlingRepository,
+    public BehandlingDtoTjeneste(FagsakRepository fagsakRepository,
+                                 BehandlingRepository behandlingRepository,
                                  BehandlingVedtakRepository behandlingVedtakRepository,
                                  SøknadRepository søknadRepository,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  VilkårResultatRepository vilkårResultatRepository) {
 
+        this.fagsakRepository = fagsakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
@@ -312,10 +317,19 @@ public class BehandlingDtoTjeneste {
     private void leggTilUttakEndepunkt(Behandling behandling, BehandlingDto dto) {
         var behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
 
-        // uttaksplaner
+        Fagsak fagsak = behandling.getFagsak();
+        var andreSaker = fagsakRepository.finnFagsakRelatertTilPleietrengende(fagsak.getPleietrengendeAktørId(), fagsak.getYtelseType())
+                .stream().map(Fagsak::getSaksnummer)
+                .collect(Collectors.toList());
+        
+        // uttaksplaner link inkl 
         var link = BehandlingDtoUtil.buildLink(UttakRestTjeneste.UTTAKSPLANER, "uttak-uttaksplaner", HttpMethod.GET, ub -> {
             ub.addParameter(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+            for(var s: andreSaker) {
+                ub.addParameter("saksnummer", s.getVerdi());
+            }
         });
+        
         dto.leggTil(link);
 
         dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", behandlingUuidQueryParams));

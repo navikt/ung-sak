@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.UtledBrukAvPermisjonForWrapper;
 import no.nav.k9.sak.domene.iay.modell.BekreftetPermisjon;
 
 public class UtledBrukAvPermisjonForWrapperTest {

@@ -15,7 +15,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.domene.behandling.steg.avklarfakta.AksjonspunktUtlederForTilleggsopplysninger;
 
 public class AksjonspunktUtlederForTilleggsopplysningerTest {
 

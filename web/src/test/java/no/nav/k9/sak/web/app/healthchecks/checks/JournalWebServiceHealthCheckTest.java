@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.web.app.healthchecks.checks.JournalWebServiceHealthCheck;
 import no.nav.vedtak.felles.integrasjon.journal.v3.JournalSelftestConsumer;
 
 public class JournalWebServiceHealthCheckTest {

@@ -14,7 +14,6 @@ import com.codahale.metrics.health.HealthCheck;
 import no.nav.k9.sak.kontrakt.SystemNedeDto;
 import no.nav.k9.sak.web.app.healthchecks.SelftestResultat;
 import no.nav.k9.sak.web.app.healthchecks.Selftests;
-import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusTjeneste;
 
 public class IntegrasjonstatusTjenesteTest {
 

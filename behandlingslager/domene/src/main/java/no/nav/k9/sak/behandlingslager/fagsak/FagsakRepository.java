@@ -1,8 +1,11 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,6 +16,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -100,6 +104,24 @@ public class FagsakRepository {
         entityManager.persist(fagsak);
         entityManager.flush();
 
+    }
+
+    /**
+     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).
+     * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
+     */
+    public List<Fagsak> finnFagsakRelatertTilPleietrengende(AktørId aktørId, FagsakYtelseType ytelseType) {
+        TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak where pleietrengendeAktørId=:aktørId and ytelseType=:ytelseType", Fagsak.class);
+        query.setParameter("aktørId", aktørId);
+        query.setParameter("ytelseType", ytelseType);
+
+        // TODO: Ta med periode her også?
+        // opprettet tidspunkt vil gi sist opprettede, men ikke nødvendigvis den som matcher periode bakover?
+        var res = query
+            .getResultStream()
+            .collect(Collectors.toMap(Fagsak::getBrukerAktørId, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Fagsak::getOpprettetTidspunkt))));
+
+        return List.copyOf(res.values());
     }
 
     public Optional<Fagsak> hentSakGittSaksnummer(Saksnummer saksnummer, boolean taSkriveLås) {

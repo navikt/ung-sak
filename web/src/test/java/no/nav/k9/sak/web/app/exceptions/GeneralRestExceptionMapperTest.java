@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
-import no.nav.k9.sak.web.app.exceptions.GeneralRestExceptionMapper;
 import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;

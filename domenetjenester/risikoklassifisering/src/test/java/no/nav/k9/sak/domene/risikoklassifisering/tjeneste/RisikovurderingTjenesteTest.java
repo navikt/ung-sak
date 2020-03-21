@@ -7,10 +7,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.risikoklassifisering.json.KontrollresultatMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringRepository;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.HentFaresignalerTjeneste;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 

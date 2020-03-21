@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFer
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.KopierFeriepenger;
 
 public class KopierFeriepengerTest {
 

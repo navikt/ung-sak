@@ -14,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;

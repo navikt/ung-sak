@@ -8,9 +8,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektsmeldingAggregatEntitetTest {

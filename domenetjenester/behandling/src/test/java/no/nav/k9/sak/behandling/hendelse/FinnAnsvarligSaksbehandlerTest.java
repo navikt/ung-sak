@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.k9.sak.behandling.hendelse.FinnAnsvarligSaksbehandler;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 

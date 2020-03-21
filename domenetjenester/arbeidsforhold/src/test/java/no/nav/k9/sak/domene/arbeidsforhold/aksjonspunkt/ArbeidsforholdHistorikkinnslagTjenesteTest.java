@@ -25,8 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSu
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsforholdHistorikkinnslagTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.k9.sak.historikk.HistorikkInnslagKonverter;

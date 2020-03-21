@@ -7,7 +7,6 @@ import javax.xml.ws.WebServiceException;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.k9.sak.web.app.healthchecks.checks.ExtHealthCheck;
 import no.nav.k9.sak.web.app.healthchecks.checks.WebServiceHealthCheck;
 
 public class WebServiceHealthCheckTest {

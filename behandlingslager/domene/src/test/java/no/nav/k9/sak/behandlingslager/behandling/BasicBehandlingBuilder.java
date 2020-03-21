@@ -1,17 +1,8 @@
 package no.nav.k9.sak.behandlingslager.behandling;
 
-import static java.time.Month.JANUARY;
-import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -20,7 +11,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**

@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.behandling.hendelse.HistorikkInnslagForAksjonspunktEventObserver;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;

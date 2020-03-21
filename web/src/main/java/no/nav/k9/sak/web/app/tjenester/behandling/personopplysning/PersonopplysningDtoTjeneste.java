@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;

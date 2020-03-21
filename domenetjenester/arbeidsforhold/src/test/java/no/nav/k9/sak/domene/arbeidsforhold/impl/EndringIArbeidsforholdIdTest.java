@@ -11,9 +11,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.EndringIArbeidsforholdId;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;

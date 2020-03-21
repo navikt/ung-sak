@@ -3,7 +3,6 @@ package no.nav.k9.sak.behandlingslager.saksnummer;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
