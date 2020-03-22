@@ -37,7 +37,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          export PGPASSWORD="$POSTGRES_PASSWORD" && psql "postgres://$POSTGRES_USER@127.0.0.1:5432/k9sak_unit" -c "create extension btree_gist;"
+          export PGPASSWORD="$POSTGRES_PASSWORD" && psql "postgres://127.0.0.1:5432/k9sak_unit" -c "create extension btree_gist;"
           echo "Building $(echo $GITHUB_SHA | cut -c1-7)"
           mvn package --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)
         env:
