@@ -2,11 +2,7 @@ name: Bygg pull request
 
 on: [pull_request]
 
-env:
-  POSTGRES_USER: k9sak_unit
-  POSTGRES_PASSWORD: k9sak_unit
-  POSTGRES_DB: k9sak_unit
-  
+ 
 jobs:
   build:
     name: Bygg pull-request
@@ -15,6 +11,10 @@ jobs:
     services:
       postgres:
         image: postgres:11.5
+        env:
+          POSTGRES_USER: k9sak_unit
+          POSTGRES_PASSWORD: k9sak_unit
+          POSTGRES_DB: k9sak_unit
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
@@ -37,7 +37,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          psql "postgres://postgres:postgres@127.0.0.1:5432" -c "create extension btree_gist;"
+          psql "postgres://127.0.0.1:5432/k9sak_unit" -c "create extension btree_gist;"
           echo "Building $(echo $GITHUB_SHA | cut -c1-7)"
           mvn package --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)
         env:
