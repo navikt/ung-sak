@@ -24,7 +24,7 @@ jobs:
       - name: Postgres setup
         run: |
           PGPASSWORD="$POSTGRES_PASSWORD"
-          psql -v ON_ERROR_STOP=1 --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" -c "create extension btree_gist;"
+          psql -v ON_ERROR_STOP=1 -h localhost -p 5432 --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" -c "create extension btree_gist;"
       - uses: actions/checkout@v2.0.0
       - uses: actions/setup-java@v1.3.0
         with:
