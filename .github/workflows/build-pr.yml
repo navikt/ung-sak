@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Setup postgres extensions
-        run: export PGPASSWORD=$POSTGRES_PASSWORD; psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -w -d $POSTGRES_DB -c 'create extension if not exists btree_gist;'
+        run: export PGPASSWORD=$POSTGRES_PASSWORD; psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -w -c 'create extension if not exists btree_gist;'
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
