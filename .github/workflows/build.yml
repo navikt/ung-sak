@@ -8,9 +8,6 @@ env:
   IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/k9-sak
   CLUSTER: dev-fss
   NAMESPACE: default
-  POSTGRES_USER: k9sak_unit
-  POSTGRES_PASSWORD: k9sak_unit
-  POSTGRES_DB: k9sak_unit
 
 jobs:
   build:
@@ -22,16 +19,14 @@ jobs:
         image: postgres:11.5
         ports:
           - 5432:5432
+        env:
+          POSTGRES_USER: k9sak_unit
+          POSTGRES_PASSWORD: k9sak_unit
+          POSTGRES_DB: k9sak_unit
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-    steps:
-      - name: Setup postgres extensions
-        run: export PGPASSWORD=$POSTGRES_PASSWORD; psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -w -c 'create extension if not exists btree_gist;'
-        env:
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
-           
+    steps:   
       - uses: actions/checkout@v2.0.0
       - uses: actions/setup-java@v1.3.0
         with:
