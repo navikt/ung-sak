@@ -17,7 +17,7 @@ jobs:
           POSTGRES_PASSWORD: k9sak_unit
           POSTGRES_DB: k9sak_unit
         volumes:
-          ./.github/init.sql:/docker-entrypoint-initdb.d/init.sql
+          - ./.github/init.sql:/docker-entrypoint-initdb.d/init.sql
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
