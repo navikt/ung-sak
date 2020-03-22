@@ -19,6 +19,8 @@ jobs:
         image: postgres:11.5
         ports:
           - 5432:5432
+        volumes:
+          - ./.github/init.sql:/docker-entrypoint-initdb.d/init.sql
         env:
           POSTGRES_USER: k9sak_unit
           POSTGRES_PASSWORD: k9sak_unit
