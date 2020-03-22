@@ -16,6 +16,11 @@ import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.TypeDef;
+
+import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
+import com.vladmihalcea.hibernate.type.range.Range;
+
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -28,6 +33,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
+@TypeDef(typeClass = PostgreSQLRangeType.class, defaultForType = Range.class)
 public class Fagsak extends BaseEntitet {
 
     @Id
@@ -57,13 +63,9 @@ public class Fagsak extends BaseEntitet {
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "saksnummer")))
     private Saksnummer saksnummer;
-    
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "fomDato", column = @Column(name = "gjelder_fom")),
-            @AttributeOverride(name = "tomDato", column = @Column(name = "gjelder_tom"))
-    })
-    private DatoIntervallEntitet periode= DatoIntervallEntitet.fraOgMed(LocalDate.now());
+
+    @Column(name = "periode", columnDefinition = "daterange")
+    private Range<LocalDate> periode;
 
     @Column(name = "til_infotrygd", nullable = false)
     private boolean skalTilInfotrygd = false;
@@ -81,12 +83,18 @@ public class Fagsak extends BaseEntitet {
     }
 
     public Fagsak(FagsakYtelseType ytelseType, AktørId søker, Saksnummer saksnummer) {
+        this(ytelseType, søker, null, saksnummer, null, null);
+    }
+
+    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, AktørId pleietrengende, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
         Objects.requireNonNull(ytelseType, "ytelseType");
         this.ytelseType = ytelseType;
         this.brukerAktørId = søker;
+        this.pleietrengendeAktørId = pleietrengende;
         if (saksnummer != null) {
             setSaksnummer(saksnummer);
         }
+        setPeriode(fom, tom);
     }
 
     public Fagsak(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer) {
@@ -113,9 +121,11 @@ public class Fagsak extends BaseEntitet {
         }
         return BehandlingTema.UDEFINERT;
     }
-    
+
     public DatoIntervallEntitet getPeriode() {
-        return periode;
+        return DatoIntervallEntitet.fraOgMedTilOgMed(
+            periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.lower(),
+            periode.upper() == null ? DatoIntervallEntitet.TIDENES_ENDE : periode.upper());
     }
 
     public Long getId() {
@@ -237,5 +247,19 @@ public class Fagsak extends BaseEntitet {
     public BehandlingTema getBehandlingTema() {
         // FIXME K9 kodeverk/logikk
         return fraFagsakHendelse(this.getYtelseType());
+    }
+
+    public void setPeriode(LocalDate fom, LocalDate tom) {
+        if (fom != null && tom != null) {
+            this.periode = Range.closed(fom, tom);
+        } else if (fom == null) {
+            if (tom != null) {
+                this.periode = Range.infiniteClosed(tom);
+            } else {
+                this.periode = Range.infinite(LocalDate.class);
+            }
+        } else {
+            this.periode = Range.closedInfinite(fom);
+        }
     }
 }

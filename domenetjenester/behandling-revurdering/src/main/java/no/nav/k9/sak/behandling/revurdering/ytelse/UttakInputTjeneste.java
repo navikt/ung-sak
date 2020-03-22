@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
@@ -21,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.Ferie;
@@ -36,29 +34,23 @@ import no.nav.k9.sak.typer.AktørId;
 public class UttakInputTjeneste {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private MedlemTjeneste medlemTjeneste;
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private UttakRepository uttakRepository;
 
     @Inject
     public UttakInputTjeneste(SøknadRepository søknadRepository,
-                              MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                               PleiebehovResultatRepository pleiebehovResultatRepository,
                               UttakRepository uttakRepository,
                               InntektArbeidYtelseTjeneste iayTjeneste,
                               BasisPersonopplysningTjeneste personopplysningTjeneste,
-                              MedlemTjeneste medlemTjeneste,
                               VilkårResultatRepository vilkårResultatRepository) {
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakRepository = uttakRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
-        this.medlemTjeneste = Objects.requireNonNull(medlemTjeneste, "medlemTjeneste");
         this.søknadRepository = Objects.requireNonNull(søknadRepository, "søknadRepository");
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
@@ -90,7 +82,7 @@ public class UttakInputTjeneste {
 
         var medlemskapsperioder = hentMedlemskapsperioder(behandlingId);
 
-        var uttakInput =  new UttakInput(ref, iayGrunnlag)
+        var uttakInput = new UttakInput(ref, iayGrunnlag)
             .medSøker(søker)
             .medPleietrengende(pleietrengende)
             .medUttakAktivitetPerioder(fastsattUttak)

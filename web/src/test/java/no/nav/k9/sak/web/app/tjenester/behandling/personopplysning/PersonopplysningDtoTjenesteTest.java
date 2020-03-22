@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
@@ -33,12 +32,11 @@ public class PersonopplysningDtoTjenesteTest {
     @Inject
     PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository = new MedisinskGrunnlagRepository(repoRule.getEntityManager());
     private PersonopplysningDtoTjeneste tjeneste;
 
     @Before
     public void setUp() {
-        tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, medisinskGrunnlagRepository, repositoryProvider);
+        tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, repositoryProvider);
     }
 
     @Test

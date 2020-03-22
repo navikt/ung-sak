@@ -230,7 +230,7 @@ public class UttakRepository {
 
     public Optional<UttakGrunnlag> hentGrunnlag(Long behandlingId) {
         final TypedQuery<UttakGrunnlag> query = entityManager.createQuery(
-            "FROM UttakGrunnlag s " +
+            "SELECT s FROM UttakGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId AND s.aktiv = true",
             UttakGrunnlag.class);
 
@@ -241,7 +241,7 @@ public class UttakRepository {
     
     public Optional<UttakGrunnlag> hentGrunnlag(UUID behandlingId) {
         final TypedQuery<UttakGrunnlag> query = entityManager.createQuery(
-            "FROM UttakGrunnlag s INNER JOIN Behandling b on b.id=s.behandlingId " +
+            "SELECT s FROM UttakGrunnlag s INNER JOIN Behandling b on b.id=s.behandlingId " +
                 "WHERE b.uuid = :behandlingId AND s.aktiv = true",
             UttakGrunnlag.class);
 

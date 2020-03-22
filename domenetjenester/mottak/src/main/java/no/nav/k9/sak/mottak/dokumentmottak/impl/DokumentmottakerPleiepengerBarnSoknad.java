@@ -12,7 +12,6 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
-import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentpersiterer.søknad.psb.PleiepengerBarnSoknadOversetter;
 import no.nav.k9.sak.typer.AktørId;
@@ -38,7 +37,6 @@ public class DokumentmottakerPleiepengerBarnSoknad {
                                                  SaksnummerRepository saksnummerRepository,
                                                  Behandlingsoppretter behandlingsoppretter,
                                                  PleiepengerBarnSoknadOversetter pleiepengerBarnSoknadOversetter,
-                                                 TpsTjeneste tpsTjeneste,
                                                  FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;

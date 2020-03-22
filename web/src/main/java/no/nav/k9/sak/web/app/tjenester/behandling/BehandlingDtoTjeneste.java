@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,6 +32,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.ResourceLink.HttpMethod;
@@ -83,6 +87,7 @@ public class BehandlingDtoTjeneste {
     private SøknadRepository søknadRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private UttakRepository uttakRepository;
     
     BehandlingDtoTjeneste() {
         // for CDI proxy
@@ -93,11 +98,13 @@ public class BehandlingDtoTjeneste {
                                  BehandlingRepository behandlingRepository,
                                  BehandlingVedtakRepository behandlingVedtakRepository,
                                  SøknadRepository søknadRepository,
+                                 UttakRepository uttakRepository,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  VilkårResultatRepository vilkårResultatRepository) {
 
         this.fagsakRepository = fagsakRepository;
+        this.uttakRepository = uttakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
@@ -315,16 +322,23 @@ public class BehandlingDtoTjeneste {
     }
 
     private void leggTilUttakEndepunkt(Behandling behandling, BehandlingDto dto) {
-        var behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+
+        UUID behandlingUuid = behandling.getUuid();
+        var behandlingUuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandlingUuid.toString());
+
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingUuid).map(Søknadsperioder::getMaksPeriode);
 
         Fagsak fagsak = behandling.getFagsak();
-        var andreSaker = fagsakRepository.finnFagsakRelatertTilPleietrengende(fagsak.getPleietrengendeAktørId(), fagsak.getYtelseType())
+        var fom = søknadsperioder.map(DatoIntervallEntitet::getFomDato).orElse(fagsak.getPeriode().getFomDato());
+        var tom = søknadsperioder.map(DatoIntervallEntitet::getTomDato).orElse(fagsak.getPeriode().getTomDato());
+        
+        var andreSaker = fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId(), fom, tom)
                 .stream().map(Fagsak::getSaksnummer)
                 .collect(Collectors.toList());
         
         // uttaksplaner link inkl 
         var link = BehandlingDtoUtil.buildLink(UttakRestTjeneste.UTTAKSPLANER, "uttak-uttaksplaner", HttpMethod.GET, ub -> {
-            ub.addParameter(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+            ub.addParameter(BehandlingUuidDto.NAME, behandlingUuid.toString());
             for(var s: andreSaker) {
                 ub.addParameter("saksnummer", s.getVerdi());
             }

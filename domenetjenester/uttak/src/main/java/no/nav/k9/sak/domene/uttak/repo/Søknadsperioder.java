@@ -61,7 +61,7 @@ public class Søknadsperioder extends BaseEntitet {
     public Set<Søknadsperiode> getPerioder() {
         return perioder;
     }
-
+    
     public DatoIntervallEntitet getMaksPeriode() {
         var perioder = getPerioder();
         var fom = perioder.stream()

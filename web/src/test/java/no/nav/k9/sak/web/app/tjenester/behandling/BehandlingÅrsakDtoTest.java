@@ -67,7 +67,7 @@ public class BehandlingÅrsakDtoTest {
     @Before
     public void setup() {
         skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(behandlingRepository, repositoryProvider.getOpptjeningRepository(), uttakRepository, vilkårResultatRepository);
-        behandlingDtoTjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository,
+        behandlingDtoTjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository,
             tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();

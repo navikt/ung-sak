@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -17,8 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -31,13 +28,10 @@ import no.nav.vedtak.konfig.Tid;
 @ApplicationScoped
 public class PleiepengerBarnSoknadOversetter {
 
-    private VirksomhetTjeneste virksomhetTjeneste;
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private TpsTjeneste tpsTjeneste;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
     private FagsakRepository fagsakRepository;
 
     PleiepengerBarnSoknadOversetter() {
@@ -46,18 +40,12 @@ public class PleiepengerBarnSoknadOversetter {
 
     @Inject
     public PleiepengerBarnSoknadOversetter(BehandlingRepositoryProvider repositoryProvider,
-                                           VirksomhetTjeneste virksomhetTjeneste,
-                                           InntektArbeidYtelseTjeneste iayTjeneste,
                                            UttakRepository uttakRepository,
-                                           MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                            TpsTjeneste tpsTjeneste) {
-        this.iayTjeneste = iayTjeneste;
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.virksomhetTjeneste = virksomhetTjeneste;
         this.uttakRepository = uttakRepository;
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
     }
 
@@ -79,7 +67,6 @@ public class PleiepengerBarnSoknadOversetter {
         // Utgår for K9-ytelsene?
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
         // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
-
 
         lagreMedlemskapinfo(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
         lagrePleietrengende(behandling.getFagsakId(), soknad.barn);

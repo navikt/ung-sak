@@ -21,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -41,6 +42,9 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private UttakRepository uttakRepository;
 
     @Inject
     private SøknadRepository søknadRepository;
@@ -64,7 +68,7 @@ public class BehandlingDtoTjenesteImplTest {
     @Before
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository,
+        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository,
             tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
     }
 
