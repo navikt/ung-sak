@@ -131,7 +131,9 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
-        var nyFagsakFor = dokumentmottakerPleiepengerBarnSoknad.createNyFagsakFor(behandlingTema.getFagsakYtelseType(), aktørId, pleietrengendeAktørId);
+        var startDato = opprettSakDto.getPeriodeStart() != null ? opprettSakDto.getPeriodeStart() : LocalDate.now();
+
+        var nyFagsakFor = dokumentmottakerPleiepengerBarnSoknad.finnEllerOpprett(behandlingTema.getFagsakYtelseType(), aktørId, pleietrengendeAktørId, startDato);
 
         return new SaksnummerDto(nyFagsakFor.getSaksnummer().getVerdi());
     }

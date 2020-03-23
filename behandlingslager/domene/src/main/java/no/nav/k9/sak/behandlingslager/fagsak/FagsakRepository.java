@@ -111,10 +111,46 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
+
     /**
      * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).
      * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
-     * 
+     *
+     * @param tom
+     */
+    @SuppressWarnings("unchecked")
+    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId, LocalDate fom, LocalDate tom) {
+        Query query;
+
+        if (pleietrengendeAktørId != null) {
+            query = entityManager.createNativeQuery(
+                "select f.* from Fagsak f"
+                    + " where f.pleietrengende_aktoer_id = :pleietrengendeAktørId"
+                    + "   and f.bruker_aktoer_id = :brukerAktørId"
+                    + "   and f.ytelse_type = :ytelseType"
+                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+                Fagsak.class); // NOSONAR
+            query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
+        } else {
+            query = entityManager.createNativeQuery(
+                "select f.* from Fagsak f"
+                    + " where f.ytelse_type = :ytelseType"
+                    + "   and f.bruker_aktoer_id = :brukerAktørId"
+                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+                Fagsak.class); // NOSONAR
+        }
+        query.setParameter("brukerAktørId", Objects.requireNonNull(bruker, "bruker").getId());
+        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
+        query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
+        query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
+
+        return query.getResultList();
+    }
+
+    /**
+     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).
+     * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
+     *
      * @param tom
      */
     @SuppressWarnings("unchecked")

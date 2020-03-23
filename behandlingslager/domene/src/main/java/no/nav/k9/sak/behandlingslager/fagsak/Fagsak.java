@@ -114,6 +114,10 @@ public class Fagsak extends BaseEntitet {
         return new Fagsak(ytelseType, bruker, pleietrengende, saksnummer);
     }
 
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
+        return new Fagsak(ytelseType, bruker, pleietrengende, saksnummer, fom, tom);
+    }
+
     public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
         // FIXME K9 kodeverk/logikk
         if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelseType)) {

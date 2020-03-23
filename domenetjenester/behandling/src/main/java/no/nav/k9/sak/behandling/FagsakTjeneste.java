@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandling;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,6 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -71,4 +74,11 @@ public class FagsakTjeneste {
         return fagsakRepository.hentJournalpost(journalpostId);
     }
 
+    public Optional<Fagsak> finnesEnFagsakSomOverlapper(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, LocalDate fom, LocalDate tom) {
+        var potensielleFagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, pleietrengende, fom, tom);
+        if (potensielleFagsaker.isEmpty()) {
+            return Optional.empty();
+        }
+        return potensielleFagsaker.stream().max(Comparator.comparing(Fagsak::getPeriode));
+    }
 }

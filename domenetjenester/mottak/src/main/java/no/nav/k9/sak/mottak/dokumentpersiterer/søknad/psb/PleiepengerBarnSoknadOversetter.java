@@ -51,6 +51,7 @@ public class PleiepengerBarnSoknadOversetter {
 
     // @Override
     public void persister(PleiepengerBarnSøknad soknad, Behandling behandling) {
+        var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
         // TODO:
@@ -69,15 +70,24 @@ public class PleiepengerBarnSoknadOversetter {
         // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
 
         lagreMedlemskapinfo(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
-        lagrePleietrengende(behandling.getFagsakId(), soknad.barn);
+        lagrePleietrengende(fagsakId, soknad.barn);
 
-        lagreUttakOgPerioder(soknad, behandlingId);
-
+        lagreUttakOgPerioder(soknad, behandlingId, fagsakId);
     }
 
-    private void lagreUttakOgPerioder(PleiepengerBarnSøknad soknad, final Long behandlingId) {
+    private void lagreUttakOgPerioder(PleiepengerBarnSøknad soknad, final Long behandlingId, Long fagsakId) {
         var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
+
+        var maksPeriode = mapUttakGrunnlag.getOppgittUttak().getMaksPeriode();
+
+        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        var eksisterendeFom = fagsak.getPeriode().getFomDato();
+        var eksisterendeTom = fagsak.getPeriode().getTomDato();
+        var oppdatertFom = eksisterendeFom.isBefore(maksPeriode.getFomDato()) && !Tid.TIDENES_BEGYNNELSE.equals(eksisterendeFom) ? eksisterendeFom : maksPeriode.getFomDato();
+        var oppdatertTom = eksisterendeTom.isAfter(maksPeriode.getTomDato()) && !Tid.TIDENES_ENDE.equals(eksisterendeTom) ? eksisterendeTom : maksPeriode.getTomDato();
+
+        fagsakRepository.oppdaterPeriode(fagsakId, oppdatertFom, oppdatertTom);
     }
 
     private void lagrePleietrengende(Long fagsakId, Barn barn) {
