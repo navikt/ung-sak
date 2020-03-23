@@ -119,6 +119,7 @@ public class BehandlingskontrollEventObserver {
             .medBehandlingId(behandling.getId())
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
             .medAktørId(behandling.getAktørId().getId())
+            .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
             .medEventHendelse(eventHendelse)
             .medBehandlinStatus(behandling.getStatus().getKode())
             .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())

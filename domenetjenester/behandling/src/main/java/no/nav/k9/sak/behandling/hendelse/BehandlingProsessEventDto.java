@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -16,6 +17,7 @@ public class BehandlingProsessEventDto {
      */
     private UUID eksternId;
     private Fagsystem fagsystem;
+    private LocalDate behandlingstidFrist;
     private String saksnummer;
     private String aktørId;
 
@@ -128,6 +130,10 @@ public class BehandlingProsessEventDto {
         return ansvarligSaksbehandlerForTotrinn;
     }
 
+    public LocalDate getBehandlingstidFrist() {
+        return behandlingstidFrist;
+    }
+
     protected BehandlingProsessEventDto(Builder<?> builder) {
         this.eksternId = builder.eksternId;
         this.fagsystem = builder.fagsystem;
@@ -135,6 +141,8 @@ public class BehandlingProsessEventDto {
         this.aktørId = builder.aktørId;
         this.behandlingId = builder.behandlingId;
         this.eventTid = builder.eventTid;
+        this.fagsystem = builder.fagsystem;
+        this.behandlingstidFrist = builder.behandlingstidFrist;
         this.eventHendelse = builder.eventHendelse;
         this.behandlinStatus = builder.behandlinStatus;
         this.behandlingStatus = builder.behandlingStatus;
@@ -153,6 +161,7 @@ public class BehandlingProsessEventDto {
         private Fagsystem fagsystem;
         private String saksnummer;
         private String aktørId;
+        private LocalDate behandlingstidFrist;
         private Long behandlingId;
         private LocalDateTime eventTid;
         private EventHendelse eventHendelse;
@@ -196,6 +205,11 @@ public class BehandlingProsessEventDto {
 
         public T medAktørId(String aktørId) {
             this.aktørId = aktørId;
+            return self();
+        }
+
+        public T getBehandlingstidFrist(LocalDate behandlingstidFrist) {
+            this.behandlingstidFrist = behandlingstidFrist;
             return self();
         }
 
