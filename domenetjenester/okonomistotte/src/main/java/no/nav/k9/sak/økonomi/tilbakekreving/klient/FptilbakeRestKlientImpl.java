@@ -24,7 +24,7 @@ public class FptilbakeRestKlientImpl implements FptilbakeRestKlient {
 
     @Inject
     public FptilbakeRestKlientImpl(OidcRestClient restClient,
-                                   @KonfigVerdi(value = "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING", defaultVerdi = "http://fptilbake/fptilbake/api/iverksett/start/behandlinger/tilbakekreving/aapen") String urlSjekkÅpenBehandling) {
+                                   @KonfigVerdi(value = "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING", defaultVerdi = "http://fptilbake/fptilbake/api/behandlinger/tilbakekreving/aapen") String urlSjekkÅpenBehandling) {
         this.restClient = restClient;
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlSjekkÅpenBehandling, "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING");
     }
