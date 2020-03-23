@@ -1,6 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,15 +31,16 @@ import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
-
 
 @ApplicationScoped
 public class KalkulusRestTjeneste {
@@ -49,10 +49,10 @@ public class KalkulusRestTjeneste {
     private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandResponse.class);
+    private final ObjectReader oppdaterReader = kalkulusMapper.readerFor(OppdateringRespons.class);
     private final ObjectReader dtoReader = kalkulusMapper.readerFor(BeregningsgrunnlagDto.class);
     private final ObjectReader grunnlagReader = kalkulusMapper.readerFor(BeregningsgrunnlagGrunnlagDto.class);
     private final ObjectReader fastSattReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto.class);
-
 
     private OidcRestClient oidcRestClient;
     private URI kalkulusEndpoint;
@@ -92,8 +92,8 @@ public class KalkulusRestTjeneste {
 
         try {
             String json = kalkulusJsonWriter.writeValueAsString(request);
-            //TODO(K9-SAK) logger for debugging, fjern før prodsetting
-            log.info("Input til kalkulus: "+ json);
+            // TODO(K9-SAK) logger for debugging, fjern før prodsetting
+            log.info("Input til kalkulus: " + json);
             return getTilstandResponse(endpoint, json);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
@@ -110,11 +110,11 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    public TilstandResponse oppdaterBeregning(HåndterBeregningRequest request) {
+    public OppdateringRespons oppdaterBeregning(HåndterBeregningRequest request) {
         var endpoint = oppdaterEndpoint;
 
         try {
-            return getTilstandResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+            return getOppdaterResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
@@ -149,7 +149,6 @@ public class KalkulusRestTjeneste {
         }
     }
 
-
     public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(HentBeregningsgrunnlagDtoForGUIRequest request) {
         var endpoint = beregningsgrunnlagDtoEndpoint;
 
@@ -159,7 +158,6 @@ public class KalkulusRestTjeneste {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
-
 
     public Boolean erEndringIBeregning(ErEndringIBeregningRequest request) {
         var endpoint = erEndringIBeregningEndpoint;
@@ -171,10 +169,17 @@ public class KalkulusRestTjeneste {
         }
     }
 
+    private OppdateringRespons getOppdaterResponse(URI endpoint, String json) {
+        try {
+            return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, oppdaterReader));
+        } catch (IOException e) {
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+        }
+    }
 
     private TilstandResponse getTilstandResponse(URI endpoint, String json) {
         try {
-            return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<TilstandResponse>(endpoint, tilstandReader));
+            return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, tilstandReader));
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
@@ -229,14 +234,13 @@ public class KalkulusRestTjeneste {
         }
     }
 
-
-    private <T> T utførOgHent(URI endpoint, String json, ObjectReaderResponseHandler<T> responseHandler) throws IOException {
+    private <T> T utførOgHent(URI endpoint, String json, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         try (var httpResponse = oidcRestClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
-            if (responseCode == HttpStatus.SC_OK) {
+            if (isOk(responseCode)) {
                 return responseHandler.handleResponse(httpResponse);
             } else {
                 if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
@@ -249,8 +253,10 @@ public class KalkulusRestTjeneste {
                     return null;
                 }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                String feilmelding = "Kunne ikke hente grunnlag fra kalkulus: " + httpPost.getURI()
-                        + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+                String feilmelding = "Kunne ikke hente utføre kall til kalkulus,"
+                    + " endpoint=" + httpPost.getURI()
+                    + ", HTTP status=" + httpResponse.getStatusLine()
+                    + ". HTTP Errormessage=" + responseBody;
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
                     throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
                 } else {
@@ -258,11 +264,15 @@ public class KalkulusRestTjeneste {
                 }
             }
         } catch (RuntimeException re) {
-            log.warn("Feil ved henting av data fra kalkulus: endpoint=" + endpoint, re);
+            log.warn("Feil ved henting av data. uri=" + endpoint + (json == null ? null : ". jsonInput=" + json), re);
             throw re;
         }
     }
 
+    private boolean isOk(int responseCode) {
+        return responseCode == HttpStatus.SC_OK
+            || responseCode == HttpStatus.SC_CREATED;
+    }
 
     private URI toUri(String relativeUri) {
         String uri = kalkulusEndpoint.toString() + relativeUri;

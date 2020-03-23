@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -17,11 +18,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.Immutable;
+
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "UttakAktivitet")
 @Table(name = "UT_UTTAK_AKTIVITET")
+@Immutable
 public class UttakAktivitet extends BaseEntitet {
 
     @Id
@@ -39,6 +43,10 @@ public class UttakAktivitet extends BaseEntitet {
         // hibernate
     }
 
+    public UttakAktivitet(UttakAktivitetPeriode... perioder) {
+        this(Arrays.asList(perioder));
+    }
+    
     public UttakAktivitet(Collection<UttakAktivitetPeriode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()

@@ -50,7 +50,7 @@
 		    <groupId>no.nav.vedtak.prosesstask</groupId>
 		    <artifactId>prosesstask-legacy</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>kontrakt</artifactId>
@@ -61,20 +61,14 @@
 		</dependency>
 		<dependency>
 			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
-			<artifactId>soeknad-v3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
-			<artifactId>abonnent-v1</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			<artifactId>fordel-v1</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>no.nav.foreldrepenger.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
+		
 		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde vært her da de trekkes inn av server. -->
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>

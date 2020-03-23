@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -17,11 +18,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.Immutable;
+
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Ferie")
 @Table(name = "UT_FERIE")
+@Immutable
 public class Ferie extends BaseEntitet {
 
     @Id
@@ -37,6 +41,10 @@ public class Ferie extends BaseEntitet {
 
     Ferie() {
         // hibernate
+    }
+
+    public Ferie(FeriePeriode... perioder) {
+        this(Arrays.asList(perioder));
     }
 
     public Ferie(Collection<FeriePeriode> perioder) {
@@ -72,7 +80,7 @@ public class Ferie extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() +"<" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", perioder=" + perioder +
             '>';

@@ -17,11 +17,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.Immutable;
+
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "TilsynsordningPeriode")
 @Table(name = "UT_TILSYNSORDNING_PERIODE")
+@Immutable
 public class TilsynsordningPeriode extends BaseEntitet {
 
     @Id

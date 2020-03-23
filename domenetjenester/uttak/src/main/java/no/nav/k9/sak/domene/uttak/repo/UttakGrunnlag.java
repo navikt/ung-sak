@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "UttakGrunnlag")
 @Table(name = "GR_UTTAK")

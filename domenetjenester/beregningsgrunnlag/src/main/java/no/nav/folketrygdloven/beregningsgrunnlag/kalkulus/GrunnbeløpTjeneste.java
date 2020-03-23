@@ -8,9 +8,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.Grunnbeløp;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSats;
-import no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 
 @ApplicationScoped
 public class GrunnbeløpTjeneste {

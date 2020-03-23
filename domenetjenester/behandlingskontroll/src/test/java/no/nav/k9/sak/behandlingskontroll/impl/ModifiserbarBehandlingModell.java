@@ -1,0 +1,38 @@
+package no.nav.k9.sak.behandlingskontroll.impl;
+
+import java.util.List;
+
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl.TriFunction;
+
+/** Modell for testing som lar oss endre på referansedata uten å eksponere vanlig api. */
+public class ModifiserbarBehandlingModell {
+
+    public static BehandlingModellImpl setupModell(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType, List<TestStegKonfig> resolve) {
+        TriFunction<BehandlingStegType, BehandlingType, FagsakYtelseType, BehandlingSteg> finnSteg = DummySteg.map(resolve);
+
+        BehandlingModellImpl modell = new BehandlingModellImpl(behandlingType, fagsakYtelseType, finnSteg) {
+            @Override
+            protected void leggTilAksjonspunktDefinisjoner(BehandlingStegType stegType, BehandlingStegModellImpl entry) {
+                // overstyrer denne - se under
+            }
+        };
+        for (TestStegKonfig konfig : resolve) {
+            BehandlingStegType stegType = konfig.getBehandlingStegType();
+
+            // fake legg til behandlingSteg og vureringspunkter
+            modell.leggTil(stegType, behandlingType, fagsakYtelseType);
+
+            konfig.getInngangAksjonspunkter().forEach(a ->  modell.internFinnSteg(stegType).leggTilAksjonspunktVurderingInngang(a.getKode()));
+            konfig.getUtgangAksjonspunkter().forEach(a ->  modell.internFinnSteg(stegType).leggTilAksjonspunktVurderingUtgang(a.getKode()));
+
+        }
+        return modell;
+
+    }
+
+}

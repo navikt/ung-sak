@@ -21,6 +21,10 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>kodeverk</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>soknad-pleiepenger-barn</artifactId>
+        </dependency>
 
 		<!-- for Bean validation -->
 		<dependency>

@@ -23,20 +23,20 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsperiodeGrunnlag;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
-import no.nav.foreldrepenger.inngangsvilkaar.regelmodell.opptjeningsperiode.RegelFastsettOpptjeningsperiode;
 import no.nav.fpsak.nare.RuleService;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsperiodeGrunnlag;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
+import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjeningsperiode.RegelFastsettOpptjeningsperiode;
 import no.nav.vedtak.util.Tuple;
 
 class VilkårVurdering {

@@ -6,29 +6,41 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.Skjæringstidspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.pleiebehov.Pleieperioder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.uttak.repo.Ferie;
+import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 /** Inputstruktur for uttak tjenester. */
 public class UttakInput {
 
     private final BehandlingReferanse behandlingReferanse;
+    private Ferie ferie;
+
     private final InntektArbeidYtelseGrunnlag iayGrunnlag;
+    private Pleieperioder pleieperioder;
 
-    private Collection<UttakAktivitetPeriode> UttakAktivitetPerioder = Collections.emptyList();
+    private Person pleietrengende;
+
+    /** Map av relaterte saker i sakskomplekset. */
+    private Map<AktørId, Saksnummer> relaterteSaker = Collections.emptyMap();
+
+    private Person søker;
     private LocalDate søknadMottattDato;
-
-    private UttakPersonInfo pleietrengende;
-
-    private Map<AktørId, UUID> relaterteBehandlinger = Collections.emptyMap();
-
-    private UttakPersonInfo søker;
+    private Søknadsperioder søknadsperioder;
+    private OppgittTilsynsordning tilsynsordning;
+    private Collection<UttakAktivitetPeriode> uttakAktivitetPerioder = Collections.emptyList();
+    private Vilkår medlemskapVilkår;
 
     public UttakInput(BehandlingReferanse behandlingReferanse,
                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
@@ -38,10 +50,16 @@ public class UttakInput {
 
     private UttakInput(UttakInput input) {
         this(input.getBehandlingReferanse(), input.getIayGrunnlag());
-        this.UttakAktivitetPerioder = List.copyOf(input.UttakAktivitetPerioder);
+        this.uttakAktivitetPerioder = List.copyOf(input.uttakAktivitetPerioder);
         this.søknadMottattDato = input.søknadMottattDato;
         this.pleietrengende = input.pleietrengende;
         this.søker = input.søker;
+        this.søknadsperioder = input.søknadsperioder;
+        this.ferie = input.ferie;
+        this.tilsynsordning = input.tilsynsordning;
+        this.relaterteSaker = input.relaterteSaker;
+        this.pleieperioder = input.pleieperioder;
+        this.medlemskapVilkår= input.medlemskapVilkår;
     }
 
     public AktørId getAktørId() {
@@ -52,38 +70,88 @@ public class UttakInput {
         return behandlingReferanse;
     }
 
-    public Collection<UttakAktivitetPeriode> getUttakAktivitetPerioder() {
-        return UttakAktivitetPerioder;
-    }
-
     public FagsakYtelseType getFagsakYtelseType() {
         return behandlingReferanse.getFagsakYtelseType();
+    }
+
+    public Ferie getFerie() {
+        return ferie;
     }
 
     public InntektArbeidYtelseGrunnlag getIayGrunnlag() {
         return iayGrunnlag;
     }
 
+    public Vilkår getMedlemskap() {
+        return medlemskapVilkår;
+    }
+
+    public Pleieperioder getPleieperioder() {
+        return pleieperioder;
+    }
+
+    public Person getPleietrengende() {
+        return pleietrengende;
+    }
+
+    public Map<AktørId, Saksnummer> getRelaterteSaker() {
+        return relaterteSaker;
+    }
+
     public Skjæringstidspunkt getSkjæringstidspunkt() {
         return behandlingReferanse.getSkjæringstidspunkt();
+    }
+
+    public Person getSøker() {
+        return søker;
     }
 
     public LocalDate getSøknadMottattDato() {
         return søknadMottattDato;
     }
 
+    public Søknadsperioder getSøknadsperioder() {
+        return søknadsperioder;
+    }
+
+    public OppgittTilsynsordning getTilsynsordning() {
+        return tilsynsordning;
+    }
+
+    public Collection<UttakAktivitetPeriode> getUttakAktivitetPerioder() {
+        return uttakAktivitetPerioder;
+    }
+
     public UttakYrkesaktiviteter getYrkesaktiviteter() {
         return new UttakYrkesaktiviteter(this);
     }
 
-    public UttakInput medUttakAktivitetPerioder(Collection<UttakAktivitetPeriode> statusPerioder) {
+    public boolean harAktørArbeid() {
+        return iayGrunnlag != null && iayGrunnlag.getAktørArbeidFraRegister(getAktørId()).isPresent();
+    }
+
+    public UttakInput medFerie(Ferie ferie) {
         var newInput = new UttakInput(this);
-        newInput.UttakAktivitetPerioder = List.copyOf(statusPerioder);
+        newInput.ferie = ferie;
         return newInput;
     }
 
-    public boolean harAktørArbeid() {
-        return iayGrunnlag != null && iayGrunnlag.getAktørArbeidFraRegister(getAktørId()).isPresent();
+    public UttakInput medPleieperioder(Pleieperioder pleieperioder) {
+        var newInput = new UttakInput(this);
+        newInput.pleieperioder = pleieperioder;
+        return newInput;
+    }
+
+    public UttakInput medPleietrengende(Person pleietrengende) {
+        var newInput = new UttakInput(this);
+        newInput.pleietrengende = pleietrengende;
+        return newInput;
+    }
+
+    public UttakInput medSøker(Person søker) {
+        var newInput = new UttakInput(this);
+        newInput.søker = søker;
+        return newInput;
     }
 
     public UttakInput medSøknadMottattDato(LocalDate mottattDato) {
@@ -92,21 +160,27 @@ public class UttakInput {
         return newInput;
     }
 
-    public UttakInput medPleietrengende(UttakPersonInfo pleietrengende) {
-        this.pleietrengende = pleietrengende;
-        return this;
+    public UttakInput medSøknadsperioder(Søknadsperioder søknadsperioder) {
+        var newInput = new UttakInput(this);
+        newInput.søknadsperioder = søknadsperioder;
+        return newInput;
     }
 
-    public UttakInput medSøker(UttakPersonInfo søker) {
-        this.søker = søker;
-        return this;
+    public UttakInput medTilsynsordning(OppgittTilsynsordning tilsynsordning) {
+        var newInput = new UttakInput(this);
+        newInput.tilsynsordning = tilsynsordning;
+        return newInput;
     }
 
-    public UttakPersonInfo getPleietrengende() {
-        return pleietrengende;
+    public UttakInput medUttakAktivitetPerioder(Collection<UttakAktivitetPeriode> statusPerioder) {
+        var newInput = new UttakInput(this);
+        newInput.uttakAktivitetPerioder = List.copyOf(statusPerioder);
+        return newInput;
     }
 
-    public UttakPersonInfo getSøker() {
-        return søker;
+    public UttakInput medMedlemskapVilkår(Vilkår medlemskap) {
+        var newInput = new UttakInput(this);
+        newInput.medlemskapVilkår = medlemskap;
+        return newInput;
     }
 }

@@ -1,0 +1,15 @@
+package no.nav.k9.sak.domene.risikoklassifisering.kafka.config;
+/**
+ * @deprecated single impl interface
+ *
+ */
+@Deprecated
+public interface MeldingProducer {
+
+    void sendJson(String json);
+
+    void sendJsonMedNøkkel(String nøkkel, String json);
+
+    void flushAndClose();
+
+}

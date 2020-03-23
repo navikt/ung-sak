@@ -19,11 +19,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.Immutable;
+
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "OppgittTilsynsordning")
 @Table(name = "UT_TILSYNSORDNING")
+@Immutable
 public class OppgittTilsynsordning extends BaseEntitet {
 
     @Id

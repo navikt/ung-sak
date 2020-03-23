@@ -7,12 +7,14 @@ import java.util.UUID;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningAksjonspunktResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 
 /**
  * BeregningTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
@@ -37,14 +39,14 @@ public interface BeregningTjeneste {
      * @param stegType {@link BehandlingStegType}
      * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
      */
-    List<BeregningAksjonspunktResultat> fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType);
+    KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
      * @param referanse Behandlingreferanse
-     * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
+     * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
-    List<BeregningAksjonspunktResultat> oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse);
+    OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse);
 
     Beregningsgrunnlag hentEksaktFastsatt(Long behandlingId);
 
