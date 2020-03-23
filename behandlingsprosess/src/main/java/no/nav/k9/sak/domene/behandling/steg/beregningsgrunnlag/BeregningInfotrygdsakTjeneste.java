@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -21,9 +22,9 @@ import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveSen
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
-
-/** NB! Midlertidlig tjeneste som avslutter sak og oppretter sak i infotrygd.
- *
+/**
+ * NB! Midlertidlig tjeneste som avslutter sak og oppretter sak i infotrygd.
+ * <p>
  * Gjelder ytelsen OSM
  * omsorgspengersaker som faller ut pga. FL(frilans) og SN (selvstendig næringsdrivende)
  */
@@ -33,6 +34,8 @@ public class BeregningInfotrygdsakTjeneste {
     private FagsakRepository fagsakRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+
+    private static final List<ArbeidType> ARBEID_TYPER_SOM_SKAL_TRIGGE_SAK_TIL_INFOTRYGD = List.of((ArbeidType.FRILANSER), ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER, ArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
     protected BeregningInfotrygdsakTjeneste() {
         // for CDI proxy
@@ -51,8 +54,9 @@ public class BeregningInfotrygdsakTjeneste {
     }
 
     public boolean vurderOgOppdaterSakSomBehandlesAvInfotrygd(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, AbstractLocalDateInterval inntektsperioden) {
+        //skal bare sjekke for OMSORGSPENGER i første omgang
         if (ref.getFagsakYtelseType() != FagsakYtelseType.OMSORGSPENGER) {
-            throw new IllegalStateException("skal bare benyttes av OMSORGSPENGER, fikk sendt inn " + ref.getFagsakYtelseType());
+            return false;
         }
 
         if (skalSakenTilInfotrygd(ref, inntektsperioden)) {
@@ -71,14 +75,12 @@ public class BeregningInfotrygdsakTjeneste {
         return aktørArbeidFraRegister
                 .map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(Collections.emptyList())
                 .stream()
-                .anyMatch(yrkesaktivitet -> (yrkesaktivitet.getArbeidType() == ArbeidType.FRILANSER ||
-                        yrkesaktivitet.getArbeidType() == ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER ||
-                        yrkesaktivitet.getArbeidType() == ArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE) &&
+                .anyMatch(yrkesaktivitet -> (ARBEID_TYPER_SOM_SKAL_TRIGGE_SAK_TIL_INFOTRYGD.contains(yrkesaktivitet.getArbeidType()) &&
                         yrkesaktivitet.getAlleAktivitetsAvtaler()
                                 .stream()
                                 .filter(AktivitetsAvtale::erAnsettelsesPeriode)
                                 .map(AktivitetsAvtale::getPeriode)
-                                .anyMatch(datoIntervallEntitet -> datoIntervallEntitet.overlapper(inntektsperioden)));
+                                .anyMatch(datoIntervallEntitet -> datoIntervallEntitet.overlapper(inntektsperioden))));
     }
 
     private void dispatchTilInfotrygd(BehandlingReferanse ref) {

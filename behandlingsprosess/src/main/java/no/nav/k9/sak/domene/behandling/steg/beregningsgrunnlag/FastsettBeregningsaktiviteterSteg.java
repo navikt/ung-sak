@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -67,18 +65,16 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
         //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
-        if (ref.getFagsakYtelseType() == OMSORGSPENGER) {
-            DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(skjæringstidspunkter.getSkjæringstidspunktOpptjening(), ANTALL_ARBEIDSDAGER);
-
-            boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
-            if (sendtTilInfotrygd) {
-                return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-            }
+        DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(skjæringstidspunkter.getSkjæringstidspunktOpptjening(), ANTALL_ARBEIDSDAGER);
+        boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
+        if (sendtTilInfotrygd) {
+            return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
+        } else {
+            var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
+            var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
+            var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
         }
-        var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
-        var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
     }
 
     @Override
