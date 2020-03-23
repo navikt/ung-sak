@@ -13,12 +13,12 @@
     <sequence-generator name="SEQ_BR_FERIEPENGER" allocation-size="50" sequence-name="SEQ_BR_FERIEPENGER" />
     <sequence-generator name="SEQ_BR_FERIEPENGER_PR_AAR" allocation-size="50" sequence-name="SEQ_BR_FERIEPENGER_PR_AAR" />
 
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatPeriode"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatAndel"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningsresultatEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet"/>
-    <entity class="no.nav.foreldrepenger.behandlingslager.behandling.beregning.BeregningSats"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats"/>
 
 </entity-mappings>

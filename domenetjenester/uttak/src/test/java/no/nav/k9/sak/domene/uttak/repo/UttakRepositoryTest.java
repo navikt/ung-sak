@@ -2,6 +2,8 @@ package no.nav.k9.sak.domene.uttak.repo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -12,15 +14,20 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.uttak.BasicBehandlingBuilder;
+import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning.OppgittTilsynSvar;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
 public class UttakRepositoryTest {
+
+    private static final Duration KORT_UKE = Duration.ofHours(10);
+
+    private static final BigDecimal FULLTID_STILLING = BigDecimal.valueOf(100L);
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -40,17 +47,15 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER);
-        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER);
+        var data = new UttakAktivitet(Set.of(
+            new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING), 
+            new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER, KORT_UKE, FULLTID_STILLING)));
 
-        var perioder = Set.of(p1, p2);
-        var uttak = new UttakAktivitet(perioder);
+        uttakRepository.lagreOgFlushOppgittUttak(behandlingId, data);
 
-        uttakRepository.lagreOgFlushOppgittUttak(behandlingId, uttak);
-
-        var uttak2 = uttakRepository.hentOppgittUttak(behandlingId);
-        assertThat(uttak2).isNotNull();
-        assertThat(uttak2.getPerioder()).hasSameSizeAs(uttak.getPerioder());
+        var data2 = uttakRepository.hentOppgittUttak(behandlingId);
+        assertThat(data2).isNotNull();
+        assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
     }
 
     @Test
@@ -58,17 +63,15 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER);
-        var p2 = new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER);
+        var data = new UttakAktivitet(Set.of(
+            new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING), 
+            new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER, KORT_UKE, FULLTID_STILLING)));
 
-        var perioder = Set.of(p1, p2);
-        var uttak = new UttakAktivitet(perioder);
+        uttakRepository.lagreOgFlushFastsattUttak(behandlingId, data);
 
-        uttakRepository.lagreOgFlushFastsattUttak(behandlingId, uttak);
-
-        var uttak2 = uttakRepository.hentFastsattUttak(behandlingId);
-        assertThat(uttak2).isNotNull();
-        assertThat(uttak2.getPerioder()).hasSameSizeAs(uttak.getPerioder());
+        var data2 = uttakRepository.hentFastsattUttak(behandlingId);
+        assertThat(data2).isNotNull();
+        assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
     }
 
     @Test
@@ -76,17 +79,13 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new Søknadsperiode(fom, tom);
-        var p2 = new Søknadsperiode(tom.plusDays(1), tom.plusDays(10));
+        var data = new Søknadsperioder(Set.of(new Søknadsperiode(fom, tom), new Søknadsperiode(tom.plusDays(1), tom.plusDays(10))));
 
-        var perioder = Set.of(p1, p2);
-        var søknadsperioder = new Søknadsperioder(perioder);
+        uttakRepository.lagreOgFlushSøknadsperioder(behandlingId, data);
 
-        uttakRepository.lagreOgFlushSøknadsperioder(behandlingId, søknadsperioder);
-
-        var søknasperioder2 = uttakRepository.hentOppgittSøknadsperioder(behandlingId);
-        assertThat(søknasperioder2).isNotNull();
-        assertThat(søknasperioder2.getPerioder()).hasSameSizeAs(søknadsperioder.getPerioder());
+        var data2 = uttakRepository.hentOppgittSøknadsperioder(behandlingId);
+        assertThat(data2).isNotNull();
+        assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
     }
 
     @Test
@@ -94,16 +93,30 @@ public class UttakRepositoryTest {
         Long behandlingId = behandling.getId();
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
-        var p1 = new FeriePeriode(fom, tom);
-        var p2 = new FeriePeriode(tom.plusDays(1), tom.plusDays(10));
+        var data = new Ferie(Set.of(new FeriePeriode(fom, tom), new FeriePeriode(tom.plusDays(1), tom.plusDays(10))));
 
-        var perioder = Set.of(p1, p2);
-        var ferie = new Ferie(perioder);
+        uttakRepository.lagreOgFlushOppgittFerie(behandlingId, data);
 
-        uttakRepository.lagreOgFlushOppgittFerie(behandlingId, ferie);
+        var data2 = uttakRepository.hentOppgittFerie(behandlingId);
+        assertThat(data2).isNotNull();
+        assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
+    }
 
-        var feire2 = uttakRepository.hentOppgittFerie(behandlingId);
-        assertThat(feire2).isNotNull();
-        assertThat(feire2.getPerioder()).hasSameSizeAs(ferie.getPerioder());
+    @Test
+    public void skal_lagre_tilsynsordning() throws Exception {
+        Long behandlingId = behandling.getId();
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
+        var data = new OppgittTilsynsordning(Set.of(
+            new TilsynsordningPeriode(fom, tom, Duration.parse("P1DT3H")),
+            new TilsynsordningPeriode(tom.plusDays(1), tom.plusDays(10), Duration.ofHours(3))), 
+            OppgittTilsynSvar.JA);
+
+        uttakRepository.lagreOgFlushOppgittTilsynsordning(behandlingId, data);
+
+        var data2 = uttakRepository.hentOppgittTilsynsordning(behandlingId);
+        assertThat(data2).isNotNull();
+        assertThat(data2.getOppgittTilsynSvar()).isEqualTo(OppgittTilsynSvar.JA);
+        assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
     }
 }

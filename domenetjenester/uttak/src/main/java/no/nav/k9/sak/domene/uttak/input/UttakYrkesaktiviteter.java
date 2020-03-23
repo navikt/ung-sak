@@ -10,11 +10,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.behandling.Skjæringstidspunkt;
-import no.nav.foreldrepenger.domene.iay.modell.AktivitetsAvtale;
-import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.foreldrepenger.domene.iay.modell.Yrkesaktivitet;
-import no.nav.foreldrepenger.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.behandling.Skjæringstidspunkt;
+import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -30,7 +31,7 @@ public class UttakYrkesaktiviteter {
         if (grunnlag == null) {
             return Collections.emptyList();
         }
-        Collection<UttakAktivitetStatusPeriode> andeler = input.getUttakAktivitetStatusPerioder();
+        Collection<UttakAktivitetPeriode> andeler = input.getUttakAktivitetPerioder();
         var ref = input.getBehandlingReferanse();
         LocalDate skjæringstidspunkt = ref.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
 
@@ -46,7 +47,7 @@ public class UttakYrkesaktiviteter {
     private List<Yrkesaktivitet> hentYrkesAktiviteterFrilans(UttakInput input) {
         var ref = input.getBehandlingReferanse();
         var grunnlag = input.getIayGrunnlag();
-        var andeler = input.getUttakAktivitetStatusPerioder();
+        var andeler = input.getUttakAktivitetPerioder();
 
         if (grunnlag == null || (andeler == null || andeler.isEmpty())) {
             return Collections.emptyList();
@@ -61,19 +62,19 @@ public class UttakYrkesaktiviteter {
             .collect(Collectors.toList());
     }
 
-    public List<Yrkesaktivitet> hentAlleYrkesaktiviteter() {
+    public List<Yrkesaktivitet> hentRelevanteYrkesaktiviteter() {
         List<Yrkesaktivitet> aktiviteter = hentYrkesAktiviteterOrdinærtArbeidsforhold(input);
         aktiviteter.addAll(hentYrkesAktiviteterFrilans(input));
         return aktiviteter;
     }
 
-    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, Collection<UttakAktivitetStatusPeriode> statusPerioder) {
+    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, Collection<UttakAktivitetPeriode> statusPerioder) {
         return statusPerioder.stream().anyMatch(bsp -> skalYrkesaktivitetTasMed(yrkesaktivitet, bsp));
     }
 
-    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, UttakAktivitetStatusPeriode bsp) {
-        var arbeidsgiver = bsp.getArbeidsgiver().orElse(null);
-        var arbeidsforhold = bsp.getArbeidsforholdRef().orElse(InternArbeidsforholdRef.nullRef());
+    private boolean skalYrkesaktivitetTasMed(Yrkesaktivitet yrkesaktivitet, UttakAktivitetPeriode bsp) {
+        var arbeidsgiver = bsp.getArbeidsgiver();
+        var arbeidsforhold = bsp.getArbeidsforholdRef();
         var arbeidsgiver2 = yrkesaktivitet.getArbeidsgiver();
         var arbeidsforhold2 = Optional.ofNullable(yrkesaktivitet.getArbeidsforholdRef()).orElse(InternArbeidsforholdRef.nullRef());
         if (arbeidsgiver == null || arbeidsgiver2 == null) {

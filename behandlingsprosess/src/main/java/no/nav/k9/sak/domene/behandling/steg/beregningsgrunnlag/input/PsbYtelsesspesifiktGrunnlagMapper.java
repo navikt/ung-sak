@@ -19,15 +19,15 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
-import no.nav.foreldrepenger.behandling.BehandlingReferanse;
-import no.nav.foreldrepenger.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakUtbetalingsgrad;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakUtbetalingsgrad;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -79,7 +79,7 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
 
     private UtbetalingsgradArbeidsforholdDto lagArbeidsforhold(UttakArbeidsforhold arb) {
         return new UtbetalingsgradArbeidsforholdDto(lagAktør(arb),
-            new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()),
+            arb.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()) : null,
             new UttakArbeidType(arb.getType().getKode()));
     }
 

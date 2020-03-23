@@ -5,7 +5,7 @@
 
 	<sequence-generator name="SEQ_MOTTATT_DOKUMENT" allocation-size="50" sequence-name="SEQ_MOTTATT_DOKUMENT" />
 
-	<entity class="no.nav.foreldrepenger.behandlingslager.hendelser.MottattHendelse" />
-	<entity class="no.nav.foreldrepenger.behandlingslager.behandling.MottattDokument" />
+	<entity class="no.nav.k9.sak.behandlingslager.hendelser.MottattHendelse" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.MottattDokument" />
 
 </entity-mappings>

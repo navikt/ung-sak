@@ -171,6 +171,8 @@ spec:
       value: http://k9-oppdrag/k9/oppdrag/api
     - name: K9_PSB_UTTAK_URL
       value: http://pleiepenger-barn-uttak/pleiepenger-barn-uttak
+    - name: URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING
+      value: http://fptilbake.q1/fptilbake/api/behandlinger/tilbakekreving/aapen
 
     # Web services
     - name: AKTOER_V2_URL

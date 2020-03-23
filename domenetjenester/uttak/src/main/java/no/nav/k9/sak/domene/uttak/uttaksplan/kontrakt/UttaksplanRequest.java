@@ -17,12 +17,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonPropertyOrder({ "saksnummer", "behandlingId", "andrePartersSaker", "søker", "barn", "søknadsperioder", "lovbestemtFerie", "arbeid", "tilsynsbehov", "medlemskap" })
@@ -32,11 +31,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class UttaksplanRequest {
 
     @JsonProperty(value = "andrePartersSaker")
-    @JsonInclude(value = Include.NON_EMPTY)
     @Valid
     private List<AndrePartSak> andrePartersSaker = new ArrayList<>();
 
-    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "arbeid")
     @Valid
     private List<UttakArbeid> arbeid = new ArrayList<>();
@@ -52,7 +49,6 @@ public class UttaksplanRequest {
     @NotNull
     private UUID behandlingId;
 
-    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "medlemskap")
     @Valid
     private NavigableMap<Periode, UttakMedlemskap> medlemskap = Collections.emptyNavigableMap();
@@ -73,12 +69,10 @@ public class UttaksplanRequest {
     @Size(min = 1)
     private List<Periode> søknadsperioder = new ArrayList<Periode>();
 
-    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "lovbestemtFerie", required = true)
     @Valid
     private List<LovbestemtFerie> lovbestemtFerie = new ArrayList<>();
 
-    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "tilsynsbehov")
     @Valid
     private NavigableMap<Periode, UttakTilsynsbehov> tilsynsbehov = Collections.emptyNavigableMap();
@@ -151,7 +145,7 @@ public class UttaksplanRequest {
 
     @JsonSetter("medlemskap")
     public void setMedlemskap(Map<Periode, UttakMedlemskap> medlemskap) {
-        this.medlemskap = medlemskap == null ? Collections.emptyNavigableMap() : new TreeMap<>(medlemskap);
+        this.medlemskap = medlemskap == null ? null : new TreeMap<>(medlemskap);
     }
 
     public void setSaksnummer(Saksnummer saksnummer) {
@@ -163,7 +157,12 @@ public class UttaksplanRequest {
     }
 
     public void setSøknadsperioder(List<Periode> søknadsperioder) {
-        this.søknadsperioder = søknadsperioder;
+        if (søknadsperioder == null) {
+            this.søknadsperioder = Collections.emptyList();
+        } else {
+            this.søknadsperioder = new ArrayList<>(søknadsperioder);
+            Collections.sort(this.søknadsperioder);
+        }
     }
 
     @JsonSetter("tilsynsbehov")

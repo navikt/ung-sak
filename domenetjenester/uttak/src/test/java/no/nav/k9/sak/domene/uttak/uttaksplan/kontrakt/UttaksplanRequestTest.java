@@ -18,15 +18,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.AndrePartSak;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Periode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeid;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforhold;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeidsforholdPeriodeInfo;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakMedlemskap;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakTilsynsbehov;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforholdPeriodeInfo;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class UttaksplanRequestTest {
@@ -65,12 +59,10 @@ public class UttaksplanRequestTest {
         req.setSøknadsperioder(List.of(new Periode(fom, tom)));
         req.setBehandlingId(behandlingId);
 
-        Person barn = new Person();
-        barn.setFødselsdato(fom);
+        Person barn = new Person(null, fom, null);
         req.setBarn(barn);
 
-        Person søker = new Person();
-        søker.setFødselsdato(fom.minusYears(18));
+        Person søker = new Person(null, fom.minusYears(30), null);
         req.setSøker(søker);
 
         req.setAndrePartersSaker(List.of(new AndrePartSak(new Saksnummer("HELLO1")), new AndrePartSak(new Saksnummer("HELLO2"))));
@@ -78,14 +70,11 @@ public class UttaksplanRequestTest {
         var uttakArbeid = new UttakArbeid();
         var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER, UUID.randomUUID().toString());
         uttakArbeid.setArbeidsforhold(arbeidsforhold);
-        var arbeidsforholdInfo = new UttakArbeidsforholdPeriodeInfo();
-        arbeidsforholdInfo.setJobberNormaltPerUke(Duration.parse("P7D"));
-        arbeidsforholdInfo.setSkalJobbeProsent(new BigDecimal(50));
+        var arbeidsforholdInfo = new UttakArbeidsforholdPeriodeInfo(Duration.parse("P7D"), new BigDecimal(50));
         uttakArbeid.setPerioder(Map.of(new Periode(fom, tom), arbeidsforholdInfo));
         req.setArbeid(List.of(uttakArbeid));
 
-        var tilsynsbehov = new UttakTilsynsbehov();
-        tilsynsbehov.setProsent(100);
+        var tilsynsbehov = new UttakTilsynsbehov(100);
         req.setTilsynsbehov(Map.of(new Periode(fom, tom), tilsynsbehov));
 
         req.setMedlemskap(Map.of(new Periode(fom, tom), new UttakMedlemskap()));

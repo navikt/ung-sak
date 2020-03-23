@@ -7,7 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -15,26 +18,29 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingStegModell;
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.foreldrepenger.behandlingskontroll.transisjoner.FellesTransisjoner;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.foreldrepenger.behandlingslager.testutilities.behandling.TestScenarioBuilder;
-import no.nav.foreldrepenger.behandlingsprosess.prosessering.BehandlingProsesseringTjeneste;
-import no.nav.foreldrepenger.dbstoette.UnittestRepositoryRule;
-import no.nav.foreldrepenger.økonomi.simulering.klient.K9OppdragRestKlient;
-import no.nav.foreldrepenger.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
-import no.nav.foreldrepenger.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
-import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import no.nav.foreldrepenger.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.foreldrepenger.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
-import no.nav.k9.sak.domene.behandling.steg.simulering.SimulerOppdragSteg;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
+import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
+import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
+import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
+import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 
 public class SimulerOppdragStegTest {
 
@@ -62,6 +68,12 @@ public class SimulerOppdragStegTest {
         behandling = scenario.lagre(repositoryProvider);
         kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling));
         simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjeneste(tilkjentYtelseTjenesteMock, k9OppdragRestKlientMock);
+
+        TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
+        TilkjentYtelse ty = new TilkjentYtelse(LocalDate.now(), Collections.emptyList());
+        InntrekkBeslutning ib = new InntrekkBeslutning(true);
+        TilkjentYtelseOppdrag tyo = new TilkjentYtelseOppdrag(ty, info, UUID.randomUUID(), ib);
+        when(tilkjentYtelseTjenesteMock.hentTilkjentYtelseOppdrag(behandling)).thenReturn(tyo);
     }
 
     @Test

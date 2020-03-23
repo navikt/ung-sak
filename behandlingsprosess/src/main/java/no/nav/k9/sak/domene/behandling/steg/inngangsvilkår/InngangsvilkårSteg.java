@@ -2,9 +2,9 @@ package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
 
 import java.util.List;
 
-import no.nav.foreldrepenger.behandlingskontroll.BehandlingSteg;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface InngangsvilkårSteg extends BehandlingSteg {
 

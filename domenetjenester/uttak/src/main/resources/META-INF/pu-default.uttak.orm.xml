@@ -8,11 +8,17 @@
 	<sequence-generator name="SEQ_UT_UTTAK_AKTIVITET_PERIODE" allocation-size="50" sequence-name="SEQ_UT_UTTAK_AKTIVITET_PERIODE" />
 	<sequence-generator name="SEQ_UT_SOEKNADSPERIODER" allocation-size="50" sequence-name="SEQ_UT_SOEKNADSPERIODER" />
 	<sequence-generator name="SEQ_UT_SOEKNADSPERIODE" allocation-size="50" sequence-name="SEQ_UT_SOEKNADSPERIODE" />
+	<sequence-generator name="SEQ_UT_FERIE" allocation-size="50" sequence-name="SEQ_UT_FERIE" />
+	<sequence-generator name="SEQ_UT_FERIE_PERIODE" allocation-size="50" sequence-name="SEQ_UT_FERIE_PERIODE" />
+	<sequence-generator name="SEQ_UT_TILSYNSORDNING" allocation-size="50" sequence-name="SEQ_UT_TILSYNSORDNING" />
+	<sequence-generator name="SEQ_UT_TILSYNSORDNING_PERIODE" allocation-size="50" sequence-name="SEQ_UT_TILSYNSORDNING_PERIODE" />
 
 	<entity class="no.nav.k9.sak.domene.uttak.repo.Søknadsperioder" />
 	<entity class="no.nav.k9.sak.domene.uttak.repo.Søknadsperiode" />
 	<entity class="no.nav.k9.sak.domene.uttak.repo.Ferie" />
 	<entity class="no.nav.k9.sak.domene.uttak.repo.FeriePeriode" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.TilsynsordningPeriode" />
 	<entity class="no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag" />
 	<entity class="no.nav.k9.sak.domene.uttak.repo.UttakAktivitet" />
 	<entity class="no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode" />

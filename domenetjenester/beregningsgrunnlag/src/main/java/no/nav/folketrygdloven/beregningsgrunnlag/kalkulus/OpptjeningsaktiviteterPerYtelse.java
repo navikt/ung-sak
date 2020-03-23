@@ -3,10 +3,10 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.util.Map;
 import java.util.Set;
 
-import no.nav.foreldrepenger.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 
 public class OpptjeningsaktiviteterPerYtelse {
 

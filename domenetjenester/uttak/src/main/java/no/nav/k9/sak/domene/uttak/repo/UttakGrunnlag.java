@@ -12,11 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import no.nav.foreldrepenger.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "UttakGrunnlag")
 @Table(name = "GR_UTTAK")
-class UttakGrunnlag extends BaseEntitet {
+public class UttakGrunnlag extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_UTTAK")
@@ -41,6 +41,10 @@ class UttakGrunnlag extends BaseEntitet {
     @JoinColumn(name = "ferie_id")
     private Ferie oppgittFerie;
 
+    @ManyToOne
+    @JoinColumn(name = "tilsynsordning_id")
+    private OppgittTilsynsordning oppgittTilsynsordning;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -51,12 +55,18 @@ class UttakGrunnlag extends BaseEntitet {
     UttakGrunnlag() {
     }
 
-    UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder, Ferie ferie) {
+    /** Opprett uten fastsattUttak - kommer fra saksbehandler senere. */
+    public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, Søknadsperioder søknadsperioder, Ferie ferie, OppgittTilsynsordning tilsynsordning) {
+        this(behandlingId, oppgittUttak, null, søknadsperioder, ferie, tilsynsordning);
+    }
+
+    public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder, Ferie ferie, OppgittTilsynsordning tilsynsordning) {
         this.behandlingId = behandlingId;
         this.oppgittUttak = oppgittUttak;
         this.fastsattUttak = fastsattUttak;
         this.søknadsperioder = søknadsperioder;
         this.oppgittFerie = ferie;
+        this.oppgittTilsynsordning = tilsynsordning;
     }
 
     void setAktiv(boolean aktiv) {
@@ -75,6 +85,10 @@ class UttakGrunnlag extends BaseEntitet {
         return søknadsperioder;
     }
 
+    public OppgittTilsynsordning getOppgittTilsynsordning() {
+        return oppgittTilsynsordning;
+    }
+
     public Ferie getOppgittFerie() {
         return oppgittFerie;
     }
@@ -82,9 +96,13 @@ class UttakGrunnlag extends BaseEntitet {
     void setOppgittFordeling(UttakAktivitet oppgittFordeling) {
         this.oppgittUttak = oppgittFordeling;
     }
-    
+
     void setOppgittFerie(Ferie ferie) {
         this.oppgittFerie = ferie;
+    }
+    
+    void setOppgittTilsynsordning(OppgittTilsynsordning tilsynsordning) {
+        this.oppgittTilsynsordning = tilsynsordning;
     }
 
     @Override
@@ -97,25 +115,27 @@ class UttakGrunnlag extends BaseEntitet {
         return Objects.equals(oppgittUttak, that.oppgittUttak)
             && Objects.equals(fastsattUttak, that.fastsattUttak)
             && Objects.equals(søknadsperioder, that.søknadsperioder)
-            && Objects.equals(oppgittFerie, that.oppgittFerie);
+            && Objects.equals(oppgittFerie, that.oppgittFerie)
+            && Objects.equals(oppgittTilsynsordning, that.oppgittTilsynsordning);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgittUttak, fastsattUttak, søknadsperioder, oppgittFerie);
+        return Objects.hash(oppgittUttak, fastsattUttak, søknadsperioder, oppgittFerie, oppgittTilsynsordning);
     }
 
     @Override
     public String toString() {
-        return "UttakGrunnlag{" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", behandling=" + behandlingId +
             ", oppgittUttak=" + oppgittUttak +
             ", fastsattUttak=" + fastsattUttak +
             ", oppgittFerie = " + oppgittFerie +
             ", søknadsperioder = " + søknadsperioder +
+            ", oppgittTilsynsordning = " + oppgittTilsynsordning +
             ", aktiv=" + aktiv +
             ", versjon=" + versjon +
-            '}';
+            '>';
     }
 }

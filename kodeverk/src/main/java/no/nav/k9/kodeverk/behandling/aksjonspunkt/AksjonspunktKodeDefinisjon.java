@@ -26,7 +26,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AVKLAR_OPPHOLDSRETT_KODE = "5023";
     public static final String AVKLAR_TILLEGGSOPPLYSNINGER_KODE = "5009";
     public static final String AVKLAR_VERGE_KODE = "5030";
-    public static final String AVKLAR_OM_SØKER_HAR_MOTTATT_STØTTE_KODE = "5031";
     public static final String AVKLAR_FORTSATT_MEDLEMSKAP_KODE = "5053";
 
     public static final String FATTER_VEDTAK_KODE = "5016";

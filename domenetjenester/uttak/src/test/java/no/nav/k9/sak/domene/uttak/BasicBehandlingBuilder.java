@@ -1,23 +1,13 @@
 package no.nav.k9.sak.domene.uttak;
 
-import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 
-import no.nav.foreldrepenger.behandlingslager.aktør.NavBruker;
-import no.nav.foreldrepenger.behandlingslager.aktør.Personinfo;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.foreldrepenger.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /** Enkel builder for å lage en enkel behandling for internt bruk her. */
@@ -29,8 +19,6 @@ public class BasicBehandlingBuilder {
     private Fagsak fagsak;
 
     private final AktørId aktørId = AktørId.dummy();
-
-    private Map<AktørId, NavBruker> lagredeBrukere = new HashMap<>();
 
     public BasicBehandlingBuilder(EntityManager em) {
         this.em = em;
@@ -71,22 +59,9 @@ public class BasicBehandlingBuilder {
 
     private Fagsak opprettFagsak(FagsakYtelseType ytelse, AktørId aktørId) {
 
-        var bruker = lagredeBrukere.computeIfAbsent(aktørId, aid -> {
-            return NavBruker.opprettNy(
-                new Personinfo.Builder()
-                    .medAktørId(aid)
-                    .medPersonIdent(new PersonIdent("12345678901"))
-                    .medNavn("Kari Nordmann")
-                    .medForetrukketSpråk(Språkkode.nb)
-                    .medFødselsdato(LocalDate.now().minusYears(20))
-                    .medKjønn(KVINNE)
-                    .build());
-        });
-        em.persist(bruker);
-
         // Opprett fagsak
         String randomSaksnummer = System.nanoTime() + "";
-        this.fagsak = Fagsak.opprettNy(ytelse, bruker, new Saksnummer(randomSaksnummer));
+        this.fagsak = Fagsak.opprettNy(ytelse, aktørId, new Saksnummer(randomSaksnummer));
         em.persist(fagsak);
         em.flush();
         return fagsak;

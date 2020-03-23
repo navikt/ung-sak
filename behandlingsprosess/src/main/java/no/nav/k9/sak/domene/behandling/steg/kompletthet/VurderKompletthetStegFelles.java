@@ -1,17 +1,17 @@
 package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import static java.util.Collections.singletonList;
-import static no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat.opprettForAksjonspunktMedFrist;
+import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettForAksjonspunktMedFrist;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.foreldrepenger.behandlingskontroll.AksjonspunktResultat;
-import no.nav.foreldrepenger.behandlingskontroll.BehandleStegResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.foreldrepenger.kompletthet.KompletthetResultat;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.kompletthet.KompletthetResultat;
 
 /**
  * Fellesklasse for gjenbrukte metode av subklasser for {@link VurderKompletthetSteg}.
