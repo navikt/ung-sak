@@ -11,7 +11,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
-import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl.TriFunction;
 public class BehandlingModellEnkelTest {
 

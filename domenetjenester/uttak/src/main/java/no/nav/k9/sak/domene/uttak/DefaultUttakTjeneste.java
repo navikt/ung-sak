@@ -17,11 +17,7 @@ import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
-import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -38,9 +34,9 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakArbeid;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakMedlemskap;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttakTilsynsbehov;
 import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakArbeidsforhold;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakArbeidsforholdPeriodeInfo;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforholdPeriodeInfo;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -50,7 +46,6 @@ import no.nav.vedtak.util.Tuple;
 @ApplicationScoped
 @Default
 public class DefaultUttakTjeneste implements UttakTjeneste {
-    private static final Logger log = LoggerFactory.getLogger(DefaultUttakTjeneste.class);
 
     private UttakRestKlient restKlient;
 
@@ -106,11 +101,6 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     }
 
     static class MapUttakRequest {
-
-        // TODO K9: blir dette riktig?
-        private static final Set<MedlemskapManuellVurderingType> IGNORE_PERIODER = Set.of(
-            MedlemskapManuellVurderingType.SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS,
-            MedlemskapManuellVurderingType.IKKE_RELEVANT);
 
         private static Periode tilPeriode(DatoIntervallEntitet key) {
             return new Periode(key.getFomDato(), key.getTomDato());

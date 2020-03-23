@@ -31,7 +31,6 @@ import no.nav.k9.sak.kontrakt.medlem.BekreftErMedlemVurderingDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjenesteImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.medlem.BekreftErMedlemVurderingOppdaterer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)

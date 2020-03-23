@@ -23,7 +23,6 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.medlem.api.FinnMedlemRequest;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.medlem.api.MedlemskapsperiodeKoder;
-import no.nav.k9.sak.domene.medlem.impl.HentMedlemskapFraRegister;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.felles.v1.informasjon.ForretningsmessigUnntaksdetaljer;

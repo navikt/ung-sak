@@ -12,8 +12,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -31,7 +29,6 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadDtoFeil;
 public class PersonopplysningDtoTjeneste {
 
     private PersonopplysningTjeneste personopplysningTjeneste;
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
 
     PersonopplysningDtoTjeneste() {
@@ -39,10 +36,8 @@ public class PersonopplysningDtoTjeneste {
 
     @Inject
     public PersonopplysningDtoTjeneste(PersonopplysningTjeneste personopplysningTjeneste,
-                                       MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                        BehandlingRepositoryProvider repositoryProvider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 

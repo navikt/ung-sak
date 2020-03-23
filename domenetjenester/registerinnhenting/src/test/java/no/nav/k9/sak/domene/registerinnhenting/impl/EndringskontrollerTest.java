@@ -34,8 +34,6 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjeneste;
-import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
-import no.nav.k9.sak.domene.registerinnhenting.impl.RegisterinnhentingHistorikkinnslagTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;

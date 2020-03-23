@@ -25,7 +25,6 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 import no.nav.k9.sak.web.app.JettyTestApplication;
-import no.nav.k9.sak.web.server.jetty.AppKonfigurasjon;
 import no.nav.k9.sak.web.server.jetty.JettyServer;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceUtil;

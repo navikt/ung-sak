@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.UtledOmHistorikkinnslagForInntektsmeldingErNødvendig;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 public class UtledOmHistorikkinnslagForInntektsmeldingErNødvendigTest {

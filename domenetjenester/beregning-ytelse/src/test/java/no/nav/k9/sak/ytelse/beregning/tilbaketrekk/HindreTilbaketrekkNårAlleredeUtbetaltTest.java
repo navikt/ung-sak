@@ -16,8 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAnd
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.HindreTilbaketrekkNårAlleredeUtbetalt;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.MapBRAndelSammenligningTidslinje;
 
 public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
 

@@ -17,8 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
-import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
-import no.nav.k9.sak.domene.registerinnhenting.RegisterdataInnhenter;
 import no.nav.k9.sak.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktRegisterinnhentingTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;

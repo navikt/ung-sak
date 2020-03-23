@@ -28,7 +28,6 @@ import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.VurderTilbaketrekkOppdaterer;
 
 public class VurderTilbaketrekkOppdatererTest {
 

@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 
 import no.nav.k9.sak.kontrakt.FeilDto;
-import no.nav.k9.sak.web.app.exceptions.JsonMappingExceptionMapper;
 
 public class JsonMappingExceptionMapperTest {
 

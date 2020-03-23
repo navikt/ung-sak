@@ -12,8 +12,6 @@ import com.codahale.metrics.health.HealthCheck;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.k9.sak.web.app.healthchecks.SelftestResultat;
-import no.nav.k9.sak.web.app.healthchecks.SelftestsJsonSerializerModule;
 import no.nav.k9.sak.web.app.healthchecks.checks.ExtHealthCheck;
 
 public class SelftestsJsonSerializerModuleTest {

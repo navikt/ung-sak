@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.k9.sak.web.app.tjenester.kodeverk.HentKodeverkTjeneste;
 
 public class HentKodeverkTjenesteImplTest {
 

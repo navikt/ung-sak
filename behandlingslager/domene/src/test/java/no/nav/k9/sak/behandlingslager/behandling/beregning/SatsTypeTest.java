@@ -10,8 +10,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.db.Repository;

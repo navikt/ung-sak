@@ -26,7 +26,7 @@ import no.nav.vedtak.konfig.Tid;
  */
 public abstract class AbstractLocalDateInterval implements Comparable<AbstractLocalDateInterval>, Serializable {
 
-    private static final LocalDate TIDENES_BEGYNNELSE = Tid.TIDENES_BEGYNNELSE;
+    public static final LocalDate TIDENES_BEGYNNELSE = Tid.TIDENES_BEGYNNELSE;
     public static final LocalDate TIDENES_ENDE = Tid.TIDENES_ENDE;
 
     static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");

@@ -23,11 +23,6 @@ import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdAnnulert;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdHendelse;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
-import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdInnvilget;
-import no.nav.k9.sak.domene.vedtak.infotrygd.Innhold;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 

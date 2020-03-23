@@ -54,7 +54,6 @@ import no.nav.k9.sak.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkaar.impl.InngangsvilkårOversetter;
-import no.nav.k9.sak.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;

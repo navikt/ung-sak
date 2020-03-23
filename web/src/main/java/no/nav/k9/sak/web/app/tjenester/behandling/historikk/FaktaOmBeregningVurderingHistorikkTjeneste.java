@@ -11,8 +11,6 @@ import static no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType.SELVSTENDIG_N
 import static no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType.VURDER_ETTERLØNN_SLUTTPAKKE;
 
 import java.util.List;
-import java.util.Optional;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 

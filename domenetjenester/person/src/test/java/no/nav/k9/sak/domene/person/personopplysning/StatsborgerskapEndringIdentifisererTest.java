@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.web.app.healthchecks.checks.OppgavebehandlingWebServiceHealthCheck;
 import no.nav.vedtak.felles.integrasjon.behandleoppgave.BehandleoppgaveSelftestConsumer;
 
 public class OppgavebehandlingWebServiceHealthCheckTest {

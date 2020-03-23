@@ -36,8 +36,6 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.impl.DokumentmottakerFelles;
-import no.nav.k9.sak.mottak.dokumentmottak.impl.Kompletthetskontroller;
 import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetModell;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

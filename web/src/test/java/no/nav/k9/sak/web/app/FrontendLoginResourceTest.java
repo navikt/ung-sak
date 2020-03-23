@@ -6,8 +6,6 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.web.app.FrontendLoginResource;
-
 public class FrontendLoginResourceTest {
 
     private FrontendLoginResource resource = new FrontendLoginResource();

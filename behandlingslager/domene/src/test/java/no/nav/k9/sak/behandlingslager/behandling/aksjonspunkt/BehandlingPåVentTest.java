@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 public class BehandlingPåVentTest {

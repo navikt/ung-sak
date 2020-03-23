@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.uttak.repo;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -42,6 +43,10 @@ public class Ferie extends BaseEntitet {
         // hibernate
     }
 
+    public Ferie(FeriePeriode... perioder) {
+        this(Arrays.asList(perioder));
+    }
+
     public Ferie(Collection<FeriePeriode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
@@ -75,7 +80,7 @@ public class Ferie extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() +"<" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", perioder=" + perioder +
             '>';

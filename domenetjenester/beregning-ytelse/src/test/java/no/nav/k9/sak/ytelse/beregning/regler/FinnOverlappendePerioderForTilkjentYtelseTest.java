@@ -29,7 +29,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsg
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Periode;
-import no.nav.k9.sak.ytelse.beregning.regler.FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder;
 
 @Ignore("Espen Velsvik: Venter på at kalkulus returnerer ikke-redusert dagsats")
 public class FinnOverlappendePerioderForTilkjentYtelseTest {

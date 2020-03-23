@@ -10,8 +10,6 @@ import org.junit.Test;
 
 import com.codahale.metrics.health.HealthCheck;
 
-import no.nav.k9.sak.web.app.healthchecks.SelftestResultat;
-
 public class SelftestsOverallresultsTest {
 
     private SelftestResultat samletResultat;

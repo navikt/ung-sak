@@ -14,8 +14,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
@@ -53,7 +51,7 @@ public class OppgaveBehandlingKoblingRepositoryImplTest {
         bsAvsl.ferdigstillOppgave("I11111");
         OppgaveBehandlingKobling bsAapen = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK, "O1235", DUMMY_SAKSNUMMER, behandling);
         OppgaveBehandlingKobling godkjenn = new OppgaveBehandlingKobling(OppgaveÅrsak.GODKJENNE_VEDTAK, "O1236", DUMMY_SAKSNUMMER, behandling);
-        OppgaveBehandlingKobling registrer = new OppgaveBehandlingKobling(OppgaveÅrsak.REGISTRER_SØKNAD, "O1238", DUMMY_SAKSNUMMER, behandling);
+        OppgaveBehandlingKobling registrer = new OppgaveBehandlingKobling(OppgaveÅrsak.VURDER_DOKUMENT, "O1238", DUMMY_SAKSNUMMER, behandling);
         OppgaveBehandlingKobling revurder = new OppgaveBehandlingKobling(OppgaveÅrsak.REVURDER, "O1237", DUMMY_SAKSNUMMER, behandling);
 
         lagOppgave(bsAapen);

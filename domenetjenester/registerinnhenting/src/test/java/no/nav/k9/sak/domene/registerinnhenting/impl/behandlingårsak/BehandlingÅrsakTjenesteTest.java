@@ -34,7 +34,6 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.BehandlingÅrsakTjeneste;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
-import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 

@@ -18,8 +18,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingvalgHistorikkinnslagBygger;
-import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.VurderFeilutbetalingOppdaterer;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 

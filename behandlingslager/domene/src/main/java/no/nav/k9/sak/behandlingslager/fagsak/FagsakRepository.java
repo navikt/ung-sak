@@ -1,9 +1,9 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -13,6 +13,8 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -102,6 +104,45 @@ public class FagsakRepository {
 
     }
 
+    public void oppdaterPeriode(Long fagsakId, LocalDate fom, LocalDate tom) {
+        Fagsak fagsak = finnEksaktFagsak(fagsakId);
+        fagsak.setPeriode(fom, tom);
+        entityManager.persist(fagsak);
+        entityManager.flush();
+    }
+
+    /**
+     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).
+     * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
+     * 
+     * @param tom
+     */
+    @SuppressWarnings("unchecked")
+    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, LocalDate fom, LocalDate tom) {
+        Query query;
+
+        if (pleietrengendeAktørId != null) {
+            query = entityManager.createNativeQuery(
+                "select f.* from Fagsak f"
+                    + " where f.pleietrengende_aktoer_id = :pleietrengendeAktørId"
+                    + "   and f.ytelse_type = :ytelseType"
+                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+                Fagsak.class); // NOSONAR
+            query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
+        } else {
+            query = entityManager.createNativeQuery(
+                "select f.* from Fagsak f"
+                    + " where f.ytelse_type = :ytelseType"
+                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+                Fagsak.class); // NOSONAR
+        }
+        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
+        query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
+        query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
+
+        return query.getResultList();
+    }
+
     public Optional<Fagsak> hentSakGittSaksnummer(Saksnummer saksnummer, boolean taSkriveLås) {
         TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak where saksnummer=:saksnummer", Fagsak.class);
         query.setParameter("saksnummer", saksnummer); // NOSONAR
@@ -135,36 +176,6 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
-    public List<Fagsak> hentForStatus(FagsakStatus fagsakStatus) {
-        TypedQuery<Fagsak> query = entityManager.createQuery("select fagsak from Fagsak fagsak where fagsak.fagsakStatus=:fagsakStatus", Fagsak.class);
-        query.setParameter("fagsakStatus", fagsakStatus); // NOSONAR
-
-        return query.getResultList();
-    }
-
-    public List<Saksnummer> hentÅpneFagsakerUtenBehandling() {
-        Query query = entityManager.createNativeQuery(
-            "select f.saksnummer from FAGSAK f where f.FAGSAK_STATUS<>'AVSLU' and not exists (select * from BEHANDLING b where b.FAGSAK_ID = f.ID)");
-        @SuppressWarnings("unchecked")
-        List<String> saksnumre = query.getResultList();
-        return saksnumre.stream().filter(Objects::nonNull).map(Saksnummer::new).collect(Collectors.toList());
-    }
-
-    /**
-     * @deprecated : Er kun til migrering av vedtak fra fpsak til fp-abakus
-     * @param fagsakId min fagsakid
-     * @param maxResult antall rader
-     * @return liste over fagsaker
-     */
-    @Deprecated(forRemoval = true)
-    public List<Fagsak> hentFagsakerMedIdStørreEnn(long fagsakId, int maxResult) {
-        final TypedQuery<Fagsak> query = entityManager.createQuery("SELECT f FROM Fagsak f WHERE f.id > :fagsakId order by f.id asc",
-            Fagsak.class);
-        query.setParameter("fagsakId", fagsakId); // NOSONAR
-        query.setMaxResults(maxResult);
-        return query.getResultList();
-    }
-
     public void fagsakSkalBehandlesAvInfotrygd(Long fagsakId) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);
         fagsak.setSkalTilInfotrygd(true);
@@ -172,10 +183,4 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
-    public void fagsakSkalGjenåpnesForBruk(Long fagsakId) {
-        Fagsak fagsak = finnEksaktFagsak(fagsakId);
-        fagsak.setSkalTilInfotrygd(false);
-        entityManager.persist(fagsak);
-        entityManager.flush();
-    }
 }

@@ -14,7 +14,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.UtledPermisjonSomFørerTilAksjonspunkt;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;

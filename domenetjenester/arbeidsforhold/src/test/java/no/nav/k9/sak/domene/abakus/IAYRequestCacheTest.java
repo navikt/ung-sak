@@ -6,8 +6,6 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.abakus.IAYRequestCache;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 
 public class IAYRequestCacheTest {

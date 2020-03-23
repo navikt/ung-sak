@@ -19,7 +19,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
-import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 public class HistorikkInnslagTekstBuilderTest {
 

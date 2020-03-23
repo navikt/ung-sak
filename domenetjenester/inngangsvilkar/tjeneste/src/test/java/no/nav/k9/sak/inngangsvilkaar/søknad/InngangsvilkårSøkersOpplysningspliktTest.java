@@ -18,7 +18,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkaar.VilkårData;
-import no.nav.k9.sak.inngangsvilkaar.søknad.InngangsvilkårSøkersOpplysningsplikt;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

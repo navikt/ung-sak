@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
-import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 
 public class UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforholdTest {

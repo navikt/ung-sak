@@ -27,8 +27,6 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.impl.DokumentmottakerFelles;
-import no.nav.k9.sak.mottak.dokumentmottak.impl.Kompletthetskontroller;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;

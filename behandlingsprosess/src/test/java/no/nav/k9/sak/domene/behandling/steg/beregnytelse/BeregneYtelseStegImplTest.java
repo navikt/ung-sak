@@ -33,10 +33,9 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseStegImpl;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;

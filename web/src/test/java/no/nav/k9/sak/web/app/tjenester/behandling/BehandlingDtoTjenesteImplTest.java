@@ -19,11 +19,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
@@ -37,7 +38,13 @@ public class BehandlingDtoTjenesteImplTest {
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
+    private FagsakRepository fagsakRepository;
+
+    @Inject
     private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private UttakRepository uttakRepository;
 
     @Inject
     private SøknadRepository søknadRepository;
@@ -61,8 +68,8 @@ public class BehandlingDtoTjenesteImplTest {
     @Before
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, skjæringstidspunktTjeneste,
-            vilkårResultatRepository);
+        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository,
+            tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
     }
 
     @Test

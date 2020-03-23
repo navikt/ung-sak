@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
@@ -26,7 +27,6 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingÅrsakDto;
 import no.nav.k9.sak.skjæringstidspunkt.DefaultSkjæringstidspunktTjenesteImpl;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
@@ -38,6 +38,9 @@ public class BehandlingÅrsakDtoTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
+
+    @Inject
+    private FagsakRepository fagsakRepository;
 
     @Inject
     private BehandlingRepository behandlingRepository;
@@ -64,7 +67,8 @@ public class BehandlingÅrsakDtoTest {
     @Before
     public void setup() {
         skjæringstidspunktTjeneste = new DefaultSkjæringstidspunktTjenesteImpl(behandlingRepository, repositoryProvider.getOpptjeningRepository(), uttakRepository, vilkårResultatRepository);
-        behandlingDtoTjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
+        behandlingDtoTjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository,
+            tilbakekrevingRepository, skjæringstidspunktTjeneste, vilkårResultatRepository);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);

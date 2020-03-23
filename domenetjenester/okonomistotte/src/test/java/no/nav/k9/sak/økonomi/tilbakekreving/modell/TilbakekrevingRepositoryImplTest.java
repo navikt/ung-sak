@@ -15,9 +15,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
-import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class TilbakekrevingRepositoryImplTest {

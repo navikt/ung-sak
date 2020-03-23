@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,8 +58,8 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -98,8 +99,8 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     @Before
     public void setup() {
-        when(uttakRepository.hentOppgittSøknadsperioder(any())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
-        when(uttakRepository.hentOppgittUttak(any())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
+        when(uttakRepository.hentOppgittSøknadsperioder(anyLong())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
+        when(uttakRepository.hentOppgittUttak(anyLong())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,

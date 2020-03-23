@@ -14,8 +14,6 @@ import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.ytelse.beregning.FinnEndringsdatoMellomPeriodeLister;
-import no.nav.k9.sak.ytelse.beregning.SjekkForEndringMellomPerioder;
 
 public class FinnEndringsdatoMellomPeriodeListerImplTest {
 

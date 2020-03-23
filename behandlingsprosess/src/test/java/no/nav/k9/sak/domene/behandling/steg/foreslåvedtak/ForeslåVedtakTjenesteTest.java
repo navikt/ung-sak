@@ -39,8 +39,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.SjekkMotEksisterendeOppgaverTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

@@ -29,8 +29,6 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
-import no.nav.k9.sak.domene.medlem.impl.AvklarOmErBosatt;
-import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

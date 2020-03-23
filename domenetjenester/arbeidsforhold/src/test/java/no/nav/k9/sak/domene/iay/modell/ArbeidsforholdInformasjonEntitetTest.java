@@ -7,7 +7,6 @@ import org.junit.Test;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 
 public class ArbeidsforholdInformasjonEntitetTest {

@@ -26,7 +26,6 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.søknad.BekreftSokersOpplysningspliktManuDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.web.app.tjenester.behandling.søknad.BekreftSøkersOpplysningspliktManuellOppdaterer;
 import no.nav.vedtak.util.Tuple;
 
 public class BekreftSøkersOpplysningspliktManuellOppdatererTest {

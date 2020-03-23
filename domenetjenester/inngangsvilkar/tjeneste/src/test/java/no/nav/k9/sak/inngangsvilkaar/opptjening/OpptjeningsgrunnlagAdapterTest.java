@@ -19,7 +19,6 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektPeriode;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkaar.opptjening.OpptjeningsgrunnlagAdapter;
 import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.AktivitetPeriode;
 import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;

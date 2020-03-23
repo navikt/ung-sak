@@ -19,8 +19,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BRAndelSammenligning;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.MapBRAndelSammenligningTidslinje;
 
 public class MapBRAndelSammenligningTidslinjeTest {
 

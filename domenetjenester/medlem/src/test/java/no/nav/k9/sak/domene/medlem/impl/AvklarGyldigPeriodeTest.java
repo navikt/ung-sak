@@ -26,8 +26,6 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
-import no.nav.k9.sak.domene.medlem.impl.AvklarGyldigPeriode;
-import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 

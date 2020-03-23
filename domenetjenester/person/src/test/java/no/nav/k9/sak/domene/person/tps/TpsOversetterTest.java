@@ -30,8 +30,6 @@ import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.person.tps.TpsAdresseOversetter;
-import no.nav.k9.sak.domene.person.tps.TpsOversetter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse;

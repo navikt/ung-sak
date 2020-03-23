@@ -6,8 +6,6 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynBuilder;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class KontinuerligTilsynBuilderTest {

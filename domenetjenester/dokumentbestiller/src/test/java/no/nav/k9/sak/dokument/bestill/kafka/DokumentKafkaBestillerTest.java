@@ -20,9 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
-import no.nav.k9.sak.dokument.bestill.kafka.DokumentKafkaBestiller;
-import no.nav.k9.sak.dokument.bestill.kafka.DokumentbestillerKafkaTaskProperties;
-import no.nav.k9.sak.dokument.bestill.kafka.JsonMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;

@@ -20,7 +20,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforh
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Dekningsgrad;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
-import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
 
 public class RegelBeregnFeriepengerTest {
 

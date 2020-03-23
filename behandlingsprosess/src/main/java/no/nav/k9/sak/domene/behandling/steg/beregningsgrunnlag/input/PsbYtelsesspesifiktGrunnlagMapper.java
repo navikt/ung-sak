@@ -24,9 +24,9 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakUtbetalingsgrad;
 
 @FagsakYtelseTypeRef("PSB")

@@ -33,8 +33,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
-import no.nav.k9.sak.domene.medlem.impl.AvklaringFaktaMedlemskap;
-import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

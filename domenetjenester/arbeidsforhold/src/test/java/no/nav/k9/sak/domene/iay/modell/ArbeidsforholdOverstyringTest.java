@@ -10,9 +10,6 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyrtePerioder;
-import no.nav.k9.sak.domene.iay.modell.BekreftetPermisjon;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

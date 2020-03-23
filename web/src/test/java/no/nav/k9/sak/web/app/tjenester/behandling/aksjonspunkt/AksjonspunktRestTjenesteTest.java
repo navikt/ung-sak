@@ -26,9 +26,6 @@ import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
 import no.nav.k9.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.vedtak.exception.FunksjonellException;
 
 public class AksjonspunktRestTjenesteTest {

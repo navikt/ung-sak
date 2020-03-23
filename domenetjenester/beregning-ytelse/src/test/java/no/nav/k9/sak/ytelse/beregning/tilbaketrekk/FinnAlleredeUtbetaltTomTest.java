@@ -8,8 +8,6 @@ import java.time.Month;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.FinnAlleredeUtbetaltTom;
-
 public class FinnAlleredeUtbetaltTomTest {
 
     @Test

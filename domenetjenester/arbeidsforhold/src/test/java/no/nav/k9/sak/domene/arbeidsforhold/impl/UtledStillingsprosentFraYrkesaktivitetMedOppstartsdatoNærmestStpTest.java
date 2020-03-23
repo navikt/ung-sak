@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.UtledStillingsprosentFraYrkesaktivitetMedOppstartsdatoNærmestStp;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;

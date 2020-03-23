@@ -10,10 +10,6 @@ import org.junit.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Aktivitet;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
 
 public class OpptjeningVilkårAntattGodkjentOgUnderkjentArbeidTest {
 

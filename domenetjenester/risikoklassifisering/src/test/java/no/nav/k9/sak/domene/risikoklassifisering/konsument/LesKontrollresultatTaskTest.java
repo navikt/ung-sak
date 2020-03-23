@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.risikoklassifisering.konsument;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.k9.sak.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.json.KontrollresultatMapper;
-import no.nav.k9.sak.domene.risikoklassifisering.konsument.LesKontrollresultatTask;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
