@@ -12,9 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.vedtak.felles.integrasjon.kafka.BehandlingProsessEventDto;
-import no.nav.vedtak.felles.integrasjon.kafka.EventHendelse;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import org.slf4j.Logger;

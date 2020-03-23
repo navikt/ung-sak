@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.hendelse.prosess;
+package no.nav.k9.sak.behandling.hendelse;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -185,7 +185,7 @@ public class BehandlingProsessEventDto {
         }
 
         public T medFagsystem(Fagsystem fagsystem) {
-            this.fagsystem = fagsystem;
+        //    this.fagsystem = fagsystem;
             return self();
         }
 
