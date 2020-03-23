@@ -17,16 +17,24 @@ jobs:
     services:
       postgres:
         image: postgres:11.5
+        env:
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
-        env:
-          POSTGRES_USER: k9sak_unit
-          POSTGRES_PASSWORD: k9sak_unit
-          POSTGRES_DB: k9sak_unit
-        # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:   
+      - name: init postgres
+        run: |
+          export PGPASSWORD='postgres'
+          psql -h localhost -p 5432 -U 'postgres' <<EOSQL
+            CREATE DATABASE k9sak_unit;
+            CREATE USER k9sak_unit WITH PASSWORD 'k9sak_unit';
+            GRANT ALL PRIVILEGES ON DATABASE k9sak_unit TO k9sak_unit;
+            ALTER DATABASE k9sak_unit SET timezone TO 'Europe/Oslo';
+            \connect k9sak_unit;
+            create extension if not exists btree_gist;
+          EOSQL
       - uses: actions/checkout@v2.0.0
       - uses: actions/setup-java@v1.3.0
         with:
@@ -44,7 +52,6 @@ jobs:
         shell: bash
         run: |
           echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
-          psql "postgres://k9sak_unit:k9sak_unit@localhost:5432/k9sak_unit" -c "create extension btree_gist;"
           mvn jacoco:prepare-agent deploy -e --batch-mode --settings ./.github/.m2/settings.xml -Dmaven.wagon.http.pool=false --file pom.xml -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8 -DinstallAtEnd=true -DdeployAtEnd=true -Djacoco.destFile=$(pwd)/target/jacoco.exec
           # har ikke tilgang til sonarcloud sålenge dette er private repo, kommenterer derfor ut neste linje
           # mvn jacoco:report sonar:sonar -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Djacoco.dataFile=$(pwd)/target/jacoco.exec -Dsonar.projectKey="navikt_k9-sak" -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization=navit -Dsonar.login=${SONAR_TOKEN}
