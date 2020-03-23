@@ -46,7 +46,6 @@ class BeregningsgrunnlagVilkårTjeneste {
     }
 
     void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, boolean vilkårOppfylt) {
-
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -54,6 +53,25 @@ class BeregningsgrunnlagVilkårTjeneste {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
         }
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+    }
+
+
+    void lagreVilkårresultatSkalBehandlesIInfotrygd(BehandlingskontrollKontekst kontekst) {
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        vilkårBuilder.leggTil(vilkårBuilder
+                .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) - Sett reelle perioder
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                //FIXME (k9) bestem riktig avslagsårsak og utfall
+                .medMerknad(VilkårUtfallMerknad.VM_1041)
+                .medAvslagsårsak(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
+        builder.leggTil(vilkårBuilder);
+
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
@@ -83,8 +101,8 @@ class BeregningsgrunnlagVilkårTjeneste {
         }
         Vilkårene vilkårene = vilkårResultatOpt.get();
         Optional<Vilkår> beregningsvilkåret = vilkårene.getVilkårene().stream()
-            .filter(vilkår -> vilkår.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-            .findFirst();
+                .filter(vilkår -> vilkår.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+                .findFirst();
         if (beregningsvilkåret.isEmpty()) {
             return;
         }
