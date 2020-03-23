@@ -21,6 +21,7 @@ public class BeregningsgrunnlagVerdierHistorikkTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private InntektHistorikkTjeneste inntektHistorikkTjeneste;
     private InntektskategoriHistorikkTjeneste inntektskategoriHistorikkTjeneste;
+    private RefusjonHistorikkTjeneste refusjonHistorikkTjeneste;
 
     public BeregningsgrunnlagVerdierHistorikkTjeneste() {
         // CDI
@@ -29,10 +30,12 @@ public class BeregningsgrunnlagVerdierHistorikkTjeneste {
     @Inject
     public BeregningsgrunnlagVerdierHistorikkTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                       InntektHistorikkTjeneste inntektHistorikkTjeneste,
-                                                      InntektskategoriHistorikkTjeneste inntektskategoriHistorikkTjeneste) {
+                                                      InntektskategoriHistorikkTjeneste inntektskategoriHistorikkTjeneste,
+                                                      RefusjonHistorikkTjeneste refusjonHistorikkTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.inntektHistorikkTjeneste = inntektHistorikkTjeneste;
         this.inntektskategoriHistorikkTjeneste = inntektskategoriHistorikkTjeneste;
+        this.refusjonHistorikkTjeneste = refusjonHistorikkTjeneste;
     }
 
     public void lagHistorikkForBeregningsgrunnlagVerdier(Long behandlingId, BeregningsgrunnlagPeriodeEndring periode, HistorikkInnslagTekstBuilder tekstBuilder) {
@@ -45,6 +48,8 @@ public class BeregningsgrunnlagVerdierHistorikkTjeneste {
     private void lagHistorikkForAndel(HistorikkInnslagTekstBuilder tekstBuilder, List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer, BeregningsgrunnlagPrStatusOgAndelEndring andelEndring) {
         inntektHistorikkTjeneste.lagHistorikkOmEndret(tekstBuilder, arbeidsforholdOverstyringer, andelEndring);
         inntektskategoriHistorikkTjeneste.lagHistorikkOmEndret(tekstBuilder, arbeidsforholdOverstyringer, andelEndring);
+        refusjonHistorikkTjeneste.lagHistorikkOmEndret(tekstBuilder, arbeidsforholdOverstyringer, andelEndring);
+
     }
 
 }

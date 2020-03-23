@@ -49,6 +49,7 @@ public class InntektHistorikkTjenesteTest {
         BeregningsgrunnlagPrStatusOgAndelEndring andelEndring = new BeregningsgrunnlagPrStatusOgAndelEndring(
             new InntektEndring(null, månedsbeløp.multiply(BigDecimal.valueOf(12))),
             null,
+            null,
             AktivitetStatus.ARBEIDSTAKER,
             OpptjeningAktivitetType.ARBEID,
             Arbeidsgiver.virksomhet(ORGNR),
@@ -76,6 +77,7 @@ public class InntektHistorikkTjenesteTest {
         BigDecimal forrigeMånedsbeløp = BigDecimal.ONE;
         BeregningsgrunnlagPrStatusOgAndelEndring andelEndring = new BeregningsgrunnlagPrStatusOgAndelEndring(
             new InntektEndring(forrigeMånedsbeløp.multiply(BigDecimal.valueOf(12)), månedsbeløp.multiply(BigDecimal.valueOf(12))),
+            null,
             null,
             AktivitetStatus.ARBEIDSTAKER,
             OpptjeningAktivitetType.ARBEID,
@@ -106,6 +108,7 @@ public class InntektHistorikkTjenesteTest {
         BeregningsgrunnlagPrStatusOgAndelEndring andelEndring = new BeregningsgrunnlagPrStatusOgAndelEndring(
             new InntektEndring(forrigeMånedsbeløp.multiply(BigDecimal.valueOf(12)), månedsbeløp.multiply(BigDecimal.valueOf(12))),
             null,
+            null,
             AktivitetStatus.ARBEIDSTAKER,
             OpptjeningAktivitetType.ETTERLØNN_SLUTTPAKKE,
             null,
@@ -134,6 +137,7 @@ public class InntektHistorikkTjenesteTest {
         BigDecimal forrigeMånedsbeløp = BigDecimal.ONE;
         BeregningsgrunnlagPrStatusOgAndelEndring andelEndring = new BeregningsgrunnlagPrStatusOgAndelEndring(
             new InntektEndring(forrigeMånedsbeløp.multiply(BigDecimal.valueOf(12)), månedsbeløp.multiply(BigDecimal.valueOf(12))),
+            null,
             null,
             AktivitetStatus.FRILANSER,
             OpptjeningAktivitetType.FRILANS,
@@ -164,6 +168,7 @@ public class InntektHistorikkTjenesteTest {
         BeregningsgrunnlagPrStatusOgAndelEndring andelEndring = new BeregningsgrunnlagPrStatusOgAndelEndring(
             new InntektEndring(forrigeMånedsbeløp.multiply(BigDecimal.valueOf(12)), månedsbeløp.multiply(BigDecimal.valueOf(12))),
             null,
+            null,
             AktivitetStatus.DAGPENGER,
             null,
             null,
@@ -192,6 +197,7 @@ public class InntektHistorikkTjenesteTest {
         BigDecimal forrigeMånedsbeløp = BigDecimal.ONE;
         BeregningsgrunnlagPrStatusOgAndelEndring andelEndring = new BeregningsgrunnlagPrStatusOgAndelEndring(
             new InntektEndring(forrigeMånedsbeløp.multiply(BigDecimal.valueOf(12)), månedsbeløp.multiply(BigDecimal.valueOf(12))),
+            null,
             null,
             AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE,
             null,
