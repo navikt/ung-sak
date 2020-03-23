@@ -49,9 +49,13 @@ import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 @ApplicationScoped
 public class OppgaveTjeneste {
     private static final int DEFAULT_OPPGAVEFRIST_DAGER = 1;
+
+    //FIXME(k9) hva skal fristen være?
+    private static final int DEFAULT_OPPGAVEFRIST_OMSORGSPENGER_DAGER = 21;
+
     private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL!";
 
-    private static final String FORELDREPENGESAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Foreldrepengesak må flyttes til Infotrygd";
+    private static final String OMSORGSPENGERSAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Omsorgspengersak må flyttes til Infotrygd";
 
     private static final String NØS_ANSVARLIG_ENHETID = "4151";
     private static final String NØS_FP_UNDERKATEGORI = "FORELDREPE_STO";
@@ -213,14 +217,14 @@ public class OppgaveTjeneste {
         OpprettOppgaveRequest request = OpprettOppgaveRequest.builder()
             .medOpprettetAvEnhetId(Integer.parseInt(behandling.getBehandlendeEnhet()))
             .medAnsvarligEnhetId(behandling.getBehandlendeEnhet())
-            .medFagomradeKode(FagomradeKode.FOR.getKode())
+            .medFagomradeKode(FagomradeKode.OMS.getKode())
             .medFnr(hentPersonInfo(behandling.getAktørId()).getPersonIdent().getIdent())
             .medAktivFra(LocalDate.now())
-            .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_DAGER)))
-            .medOppgavetypeKode(OppgaveÅrsak.BEHANDLE_SAK_INFOTRYGD.getKode())
+            .medAktivTil(helgeJustertFrist(LocalDate.now().plusDays(DEFAULT_OPPGAVEFRIST_OMSORGSPENGER_DAGER)))
+            .medOppgavetypeKode(OppgaveÅrsak.BEHANDLE_SAK_INFOTRYGD_OMS.getKode())
             .medSaksnummer(saksnummer.getVerdi())
-            .medPrioritetKode(PrioritetKode.NORM_FOR.toString())
-            .medBeskrivelse(FORELDREPENGESAK_MÅ_FLYTTES_TIL_INFOTRYGD)
+            .medPrioritetKode(PrioritetKode.NORM_OMS.toString())
+            .medBeskrivelse(OMSORGSPENGERSAK_MÅ_FLYTTES_TIL_INFOTRYGD)
             .medLest(false)
             .build();
 
