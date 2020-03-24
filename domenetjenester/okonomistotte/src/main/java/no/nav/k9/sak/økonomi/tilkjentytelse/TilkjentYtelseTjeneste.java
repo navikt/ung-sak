@@ -1,6 +1,8 @@
 package no.nav.k9.sak.økonomi.tilkjentytelse;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.validation.Validation;
 
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
@@ -81,7 +84,19 @@ public class TilkjentYtelseTjeneste {
         TilkjentYtelse tilkjentYtelse = hentilkjentYtelse(behandlingId);
         TilkjentYtelseBehandlingInfoV1 behandlingInfo = hentilkjentYtelseBehandlingInfo(behandlingId);
         InntrekkBeslutning inntrekkBeslutning = utledInntrekkBeslutning(behandling);
-        return new TilkjentYtelseOppdrag(tilkjentYtelse, behandlingInfo, behandling.getUuid(), inntrekkBeslutning);
+        
+        TilkjentYtelseOppdrag tilkjentYtelseOppdrag = new TilkjentYtelseOppdrag(tilkjentYtelse, behandlingInfo, behandling.getUuid(), inntrekkBeslutning);
+        tilkjentYtelseOppdrag.getBehandlingsinfo().setBehandlingTidspunkt(OffsetDateTime.now(ZoneId.of("UTC")));
+        validate(tilkjentYtelseOppdrag);
+        
+        return tilkjentYtelseOppdrag;
+    }
+
+    private static void validate(Object object) {
+        var valideringsfeil = Validation.buildDefaultValidatorFactory().getValidator().validate(object);
+        if (!valideringsfeil.isEmpty()) {
+            throw new IllegalArgumentException("Kan ikke validate obj=" + object + "\n\tValideringsfeil:" + valideringsfeil);
+        }
     }
 
     private InntrekkBeslutning utledInntrekkBeslutning(Behandling behandling) {
