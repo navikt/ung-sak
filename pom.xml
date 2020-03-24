@@ -19,6 +19,9 @@
 		<module>domenetjenester</module>
 		<module>behandlingsprosess</module>
 
+		<module>ytelse-omsorgspenger</module>
+		<module>ytelse-pleiepengerbarn</module>
+
 		<!-- Web klient og server -->
 		<module>web</module>
 
@@ -300,6 +303,17 @@
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>behandling-prosessering</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>no.nav.k9.sak.ytelse</groupId>
+				<artifactId>ytelse-omsorgspenger</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.sak.ytelse</groupId>
+				<artifactId>ytelse-pleiepengerbarn</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

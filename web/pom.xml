@@ -42,7 +42,7 @@
 		</dependency>
 
 		<!-- Prosjekt avhengigheter -->
-        <dependency>
+        	<dependency>
 		    <groupId>no.nav.vedtak.prosesstask</groupId>
 		    <artifactId>prosesstask-rest-api</artifactId>
 		</dependency>
@@ -68,6 +68,17 @@
 			<groupId>no.nav.foreldrepenger.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
+
+	
+		<!-- Ytelsespesifikke moduler -->
+                <dependency>
+                        <groupId>no.nav.k9.sak.ytelse</groupId>
+                        <artifactId>ytelse-pleiepengerbarn</artifactId>
+                </dependency>
+                <dependency>
+                        <groupId>no.nav.k9.sak.ytelse</groupId>
+                        <artifactId>ytelse-omsorgspenger</artifactId>
+                </dependency>
 		
 		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde vært her da de trekkes inn av server. -->
         <dependency>
