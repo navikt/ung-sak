@@ -72,7 +72,7 @@ public class BehandlingskontrollEventPublisererTest {
 
     @Test
     public void skal_fyre_event_for_aksjonspunkt_funnet_ved_prosessering() throws Exception {
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
 
         BehandlingskontrollKontekst kontekst = kontrollTjeneste.initBehandlingskontroll(behandling.getId());
@@ -182,7 +182,7 @@ public class BehandlingskontrollEventPublisererTest {
     }
 
     protected TestScenario nyttScenario(BehandlingStegType startSteg) {
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         scenario.medBehandlingStegStart(startSteg);
         return scenario;
     }

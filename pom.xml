@@ -206,11 +206,6 @@
 			</dependency>
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>inngangsvilkar-regelmodell</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>inngangsvilkar</artifactId>
 				<version>${project.version}</version>
 			</dependency>

@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.uttak;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
+@ApplicationScoped
 @BehandlingStegRef(kode = "KOFAKUT")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef

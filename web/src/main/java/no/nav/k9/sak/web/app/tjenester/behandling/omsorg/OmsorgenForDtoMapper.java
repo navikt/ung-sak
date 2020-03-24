@@ -9,9 +9,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.OmsorgenFor;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
@@ -19,6 +16,9 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.OmsorgenFor;
 
 @ApplicationScoped
 class OmsorgenForDtoMapper {

@@ -10,9 +10,9 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkaar.RegelOrkestrerer;
-import no.nav.k9.sak.inngangsvilkaar.RegelResultat;
-import no.nav.k9.sak.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.inngangsvilkår.RegelOrkestrerer;
+import no.nav.k9.sak.inngangsvilkår.RegelResultat;
+import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @ApplicationScoped

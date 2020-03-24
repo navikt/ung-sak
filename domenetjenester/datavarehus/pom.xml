@@ -30,7 +30,7 @@
 		</dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>inngangsvilkar-regelmodell</artifactId>
+			<artifactId>inngangsvilkar</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt;
 
+import static javax.validation.Validation.buildDefaultValidatorFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -7,8 +8,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.validation.Validation;
 
 import org.junit.Test;
 
@@ -40,7 +39,8 @@ public class UttaksplanResponseTest {
         var uttaksperiodeInfo = new InnvilgetUttaksplanperiode(100, List.of(new UttakUtbetalingsgrad(arbeidsforhold, new BigDecimal("100.00"))));
         var uttaksplan = new Uttaksplan(Map.of(new Periode(fom, tom ), uttaksperiodeInfo));
         
-        var validator = Validation.buildDefaultValidatorFactory().getValidator();
+        @SuppressWarnings("resource")
+        var validator = buildDefaultValidatorFactory().getValidator();
         var violations = validator.validate(uttaksplan);
         assertThat(violations).isEmpty();
 

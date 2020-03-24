@@ -48,7 +48,7 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.k9.sak.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
+import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.uttak;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -14,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
+@ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef

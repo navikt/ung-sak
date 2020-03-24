@@ -64,6 +64,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     
     public static final FagsakYtelseType ES = ENGANGSTØNAD;
     public static final FagsakYtelseType PSB = PLEIEPENGER_SYKT_BARN;
+    public static final FagsakYtelseType OMP = OMSORGSPENGER;
     public static final FagsakYtelseType FP = FORELDREPENGER;
     public static final FagsakYtelseType SVP = SVANGERSKAPSPENGER;
 

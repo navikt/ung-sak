@@ -24,8 +24,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.inngangsvilkaar.VilkårData;
-import no.nav.k9.sak.inngangsvilkaar.medlemskap.VurderLøpendeMedlemskap;
+import no.nav.k9.sak.inngangsvilkår.VilkårData;
+import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.vedtak.konfig.Tid;
 
 @BehandlingStegRef(kode = "VURDERMV")

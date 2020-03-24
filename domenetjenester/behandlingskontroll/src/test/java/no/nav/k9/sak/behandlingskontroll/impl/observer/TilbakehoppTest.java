@@ -24,10 +24,10 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
@@ -43,6 +43,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 @RunWith(CdiRunner.class)
 public class TilbakehoppTest {
 
+    private static final FagsakYtelseType YTELSE_TYPE = TestScenario.DUMMY_YTELSE_TYPE;
     private final BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -71,7 +72,7 @@ public class TilbakehoppTest {
 
     @Before
     public void before() throws Exception {
-        modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.FORELDREPENGER);
+        modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         steg1 = BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT;
 
         // siden konfig er statisk definert p.t. må vi lete fram noen passende steg til å hoppe mellom
@@ -250,7 +251,7 @@ public class TilbakehoppTest {
         AksjonspunktDefinisjon ad = finnAksjonspunkt(port, manueltOpprettet);
         BehandlingStegType idSteg = BehandlingStegType.fraKode(identifisertISteg.getKode());
 
-        Behandling ytelseBehandling = TestScenario.forForeldrepenger().lagre(serviceProvider);
+        Behandling ytelseBehandling = TestScenario.dummyScenario().lagre(serviceProvider);
         behandling = Behandling.nyBehandlingFor(ytelseBehandling.getFagsak(), BehandlingType.FØRSTEGANGSSØKNAD).build();
         behandlingLås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, behandlingLås);

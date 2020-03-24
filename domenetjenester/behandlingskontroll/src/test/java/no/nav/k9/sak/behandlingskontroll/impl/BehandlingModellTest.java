@@ -43,7 +43,7 @@ public class BehandlingModellTest {
     private static final LocalDateTime FRIST_TID = LocalDateTime.now().plusWeeks(4).withNano(0);
 
     private final BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
-    private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.ENGANGSTØNAD;
+    private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.SVANGERSKAPSPENGER;
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -151,7 +151,7 @@ public class BehandlingModellTest {
             new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
         BehandlingStegVisitorUtenLagring visitor = lagVisitor(behandling);
         BehandlingStegUtfall siste = modell.prosesserFra(STEG_1, visitor);
@@ -173,7 +173,7 @@ public class BehandlingModellTest {
             new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
         BehandlingStegVisitorUtenLagring visitor = lagVisitor(behandling);
         BehandlingStegUtfall siste = modell.prosesserFra(STEG_1, visitor);
@@ -191,7 +191,7 @@ public class BehandlingModellTest {
             new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
 
         // Act 1
@@ -239,7 +239,7 @@ public class BehandlingModellTest {
             new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
 
         // Act 1
@@ -259,7 +259,7 @@ public class BehandlingModellTest {
             new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
         BehandlingStegVisitorUtenLagring visitor = lagVisitor(behandling);
 
@@ -296,7 +296,7 @@ public class BehandlingModellTest {
             new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
             new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE), ap()));
         BehandlingModellImpl modell = setupModell(modellData);
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
         BehandlingStegVisitorUtenLagring visitor = lagVisitor(behandling);
 
