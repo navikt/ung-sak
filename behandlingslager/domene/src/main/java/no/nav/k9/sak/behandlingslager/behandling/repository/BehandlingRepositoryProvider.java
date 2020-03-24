@@ -35,7 +35,6 @@ public class BehandlingRepositoryProvider {
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OpptjeningRepository opptjeningRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -73,7 +72,6 @@ public class BehandlingRepositoryProvider {
         this.beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
 
         // behandling støtte repositories
-        this.mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         this.historikkRepository = new HistorikkRepository(entityManager);
         this.behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
         this.behandlingRevurderingRepository = new BehandlingRevurderingRepository(entityManager, behandlingRepository, søknadRepository,
@@ -135,10 +133,6 @@ public class BehandlingRepositoryProvider {
 
     public BeregningsresultatRepository getBeregningsresultatRepository() {
         return beregningsresultatRepository;
-    }
-
-    public MottatteDokumentRepository getMottatteDokumentRepository() {
-        return mottatteDokumentRepository;
     }
 
     public BehandlingRevurderingRepository getBehandlingRevurderingRepository() {

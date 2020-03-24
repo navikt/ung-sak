@@ -19,13 +19,11 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -302,19 +300,12 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
     }
 
     private void sendInnInntektsmeldingPå(Behandling behandling, String virksomhetOrgnr, InternArbeidsforholdRef arbeidsforholdId) {
-        MottattDokument mottattDokument = new MottattDokument.Builder()
-            .medFagsakId(behandling.getFagsakId())
-            .medMottattDato(LocalDate.now())
-            .medBehandlingId(behandling.getId())
-            .medJournalPostId(new JournalpostId("2"))
-            .medDokumentTypeId(DokumentTypeId.INNTEKTSMELDING)
-            .build();
-        repositoryProvider.getMottatteDokumentRepository().lagre(mottattDokument);
+        JournalpostId journalpostId = new JournalpostId(1L);
         final InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(Arbeidsgiver.virksomhet(virksomhetOrgnr))
             .medInnsendingstidspunkt(LocalDateTime.now())
             .medArbeidsforholdId(arbeidsforholdId)
-            .medJournalpostId(mottattDokument.getJournalpostId())
+            .medJournalpostId(journalpostId)
             .medBeløp(BigDecimal.TEN)
             .medStartDatoPermisjon(LocalDate.now())
             .medNærRelasjon(false)
