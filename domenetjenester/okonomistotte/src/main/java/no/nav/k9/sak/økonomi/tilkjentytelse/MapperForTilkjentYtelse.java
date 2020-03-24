@@ -2,6 +2,7 @@ package no.nav.k9.sak.økonomi.tilkjentytelse;
 
 import java.time.Year;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ class MapperForTilkjentYtelse {
         return beregningsresultat.getBeregningsresultatPerioder()
             .stream()
             .map(MapperForTilkjentYtelse::mapPeriode)
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 
@@ -33,6 +35,11 @@ class MapperForTilkjentYtelse {
             .stream()
             .map(MapperForTilkjentYtelse::mapAndel)
             .collect(Collectors.toList());
+        
+        if (andeler.isEmpty()) {
+            return null;
+        }
+        
         return new TilkjentYtelsePeriodeV1(periode.getBeregningsresultatPeriodeFom(), periode.getBeregningsresultatPeriodeTom(), andeler);
     }
 
