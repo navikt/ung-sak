@@ -100,6 +100,7 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
         stegModell.getSteg().vedTransisjon(transisjonEvent.getKontekst(), stegModell, TransisjonType.HOPP_OVER_FRAMOVER, finalFørsteSteg, sisteSteg);
     }
 
+    @SuppressWarnings("resource")
     protected BehandlingModell getModell(Behandling behandling) {
         return serviceProvider.getBehandlingModellRepository().getModell(behandling.getType(), behandling.getFagsakYtelseType());
     }

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt;
 
+import static javax.validation.Validation.buildDefaultValidatorFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -8,8 +9,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.validation.Validation;
 
 import org.junit.Test;
 
@@ -35,7 +34,8 @@ public class UttaksplanRequestTest {
     public void skal_serialisere_uttaksplan_request() throws Exception {
         var req = opprettUttaksplanRequest();
 
-        var validator = Validation.buildDefaultValidatorFactory().getValidator();
+        @SuppressWarnings("resource")
+        var validator = buildDefaultValidatorFactory().getValidator();
         var violations = validator.validate(req);
         assertThat(violations).isEmpty();
 

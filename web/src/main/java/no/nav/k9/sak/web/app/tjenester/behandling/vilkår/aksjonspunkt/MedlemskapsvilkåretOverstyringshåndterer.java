@@ -10,7 +10,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.inngangsvilkaar.InngangsvilkårTjeneste;
+import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
 import no.nav.k9.sak.kontrakt.medlem.OverstyringMedlemskapsvilkåretDto;
 
 @ApplicationScoped

@@ -23,7 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkaar.RegelResultat;
+import no.nav.k9.sak.inngangsvilkår.RegelResultat;
 
 public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 

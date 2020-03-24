@@ -54,10 +54,12 @@ public class HistorikkStreamKafkaProperties {
         return "KC-" + topic;
     }
 
+    @SuppressWarnings("resource")
     Class<?> getKeyClass() {
         return kontraktTopic.getSerdeKey().getClass();
     }
 
+    @SuppressWarnings("resource")
     Class<?> getValueClass() {
         return kontraktTopic.getSerdeValue().getClass();
     }

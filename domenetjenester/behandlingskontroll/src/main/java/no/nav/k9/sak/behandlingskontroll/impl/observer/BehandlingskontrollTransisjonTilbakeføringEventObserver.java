@@ -77,6 +77,7 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
         s.getSteg().vedTransisjon(event.getKontekst(), s, BehandlingSteg.TransisjonType.HOPP_OVER_BAKOVER, førsteSteg, sisteSteg);
     }
 
+    @SuppressWarnings("resource")
     private BehandlingModell getModell(Behandling behandling) {
         return serviceProvider.getBehandlingModellRepository().getModell(behandling.getType(), behandling.getFagsakYtelseType());
     }

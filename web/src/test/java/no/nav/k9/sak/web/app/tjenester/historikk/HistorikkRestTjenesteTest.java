@@ -30,6 +30,7 @@ public class HistorikkRestTjenesteTest {
         historikkRestTjeneste = new HistorikkRestTjeneste(historikkApplikasjonTjenesteMock);
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void hentAlleInnslag() {
         // Arrange

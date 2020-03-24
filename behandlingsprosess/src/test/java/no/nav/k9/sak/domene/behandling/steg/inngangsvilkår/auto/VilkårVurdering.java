@@ -29,14 +29,14 @@ import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medlemskap.Medlemskapsvilkår;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.medlemskap.MedlemskapsvilkårGrunnlag;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsgrunnlag;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsperiodeGrunnlag;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Opptjeningsvilkår;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjeningsperiode.RegelFastsettOpptjeningsperiode;
+import no.nav.k9.sak.inngangsvilkår.medlemskap.regelmodell.Medlemskapsvilkår;
+import no.nav.k9.sak.inngangsvilkår.medlemskap.regelmodell.MedlemskapsvilkårGrunnlag;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsPeriode;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsgrunnlag;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsperiodeGrunnlag;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsvilkår;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårResultat;
+import no.nav.k9.sak.inngangsvilkår.opptjeningsperiode.regelmodell.RegelFastsettOpptjeningsperiode;
 import no.nav.vedtak.util.Tuple;
 
 class VilkårVurdering {

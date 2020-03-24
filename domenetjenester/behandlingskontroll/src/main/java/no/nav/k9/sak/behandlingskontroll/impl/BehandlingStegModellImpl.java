@@ -46,22 +46,16 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
     BehandlingStegModellImpl(BehandlingModellImpl behandlingModell, 
         @Any Instance<BehandlingSteg> bean, 
         BehandlingStegType stegType) {
-        Objects.requireNonNull(behandlingModell, "behandlingModell"); //$NON-NLS-1$
-        Objects.requireNonNull(bean, "bean"); //$NON-NLS-1$
-        Objects.requireNonNull(stegType, "stegType"); //$NON-NLS-1$
-        this.stegInstances = bean;
-        this.behandlingModell = behandlingModell;
-        this.behandlingStegType = stegType;
+        this.stegInstances = Objects.requireNonNull(bean, "bean");
+        this.behandlingModell = Objects.requireNonNull(behandlingModell, "behandlingModell");
+        this.behandlingStegType = Objects.requireNonNull(stegType, "stegType");
     }
 
     /** Direkte injisering av {@link BehandlingSteg}. For testing. */
     BehandlingStegModellImpl(BehandlingModellImpl behandlingModell, BehandlingSteg steg, BehandlingStegType stegType) {
-        Objects.requireNonNull(behandlingModell, "behandlingModell"); //$NON-NLS-1$
-        Objects.requireNonNull(steg, "steg"); //$NON-NLS-1$ // NOSONAR
-        Objects.requireNonNull(stegType, "stegType"); //$NON-NLS-1$ // NOSONAR
-        this.steg = steg;
-        this.behandlingModell = behandlingModell;
-        this.behandlingStegType = stegType;
+        this.steg = Objects.requireNonNull(steg, "steg");
+        this.behandlingModell = Objects.requireNonNull(behandlingModell, "behandlingModell");
+        this.behandlingStegType = Objects.requireNonNull(stegType, "stegType");
     }
 
     @Override

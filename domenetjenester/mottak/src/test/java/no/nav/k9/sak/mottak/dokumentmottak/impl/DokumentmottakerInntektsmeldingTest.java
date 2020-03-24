@@ -113,7 +113,7 @@ public class DokumentmottakerInntektsmeldingTest {
 
         TestScenarioBuilder revurderingScenario = TestScenarioBuilder.builderMedSøknad()
             .medFagsakId(behandling.getFagsakId())
-            .medBehandlingStegStart(BehandlingStegType.REGISTRER_SØKNAD)
+            .medBehandlingStegStart(BehandlingStegType.VURDER_UTLAND)
             .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         Behandling revurderingBehandling = revurderingScenario.lagre(repositoryProvider);
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", DokumentTypeId.INNTEKTSMELDING);

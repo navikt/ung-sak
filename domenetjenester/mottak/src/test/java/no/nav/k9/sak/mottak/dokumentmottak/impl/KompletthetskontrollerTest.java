@@ -120,7 +120,7 @@ public class KompletthetskontrollerTest {
 
         when(kompletthetsjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetsjekker);
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
-        when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.REGISTRER_SØKNAD)).thenReturn(true);
+        when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
         // Act
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
@@ -143,7 +143,7 @@ public class KompletthetskontrollerTest {
         // Arrange
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.oppfylt());
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_KOMPLETTHET)).thenReturn(false);
-        when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.REGISTRER_SØKNAD)).thenReturn(true);
+        when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 

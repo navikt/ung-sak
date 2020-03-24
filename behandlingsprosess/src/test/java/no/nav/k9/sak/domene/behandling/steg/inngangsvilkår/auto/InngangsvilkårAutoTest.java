@@ -21,8 +21,8 @@ import org.junit.runners.Parameterized;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsPeriode;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsPeriode;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårResultat;
 
 @RunWith(Parameterized.class)
 public class InngangsvilkårAutoTest {

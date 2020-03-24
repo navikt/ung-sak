@@ -52,6 +52,7 @@ public class AksjonspunktRestTjenesteTest {
 
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void skal_bekrefte_fatte_vedtak_med_aksjonspunkt_godkjent() throws URISyntaxException {
         when(behandling.getStatus()).thenReturn(BehandlingStatus.FATTER_VEDTAK);
@@ -69,6 +70,7 @@ public class AksjonspunktRestTjenesteTest {
         verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong());
     }
 
+    @SuppressWarnings("resource")
     @Test(expected = FunksjonellException.class)
     public void skal_ikke_kunne_bekrefte_andre_aksjonspunkt_ved_status_fatter_vedtak() throws URISyntaxException {
         when(behandling.getStatus()).thenReturn(BehandlingStatus.FATTER_VEDTAK);

@@ -21,8 +21,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkaar.VilkårData;
-import no.nav.k9.sak.inngangsvilkaar.opptjening.OpptjeningsVilkårTjeneste;
+import no.nav.k9.sak.inngangsvilkår.VilkårData;
+import no.nav.k9.sak.inngangsvilkår.opptjening.OpptjeningsVilkårTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 public abstract class OpptjeningFaktaStegFelles implements BehandlingSteg {
