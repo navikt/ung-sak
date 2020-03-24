@@ -21,7 +21,6 @@ import org.junit.Test;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
@@ -126,13 +125,6 @@ public class KompletthetssjekkerSøknadRevurderingTest {
         // Matcher med søknad, men mangler mottatt dato:
         Set<DokumentTypeId> dokumentListe = singleton(DokumentTypeId.INNTEKTSMELDING);
         when(dokumentArkivTjeneste.hentDokumentTypeIdForSak(any(Saksnummer.class), any())).thenReturn(dokumentListe);
-
-        MottattDokument mottattDokument = new MottattDokument.Builder()
-            .medFagsakId(revurdering.getFagsakId())
-            .medBehandlingId(revurdering.getId())
-            .medMottattDato(LocalDate.now())
-            .build();
-        repositoryProvider.getMottatteDokumentRepository().lagre(mottattDokument);
 
         // Act
         List<ManglendeVedlegg> manglendeVedlegg = kompletthetssjekker.utledManglendeVedleggForSøknad(lagRef(revurdering));

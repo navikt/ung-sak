@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 public class MottattDokumentSortererTest {
 

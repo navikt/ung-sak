@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 public interface MottattDokumentOversetter<T extends MottattDokumentWrapper<?>> {
 
