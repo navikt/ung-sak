@@ -45,6 +45,14 @@
 		<kalkulus.version>1.0-2020.03.20.081338-0c6000f</kalkulus.version>
 	</properties>
 
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/navikt/fp-felles/</url>
+        </repository>
+    </repositories>
+
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det 
 		har uheldige virkninger ved bruk av import og dependency (bruk composition 
 		over arv) da de overstyrer andre scope definisjoner. Sett det heller der 
