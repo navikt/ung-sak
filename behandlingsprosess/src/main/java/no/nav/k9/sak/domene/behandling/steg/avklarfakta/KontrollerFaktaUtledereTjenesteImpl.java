@@ -5,6 +5,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederHolder;
@@ -25,6 +26,10 @@ class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
         // Legger til utledere som alltid skal kjøres
         leggTilStandardUtledere(utlederHolder);
 
+        if (FagsakYtelseType.PSB.equals(ref.getFagsakYtelseType())) {
+            utlederHolder.leggTil(AksjonspunktutlederForMedisinskvilkår.class);
+        }
+
         return utlederHolder.getUtledere();
     }
 
@@ -35,7 +40,6 @@ class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
 
     private void leggTilStandardUtledere(AksjonspunktUtlederHolder utlederHolder) {
         utlederHolder.leggTil(AksjonspunktutlederForMedlemskap.class)
-            .leggTil(AksjonspunktUtlederForTilleggsopplysninger.class)
-            .leggTil(AksjonspunktutlederForMedisinskvilkår.class);
+            .leggTil(AksjonspunktUtlederForTilleggsopplysninger.class);
     }
 }

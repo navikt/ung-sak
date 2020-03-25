@@ -108,7 +108,11 @@ public class AvklarOmErBosatt {
     //TODO(OJR) må denne endres?
     private Utfall harBrukerTilknytningHjemland(Long behandlingId) {
         final Optional<MedlemskapAggregat> medlemskapAggregat = medlemskapRepository.hentMedlemskap(behandlingId);
-        final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning)
+        var medlemskapOppgittTilknytningEntitet = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning);
+        if (medlemskapOppgittTilknytningEntitet.isEmpty()) {
+            return JA; // DEFAULT
+        }
+        final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet
             .orElseThrow(IllegalStateException::new);
 
         int antallNei = 0;

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -30,7 +31,7 @@ public class OmsorgenForTjeneste {
 
         final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
 
-        OmsorgenForGrunnlag grunnlag = null; // TODO K9
+        OmsorgenForGrunnlag grunnlag = new OmsorgenForGrunnlag(null, List.of(), List.of(), null); // TODO K9
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
 
         return utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, grunnlag, periodeTilVurdering);
