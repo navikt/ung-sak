@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.dokumentpersiterer.xml;
+package no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.xml;
 
 import static no.nav.vedtak.feil.LogLevel.ERROR;
 import static no.nav.vedtak.feil.LogLevel.WARN;

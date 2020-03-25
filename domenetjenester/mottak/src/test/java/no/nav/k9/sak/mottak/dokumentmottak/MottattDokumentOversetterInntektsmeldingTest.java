@@ -41,7 +41,7 @@ import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.v1.MottattDokumentOversetterInntektsmelding;
 import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding;
-import no.nav.k9.sak.mottak.dokumentpersiterer.xml.MottattDokumentXmlParser;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.xml.MottattDokumentXmlParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;

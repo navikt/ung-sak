@@ -1,12 +1,12 @@
-package no.nav.k9.sak.mottak.dokumentpersiterer.xml;
+package no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.xml;
 
-import static no.nav.k9.sak.mottak.dokumentpersiterer.xml.MottattDokumentXmlParserFeil.FACTORY;
+import static no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.xml.MottattDokumentXmlParserFeil.FACTORY;
 import static no.nav.vedtak.felles.xml.XmlUtils.retrieveNameSpaceOfXML;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.k9.sak.mottak.dokumentpersiterer.MottattDokumentWrapper;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.MottattInntektsmeldingWrapper;
 import no.nav.vedtak.felles.integrasjon.felles.ws.JaxbHelper;
 
 public final class MottattDokumentXmlParser {
@@ -26,7 +26,7 @@ public final class MottattDokumentXmlParser {
     }
 
     @SuppressWarnings("rawtypes")
-    public static MottattDokumentWrapper unmarshallXml(String xml) {
+    public static MottattInntektsmeldingWrapper unmarshallXml(String xml) {
         final Object mottattDokument;
         final String namespace = hentNamespace(xml);
 
@@ -36,7 +36,7 @@ public final class MottattDokumentXmlParser {
                 throw FACTORY.ukjentNamespace(namespace, new IllegalStateException()).toException();
             }
             mottattDokument = JaxbHelper.unmarshalAndValidateXMLWithStAX(dokumentParserKonfig.jaxbClass, xml, dokumentParserKonfig.xsdLocation);
-            return MottattDokumentWrapper.tilXmlWrapper(mottattDokument);
+            return MottattInntektsmeldingWrapper.tilXmlWrapper(mottattDokument);
         } catch (Exception e) {
             throw FACTORY.uventetFeilVedParsingAvSoeknadsXml(namespace, e).toException();
         }
