@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "OmsorgenFor")
 @Table(name = "MD_OMSORGENFOR")
@@ -20,6 +21,7 @@ public class OmsorgenFor extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_OMSORGENFOR")
     private Long id;
 
+    @ChangeTracked
     @Column(name = "har_omsorg_for", nullable = false)
     private boolean harOmsorgFor;
 

@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -43,6 +44,7 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
@@ -428,7 +430,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
     private void lagreInntektsmelding(LocalDate mottattDato, Behandling behandling, InternArbeidsforholdRef arbeidsforholdId, EksternArbeidsforholdRef eksternArbeidsforholdRef) {
         JournalpostId journalPostId = new JournalpostId("123");
-        var inntektsmelding = InntektsmeldingBuilder.builder()
+        var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
         .medStartDatoPermisjon(I_DAG)
         .medArbeidsgiver(arbeidsgiver)
         .medBeløp(BigDecimal.TEN)
@@ -438,7 +440,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         .medMottattDato(mottattDato)
         .medInnsendingstidspunkt(LocalDateTime.now()).medJournalpostId(journalPostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmelding);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(new InntektsmeldingInnhold(inntektsmeldingBuilder)));
 
     }
 

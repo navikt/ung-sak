@@ -99,7 +99,7 @@ public abstract class DokumentmottakerTestsupport {
 
     protected MottattDokument dummyInntektsmeldingDokument(Behandling behandling) {
         DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        return DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "<"+dokumentTypeId+">", now(), "123", DokumentTypeId.INNTEKTSMELDING);
+        return DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "<"+dokumentTypeId+">", now(), "123");
     }
 
 

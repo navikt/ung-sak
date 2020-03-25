@@ -15,12 +15,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "InnleggelsePeriode")
 @Table(name = "MD_INNLEGGELSE")
-public class InnleggelsePeriode extends BaseEntitet {
+public class InnleggelsePeriode extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_INNLEGGELSE")
@@ -52,6 +54,11 @@ public class InnleggelsePeriode extends BaseEntitet {
         this.periode = innleggelsePeriode.getPeriode();
     }
 
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(periode);
+    }
+    
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }

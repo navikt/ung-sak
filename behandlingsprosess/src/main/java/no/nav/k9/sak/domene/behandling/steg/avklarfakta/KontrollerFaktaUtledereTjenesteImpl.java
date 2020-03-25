@@ -20,7 +20,7 @@ class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
     }
 
     // Legg til aksjonspunktutledere som er felles for Førstegangsbehandling og Revurdering
-    protected List<AksjonspunktUtleder> leggTilFellesutledere(@SuppressWarnings("unused") BehandlingReferanse ref) {
+    protected List<AksjonspunktUtleder> leggTilFellesutledere(BehandlingReferanse ref) {
         var utlederHolder = new AksjonspunktUtlederHolder();
 
         // Legger til utledere som alltid skal kjøres

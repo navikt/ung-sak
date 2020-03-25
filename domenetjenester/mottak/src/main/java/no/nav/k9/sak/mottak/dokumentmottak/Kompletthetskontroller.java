@@ -2,9 +2,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_KOMPLETT_OPPDATERING;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -61,7 +59,7 @@ public class Kompletthetskontroller {
         EndringsresultatSnapshot grunnlagSnapshot = behandlingProsesseringTjeneste.taSnapshotAvBehandlingsgrunnlag(behandling);
 
         // Persister dokument (dvs. knytt dokument til behandlingen)
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, Optional.empty());
+        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
 
         // Vurder kompletthet etter at dokument knyttet til behandling
         var kompletthetResultat = vurderBehandlingKomplett(behandling);
@@ -93,9 +91,9 @@ public class Kompletthetskontroller {
             HistorikkinnslagType.BEH_VENT, kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
     }
 
-    void persisterKøetDokumentOgVurderKompletthet(Behandling behandling, MottattDokument mottattDokument, Optional<LocalDate> gjelderFra) {
+    void persisterKøetDokumentOgVurderKompletthet(Behandling behandling, MottattDokument mottattDokument) {
         // Persister dokument (dvs. knytt dokument til behandlingen)
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, gjelderFra);
+        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
         vurderKompletthetForKøetBehandling(behandling);
     }
 

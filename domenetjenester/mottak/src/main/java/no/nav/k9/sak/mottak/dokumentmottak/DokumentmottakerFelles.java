@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -112,7 +111,7 @@ public class DokumentmottakerFelles {
 
     Behandling opprettRevurdering(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettRevurdering(fagsak, behandlingÅrsakType);
-        mottatteDokumentTjeneste.persisterDokumentinnhold(revurdering, mottattDokument, Optional.empty());
+        mottatteDokumentTjeneste.persisterDokumentinnhold(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandling(revurdering);
         return revurdering;
     }

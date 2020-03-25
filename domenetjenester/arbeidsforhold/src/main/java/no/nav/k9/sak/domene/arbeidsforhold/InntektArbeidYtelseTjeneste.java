@@ -126,6 +126,6 @@ public interface InntektArbeidYtelseTjeneste {
      * @param behandlingId - Behandling Id
      * @param builders - Collection med {@link InntektsmeldingBuilder}
      */
-    void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders);
+    void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingInnhold> builders);
 
 }

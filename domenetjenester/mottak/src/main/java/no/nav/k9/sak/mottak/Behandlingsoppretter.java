@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -95,7 +96,7 @@ public class Behandlingsoppretter {
         }); // NOSONAR
     }
 
-    public Behandling opprettNyFørstegangsbehandlingMedImOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {
+    public Behandling opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {
         Behandling forrigeBehandling = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
             .orElseThrow(() -> new IllegalStateException("Fant ingen behandling som passet for saksnummer: " + fagsak.getSaksnummer()));
         Behandling nyFørstegangsbehandling = opprettFørstegangsbehandling(fagsak, behandlingÅrsakType, Optional.of(forrigeBehandling));
@@ -118,7 +119,7 @@ public class Behandlingsoppretter {
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
-            return opprettNyFørstegangsbehandlingMedImOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
+            return opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
         }
         Behandling revurdering = opprettRevurdering(sisteYtelseBehandling.getFagsak(), revurderingsÅrsak);
 
@@ -143,18 +144,11 @@ public class Behandlingsoppretter {
     }
 
     public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(@SuppressWarnings("unused") Saksnummer saksnummer, Behandling nyBehandling) {
-        hentAlleInntektsmeldingdokumenter(nyBehandling.getFagsakId()).stream()
-            .sorted(MottattDokumentSorterer.sorterMottattDokument())
-            .forEach(mottattDokument -> leggInntektsmeldingTilBehandling(nyBehandling, mottattDokument));
-
-    }
-
-    private void leggInntektsmeldingTilBehandling(Behandling nyBehandling, MottattDokument mottattDokument) {
-        var innhold = inntektsmeldingPersistererTjeneste.persisterDokumentinnhold(mottattDokument, nyBehandling);
-        var omsorgsfravær = innhold.getOmsorgspengerFravær();
-        if(!omsorgsfravær.isEmpty()) {
-            
-        }
+        var mottatteDokumenter = hentAlleInntektsmeldingdokumenter(nyBehandling.getFagsakId()).stream()
+            .sorted(MottattDokumentSorterer.sorterMottattDokument()).collect(Collectors.toList());
+        
+        inntektsmeldingPersistererTjeneste.leggInntektsmeldingerTilBehandling(nyBehandling, mottatteDokumenter);
+        
     }
 
     private List<MottattDokument> hentAlleInntektsmeldingdokumenter(Long fagsakId) {
@@ -189,7 +183,7 @@ public class Behandlingsoppretter {
             behandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), dokumentTypeId);
         }
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, Optional.empty());
+        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
         return behandling;
     }
 

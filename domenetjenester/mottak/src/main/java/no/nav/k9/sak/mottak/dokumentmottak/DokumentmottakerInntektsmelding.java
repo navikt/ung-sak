@@ -41,7 +41,7 @@ class DokumentmottakerInntektsmelding extends DokumentmottakerYtelsesesrelatertD
     public void håndterIngenTidligereBehandling(Fagsak fagsak, MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) { //#I1
         // Opprett ny førstegangsbehandling
         Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, Optional.empty());
+        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
         dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), null);
     }

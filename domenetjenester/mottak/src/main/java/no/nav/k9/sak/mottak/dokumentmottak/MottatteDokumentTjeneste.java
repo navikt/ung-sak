@@ -19,7 +19,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
-import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.MottattInntektsmeldingWrapper;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
@@ -58,13 +57,10 @@ public class MottatteDokumentTjeneste {
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
-    public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument, Optional<LocalDate> gjelderFra) {
+    public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument) {
         oppdaterMottattDokumentMedBehandling(dokument, behandling.getId());
         if (dokument.getPayload() != null) {
-            var innhold = dokumentPersistererTjeneste.persisterDokumentinnhold(dokument, behandling, gjelderFra);
-            if(!innhold.getOmsorgspengerFravær().isEmpty()) {
-                
-            }
+            dokumentPersistererTjeneste.leggInntektsmeldingTilBehandling(behandling, dokument);
         }
     }
 

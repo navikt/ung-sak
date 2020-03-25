@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingSomIkkeKommer;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -216,7 +215,7 @@ public class InntektsmeldingTjeneste {
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver));
     }
 
-    public void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingBuilder im) {
+    private void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingInnhold im) {
         iayTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(im));
     }
 
@@ -267,5 +266,11 @@ public class InntektsmeldingTjeneste {
             .map(iayGrunnlag -> iayGrunnlag.getInntektsmeldinger()
                 .map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).orElse(emptyList()))
             .orElse(emptyList());
+    }
+
+    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, List<InntektsmeldingInnhold> inntektsmeldinger) {
+        for(var im : inntektsmeldinger) {
+            lagreInntektsmelding(saksnummer, behandlingId, im);
+        }
     }
 }

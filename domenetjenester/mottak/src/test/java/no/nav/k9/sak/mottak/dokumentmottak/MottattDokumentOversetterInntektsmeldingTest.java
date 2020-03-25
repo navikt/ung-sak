@@ -92,7 +92,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         when(organisasjonConsumer.hentOrganisasjon(any())).thenReturn(hentOrganisasjonResponse);
         VirksomhetTjeneste virksomhetTjeneste = new VirksomhetTjeneste(organisasjonConsumer, new VirksomhetRepository());
 
-        oversetter = new MottattDokumentOversetterInntektsmelding(inntektsmeldingTjeneste, virksomhetTjeneste);
+        oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste);
     }
 
     @Test
@@ -140,8 +140,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
 
         final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
-        // Act
-        oversetter.trekkUtDataOgPersister(wrapper, mottattDokument, behandling, Optional.empty());
+        persisterInntektsmelding(behandling, mottattDokument, wrapper);
 
         // Assert
         final InntektArbeidYtelseGrunnlag grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
@@ -171,11 +170,11 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         // Act
         // Motta nyere inntektsmelding først
         Mockito.doReturn(Optional.of(nyereDato)).when(wrapperSpied).getInnsendingstidspunkt();
-        oversetter.trekkUtDataOgPersister(wrapperSpied, mottattDokument, behandling, Optional.empty());
+        persisterInntektsmelding(behandling, mottattDokument, wrapperSpied);
 
         // Så motta eldre inntektsmelding
         Mockito.doReturn(Optional.of(eldreDato)).when(wrapperSpied).getInnsendingstidspunkt();
-        oversetter.trekkUtDataOgPersister(wrapperSpied, mottattDokument, behandling, Optional.empty());
+        persisterInntektsmelding(behandling, mottattDokument, wrapperSpied);
 
         // Assert
         final InntektArbeidYtelseGrunnlag grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
@@ -206,11 +205,11 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         // Act
         // Motta eldre inntektsmelding først
         Mockito.doReturn(Optional.of(eldreDato)).when(wrapperSpied).getInnsendingstidspunkt();
-        oversetter.trekkUtDataOgPersister(wrapperSpied, mottattDokument, behandling, Optional.empty());
+        persisterInntektsmelding(behandling, mottattDokument, wrapperSpied);
 
         // Så motta nyere inntektsmelding
         Mockito.doReturn(Optional.of(nyereDato)).when(wrapperSpied).getInnsendingstidspunkt();
-        oversetter.trekkUtDataOgPersister(wrapperSpied, mottattDokument, behandling, Optional.empty());
+        persisterInntektsmelding(behandling, mottattDokument, wrapperSpied);
 
         // Assert
         final InntektArbeidYtelseGrunnlag grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
@@ -225,13 +224,25 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         assertThat(grunnlag.getInntektsmeldinger().map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).get()).hasSize(1);
     }
 
+    private void persisterInntektsmelding(final Behandling behandling, MottattDokument mottattDokument, MottattDokumentWrapperInntektsmelding wrapperSpied) {
+        var innhold = oversetter.trekkUtData(wrapperSpied, mottattDokument, behandling);
+        
+        Long behandlingId = behandling.getId();
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(innhold));
+    }
+
     private Behandling opprettScenarioOgLagreInntektsmelding(String inntektsmeldingFilnavn) throws URISyntaxException, IOException {
-        final Behandling behandling = opprettBehandling();
+        Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, inntektsmeldingFilnavn);
 
-        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
+        var wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
-        oversetter.trekkUtDataOgPersister(wrapper, mottattDokument, behandling, Optional.empty());
+        var innhold = oversetter.trekkUtData(wrapper, mottattDokument, behandling);
+        
+        Long behandlingId = behandling.getId();
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(innhold));
         return behandling;
     }
 

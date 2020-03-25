@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
@@ -330,7 +332,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY)
         .medInnsendingstidspunkt(nyTid()).medJournalpostId(journalpostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(new InntektsmeldingInnhold(inntektsmeldingBuilder)));
     }
 
     private LocalDateTime nyTid() {
@@ -346,7 +348,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.ENDRING)
         .medInnsendingstidspunkt(nyTid()).medJournalpostId(new JournalpostId("123"));
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(new InntektsmeldingInnhold(inntektsmeldingBuilder)));
     }
 
     private void avsluttBehandlingOgFagsak(Behandling behandling) {
