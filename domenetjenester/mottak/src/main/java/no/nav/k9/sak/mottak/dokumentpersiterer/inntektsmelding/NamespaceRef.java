@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.dokumentpersiterer;
+package no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

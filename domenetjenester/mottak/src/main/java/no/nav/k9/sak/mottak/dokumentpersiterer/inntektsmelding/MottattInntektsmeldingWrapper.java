@@ -1,19 +1,19 @@
-package no.nav.k9.sak.mottak.dokumentpersiterer;
+package no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding;
 
 import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.v2.MottattDokumentWrapperInntektsmelding;
 
-public abstract class MottattDokumentWrapper<S> {
+public abstract class MottattInntektsmeldingWrapper<S> {
 
     private S skjema;
     private String namespace;
 
-    protected MottattDokumentWrapper(S skjema, String namespace) {
+    protected MottattInntektsmeldingWrapper(S skjema, String namespace) {
         this.skjema = skjema;
         this.namespace = namespace;
     }
 
     @SuppressWarnings("rawtypes")
-    public static MottattDokumentWrapper tilXmlWrapper(Object skjema) {
+    public static MottattInntektsmeldingWrapper tilXmlWrapper(Object skjema) {
         if (skjema instanceof no.seres.xsd.nav.inntektsmelding_m._20180924.InntektsmeldingM) {
             return new no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding((no.seres.xsd.nav.inntektsmelding_m._20180924.InntektsmeldingM) skjema);
         } else if (skjema instanceof no.seres.xsd.nav.inntektsmelding_m._20181211.InntektsmeldingM) {

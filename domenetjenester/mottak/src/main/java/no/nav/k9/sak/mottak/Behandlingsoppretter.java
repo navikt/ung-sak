@@ -31,7 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.k9.sak.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -41,7 +41,7 @@ public class Behandlingsoppretter {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private DokumentPersistererTjeneste dokumentPersistererTjeneste;
+    private InntektsmeldingPersistererTjeneste inntektsmeldingPersistererTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
@@ -57,12 +57,12 @@ public class Behandlingsoppretter {
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                 VedtakVarselRepository vedtakVarselRepository,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                DokumentPersistererTjeneste dokumentPersistererTjeneste,
+                                InntektsmeldingPersistererTjeneste inntektsmeldingPersistererTjeneste,
                                 MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                 HistorikkinnslagTjeneste historikkinnslagTjeneste) { // NOSONAR
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
+        this.inntektsmeldingPersistererTjeneste = inntektsmeldingPersistererTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
@@ -145,8 +145,16 @@ public class Behandlingsoppretter {
     public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(@SuppressWarnings("unused") Saksnummer saksnummer, Behandling nyBehandling) {
         hentAlleInntektsmeldingdokumenter(nyBehandling.getFagsakId()).stream()
             .sorted(MottattDokumentSorterer.sorterMottattDokument())
-            .forEach(mottattDokument -> dokumentPersistererTjeneste.persisterDokumentinnhold(mottattDokument, nyBehandling));
+            .forEach(mottattDokument -> leggInntektsmeldingTilBehandling(nyBehandling, mottattDokument));
 
+    }
+
+    private void leggInntektsmeldingTilBehandling(Behandling nyBehandling, MottattDokument mottattDokument) {
+        var innhold = inntektsmeldingPersistererTjeneste.persisterDokumentinnhold(mottattDokument, nyBehandling);
+        var omsorgsfravær = innhold.getOmsorgspengerFravær();
+        if(!omsorgsfravær.isEmpty()) {
+            
+        }
     }
 
     private List<MottattDokument> hentAlleInntektsmeldingdokumenter(Long fagsakId) {

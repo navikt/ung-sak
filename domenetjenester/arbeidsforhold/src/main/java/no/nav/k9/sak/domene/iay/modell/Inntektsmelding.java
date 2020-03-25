@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
@@ -79,9 +78,10 @@ public class Inntektsmelding implements IndexKey {
     }
 
     public Inntektsmelding(Inntektsmelding inntektsmelding) {
+        this.ytelseType = inntektsmelding.getFagsakYtelseType();
         this.arbeidsgiver = inntektsmelding.getArbeidsgiver();
         this.arbeidsforholdRef = inntektsmelding.arbeidsforholdRef;
-        this.startDatoPermisjon = inntektsmelding.getStartDatoPermisjon().orElse(null);
+        this.startDatoPermisjon = inntektsmelding.startDatoPermisjon;
         this.nærRelasjon = inntektsmelding.getErNærRelasjon();
         this.journalpostId = inntektsmelding.getJournalpostId();
         this.inntektBeløp = inntektsmelding.getInntektBeløp();
@@ -92,23 +92,10 @@ public class Inntektsmelding implements IndexKey {
         this.kanalreferanse = inntektsmelding.getKanalreferanse();
         this.kildesystem = inntektsmelding.getKildesystem();
         this.mottattDato = inntektsmelding.getMottattDato();
-        this.graderinger = inntektsmelding.getGraderinger().stream().map(g -> {
-            final Gradering gradering = new Gradering(g);
-            return gradering;
-        }).collect(Collectors.toList());
-        this.naturalYtelser = inntektsmelding.getNaturalYtelser().stream().map(n -> {
-            final NaturalYtelse naturalYtelse = new NaturalYtelse(n);
-            return naturalYtelse;
-        }).collect(Collectors.toList());
-        this.utsettelsePerioder = inntektsmelding.getUtsettelsePerioder().stream().map(u -> {
-            final UtsettelsePeriode utsettelsePeriode = new UtsettelsePeriode(u);
-            return utsettelsePeriode;
-        }).collect(Collectors.toList());
-        this.endringerRefusjon = inntektsmelding.getEndringerRefusjon().stream().map(r -> {
-            final Refusjon refusjon = new Refusjon(r);
-            return refusjon;
-        }).collect(Collectors.toList());
-        this.ytelseType = inntektsmelding.getFagsakYtelseType();
+        this.graderinger = inntektsmelding.getGraderinger();
+        this.naturalYtelser = inntektsmelding.getNaturalYtelser();
+        this.utsettelsePerioder = inntektsmelding.getUtsettelsePerioder();
+        this.endringerRefusjon = inntektsmelding.getEndringerRefusjon();
     }
 
     @Override
@@ -206,7 +193,6 @@ public class Inntektsmelding implements IndexKey {
     public List<NaturalYtelse> getNaturalYtelser() {
         return Collections.unmodifiableList(naturalYtelser);
     }
-
 
     /**
      * Liste over utsettelse perioder

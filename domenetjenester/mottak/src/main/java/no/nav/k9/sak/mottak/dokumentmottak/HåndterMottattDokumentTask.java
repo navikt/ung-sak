@@ -11,7 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
-import no.nav.k9.sak.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -26,7 +26,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlingRepository behandlingRepository;
-    private DokumentPersistererTjeneste dokumentPersistererTjeneste;
+    private InntektsmeldingPersistererTjeneste dokumentPersistererTjeneste;
 
     HåndterMottattDokumentTask() {
         // for CDI proxy
@@ -35,7 +35,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     @Inject
     public HåndterMottattDokumentTask(BehandlingRepositoryProvider repositoryProvider, 
                                       InnhentDokumentTjeneste innhentDokumentTjeneste,
-                                      DokumentPersistererTjeneste dokumentPersistererTjeneste, 
+                                      InntektsmeldingPersistererTjeneste dokumentPersistererTjeneste, 
                                       MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.innhentDokumentTjeneste = innhentDokumentTjeneste;

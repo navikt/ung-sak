@@ -104,7 +104,7 @@ public class MapInntektsmeldinger {
                 eksternRef = validerArbeidsforholdId ? arbeidsforholdInformasjon.finnEksternRaw(im.getArbeidsgiver(), im.getArbeidsforholdRef()) : null;
             } catch (IllegalStateException e) {
                 if (e.getMessage().startsWith("Mangler eksternReferanse for internReferanse:")) {
-                    // Sukk, må håndtere at det ligger dritt her også ..
+                    // Sukk, må håndtere at det ligger dårlig data her også ..
                     log.warn("Mangler eksternReferanse for internReferanse={}, forkaster internReferanse. Antar feilmapping", im.getArbeidsforholdRef());
                     eksternRef = null;
                 } else {
