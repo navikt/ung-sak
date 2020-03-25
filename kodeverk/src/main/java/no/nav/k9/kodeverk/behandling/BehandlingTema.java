@@ -22,13 +22,6 @@ public enum BehandlingTema implements Kodeverdi {
     PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN),  // ny ordning fom 011017
     OMSORGSPENGER("OMS_OMSORG", "Omsorgspenger", "ab0149", FagsakYtelseType.OMSORGSPENGER),
 
-    // FIXME K9 - kodeverk for k9 ytelser i stedet
-    ENGANGSSTØNAD("ENGST", "Engangsstønad", "ab0327", FagsakYtelseType.ENGANGSTØNAD),
-    ENGANGSSTØNAD_FØDSEL("ENGST_FODS", "Engangsstønad ved fødsel", "ab0050", FagsakYtelseType.ENGANGSTØNAD),
-    ENGANGSSTØNAD_ADOPSJON("ENGST_ADOP", "Engangsstønad ved adopsjon", "ab0027", FagsakYtelseType.ENGANGSTØNAD),
-    FORELDREPENGER("FORP", "Foreldrepenger", "ab0326", FagsakYtelseType.FORELDREPENGER),
-    FORELDREPENGER_ADOPSJON("FORP_ADOP", "Foreldrepenger ved adopsjon", "ab0072", FagsakYtelseType.FORELDREPENGER),
-    FORELDREPENGER_FØDSEL("FORP_FODS", "Foreldrepenger ved fødsel", "ab0047", FagsakYtelseType.FORELDREPENGER),
     SVANGERSKAPSPENGER("SVP", "Svangerskapspenger", "ab0126", FagsakYtelseType.SVANGERSKAPSPENGER),
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 
@@ -36,11 +29,15 @@ public enum BehandlingTema implements Kodeverdi {
 
     public static final String KODEVERK = "BEHANDLING_TEMA";
     private static final Map<String, BehandlingTema> KODER = new LinkedHashMap<>();
+    private static final Map<FagsakYtelseType, BehandlingTema> YTELSE_TYPE_TIL_TEMA = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
+                throw new IllegalArgumentException("Duplikat kode: " + v.kode);
+            }
+            if (YTELSE_TYPE_TIL_TEMA.putIfAbsent(v.fagsakYtelseType, v) != null) {
+                throw new IllegalArgumentException("Duplikat ytelseType -> tema: " + v);
             }
         }
     }
@@ -87,27 +84,8 @@ public enum BehandlingTema implements Kodeverdi {
         return List.of(values()).stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst().orElse(UDEFINERT);
     }
 
-    public static boolean gjelderEngangsstønad(BehandlingTema behandlingTema) {
-        return ENGANGSSTØNAD_ADOPSJON.equals(behandlingTema) || ENGANGSSTØNAD_FØDSEL.equals(behandlingTema) || ENGANGSSTØNAD.equals(behandlingTema);
-    }
-
-    public static boolean gjelderForeldrepenger(BehandlingTema behandlingTema) {
-        return FORELDREPENGER_ADOPSJON.equals(behandlingTema) || FORELDREPENGER_FØDSEL.equals(behandlingTema) || FORELDREPENGER.equals(behandlingTema);
-    }
-
-    public static boolean gjelderSvangerskapspenger(BehandlingTema behandlingTema) {
-        return SVANGERSKAPSPENGER.equals(behandlingTema);
-    }
-
-    public static boolean ikkeSpesifikkHendelse(BehandlingTema behandlingTema) {
-        return FORELDREPENGER.equals(behandlingTema) || ENGANGSSTØNAD.equals(behandlingTema) || UDEFINERT.equals(behandlingTema);
-    }
-
-    public static boolean gjelderSammeYtelse(BehandlingTema tema1, BehandlingTema tema2) {
-        return (gjelderForeldrepenger(tema1) && gjelderForeldrepenger(tema2))
-            || (gjelderEngangsstønad(tema1) && gjelderEngangsstønad(tema2))
-            || (gjelderSvangerskapspenger(tema1) && gjelderSvangerskapspenger(tema2));
-
+    public static BehandlingTema finnForFagsakYtelseType(FagsakYtelseType ytelseType) {
+        return YTELSE_TYPE_TIL_TEMA.getOrDefault(ytelseType, BehandlingTema.UDEFINERT);
     }
 
     @Override
@@ -130,14 +108,6 @@ public enum BehandlingTema implements Kodeverdi {
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
-    }
-
-    /**
-     * Returnerer true hvis angitt tema gjelder samme ytelse og hendelse som denne. Hendlse trenger kun matche hvis begge temaene amgir dette
-     * eksplisitt.
-     */
-    public boolean erKompatibelMed(BehandlingTema that) {
-        return gjelderSammeYtelse(this, that) && (ikkeSpesifikkHendelse(this) || ikkeSpesifikkHendelse(that) || equals(that));
     }
 
     public FagsakYtelseType getFagsakYtelseType() {
