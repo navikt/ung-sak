@@ -1,16 +1,16 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperioder;
-import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.uttak.UttakTjeneste;
+import no.nav.k9.sak.domene.uttak.rest.UttakRestKlient;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -21,10 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -33,10 +30,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class InfotrygdFeedServiceTest {
 
     @Mock
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-
-    @Mock
-    private PleiebehovResultatRepository pleiebehovResultatRepository;
+    UttakTjeneste uttakTjeneste;
 
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
@@ -46,7 +40,7 @@ public class InfotrygdFeedServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        service = new InfotrygdFeedService(medisinskGrunnlagRepository, pleiebehovResultatRepository, prosessTaskRepository);
+        service = new InfotrygdFeedService(uttakTjeneste, prosessTaskRepository);
     }
 
     @Test
@@ -66,8 +60,9 @@ public class InfotrygdFeedServiceTest {
             .medSaksnummer("saksnummer")
             .medAktørId("123")
             .medAktørIdPleietrengende("321")
-            .medPeriode(førsteStønadsdag, vilkårligDato)
-            .medPeriode(vilkårligDato, sisteStønadsdag)
+            .medInnvilgetPeriode(førsteStønadsdag, vilkårligDato)
+            .medInnvilgetPeriode(vilkårligDato, sisteStønadsdag)
+            .medAvslåttPeriode(sisteStønadsdag, sisteStønadsdag.plusMonths(1))
             .medVersjonFagsak(99L)
             .medVersjonBehandling(88L)
             .hentBehandling();
@@ -94,9 +89,11 @@ public class InfotrygdFeedServiceTest {
     }
 
     @Test
-    public void publiserHendelse_uten_resultat_i_medisinskGrunnlagRepository() {
+    public void publiserHendelse_uten_aktørId_pleietrengende() {
+        String aktørId = "123";
         Behandling behandling = mockHelper()
-            .utenMedisinskGrunnlag()
+            .medAktørId(aktørId)
+            .medAktørIdPleietrengende(null)
             .hentBehandling();
 
         ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
@@ -106,7 +103,25 @@ public class InfotrygdFeedServiceTest {
 
         ProsessTaskData pd = captor.getValue();
         InfotrygdFeedMessage message = InfotrygdFeedMessage.fromJson(pd.getPayloadAsString());
+        assertThat(message.getAktoerId()).isEqualTo(aktørId);
         assertThat(message.getAktoerIdPleietrengende()).isNull();
+    }
+
+    @Test
+    public void publiserHendelse_uten_treff_i_uttak() {
+        Behandling behandling = mockHelper()
+            .utenUttaksplaner()
+            .hentBehandling();
+
+        ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
+        when(prosessTaskRepository.lagre(captor.capture())).thenReturn("urelevant");
+
+        service.publiserHendelse(behandling);
+
+        ProsessTaskData pd = captor.getValue();
+        InfotrygdFeedMessage message = InfotrygdFeedMessage.fromJson(pd.getPayloadAsString());
+        assertThat(message.getFoersteStoenadsdag()).isNull();
+        assertThat(message.getSisteStoenadsdag()).isNull();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -145,39 +160,31 @@ public class InfotrygdFeedServiceTest {
         service.publiserHendelse(behandling);
     }
 
-    // todo: uten resultat i pleiebehovResultatRepository
-
-    // todo: tester for manglende treff i repo og nullverdier
-    // todo: hvordan sjekker jeg at en periode er annulert ???????
-
     private FeedServiceMockHelper mockHelper() {
-        return new FeedServiceMockHelper(medisinskGrunnlagRepository, pleiebehovResultatRepository, prosessTaskRepository);
+        return new FeedServiceMockHelper(uttakTjeneste, prosessTaskRepository);
     }
 }
 
 class FeedServiceMockHelper {
     // Mocks
-    private final MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-    private final PleiebehovResultatRepository pleiebehovResultatRepository;
+    private final UttakTjeneste uttakTjeneste;
     private final ProsessTaskRepository prosessTaskRepository;
 
     // Builder-parametere
     private Saksnummer saksnummer = new Saksnummer("x123");
     private AktørId aktørId = new AktørId(123L);
-    private AktørId aktørIdPleietrengende = new AktørId(543L);
+    private AktørId aktørIdPleietrengende; // = new AktørId(543L);
     private FagsakYtelseType fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
     private Long versjonFagsak = 1L;
     private Long versjonBehandling = 2L;
     private List<FomTom> perioder = new ArrayList<>();
-    private boolean harMedisinskGrunnlag = true;
-    private boolean harPleiebehovResultat = true;
+    private boolean harUttaksplaner = true;
 
     // Annen tilstand
     private long sisteBehandlingsId = 0L;
 
-    FeedServiceMockHelper(MedisinskGrunnlagRepository medisinskGrunnlagRepository, PleiebehovResultatRepository pleiebehovResultatRepository, ProsessTaskRepository prosessTaskRepository) {
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
-        this.pleiebehovResultatRepository = pleiebehovResultatRepository;
+    FeedServiceMockHelper(UttakTjeneste uttakTjeneste, ProsessTaskRepository prosessTaskRepository) {
+        this.uttakTjeneste = uttakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
@@ -200,22 +207,26 @@ class FeedServiceMockHelper {
     }
 
     FeedServiceMockHelper medAktørIdPleietrengende(String aktørIdPleietrengende) {
-        this.aktørIdPleietrengende = new AktørId(aktørIdPleietrengende);
+        if(aktørIdPleietrengende == null) {
+            this.aktørIdPleietrengende = null;
+        } else {
+            this.aktørIdPleietrengende = new AktørId(aktørIdPleietrengende);
+        }
         return this;
     }
 
-    FeedServiceMockHelper medPeriode(LocalDate fom, LocalDate tom) {
-        perioder.add(new FomTom(fom, tom));
+    FeedServiceMockHelper medInnvilgetPeriode(LocalDate fom, LocalDate tom) {
+        perioder.add(new FomTom(fom, tom, true));
         return this;
     }
 
-    FeedServiceMockHelper utenMedisinskGrunnlag() {
-        harMedisinskGrunnlag = false;
+    FeedServiceMockHelper medAvslåttPeriode(LocalDate fom, LocalDate tom) {
+        perioder.add(new FomTom(fom, tom, false));
         return this;
     }
 
-    FeedServiceMockHelper utenPleiebehovResultat() {
-        harPleiebehovResultat = false;
+    FeedServiceMockHelper utenUttaksplaner() {
+        harUttaksplaner = false;
         return this;
     }
 
@@ -237,15 +248,41 @@ class FeedServiceMockHelper {
     Behandling hentBehandling() {
         long behandlingsId = nesteBehandlingsId();
 
-        if(harPleiebehovResultat) {
-            mockPleiebehov(behandlingsId);
-        }
-
-        if(harMedisinskGrunnlag) {
-            mockMedisinskGrunnlag(behandlingsId);
+        if(harUttaksplaner) {
+            lagUttaksplaner(saksnummer);
         }
 
         return mockBehandling(behandlingsId);
+    }
+
+    private void lagUttaksplaner(Saksnummer saksnummer) {
+        if(saksnummer == null) {
+            return;
+        }
+        Uttaksplan uttaksplan = mockUttaksplan();
+        when(uttakTjeneste.hentUttaksplaner(List.of(saksnummer)))
+            .thenReturn(Map.of(saksnummer, uttaksplan));
+    }
+
+    private Uttaksplan mockUttaksplan() {
+        Uttaksplan uttaksplan = mock(Uttaksplan.class);
+
+        NavigableMap<Periode, Uttaksplanperiode> perioder = new TreeMap<>();
+
+        for(FomTom fomTom : this.perioder) {
+            Periode periode = new Periode(fomTom.fom, fomTom.tom);
+            Uttaksplanperiode uttaksplanperiode = mock(Uttaksplanperiode.class);
+            if(fomTom.innvilget) {
+                when(uttaksplanperiode.getUtfall()).thenReturn(UtfallType.INNVILGET);
+            } else {
+                when(uttaksplanperiode.getUtfall()).thenReturn(UtfallType.AVSLÅTT);
+            }
+            perioder.put(periode, uttaksplanperiode);
+        }
+
+        when(uttaksplan.getPerioder()).thenReturn(perioder);
+
+        return uttaksplan;
     }
 
     // ==== Behandling ====
@@ -267,6 +304,7 @@ class FeedServiceMockHelper {
         when(fagsak.getYtelseType()).thenReturn(fagsakYtelseType);
         when(fagsak.getSaksnummer()).thenReturn(saksnummer);
         when(fagsak.getAktørId()).thenReturn(aktørId);
+        when(fagsak.getPleietrengendeAktørId()).thenReturn(aktørIdPleietrengende);
         when(fagsak.getVersjon()).thenReturn(versjonFagsak);
         return fagsak;
     }
@@ -275,50 +313,17 @@ class FeedServiceMockHelper {
         return sisteBehandlingsId++;
     }
 
-    // ==== MedisinskGrunnlag ====
-
-    private void mockMedisinskGrunnlag(long behandlingsId) {
-        MedisinskGrunnlag medisinskGrunnlag = mock(MedisinskGrunnlag.class);
-        when(medisinskGrunnlagRepository.hent(behandlingsId)).thenReturn(medisinskGrunnlag);
-
-        Pleietrengende pleietrengende = mockPleietrengende();
-        when(medisinskGrunnlag.getPleietrengende()).thenReturn(pleietrengende);
-    }
-
-    private Pleietrengende mockPleietrengende() {
-        Pleietrengende pleietrengende = mock(Pleietrengende.class);
-        when(pleietrengende.getAktørId()).thenReturn(aktørIdPleietrengende);
-        return pleietrengende;
-    }
-
-    // ==== Pleiebehov ====
-    private void mockPleiebehov(long behandlingsId) {
-        PleiebehovResultat pleiebehovResultat = mock(PleiebehovResultat.class);
-        when(pleiebehovResultatRepository.hent(behandlingsId)).thenReturn(pleiebehovResultat);
-
-        Pleieperioder pleieperioder = mock(Pleieperioder.class);
-        when(pleiebehovResultat.getPleieperioder()).thenReturn(pleieperioder);
-
-        List<Pleieperiode> perioder = this.perioder.stream()
-            .map(this::mockPleieperiode)
-            .collect(Collectors.toList());
-        when(pleieperioder.getPerioder()).thenReturn(perioder);
-    }
-
-    private Pleieperiode mockPleieperiode(FomTom fomTom) {
-        Pleieperiode pleieperiode = mock(Pleieperiode.class);
-        when(pleieperiode.getPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(fomTom.fom, fomTom.tom));
-        return pleieperiode;
-    }
 
 
-    private static class FomTom {
+    private static final class FomTom {
         private final LocalDate fom;
         private final LocalDate tom;
+        private final boolean innvilget;
 
-        private FomTom(LocalDate fom, LocalDate tom) {
+        private FomTom(LocalDate fom, LocalDate tom, boolean innvilget) {
             this.fom = fom;
             this.tom = tom;
+            this.innvilget = innvilget;
         }
     }
 }

@@ -1,15 +1,14 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
-import no.nav.foreldrepenger.behandlingslager.behandling.Behandling;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.medisinsk.Pleietrengende;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultat;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.PleiebehovResultatRepository;
-import no.nav.foreldrepenger.behandlingslager.behandling.pleiebehov.Pleieperiode;
-import no.nav.foreldrepenger.behandlingslager.fagsak.Fagsak;
-import no.nav.foreldrepenger.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.uttak.UttakTjeneste;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Periode;
+import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -19,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
@@ -31,18 +27,14 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 public class InfotrygdFeedService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-    private final PleiebehovResultatRepository pleiebehovResultatRepository;
+    private final UttakTjeneste uttakTjeneste;
     private final ProsessTaskRepository prosessTaskRepository;
 
     @Inject
     public InfotrygdFeedService(
-        MedisinskGrunnlagRepository medisinskGrunnlagRepository,
-        PleiebehovResultatRepository pleiebehovResultatRepository,
-        ProsessTaskRepository prosessTaskRepository
+        UttakTjeneste uttakTjeneste, ProsessTaskRepository prosessTaskRepository
     ) {
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
-        this.pleiebehovResultatRepository = pleiebehovResultatRepository;
+        this.uttakTjeneste = uttakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
@@ -70,21 +62,54 @@ public class InfotrygdFeedService {
     }
 
     private InfotrygdFeedMessage getInfotrygdFeedMessage(Behandling behandling) {
-        PleiebehovResultat pleiebehovResultat = pleiebehovResultatRepository.hent(behandling.getId());
-        MedisinskGrunnlag medisinskGrunnlag = medisinskGrunnlagRepository.hent(behandling.getId());
-
         InfotrygdFeedMessage.Builder builder = InfotrygdFeedMessage.builder()
             .uuid(UUID.randomUUID().toString());
 
         setSaksnummerOgAktørId(builder, behandling.getFagsak());
-        setFomTom(builder, pleiebehovResultat);
-        setAktørIdPleietrengende(builder, medisinskGrunnlag);
+        setFomTom(builder, behandling);
+        setAktørIdPleietrengende(builder, behandling);
 
         return builder.build();
     }
 
+    private void setSaksnummerOgAktørId(InfotrygdFeedMessage.Builder builder, Fagsak fagsak) {
+        builder
+            .saksnummer(fagsak.getSaksnummer().getVerdi())
+            .aktoerId(fagsak.getAktørId().getId());
+    }
+
+    private void setFomTom(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
+        Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
+        Map<Saksnummer, Uttaksplan> saksnummerUttaksplanMap = uttakTjeneste.hentUttaksplaner(List.of(saksnummer));
+        Uttaksplan uttaksplan = saksnummerUttaksplanMap.get(saksnummer);
+        if(uttaksplan == null) {
+            logger.info("Ingen treff i uttaksplaner. Antar at saken er annullert. Saksnummer: " + saksnummer);
+            return;
+        }
+        List<Periode> perioder = uttaksplan.getPerioder().entrySet().stream()
+            .filter(e -> Objects.equals(UtfallType.INNVILGET, e.getValue().getUtfall()))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
+
+        LocalDate fom = perioder.stream().map(Periode::getFom).min(Comparator.naturalOrder()).orElse(null);
+        LocalDate tom = perioder.stream().map(Periode::getTom).max(Comparator.naturalOrder()).orElse(null);
+
+        if(!Objects.equals(Tid.TIDENES_BEGYNNELSE, fom)) {
+            builder.foersteStoenadsdag(fom);
+        }
+        if(!Objects.equals(Tid.TIDENES_ENDE, tom)) {
+            builder.sisteStoenadsdag(tom);
+        }
+    }
+
+    private void setAktørIdPleietrengende(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
+        AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
+        if(pleietrengendeAktørId != null) {
+            builder.aktoerIdPleietrengende(pleietrengendeAktørId.getId());
+        }
+    }
+
     private ProsessTaskData getProsessTaskData(Behandling behandling, InfotrygdFeedMessage infotrygdFeedMessage) {
-        // todo: legg til asserts på ugyldige verdier
         String tasktype = PubliserInfotrygdFeedElementTask.TASKTYPE;
         ProsessTaskData pd = new ProsessTaskData(tasktype);
 
@@ -98,46 +123,6 @@ public class InfotrygdFeedService {
 
         pd.setPayload(infotrygdFeedMessage.toJson());
         return pd;
-    }
-
-    private void setSaksnummerOgAktørId(InfotrygdFeedMessage.Builder builder, Fagsak fagsak) {
-        builder
-            .saksnummer(fagsak.getSaksnummer().getVerdi())
-            .aktoerId(fagsak.getAktørId().getId());
-    }
-
-    private void setFomTom(InfotrygdFeedMessage.Builder builder, PleiebehovResultat pleiebehovResultat) {
-        Comparator<LocalDate> localDateComparator = Comparator.comparing(d -> d);
-
-        List<DatoIntervallEntitet> perioder = pleiebehovResultat.getPleieperioder().getPerioder().stream()
-            .map(Pleieperiode::getPeriode).collect(Collectors.toList());
-
-        LocalDate fom = perioder.stream()
-            .map(DatoIntervallEntitet::getFomDato)
-            .min(localDateComparator)
-            .filter(d -> !Objects.equals(Tid.TIDENES_BEGYNNELSE, d))
-            .orElse(null);
-
-        LocalDate tom = perioder.stream()
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(localDateComparator)
-            .filter(d -> !Objects.equals(Tid.TIDENES_ENDE, d))
-            .orElse(null);
-
-        builder
-            .foersteStoenadsdag(fom)
-            .sisteStoenadsdag(tom);
-    }
-
-    private void setAktørIdPleietrengende(InfotrygdFeedMessage.Builder builder, MedisinskGrunnlag medisinskGrunnlag) {
-        if(medisinskGrunnlag == null) {
-            return;
-        }
-        Pleietrengende pleietrengende = medisinskGrunnlag.getPleietrengende();
-        if(pleietrengende == null) {
-            return;
-        }
-        builder.aktoerIdPleietrengende(pleietrengende.getAktørId().getId());
     }
 
     private String lagSekvensnummer(Behandling behandling) {
