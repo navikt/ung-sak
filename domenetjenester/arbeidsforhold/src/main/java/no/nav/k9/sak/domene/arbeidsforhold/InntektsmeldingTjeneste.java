@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingSomIkkeKommer;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -215,7 +216,7 @@ public class InntektsmeldingTjeneste {
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver));
     }
 
-    private void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingInnhold im) {
+    private void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingBuilder im) {
         iayTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(im));
     }
 
@@ -268,7 +269,7 @@ public class InntektsmeldingTjeneste {
             .orElse(emptyList());
     }
 
-    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, List<InntektsmeldingInnhold> inntektsmeldinger) {
+    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, List<InntektsmeldingBuilder> inntektsmeldinger) {
         for(var im : inntektsmeldinger) {
             lagreInntektsmelding(saksnummer, behandlingId, im);
         }

@@ -60,9 +60,9 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    /** tid oppgittFravær per dag. */
+    /** tid oppgittFravær per dag. Hvis ikke oppgitt antas hele dagen å telle med. */
     @ChangeTracked
-    @Column(name = "fravaer_per_dag")
+    @Column(name = "fravaer_per_dag", nullable = true)
     private Duration fraværPerDag;
 
     @Version

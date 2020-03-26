@@ -6,18 +6,13 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingMottaker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.xml.MottattDokumentXmlParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
@@ -25,23 +20,18 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 @ApplicationScoped
 public class InntektsmeldingPersistererTjeneste {
 
-    private Instance<InntektsmeldingMottaker> inntektsmeldingMottakere;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
 
     InntektsmeldingPersistererTjeneste() {
     }
 
     @Inject
-    public InntektsmeldingPersistererTjeneste(InntektsmeldingTjeneste inntektsmeldingTjeneste,
-                                              @Any Instance<InntektsmeldingMottaker> inntektsmeldingMottakere) {
+    public InntektsmeldingPersistererTjeneste(InntektsmeldingTjeneste inntektsmeldingTjeneste) {
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
-        this.inntektsmeldingMottakere = inntektsmeldingMottakere;
     }
 
     @SuppressWarnings("unchecked")
     public void leggInntektsmeldingerTilBehandling(Behandling behandling, List<MottattDokument> mottatteDokumenter) {
-        var mottaker = BehandlingTypeRef.Lookup.find(InntektsmeldingMottaker.class, inntektsmeldingMottakere, behandling.getFagsakYtelseType(), behandling.getType());
-
         // wrap/dekod alle først
         var mottatt = new IdentityHashMap();
         var oversettere = new IdentityHashMap();
@@ -52,7 +42,7 @@ public class InntektsmeldingPersistererTjeneste {
         }
 
         // så lagre - dette gjør remote kall m.m.
-        List<InntektsmeldingInnhold> inntektsmeldinger = new ArrayList<>();
+        List<InntektsmeldingBuilder> inntektsmeldinger = new ArrayList<>();
         for (var m : mottatteDokumenter) {
             var wrapper = (MottattInntektsmeldingWrapper) mottatt.get(m);
             var oversetter = (MottattInntektsmeldingOversetter) oversettere.get(m);
@@ -60,9 +50,7 @@ public class InntektsmeldingPersistererTjeneste {
             inntektsmeldinger.add(im);
         }
 
-        var ref = BehandlingReferanse.fra(behandling);
-        mottaker.ifPresent(m -> m.mottattInntektsmelding(ref, inntektsmeldinger));
-
+        // lagre inntektsmeldinger til Abakus (dette korrelerer også arbeidsforhold referanser - genererer interne arbeidsforhold refs
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
     }
 

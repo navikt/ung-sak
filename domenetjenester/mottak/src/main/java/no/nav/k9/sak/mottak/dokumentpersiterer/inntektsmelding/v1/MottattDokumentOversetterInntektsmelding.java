@@ -22,7 +22,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Gradering;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
@@ -69,7 +68,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
     }
 
     @Override
-    public InntektsmeldingInnhold trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument, Behandling behandling) {
+    public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument, Behandling behandling) {
         String aarsakTilInnsending = wrapper.getSkjema().getSkjemainnhold().getAarsakTilInnsending();
         InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
@@ -96,8 +95,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapFerie(wrapper, builder);
         mapUtsettelse(wrapper, builder);
         mapRefusjon(wrapper, builder);
-        
-        return new InntektsmeldingInnhold(builder, wrapper.getOmsorgspenger());
+        builder.medOmsorgspenger(wrapper.getOmsorgspenger());
+        return builder;
     }
     
     private void mapArbeidsforholdOgBeløp(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {

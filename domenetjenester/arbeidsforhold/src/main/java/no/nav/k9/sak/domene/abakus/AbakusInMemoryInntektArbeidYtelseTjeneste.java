@@ -26,7 +26,6 @@ import javax.enterprise.inject.Alternative;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -255,13 +254,12 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
-    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingInnhold> inntektsmeldingInnhold) {
-        Objects.requireNonNull(inntektsmeldingInnhold, "inntektsmeldingInnhold"); // NOSONAR
+    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders) {
+        Objects.requireNonNull(builders, "inntektsmeldingBuilder"); // NOSONAR
         InMemoryInntektArbeidYtelseGrunnlagBuilder builder = opprettGrunnlagBuilderFor(behandlingId);
         InntektsmeldingAggregat inntektsmeldinger = builder.getInntektsmeldinger();
 
-        for (var imInnhold : inntektsmeldingInnhold) {
-            var inntektsmeldingBuilder = imInnhold.getInntektsmeldingBuilder();
+        for (var inntektsmeldingBuilder : builders) {
             var informasjon = builder.getInformasjon();
             konverterEksternArbeidsforholdRefTilInterne(inntektsmeldingBuilder, informasjon);
 

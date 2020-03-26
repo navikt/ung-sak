@@ -44,7 +44,6 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
@@ -440,7 +439,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         .medMottattDato(mottattDato)
         .medInnsendingstidspunkt(LocalDateTime.now()).medJournalpostId(journalPostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(new InntektsmeldingInnhold(inntektsmeldingBuilder)));
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
 
     }
 

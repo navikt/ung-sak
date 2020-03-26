@@ -7,8 +7,8 @@ import javax.enterprise.context.ApplicationScoped;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingMottaker;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingTypeRef
@@ -16,7 +16,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingMottaker;
 public class PleiepengerInntektsmeldingMottaker implements InntektsmeldingMottaker {
 
     @Override
-    public void mottattInntektsmelding(BehandlingReferanse ref, List<InntektsmeldingInnhold> inntektsmelding) {
+    public void mottattInntektsmelding(BehandlingReferanse ref, List<Inntektsmelding> inntektsmelding) {
     }
 
 }

@@ -16,8 +16,8 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingInnhold;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingMottaker;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -39,19 +39,19 @@ public class OmsorgspengerInntektsmeldingMottaker implements InntektsmeldingMott
     }
 
     @Override
-    public void mottattInntektsmelding(BehandlingReferanse ref, List<InntektsmeldingInnhold> inntektsmeldinger) {
+    public void mottattInntektsmelding(BehandlingReferanse ref, List<Inntektsmelding> inntektsmeldinger) {
         Long behandlingId = ref.getBehandlingId();
         List<OppgittFraværPeriode> perioder = trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
         grunnlagRepository.lagreOgFlushOppgittFravær(behandlingId, new OppgittFravær(perioder));
     }
 
-    private List<OppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(List<InntektsmeldingInnhold> inntektsmeldinger) {
+    private List<OppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(List<Inntektsmelding> inntektsmeldinger) {
         var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
         List<OppgittFraværPeriode> alle = new ArrayList<>();
         Map<Object, List<OppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var im : inntektsmeldinger) {
-            var arbeidsgiver = im.getInntektsmelding().getArbeidsgiver();
-            var arbeidsforholdRef = im.getInntektsmelding().getArbeidsforholdRef();
+            var arbeidsgiver = im.getArbeidsgiver();
+            var arbeidsforholdRef = im.getArbeidsforholdRef();
             var dummyGruppe = Arrays.asList(aktivitetType, arbeidsgiver, arbeidsforholdRef);
 
             var liste = im.getOmsorgspengerFravær().stream()

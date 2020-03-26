@@ -125,7 +125,7 @@ public class DokumentmottakerFelles {
     
     Behandling opprettNyFørstegangFraAvslag(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, DokumentTypeId dokumentTypeId) {
         Behandling nyBehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottattDokument, fagsak, avsluttetBehandling, dokumentTypeId);
-        behandlingsoppretter.opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(fagsak.getSaksnummer(), nyBehandling);
+        behandlingsoppretter.opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(avsluttetBehandling, nyBehandling);
         opprettTaskForÅStarteBehandling(nyBehandling);
         return nyBehandling;
     }

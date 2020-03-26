@@ -21,13 +21,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class PeriodeAndel {
 
-    public static final Duration HEL_DAG = Duration.parse("PT7H30M");
-
     @JsonProperty(value = "periode", required = true)
     @NotNull
     @Valid
     private Periode periode;
 
+    /** antall timer per dag (og minutter). Hvis null antas hel arbeidsdag skal telles. */
     @JsonProperty(value = "varighetPerDag")
     @Valid
     private Duration varighetPerDag;
@@ -46,13 +45,14 @@ public class PeriodeAndel {
     public PeriodeAndel(LocalDate fom, LocalDate tom, BigDecimal timerPerDag) {
         this(new Periode(fom, tom), toDuration(timerPerDag));
     }
-    
+
+    /** Antal hel dag skal telles med. */
     public PeriodeAndel(Periode periode) {
-        this(periode, HEL_DAG);
+        this(periode, (Duration) null);
     }
 
     public PeriodeAndel(LocalDate fom, LocalDate tom) {
-        this(new Periode(fom, tom), HEL_DAG);
+        this(new Periode(fom, tom), (Duration) null);
     }
 
     public PeriodeAndel(Periode periode, BigDecimal timerPerDag) {
