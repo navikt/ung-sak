@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.uttak;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @ApplicationScoped
 @BehandlingStegRef(kode = "KOFAKUT")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("PSB")
 public class FaktaOmUttakSteg implements BehandlingSteg {
 
     private UttakRepository uttakRepository;
