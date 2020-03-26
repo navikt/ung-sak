@@ -12,16 +12,16 @@ import javax.persistence.TypedQuery;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped
-public class OmsorgspengeGrunnlagRepository {
+public class OmsorgspengerGrunnlagRepository {
 
     private EntityManager entityManager;
 
-    OmsorgspengeGrunnlagRepository() {
+    OmsorgspengerGrunnlagRepository() {
         // CDI
     }
 
     @Inject
-    public OmsorgspengeGrunnlagRepository(EntityManager entityManager) {
+    public OmsorgspengerGrunnlagRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
     }
@@ -62,7 +62,7 @@ public class OmsorgspengeGrunnlagRepository {
         entityManager.flush();
     }
 
-    public void lagreOgFlushRapportertFravær(Long behandlingId, OppgittFravær input) {
+    public void lagreOgFlushOppgittFravær(Long behandlingId, OppgittFravær input) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         entityManager.persist(input);
         deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
@@ -74,7 +74,7 @@ public class OmsorgspengeGrunnlagRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         Optional<OppgittFravær> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
-        søknadEntitet.ifPresent(entitet -> lagreOgFlushRapportertFravær(nyBehandlingId, entitet));
+        søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittFravær(nyBehandlingId, entitet));
     }
 
     private void lagreOgFlushNyttGrunnlag(OmsorgspengerGrunnlag grunnlagEntitet) {

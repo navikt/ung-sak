@@ -216,7 +216,7 @@ public class InntektsmeldingTjeneste {
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver));
     }
 
-    public void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingBuilder im) {
+    private void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingBuilder im) {
         iayTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(im));
     }
 
@@ -267,5 +267,11 @@ public class InntektsmeldingTjeneste {
             .map(iayGrunnlag -> iayGrunnlag.getInntektsmeldinger()
                 .map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).orElse(emptyList()))
             .orElse(emptyList());
+    }
+
+    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, List<InntektsmeldingBuilder> inntektsmeldinger) {
+        for(var im : inntektsmeldinger) {
+            lagreInntektsmelding(saksnummer, behandlingId, im);
+        }
     }
 }

@@ -15,12 +15,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "KontinuerligTilsynPeriode")
 @Table(name = "MD_KONTINUERLIG_TILSYN_PERIODE")
-public class KontinuerligTilsynPeriode extends BaseEntitet {
+public class KontinuerligTilsynPeriode extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_KONTINUERLIG_TILSYN_PERIODE")
@@ -33,15 +36,19 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
+    @ChangeTracked
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
+    @ChangeTracked
     @Column(name = "aarsaksammenheng")
     private Boolean årsaksammenheng;
 
+    @ChangeTracked
     @Column(name = "aarsaksammenheng_begrunnelse")
     private String årsaksammenhengBegrunnelse;
 
+    @ChangeTracked
     @Column(name = "grad", nullable = false)
     private int grad;
 
@@ -87,6 +94,11 @@ public class KontinuerligTilsynPeriode extends BaseEntitet {
         return periode;
     }
 
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(periode);
+    }
+    
     void setKontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
         this.kontinuerligTilsyn = kontinuerligTilsyn;
     }

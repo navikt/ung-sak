@@ -301,7 +301,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
 
     private void sendInnInntektsmeldingPå(Behandling behandling, String virksomhetOrgnr, InternArbeidsforholdRef arbeidsforholdId) {
         JournalpostId journalpostId = new JournalpostId(1L);
-        final InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
+        InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(Arbeidsgiver.virksomhet(virksomhetOrgnr))
             .medInnsendingstidspunkt(LocalDateTime.now())
             .medArbeidsforholdId(arbeidsforholdId)
@@ -310,7 +310,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
             .medStartDatoPermisjon(LocalDate.now())
             .medNærRelasjon(false)
             .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY);
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }
 
     private void opprettInntekt(AktørId aktørId1, Behandling behandling, String virksomhetOrgnr, InternArbeidsforholdRef arbeidsforholdRef) {

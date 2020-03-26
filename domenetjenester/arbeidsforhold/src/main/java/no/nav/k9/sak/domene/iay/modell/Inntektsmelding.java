@@ -18,6 +18,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PeriodeAndel;
 
 public class Inntektsmelding implements IndexKey {
 
@@ -38,6 +39,9 @@ public class Inntektsmelding implements IndexKey {
 
     @ChangeTracked
     private LocalDate startDatoPermisjon;
+
+    @ChangeTracked
+    private List<PeriodeAndel> omsorgspengerFravær;
 
     private boolean nærRelasjon;
 
@@ -176,6 +180,10 @@ public class Inntektsmelding implements IndexKey {
         this.mottattDato = mottattDato;
     }
 
+    void setOmsorgspengerFravær(List<PeriodeAndel> input) {
+        this.omsorgspengerFravær = input == null ? Collections.emptyList() : new ArrayList<PeriodeAndel>(input);
+    }
+
     /**
      * Liste over perioder med graderinger
      *
@@ -183,6 +191,10 @@ public class Inntektsmelding implements IndexKey {
      */
     public List<Gradering> getGraderinger() {
         return Collections.unmodifiableList(graderinger);
+    }
+
+    public List<PeriodeAndel> getOmsorgspengerFravær() {
+        return omsorgspengerFravær;
     }
 
     /**

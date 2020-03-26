@@ -44,7 +44,7 @@ public class MapOmsorgspengerFravær {
             .orElse(Stream.empty());
 
         List<LocalDateSegment<Duration>> segmenter = fravær
-            .map(f -> new LocalDateSegment<Duration>(f.getFom().getValue(), f.getTom().getValue(), PeriodeAndel.HEL_DAG))
+            .map(f -> new LocalDateSegment<Duration>(f.getFom().getValue(), f.getTom().getValue(), null))
             .collect(Collectors.toList());
         return new LocalDateTimeline<Duration>(segmenter);
     }
@@ -56,21 +56,19 @@ public class MapOmsorgspengerFravær {
         return timeline.toSegments().stream().map(s -> new PeriodeAndel(s.getFom(), s.getTom(), s.getValue())).collect(Collectors.toList());
     }
 
-    private LocalDateSegment<Duration> summerVarighetPerDag(LocalDateInterval di,
-                                                            LocalDateSegment<Duration> lhs,
-                                                            LocalDateSegment<Duration> rhs) {
+    private LocalDateSegment<Duration> summerVarighetPerDag(LocalDateInterval di, LocalDateSegment<Duration> lhs, LocalDateSegment<Duration> rhs) {
         if (lhs == null && rhs != null) {
             return new LocalDateSegment<>(di, rhs.getValue());
         } else if (rhs == null && lhs != null) {
             return new LocalDateSegment<>(di, lhs.getValue());
+        } else {
+            if (lhs.getValue() == null || rhs.getValue() == null) {
+                return new LocalDateSegment<>(di, null);
+            } else {
+                var dur = lhs.getValue().plus(rhs.getValue());
+                return new LocalDateSegment<>(di, dur);
+            }
         }
-    
-        var dur = lhs.getValue().plus(rhs.getValue());
-        if (PeriodeAndel.HEL_DAG.minus(dur).isNegative()) {
-            dur = PeriodeAndel.HEL_DAG;
-        }
-        return new LocalDateSegment<>(di, dur);
-    
     }
 
 }

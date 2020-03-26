@@ -339,7 +339,7 @@ public class InntektsmeldingTjenesteImplTest {
     private void lagreInntektsmelding(LocalDate mottattDato, Behandling behandling, InternArbeidsforholdRef arbeidsforholdIdIntern, EksternArbeidsforholdRef arbeidsforholdId, BigDecimal beløp) {
         JournalpostId journalPostId = new JournalpostId(journalpostIdInc.getAndIncrement());
 
-        var inntektsmelding = InntektsmeldingBuilder.builder()
+        var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medStartDatoPermisjon(I_DAG)
             .medArbeidsgiver(arbeidsgiver)
             .medBeløp(beløp)
@@ -349,7 +349,7 @@ public class InntektsmeldingTjenesteImplTest {
             .medInnsendingstidspunkt(LocalDateTime.of(mottattDato, LocalTime.MIN))
             .medJournalpostId(journalPostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmelding);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
 
     }
 

@@ -19,13 +19,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.kodeverk.LegeerklæringKildeKodeverkConverter;
 
 @Entity(name = "Legeerklæring")
 @Table(name = "MD_LEGEERKLAERING")
-public class Legeerklæring extends BaseEntitet {
+public class Legeerklæring extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_LEGEERKLAERING")
@@ -34,9 +37,11 @@ public class Legeerklæring extends BaseEntitet {
     @Column(name = "referanse", nullable = false)
     private UUID uuid = UUID.randomUUID();
 
+    @ChangeTracked
     @Column(name = "fom", nullable = false)
     private LocalDate datert;
 
+    @ChangeTracked
     @OneToMany(mappedBy = "legeerklæring", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<InnleggelsePeriode> innleggelsesPerioder;
 
@@ -44,10 +49,12 @@ public class Legeerklæring extends BaseEntitet {
     @JoinColumn(name = "legeerklaeringer_id", nullable = false, updatable = false, unique = true)
     private Legeerklæringer legeerklæringer;
 
+    @ChangeTracked
     @Convert(converter = LegeerklæringKildeKodeverkConverter.class)
     @Column(name = "kilde", nullable = false)
     private LegeerklæringKilde kilde;
 
+    @ChangeTracked
     @Column(name = "diagnose", nullable = false)
     private String diagnose;
 
@@ -89,6 +96,11 @@ public class Legeerklæring extends BaseEntitet {
         }
     }
 
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(datert, kilde, diagnose);
+    }
+    
     public Long getId() {
         return id;
     }

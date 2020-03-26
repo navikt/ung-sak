@@ -19,8 +19,11 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -28,7 +31,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @Entity(name = "OmsorgspengerFraværPeriode")
 @Table(name = "OMP_OPPGITT_FRAVAER_PERIODE")
 @Immutable
-public class OppgittFraværPeriode extends BaseEntitet {
+public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMP_OPPGITT_FRAVAER_PERIODE")
@@ -45,17 +48,21 @@ public class OppgittFraværPeriode extends BaseEntitet {
     @JoinColumn(name = "fravaer_id", nullable = false, updatable = false, unique = true)
     private OppgittFravær oppgittFravær;
 
+    @ChangeTracked
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
 
+    @ChangeTracked
     @Embedded
     private Arbeidsgiver arbeidsgiver;
 
+    @ChangeTracked
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    /** tid oppgittFravær per dag. */
-    @Column(name = "fravaer_per_dag")
+    /** tid oppgittFravær per dag. Hvis ikke oppgitt antas hele dagen å telle med. */
+    @ChangeTracked
+    @Column(name = "fravaer_per_dag", nullable = true)
     private Duration fraværPerDag;
 
     @Version
@@ -84,8 +91,21 @@ public class OppgittFraværPeriode extends BaseEntitet {
         this.periode = periode;
     }
 
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+    
+    public LocalDate getFom() {
+        return getPeriode().getFomDato();
+    }
+    
+    public LocalDate getTom() {
+        return getPeriode().getTomDato();
     }
 
     void setFravær(OppgittFravær uttak) {

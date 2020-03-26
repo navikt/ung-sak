@@ -22,8 +22,11 @@ import javax.validation.constraints.DecimalMin;
 
 import org.hibernate.annotations.Immutable;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -31,7 +34,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @Entity(name = "UttakAktivitetPeriode")
 @Table(name = "UT_UTTAK_AKTIVITET_PERIODE")
 @Immutable
-public class UttakAktivitetPeriode extends BaseEntitet {
+public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_UTTAK_AKTIVITET_PERIODE")
@@ -48,21 +51,26 @@ public class UttakAktivitetPeriode extends BaseEntitet {
     @JoinColumn(name = "aktivitet_id", nullable = false, updatable = false, unique = true)
     private UttakAktivitet uttak;
 
+    @ChangeTracked
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
 
+    @ChangeTracked
     @Embedded
     private Arbeidsgiver arbeidsgiver;
 
+    @ChangeTracked
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    /** prosent av normatl man kommer til å jobbe når man har denne ytelsen. */
+    /** prosent av normalt man kommer til å jobbe når man har denne ytelsen. */
+    @ChangeTracked
     @Column(name = "skal_jobbe_prosent", updatable = false)
     @DecimalMin("0.00")
     @DecimalMax("100.00")
     private BigDecimal skalJobbeProsent;
 
+    @ChangeTracked
     /** tid jobber normalt per uke (timer etc.) til vanlig (hvis man ikke hadde hatt denne ytelsen). */
     @Column(name = "jobber_normalt_per_uke")
     private Duration jobberNormaltPerUke;
@@ -99,6 +107,11 @@ public class UttakAktivitetPeriode extends BaseEntitet {
         this.periode = periode;
     }
 
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(periode);
+    }
+    
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }

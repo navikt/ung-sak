@@ -19,13 +19,16 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "TilsynsordningPeriode")
 @Table(name = "UT_TILSYNSORDNING_PERIODE")
 @Immutable
-public class TilsynsordningPeriode extends BaseEntitet {
+public class TilsynsordningPeriode extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_TILSYNSORDNING_PERIODE")
@@ -42,6 +45,7 @@ public class TilsynsordningPeriode extends BaseEntitet {
     @JoinColumn(name = "tilsynsordning_id", nullable = false, updatable = false, unique = true)
     private OppgittTilsynsordning tilsynsordning;
 
+    @ChangeTracked
     @Column(name = "varighet", nullable = false, updatable = false)
     private Duration varighet;
 
@@ -67,6 +71,11 @@ public class TilsynsordningPeriode extends BaseEntitet {
 
     void setTilsynsordning(OppgittTilsynsordning tilsynsordning) {
         this.tilsynsordning = Objects.requireNonNull(tilsynsordning, "tilsynsordning");
+    }
+    
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(periode);
     }
 
     @Override

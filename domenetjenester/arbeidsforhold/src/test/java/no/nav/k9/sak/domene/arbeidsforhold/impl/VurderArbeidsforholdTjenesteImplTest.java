@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -330,7 +331,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY)
         .medInnsendingstidspunkt(nyTid()).medJournalpostId(journalpostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }
 
     private LocalDateTime nyTid() {
@@ -346,7 +347,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.ENDRING)
         .medInnsendingstidspunkt(nyTid()).medJournalpostId(new JournalpostId("123"));
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }
 
     private void avsluttBehandlingOgFagsak(Behandling behandling) {

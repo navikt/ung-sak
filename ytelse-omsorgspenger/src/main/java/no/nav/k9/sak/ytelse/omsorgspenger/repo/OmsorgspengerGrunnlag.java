@@ -40,9 +40,9 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     }
 
     /** Opprett uten oppgittFravær - kommer fra saksbehandler senere. */
-    public OmsorgspengerGrunnlag(Long behandlingId, OppgittFravær rapportertFravær) {
+    public OmsorgspengerGrunnlag(Long behandlingId, OppgittFravær oppgittFravær) {
         this.behandlingId = behandlingId;
-        this.oppgittFravær = rapportertFravær;
+        this.oppgittFravær = oppgittFravær;
     }
 
     public OppgittFravær getOppgittFravær() {
