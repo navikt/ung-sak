@@ -41,7 +41,7 @@ public class Inntektsmelding implements IndexKey {
     private LocalDate startDatoPermisjon;
 
     @ChangeTracked
-    private List<PeriodeAndel> omsorgspengerFravær;
+    private List<PeriodeAndel> oppgittFravær;
 
     private boolean nærRelasjon;
 
@@ -181,7 +181,7 @@ public class Inntektsmelding implements IndexKey {
     }
 
     void setOmsorgspengerFravær(List<PeriodeAndel> input) {
-        this.omsorgspengerFravær = input == null ? Collections.emptyList() : new ArrayList<PeriodeAndel>(input);
+        this.oppgittFravær = input == null ? Collections.emptyList() : new ArrayList<PeriodeAndel>(input);
     }
 
     /**
@@ -193,8 +193,8 @@ public class Inntektsmelding implements IndexKey {
         return Collections.unmodifiableList(graderinger);
     }
 
-    public List<PeriodeAndel> getOmsorgspengerFravær() {
-        return omsorgspengerFravær;
+    public List<PeriodeAndel> getOppgittFravær() {
+        return Collections.unmodifiableList(oppgittFravær);
     }
 
     /**
@@ -324,6 +324,10 @@ public class Inntektsmelding implements IndexKey {
         return Collections.unmodifiableList(endringerRefusjon);
     }
 
+    void leggTilFravær(PeriodeAndel fravær) {
+        this.oppgittFravær.add(fravær);
+    }
+    
     void leggTil(Gradering gradering) {
         this.graderinger.add(gradering);
     }

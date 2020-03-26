@@ -54,7 +54,7 @@ public class OmsorgspengerInntektsmeldingMottaker implements InntektsmeldingMott
             var arbeidsforholdRef = im.getArbeidsforholdRef();
             var dummyGruppe = Arrays.asList(aktivitetType, arbeidsgiver, arbeidsforholdRef);
 
-            var liste = im.getOmsorgspengerFravær().stream()
+            var liste = im.getOppgittFravær().stream()
                 .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag()))
                 .collect(Collectors.toList());
             mapByAktivitet.computeIfAbsent(dummyGruppe, k -> new ArrayList<>()).addAll(liste);

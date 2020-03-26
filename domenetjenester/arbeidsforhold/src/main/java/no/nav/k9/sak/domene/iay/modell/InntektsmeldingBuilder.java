@@ -77,6 +77,13 @@ public class InntektsmeldingBuilder {
         return this;
     }
 
+    public InntektsmeldingBuilder leggTilFravær(PeriodeAndel fravær) {
+        precondition();
+        kladd.leggTilFravær(fravær);
+        return this;
+    }
+
+    
     public InntektsmeldingBuilder leggTil(Refusjon refusjon) {
         precondition();
         kladd.leggTil(refusjon);
@@ -142,9 +149,9 @@ public class InntektsmeldingBuilder {
         return this;
     }
 
-    public InntektsmeldingBuilder medOmsorgspenger(List<PeriodeAndel> omsorgspengerFravær) {
+    public InntektsmeldingBuilder medOppgittFravær(List<PeriodeAndel> fravær) {
         precondition();
-        kladd.setOmsorgspengerFravær(omsorgspengerFravær);
+        kladd.setOmsorgspengerFravær(fravær);
         return this;
     }
 

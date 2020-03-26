@@ -216,10 +216,6 @@ public class InntektsmeldingTjeneste {
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver));
     }
 
-    private void lagreInntektsmelding(Saksnummer saksnummer, Long behandlingId, InntektsmeldingBuilder im) {
-        iayTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(im));
-    }
-
     /**
      * Filtrer vekk inntektsmeldinger som er knyttet til et arbeidsforhold som har en tom dato som slutter før STP.
      */
@@ -270,8 +266,6 @@ public class InntektsmeldingTjeneste {
     }
 
     public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, List<InntektsmeldingBuilder> inntektsmeldinger) {
-        for(var im : inntektsmeldinger) {
-            lagreInntektsmelding(saksnummer, behandlingId, im);
-        }
+        iayTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, inntektsmeldinger);
     }
 }

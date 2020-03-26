@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -38,7 +38,6 @@ public class ProsessModell {
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.VURDER_SAMLET,
             BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
             BehandlingStegType.VURDER_UTTAK,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
@@ -78,7 +77,6 @@ public class ProsessModell {
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.VURDER_SAMLET,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
             BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.uttak;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -18,7 +18,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
 @BehandlingTypeRef
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("PSB")
 public class VurderUttakSteg implements BehandlingSteg {
 
     private UttakTjeneste uttakTjeneste;

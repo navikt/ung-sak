@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger;
+package no.nav.k9.sak.ytelse.omsorgspenger.prosess;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -33,11 +33,9 @@ public class ProsessModell {
             BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
             BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            BehandlingStegType.VURDER_OMSORG_FOR,
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.VURDER_SAMLET,
             BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
             BehandlingStegType.VURDER_UTTAK,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
@@ -45,7 +43,6 @@ public class ProsessModell {
             BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
             BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG,
             BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG,
-
             BehandlingStegType.BEREGN_YTELSE,
             BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT,
             BehandlingStegType.SIMULER_OPPDRAG,
@@ -73,11 +70,9 @@ public class ProsessModell {
             BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
             BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            BehandlingStegType.VURDER_OMSORG_FOR,
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.VURDER_SAMLET,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
             BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,

@@ -58,7 +58,7 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
         return getSkjema().getSkjemainnhold();
     }
     
-    public List<PeriodeAndel> getOmsorgspenger() {
+    public List<PeriodeAndel> getOppgittFravær() {
         Optional<Omsorgspenger> omsorgspenger = Optional.ofNullable(getSkjemaInnhold().getOmsorgspenger()).map(JAXBElement::getValue);
         if (omsorgspenger.isEmpty()) {
             return Collections.emptyList();

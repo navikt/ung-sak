@@ -95,7 +95,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapFerie(wrapper, builder);
         mapUtsettelse(wrapper, builder);
         mapRefusjon(wrapper, builder);
-        builder.medOmsorgspenger(wrapper.getOmsorgspenger());
+        
+        builder.medOppgittFravær(wrapper.getOppgittFravær());
         return builder;
     }
     
