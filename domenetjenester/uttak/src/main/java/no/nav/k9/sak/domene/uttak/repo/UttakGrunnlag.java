@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "UttakGrunnlag")
 @Table(name = "GR_UTTAK")
@@ -25,22 +26,27 @@ public class UttakGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "oppgitt_uttak_id", nullable = false, updatable = false)
     private UttakAktivitet oppgittUttak;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "fastsatt_uttak_id")
     private UttakAktivitet fastsattUttak;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "soeknadsperioder_id")
     private Søknadsperioder søknadsperioder;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "ferie_id")
     private Ferie oppgittFerie;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "tilsynsordning_id")
     private OppgittTilsynsordning oppgittTilsynsordning;

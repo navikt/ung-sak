@@ -40,6 +40,12 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         var stp = stpTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, stp);
         
+        // K9 TODO: 
+        // 1. kalle årskvantum for å få vurdet fraværet
+        //    a. hvis Ok gå videre uten aksjonspunkter
+        //    b. hvis Ikke Ok opprett aksjonspunkt som må løses i dette steget (fosterforeldre, delt bosted, etc.)
+        // 2. Lag REST tjeneste for GUI - vise hvor mye brukt (basert på samme tjeneste som kalles her
+        // 3. Lag AksjonspunktOppdaterer for å skrive ned oppdatert kvantum til Årskvantum og la steget kjøre på nytt.
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

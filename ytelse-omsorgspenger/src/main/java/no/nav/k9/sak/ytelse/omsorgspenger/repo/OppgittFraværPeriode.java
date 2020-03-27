@@ -99,11 +99,11 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
-    
+
     public LocalDate getFom() {
         return getPeriode().getFomDato();
     }
-    
+
     public LocalDate getTom() {
         return getPeriode().getTomDato();
     }
