@@ -40,6 +40,7 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_UTTAK_AKTIVITET_PERIODE")
     private Long id;
 
+    @ChangeTracked
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),

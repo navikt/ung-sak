@@ -9,6 +9,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
+import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
+import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped
@@ -26,15 +29,11 @@ public class OmsorgspengerGrunnlagRepository {
         this.entityManager = entityManager;
     }
 
-    public OppgittFravær hentRapportertFravær(Long behandlingId) {
-        return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
+    public OppgittFravær hentOppgittFravær(UUID behandlingId) {
+        return hentOppittFraværHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
     }
 
-    public OppgittFravær hentRapportertFravær(UUID behandlingId) {
-        return hentOppittUttakHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
-    }
-
-    public Optional<OppgittFravær> hentOppittUttakHvisEksisterer(Long behandlingId) {
+    public Optional<OppgittFravær> hentOppittFraværHvisEksisterer(UUID behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
         }
@@ -43,7 +42,11 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær);
     }
 
-    public Optional<OppgittFravær> hentOppittUttakHvisEksisterer(UUID behandlingId) {
+    public OppgittFravær hentOppgittFravær(Long behandlingId) {
+        return hentOppgittFraværHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
+    }
+
+    public Optional<OppgittFravær> hentOppgittFraværHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
         }
@@ -54,12 +57,24 @@ public class OmsorgspengerGrunnlagRepository {
 
     public void lagreOgFlushNyttGrunnlag(Long behandlingId, OmsorgspengerGrunnlag grunnlag) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
-        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
 
+        if (eksisterendeGrunnlag.isPresent()) {
+            boolean erForskjellige = differ(false).areDifferent(grunnlag, eksisterendeGrunnlag.orElse(null));
+            if (erForskjellige) {
+                deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+            } else {
+                // skip
+                return;
+            }
+        }
         Optional.ofNullable(grunnlag.getOppgittFravær()).ifPresent(entityManager::persist);
-
         entityManager.persist(grunnlag);
         entityManager.flush();
+    }
+
+    private DiffEntity differ(boolean medOnlyCheckTrackedFields) {
+        TraverseGraph traverser = TraverseEntityGraphFactory.build(medOnlyCheckTrackedFields);
+        return new DiffEntity(traverser);
     }
 
     public void lagreOgFlushOppgittFravær(Long behandlingId, OppgittFravær input) {
@@ -73,7 +88,7 @@ public class OmsorgspengerGrunnlagRepository {
      * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<OppgittFravær> søknadEntitet = hentOppittUttakHvisEksisterer(gammelBehandlingId);
+        Optional<OppgittFravær> søknadEntitet = hentOppgittFraværHvisEksisterer(gammelBehandlingId);
         søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittFravær(nyBehandlingId, entitet));
     }
 

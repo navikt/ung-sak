@@ -34,6 +34,7 @@ public class TilsynsordningPeriode extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_TILSYNSORDNING_PERIODE")
     private Long id;
 
+    @ChangeTracked
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),

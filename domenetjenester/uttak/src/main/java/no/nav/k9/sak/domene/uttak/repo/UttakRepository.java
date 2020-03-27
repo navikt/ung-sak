@@ -9,6 +9,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
+import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
+import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped
@@ -147,7 +150,16 @@ public class UttakRepository {
     
     public void lagreOgFlushNyttGrunnlag(Long behandlingId, UttakGrunnlag grunnlag) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
-        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        
+        if (eksisterendeGrunnlag.isPresent()) {
+            boolean erForskjellige = differ(true).areDifferent(grunnlag, eksisterendeGrunnlag.orElse(null));
+            if (erForskjellige) {
+                deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+            } else {
+                // skip lagring - ingen endring
+                return;
+            }
+        }
         
         Optional.ofNullable(grunnlag.getOppgittUttak()).ifPresent(entityManager::persist);
         Optional.ofNullable(grunnlag.getOppgittFerie()).ifPresent(entityManager::persist);
@@ -258,5 +270,9 @@ public class UttakRepository {
         lagreOgFlushNyttGrunnlag(eksisterende);
     }
 
+    private DiffEntity differ(boolean medOnlyCheckTrackedFields) {
+        TraverseGraph traverser = TraverseEntityGraphFactory.build(medOnlyCheckTrackedFields);
+        return new DiffEntity(traverser);
+    }
 
 }

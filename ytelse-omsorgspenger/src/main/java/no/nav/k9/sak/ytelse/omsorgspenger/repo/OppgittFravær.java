@@ -21,6 +21,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "OmsorgspengerFravær")
@@ -32,6 +33,7 @@ public class OppgittFravær extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMP_OPPGITT_FRAVAER")
     private Long id;
 
+    @ChangeTracked
     @OneToMany(mappedBy = "oppgittFravær", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
     private Set<OppgittFraværPeriode> perioder;
 
