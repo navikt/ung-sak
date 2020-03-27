@@ -35,7 +35,7 @@ public class KalkulatorTilBGMapper {
 
         //legg til
         fraKalkulus.getPeriodeÅrsaker().forEach(periodeÅrsak -> builder.leggTilPeriodeÅrsak(PeriodeÅrsak.fraKode(periodeÅrsak.getKode())));
-        fraKalkulus.getBeregningsgrunnlagPrStatusOgAndelList().forEach( statusOgAndel -> builder.leggTilBeregningsgrunnlagPrStatusOgAndel(mapStatusOgAndel(statusOgAndel)));
+        fraKalkulus.getBeregningsgrunnlagPrStatusOgAndelList().forEach(statusOgAndel -> builder.leggTilBeregningsgrunnlagPrStatusOgAndel(mapStatusOgAndel(statusOgAndel)));
 
         return builder;
     }
@@ -51,18 +51,21 @@ public class KalkulatorTilBGMapper {
 
     private static BeregningsgrunnlagPrStatusOgAndel.Builder mapStatusOgAndel(BeregningsgrunnlagPrStatusOgAndelDto fraKalkulus) {
         BeregningsgrunnlagPrStatusOgAndel.Builder builder = BeregningsgrunnlagPrStatusOgAndel.builder()
-                .medAktivitetStatus(AktivitetStatus.fraKode(fraKalkulus.getAktivitetStatus().getKode()))
-                .medArbforholdType(fraKalkulus.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(fraKalkulus.getArbeidsforholdType().getKode()))
-                .medBruttoPrÅr(fraKalkulus.getBruttoPrÅr())
-                .medRedusertBrukersAndelPrÅr(fraKalkulus.getRedusertBrukersAndelPrÅr())
-                .medRedusertRefusjonPrÅr(fraKalkulus.getRedusertRefusjonPrÅr())
-                .medInntektskategori(fraKalkulus.getInntektskategori() == null ? null : Inntektskategori.fraKode(fraKalkulus.getInntektskategori().getKode()));
+            .medAktivitetStatus(AktivitetStatus.fraKode(fraKalkulus.getAktivitetStatus().getKode()))
+            .medArbforholdType(fraKalkulus.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(fraKalkulus.getArbeidsforholdType().getKode()))
+            .medBruttoPrÅr(fraKalkulus.getBruttoPrÅr())
+            .medRedusertBrukersAndelPrÅr(fraKalkulus.getRedusertBrukersAndelPrÅr())
+            .medRedusertRefusjonPrÅr(fraKalkulus.getRedusertRefusjonPrÅr())
+            .medInntektskategori(fraKalkulus.getInntektskategori() == null ? null : Inntektskategori.fraKode(fraKalkulus.getInntektskategori().getKode()));
 
         if (fraKalkulus.getBeregningsperiodeFom() != null) {
             builder.medBeregningsperiode(fraKalkulus.getBeregningsperiodeFom(), fraKalkulus.getBeregningsperiodeTom());
         }
 
-        fraKalkulus.getBgAndelArbeidsforhold().ifPresent(bgAndelArbeidsforhold -> builder.medBGAndelArbeidsforhold(KalkulatorTilBGMapper.magBGAndelArbeidsforhold(bgAndelArbeidsforhold)));
+        if (fraKalkulus.getBgAndelArbeidsforhold() != null) {
+            builder.medBGAndelArbeidsforhold(KalkulatorTilBGMapper.magBGAndelArbeidsforhold(fraKalkulus.getBgAndelArbeidsforhold()));
+        }
+
         return builder;
     }
 
@@ -73,9 +76,9 @@ public class KalkulatorTilBGMapper {
         builder.medArbeidsperiodeFom(fraKalkulus.getArbeidsperiodeFom());
         builder.medRefusjonskravPrÅr(fraKalkulus.getRefusjonskravPrÅr());
 
-        fraKalkulus.getArbeidsperiodeTom().ifPresent(builder::medArbeidsperiodeTom);
-        fraKalkulus.getNaturalytelseBortfaltPrÅr().ifPresent(builder::medNaturalytelseBortfaltPrÅr);
-        fraKalkulus.getNaturalytelseTilkommetPrÅr().ifPresent(builder::medNaturalytelseTilkommetPrÅr);
+        builder.medArbeidsperiodeTom(fraKalkulus.getArbeidsperiodeTom());
+        builder.medNaturalytelseTilkommetPrÅr(fraKalkulus.getNaturalytelseTilkommetPrÅr());
+        builder.medNaturalytelseBortfaltPrÅr(fraKalkulus.getNaturalytelseBortfaltPrÅr());
         return builder;
     }
 }

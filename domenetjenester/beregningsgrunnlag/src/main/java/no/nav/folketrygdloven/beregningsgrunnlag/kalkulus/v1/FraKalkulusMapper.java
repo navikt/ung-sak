@@ -154,7 +154,10 @@ public class FraKalkulusMapper {
                 .medRedusertPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getRedusertPrÅr())
                 .medRedusertRefusjonPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getRedusertRefusjonPrÅr())
                 .medÅrsbeløpFraTilstøtendeYtelse(beregningsgrunnlagPrStatusOgAndelDto.getÅrsbeløpFraTilstøtendeYtelse());
-        beregningsgrunnlagPrStatusOgAndelDto.getBgAndelArbeidsforhold().map(FraKalkulusMapper::mapBgAndelArbeidsforhold).ifPresent(builder::medBGAndelArbeidsforhold);
+
+        if (beregningsgrunnlagPrStatusOgAndelDto.getBgAndelArbeidsforhold() != null) {
+            builder.medBGAndelArbeidsforhold(FraKalkulusMapper.mapBgAndelArbeidsforhold(beregningsgrunnlagPrStatusOgAndelDto.getBgAndelArbeidsforhold()));
+        }
 
         if (beregningsgrunnlagPrStatusOgAndelDto.getPgiSnitt() != null) {
             builder.medPgi(beregningsgrunnlagPrStatusOgAndelDto.getPgiSnitt(), List.of(beregningsgrunnlagPrStatusOgAndelDto.getPgi1(), beregningsgrunnlagPrStatusOgAndelDto.getPgi2(), beregningsgrunnlagPrStatusOgAndelDto.getPgi3()));
@@ -168,8 +171,8 @@ public class FraKalkulusMapper {
                 .medArbeidsgiver(mapArbeidsgiver(bgAndelArbeidsforhold.getArbeidsgiver()))
                 .medArbeidsperiodeFom(bgAndelArbeidsforhold.getArbeidsperiodeFom())
                 .medArbeidsperiodeTom(bgAndelArbeidsforhold.getArbeidsperiodeFom())
-                .medNaturalytelseBortfaltPrÅr(bgAndelArbeidsforhold.getNaturalytelseBortfaltPrÅr().orElse(null))
-                .medNaturalytelseTilkommetPrÅr(bgAndelArbeidsforhold.getNaturalytelseTilkommetPrÅr().orElse(null));
+                .medNaturalytelseBortfaltPrÅr(bgAndelArbeidsforhold.getNaturalytelseBortfaltPrÅr())
+                .medNaturalytelseTilkommetPrÅr(bgAndelArbeidsforhold.getNaturalytelseTilkommetPrÅr());
     }
 
     private static Arbeidsgiver mapArbeidsgiver(no.nav.folketrygdloven.kalkulus.response.v1.Arbeidsgiver arbeidsgiver) {
