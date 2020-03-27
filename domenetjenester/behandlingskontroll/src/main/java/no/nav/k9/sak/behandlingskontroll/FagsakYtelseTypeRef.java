@@ -138,7 +138,7 @@ public @interface FagsakYtelseTypeRef {
 
         private static <I> String classNameFromInstance(Instance<I> instances) {
             try {
-                return instances.get().getClass().getName();
+                return instances.iterator().next().getClass().getName();
             } catch (RuntimeException e) {
                 return "Ukjent";
             }
