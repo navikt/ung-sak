@@ -146,7 +146,7 @@ public class TilKalkulusMapper {
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
     }
 
-    private static Aktør mapTilAktør(Arbeidsgiver arbeidsgiver) {
+    public static Aktør mapTilAktør(Arbeidsgiver arbeidsgiver) {
         return arbeidsgiver.getErVirksomhet() ? new Organisasjon(arbeidsgiver.getOrgnr()) : new AktørIdPersonident(arbeidsgiver.getAktørId().getId());
     }
 
@@ -243,6 +243,7 @@ public class TilKalkulusMapper {
     private static YrkesaktivitetDto mapTilDto(Yrkesaktivitet yrkesaktivitet) {
         List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale ->
                 new AktivitetsAvtaleDto(new Periode(aktivitetsAvtale.getPeriode().getFomDato(), aktivitetsAvtale.getPeriode().getTomDato()),
+                        aktivitetsAvtale.getSisteLønnsendringsdato(),
                         aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
 
         ).collect(Collectors.toList());
