@@ -146,7 +146,7 @@ public class TilKalkulusMapper {
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
     }
 
-    private static Aktør mapTilAktør(Arbeidsgiver arbeidsgiver) {
+    public static Aktør mapTilAktør(Arbeidsgiver arbeidsgiver) {
         return arbeidsgiver.getErVirksomhet() ? new Organisasjon(arbeidsgiver.getOrgnr()) : new AktørIdPersonident(arbeidsgiver.getAktørId().getId());
     }
 
