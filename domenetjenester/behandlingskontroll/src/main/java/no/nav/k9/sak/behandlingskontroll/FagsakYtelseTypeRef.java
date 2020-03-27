@@ -27,7 +27,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.ContainerOfFagsakYt
 /**
  * Marker type som implementerer interface {@link BehandlingSteg} for å skille ulike implementasjoner av samme steg for ulike ytelser (eks.
  * Foreldrepenger vs. Engangsstønad).<br>
- *
+ * <p>
  * NB: Settes kun dersom det er flere implementasjoner med samme {@link BehandlingStegRef}.
  */
 @Repeatable(ContainerOfFagsakYtelseTypeRef.class)
@@ -35,7 +35,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.ContainerOfFagsakYt
 @Stereotype
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
 @Documented
 public @interface FagsakYtelseTypeRef {
 
@@ -48,7 +48,22 @@ public @interface FagsakYtelseTypeRef {
      */
     String value() default "*";
 
-    /** AnnotationLiteral som kan brukes ved CDI søk. */
+    /**
+     * container for repeatable annotations.
+     *
+     * @see https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html
+     */
+    @Inherited
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD})
+    @Documented
+    public @interface ContainerOfFagsakYtelseTypeRef {
+        FagsakYtelseTypeRef[] value();
+    }
+
+    /**
+     * AnnotationLiteral som kan brukes ved CDI søk.
+     */
     public static class FagsakYtelseTypeRefLiteral extends AnnotationLiteral<FagsakYtelseTypeRef> implements FagsakYtelseTypeRef {
 
         private String navn;
@@ -89,7 +104,7 @@ public @interface FagsakYtelseTypeRef {
         public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode) {
             return find(cls, instances, ytelseTypeKode.getKode());
         }
-        
+
         public static <I> Optional<I> find(Instance<I> instances, String ytelseTypeKode) {
             return find(null, instances, ytelseTypeKode);
         }
@@ -111,12 +126,22 @@ public @interface FagsakYtelseTypeRef {
                     return Optional.of(getInstance(inst));
                 } else {
                     if (inst.isAmbiguous()) {
-                        throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral);
+                        String className = cls != null ? cls.getName() : "null";
+                        String instancesClassName = classNameFromInstance(instances);
+                        throw new IllegalStateException("Har flere matchende instanser for klasse={" + className + "}, fra instances klass={" + instancesClassName + "}, fagsakType={" + fagsakLiteral + "}");
                     }
                 }
             }
 
             return Optional.empty();
+        }
+
+        private static <I> String classNameFromInstance(Instance<I> instances) {
+            try {
+                return instances.get().getClass().getName();
+            } catch (RuntimeException e) {
+                return "Ukjent";
+            }
         }
 
         private static <I> Instance<I> select(Class<I> cls, Instance<I> instances, Annotation anno) {
@@ -137,18 +162,5 @@ public @interface FagsakYtelseTypeRef {
         private static List<String> coalesce(String... vals) {
             return Arrays.asList(vals).stream().filter(v -> v != null).distinct().collect(Collectors.toList());
         }
-    }
-
-    /**
-     * container for repeatable annotations.
-     * 
-     * @see https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html
-     */
-    @Inherited
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD })
-    @Documented
-    public @interface ContainerOfFagsakYtelseTypeRef {
-        FagsakYtelseTypeRef[] value();
     }
 }

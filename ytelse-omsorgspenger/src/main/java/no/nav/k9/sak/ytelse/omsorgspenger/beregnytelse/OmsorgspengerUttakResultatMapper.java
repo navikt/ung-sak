@@ -22,7 +22,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
 public class OmsorgspengerUttakResultatMapper implements no.nav.k9.sak.ytelse.beregning.UttakResultatMapper {
 
@@ -80,7 +80,7 @@ public class OmsorgspengerUttakResultatMapper implements no.nav.k9.sak.ytelse.be
         });
         return res;
     }
-    
+
     private static LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
         return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
     }
@@ -88,6 +88,6 @@ public class OmsorgspengerUttakResultatMapper implements no.nav.k9.sak.ytelse.be
     private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
         return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
     }
-    
+
 
 }
