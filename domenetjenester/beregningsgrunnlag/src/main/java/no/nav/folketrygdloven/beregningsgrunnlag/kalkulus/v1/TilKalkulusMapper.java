@@ -243,6 +243,7 @@ public class TilKalkulusMapper {
     private static YrkesaktivitetDto mapTilDto(Yrkesaktivitet yrkesaktivitet) {
         List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale ->
                 new AktivitetsAvtaleDto(new Periode(aktivitetsAvtale.getPeriode().getFomDato(), aktivitetsAvtale.getPeriode().getTomDato()),
+                        aktivitetsAvtale.getSisteLønnsendringsdato(),
                         aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
 
         ).collect(Collectors.toList());
