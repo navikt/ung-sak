@@ -28,11 +28,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
-import no.nav.k9.sak.domene.repo.pleiebehov.PleiebehovBuilder;
-import no.nav.k9.sak.domene.repo.pleiebehov.PleiebehovResultat;
-import no.nav.k9.sak.domene.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.domene.repo.pleiebehov.Pleieperiode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovBuilder;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperiode;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;

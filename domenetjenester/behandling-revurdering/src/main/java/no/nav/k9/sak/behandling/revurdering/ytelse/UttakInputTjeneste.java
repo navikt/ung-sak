@@ -18,16 +18,16 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
-import no.nav.k9.sak.domene.repo.pleiebehov.PleiebehovResultat;
-import no.nav.k9.sak.domene.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.domene.repo.pleiebehov.Pleieperioder;
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.Ferie;
 import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperioder;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.Person;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped

@@ -16,11 +16,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
+import no.nav.k9.sak.domene.uttak.uttaksplan.UttakUtbetalingsgrad;
+import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttakUtbetalingsgrad;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
 
 public class UttaksplanResponseTest {
 

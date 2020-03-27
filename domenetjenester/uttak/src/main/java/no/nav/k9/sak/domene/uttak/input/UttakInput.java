@@ -12,12 +12,12 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.repo.pleiebehov.Pleieperioder;
 import no.nav.k9.sak.domene.uttak.repo.Ferie;
 import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.Person;
+import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperioder;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.Person;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
