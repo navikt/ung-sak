@@ -12,6 +12,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class VilkårResultatBuilder {
 
     private Vilkårene kladd = new Vilkårene();
+    private int mellomliggendePeriodeAvstand = 0;
     private boolean built;
 
     VilkårResultatBuilder() {
@@ -36,6 +37,15 @@ public class VilkårResultatBuilder {
             .medType(vilkårType);
     }
 
+    public VilkårResultatBuilder medMaksMellomliggendePeriodeAvstand(int mellomliggendePeriodeAvstand) {
+        if (mellomliggendePeriodeAvstand < 0) {
+            throw new IllegalArgumentException("Må være positivt");
+        }
+        this.mellomliggendePeriodeAvstand = mellomliggendePeriodeAvstand;
+        return this;
+    }
+
+
     public VilkårResultatBuilder leggTil(VilkårBuilder vilkårBuilder) {
         kladd.leggTilVilkår(vilkårBuilder.build());
         return this;
@@ -57,7 +67,9 @@ public class VilkårResultatBuilder {
 
     public VilkårResultatBuilder leggTilIkkeVurderteVilkår(List<DatoIntervallEntitet> intervaller, List<VilkårType> vilkår) {
         vilkår.stream()
-            .map(type -> new VilkårBuilder().medType(type))
+            .map(type -> new VilkårBuilder()
+                .medType(type)
+                .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand))
             .peek(v -> intervaller.forEach(p -> v.leggTil(v.hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT))))
             .forEach(builder -> kladd.leggTilVilkår(builder.build()));
         return this;

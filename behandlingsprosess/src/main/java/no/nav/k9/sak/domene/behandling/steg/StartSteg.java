@@ -6,6 +6,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -25,6 +26,8 @@ import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjenes
 @ApplicationScoped
 public class StartSteg implements BehandlingSteg {
 
+    public static final int PLEIEPENGER_VILKÅR_MELLOMLIGGENDE_PERIODE = 7;
+    public static final int DEFAULT_MAKS_AVSTAND = 0;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
@@ -57,12 +60,22 @@ public class StartSteg implements BehandlingSteg {
 
     private void opprettVilkår(Behandling behandling) {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
-        final var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
-        final var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
-        vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder.leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
-        final var vilkårResultat = vilkårBuilder.build();
+        var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
+        var utledetAvstand = utledAvstand(behandling.getFagsakYtelseType());
+        vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder
+            .medMaksMellomliggendePeriodeAvstand(utledetAvstand)
+            .leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
+        var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
+    }
+
+    private int utledAvstand(FagsakYtelseType fagsakYtelseType) {
+        if (FagsakYtelseType.PSB.equals(fagsakYtelseType)) {
+            return PLEIEPENGER_VILKÅR_MELLOMLIGGENDE_PERIODE;
+        }
+        return DEFAULT_MAKS_AVSTAND;
     }
 
 }

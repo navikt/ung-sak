@@ -1,11 +1,11 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 
-import javax.enterprise.context.ApplicationScoped;
-
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
 public class OmsorgspengerBeregnFeriepenger extends BeregnFeriepengerTjeneste {
 
