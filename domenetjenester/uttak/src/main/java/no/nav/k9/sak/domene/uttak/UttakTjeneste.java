@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.k9.sak.domene.uttak.input.UttakInput;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public interface UttakTjeneste {

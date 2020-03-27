@@ -11,9 +11,9 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplanperiode;
 
 @ApplicationScoped
 public class OpphørUttakTjeneste {

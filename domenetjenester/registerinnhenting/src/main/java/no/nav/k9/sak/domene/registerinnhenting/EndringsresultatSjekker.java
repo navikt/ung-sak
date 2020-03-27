@@ -120,7 +120,7 @@ public class EndringsresultatSjekker {
 
     //Denne metoden bør legges i Tjeneste
     public EndringsresultatSnapshot finnAktivBeregningsgrunnlagGrunnlagAggregatId(Long behandlingId) {
-        //TODO(OJR) koble på kalkulus her
+        //FIXME K9 (OJR) koble på kalkulus her
         Optional<Long> aktivBeregningsgrunnlagGrunnlagId = Optional.empty();
         return aktivBeregningsgrunnlagGrunnlagId
             .map(id -> EndringsresultatSnapshot.medSnapshot(Beregningsgrunnlag.class, id))
