@@ -3,9 +3,7 @@ package no.nav.k9.sak.mottak;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -33,7 +31,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 
@@ -42,7 +39,6 @@ public class Behandlingsoppretter {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private InntektsmeldingPersistererTjeneste inntektsmeldingPersistererTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
@@ -59,13 +55,11 @@ public class Behandlingsoppretter {
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                 VedtakVarselRepository vedtakVarselRepository,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                InntektsmeldingPersistererTjeneste inntektsmeldingPersistererTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                 HistorikkinnslagTjeneste historikkinnslagTjeneste) { // NOSONAR
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.inntektsmeldingPersistererTjeneste = inntektsmeldingPersistererTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
@@ -147,15 +141,7 @@ public class Behandlingsoppretter {
     }
 
     public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(@SuppressWarnings("unused") Behandling forrigeBehandling, Behandling nyBehandling) {
-        var mottatteDokumenter = hentAlleInntektsmeldingdokumenter(nyBehandling.getFagsakId()).stream()
-            .sorted(MottattDokumentSorterer.sorterMottattDokument()).collect(Collectors.toList());
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
-//        inntektsmeldingPersistererTjeneste.leggInntektsmeldingerTilBehandling(nyBehandling, mottatteDokumenter);
-        
-    }
-
-    private List<MottattDokument> hentAlleInntektsmeldingdokumenter(Long fagsakId) {
-        return mottatteDokumentTjeneste.hentMottatteDokumentFagsak(fagsakId).stream().collect(toList());
     }
 
     private OrganisasjonsEnhet finnBehandlendeEnhet(Behandling behandling) {

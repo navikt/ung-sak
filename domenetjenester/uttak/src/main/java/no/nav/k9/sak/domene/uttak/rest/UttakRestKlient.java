@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
-import no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt.UttaksplanRequest;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.Uttaksplan;
-import no.nav.k9.sak.kontrakt.uttak.uttaksplan.UttaksplanListe;
+import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
+import no.nav.k9.sak.domene.uttak.uttaksplan.UttaksplanListe;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttaksplanRequest;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;

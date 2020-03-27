@@ -7,8 +7,8 @@
 	<sequence-generator name="SEQ_PB_PLEIEPERIODE" allocation-size="50" sequence-name="SEQ_PB_PLEIEPERIODE" />
 	<sequence-generator name="SEQ_PB_PLEIEPERIODER" allocation-size="50" sequence-name="SEQ_PB_PLEIEPERIODER" />
 
-	<entity class="no.nav.k9.sak.domene.repo.pleiebehov.PleiebehovResultat" />
-	<entity class="no.nav.k9.sak.domene.repo.pleiebehov.Pleieperioder" />
-	<entity class="no.nav.k9.sak.domene.repo.pleiebehov.Pleieperiode" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperioder" />
+	<entity class="no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperiode" />
 
 </entity-mappings>
