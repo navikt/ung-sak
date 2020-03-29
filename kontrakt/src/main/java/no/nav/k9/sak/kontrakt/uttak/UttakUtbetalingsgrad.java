@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.uttaksplan;
+package no.nav.k9.sak.kontrakt.uttak;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -10,8 +10,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

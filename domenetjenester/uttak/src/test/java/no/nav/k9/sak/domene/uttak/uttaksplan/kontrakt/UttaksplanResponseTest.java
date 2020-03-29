@@ -17,7 +17,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.UttakUtbetalingsgrad;
+import no.nav.k9.sak.kontrakt.uttak.UttakUtbetalingsgrad;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
@@ -34,11 +34,11 @@ public class UttaksplanResponseTest {
     public void skal_serialisere_deserialisere_UttaksplanResponse() throws Exception {
         LocalDate fom = LocalDate.now();
         LocalDate tom = fom.plusDays(10);
-        
+
         var arbeidsforhold = new UttakArbeidsforhold("0140821423", null, UttakArbeidType.ARBEIDSTAKER, UUID.randomUUID().toString());
         var uttaksperiodeInfo = new InnvilgetUttaksplanperiode(100, List.of(new UttakUtbetalingsgrad(arbeidsforhold, new BigDecimal("100.00"))));
         var uttaksplan = new Uttaksplan(Map.of(new Periode(fom, tom ), uttaksperiodeInfo));
-        
+
         @SuppressWarnings("resource")
         var validator = buildDefaultValidatorFactory().getValidator();
         var violations = validator.validate(uttaksplan);
@@ -50,7 +50,7 @@ public class UttaksplanResponseTest {
 
         var response = OM.readValue(reqJson, Uttaksplan.class);
         assertThat(response.getPerioder()).hasSameSizeAs(uttaksplan.getPerioder());
-        
+
     }
 
 }
