@@ -12,7 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.UttakUtbetalingsgrad;
+import no.nav.k9.sak.kontrakt.uttak.UttakUtbetalingsgrad;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
@@ -80,7 +80,7 @@ public class PleiepengerUttakResultatMapper implements no.nav.k9.sak.ytelse.bere
         });
         return res;
     }
-    
+
     private static LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
         return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
     }
@@ -88,6 +88,6 @@ public class PleiepengerUttakResultatMapper implements no.nav.k9.sak.ytelse.bere
     private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
         return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
     }
-    
+
 
 }

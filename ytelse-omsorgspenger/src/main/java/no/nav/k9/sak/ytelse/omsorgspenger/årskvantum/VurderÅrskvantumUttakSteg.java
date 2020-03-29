@@ -12,7 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.Utfall;
+import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 
 @ApplicationScoped
@@ -47,7 +47,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumResultat = årskvantumRestKlient.hentÅrskvantumUttakMock();
 
-        if(Utfall.INNVILGET.equals(årskvantumResultat.samletUtfall)) {
+        if(OmsorgspengerUtfall.INNVILGET.equals(årskvantumResultat.getSamletUtfall())) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else {
             //TODO 1 lage aksjonspunkt for manglende årskvantum.
