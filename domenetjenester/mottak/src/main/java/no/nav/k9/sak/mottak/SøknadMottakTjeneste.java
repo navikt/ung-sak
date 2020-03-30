@@ -8,8 +8,7 @@ import no.nav.k9.sak.kontrakt.søknad.innsending.SøknadInnsending;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@SuppressWarnings("rawtypes")
-public interface SøknadMottakTjeneste<V extends SøknadInnsending> {
+public interface SøknadMottakTjeneste<V extends SøknadInnsending<?>> {
 
     void mottaSøknad(Saksnummer saksnummer, V søknad);
 

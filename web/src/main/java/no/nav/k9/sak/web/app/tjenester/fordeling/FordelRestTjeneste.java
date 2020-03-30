@@ -75,17 +75,16 @@ public class FordelRestTjeneste {
     private JournalTjeneste journalTjeneste;
     private FagsakTjeneste fagsakTjeneste;
 
-    @SuppressWarnings("rawtypes")
-    private Instance<SøknadMottakTjeneste> søknadMottakere;
+    private Instance<SøknadMottakTjeneste<?>> søknadMottakere;
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
 
-    @SuppressWarnings("rawtypes")
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
-                              JournalTjeneste journalTjeneste, FagsakTjeneste fagsakTjeneste,
-                              @Any Instance<SøknadMottakTjeneste> søknadMottakere) { // NOSONAR
+                              JournalTjeneste journalTjeneste, 
+                              FagsakTjeneste fagsakTjeneste,
+                              @Any Instance<SøknadMottakTjeneste<?>> søknadMottakere) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.journalTjeneste = journalTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -163,7 +162,7 @@ public class FordelRestTjeneste {
     }
 
     @SuppressWarnings("rawtypes")
-    private SøknadMottakTjeneste finnSøknadMottakerTjeneste(FagsakYtelseType ytelseType) {
+    SøknadMottakTjeneste finnSøknadMottakerTjeneste(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.find(søknadMottakere, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke støtte for ytelseType:" + ytelseType));
     }
