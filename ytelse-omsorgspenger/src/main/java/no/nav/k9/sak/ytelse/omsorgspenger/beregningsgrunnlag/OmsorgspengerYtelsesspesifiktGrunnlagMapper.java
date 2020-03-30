@@ -47,10 +47,9 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
         var årskvantum = årskvantumTjeneste.hentÅrskvantumUttak(ref);
-        BigDecimal dekningsgrad = BigDecimal.valueOf(100L); // hva er denne for her?
         var arbeidsforholdPerioder = årskvantum.getUttaksperioder().stream().collect(Collectors.groupingBy(u -> u.getUtbetalingsgrad().getArbeidsforhold()));
         var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.entrySet().stream().map(e -> mapTilUtbetalingsgrad(e.getKey(), e.getValue())).collect(Collectors.toList());
-        var grunnlag = new OmsorgspengerGrunnlag(dekningsgrad, utbetalingsgradPrAktivitet);
+        var grunnlag = new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
         return grunnlag;
     }
 

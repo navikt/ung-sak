@@ -52,7 +52,7 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
             .filter(e -> Objects.equals(UtfallType.INNVILGET, e.getValue().getUtfall()))
             .flatMap(e -> lagUtbetalingsgrad(e.getKey(), (InnvilgetUttaksplanperiode) e.getValue()).stream()).collect(Collectors.toList());
 
-        return new PleiepengerSyktBarnGrunnlag(BigDecimal.valueOf(100), utbetalingsgrader);
+        return new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
     }
 
     private List<UtbetalingsgradPrAktivitetDto> lagUtbetalingsgrad(Periode periode, InnvilgetUttaksplanperiode plan) {
