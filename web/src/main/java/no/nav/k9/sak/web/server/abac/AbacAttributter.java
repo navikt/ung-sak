@@ -8,9 +8,9 @@ public class AbacAttributter {
     public static final String RESOURCE_FELLES_DOMENE = "no.nav.abac.attributter.resource.felles.domene";
     public static final String RESOURCE_FELLES_RESOURCE_TYPE = "no.nav.abac.attributter.resource.felles.resource_type";
 
-    public static final String RESOURCE_FORELDREPENGER_SAK_SAKSSTATUS = "no.nav.abac.attributter.resource.foreldrepenger.sak.saksstatus";
-    public static final String RESOURCE_FORELDREPENGER_SAK_BEHANDLINGSSTATUS = "no.nav.abac.attributter.resource.foreldrepenger.sak.behandlingsstatus";
-    public static final String RESOURCE_FORELDREPENGER_SAK_AKSJONSPUNKT_TYPE = "no.nav.abac.attributter.resource.foreldrepenger.sak.aksjonspunkt_type";
-    public static final String RESOURCE_FORELDREPENGER_SAK_ANSVARLIG_SAKSBEHANDLER = "no.nav.abac.attributter.resource.foreldrepenger.sak.ansvarlig_saksbehandler";
-    public static final String RESOURCE_FORELDREPENGER_UTTAKSPLAN = "no.nav.abac.attributter.resource.foreldrepenger.uttaksplan";
+    public static final String RESOURCE_K9_SAK_SAKSSTATUS = "no.nav.abac.attributter.resource.k9.sak.saksstatus";
+    public static final String RESOURCE_K9_SAK_BEHANDLINGSSTATUS = "no.nav.abac.attributter.resource.k9.sak.behandlingsstatus";
+    public static final String RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE = "no.nav.abac.attributter.resource.k9.sak.aksjonspunkt_type";
+    public static final String RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER = "no.nav.abac.attributter.resource.k9.sak.ansvarlig_saksbehandler";
+    public static final String RESOURCE_FORELDREPENGER_UTTAKSPLAN = "no.nav.abac.attributter.resource.k9.uttaksplan";
 }

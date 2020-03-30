@@ -45,7 +45,7 @@ public class AppXacmlRequestBuilderTjenesteImpl implements XacmlRequestBuilderTj
     }
 
     private void populerResources(XacmlRequestBuilder xacmlBuilder, PdpRequest pdpRequest, Tuple<String, String> ident) {
-        List<String> aksjonspunktTyper = pdpRequest.getListOfString(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_AKSJONSPUNKT_TYPE);
+        List<String> aksjonspunktTyper = pdpRequest.getListOfString(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE);
         if (aksjonspunktTyper.isEmpty()) {
             xacmlBuilder.addResourceAttributeSet(byggRessursAttributter(pdpRequest, ident, null));
         } else {
@@ -59,14 +59,14 @@ public class AppXacmlRequestBuilderTjenesteImpl implements XacmlRequestBuilderTj
         XacmlAttributeSet resourceAttributeSet = new XacmlAttributeSet();
         resourceAttributeSet.addAttribute(AbacAttributter.RESOURCE_FELLES_DOMENE, pdpRequest.getString(AbacAttributter.RESOURCE_FELLES_DOMENE));
         resourceAttributeSet.addAttribute(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, pdpRequest.getString(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE));
-        setOptionalValueinAttributeSet(resourceAttributeSet, pdpRequest, AbacAttributter.RESOURCE_FORELDREPENGER_SAK_SAKSSTATUS);
-        setOptionalValueinAttributeSet(resourceAttributeSet, pdpRequest, AbacAttributter.RESOURCE_FORELDREPENGER_SAK_BEHANDLINGSSTATUS);
-        setOptionalValueinAttributeSet(resourceAttributeSet, pdpRequest, AbacAttributter.RESOURCE_FORELDREPENGER_SAK_ANSVARLIG_SAKSBEHANDLER);
+        setOptionalValueinAttributeSet(resourceAttributeSet, pdpRequest, AbacAttributter.RESOURCE_K9_SAK_SAKSSTATUS);
+        setOptionalValueinAttributeSet(resourceAttributeSet, pdpRequest, AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS);
+        setOptionalValueinAttributeSet(resourceAttributeSet, pdpRequest, AbacAttributter.RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER);
         if (ident != null) {
             resourceAttributeSet.addAttribute(ident.getElement1(), ident.getElement2());
         }
         if (aksjonsounktType != null) {
-            resourceAttributeSet.addAttribute(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_AKSJONSPUNKT_TYPE, aksjonsounktType);
+            resourceAttributeSet.addAttribute(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE, aksjonsounktType);
         }
 
         return resourceAttributeSet;

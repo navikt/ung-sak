@@ -34,7 +34,7 @@ import no.nav.vedtak.sikkerhet.abac.PdpRequestBuilder;
 @Alternative
 @Priority(2)
 public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
-    public static final String ABAC_DOMAIN = "foreldrepenger";
+    public static final String ABAC_DOMAIN = "k9";
     private static final MdcExtendedLogContext MDC_EXTENDED_LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørConsumerMedCache aktørConsumer;
@@ -102,7 +102,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         if (!fnrs.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fnrs);
         }
-        pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
+        pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
         return pdpRequest;
     }
 
@@ -110,11 +110,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                                      PipBehandlingsData behandlingData) {
         PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aksjonspunktType);
         AbacUtil.oversettBehandlingStatus(behandlingData.getBehandligStatus())
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_BEHANDLINGSSTATUS, it.getEksternKode()));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, it.getEksternKode()));
         AbacUtil.oversettFagstatus(behandlingData.getFagsakStatus())
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_SAKSSTATUS, it.getEksternKode()));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_SAKSSTATUS, it.getEksternKode()));
         behandlingData.getAnsvarligSaksbehandler()
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_ANSVARLIG_SAKSBEHANDLER, it));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER, it));
         return pdpRequest;
     }
 
