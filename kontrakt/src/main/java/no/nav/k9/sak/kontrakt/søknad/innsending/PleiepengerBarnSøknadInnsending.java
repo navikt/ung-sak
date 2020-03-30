@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.søknad.innsending;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -23,6 +24,7 @@ public class PleiepengerBarnSøknadInnsending extends SøknadInnsending<Pleiepen
 
     public static final String YTELSE_TYPE = "PSB";
     
+    @JsonAlias("payload")
     @JsonProperty(value = "søknad", required = true)
     @NotNull
     @Valid
