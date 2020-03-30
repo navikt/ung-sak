@@ -153,8 +153,6 @@ public class BehandlingProsessEventDto {
         this.behandlingTypeKode = builder.behandlingTypeKode;
         this.opprettetBehandling = builder.opprettetBehandling;
         this.aksjonspunktKoderMedStatusListe = builder.aksjonspunktKoderMedStatusListe;
-        this.ansvarligSaksbehandlerForTotrinn = builder.ansvarligSaksbehandlerForTotrinn;
-        this.ansvarligBeslutterForTotrinn = builder.ansvarligBeslutterForTotrinn;
     }
 
     public static abstract class Builder<T extends Builder<T>> {
@@ -170,8 +168,6 @@ public class BehandlingProsessEventDto {
         private String behandlingStatus;
         private String behandlingSteg;
         private String behandlendeEnhet;
-        private String ansvarligSaksbehandlerForTotrinn;
-        private String ansvarligBeslutterForTotrinn;
         private String ytelseTypeKode;
         private String behandlingTypeKode;
         private LocalDateTime opprettetBehandling;
@@ -184,15 +180,6 @@ public class BehandlingProsessEventDto {
             return self();
         }
 
-        public T medAnsvarligSaksbehandlerForTotrinn(String ansvarligSaksbehandlerForTotrinn) {
-            this.ansvarligSaksbehandlerForTotrinn = ansvarligSaksbehandlerForTotrinn;
-            return self();
-        }
-
-        public T medAnsvarligBeslutterForTotrinn(String ansvarligBeslutterForTotrinn) {
-            this.ansvarligBeslutterForTotrinn = ansvarligBeslutterForTotrinn;
-            return self();
-        }
 
         public T medFagsystem(Fagsystem fagsystem) {
            this.fagsystem = fagsystem;
