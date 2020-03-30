@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
+import no.nav.k9.sak.mottak.inntektsmelding.DokumentmottakerInntektsmelding;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;

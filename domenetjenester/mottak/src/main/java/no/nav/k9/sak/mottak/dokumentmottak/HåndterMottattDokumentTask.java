@@ -11,7 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
-import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
+import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingPersistererTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;

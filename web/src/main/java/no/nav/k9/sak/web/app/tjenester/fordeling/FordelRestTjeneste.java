@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -26,26 +28,26 @@ import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
 import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.JournalTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
-import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSøknadInnsending;
-import no.nav.k9.sak.kontrakt.søknad.psb.PleiepengerBarnSøknadMottatt;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerPleiepengerBarnSoknad;
+import no.nav.k9.sak.kontrakt.søknad.innsending.SøknadInnsending;
+import no.nav.k9.sak.kontrakt.søknad.innsending.SøknadInnsendingMottatt;
+import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.k9.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.soap.sak.tjeneste.OpprettSakTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -67,35 +69,31 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class FordelRestTjeneste {
 
     static final String BASE_PATH = "/fordel";
-    private static final String POST_INFORMASJON_PATH = "/fagsak/informasjon";
-    private static final String POST_OPPRETT_PATH = "/fagsak/opprett";
-    private static final String POST_KNYTT_JOURNALPOST_PATH = "/fagsak/knyttJournalpost";
-    private static final String POST_JOURNALPOST_PATH = "/journalpost";
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
     private JournalTjeneste journalTjeneste;
     private FagsakTjeneste fagsakTjeneste;
-    private OpprettSakTjeneste opprettSakTjeneste;
-    private DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad;
+
+    @SuppressWarnings("rawtypes")
+    private Instance<SøknadMottakTjeneste> søknadMottakere;
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
 
+    @SuppressWarnings("rawtypes")
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               JournalTjeneste journalTjeneste, FagsakTjeneste fagsakTjeneste,
-                              OpprettSakTjeneste opprettSakTjeneste,
-                              DokumentmottakerPleiepengerBarnSoknad dokumentmottakerPleiepengerBarnSoknad) { // NOSONAR
+                              @Any Instance<SøknadMottakTjeneste> søknadMottakere) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.journalTjeneste = journalTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
-        this.opprettSakTjeneste = opprettSakTjeneste;
-        this.dokumentmottakerPleiepengerBarnSoknad = dokumentmottakerPleiepengerBarnSoknad;
+        this.søknadMottakere = søknadMottakere;
     }
 
     @POST
-    @Path(POST_INFORMASJON_PATH)
+    @Path("/fagsak/informasjon")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Informasjon om en fagsak", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
@@ -114,7 +112,7 @@ public class FordelRestTjeneste {
     }
 
     @POST
-    @Path(POST_OPPRETT_PATH)
+    @Path("/fagsak/opprett")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
@@ -128,37 +126,32 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
+        var ytelseType = behandlingTema.getFagsakYtelseType();
         var startDato = opprettSakDto.getPeriodeStart() != null ? opprettSakDto.getPeriodeStart() : LocalDate.now();
+        var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
+        
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, startDato);
 
-        var nyFagsakFor = dokumentmottakerPleiepengerBarnSoknad.finnEllerOpprett(behandlingTema.getFagsakYtelseType(), aktørId, pleietrengendeAktørId, startDato);
-
-        return new SaksnummerDto(nyFagsakFor.getSaksnummer().getVerdi());
+        return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @POST
-    @Path(POST_KNYTT_JOURNALPOST_PATH)
+    @Path("innsending")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
-    @Operation(description = "Knytt journalpost til fagsak.", summary = ("Før en journalpost journalføres på en fagsak skal fagsaken oppdateres med journalposten."), tags = "fordel")
+    @Operation(description = "Mottak av søknad.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public void knyttSakOgJournalpost(@Parameter(description = "Saksnummer og JournalpostId som skal knyttes sammen") @Valid AbacJournalpostKnyttningDto journalpostKnytningDto) {
-        opprettSakTjeneste.knyttSakOgJournalpost(new Saksnummer(journalpostKnytningDto.getSaksnummer()),
-            new JournalpostId(journalpostKnytningDto.getJournalpostId()));
+    public SøknadInnsendingMottatt innsendingSøknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid SøknadInnsending søknad) {
+        var saksnummer = søknad.getSaksnummer();
+        var ytelseType = søknad.getYtelseType();
+        var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
+        søknadMottaker.mottaSøknad(saksnummer, søknad);
+        return new SøknadInnsendingMottatt(saksnummer);
     }
 
     @POST
-    @Path("psbSoknad")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(JSON_UTF8)
-    @Operation(description = "Mottak av søknad for pleiepenger barn.", tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public PleiepengerBarnSøknadMottatt psbSoknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid PleiepengerBarnSøknadInnsending pleiepengerBarnSoknad) {
-        final Behandling behandling = dokumentmottakerPleiepengerBarnSoknad.mottaSoknad(pleiepengerBarnSoknad.getSaksnummer(), pleiepengerBarnSoknad.getSøknad());
-        return new PleiepengerBarnSøknadMottatt(behandling.getFagsak().getSaksnummer());
-    }
-
-    @POST
-    @Path(POST_JOURNALPOST_PATH)
+    @Path("/journalpost")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
@@ -167,6 +160,12 @@ public class FordelRestTjeneste {
 
         InngåendeSaksdokument saksdokument = map(mottattJournalpost);
         dokumentmottakTjeneste.dokumentAnkommet(saksdokument);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private SøknadMottakTjeneste finnSøknadMottakerTjeneste(FagsakYtelseType ytelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(søknadMottakere, ytelseType)
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke støtte for ytelseType:" + ytelseType));
     }
 
     private InngåendeSaksdokument map(AbacJournalpostMottakDto mottattJournalpost) {
