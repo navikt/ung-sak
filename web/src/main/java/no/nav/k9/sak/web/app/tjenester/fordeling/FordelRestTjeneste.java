@@ -39,8 +39,8 @@ import no.nav.k9.sak.dokument.arkiv.journal.JournalTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
-import no.nav.k9.sak.kontrakt.søknad.innsending.SøknadInnsending;
-import no.nav.k9.sak.kontrakt.søknad.innsending.SøknadInnsendingMottatt;
+import no.nav.k9.sak.kontrakt.søknad.innsending.Innsending;
+import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.k9.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
@@ -134,19 +134,19 @@ public class FordelRestTjeneste {
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     @POST
     @Path("/innsending")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
-    public SøknadInnsendingMottatt innsendingSøknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid SøknadInnsending søknad) {
-        var saksnummer = søknad.getSaksnummer();
-        var ytelseType = søknad.getYtelseType();
+    public InnsendingMottatt innsending(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid Innsending innsending) {
+        var saksnummer = innsending.getSaksnummer();
+        var ytelseType = innsending.getYtelseType();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
-        søknadMottaker.mottaSøknad(saksnummer, søknad);
-        return new SøknadInnsendingMottatt(saksnummer);
+        søknadMottaker.mottaSøknad(saksnummer, innsending.getInnhold());
+        return new InnsendingMottatt(saksnummer);
     }
 
     @POST

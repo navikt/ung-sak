@@ -18,19 +18,19 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class SøknadInnsendingMottatt {
+public class InnsendingMottatt {
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
     @Valid
     private Saksnummer saksnummer;
 
-    public SøknadInnsendingMottatt() {
+    public InnsendingMottatt() {
         // 
     }
     
     @JsonCreator
-    public SøknadInnsendingMottatt(@JsonProperty(value = "saksnummer", required = true)
+    public InnsendingMottatt(@JsonProperty(value = "saksnummer", required = true)
                                         @NotNull
                                         @Valid Saksnummer saksnummer) {
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
