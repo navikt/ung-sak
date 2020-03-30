@@ -18,10 +18,10 @@ import java.util.List;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ÅrskvantumResultat {
 
-    @JsonProperty(value = "behandlingsId", required = true)
+    @JsonProperty(value = "behandlingId", required = true)
     @Valid
     @NotNull
-    private String behandlingsId;
+    private String behandlingId;
 
     @JsonProperty(value="utfall", required=true)
     @Valid
@@ -34,12 +34,12 @@ public class ÅrskvantumResultat {
     private List<UttaksperiodeOmsorgspenger> uttaksperioder;
 
 
-    public String getBehandlingsId() {
-        return behandlingsId;
+    public String getBehandlingId() {
+        return behandlingId;
     }
 
-    public void setBehandlingsId(String behandlingsId) {
-        this.behandlingsId = behandlingsId;
+    public void setBehandlingId(String behandlingId) {
+        this.behandlingId = behandlingId;
     }
 
     public OmsorgspengerUtfall getSamletUtfall() {
