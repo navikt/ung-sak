@@ -22,9 +22,8 @@ public class OmsorgspengerSøknadInnsending extends SøknadInnsending<Void> {
 
     public static final String YTELSE_TYPE = "OMP";
     
-    
     public OmsorgspengerSøknadInnsending() {
-        super(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        super(FagsakYtelseType.OMSORGSPENGER);
     }
 
     @JsonCreator
