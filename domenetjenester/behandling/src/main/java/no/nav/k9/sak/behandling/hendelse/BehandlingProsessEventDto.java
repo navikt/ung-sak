@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import no.nav.k9.kodeverk.Fagsystem;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -194,7 +195,7 @@ public class BehandlingProsessEventDto {
         }
 
         public T medFagsystem(Fagsystem fagsystem) {
-        //    this.fagsystem = fagsystem;
+           this.fagsystem = fagsystem;
             return self();
         }
 
