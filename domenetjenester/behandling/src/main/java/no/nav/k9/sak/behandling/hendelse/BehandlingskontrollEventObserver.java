@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandling.hendelse;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +12,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +27,6 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.vedtak.felles.integrasjon.kafka.BehandlingProsessEventDto;
-import no.nav.vedtak.felles.integrasjon.kafka.EventHendelse;
-import no.nav.vedtak.felles.integrasjon.kafka.Fagsystem;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class BehandlingskontrollEventObserver {
@@ -112,16 +111,17 @@ public class BehandlingskontrollEventObserver {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
 
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
-
         return BehandlingProsessEventDto.builder()
-            .medFagsystem(Fagsystem.FPSAK)
+            .medEksternId(behandling.getUuid())
+            .medEventTid(LocalDateTime.now())
+            .medFagsystem(Fagsystem.K9SAK)
             .medBehandlingId(behandling.getId())
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
             .medAktørId(behandling.getAktørId().getId())
+            .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
             .medEventHendelse(eventHendelse)
             .medBehandlinStatus(behandling.getStatus().getKode())
             .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())
-            .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
