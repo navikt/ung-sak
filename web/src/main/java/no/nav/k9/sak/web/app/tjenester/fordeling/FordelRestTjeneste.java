@@ -136,7 +136,7 @@ public class FordelRestTjeneste {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @POST
-    @Path("innsending")
+    @Path("/innsending")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad.", tags = "fordel")
