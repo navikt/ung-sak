@@ -20,6 +20,7 @@ public enum OppgaveÅrsak implements Kodeverdi {
 
     BEHANDLE_SAK("BEH_SAK_VL", "Behandle sak i VL"),
     BEHANDLE_SAK_INFOTRYGD("BEH_SAK_FOR", "Behandle sak i Infotrygd"),
+    BEHANDLE_SAK_INFOTRYGD_OMS("BEH_SAK_OMS", "Behandle sak(OMS) i Infotrygd"),
     SETT_ARENA_UTBET_VENT("SETTVENT_STO", "Sett Arena utbetaling på vent"),
     GODKJENNE_VEDTAK("GOD_VED_VL", "Godkjenne vedtak i VL"),
     REVURDER("RV_VL", "Revurdere i VL"),
@@ -83,7 +84,7 @@ public enum OppgaveÅrsak implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {

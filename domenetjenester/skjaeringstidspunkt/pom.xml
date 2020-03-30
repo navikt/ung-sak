@@ -38,10 +38,6 @@
             <artifactId>uttak</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>inngangsvilkar-regelmodell</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.foreldrepenger.felles</groupId>
             <artifactId>felles-util</artifactId>
         </dependency>

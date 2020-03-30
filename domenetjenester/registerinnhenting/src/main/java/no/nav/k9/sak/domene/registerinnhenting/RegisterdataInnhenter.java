@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +60,9 @@ import no.nav.k9.sak.domene.medlem.api.FinnMedlemRequest;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.DefaultRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleiepengerRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -69,29 +73,24 @@ import no.nav.vedtak.konfig.Tid;
 public class RegisterdataInnhenter {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterdataInnhenter.class);
-    private static final Set<RegisterdataType> FØRSTEGANGSSØKNAD_FP_SVP = Set.of(
-        YTELSE,
-        ARBEIDSFORHOLD,
-        INNTEKT_PENSJONSGIVENDE,
-        LIGNET_NÆRING,
-        INNTEKT_BEREGNINGSGRUNNLAG,
-        INNTEKT_SAMMENLIGNINGSGRUNNLAG);
-    private static final Set<RegisterdataType> FØRSTEGANGSSØKNAD_ES = Set.of(
-        YTELSE,
-        ARBEIDSFORHOLD,
-        INNTEKT_PENSJONSGIVENDE,
-        LIGNET_NÆRING);
-    private static final Set<RegisterdataType> REVURDERING_FP_SVP = Set.of(
-        YTELSE,
-        ARBEIDSFORHOLD,
-        INNTEKT_PENSJONSGIVENDE,
-        INNTEKT_BEREGNINGSGRUNNLAG,
-        INNTEKT_SAMMENLIGNINGSGRUNNLAG);
+    private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
+        BehandlingType.FØRSTEGANGSSØKNAD,
+        Set.of(
+            YTELSE,
+            ARBEIDSFORHOLD,
+            INNTEKT_PENSJONSGIVENDE,
+            LIGNET_NÆRING,
+            INNTEKT_BEREGNINGSGRUNNLAG,
+            INNTEKT_SAMMENLIGNINGSGRUNNLAG),
+        BehandlingType.REVURDERING,
+        Set.of(
+            YTELSE,
+            ARBEIDSFORHOLD,
+            INNTEKT_PENSJONSGIVENDE,
+            INNTEKT_BEREGNINGSGRUNNLAG,
+            INNTEKT_SAMMENLIGNINGSGRUNNLAG));
 
-    private static final Set<RegisterdataType> REVURDERING_ES = Set.of(
-        YTELSE,
-        ARBEIDSFORHOLD,
-        INNTEKT_PENSJONSGIVENDE);
+    private Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> relasjonsFiltrering = Map.of(FagsakYtelseType.PSB, new PleiepengerRelasjonsFilter());
 
     private PersoninfoAdapter personinfoAdapter;
     private MedlemTjeneste medlemTjeneste;
@@ -360,15 +359,11 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
+        var relasjonsFilter = relasjonsFiltrering.getOrDefault(behandling.getFagsakYtelseType(), new DefaultRelasjonsFilter());
 
-        if (pleietrengende.isEmpty()) {
-            return List.of();
-        } else {
-            return relaterteBarn.stream()
-                .filter(it -> it.getAktørId().equals(pleietrengende.orElse(null)))
-                .collect(Collectors.toList());
-        }
+        return relaterteBarn.stream()
+            .filter(it -> relasjonsFilter.relasjonsFiltrering(behandling, it))
+            .collect(Collectors.toList());
     }
 
     private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo) {
@@ -448,10 +443,7 @@ public class RegisterdataInnhenter {
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 
-    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
-        if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandlingType)) {
-            return FagsakYtelseType.ENGANGSTØNAD.equals(fagsakYtelseType) ? FØRSTEGANGSSØKNAD_ES : FØRSTEGANGSSØKNAD_FP_SVP;
-        }
-        return FagsakYtelseType.ENGANGSTØNAD.equals(fagsakYtelseType) ? REVURDERING_ES : REVURDERING_FP_SVP;
+    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, @SuppressWarnings("unused") FagsakYtelseType fagsakYtelseType) {
+        return FILTER.get(behandlingType);
     }
 }

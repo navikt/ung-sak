@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.OpptjeningsvilkårResultat;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårResultat;
 
 @BehandlingStegRef(kode = "VURDER_OPPTJ")
 @BehandlingTypeRef

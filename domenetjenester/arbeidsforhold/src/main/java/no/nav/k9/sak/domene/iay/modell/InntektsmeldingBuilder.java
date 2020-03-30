@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PeriodeAndel;
 import no.nav.vedtak.konfig.Tid;
 
 public class InntektsmeldingBuilder {
@@ -75,6 +77,13 @@ public class InntektsmeldingBuilder {
         return this;
     }
 
+    public InntektsmeldingBuilder leggTilFravær(PeriodeAndel fravær) {
+        precondition();
+        kladd.leggTilFravær(fravær);
+        return this;
+    }
+
+    
     public InntektsmeldingBuilder leggTil(Refusjon refusjon) {
         precondition();
         kladd.leggTil(refusjon);
@@ -137,6 +146,12 @@ public class InntektsmeldingBuilder {
     public InntektsmeldingBuilder medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak inntektsmeldingInnsendingsårsak) {
         precondition();
         kladd.setInntektsmeldingInnsendingsårsak(inntektsmeldingInnsendingsårsak);
+        return this;
+    }
+
+    public InntektsmeldingBuilder medOppgittFravær(List<PeriodeAndel> fravær) {
+        precondition();
+        kladd.setOmsorgspengerFravær(fravær);
         return this;
     }
 

@@ -1,4 +1,3 @@
-
 package no.nav.k9.sak.domene.medlem.impl;
 
 import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.JA;
@@ -37,8 +36,8 @@ public class AvklarOmErBosatt {
     private MedlemskapPerioderTjeneste medlemskapPerioderTjeneste;
 
     public AvklarOmErBosatt(MedlemskapRepository medlemskapRepository,
-                     MedlemskapPerioderTjeneste medlemskapPerioderTjeneste,
-                     PersonopplysningTjeneste personopplysningTjeneste) {
+                            MedlemskapPerioderTjeneste medlemskapPerioderTjeneste,
+                            PersonopplysningTjeneste personopplysningTjeneste) {
         this.medlemskapRepository = medlemskapRepository;
         this.medlemskapPerioderTjeneste = medlemskapPerioderTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -62,23 +61,26 @@ public class AvklarOmErBosatt {
     }
 
     private boolean søkerHarSkalOppholdeSegIUtlandetImerEnn12M(Long behandlingId, LocalDate vurderingsdato) {
-            final Optional<MedlemskapAggregat> medlemskapAggregat = medlemskapRepository.hentMedlemskap(behandlingId);
-            final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning)
-                .orElseThrow(IllegalStateException::new);
+        final Optional<MedlemskapAggregat> medlemskapAggregat = medlemskapRepository.hentMedlemskap(behandlingId);
+        var medlemskapOppgittTilknytningEntitet = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning);
+        if (medlemskapOppgittTilknytningEntitet.isEmpty()) {
+            return false;
+        }
+        final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet.get();
 
-            List<LocalDateSegment<Boolean>> fremtidigeOpphold = oppgittTilknytning.getOpphold()
-                .stream()
-                .filter(opphold -> !opphold.isTidligereOpphold()
-                    && !opphold.getLand().equals(Landkoder.NOR))
-                .map(o -> finnSegment(vurderingsdato, o.getPeriodeFom(), o.getPeriodeTom()))
-                .collect(Collectors.toList());
+        List<LocalDateSegment<Boolean>> fremtidigeOpphold = oppgittTilknytning.getOpphold()
+            .stream()
+            .filter(opphold -> !opphold.isTidligereOpphold()
+                && !opphold.getLand().equals(Landkoder.NOR))
+            .map(o -> finnSegment(vurderingsdato, o.getPeriodeFom(), o.getPeriodeTom()))
+            .collect(Collectors.toList());
 
-            LocalDateTimeline<Boolean> fremtidigePerioder = new LocalDateTimeline<>(fremtidigeOpphold,
-                StandardCombinators::alwaysTrueForMatch).compress();
+        LocalDateTimeline<Boolean> fremtidigePerioder = new LocalDateTimeline<>(fremtidigeOpphold,
+            StandardCombinators::alwaysTrueForMatch).compress();
 
-           return fremtidigePerioder.getDatoIntervaller()
-               .stream()
-               .anyMatch(this::periodeLengreEnn12M);
+        return fremtidigePerioder.getDatoIntervaller()
+            .stream()
+            .anyMatch(this::periodeLengreEnn12M);
     }
 
     private boolean periodeLengreEnn12M(LocalDateInterval localDateInterval) {
@@ -106,7 +108,11 @@ public class AvklarOmErBosatt {
     //TODO(OJR) må denne endres?
     private Utfall harBrukerTilknytningHjemland(Long behandlingId) {
         final Optional<MedlemskapAggregat> medlemskapAggregat = medlemskapRepository.hentMedlemskap(behandlingId);
-        final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning)
+        var medlemskapOppgittTilknytningEntitet = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning);
+        if (medlemskapOppgittTilknytningEntitet.isEmpty()) {
+            return JA; // DEFAULT
+        }
+        final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet
             .orElseThrow(IllegalStateException::new);
 
         int antallNei = 0;

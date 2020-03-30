@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -428,7 +429,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
     private void lagreInntektsmelding(LocalDate mottattDato, Behandling behandling, InternArbeidsforholdRef arbeidsforholdId, EksternArbeidsforholdRef eksternArbeidsforholdRef) {
         JournalpostId journalPostId = new JournalpostId("123");
-        var inntektsmelding = InntektsmeldingBuilder.builder()
+        var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
         .medStartDatoPermisjon(I_DAG)
         .medArbeidsgiver(arbeidsgiver)
         .medBeløp(BigDecimal.TEN)
@@ -438,7 +439,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         .medMottattDato(mottattDato)
         .medInnsendingstidspunkt(LocalDateTime.now()).medJournalpostId(journalPostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmelding);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
 
     }
 

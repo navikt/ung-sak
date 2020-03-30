@@ -8,6 +8,19 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.abakus.iaygrunnlag.Aktør;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
+import no.nav.abakus.iaygrunnlag.JournalpostId;
+import no.nav.abakus.iaygrunnlag.Organisasjon;
+import no.nav.abakus.iaygrunnlag.Periode;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.FraværDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.GraderingDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.NaturalytelseDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.UtsettelsePeriodeDto;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
@@ -23,18 +36,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.abakus.iaygrunnlag.Aktør;
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
-import no.nav.abakus.iaygrunnlag.JournalpostId;
-import no.nav.abakus.iaygrunnlag.Organisasjon;
-import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.GraderingDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.NaturalytelseDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.UtsettelsePeriodeDto;
+import no.nav.k9.sak.typer.PeriodeAndel;
 
 public class MapInntektsmeldinger {
     private static final Comparator<RefusjonDto> COMP_ENDRINGER_REFUSJON = Comparator
@@ -48,6 +50,10 @@ public class MapInntektsmeldinger {
         .comparing((NaturalytelseDto dto) -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getType() == null ? null : dto.getType().getKode(), Comparator.nullsLast(Comparator.naturalOrder()));
+
+    private static final Comparator<FraværDto> COMP_FRAVÆR = Comparator
+        .comparing((FraværDto dto) -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
+        .thenComparing(dto -> dto.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 
     private static final Comparator<UtsettelsePeriodeDto> COMP_UTSETTELSE = Comparator
         .comparing((UtsettelsePeriodeDto dto) -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
@@ -104,7 +110,7 @@ public class MapInntektsmeldinger {
                 eksternRef = validerArbeidsforholdId ? arbeidsforholdInformasjon.finnEksternRaw(im.getArbeidsgiver(), im.getArbeidsforholdRef()) : null;
             } catch (IllegalStateException e) {
                 if (e.getMessage().startsWith("Mangler eksternReferanse for internReferanse:")) {
-                    // Sukk, må håndtere at det ligger dritt her også ..
+                    // Sukk, må håndtere at det ligger dårlig data her også ..
                     log.warn("Mangler eksternReferanse for internReferanse={}, forkaster internReferanse. Antar feilmapping", im.getArbeidsforholdRef());
                     eksternRef = null;
                 } else {
@@ -194,6 +200,11 @@ public class MapInntektsmeldinger {
                 .medInntektsmeldinger(inntektsmeldingBuildere.stream().map(this::map).collect(Collectors.toList()));
         }
 
+        private FraværDto mapOppgittFravær(PeriodeAndel fravær) {
+            var periode = fravær.getPeriode();
+            return new FraværDto(new Periode(periode.getFom(), periode.getTom()), fravær.getVarighetPerDag());
+        }
+
         private InntektsmeldingDto map(InntektsmeldingBuilder builder) {
             final var im = builder.build(true);
             var arbeidsgiver = mapAktør(im.getArbeidsgiver());
@@ -223,6 +234,7 @@ public class MapInntektsmeldinger {
 
             inntektsmeldingDto.medUtsettelsePerioder(im.getUtsettelsePerioder().stream().map(this::mapUtsettelsePeriode).sorted(COMP_UTSETTELSE).collect(Collectors.toList()));
 
+            inntektsmeldingDto.medOppgittFravær(im.getOppgittFravær().stream().map(this::mapOppgittFravær).sorted(COMP_FRAVÆR).collect(Collectors.toList()));
             return inntektsmeldingDto;
         }
     }
@@ -298,6 +310,13 @@ public class MapInntektsmeldinger {
                     return UtsettelsePeriode.utsettelse(periode.getFom(), periode.getTom(), utsettelseÅrsak);
                 })
                 .forEach(builder::leggTil);
+
+            dto.getOppgittFravær().stream()
+                .map(data -> {
+                    var periode = data.getPeriode();
+                    return new PeriodeAndel(periode.getFom(), periode.getTom(), data.getVarighetPerDag());
+                })
+                .forEach(builder::leggTilFravær);
 
             return builder.build();
         }

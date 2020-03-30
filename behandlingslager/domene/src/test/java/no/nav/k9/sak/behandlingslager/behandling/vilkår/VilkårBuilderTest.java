@@ -67,7 +67,9 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_teste_mellomliggende_perioder() {
-        final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
+        final var vilkårBuilder = new VilkårBuilder()
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
 
         final var førsteSkjæringstidspunkt = LocalDate.now();
         final var sluttFørstePeriode = LocalDate.now().plusMonths(3);
@@ -89,7 +91,9 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_teste_mellomliggende_perioder_forskjellig_begrunnelse() {
-        final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
+        final var vilkårBuilder = new VilkårBuilder()
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
 
         final var førsteSkjæringstidspunkt = LocalDate.now();
         final var sluttFørstePeriode = LocalDate.now().plusMonths(3);
@@ -113,7 +117,9 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_få_to_perioder_hvis_avstand_er_mer_enn_6_dager() {
-        final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
+        final var vilkårBuilder = new VilkårBuilder()
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
 
         final var førsteSkjæringstidspunkt = LocalDate.now();
         final var sluttFørstePeriode = LocalDate.now().plusMonths(3);

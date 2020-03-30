@@ -59,13 +59,14 @@ public class BehandlingskontrollTjenesteImplTest {
 
     private String steg2UtgangAksjonspunkt;
 
+    @SuppressWarnings("resource")
     @Before
     public void setup() {
-        TestScenario scenario = TestScenario.forForeldrepenger();
+        TestScenario scenario = TestScenario.dummyScenario();
         behandling = scenario.lagre(serviceProvider);
         modell = serviceProvider.getBehandlingModellRepository().getModell(behandling.getType(), behandling.getFagsakYtelseType());
 
-        steg2 = modell.getAlleBehandlingStegTyper().get(5);
+        steg2 = BehandlingStegType.KONTROLLER_FAKTA;
         steg3 = modell.finnNesteSteg(steg2).getBehandlingStegType();
         steg4 = modell.finnNesteSteg(steg3).getBehandlingStegType();
         steg5 = modell.finnNesteSteg(steg4).getBehandlingStegType();

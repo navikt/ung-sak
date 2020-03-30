@@ -7,13 +7,76 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-	<artifactId>inngangsvilkar-pom</artifactId>
-    <name>K9SAK :: Domenetjenester - Inngangsvilkår Pom</name>
-    <packaging>pom</packaging>
+	<artifactId>inngangsvilkar</artifactId>
+    <name>K9SAK :: Domenetjenester - Inngangsvilkår</name>
+    <packaging>jar</packaging>
+	
+	<dependencies>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
+            <artifactId>felles-feil</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
+            <artifactId>felles-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
+            <artifactId>felles-db</artifactId>
+        </dependency>
 
-    <modules>
-		<module>regelmodell</module>
-		<module>tjeneste</module>
-	</modules>
+        <!-- Domenetjenester avhengigheter -->
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>medlem</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>uttak</artifactId>
+        </dependency>
+        
+
+        <!-- Prosjekt avhengigheter -->
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingslager-domene</artifactId>
+        </dependency>
+        
+        <!-- NARE: Java regelmodell -->
+        <dependency>
+            <groupId>no.nav.fpsak.nare</groupId>
+            <artifactId>fpsak-nare-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.fpsak.tidsserie</groupId>
+            <artifactId>fpsak-tidsserie</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test avhengigheter -->
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingslager-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingskontroll</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

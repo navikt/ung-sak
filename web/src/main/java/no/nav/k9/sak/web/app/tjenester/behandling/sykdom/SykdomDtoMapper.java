@@ -7,9 +7,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæringer;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
@@ -19,6 +16,9 @@ import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsyn;
 import no.nav.k9.sak.kontrakt.medisinsk.PeriodeMedTilsynOgÅrsakssammenheng;
 import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.KontinuerligTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.Legeerklæringer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepository;
 
 @ApplicationScoped
 class SykdomDtoMapper {
@@ -103,7 +103,7 @@ class SykdomDtoMapper {
             .collect(Collectors.toList());
     }
 
-    private Legeerklæring mapTilLegeerklæring(no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring it) {
+    private Legeerklæring mapTilLegeerklæring(no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.Legeerklæring it) {
         return new Legeerklæring(it.getDatert(),
             it.getDatert(),
             it.getUuid(),

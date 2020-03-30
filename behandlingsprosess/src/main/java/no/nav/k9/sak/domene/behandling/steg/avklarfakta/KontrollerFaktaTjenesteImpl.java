@@ -46,12 +46,6 @@ public abstract class KontrollerFaktaTjenesteImpl implements KontrollerFaktaAksj
         return filtrerAksjonspunkterTilVenstreForStartpunkt(ref, aksjonspunktResultat, startpunktType);
     }
 
-    @Override
-    public boolean skalOverstyringLøsesTilHøyreForStartpunkt(BehandlingReferanse ref, StartpunktType startpunktType, AksjonspunktDefinisjon apDef) {
-        return behandlingskontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(
-            ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunktType.getBehandlingSteg(), apDef);
-    }
-
     private List<AksjonspunktResultat> filtrerAksjonspunkterTilVenstreForStartpunkt(BehandlingReferanse referanse, List<AksjonspunktResultat> aksjonspunktResultat,
                                                                                     StartpunktType startpunkt) {
         // Fjerner aksjonspunkter som ikke skal løses i eller etter steget som følger av startpunktet:

@@ -18,6 +18,7 @@ public class VilkårBuilder {
     private final Vilkår vilkåret;
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
     private boolean bygget = false;
+    private int mellomliggendePeriodeAvstand = 0;
 
     public VilkårBuilder() {
         this.vilkåret = new Vilkår();
@@ -36,12 +37,20 @@ public class VilkårBuilder {
         } else {
             avstand = ChronoUnit.DAYS.between(secondDate, firstDate);
         }
-        return avstand > 0 && avstand < 7;
+        return avstand > 0 && avstand < mellomliggendePeriodeAvstand;
     }
 
     public VilkårBuilder medType(VilkårType type) {
         validerBuilder();
         vilkåret.setVilkårType(type);
+        return this;
+    }
+
+    public VilkårBuilder medMaksMellomliggendePeriodeAvstand(int mellomliggendePeriodeAvstand) {
+        if (mellomliggendePeriodeAvstand < 0) {
+            throw new IllegalArgumentException("Må være positivt");
+        }
+        this.mellomliggendePeriodeAvstand = mellomliggendePeriodeAvstand;
         return this;
     }
 

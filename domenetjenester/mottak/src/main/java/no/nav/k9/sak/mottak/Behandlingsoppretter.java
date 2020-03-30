@@ -3,7 +3,6 @@ package no.nav.k9.sak.mottak;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
@@ -21,7 +20,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
@@ -30,24 +28,24 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.k9.sak.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 public class Behandlingsoppretter {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private DokumentPersistererTjeneste dokumentPersistererTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     private VedtakVarselRepository vedtakVarselRepository;
     private SøknadRepository søknadRepository;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
 
     public Behandlingsoppretter() {
         // For CDI
@@ -57,12 +55,12 @@ public class Behandlingsoppretter {
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                 VedtakVarselRepository vedtakVarselRepository,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                DokumentPersistererTjeneste dokumentPersistererTjeneste,
+                                InntektArbeidYtelseTjeneste iayTjeneste,
                                 MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                 HistorikkinnslagTjeneste historikkinnslagTjeneste) { // NOSONAR
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
+        this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
@@ -95,11 +93,11 @@ public class Behandlingsoppretter {
         }); // NOSONAR
     }
 
-    public Behandling opprettNyFørstegangsbehandlingMedImOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {
+    public Behandling opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {
         Behandling forrigeBehandling = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
             .orElseThrow(() -> new IllegalStateException("Fant ingen behandling som passet for saksnummer: " + fagsak.getSaksnummer()));
         Behandling nyFørstegangsbehandling = opprettFørstegangsbehandling(fagsak, behandlingÅrsakType, Optional.of(forrigeBehandling));
-        opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(fagsak.getSaksnummer(), nyFørstegangsbehandling);
+        opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(forrigeBehandling, nyFørstegangsbehandling);
         return nyFørstegangsbehandling;
     }
 
@@ -118,11 +116,11 @@ public class Behandlingsoppretter {
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
-            return opprettNyFørstegangsbehandlingMedImOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
+            return opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
         }
         Behandling revurdering = opprettRevurdering(sisteYtelseBehandling.getFagsak(), revurderingsÅrsak);
 
-        opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling.getFagsak().getSaksnummer(), revurdering);
+        opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling, revurdering);
 
         // Kopier behandlingsårsaker fra forrige behandling
         new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
@@ -142,15 +140,8 @@ public class Behandlingsoppretter {
         behandlingskontrollTjeneste.henleggBehandling(kontekst, BehandlingResultatType.MERGET_OG_HENLAGT);
     }
 
-    public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(@SuppressWarnings("unused") Saksnummer saksnummer, Behandling nyBehandling) {
-        hentAlleInntektsmeldingdokumenter(nyBehandling.getFagsakId()).stream()
-            .sorted(MottattDokumentSorterer.sorterMottattDokument())
-            .forEach(mottattDokument -> dokumentPersistererTjeneste.persisterDokumentinnhold(mottattDokument, nyBehandling));
-
-    }
-
-    private List<MottattDokument> hentAlleInntektsmeldingdokumenter(Long fagsakId) {
-        return mottatteDokumentTjeneste.hentMottatteDokumentFagsak(fagsakId).stream().collect(toList());
+    public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(@SuppressWarnings("unused") Behandling forrigeBehandling, Behandling nyBehandling) {
+        iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
     }
 
     private OrganisasjonsEnhet finnBehandlendeEnhet(Behandling behandling) {
@@ -181,7 +172,7 @@ public class Behandlingsoppretter {
             behandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), dokumentTypeId);
         }
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument, Optional.empty());
+        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
         return behandling;
     }
 

@@ -21,18 +21,17 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Gradering;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
-import no.nav.k9.sak.mottak.dokumentpersiterer.InntektsmeldingFeil;
-import no.nav.k9.sak.mottak.dokumentpersiterer.MottattDokumentOversetter;
-import no.nav.k9.sak.mottak.dokumentpersiterer.NamespaceRef;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingFeil;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.MottattInntektsmeldingOversetter;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.NamespaceRef;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -48,7 +47,7 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.UtsettelseAvForeldrepenger;
 
 @NamespaceRef(InntektsmeldingConstants.NAMESPACE)
 @ApplicationScoped
-public class MottattDokumentOversetterInntektsmelding implements MottattDokumentOversetter<MottattDokumentWrapperInntektsmelding> {
+public class MottattDokumentOversetterInntektsmelding implements MottattInntektsmeldingOversetter<MottattDokumentWrapperInntektsmelding> {
 
     private static final LocalDate TIDENES_BEGYNNELSE = LocalDate.of(1, Month.JANUARY, 1);
     private static Map<ÅrsakInnsendingKodeliste, InntektsmeldingInnsendingsårsak> innsendingsårsakMap;
@@ -61,27 +60,23 @@ public class MottattDokumentOversetterInntektsmelding implements MottattDokument
 
     private VirksomhetTjeneste virksomhetTjeneste;
     private AktørConsumer aktørConsumer;
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
 
     MottattDokumentOversetterInntektsmelding() {
         // for CDI proxy
     }
 
     @Inject
-    public MottattDokumentOversetterInntektsmelding(InntektsmeldingTjeneste inntektsmeldingTjeneste,
-                                                    VirksomhetTjeneste virksomhetTjeneste,
+    public MottattDokumentOversetterInntektsmelding(VirksomhetTjeneste virksomhetTjeneste,
                                                     AktørConsumer aktørConsumer) {
-        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.aktørConsumer = aktørConsumer;
     }
 
     @Override
-    public void trekkUtDataOgPersister(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument, Behandling behandling, Optional<LocalDate> gjelderFra) {
+    public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument, Behandling behandling) {
         String aarsakTilInnsending = wrapper.getSkjema().getSkjemainnhold().getAarsakTilInnsending();
-        InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ?
-            InntektsmeldingInnsendingsårsak.UDEFINERT :
-            innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
+        InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
+            : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
 
         InntektsmeldingBuilder builder = InntektsmeldingBuilder.builder();
 
@@ -105,8 +100,9 @@ public class MottattDokumentOversetterInntektsmelding implements MottattDokument
         mapFerie(wrapper, builder);
         mapUtsettelse(wrapper, builder);
         mapRefusjon(wrapper, builder);
+        builder.medOppgittFravær(wrapper.getOppgittFravær());
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), builder);
+        return builder;
     }
 
     private void mapArbeidsforholdOgBeløp(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {

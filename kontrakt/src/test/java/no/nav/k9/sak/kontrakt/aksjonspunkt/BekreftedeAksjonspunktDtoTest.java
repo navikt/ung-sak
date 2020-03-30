@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
+import java.io.InputStream;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -16,9 +18,11 @@ public class BekreftedeAksjonspunktDtoTest {
         ObjectMapper mapper = JsonUtil.getObjectMapper();
         mapper.registerSubtypes(BekreftErMedlemVurderingDto.class);
 
-        BekreftedeAksjonspunkterDto obj = mapper.readerFor(BekreftedeAksjonspunkterDto.class).readValue(this.getClass().getResourceAsStream(jsonFile));
+        try (InputStream inputStream = this.getClass().getResourceAsStream(jsonFile)) {
+            BekreftedeAksjonspunkterDto obj = mapper.readerFor(BekreftedeAksjonspunkterDto.class).readValue(inputStream);
 
-        Assertions.assertThat(obj.getBehandlingVersjon()).isNotNull().isEqualTo(16);
+            Assertions.assertThat(obj.getBehandlingVersjon()).isNotNull().isEqualTo(16);
+        }
     }
 
 }

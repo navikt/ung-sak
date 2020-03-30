@@ -27,9 +27,9 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingskontroll.impl.observer.BehandlingskontrollFremoverhoppTransisjonEventObserver;
@@ -44,6 +44,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class FremoverhoppTest {
+
+    private static final FagsakYtelseType YTELSE_TYPE = TestScenario.DUMMY_YTELSE_TYPE;
 
     private List<no.nav.k9.sak.behandlingskontroll.impl.observer.StegTransisjon> transisjoner = new ArrayList<>();
 
@@ -72,7 +74,7 @@ public class FremoverhoppTest {
 
     @Before
     public void before() throws Exception {
-        var modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.FORELDREPENGER);
+        var modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         steg1 = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
         steg2 = modell.finnNesteSteg(steg1).getBehandlingStegType();
         steg3 = modell.finnNesteSteg(steg2).getBehandlingStegType();
@@ -180,7 +182,7 @@ public class FremoverhoppTest {
 
         BehandlingStegType idSteg = BehandlingStegType.fraKode(identifisertI.getKode());
 
-        Behandling ytelseBehandling = TestScenario.forForeldrepenger().lagre(serviceProvider);
+        Behandling ytelseBehandling = TestScenario.dummyScenario().lagre(serviceProvider);
         behandling = Behandling.nyBehandlingFor(ytelseBehandling.getFagsak(), BehandlingType.FØRSTEGANGSSØKNAD).build();
         behandlingLås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, behandlingLås);

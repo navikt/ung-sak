@@ -57,7 +57,6 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VENT_PÅ_SCANNING_KODE = "7007";
     public static final String VENT_PGA_FOR_TIDLIG_SØKNAD_KODE = "7008";
-    public static final String VENT_PÅ_SØKNAD_KODE = "7013";
 
     public static final String VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE = "5033";
     public static final String VURDERE_DOKUMENT_FØR_VEDTAK_KODE = "5034";

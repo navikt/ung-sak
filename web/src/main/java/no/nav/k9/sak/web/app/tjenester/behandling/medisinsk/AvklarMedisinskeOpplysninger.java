@@ -12,18 +12,18 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.InnleggelsePeriode;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsyn;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynBuilder;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.KontinuerligTilsynPeriode;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæringer;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.behandlingslager.behandling.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkaar.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Legeerklæring;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.Pleiebehov;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.InnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.KontinuerligTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.KontinuerligTilsynBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.KontinuerligTilsynPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.Legeerklæringer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepository;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarMedisinskeOpplysningerDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -100,7 +100,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                     .stream()
                     .map(at -> new InnleggelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom())))
                     .collect(Collectors.toSet());
-                return new no.nav.k9.sak.behandlingslager.behandling.medisinsk.Legeerklæring(it.getIdentifikator(), it.getFom(), innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
+                return new no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.Legeerklæring(it.getIdentifikator(), it.getFom(), innleggelsePerioder, it.getKilde(), it.getDiagnosekode());
             })
             .forEach(oppdatertLegeerklæringer::leggTilLegeerklæring);
 

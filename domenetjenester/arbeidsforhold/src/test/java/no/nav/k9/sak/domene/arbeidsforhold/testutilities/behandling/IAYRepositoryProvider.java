@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
@@ -22,7 +21,6 @@ public class IAYRepositoryProvider {
     private SøknadRepository søknadRepository;
     private VirksomhetRepository virksomhetRepository;
     private OpptjeningRepository opptjeningRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepository behandlingRepository;
 
     @Inject
@@ -40,9 +38,6 @@ public class IAYRepositoryProvider {
         // inntekt arbeid ytelser
         this.virksomhetRepository = new VirksomhetRepository();
 
-        // behandling støtte repositories
-        this.mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
-
     }
 
     public BehandlingRepository getBehandlingRepository() {
@@ -52,10 +47,6 @@ public class IAYRepositoryProvider {
     public FagsakRepository getFagsakRepository() {
         // bridge metode før sammenkobling medBehandling
         return fagsakRepository;
-    }
-
-    public MottatteDokumentRepository getMottatteDokumentRepository() {
-        return mottatteDokumentRepository;
     }
 
     public OpptjeningRepository getOpptjeningRepository() {

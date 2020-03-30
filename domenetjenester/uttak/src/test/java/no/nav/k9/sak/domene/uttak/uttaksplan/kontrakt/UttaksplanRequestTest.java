@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.uttak.uttaksplan.kontrakt;
 
+import static javax.validation.Validation.buildDefaultValidatorFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -9,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.validation.Validation;
-
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +17,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.AndrePartSak;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.Person;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttakArbeid;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttakMedlemskap;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttakTilsynsbehov;
+import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttaksplanRequest;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforholdPeriodeInfo;
@@ -35,7 +40,8 @@ public class UttaksplanRequestTest {
     public void skal_serialisere_uttaksplan_request() throws Exception {
         var req = opprettUttaksplanRequest();
 
-        var validator = Validation.buildDefaultValidatorFactory().getValidator();
+        @SuppressWarnings("resource")
+        var validator = buildDefaultValidatorFactory().getValidator();
         var violations = validator.validate(req);
         assertThat(violations).isEmpty();
 

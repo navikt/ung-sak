@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,11 +21,9 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
@@ -322,23 +321,17 @@ public class VurderArbeidsforholdTjenesteImplTest {
     }
 
     private void sendNyInntektsmelding(Behandling behandling, Arbeidsgiver arbeidsgiver,  EksternArbeidsforholdRef ref) {
-        MottattDokument mottattDokument = new MottattDokument.Builder()
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingId(behandling.getId())
-            .medJournalPostId(new JournalpostId("123"))
-            .medDokumentTypeId(DokumentTypeId.INNTEKTSMELDING)
-            .medMottattDato(IDAG).build();
-        repositoryProvider.getMottatteDokumentRepository().lagre(mottattDokument);
 
+        JournalpostId journalpostId = new JournalpostId(1L);
         InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
         .medArbeidsgiver(arbeidsgiver)
         .medArbeidsforholdId(ref)
         .medBeløp(BigDecimal.TEN)
         .medStartDatoPermisjon(skjæringstidspunkt)
         .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY)
-        .medInnsendingstidspunkt(nyTid()).medJournalpostId(mottattDokument.getJournalpostId());
+        .medInnsendingstidspunkt(nyTid()).medJournalpostId(journalpostId);
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }
 
     private LocalDateTime nyTid() {
@@ -354,7 +347,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.ENDRING)
         .medInnsendingstidspunkt(nyTid()).medJournalpostId(new JournalpostId("123"));
 
-        inntektsmeldingTjeneste.lagreInntektsmelding(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldingBuilder);
+        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }
 
     private void avsluttBehandlingOgFagsak(Behandling behandling) {

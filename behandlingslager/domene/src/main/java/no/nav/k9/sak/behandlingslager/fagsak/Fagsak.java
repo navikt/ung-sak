@@ -118,14 +118,6 @@ public class Fagsak extends BaseEntitet {
         return new Fagsak(ytelseType, bruker, pleietrengende, saksnummer, fom, tom);
     }
 
-    public static BehandlingTema fraFagsakHendelse(FagsakYtelseType ytelseType) {
-        // FIXME K9 kodeverk/logikk
-        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(ytelseType)) {
-            return BehandlingTema.PLEIEPENGER_SYKT_BARN;
-        }
-        return BehandlingTema.UDEFINERT;
-    }
-
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fraOgMedTilOgMed(
             periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.lower(),
@@ -250,7 +242,7 @@ public class Fagsak extends BaseEntitet {
 
     public BehandlingTema getBehandlingTema() {
         // FIXME K9 kodeverk/logikk
-        return fraFagsakHendelse(this.getYtelseType());
+        return BehandlingTema.finnForFagsakYtelseType(this.getYtelseType());
     }
 
     public void setPeriode(LocalDate fom, LocalDate tom) {

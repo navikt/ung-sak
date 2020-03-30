@@ -62,10 +62,8 @@ public class SøknadEntitet extends BaseEntitet {
     @Column(name = "begrunnelse_for_sen_innsending")
     private String begrunnelseForSenInnsending;
 
-    
     @Column(name = "er_endringssoeknad", nullable = false)
     private boolean erEndringssøknad;
-
 
     @Convert(converter = RelasjonsRolleTypeKodeverdiConverter.class)
     @Column(name="bruker_rolle", nullable = false)

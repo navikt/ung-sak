@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.inngangsvilkaar.InngangsvilkårTjeneste;
+import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
 import no.nav.k9.sak.kontrakt.søker.OverstyringSokersOpplysingspliktDto;
 
 @ApplicationScoped

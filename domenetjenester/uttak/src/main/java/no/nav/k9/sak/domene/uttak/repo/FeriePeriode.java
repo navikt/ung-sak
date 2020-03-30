@@ -18,13 +18,15 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
+import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "FeriePeriode")
 @Table(name = "UT_FERIE_PERIODE")
 @Immutable
-public class FeriePeriode extends BaseEntitet {
+public class FeriePeriode extends BaseEntitet implements IndexKey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_FERIE_PERIODE")
@@ -58,6 +60,11 @@ public class FeriePeriode extends BaseEntitet {
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+    
+    @Override
+    public String getIndexKey() {
+        return IndexKeyComposer.createKey(periode);
     }
 
     void setFerie(Ferie ferie) {

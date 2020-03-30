@@ -10,7 +10,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.ReferanseType;
-import no.nav.k9.sak.inngangsvilkaar.regelmodell.opptjening.Aktivitet;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Aktivitet;
 
 public class MapTilOpptjeningAktiviteter {
 

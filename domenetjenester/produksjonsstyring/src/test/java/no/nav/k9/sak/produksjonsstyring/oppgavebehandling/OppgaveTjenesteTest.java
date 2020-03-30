@@ -337,27 +337,6 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void skal_lage_request_som_inneholder_verdier_i_forbindelse_med_manglende_regler() {
-        // Arrange
-        String gsakOppgaveId = "GSAK1110";
-        WSOpprettOppgaveResponse mockResponse = new WSOpprettOppgaveResponse();
-        mockResponse.setOppgaveId(gsakOppgaveId);
-
-        ArgumentCaptor<OpprettOppgaveRequest> captor = ArgumentCaptor.forClass(OpprettOppgaveRequest.class);
-        when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
-
-        // Act
-        String oppgaveId = tjeneste.opprettOppgaveSakSkalTilInfotrygd(String.valueOf(behandling.getId()));
-
-        // Assert
-        OpprettOppgaveRequest request = captor.getValue();
-        assertThat(request.getOppgavetypeKode()).isEqualTo("BEH_SAK_FOR");
-        assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.NORM_FOR);
-        assertThat(oppgaveId).isEqualTo(gsakOppgaveId);
-        assertThat(request.getBeskrivelse()).isEqualTo("Foreldrepengesak må flyttes til Infotrygd");
-    }
-
-    @Test
     public void skal_opprette_oppgave_med_prioritet_og_beskrivelse() {
         // Arrange
         String gsakOppgaveId = "GSAK1115";

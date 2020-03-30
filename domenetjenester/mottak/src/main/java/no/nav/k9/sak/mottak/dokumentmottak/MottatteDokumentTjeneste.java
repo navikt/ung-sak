@@ -13,15 +13,14 @@ import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.repository.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.mottak.dokumentpersiterer.DokumentPersistererTjeneste;
-import no.nav.k9.sak.mottak.dokumentpersiterer.MottattDokumentWrapper;
+import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -29,7 +28,7 @@ public class MottatteDokumentTjeneste {
 
     private Period fristForInnsendingAvDokumentasjon;
 
-    private DokumentPersistererTjeneste dokumentPersistererTjeneste;
+    private InntektsmeldingPersistererTjeneste dokumentPersistererTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -45,7 +44,7 @@ public class MottatteDokumentTjeneste {
      */
     @Inject
     public MottatteDokumentTjeneste(@KonfigVerdi(value = "sak.frist.innsending.dok", defaultVerdi = "P6W") Period fristForInnsendingAvDokumentasjon,
-                                    DokumentPersistererTjeneste dokumentPersistererTjeneste,
+                                    InntektsmeldingPersistererTjeneste dokumentPersistererTjeneste,
                                     MottatteDokumentRepository mottatteDokumentRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     UttakRepository uttakRepository,
@@ -58,12 +57,10 @@ public class MottatteDokumentTjeneste {
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
-    public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument, Optional<LocalDate> gjelderFra) {
+    public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument) {
         oppdaterMottattDokumentMedBehandling(dokument, behandling.getId());
         if (dokument.getPayload() != null) {
-            @SuppressWarnings("rawtypes")
-            MottattDokumentWrapper dokumentWrapper = dokumentPersistererTjeneste.xmlTilWrapper(dokument);
-            dokumentPersistererTjeneste.persisterDokumentinnhold(dokumentWrapper, dokument, behandling, gjelderFra);
+            dokumentPersistererTjeneste.leggInntektsmeldingTilBehandling(behandling, dokument);
         }
     }
 

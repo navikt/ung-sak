@@ -269,10 +269,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     @Override
-    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> inntektsmeldingBuilderCollection) {
-        Objects.requireNonNull(inntektsmeldingBuilderCollection, "inntektsmeldingBuilderCollection");
+    public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders) {
+        Objects.requireNonNull(builders, "inntektsmelding");
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        final var inntektsmeldingerDto = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(inntektsmeldingBuilderCollection);
+        final var inntektsmeldingerDto = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(builders);
 
         if (inntektsmeldingerDto == null) {
             return;

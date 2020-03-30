@@ -52,9 +52,11 @@ import no.nav.vedtak.util.Tuple;
  * {@link no.nav.k9.sak.behandlingslager.abakus.inntektarbeidytelse.InntektArbeidYtelseRepository}.
  * NB: Skal kun brukes for tester.
  * <p>
- * Definer som alternative i beans.xml (i src/test/resources/META-INF) i modul som skal bruke<p>
+ * Definer som alternative i beans.xml (i src/test/resources/META-INF) i modul som skal bruke
  * <p>
- * Legg inn i fil <code>src/test/resources/META-INF</code> for å aktivere for enhetstester: <p>
+ * <p>
+ * Legg inn i fil <code>src/test/resources/META-INF</code> for å aktivere for enhetstester:
+ * <p>
  * <code>
  * &lt;alternatives&gt;<br>
  * &lt;class&gt;no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste&lt;/class&gt;<br>
@@ -115,21 +117,24 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
             .filter(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || !im.getEndringerRefusjon().isEmpty())
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver)).entrySet().stream()
             .map(entry -> {
-            LocalDate førsteInnsendingAvRefusjon = entry.getValue().stream().map(Inntektsmelding::getInnsendingstidspunkt).min(Comparator.naturalOrder()).map(LocalDateTime::toLocalDate).orElse(TIDENES_ENDE);
-            LocalDate førsteDatoForRefusjon = entry.getValue().stream()
-                .map(im -> {
-                    if (!im.getRefusjonBeløpPerMnd().erNullEllerNulltall()) {
-                        return im.getStartDatoPermisjon().orElse(TIDENES_ENDE);
-                    } else {
-                        return im.getEndringerRefusjon().stream()
-                            .filter(er -> !er.getRefusjonsbeløp().erNullEllerNulltall())
-                            .min(Comparator.comparing(Refusjon::getFom))
-                            .map(Refusjon::getFom).orElse(TIDENES_ENDE);
-                    }
-                }).min(Comparator.naturalOrder()).orElse(TIDENES_ENDE);
-                return new RefusjonskravDato(entry.getKey(), førsteDatoForRefusjon, førsteInnsendingAvRefusjon, entry.getValue().stream().anyMatch(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()));
+                LocalDate førsteInnsendingAvRefusjon = entry.getValue().stream().map(Inntektsmelding::getInnsendingstidspunkt).min(Comparator.naturalOrder()).map(LocalDateTime::toLocalDate)
+                    .orElse(TIDENES_ENDE);
+                LocalDate førsteDatoForRefusjon = entry.getValue().stream()
+                    .map(im -> {
+                        if (!im.getRefusjonBeløpPerMnd().erNullEllerNulltall()) {
+                            return im.getStartDatoPermisjon().orElse(TIDENES_ENDE);
+                        } else {
+                            return im.getEndringerRefusjon().stream()
+                                .filter(er -> !er.getRefusjonsbeløp().erNullEllerNulltall())
+                                .min(Comparator.comparing(Refusjon::getFom))
+                                .map(Refusjon::getFom).orElse(TIDENES_ENDE);
+                        }
+                    }).min(Comparator.naturalOrder()).orElse(TIDENES_ENDE);
+                return new RefusjonskravDato(entry.getKey(), førsteDatoForRefusjon, førsteInnsendingAvRefusjon,
+                    entry.getValue().stream().anyMatch(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()));
             }).collect(Collectors.toList());
     }
+
     @Override
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {
         var grunnlagBuilder = getGrunnlagBuilder(behandlingId, builder);
@@ -250,16 +255,16 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
 
     @Override
     public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders) {
-        Objects.requireNonNull(builders, "builders"); // NOSONAR
+        Objects.requireNonNull(builders, "inntektsmeldingBuilder"); // NOSONAR
         InMemoryInntektArbeidYtelseGrunnlagBuilder builder = opprettGrunnlagBuilderFor(behandlingId);
-        final InntektsmeldingAggregat inntektsmeldinger = builder.getInntektsmeldinger();
+        InntektsmeldingAggregat inntektsmeldinger = builder.getInntektsmeldinger();
 
         for (var inntektsmeldingBuilder : builders) {
-            final ArbeidsforholdInformasjon informasjon = builder.getInformasjon();
+            var informasjon = builder.getInformasjon();
             konverterEksternArbeidsforholdRefTilInterne(inntektsmeldingBuilder, informasjon);
 
             var inntektsmelding = inntektsmeldingBuilder.build();
-            final ArbeidsforholdInformasjonBuilder informasjonBuilder = ArbeidsforholdInformasjonBuilder.oppdatere(informasjon);
+            var informasjonBuilder = ArbeidsforholdInformasjonBuilder.oppdatere(informasjon);
 
             // Kommet inn inntektsmelding på arbeidsforhold som vi har gått videre med uten inntektsmelding?
             if (kommetInntektsmeldingPåArbeidsforholdHvorViTidligereBehandletUtenInntektsmelding(inntektsmelding, informasjon)) {

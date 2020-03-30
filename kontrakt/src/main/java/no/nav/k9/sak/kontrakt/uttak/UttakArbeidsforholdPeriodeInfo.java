@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-
 public class UttakArbeidsforholdPeriodeInfo {
 
     @JsonProperty(value = "jobberNormaltPerUke", required = true)
