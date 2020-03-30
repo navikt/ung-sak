@@ -46,7 +46,7 @@ public class FordelRestTjenesteTest {
         
         ObjectMapper mapper = new JacksonJsonConfig().getObjectMapper();
         var json = mapper.writeValueAsString(new PleiepengerBarnSøknadInnsending());
-        
+        System.out.println(json);
         var dto = mapper.readValue(json, InnsendingInnhold.class);
         
         assertThat(dto).isInstanceOf(PleiepengerBarnSøknadInnsending.class);

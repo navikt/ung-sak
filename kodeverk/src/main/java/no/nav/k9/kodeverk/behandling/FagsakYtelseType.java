@@ -1,5 +1,6 @@
 package no.nav.k9.kodeverk.behandling;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,6 +13,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -120,43 +128,6 @@ public enum FagsakYtelseType implements Kodeverdi {
         return getKode();
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
-
-    /**
-     * @deprecated Ikke switch på dette i koden. Marker heller klasse og pakke for angitt ytelse (eks. behandlingssteg, aksjonspuntutleder,
-     *             kompletthetsjekk).
-     *             Til nød bruk en negativ guard
-     *             <code>if(!ENGANGSSTØNAD.getKode().equals(this.getKode())) throw IllegalStateException("No trespassing in this code"); </code>
-     */
-    @Deprecated
-    public final boolean gjelderEngangsstønad() {
-        return ENGANGSTØNAD.getKode().equals(this.getKode());
-    }
-
-    /**
-     * @deprecated Ikke switch på dette i koden. Marker heller klasse og pakke for angitt ytelse (eks. behandlingssteg, aksjonspuntutleder,
-     *             kompletthetsjekk)
-     *             Til nød bruk en negativ guard
-     *             <code>if(!FORELDREPENGER.getKode().equals(this.getKode())) throw IllegalStateException("No trespassing in this code"); </code>
-     */
-    @Deprecated
-    public final boolean gjelderForeldrepenger() {
-        return FORELDREPENGER.getKode().equals(this.getKode());
-    }
-
-    /**
-     * @deprecated Ikke switch på dette i koden. Marker heller klasse og pakke for angitt ytelse (eks. behandlingssteg, aksjonspuntutleder,
-     *             kompletthetsjekk)
-     *             Til nød bruk en negativ guard
-     *             <code>if(!SVANGERSKAPSPENGER.getKode().equals(this.getKode())) throw IllegalStateException("No trespassing in this code"); </code>
-     */
-    @Deprecated
-    public final boolean gjelderSvangerskapspenger() {
-        return SVANGERSKAPSPENGER.getKode().equals(this.getKode());
-    }
-
     private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OPPTJENING_RELATERTYTELSE_CONFIG = Map.of(
         FORELDREPENGER,
         Set.of(ENSLIG_FORSØRGER, SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER,
@@ -181,6 +152,30 @@ public enum FagsakYtelseType implements Kodeverdi {
             throw new IllegalStateException("Støtter ikke fagsakYtelseType" + ytelseType);
         }
         return relatertYtelseTypeSet.contains(this);
+    }
+    
+    public static final class PlainYtelseSerializer extends StdSerializer<FagsakYtelseType> {
+        public PlainYtelseSerializer() {
+            super(FagsakYtelseType.class);
+        }
+
+        @Override
+        public void serialize(FagsakYtelseType value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            gen.writeString(value.getKode());
+        }
+    }
+
+    public static final class PlainYtelseDeserializer extends StdDeserializer<FagsakYtelseType> {
+
+        public PlainYtelseDeserializer() {
+            super(FagsakYtelseType.class);
+        }
+
+        @Override
+        public FagsakYtelseType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            return FagsakYtelseType.fraKode(p.getText());
+        }
+
     }
 
 }
