@@ -55,7 +55,7 @@ public class DokumentmottakerFelles {
         this.behandlingsoppretter = behandlingsoppretter;
     }
 
-    void leggTilBehandlingsårsak(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
+    public void leggTilBehandlingsårsak(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
         BehandlingÅrsak.Builder builder = BehandlingÅrsak.builder(behandlingÅrsak);
         behandling.getOriginalBehandling().ifPresent(builder::medOriginalBehandling);
         builder.buildFor(behandling);
@@ -64,7 +64,7 @@ public class DokumentmottakerFelles {
         behandlingRepository.lagre(behandling, behandlingLås);
     }
 
-    void opprettTaskForÅStarteBehandling(Behandling behandling) {
+    public void opprettTaskForÅStarteBehandling(Behandling behandling) {
         ProsessTaskData prosessTaskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
@@ -85,7 +85,7 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, historikkinnslagType, frist, venteårsak);
     }
 
-    void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, DokumentTypeId dokumentTypeId) {
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, DokumentTypeId dokumentTypeId) {
         historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, journalpostId, dokumentTypeId);
     }
 
@@ -105,25 +105,25 @@ public class DokumentmottakerFelles {
         return organisasjonsEnhet.getEnhetId();
     }
 
-    void opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
+    public void opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    Behandling opprettRevurdering(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+    public Behandling opprettRevurdering(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettRevurdering(fagsak, behandlingÅrsakType);
         mottatteDokumentTjeneste.persisterDokumentinnhold(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandling(revurdering);
         return revurdering;
     }
 
-    boolean skalOppretteNyFørstegangsbehandling(Fagsak fagsak) {
+    public boolean skalOppretteNyFørstegangsbehandling(Fagsak fagsak) {
         if (mottatteDokumentTjeneste.erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(fagsak)) {
             return !mottatteDokumentTjeneste.harFristForInnsendingAvDokGåttUt(fagsak);
         }
         return false;
     }   
     
-    Behandling opprettNyFørstegangFraAvslag(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, DokumentTypeId dokumentTypeId) {
+    public Behandling opprettNyFørstegangFraAvslag(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling, DokumentTypeId dokumentTypeId) {
         Behandling nyBehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottattDokument, fagsak, avsluttetBehandling, dokumentTypeId);
         behandlingsoppretter.opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(avsluttetBehandling, nyBehandling);
         opprettTaskForÅStarteBehandling(nyBehandling);
