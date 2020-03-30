@@ -20,6 +20,9 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class UttakYrkesaktiviteter {
+    private static final Comparator<AktivitetsAvtale> COMP_AKTIVTET_PERIODE = Comparator.comparing(aktivitetsAvtale -> aktivitetsAvtale.getPeriode().getFomDato(),
+        Comparator.nullsFirst(Comparator.naturalOrder()));
+    
     private UttakInput input;
 
     public UttakYrkesaktiviteter(UttakInput input) {
@@ -163,7 +166,7 @@ public class UttakYrkesaktiviteter {
 
     private List<AktivitetsAvtale> sortertPåDato(Collection<AktivitetsAvtale> aktivitetsAvtaler) {
         return aktivitetsAvtaler.stream()
-            .sorted(Comparator.comparing(aktivitetsAvtale -> aktivitetsAvtale.getPeriode().getFomDato()))
+            .sorted(COMP_AKTIVTET_PERIODE)
             .collect(Collectors.toList());
     }
 
