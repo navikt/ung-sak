@@ -15,7 +15,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 public class DokumentmottakTestUtil {
 
-    static MottattDokument byggMottattDokument(Long fagsakId, String xml, LocalDate mottattDato, String journalpostId) {
+    public static MottattDokument byggMottattDokument(Long fagsakId, String xml, LocalDate mottattDato, String journalpostId) {
         MottattDokument.Builder builder = new MottattDokument.Builder();
         builder.medMottattDato(mottattDato);
         builder.medPayload(xml);
@@ -26,7 +26,7 @@ public class DokumentmottakTestUtil {
         return builder.build();
     }
 
-    static Fagsak byggFagsak(AktørId aktørId, Saksnummer saksnummer, FagsakRepository fagsakRepository) {
+    public static Fagsak byggFagsak(AktørId aktørId, Saksnummer saksnummer, FagsakRepository fagsakRepository) {
         Fagsak fagsak = FagsakBuilder.nyForeldrepengesak()
             .medSaksnummer(saksnummer)
             .medBruker(aktørId).build();

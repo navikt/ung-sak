@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.mottak.dokumentpersiterer.inntektsmelding.InntektsmeldingPersistererTjeneste;
+import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingPersistererTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;

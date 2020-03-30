@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -159,7 +160,11 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
                 if (type instanceof ParameterizedType) {
                     ParameterizedType genericTypes = (ParameterizedType) type;
                     for (Type gen : genericTypes.getActualTypeArguments()) {
-                        klasser.add((Class<?>) gen);
+                        if (!(gen instanceof WildcardType)) {
+                            klasser.add((Class<?>) gen);
+                        } else {
+                            System.err.println("Fikk wilcard type param: " + method + ": " + gen); // NOSONAR
+                        }
                     }
                 }
             }
@@ -211,7 +216,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             if (field.getAnnotation(JsonIgnore.class) != null) {
                 continue; // feltet blir hverken serialisert elle deserialisert, unntas fra sjekk
             }
-            if(field.getAnnotation(JsonRawValue.class)!=null) {
+            if (field.getAnnotation(JsonRawValue.class) != null) {
                 continue; // feltet importeres/eksporteres rått - må valideres annen plass.
             }
             if (field.getType().isEnum()) {

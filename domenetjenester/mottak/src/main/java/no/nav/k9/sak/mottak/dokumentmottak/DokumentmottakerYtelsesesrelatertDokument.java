@@ -18,10 +18,10 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 // Variasjoner av protokollen håndteres utenfro
 public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokumentmottaker {
 
-    protected DokumentmottakerFelles dokumentmottakerFelles;
-    MottatteDokumentTjeneste mottatteDokumentTjeneste;
-    Behandlingsoppretter behandlingsoppretter;
-    Kompletthetskontroller kompletthetskontroller;
+    private DokumentmottakerFelles dokumentmottakerFelles;
+    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
+    private Behandlingsoppretter behandlingsoppretter;
+    private Kompletthetskontroller kompletthetskontroller;
 
     private BehandlingRepository behandlingRepository;
     private BehandlingRevurderingRepository revurderingRepository;
@@ -59,6 +59,22 @@ public abstract class DokumentmottakerYtelsesesrelatertDokument implements Dokum
     protected abstract BehandlingÅrsakType getBehandlingÅrsakType();
     /* TEMPLATE-metoder SLUTT */
 
+    protected Behandlingsoppretter getBehandlingsoppretter() {
+        return behandlingsoppretter;
+    }
+    
+    protected DokumentmottakerFelles getDokumentmottakerFelles() {
+        return dokumentmottakerFelles;
+    }
+    
+    protected Kompletthetskontroller getKompletthetskontroller() {
+        return kompletthetskontroller;
+    }
+    
+    protected MottatteDokumentTjeneste getMottatteDokumentTjeneste() {
+        return mottatteDokumentTjeneste;
+    }
+    
     @Override
     public final void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
