@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.xml.bind.JAXBElement;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -26,7 +28,8 @@ public class MapOmsorgspengerFravær {
     }
 
     private LocalDateTimeline<Duration> getFraværDeldager() {
-        Stream<DelvisFravaer> fravær = Optional.ofNullable(omsorgspenger.getDelvisFravaersListe().getValue())
+        Stream<DelvisFravaer> fravær = Optional.ofNullable(omsorgspenger.getDelvisFravaersListe())
+            .map(JAXBElement::getValue)
             .map(DelvisFravaersListe::getDelvisFravaer)
             .map(List<DelvisFravaer>::stream)
             .orElse(Stream.empty());
@@ -38,7 +41,8 @@ public class MapOmsorgspengerFravær {
     }
 
     private LocalDateTimeline<Duration> getFraværHeledager() {
-        Stream<Periode> fravær = Optional.ofNullable(omsorgspenger.getFravaersPerioder().getValue())
+        Stream<Periode> fravær = Optional.ofNullable(omsorgspenger.getFravaersPerioder())
+            .map(JAXBElement::getValue)
             .map(FravaersPeriodeListe::getFravaerPeriode)
             .map(List<Periode>::stream)
             .orElse(Stream.empty());
