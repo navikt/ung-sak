@@ -46,10 +46,9 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Override
-    public void mottaSøknad(Saksnummer saksnummer, OmsorgspengerSøknadInnsending søknad) {
+    public void mottaSøknad(Saksnummer saksnummer, OmsorgspengerSøknadInnsending søknadInnsending) {
         Objects.requireNonNull(saksnummer);
-        Objects.requireNonNull(søknad);
-        
+        Objects.requireNonNull(søknadInnsending);
         // FIXME K9 Legg til logikk for valg av fagsak og behandling type
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
         var behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
@@ -59,7 +58,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
 
         // FIXME K9 Persister søknad
-        persisterSøknad(behandling, søknad);
+        persisterSøknad(behandling, søknadInnsending);
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
     }

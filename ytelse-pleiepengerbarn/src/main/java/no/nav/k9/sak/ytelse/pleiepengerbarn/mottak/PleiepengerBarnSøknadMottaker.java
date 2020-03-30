@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 import java.time.LocalDate;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -22,13 +23,14 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
         // for proxy
     }
 
+    @Inject
     public PleiepengerBarnSøknadMottaker(SøknadDokumentmottaker dokumentMottaker) {
         this.dokumentMottaker = dokumentMottaker;
     }
 
     @Override
-    public void mottaSøknad(Saksnummer saksnummer, PleiepengerBarnSøknadInnsending søknad) {
-        dokumentMottaker.mottaSoknad(saksnummer, søknad.getSøknad());
+    public void mottaSøknad(Saksnummer saksnummer, PleiepengerBarnSøknadInnsending søknadInnsending) {
+        dokumentMottaker.mottaSoknad(saksnummer, søknadInnsending.getSøknad());
     }
 
     @Override
