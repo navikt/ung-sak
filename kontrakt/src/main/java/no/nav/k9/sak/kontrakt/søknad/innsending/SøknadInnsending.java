@@ -31,10 +31,13 @@ public abstract class SøknadInnsending<S> {
     private Saksnummer saksnummer;
 
     @JsonProperty(value = "ytelseType", required = true)
+    @NotNull
+    @Valid
     private FagsakYtelseType ytelseType;
 
-    public SøknadInnsending(@NotNull @Valid Saksnummer saksnummer) {
+    public SøknadInnsending(@NotNull @Valid Saksnummer saksnummer, @NotNull @Valid FagsakYtelseType ytelseType) {
         this.saksnummer = saksnummer;
+        this.ytelseType = ytelseType;
     }
 
     protected SøknadInnsending(FagsakYtelseType ytelseType) {
