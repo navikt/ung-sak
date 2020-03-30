@@ -6,13 +6,15 @@ import java.net.URISyntaxException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -25,6 +27,8 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @Default
 public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
     private static final String TJENESTE_NAVN = "k9-aarskvantum";
+
+    private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
     private static final Logger log = LoggerFactory.getLogger(ÅrskvantumRestKlient.class);
 
@@ -45,12 +49,16 @@ public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
     public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/mock");
-            return restKlient.get(endpoint, ÅrskvantumResultat.class);
+            var result = restKlient.get(endpoint, ÅrskvantumResultat.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + ref + ": " + constraints);
+            }
+            return result;
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilÅrskvantum(e).toException();
         }
     }
-
 
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
@@ -66,7 +74,6 @@ public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000088", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente årskvantum for behandling: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilÅrskvantum(Throwable t);
-
 
     }
 

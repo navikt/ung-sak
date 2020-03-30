@@ -22,6 +22,10 @@ public class OmsorgspengerSøknadInnsending extends SøknadInnsending<Void> {
 
     public static final String YTELSE_TYPE = "OMP";
 
+    public OmsorgspengerSøknadInnsending() {
+        super(FagsakYtelseType.OMSORGSPENGER);
+    }
+    
     @JsonCreator
     public OmsorgspengerSøknadInnsending(@JsonProperty(value = "saksnummer", required = true) @NotNull @Valid Saksnummer saksnummer) {
         super(saksnummer, FagsakYtelseType.OMSORGSPENGER);

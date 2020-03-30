@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,10 +47,13 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
         var årskvantum = årskvantumTjeneste.hentÅrskvantumUttak(ref);
+        if (årskvantum.getUttaksperioder() == null || årskvantum.getUttaksperioder().isEmpty()) {
+            return new OmsorgspengerGrunnlag(Collections.emptyList());
+        }
+        
         var arbeidsforholdPerioder = årskvantum.getUttaksperioder().stream().collect(Collectors.groupingBy(u -> u.getUtbetalingsgrad().getArbeidsforhold()));
         var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.entrySet().stream().map(e -> mapTilUtbetalingsgrad(e.getKey(), e.getValue())).collect(Collectors.toList());
-        var grunnlag = new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
-        return grunnlag;
+        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
 
     private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(UttakArbeidsforhold uttakArbeidsforhold, List<UttaksperiodeOmsorgspenger> perioder) {
