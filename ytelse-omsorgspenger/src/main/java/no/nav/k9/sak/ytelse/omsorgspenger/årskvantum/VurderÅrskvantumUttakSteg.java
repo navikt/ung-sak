@@ -45,7 +45,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         var stp = stpTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, stp);
 
-        var årskvantumResultat = årskvantumRestKlient.hentÅrskvantumUttakMock();
+        var årskvantumResultat = årskvantumRestKlient.hentÅrskvantumUttak(ref);
 
         if(OmsorgspengerUtfall.INNVILGET.equals(årskvantumResultat.getSamletUtfall())) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();

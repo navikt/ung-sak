@@ -1,5 +1,18 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+
+import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -8,17 +21,10 @@ import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
-import org.apache.http.client.utils.URIBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @ApplicationScoped
-public class ÅrskvantumRestKlient {
+@Default
+public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
     private static final String TJENESTE_NAVN = "k9-aarskvantum";
 
     private static final Logger log = LoggerFactory.getLogger(ÅrskvantumRestKlient.class);
@@ -36,7 +42,8 @@ public class ÅrskvantumRestKlient {
         this.endpointUttaksplan = toUri(endpoint, "/k9/aarskvantum");
     }
 
-    public ÅrskvantumResultat hentÅrskvantumUttakMock() {
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
         builder.setPath("/mock");
         try {
