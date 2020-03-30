@@ -41,7 +41,7 @@ public class Inntektsmelding implements IndexKey {
     private LocalDate startDatoPermisjon;
 
     @ChangeTracked
-    private List<PeriodeAndel> oppgittFravær;
+    private List<PeriodeAndel> oppgittFravær = new ArrayList<>();
 
     private boolean nærRelasjon;
 
@@ -100,11 +100,12 @@ public class Inntektsmelding implements IndexKey {
         this.naturalYtelser = inntektsmelding.getNaturalYtelser();
         this.utsettelsePerioder = inntektsmelding.getUtsettelsePerioder();
         this.endringerRefusjon = inntektsmelding.getEndringerRefusjon();
+        this.oppgittFravær = inntektsmelding.getOppgittFravær();
     }
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
+        Object[] keyParts = {arbeidsgiver, arbeidsforholdRef};
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -238,7 +239,7 @@ public class Inntektsmelding implements IndexKey {
     public boolean gjelderSammeArbeidsforhold(Inntektsmelding annen) {
         return getArbeidsgiver().equals(annen.getArbeidsgiver())
             && (getArbeidsforholdRef() == null || annen.getArbeidsforholdRef() == null
-                || (getArbeidsforholdRef() != null && getArbeidsforholdRef().gjelderFor(annen.getArbeidsforholdRef())));
+            || (getArbeidsforholdRef() != null && getArbeidsforholdRef().gjelderFor(annen.getArbeidsforholdRef())));
     }
 
     /**
@@ -327,7 +328,7 @@ public class Inntektsmelding implements IndexKey {
     void leggTilFravær(PeriodeAndel fravær) {
         this.oppgittFravær.add(fravær);
     }
-    
+
     void leggTil(Gradering gradering) {
         this.graderinger.add(gradering);
     }

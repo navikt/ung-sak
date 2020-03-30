@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +57,7 @@ public class FaktaForÅrskvantumUttakSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         AktørId aktørId = kontekst.getAktørId();
-        
+
         var samletFravær = samleSammenOppgittFravær(behandlingId, aktørId);
         grunnlagRepository.lagreOgFlushOppgittFravær(behandlingId, samletFravær);
 
@@ -87,7 +88,8 @@ public class FaktaForÅrskvantumUttakSteg implements BehandlingSteg {
 
     private List<OppgittFraværPeriode> trekkUtFravær(List<Inntektsmelding> inntektsmeldinger) {
         var fravær = inntektsmeldinger.stream()
-            .flatMap(im -> im.getOppgittFravær().stream())
+            .map(Inntektsmelding::getOppgittFravær)
+            .flatMap(Collection::stream)
             .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, pa.getVarighetPerDag()))
             .collect(Collectors.toList());
         return fravær;

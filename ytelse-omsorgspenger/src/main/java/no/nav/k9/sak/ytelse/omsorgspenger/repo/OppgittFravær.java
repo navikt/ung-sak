@@ -25,7 +25,7 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "OmsorgspengerFravær")
-@Table(name = "UT_OMP_OPPGITT_FRAVAER")
+@Table(name = "OMP_OPPGITT_FRAVAER")
 @Immutable
 public class OppgittFravær extends BaseEntitet {
 
@@ -48,7 +48,7 @@ public class OppgittFravær extends BaseEntitet {
     public OppgittFravær(OppgittFraværPeriode... perioder) {
         this(Arrays.asList(perioder));
     }
-    
+
     public OppgittFravær(Collection<OppgittFraværPeriode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
