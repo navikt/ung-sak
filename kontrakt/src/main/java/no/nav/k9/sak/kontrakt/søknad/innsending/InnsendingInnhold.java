@@ -12,53 +12,37 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseDeserializer;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseSerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "ytelseType", defaultImpl = Void.class)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = PleiepengerBarnSøknadInnsending.class, name = PleiepengerBarnSøknadInnsending.YTELSE_TYPE),
-    @JsonSubTypes.Type(value = OmsorgspengerSøknadInnsending.class, name = OmsorgspengerSøknadInnsending.YTELSE_TYPE)
+        @JsonSubTypes.Type(value = PleiepengerBarnSøknadInnsending.class, name = PleiepengerBarnSøknadInnsending.YTELSE_TYPE),
+        @JsonSubTypes.Type(value = OmsorgspengerSøknadInnsending.class, name = OmsorgspengerSøknadInnsending.YTELSE_TYPE)
 })
-public abstract class SøknadInnsending<S> {
+public abstract class InnsendingInnhold {
 
-    @JsonProperty(value = "saksnummer", required = true)
-    @NotNull
-    @Valid
-    private Saksnummer saksnummer;
-
+    /** bruker custom serializer her da default wrapper ytelsetype i et objekt. */
+    @JsonDeserialize(using = PlainYtelseDeserializer.class)
+    @JsonSerialize(using = PlainYtelseSerializer.class)
     @JsonProperty(value = "ytelseType", required = true)
     @NotNull
     @Valid
     private FagsakYtelseType ytelseType;
 
-    public SøknadInnsending(@NotNull @Valid Saksnummer saksnummer, @NotNull @Valid FagsakYtelseType ytelseType) {
-        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
+    public InnsendingInnhold(FagsakYtelseType ytelseType) {
         this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
-    }
-
-    protected SøknadInnsending(FagsakYtelseType ytelseType) {
-        // kun for proxying
-        this.ytelseType = ytelseType;
-    }
-
-    @AbacAttributt("saksnummer")
-    public Saksnummer getSaksnummer() {
-        return saksnummer;
-    }
-
-    public void setSaksnummer(Saksnummer saksnummer) {
-        this.saksnummer = saksnummer;
     }
 
     public FagsakYtelseType getYtelseType() {
         return ytelseType;
     }
 
-    public abstract S getSøknad();
 }
