@@ -13,14 +13,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonTypeName(PleiepengerBarnSøknadInnsending.YTELSE_TYPE)
-public class PleiepengerBarnSøknadInnsending extends SøknadInnsending<PleiepengerBarnSøknad> {
+public class PleiepengerBarnSøknadInnsending extends InnsendingInnhold {
 
     public static final String YTELSE_TYPE = "PSB";
     
@@ -35,13 +34,11 @@ public class PleiepengerBarnSøknadInnsending extends SøknadInnsending<Pleiepen
     }
     
     @JsonCreator
-    public PleiepengerBarnSøknadInnsending(@JsonProperty(value = "saksnummer", required = true) @NotNull @Valid Saksnummer saksnummer,
-                                           @JsonProperty(value = "søknad", required = true) @NotNull @Valid PleiepengerBarnSøknad søknad) {
-        super(saksnummer, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+    public PleiepengerBarnSøknadInnsending(@JsonProperty(value = "søknad", required = true) @NotNull @Valid PleiepengerBarnSøknad søknad) {
+        this();
         this.søknad = søknad;
     }
 
-    @Override
     public PleiepengerBarnSøknad getSøknad() {
         return søknad;
     }
