@@ -41,7 +41,7 @@ public class Inntektsmelding implements IndexKey {
     private LocalDate startDatoPermisjon;
 
     @ChangeTracked
-    private List<PeriodeAndel> oppgittFravær;
+    private List<PeriodeAndel> oppgittFravær = new ArrayList<>();
 
     private boolean nærRelasjon;
 
@@ -326,9 +326,6 @@ public class Inntektsmelding implements IndexKey {
     }
 
     void leggTilFravær(PeriodeAndel fravær) {
-        if (this.oppgittFravær == null) {
-            this.oppgittFravær = new ArrayList<>();
-        }
         this.oppgittFravær.add(fravær);
     }
 
