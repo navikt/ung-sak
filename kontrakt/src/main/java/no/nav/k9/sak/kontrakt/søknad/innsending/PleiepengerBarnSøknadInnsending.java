@@ -30,15 +30,10 @@ public class PleiepengerBarnSøknadInnsending extends SøknadInnsending<Pleiepen
     @Valid
     private PleiepengerBarnSøknad søknad;
 
-    public PleiepengerBarnSøknadInnsending() {
-        super(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
-    }
-
     @JsonCreator
     public PleiepengerBarnSøknadInnsending(@JsonProperty(value = "saksnummer", required = true) @NotNull @Valid Saksnummer saksnummer,
-                                           @JsonProperty(value = "ytelseType", required = true) @NotNull @Valid FagsakYtelseType ytelseType,
                                            @JsonProperty(value = "søknad", required = true) @NotNull @Valid PleiepengerBarnSøknad søknad) {
-        super(saksnummer, ytelseType);
+        super(saksnummer, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
         this.søknad = søknad;
     }
 

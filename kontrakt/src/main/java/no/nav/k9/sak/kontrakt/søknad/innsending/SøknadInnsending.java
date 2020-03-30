@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.søknad.innsending;
 
+import java.util.Objects;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -36,8 +38,8 @@ public abstract class SøknadInnsending<S> {
     private FagsakYtelseType ytelseType;
 
     public SøknadInnsending(@NotNull @Valid Saksnummer saksnummer, @NotNull @Valid FagsakYtelseType ytelseType) {
-        this.saksnummer = saksnummer;
-        this.ytelseType = ytelseType;
+        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
+        this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
     }
 
     protected SøknadInnsending(FagsakYtelseType ytelseType) {

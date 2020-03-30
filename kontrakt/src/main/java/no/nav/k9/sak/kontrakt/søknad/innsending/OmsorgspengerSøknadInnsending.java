@@ -22,14 +22,9 @@ public class OmsorgspengerSøknadInnsending extends SøknadInnsending<Void> {
 
     public static final String YTELSE_TYPE = "OMP";
 
-    public OmsorgspengerSøknadInnsending() {
-        super(FagsakYtelseType.OMSORGSPENGER);
-    }
-
     @JsonCreator
-    public OmsorgspengerSøknadInnsending(@JsonProperty(value = "saksnummer", required = true) @NotNull @Valid Saksnummer saksnummer,
-                                         @JsonProperty(value = "ytelseType", required = true) @NotNull @Valid FagsakYtelseType ytelseType) {
-        super(saksnummer, ytelseType);
+    public OmsorgspengerSøknadInnsending(@JsonProperty(value = "saksnummer", required = true) @NotNull @Valid Saksnummer saksnummer) {
+        super(saksnummer, FagsakYtelseType.OMSORGSPENGER);
     }
 
     // K9 TODO referer søknad kontrakt her
