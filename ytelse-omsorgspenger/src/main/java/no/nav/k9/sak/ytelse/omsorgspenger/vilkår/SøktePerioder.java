@@ -1,4 +1,4 @@
-package no.nav.k9.sak.inngangsvilkår.perioder;
+package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
 import java.util.Collections;
 import java.util.Set;
@@ -7,27 +7,27 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
 
-    private UttakRepository uttakRepository;
+    private OmsorgspengerGrunnlagRepository uttakRepository;
 
-    SøktePerioder(UttakRepository uttakRepository) {
+    SøktePerioder(OmsorgspengerGrunnlagRepository uttakRepository) {
         this.uttakRepository = uttakRepository;
     }
 
     @Override
     public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
-
+        var søknadsperioder = uttakRepository.hentOppgittFraværHvisEksisterer(behandlingId);
 
         if (søknadsperioder.isEmpty()) {
             return Set.of();
         } else {
-            final var perioder = søknadsperioder.map(Søknadsperioder::getPerioder).orElse(Collections.emptySet()).stream().map(Søknadsperiode::getPeriode).collect(Collectors.toSet());
+            final var perioder = søknadsperioder.map(OppgittFravær::getPerioder).orElse(Collections.emptySet()).stream().map(OppgittFraværPeriode::getPeriode).collect(Collectors.toSet());
 
             final var timeline = new LocalDateTimeline<>(perioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).collect(Collectors.toList())).compress();
 

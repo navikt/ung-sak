@@ -26,12 +26,9 @@ public class VurderOpptjeningsvilkårStegTest {
 
     @Rule
     public final RepositoryRule repoRule = new UnittestRepositoryRule();
-
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-
     @Inject
     public InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
-
+    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     @Inject
     private OpptjeningRepository opptjeningRepository;
 
@@ -57,9 +54,8 @@ public class VurderOpptjeningsvilkårStegTest {
 
         // Act
         // opprett opptjening
-        new FastsettOpptjeningsperiodeSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste
-        )
-                .utførSteg(kontekst);
+        new FastsettOpptjeningsperiodeSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste)
+            .utførSteg(kontekst);
 
         // vurder vilkåret
         new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste)

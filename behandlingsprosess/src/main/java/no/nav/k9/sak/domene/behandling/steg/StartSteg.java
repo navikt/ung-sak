@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -26,11 +27,9 @@ import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjenes
 @ApplicationScoped
 public class StartSteg implements BehandlingSteg {
 
-    public static final int PLEIEPENGER_VILKÅR_MELLOMLIGGENDE_PERIODE = 7;
-    public static final int DEFAULT_MAKS_AVSTAND = 0;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     StartSteg() {
         // for CDI proxy
@@ -39,10 +38,10 @@ public class StartSteg implements BehandlingSteg {
     @Inject
     public StartSteg(BehandlingRepository behandlingRepository,
                      VilkårResultatRepository vilkårResultatRepository,
-                     VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     @Override
@@ -62,20 +61,13 @@ public class StartSteg implements BehandlingSteg {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
         var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
+        var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
-        var utledetAvstand = utledAvstand(behandling.getFagsakYtelseType());
+        var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand)
             .leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
         var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
-
-    private int utledAvstand(FagsakYtelseType fagsakYtelseType) {
-        if (FagsakYtelseType.PSB.equals(fagsakYtelseType)) {
-            return PLEIEPENGER_VILKÅR_MELLOMLIGGENDE_PERIODE;
-        }
-        return DEFAULT_MAKS_AVSTAND;
-    }
-
 }

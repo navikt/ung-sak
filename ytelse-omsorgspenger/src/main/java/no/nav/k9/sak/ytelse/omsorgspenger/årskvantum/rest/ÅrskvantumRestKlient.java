@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -44,10 +44,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
 
     @Override
     public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
-        URIBuilder builder = new URIBuilder(endpointUttaksplan);
-        builder.setPath("/mock");
         try {
-            return restKlient.get(builder.build(), ÅrskvantumResultat.class);
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/mock");
+            return restKlient.get(endpoint, ÅrskvantumResultat.class);
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilÅrskvantum(e).toException();
         }

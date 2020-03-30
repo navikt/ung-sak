@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
@@ -37,7 +38,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     }
 
     @Inject
-    AvklarMedisinskeOpplysninger(MedisinskGrunnlagRepository medisinskGrunnlagRepository, VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste) {
+    AvklarMedisinskeOpplysninger(MedisinskGrunnlagRepository medisinskGrunnlagRepository, @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.tilVurderingTjeneste = tilVurderingTjeneste;
     }

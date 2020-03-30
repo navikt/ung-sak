@@ -1,9 +1,10 @@
-package no.nav.k9.sak.inngangsvilkår.perioder;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.util.Set;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
 
 class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
 
