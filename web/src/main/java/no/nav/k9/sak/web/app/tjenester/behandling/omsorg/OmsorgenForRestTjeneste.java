@@ -1,19 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,6 +12,20 @@ import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -60,7 +60,7 @@ public class OmsorgenForRestTjeneste {
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = SykdomsDto.class)))
         })
-    @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public OmsorgenForDto hentSykdomsInformasjonFor(@NotNull @QueryParam(BehandlingUuidDto.NAME)
                                                     @Parameter(description = BehandlingUuidDto.DESC)

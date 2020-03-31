@@ -1,28 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.fordeling;
 
-import static no.nav.vedtak.feil.LogLevel.WARN;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.function.Function;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
@@ -53,12 +31,28 @@ import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.vedtak.sikkerhet.abac.*;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.feil.LogLevel.WARN;
 
 /**
  * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
@@ -97,7 +91,7 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Informasjon om en fagsak", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public FagsakInfomasjonDto fagsak(@Parameter(description = "Saksnummeret det skal hentes saksinformasjon om") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummerDto.getVerdi(), false);
         if (optFagsak.isEmpty() || optFagsak.get().getSkalTilInfotrygd()) {
@@ -116,7 +110,7 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public SaksnummerDto opprettSak(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnEllerOpprettSak opprettSakDto) {
         BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(opprettSakDto.getBehandlingstemaOffisiellKode());
 
@@ -129,7 +123,7 @@ public class FordelRestTjeneste {
         var ytelseType = behandlingTema.getFagsakYtelseType();
         var startDato = opprettSakDto.getPeriodeStart() != null ? opprettSakDto.getPeriodeStart() : LocalDate.now();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
-        
+
         var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, startDato);
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
@@ -141,7 +135,7 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av søknad.", tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public SøknadInnsendingMottatt innsendingSøknad(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid SøknadInnsending søknad) {
         var saksnummer = søknad.getSaksnummer();
         var ytelseType = søknad.getYtelseType();
@@ -155,7 +149,7 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, ressurs = BeskyttetRessursResourceAttributt.FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void mottaJournalpost(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid AbacJournalpostMottakDto mottattJournalpost) {
 
         InngåendeSaksdokument saksdokument = map(mottattJournalpost);

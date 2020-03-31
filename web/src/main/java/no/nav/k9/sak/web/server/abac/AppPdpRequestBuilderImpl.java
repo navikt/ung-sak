@@ -1,21 +1,5 @@
 package no.nav.k9.sak.web.server.abac;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.annotation.Priority;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
-
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
@@ -29,6 +13,13 @@ import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.vedtak.sikkerhet.abac.PdpKlient;
 import no.nav.vedtak.sikkerhet.abac.PdpRequest;
 import no.nav.vedtak.sikkerhet.abac.PdpRequestBuilder;
+
+import javax.annotation.Priority;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Alternative;
+import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Dependent
 @Alternative
@@ -95,7 +86,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         pdpRequest.put(AbacAttributter.RESOURCE_FELLES_DOMENE, ABAC_DOMAIN);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, attributter.getIdToken());
         pdpRequest.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
-        pdpRequest.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource().getEksternKode());
+        pdpRequest.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
         if (!aktører.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktører);
         }

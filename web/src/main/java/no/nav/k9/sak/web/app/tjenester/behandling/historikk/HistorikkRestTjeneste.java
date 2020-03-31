@@ -1,9 +1,12 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.FAGSAK;
-
-import java.util.Collections;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,14 +22,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.util.Collections;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("/historikk")
 @ApplicationScoped
@@ -46,7 +45,7 @@ public class HistorikkRestTjeneste {
     @GET
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Operation(description = "Henter alle historikkinnslag for en gitt sak.", tags = "historikk")
-    @BeskyttetRessurs(action = READ, ressurs = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentAlleInnslag(@Context HttpServletRequest request,
                                     @NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer må være et eksisterende saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
