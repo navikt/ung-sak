@@ -31,10 +31,10 @@ public class UttaksperiodeOmsorgspenger {
     private Duration lengde;
 
 
-    @JsonProperty(value="arbeidsgiver", required=false)
+    @JsonProperty(value="arbeidsforhold", required=false)
     @Valid
     @NotNull
-    private Arbeidsgiver arbeidsgiver;
+    private UttakArbeidsforhold uttakArbeidsforhold;
 
     @JsonProperty(value="utfall", required=true)
     @Valid
@@ -74,11 +74,11 @@ public class UttaksperiodeOmsorgspenger {
         this.lengde = lengde;
     }
 
-    public Arbeidsgiver getArbeidsgiver() {
-        return arbeidsgiver;
+    public UttakArbeidsforhold getUttakArbeidsforhold() {
+        return uttakArbeidsforhold;
     }
 
-    public void setArbeidsgiver(Arbeidsgiver arbeidsgiver) {
-        this.arbeidsgiver = arbeidsgiver;
+    public void setUttakArbeidsforhold(UttakArbeidsforhold uttakArbeidsforhold) {
+        this.uttakArbeidsforhold = uttakArbeidsforhold;
     }
 }

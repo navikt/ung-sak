@@ -2,7 +2,12 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -13,8 +18,10 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
@@ -63,7 +70,10 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger();
             uttaksperiodeOmsorgspenger.setPeriode(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()));
             uttaksperiodeOmsorgspenger.setLengde(fraværPeriode.getFraværPerDag());
-            uttaksperiodeOmsorgspenger.setArbeidsgiver(fraværPeriode.getArbeidsgiver());
+            uttaksperiodeOmsorgspenger.setUttakArbeidsforhold(new UttakArbeidsforhold(fraværPeriode.getArbeidsgiver().getOrgnr(),
+                                                                                      fraværPeriode.getArbeidsgiver().getAktørId(),
+                                                                                      UttakArbeidType.ARBEIDSTAKER, //TODO finn ut av hvordan vi kan utlede denne
+                                                                                      null)); //TODO sjekk opp om denne trengs
             årskvantumRequest.getUttaksperioder().add(uttaksperiodeOmsorgspenger);
         }
 

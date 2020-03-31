@@ -49,7 +49,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
     public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumRequest årskvantumRequest) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/mock");
-            var result = restKlient.get(endpoint, ÅrskvantumResultat.class);
+            var result = restKlient.post(endpoint, årskvantumRequest, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + årskvantumRequest.getBehandlingId() + ": " + constraints);
