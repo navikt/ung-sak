@@ -48,4 +48,12 @@ public class ÅrskvantumRequest {
     public void setUttaksperioder(List<UttaksperiodeOmsorgspenger> uttaksperioder) {
         this.uttaksperioder = uttaksperioder;
     }
+
+    public String getAktørid() {
+        return aktørid;
+    }
+
+    public void setAktørid(String aktørid) {
+        this.aktørid = aktørid;
+    }
 }

@@ -66,6 +66,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
 
         årskvantumRequest.setBehandlingId(ref.getBehandlingId().toString());
+        årskvantumRequest.setAktørid(behandling.getAktørId().getId());
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger();
             uttaksperiodeOmsorgspenger.setPeriode(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()));
