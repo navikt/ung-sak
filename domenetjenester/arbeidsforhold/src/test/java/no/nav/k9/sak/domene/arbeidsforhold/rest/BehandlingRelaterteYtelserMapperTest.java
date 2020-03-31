@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.arbeidsforhold.rest;
 
-import static no.nav.k9.sak.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER;
 import static no.nav.k9.sak.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_SØKER;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -100,19 +99,6 @@ public class BehandlingRelaterteYtelserMapperTest {
     }
 
     @Test
-    public void skal_returnerer_2_tom_tilgrensende_ytelser_for_soker() {
-        @SuppressWarnings("unchecked")
-        List<RelaterteYtelserDto> resultatListe = BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(Collections.EMPTY_LIST,
-            RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER);
-
-        assertThat(resultatListe).hasSize(2);
-        IntStream.range(0, RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER.size()).forEach(i -> {
-            assertThat(resultatListe.get(i).getRelatertYtelseType()).isEqualTo(RELATERT_YTELSE_TYPER_FOR_SØKER.get(i).getKode());
-            assertThat(resultatListe.get(i).getTilgrensendeYtelserListe()).isEmpty();
-        });
-    }
-
-    @Test
     public void skal_returnerer_sortert_tilgrensende_ytelser_for_soker() {
         List<TilgrensendeYtelserDto> tilgrensendeYtelserDtos = List.of(
             opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.AVSLUTTET, I_DAG.minusDays(365),
@@ -149,38 +135,6 @@ public class BehandlingRelaterteYtelserMapperTest {
         assertThat(resultatListe.get(5).getTilgrensendeYtelserListe()).hasSize(1);
     }
 
-    @Test
-    public void skal_returnerer_sortert_tilgrensende_ytelser_for_annen_forelder() {
-        List<TilgrensendeYtelserDto> tilgrensendeYtelserDtos = List.of(
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.SYKEPENGER, RelatertYtelseTilstand.AVSLUTTET, I_DAG.minusDays(365),
-                I_DAG.plusDays(360)),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.AVSLUTTET, I_DAG.minusDays(365),
-                I_DAG.plusDays(360)),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.AVSLUTTET, I_DAG.minusDays(165),
-                I_DAG.plusDays(160)),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.ÅPEN, I_DAG.minusDays(5), null),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.ÅPEN, I_DAG.plusMonths(5), null),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.ÅPEN, null, null),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.ÅPEN, I_DAG, null),
-            opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.ENGANGSTØNAD, RelatertYtelseTilstand.AVSLUTTET, I_DAG.minusDays(500),
-                I_DAG.plusDays(400)));
-
-        List<RelaterteYtelserDto> resultatListe = BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(tilgrensendeYtelserDtos,
-            RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER);
-
-        assertThat(resultatListe).hasSize(2);
-        assertThat(resultatListe.get(0).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.FORELDREPENGER.getKode());
-        final List<TilgrensendeYtelserDto> foreldrepengerYtelserListe = resultatListe.get(0).getTilgrensendeYtelserListe();
-        assertThat(foreldrepengerYtelserListe).hasSize(6);
-        assertThat(foreldrepengerYtelserListe.get(0).getPeriodeFraDato()).isNull();
-        assertThat(foreldrepengerYtelserListe.get(1).getPeriodeFraDato()).isEqualTo(I_DAG.plusMonths(5));
-        assertThat(foreldrepengerYtelserListe.get(2).getPeriodeFraDato()).isEqualTo(I_DAG);
-        assertThat(foreldrepengerYtelserListe.get(3).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(5));
-        assertThat(foreldrepengerYtelserListe.get(4).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(165));
-        assertThat(foreldrepengerYtelserListe.get(5).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(365));
-        assertThat(resultatListe.get(1).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.ENGANGSTØNAD.getKode());
-        assertThat(resultatListe.get(1).getTilgrensendeYtelserListe()).hasSize(1);
-    }
 
     private Ytelse opprettBuilderForBehandlingRelaterteYtelser(FagsakYtelseType ytelseType,
                                                                RelatertYtelseTilstand ytelseTilstand,

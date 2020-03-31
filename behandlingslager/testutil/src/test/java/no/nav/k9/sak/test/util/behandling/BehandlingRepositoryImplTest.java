@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
@@ -70,7 +71,7 @@ public class BehandlingRepositoryImplTest {
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
 
     private Saksnummer saksnummer = new Saksnummer("2");
-    private Fagsak fagsak = FagsakBuilder.nyEngangstønad().medSaksnummer(saksnummer).build();
+    private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(saksnummer).build();
     private Behandling behandling;
 
     private LocalDateTime imorgen = LocalDateTime.now().plusDays(1);

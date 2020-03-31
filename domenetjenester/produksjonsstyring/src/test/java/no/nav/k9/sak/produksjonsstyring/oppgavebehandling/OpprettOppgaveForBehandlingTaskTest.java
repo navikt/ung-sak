@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -162,7 +163,7 @@ public class OpprettOppgaveForBehandlingTaskTest {
     }
 
     private Fagsak opprettOgLagreFagsak() {
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad()
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER)
             .medSaksnummer(new Saksnummer("124"))
             .build();
         repositoryProvider.getFagsakRepository().opprettNy(fagsak);

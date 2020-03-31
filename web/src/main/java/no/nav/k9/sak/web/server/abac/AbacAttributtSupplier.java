@@ -35,16 +35,26 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
 
     private static final Class<AbacAttributt> ANNOTATION_CLASS = AbacAttributt.class;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public AbacDataAttributter apply(Object obj) {
         var abac = AbacDataAttributter.opprett();
         if (obj == null) {
             return abac;
         }
+        if (obj instanceof Collection) {
+            for (var part : (Collection<?>) obj) {
+                leggTilAbacAttributter(part, abac);
+            }
+        } else {
+            leggTilAbacAttributter(obj, abac);
+        }
+        return abac;
+    }
 
-        boolean erLagtTil = false;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private boolean leggTilAbacAttributter(Object obj, AbacDataAttributter abac) {
         var cls = obj.getClass();
+        boolean erLagtTil = false;
         for (var m : cls.getMethods()) {
             if (m.getParameterCount() > 0) {
                 continue;
@@ -75,16 +85,16 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
         if (!erLagtTil) {
             throw new IllegalStateException("Ingen abac attributter lagt til fra " + cls + ", mangler annotasjoner? " + ANNOTATION_CLASS);
         }
-        return abac;
+        return erLagtTil;
     }
-    
+
     private static final AbacAttributtType toAbacAttributtType(String key) {
         /*
          * XXX: Implementasjoner av AbacAttributtType mangler equals og hashcode. Flere steder, slik
-         *      som "AbacDataAttributter.getVerdier", bruker equals+hashCode for sjekk av om et gitt
-         *      attributt er satt. Inntil dette er ryddet opp i må kun én instans per key benyttes.
+         * som "AbacDataAttributter.getVerdier", bruker equals+hashCode for sjekk av om et gitt
+         * attributt er satt. Inntil dette er ryddet opp i må kun én instans per key benyttes.
          */
-        
+
         for (AbacAttributtType type : StandardAbacAttributtType.values()) {
             if (type.getSporingsloggKode().equals(key)) {
                 return type;
@@ -95,7 +105,7 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
                 return type;
             }
         }
-        
+
         throw new IllegalStateException("Ukjent ABAC-attributt.");
     }
 

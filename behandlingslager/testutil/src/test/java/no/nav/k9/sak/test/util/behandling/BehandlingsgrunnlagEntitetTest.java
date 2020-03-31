@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
@@ -52,7 +53,7 @@ public class BehandlingsgrunnlagEntitetTest {
     private final PersonopplysningRepository personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
 
 
-    private Fagsak fagsak = FagsakBuilder.nyEngangstønad().build();
+    private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private SøknadRepository søknadRepository = repositoryProvider.getSøknadRepository();
 
     @Before
