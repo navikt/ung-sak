@@ -33,14 +33,6 @@ public class FagsakBuilder {
         return new FagsakBuilder(fagsakYtelseType);
     }
 
-    public static FagsakBuilder nyEngangstønad() {
-        return new FagsakBuilder(FagsakYtelseType.ENGANGSTØNAD);
-    }
-
-    public static FagsakBuilder nyForeldrepengesak() {
-        return new FagsakBuilder(FagsakYtelseType.FORELDREPENGER);
-    }
-
     public AktørId getAktørId() {
         return aktørId;
     }

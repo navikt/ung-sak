@@ -10,6 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -39,7 +40,7 @@ public class VilkårResultatTest {
     private Repository repository = repoRule.getRepository();
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private Fagsak fagsak = FagsakBuilder.nyEngangstønad().build();
+    private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
     private Behandling behandling1;
     private VilkårResultatRepository vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();

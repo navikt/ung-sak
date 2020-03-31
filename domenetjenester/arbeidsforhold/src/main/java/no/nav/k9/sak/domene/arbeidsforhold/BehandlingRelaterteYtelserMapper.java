@@ -31,10 +31,6 @@ public class BehandlingRelaterteYtelserMapper {
         FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
         FagsakYtelseType.SVANGERSKAPSPENGER);
 
-    public static final List<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_ANNEN_FORELDER = List.of(
-        FagsakYtelseType.FORELDREPENGER,
-        FagsakYtelseType.ENGANGSTØNAD);
-
     private BehandlingRelaterteYtelserMapper() {
     }
 

@@ -2,6 +2,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDate;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -27,7 +28,7 @@ public class DokumentmottakTestUtil {
     }
 
     public static Fagsak byggFagsak(AktørId aktørId, Saksnummer saksnummer, FagsakRepository fagsakRepository) {
-        Fagsak fagsak = FagsakBuilder.nyForeldrepengesak()
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER)
             .medSaksnummer(saksnummer)
             .medBruker(aktørId).build();
         fagsakRepository.opprettNy(fagsak);

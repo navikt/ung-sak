@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -31,7 +32,7 @@ public class MottatteDokumentRepositoryImplTest {
     private final BehandlingRepository behandlingRepository = new BehandlingRepository(repoRule.getEntityManager());
     private final FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
 
-    private final Fagsak fagsak = FagsakBuilder.nyEngangstønad().build();
+    private final Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private Behandling beh1, beh2;
     private MottattDokument dokument1, dokument2;
 

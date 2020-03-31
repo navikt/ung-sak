@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -44,12 +45,12 @@ public class FagsakRevurderingTest {
     @SuppressWarnings("deprecation")
     @Before
     public void opprettBehandlinger() {
-        fagsak = FagsakBuilder.nyEngangstønad().medSaksnummer(fagsakSaksnummer).build();
+        fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakSaksnummer).build();
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
         
         Whitebox.setInternalState(behandling, "id", 1L);
 
-        fagsakMedFlereBehandlinger = FagsakBuilder.nyEngangstønad().medSaksnummer(fagsakMedFlereBehSaksnr).build();
+        fagsakMedFlereBehandlinger = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakMedFlereBehSaksnr).build();
         nyesteBehandling = Behandling.forFørstegangssøknad(fagsakMedFlereBehandlinger)
             .medAvsluttetDato(LocalDateTime.now())
             .build();
@@ -84,7 +85,7 @@ public class FagsakRevurderingTest {
 
     @Test
     public void behandlingerSkalSorteresSynkendePåAvsluttetDato(){
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
         LocalDateTime now = LocalDateTime.now();
         Behandling nyBehandling = Behandling.forFørstegangssøknad(fagsak).medAvsluttetDato(now).build();
         Behandling gammelBehandling = Behandling.forFørstegangssøknad(fagsak).medAvsluttetDato(now.minusDays(1)).build();
@@ -99,7 +100,7 @@ public class FagsakRevurderingTest {
 
     @Test
     public void behandlingerSkalSorteresSynkendePåOpprettetDatoNårAvsluttetDatoErNull(){
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
         LocalDateTime now = LocalDateTime.now();
         Behandling nyBehandling = Behandling.forFørstegangssøknad(fagsak).medAvsluttetDato(null).medOpprettetDato(now).build();
         Behandling gammelBehandling = Behandling.forFørstegangssøknad(fagsak).medAvsluttetDato(now).medOpprettetDato(now.minusDays(1)).build();

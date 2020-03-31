@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -57,7 +58,7 @@ public class FagsakApplikasjonTjenesteTest {
         Personinfo personinfo = new NavPersoninfoBuilder().medAktørId(AKTØR_ID).build();
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.of(personinfo));
 
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentForBruker(AKTØR_ID)).thenReturn(Collections.singletonList(fagsak));
         when(behandlingRepository.hentSisteBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
 
@@ -75,7 +76,7 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_hente_saker_på_saksreferanse() {
         // Arrange
         Personinfo personinfo = new NavPersoninfoBuilder().medAktørId(AKTØR_ID).build();
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
         when(behandlingRepository.hentSisteBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
@@ -94,7 +95,7 @@ public class FagsakApplikasjonTjenesteTest {
     @Test
     public void skal_returnere_tomt_view_når_fagsakens_bruker_er_ukjent_for_tps() {
         // Arrange
-        Fagsak fagsak = FagsakBuilder.nyEngangstønad().medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.empty()); // Ingen treff i TPS
 
