@@ -42,7 +42,7 @@
 
 		<metrics.version>4.1.5</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-		<kalkulus.version>1.0-2020.03.30.114017-ad7d40d</kalkulus.version>
+		<kalkulus.version>1.0-2020.03.31.181744-6621631</kalkulus.version>
 	</properties>
 
     <repositories>
