@@ -70,7 +70,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
-        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFraÅrskvantum(årskvantumResultat));
+        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(årskvantumResultat));
         
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);

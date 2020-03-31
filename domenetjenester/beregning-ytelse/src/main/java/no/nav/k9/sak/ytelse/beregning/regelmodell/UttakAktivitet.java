@@ -40,4 +40,22 @@ public class UttakAktivitet {
     public boolean isErGradering() {
         return erGradering;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<type=" + type + ", arbeid=" + arbeidsforhold + ", utbetalingsgrad=" + utbetalingsgrad + ">";
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if(obj==this)return true;
+        if(obj==null || obj.getClass()!=this.getClass())return false;
+        var other = (UttakAktivitet) obj;
+        return Objects.equals(type, other.type)
+                && Objects.equals(arbeidsforhold, other.arbeidsforhold);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, arbeidsforhold);
+    }
 }

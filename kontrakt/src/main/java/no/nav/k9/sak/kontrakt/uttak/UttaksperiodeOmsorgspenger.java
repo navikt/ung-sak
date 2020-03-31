@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,6 +31,15 @@ public class UttaksperiodeOmsorgspenger {
     @Valid
     @NotNull
     private OmsorgspengerUtfall utfall;
+
+    @JsonCreator
+    public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
+                                      @JsonProperty(value = "utbetalingsgrad", required = true) @Valid @NotNull UttakUtbetalingsgrad utbetalingsgrad,
+                                      @JsonProperty(value = "utfall", required = true) @Valid @NotNull OmsorgspengerUtfall utfall) {
+        this.periode = periode;
+        this.utbetalingsgrad = utbetalingsgrad;
+        this.utfall = utfall;
+    }
 
     public Periode getPeriode() {
         return periode;

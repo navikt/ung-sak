@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
@@ -23,18 +22,18 @@ class MapFraÅrskvantumResultat {
         Comparator.nullsFirst(Comparator.naturalOrder()));
 
     private static UttakAktivitet mapTilUttaksAktiviteter(UttaksperiodeOmsorgspenger uttaksperiode) {
-        if (uttaksperiode.getUtfall() == OmsorgspengerUtfall.AVSLÅTT) {
-            throw new IllegalArgumentException("Utvikler-feil: Støtter kun mapping av INNVILGET her, fikk= " + uttaksperiode);
-        }
-        
         BigDecimal stillingsgrad = BigDecimal.ZERO; // bruker ikke for Omsorgspenger, bruker kun utbetalingsgrad
         boolean erGradering = false; // setter alltid false (bruker alltid utbetalingsgrad, framfor stillingsprosent)
-        
-        BigDecimal utbetalingsgrad = uttaksperiode.getUtbetalingsgrad().getUtbetalingsgrad();
 
-        var arb = uttaksperiode.getUtbetalingsgrad().getArbeidsforhold();
-        var arbeidsforhold = mapArbeidsforhold(arb);
-        return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, arb.getType(), erGradering);
+        if (uttaksperiode.getUtbetalingsgrad() == null) {
+            return new UttakAktivitet(stillingsgrad, BigDecimal.ZERO, null, null, false);
+        } else {
+            var utbetalingsgrad = uttaksperiode.getUtbetalingsgrad().getUtbetalingsgrad();
+            var arb = uttaksperiode.getUtbetalingsgrad().getArbeidsforhold();
+            var arbeidsforhold = mapArbeidsforhold(arb);
+            return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, arb.getType(), erGradering);
+        }
+
     }
 
     private static Arbeidsforhold mapArbeidsforhold(UttakArbeidsforhold arb) {
@@ -49,7 +48,7 @@ class MapFraÅrskvantumResultat {
         return arbeidsforhold;
     }
 
-    List<UttakResultatPeriode> mapFraÅrskvantum(ÅrskvantumResultat årskvantumResultat) {
+    List<UttakResultatPeriode> mapFra(ÅrskvantumResultat årskvantumResultat) {
         List<UttakResultatPeriode> res = new ArrayList<>();
         res.addAll(getInnvilgetTimeline(årskvantumResultat));
         res.addAll(getAvslåttTimeline(årskvantumResultat));
@@ -63,8 +62,8 @@ class MapFraÅrskvantumResultat {
             .map(e -> new LocalDateSegment<>(e.getFom(), e.getPeriode().getTom(), mapTilUttaksAktiviteter(e)))
             .collect(Collectors.toList());
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        LocalDateTimeline<List<UttakAktivitet>> timeline = new LocalDateTimeline(segmenter, StandardCombinators::allValues);
+        var timeline = LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
+
         List<UttakResultatPeriode> res = new ArrayList<>();
         timeline.toSegments().forEach(seg -> {
             res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue(), false));
@@ -73,16 +72,16 @@ class MapFraÅrskvantumResultat {
     }
 
     private static List<UttakResultatPeriode> getAvslåttTimeline(ÅrskvantumResultat årskvantumResultat) {
-        List<LocalDateSegment<Boolean>> segmenter = årskvantumResultat.getUttaksperioder().stream()
+        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksperioder().stream()
             .filter(p -> p.getUtfall() == OmsorgspengerUtfall.AVSLÅTT)
-            .map(e -> new LocalDateSegment<>(e.getFom(), e.getTom(), Boolean.TRUE))
+            .map(e -> new LocalDateSegment<>(e.getFom(), e.getPeriode().getTom(), mapTilUttaksAktiviteter(e)))
             .collect(Collectors.toList());
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        LocalDateTimeline<List<UttakAktivitet>> timeline = new LocalDateTimeline(segmenter, StandardCombinators::allValues);
+        var timeline = LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
+
         List<UttakResultatPeriode> res = new ArrayList<>();
         timeline.toSegments().forEach(seg -> {
-            res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), Collections.emptyList(), true));
+            res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue(), true));
         });
         return res;
     }
