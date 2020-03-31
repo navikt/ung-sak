@@ -26,7 +26,9 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
@@ -36,8 +38,8 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste stpTjeneste;
-    private ÅrskvantumRestKlient årskvantumRestKlient;
-    private OmsorgspengerGrunnlagRepository grunnlagRepository;
+    private ÅrskvantumTjeneste årskvantumTjeneste;
+
 
     VurderÅrskvantumUttakSteg() {
         // for proxy
@@ -45,13 +47,11 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     @Inject
     public VurderÅrskvantumUttakSteg(BehandlingRepository behandlingRepository,
-                                     OmsorgspengerGrunnlagRepository grunnlagRepository,
                                      SkjæringstidspunktTjeneste stpTjeneste,
-                                     ÅrskvantumRestKlient årskvantumRestKlient) {
+                                     ÅrskvantumTjeneste årskvantumTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.grunnlagRepository = grunnlagRepository;
         this.stpTjeneste = stpTjeneste;
-        this.årskvantumRestKlient = årskvantumRestKlient;
+        this.årskvantumTjeneste = årskvantumTjeneste;
     }
 
     @Override
@@ -61,24 +61,8 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         var stp = stpTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, stp);
 
-        var årskvantumRequest = new ÅrskvantumRequest();
 
-        var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
-
-        årskvantumRequest.setBehandlingId(ref.getBehandlingId().toString());
-        årskvantumRequest.setAktørid(behandling.getAktørId().getId());
-        for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
-            UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger();
-            uttaksperiodeOmsorgspenger.setPeriode(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()));
-            uttaksperiodeOmsorgspenger.setLengde(fraværPeriode.getFraværPerDag());
-            uttaksperiodeOmsorgspenger.setUttakArbeidsforhold(new UttakArbeidsforhold(fraværPeriode.getArbeidsgiver().getOrgnr(),
-                                                                                      fraværPeriode.getArbeidsgiver().getAktørId(),
-                                                                                      UttakArbeidType.ARBEIDSTAKER, //TODO finn ut av hvordan vi kan utlede denne
-                                                                                      null)); //TODO sjekk opp om denne trengs
-            årskvantumRequest.getUttaksperioder().add(uttaksperiodeOmsorgspenger);
-        }
-
-        var årskvantumResultat = årskvantumRestKlient.hentÅrskvantumUttak(årskvantumRequest);
+        var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
 
         if (vurderUtfall(årskvantumResultat)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();

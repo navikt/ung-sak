@@ -13,7 +13,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -25,7 +24,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @Default
-public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
+public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     private static final String TJENESTE_NAVN = "k9-aarskvantum";
 
     private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
