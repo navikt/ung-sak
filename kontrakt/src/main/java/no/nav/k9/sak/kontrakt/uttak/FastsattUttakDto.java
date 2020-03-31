@@ -42,4 +42,24 @@ public class FastsattUttakDto {
         return behandlingUuid;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+        var other = (FastsattUttakDto) obj;
+        return Objects.equals(behandlingUuid, other.behandlingUuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(behandlingUuid);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<behandlingUuid=" + behandlingUuid + ", aktiviteter=" + aktiviteter + ">";
+    }
+
 }

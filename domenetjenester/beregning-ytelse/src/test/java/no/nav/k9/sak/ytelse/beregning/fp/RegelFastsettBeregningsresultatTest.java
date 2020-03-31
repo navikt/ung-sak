@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
@@ -50,6 +51,8 @@ public class RegelFastsettBeregningsresultatTest {
 
     private RegelFastsettBeregningsresultat regel;
 
+    private final FagsakYtelseType ytelseType =FagsakYtelseType.OMSORGSPENGER;
+    
     @Before
     public void setup() {
         regel = new RegelFastsettBeregningsresultat();
@@ -347,7 +350,7 @@ public class RegelFastsettBeregningsresultatTest {
             List<UttakAktivitet> uttakAktiviteter = lagUttakAktiviteter(BigDecimal.valueOf(100), BigDecimal.valueOf(100), aktivitetsStatus, uttakArbeidType, arbeidsforhold);
             periodeListe.add(new UttakResultatPeriode(periode.getFomDato(), periode.getTomDato(), uttakAktiviteter, false));
         }
-        return new UttakResultat(periodeListe);
+        return new UttakResultat(ytelseType, periodeListe);
     }
 
     private List<UttakAktivitet> lagUttakAktiviteter(BigDecimal stillingsgrad, BigDecimal utbetalingsgrad, AktivitetStatus aktivitetsStatus, UttakArbeidType uttakArbeidType, List<Arbeidsforhold> arbeidsforholdList) {
