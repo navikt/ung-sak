@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.uttak;
 
+import java.util.Objects;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -17,14 +19,36 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
 public class UttakAktivitetPeriodeDto {
 
-    @JsonProperty(value="periode", required=true)
+    @JsonProperty(value = "periode", required = true)
     @Valid
     @NotNull
     private Periode periode;
-    
-    @JsonProperty(value="type", required = true)
+
+    @JsonProperty(value = "type", required = true)
     @Valid
     @NotNull
     private UttakArbeidType type;
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+
+        var other = (UttakAktivitetPeriodeDto) obj;
+        return Objects.equals(periode, other.periode)
+            && Objects.equals(type, other.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode, type);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<periode=" + periode + ", type=" + type + ">";
+    }
+
 }

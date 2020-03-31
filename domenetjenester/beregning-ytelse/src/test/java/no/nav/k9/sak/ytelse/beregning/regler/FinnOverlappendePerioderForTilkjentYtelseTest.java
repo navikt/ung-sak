@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
@@ -36,7 +37,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
     private final String orgnr = "123";
     private BeregningsgrunnlagPrArbeidsforhold prArbeidsforhold;
     private Arbeidsforhold arbeidsforhold;
-
+    private final FagsakYtelseType ytelseType = FagsakYtelseType.OMSORGSPENGER;
     /*
      * For eksempler brukt i testene under se https://confluence.adeo.no/display/MODNAV/27b.+Beregne+tilkjent+ytelse
      */
@@ -539,7 +540,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         LocalDate tom = LocalDate.now().plusDays(14);
 
         Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, inntektskategori, redusertBrukersAndel);
-        UttakResultat uttakResultat = new UttakResultat(lagUttakResultatPeriode(fom, tom, stillingsgrad, utbetalingsgrad, uttakArbeidType, erGradering));
+        UttakResultat uttakResultat = new UttakResultat(ytelseType, lagUttakResultatPeriode(fom, tom, stillingsgrad, utbetalingsgrad, uttakArbeidType, erGradering));
         BeregningsresultatRegelmodell input = new BeregningsresultatRegelmodell(grunnlag, uttakResultat);
         Beregningsresultat output = new Beregningsresultat();
         return new BeregningsresultatRegelmodellMellomregning(input, output);
@@ -550,7 +551,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         LocalDate tom = LocalDate.now().plusDays(14);
 
         Beregningsgrunnlag grunnlag = lagBeregningsgrunnlag(fom, tom, aktivitetStatus, inntektskategori, redusertBrukersAndel);
-        UttakResultat uttakResultat = new UttakResultat(lagUttakResultatForOppholdsPeriode(fom, tom));
+        UttakResultat uttakResultat = new UttakResultat(ytelseType, lagUttakResultatForOppholdsPeriode(fom, tom));
         BeregningsresultatRegelmodell input = new BeregningsresultatRegelmodell(grunnlag, uttakResultat);
         Beregningsresultat output = new Beregningsresultat();
         return new BeregningsresultatRegelmodellMellomregning(input, output);

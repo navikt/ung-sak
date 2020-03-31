@@ -1,21 +1,25 @@
 package no.nav.k9.sak.kontrakt.uttak;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Objects;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.time.Duration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class UttaksperiodeOmsorgspenger {
 
-    @JsonProperty(value="periode", required=true)
+    @JsonProperty(value = "periode", required = true)
     @Valid
     @NotNull
     private Periode periode;
@@ -30,7 +34,6 @@ public class UttaksperiodeOmsorgspenger {
     @NotNull
     private Duration lengde;
 
-
     @JsonProperty(value="arbeidsforhold", required=false)
     @Valid
     @NotNull
@@ -41,6 +44,14 @@ public class UttaksperiodeOmsorgspenger {
     @NotNull
     private OmsorgspengerUtfall utfall;
 
+    @JsonCreator
+    public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
+                                      @JsonProperty(value = "utbetalingsgrad", required = true) @Valid @NotNull UttakUtbetalingsgrad utbetalingsgrad,
+                                      @JsonProperty(value = "utfall", required = true) @Valid @NotNull OmsorgspengerUtfall utfall) {
+        this.periode = periode;
+        this.utbetalingsgrad = utbetalingsgrad;
+        this.utfall = utfall;
+    }
 
     public Periode getPeriode() {
         return periode;
@@ -56,6 +67,14 @@ public class UttaksperiodeOmsorgspenger {
 
     public void setUtbetalingsgrad(UttakUtbetalingsgrad utbetalingsgrad) {
         this.utbetalingsgrad = utbetalingsgrad;
+    }
+
+    public LocalDate getFom() {
+        return getPeriode().getFom();
+    }
+
+    public LocalDate getTom() {
+        return getPeriode().getTom();
     }
 
     public OmsorgspengerUtfall getUtfall() {
@@ -81,4 +100,28 @@ public class UttaksperiodeOmsorgspenger {
     public void setUttakArbeidsforhold(UttakArbeidsforhold uttakArbeidsforhold) {
         this.uttakArbeidsforhold = uttakArbeidsforhold;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+
+        var other = (UttaksperiodeOmsorgspenger) obj;
+        return Objects.equals(periode, other.periode)
+            && Objects.equals(utfall, other.utfall)
+            && Objects.equals(utbetalingsgrad, other.utbetalingsgrad);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode, utfall, utbetalingsgrad);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<periode=" + periode + ", utbetalingsgrad=" + utbetalingsgrad + ", utfall=" + utfall + ">";
+    }
+
 }

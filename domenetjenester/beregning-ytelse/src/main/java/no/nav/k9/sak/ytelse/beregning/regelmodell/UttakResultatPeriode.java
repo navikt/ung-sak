@@ -12,7 +12,6 @@ public class UttakResultatPeriode {
     private List<UttakAktivitet> uttakAktiviteter;
     private boolean erOppholdsPeriode;
 
-
     public UttakResultatPeriode(LocalDate fom, LocalDate tom, List<UttakAktivitet> uttakAktiviteter, boolean erOppholdsPeriode) {
         this.periode = new LocalDateInterval(fom, tom);
         if (uttakAktiviteter == null || uttakAktiviteter.isEmpty()) {
@@ -43,6 +42,10 @@ public class UttakResultatPeriode {
         return erOppholdsPeriode;
     }
 
+    public LocalDateInterval getPeriode() {
+        return periode;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -59,5 +62,10 @@ public class UttakResultatPeriode {
     @Override
     public int hashCode() {
         return Objects.hash(periode);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<periode=" + periode + ", erOpphold=" + erOppholdsPeriode + ", aktiviteter=" + uttakAktiviteter + ">";
     }
 }
