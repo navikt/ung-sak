@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandling.hendelse;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import no.nav.k9.kodeverk.Fagsystem;
 
@@ -18,6 +19,8 @@ public class BehandlingProsessEventDto {
      */
     private UUID eksternId;
     private Fagsystem fagsystem;
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate behandlingstidFrist;
     private String saksnummer;
     private String aktørId;
