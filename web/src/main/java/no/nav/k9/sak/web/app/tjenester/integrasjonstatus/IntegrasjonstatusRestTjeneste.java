@@ -1,6 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.integrasjonstatus;
 
-import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import no.nav.k9.sak.kontrakt.SystemNedeDto;
+import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import org.apache.commons.lang3.BooleanUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,15 +14,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
-import org.apache.commons.lang3.BooleanUtils;
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 
-import io.swagger.v3.oas.annotations.Operation;
-import no.nav.k9.sak.kontrakt.SystemNedeDto;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
 
 @Path("/integrasjon")
 @ApplicationScoped
@@ -43,7 +43,7 @@ public class IntegrasjonstatusRestTjeneste {
     @Path("/status")
     @Operation(description = "Gir en oversikt over systemer som er nede",
         summary = ("Inneholder også detaljer og evt kjent tidspunkt for når systemet er oppe igjen."), tags = "integrasjon")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.APPLIKASJON)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<SystemNedeDto> finnSystemerSomErNede() {
         return integrasjonstatusTjeneste.finnSystemerSomErNede();
@@ -52,7 +52,7 @@ public class IntegrasjonstatusRestTjeneste {
     @GET
     @Path("/status/vises")
     @Operation(description = "Returnerer en boolean som angir om detaljerte feilmeldinger skal vises av GUI", tags = "integrasjon")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, ressurs = BeskyttetRessursResourceAttributt.APPLIKASJON)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public boolean skalViseDetaljerteFeilmeldinger() {
         return skalViseDetaljerteFeilmeldinger;

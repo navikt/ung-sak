@@ -1,28 +1,21 @@
 package no.nav.k9.sak.web.app.konfig;
 
-import static org.assertj.core.api.Fail.fail;
+import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.vedtak.sikkerhet.abac.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import static org.assertj.core.api.Fail.fail;
 
 /**
  * Sjekker at alle REST endepunkt har definert tilgangskontroll konfigurert for ABAC (Attribute Based Access Control).
@@ -31,7 +24,7 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class RestApiAbacTest {
     @Parameterized.Parameters(name = "Validerer Dto - {0}")
     public static Collection<Object[]> getRestMetoder() {
-        return RestApiTester.finnAlleRestMetoder().stream().map(m -> new Object[] { m.getDeclaringClass().getName() + "#" + m.getName(), m })
+        return RestApiTester.finnAlleRestMetoder().stream().map(m -> new Object[]{m.getDeclaringClass().getName() + "#" + m.getName(), m})
             .collect(Collectors.toList());
     }
 
@@ -52,9 +45,16 @@ public class RestApiAbacTest {
     }
 
     @Test
-    public void sjekk_at_ingen_metoder_er_annotert_med_dummy_verdier() {
+    public void sjekk_at_ingen_metoder_er_annotert_med_dummy_verdier() throws IllegalAccessException {
         assertAtIngenBrukerDummyVerdierPåBeskyttetRessurs(restMethod);
     }
+
+    @Test
+    public void sjekk_at_ingen_metoder_er_ressurs_annotert_med_tomme_eller_ugyldige_verdier() throws IllegalAccessException {
+        assertAtIngenBrukerTommeEllerUgyldigeVerdierPåBeskyttetRessurs(restMethod);
+    }
+
+
 
     /**
      * IKKE ignorer denne testen, helper til med at input til tilgangskontroll blir riktig
@@ -110,11 +110,43 @@ public class RestApiAbacTest {
         if (annotation != null && annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
             fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
                 + BeskyttetRessursActionAttributt.class.getSimpleName());
-        } else if (annotation != null && annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
+        } else if (annotation != null && annotation.resource().isEmpty() &&
+             annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
             fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
                 + BeskyttetRessursResourceAttributt.class.getSimpleName());
         }
     }
+
+    private void assertAtIngenBrukerTommeEllerUgyldigeVerdierPåBeskyttetRessurs(Method metode) {
+        Class<?> klasse = metode.getDeclaringClass();
+        BeskyttetRessurs annotation = metode.getAnnotation(BeskyttetRessurs.class);
+        final List<String> konstanter = Arrays.stream(BeskyttetRessursKoder.class.getDeclaredFields())
+            .filter(it -> Modifier.isStatic(it.getModifiers()) && Modifier.isFinal(it.getModifiers()))
+            .map(it -> extractValueFromField(it))
+            .collect(Collectors.toList());
+
+        if(annotation != null && annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
+            if (annotation.resource().isEmpty()) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for "
+                    + BeskyttetRessursResourceAttributt.class.getSimpleName());
+            }
+
+            if (!konstanter.contains(annotation.resource())) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Bruk verdi fra kodeliste for "
+                    + BeskyttetRessursResourceAttributt.class.getSimpleName());
+            }
+        }
+    }
+
+    private String extractValueFromField(Field field) {
+        try {
+            return (String) field.get(this);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
 
     /**
      * Disse typene slipper naturligvis krav om impl av {@link AbacDto}
