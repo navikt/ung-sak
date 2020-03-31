@@ -6,16 +6,10 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.vedtak.felles.dokumentbestilling.kodeverk.FagsakYtelseType;
 import no.nav.vedtak.felles.dokumentbestilling.v1.DokumentbestillingV1;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
@@ -26,17 +20,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 @ProsessTask(DokumentbestillerKafkaTaskProperties.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
-
-    private static ObjectMapper mapper;
-
-    static {
-        mapper = new ObjectMapper();
-        mapper.registerModule(new Jdk8Module());
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
 
     private DokumentbestillingProducer dokumentbestillingProducer;
     private BehandlingRepository behandlingRepository;
@@ -71,7 +54,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dokumentbestillingDto
             .setDokumentbestillingUuid(UUID.fromString(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID)));
         dokumentbestillingDto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
-        dokumentbestillingDto.setFritekst(JsonMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class));
+        dokumentbestillingDto.setFritekst(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class));
         dokumentbestillingDto.setHistorikkAktør(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.HISTORIKK_AKTØR));
         dokumentbestillingDto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
         dokumentbestillingDto.setBehandlendeEnhetNavn(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLENDE_ENHET_NAVN));
@@ -80,7 +63,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
 
     private String serialiser(DokumentbestillingV1 dto) {
         try {
-            return mapper.writeValueAsString(dto);
+            return JsonObjectMapper.getJson(dto);
         } catch (IOException e) {
             throw new IllegalArgumentException(
                 "Klarte ikke å serialisere historikkinnslag for behandling=" + dto.getBehandlingUuid() + ", mal=" + dto.getDokumentMal(), e); // NOSONAR

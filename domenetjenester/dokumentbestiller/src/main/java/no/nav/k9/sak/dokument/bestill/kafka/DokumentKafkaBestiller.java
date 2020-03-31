@@ -1,5 +1,6 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -11,6 +12,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
@@ -54,16 +56,20 @@ public class DokumentKafkaBestiller {
     }
 
     private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, RevurderingVarslingÅrsak årsak, HistorikkAktør aktør) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
-        prosessTaskData.setPayload(JsonMapper.toJson(fritekst));
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK, årsak != null ? årsak.getKode() : null);
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.HISTORIKK_AKTØR, aktør.getKode());
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLENDE_ENHET_NAVN, behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
-        prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
+        try {
+            ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
+            prosessTaskData.setPayload(JsonObjectMapper.getJson(fritekst));
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK, årsak != null ? årsak.getKode() : null);
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.HISTORIKK_AKTØR, aktør.getKode());
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
+            prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLENDE_ENHET_NAVN, behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
+            prosessTaskData.setCallIdFraEksisterende();
+            prosessTaskRepository.lagre(prosessTaskData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

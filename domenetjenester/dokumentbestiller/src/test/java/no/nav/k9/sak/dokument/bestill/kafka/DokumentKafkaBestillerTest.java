@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -72,7 +73,7 @@ public class DokumentKafkaBestillerTest {
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK)).isNull();
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
-            assertThat(JsonMapper.fromJson(taskData.getPayloadAsString(), String.class)).isNull();
+            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), String.class)).isNull();
         });
     }
 
@@ -89,7 +90,7 @@ public class DokumentKafkaBestillerTest {
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK)).isEqualTo(årsak.getKode());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
-            assertThat(JsonMapper.fromJson(taskData.getPayloadAsString(), String.class)).isEqualTo(fritekst);
+            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), String.class)).isEqualTo(fritekst);
         });
     }
 

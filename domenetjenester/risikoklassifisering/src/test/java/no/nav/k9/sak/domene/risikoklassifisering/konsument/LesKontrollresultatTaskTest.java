@@ -1,10 +1,10 @@
 package no.nav.k9.sak.domene.risikoklassifisering.konsument;
 
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
-import no.nav.k9.sak.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.json.KontrollresultatMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;

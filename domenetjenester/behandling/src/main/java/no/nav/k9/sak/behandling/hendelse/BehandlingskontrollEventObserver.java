@@ -1,8 +1,6 @@
 package no.nav.k9.sak.behandling.hendelse;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,14 +10,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.PubliserEventTask;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
@@ -27,6 +21,9 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class BehandlingskontrollEventObserver {
@@ -35,7 +32,6 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     public BehandlingskontrollEventObserver() {
     }
@@ -101,10 +97,7 @@ public class BehandlingskontrollEventObserver {
     }
 
     private String getJson(BehandlingProsessEventDto produksjonstyringEventDto) throws IOException {
-        Writer jsonWriter = new StringWriter();
-        objectMapper.writeValue(jsonWriter, produksjonstyringEventDto);
-        jsonWriter.flush();
-        return jsonWriter.toString();
+        return JsonObjectMapper.getJson(produksjonstyringEventDto);
     }
 
     private BehandlingProsessEventDto getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {

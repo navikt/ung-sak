@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.risikoklassifisering.json;
+package no.nav.k9.sak.domene.typer.tid;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -13,9 +13,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import no.nav.vedtak.feil.Feil;
+import no.nav.vedtak.feil.FeilFactory;
+import no.nav.vedtak.feil.LogLevel;
+import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
+import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
+
 public class JsonObjectMapper {
-    
-    private static final ObjectMapper OM;
+
+    public static final ObjectMapper OM;
+
     static {
         OM = new ObjectMapper();
         OM.registerModule(new JavaTimeModule());
@@ -28,6 +35,21 @@ public class JsonObjectMapper {
         OM.setVisibility(PropertyAccessor.CREATOR, Visibility.ANY);
     }
 
+    public static <T> T fromJson(String json, Class<T> clazz) {
+        try {
+            return OM.readerFor(clazz).readValue(json);
+        } catch (IOException e) {
+            throw JsonMapperFeil.FACTORY.ioExceptionVedLesing(e).toException();
+        }
+    }
+
+    public static String getJson(Object object) throws IOException {
+        Writer jsonWriter = new StringWriter();
+        OM.writeValue(jsonWriter, object);
+        jsonWriter.flush();
+        return jsonWriter.toString();
+    }
+
     public String readKey(String data, String... keys) throws IOException {
         JsonNode jsonNode = OM.readTree(data);
         for (String key : keys) {
@@ -38,10 +60,10 @@ public class JsonObjectMapper {
         return jsonNode == null ? null : jsonNode.asText();
     }
 
-    public static String getJson(Object object) throws IOException {
-        Writer jsonWriter = new StringWriter();
-        OM.writeValue(jsonWriter, object);
-        jsonWriter.flush();
-        return jsonWriter.toString();
+    interface JsonMapperFeil extends DeklarerteFeil {
+        JsonMapperFeil FACTORY = FeilFactory.create(JsonMapperFeil.class);
+
+        @TekniskFeil(feilkode = "F-713321", feilmelding = "Fikk IO exception ved parsing av JSON", logLevel = LogLevel.WARN)
+        Feil ioExceptionVedLesing(IOException cause);
     }
 }

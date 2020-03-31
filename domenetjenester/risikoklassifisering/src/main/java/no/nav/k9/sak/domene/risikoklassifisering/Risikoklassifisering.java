@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.threeten.extra.Interval;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.risikoklassifisering.json.JsonObjectMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.AktoerId;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.Opplysningsperiode;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RequestWrapper;
@@ -33,14 +33,14 @@ public class Risikoklassifisering {
     private RisikovurderingTjeneste risikovurderingTjeneste;
     private OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste;
 
-    Risikoklassifisering(){
+    Risikoklassifisering() {
         // CDI proxy
     }
 
     @Inject
-    public Risikoklassifisering(ProsessTaskRepository prosessTaskRepository, 
+    public Risikoklassifisering(ProsessTaskRepository prosessTaskRepository,
                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                RisikovurderingTjeneste risikovurderingTjeneste, 
+                                RisikovurderingTjeneste risikovurderingTjeneste,
                                 OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
@@ -51,7 +51,7 @@ public class Risikoklassifisering {
     public void opprettProsesstaskForRisikovurdering(Behandling behandling) {
         try {
             LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
-            Interval interval = opplysningsPeriodeTjeneste.beregn(behandling.getId(),behandling.getFagsakYtelseType());
+            Interval interval = opplysningsPeriodeTjeneste.beregn(behandling.getId(), behandling.getFagsakYtelseType());
             RisikovurderingRequest risikovurderingRequest = RisikovurderingRequest.builder()
                 .medSoekerAktoerId(new AktoerId(behandling.getAktørId()))
                 .medBehandlingstema(hentBehandlingTema(behandling))
@@ -76,7 +76,7 @@ public class Risikoklassifisering {
             taskData.setCallIdFraEksisterende();
             RequestWrapper requestWrapper = new RequestWrapper(MDCOperations.getCallId(), risikovurderingRequest);
             taskData.setProperty(RisikoklassifiseringUtførTask.KONSUMENT_ID, risikovurderingRequest.getKonsumentId().toString());
-            taskData.setProperty(RisikoklassifiseringUtførTask.RISIKOKLASSIFISERING_JSON,getJson(requestWrapper));
+            taskData.setProperty(RisikoklassifiseringUtførTask.RISIKOKLASSIFISERING_JSON, getJson(requestWrapper));
             prosessTaskRepository.lagre(taskData);
         } else {
             log.info("behandling = {} Har Blitt Risikoklassifisert", behandling.getId());
@@ -84,7 +84,7 @@ public class Risikoklassifisering {
     }
 
     private Opplysningsperiode leggTilOpplysningsperiode(Interval interval) {
-        LocalDate tilOgMed = interval.getEnd() == null ? null : LocalDate.ofInstant(interval.getEnd(),ZoneId.systemDefault());
+        LocalDate tilOgMed = interval.getEnd() == null ? null : LocalDate.ofInstant(interval.getEnd(), ZoneId.systemDefault());
         return new Opplysningsperiode(LocalDate.ofInstant(interval.getStart(), ZoneId.systemDefault()), tilOgMed);
     }
 
