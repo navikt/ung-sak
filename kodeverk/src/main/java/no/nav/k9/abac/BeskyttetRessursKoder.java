@@ -2,7 +2,7 @@ package no.nav.k9.abac;
 
 public class BeskyttetRessursKoder {
 
-    public static final String APPLIKASJON = "no.nav.abac.attributter.k9-sak";
+    public static final String APPLIKASJON = "no.nav.abac.attributter.k9";
     public static final String FAGSAK = "no.nav.abac.attributter.k9.fagsak";
     public static final String VENTEFRIST = "no.nav.abac.attributter.k9.fagsak.ventefrist";
     public static final String BATCH = "no.nav.abac.attributter.k9.batch";
