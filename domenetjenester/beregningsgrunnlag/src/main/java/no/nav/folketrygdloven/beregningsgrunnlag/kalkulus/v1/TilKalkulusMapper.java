@@ -138,7 +138,7 @@ public class TilKalkulusMapper {
     }
 
     private static OppgittFrilansDto mapOppgittFrilans(OppgittFrilans oppgittFrilans) {
-        return new OppgittFrilansDto(oppgittFrilans.getHarInntektFraFosterhjem(), oppgittFrilans.getErNyoppstartet(), oppgittFrilans.getHarNærRelasjon());
+        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet());
     }
 
     private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt) {
@@ -254,8 +254,7 @@ public class TilKalkulusMapper {
             mapTilAktør(yrkesaktivitet.getArbeidsgiver()),
             yrkesaktivitet.getArbeidsforholdRef() != null ? new InternArbeidsforholdRefDto(yrkesaktivitet.getArbeidsforholdRef().getReferanse()) : null,
             new ArbeidType(yrkesaktivitet.getArbeidType().getKode()),
-            aktivitetsAvtaleDtos,
-            yrkesaktivitet.getNavnArbeidsgiverUtland()
+            aktivitetsAvtaleDtos
         );
     }
 
