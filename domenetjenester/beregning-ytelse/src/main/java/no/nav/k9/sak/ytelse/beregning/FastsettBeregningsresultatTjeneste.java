@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraVLTilRegel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regler.RegelFastsettBeregningsresultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -37,7 +38,7 @@ public class FastsettBeregningsresultatTjeneste {
         this.mapBeregningsresultatFraRegelTilVL = mapBeregningsresultatFraRegelTilVL;
     }
 
-    public BeregningsresultatEntitet fastsettBeregningsresultat(Beregningsgrunnlag beregningsgrunnlag, UttakResultatInput input) {
+    public BeregningsresultatEntitet fastsettBeregningsresultat(Beregningsgrunnlag beregningsgrunnlag, UttakResultat input) {
         // Map til regelmodell
         BeregningsresultatRegelmodell regelmodell = mapBeregningsresultatFraVLTilRegel.mapFra(beregningsgrunnlag, input);
         // Kalle regel

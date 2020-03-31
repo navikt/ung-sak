@@ -42,6 +42,10 @@ public class UttakResultatPeriode {
     public boolean getErOppholdsPeriode() {
         return erOppholdsPeriode;
     }
+    
+    public LocalDateInterval getPeriode() {
+        return periode;
+    }
 
     @Override
     public boolean equals(Object obj) {

@@ -26,7 +26,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
-import no.nav.k9.sak.ytelse.beregning.UttakResultatInput;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingStegRef(kode = "BERYT")
@@ -74,8 +74,9 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
+        var uttakResultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraUttaksplan().mapFra(uttaksplan));
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, new UttakResultatInput(ref.getFagsakYtelseType(), uttaksplan));
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);

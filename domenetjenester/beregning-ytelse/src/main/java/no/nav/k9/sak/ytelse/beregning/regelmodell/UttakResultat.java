@@ -5,16 +5,23 @@ import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public class UttakResultat {
     private List<UttakResultatPeriode> uttakResultatPerioder;
+    private FagsakYtelseType ytelseType;
 
-    public UttakResultat(List<UttakResultatPeriode> uttakResultatPerioder) {
+    public UttakResultat(FagsakYtelseType ytelseType, List<UttakResultatPeriode> uttakResultatPerioder) {
+        this.ytelseType = ytelseType;
         this.uttakResultatPerioder = uttakResultatPerioder;
     }
 
     public List<UttakResultatPeriode> getUttakResultatPerioder() {
         return uttakResultatPerioder;
+    }
+    
+    public FagsakYtelseType getYtelseType() {
+        return ytelseType;
     }
 
     public LocalDateTimeline<UttakResultatPeriode> getUttakPeriodeTimeline() {

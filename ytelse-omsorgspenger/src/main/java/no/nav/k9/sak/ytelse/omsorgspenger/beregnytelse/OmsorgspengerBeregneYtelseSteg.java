@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
-import java.util.UUID;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -25,7 +23,8 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
-import no.nav.k9.sak.ytelse.beregning.UttakResultatInput;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
 @BehandlingStegRef(kode = "BERYT")
@@ -39,6 +38,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private ÅrskvantumTjeneste årskvantumTjeneste;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -47,9 +47,11 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     @Inject
     public OmsorgspengerBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                  BeregningTjeneste kalkulusTjeneste,
+                                 ÅrskvantumTjeneste årskvantumTjeneste,
                                  FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
+        this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -64,13 +66,14 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        UUID behandlingUuid = ref.getBehandlingUuid();
         
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
+        var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
+        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFraÅrskvantum(årskvantumResultat));
         
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, new UttakResultatInput(ref.getFagsakYtelseType(), null /* FIXME K9: Generaliser uttaksplan / interface og utled. */));
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
