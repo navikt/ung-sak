@@ -24,7 +24,8 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+
 
 @FagsakYtelseTypeRef("OMP")
 @BehandlingStegRef(kode = "BERYT")
@@ -66,12 +67,12 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        
+
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
         var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(årskvantumResultat));
-        
+
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
 

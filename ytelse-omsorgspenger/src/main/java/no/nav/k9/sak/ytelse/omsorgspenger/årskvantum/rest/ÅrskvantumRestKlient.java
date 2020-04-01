@@ -9,11 +9,10 @@ import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -25,7 +24,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @Default
-public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
+public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     private static final String TJENESTE_NAVN = "k9-aarskvantum";
 
     private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
@@ -46,13 +45,13 @@ public class ÅrskvantumRestKlient implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
+    public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumRequest årskvantumRequest) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/mock");
-            var result = restKlient.get(endpoint, ÅrskvantumResultat.class);
+            var result = restKlient.post(endpoint, årskvantumRequest, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + ref + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + årskvantumRequest.getBehandlingId() + ": " + constraints);
             }
             return result;
         } catch (Exception e) {

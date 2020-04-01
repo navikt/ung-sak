@@ -24,7 +24,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.ÅrskvantumTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -50,7 +50,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         if (årskvantum.getUttaksperioder() == null || årskvantum.getUttaksperioder().isEmpty()) {
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
-        
+
         var arbeidsforholdPerioder = årskvantum.getUttaksperioder().stream().collect(Collectors.groupingBy(u -> u.getUtbetalingsgrad().getArbeidsforhold()));
         var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.entrySet().stream().map(e -> mapTilUtbetalingsgrad(e.getKey(), e.getValue())).collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
