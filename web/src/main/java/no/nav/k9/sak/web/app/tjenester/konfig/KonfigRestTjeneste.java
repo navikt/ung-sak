@@ -1,9 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.konfig;
 
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.APPLIKASJON;
-
-import java.net.URI;
+import io.swagger.v3.oas.annotations.Operation;
+import no.nav.k9.sak.kontrakt.KonfigDto;
+import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -11,11 +11,10 @@ import javax.transaction.Transactional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import java.net.URI;
 
-import io.swagger.v3.oas.annotations.Operation;
-import no.nav.k9.sak.kontrakt.KonfigDto;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("/konfig")
 @ApplicationScoped
@@ -41,7 +40,7 @@ public class KonfigRestTjeneste {
     @Path("/rettskilde")
     @Deprecated
     @Operation(description = "Henter lenke til rettskilde.", tags = "konfig")
-    @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public KonfigDto hentRettskildeUrl() {
         return new KonfigDto("rettskilde.url", rettskildeUrl.toString());
@@ -51,7 +50,7 @@ public class KonfigRestTjeneste {
     @Path("/systemrutine")
     @Deprecated
     @Operation(description = "Henter lenge til systemrutine", tags = "konfig")
-    @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public KonfigDto hentSystemrutine() {
         return new KonfigDto("systemrutine.url", systemrutineUrl.toString());

@@ -1,20 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.saksbehandler;
 
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.APPLIKASJON;
-
-import java.util.Collection;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang3.BooleanUtils;
-
 import io.swagger.v3.oas.annotations.Operation;
 import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
 import no.nav.k9.sak.web.app.util.LdapUtil;
@@ -23,6 +8,19 @@ import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import org.apache.commons.lang3.BooleanUtils;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.Collection;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("/nav-ansatt")
 @ApplicationScoped
@@ -69,7 +67,7 @@ public class NavAnsattRestTjeneste {
         tags = "nav-ansatt",
         summary = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.")
     )
-    @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     public InnloggetAnsattDto innloggetBruker() {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);

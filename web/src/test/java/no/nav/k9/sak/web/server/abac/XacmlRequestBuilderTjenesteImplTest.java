@@ -1,9 +1,18 @@
 package no.nav.k9.sak.web.server.abac;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import no.nav.vedtak.sikkerhet.abac.*;
+import no.nav.vedtak.sikkerhet.pdp.PdpConsumer;
+import no.nav.vedtak.sikkerhet.pdp.PdpKlientImpl;
+import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlRequestBuilder;
+import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlResponseWrapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -12,25 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import no.nav.vedtak.sikkerhet.abac.AbacIdToken;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
-import no.nav.vedtak.sikkerhet.abac.NavAbacCommonAttributter;
-import no.nav.vedtak.sikkerhet.abac.PdpKlient;
-import no.nav.vedtak.sikkerhet.abac.PdpRequest;
-import no.nav.vedtak.sikkerhet.pdp.PdpConsumer;
-import no.nav.vedtak.sikkerhet.pdp.PdpKlientImpl;
-import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlRequestBuilder;
-import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlResponseWrapper;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class XacmlRequestBuilderTjenesteImplTest {
 

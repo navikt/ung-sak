@@ -33,6 +33,6 @@ public class AppPepImpl extends no.nav.vedtak.sikkerhet.abac.PepImpl {
      */
     @Override
     protected int getAntallResources(PdpRequest pdpRequest) {
-        return pdpRequest.getAntall(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_AKSJONSPUNKT_TYPE);
+        return pdpRequest.getAntall(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE);
     }
 }

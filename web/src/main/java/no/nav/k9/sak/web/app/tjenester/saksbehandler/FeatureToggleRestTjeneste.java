@@ -1,23 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.saksbehandler;
 
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt.APPLIKASJON;
-
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
 import io.swagger.v3.oas.annotations.Operation;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.UnleashContext;
@@ -29,6 +11,23 @@ import no.nav.vedtak.felles.integrasjon.unleash.strategier.ByAnsvarligSaksbehand
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("/feature-toggle")
 @ApplicationScoped
@@ -49,7 +48,7 @@ public class FeatureToggleRestTjeneste {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Svarer på om feature-toggles er skrudd på", tags = "feature-toggle")
-    @BeskyttetRessurs(action = READ, ressurs = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     public FeatureToggleDto featureToggles(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FeatureToggleNavnListeDto featureToggleNavn) {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         UnleashContext unleashContext = UnleashContext.builder()

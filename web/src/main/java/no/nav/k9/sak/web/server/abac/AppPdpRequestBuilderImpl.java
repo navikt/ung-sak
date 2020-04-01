@@ -1,21 +1,5 @@
 package no.nav.k9.sak.web.server.abac;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.annotation.Priority;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
-
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
@@ -30,11 +14,18 @@ import no.nav.vedtak.sikkerhet.abac.PdpKlient;
 import no.nav.vedtak.sikkerhet.abac.PdpRequest;
 import no.nav.vedtak.sikkerhet.abac.PdpRequestBuilder;
 
+import javax.annotation.Priority;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Alternative;
+import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Dependent
 @Alternative
 @Priority(2)
 public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
-    public static final String ABAC_DOMAIN = "foreldrepenger";
+    public static final String ABAC_DOMAIN = "k9";
     private static final MdcExtendedLogContext MDC_EXTENDED_LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørConsumerMedCache aktørConsumer;
@@ -95,14 +86,14 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         pdpRequest.put(AbacAttributter.RESOURCE_FELLES_DOMENE, ABAC_DOMAIN);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, attributter.getIdToken());
         pdpRequest.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
-        pdpRequest.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource().getEksternKode());
+        pdpRequest.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
         if (!aktører.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktører);
         }
         if (!fnrs.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fnrs);
         }
-        pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
+        pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
         return pdpRequest;
     }
 
@@ -110,11 +101,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                                      PipBehandlingsData behandlingData) {
         PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aksjonspunktType);
         AbacUtil.oversettBehandlingStatus(behandlingData.getBehandligStatus())
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_BEHANDLINGSSTATUS, it.getEksternKode()));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, it.getEksternKode()));
         AbacUtil.oversettFagstatus(behandlingData.getFagsakStatus())
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_SAKSSTATUS, it.getEksternKode()));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_SAKSSTATUS, it.getEksternKode()));
         behandlingData.getAnsvarligSaksbehandler()
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_FORELDREPENGER_SAK_ANSVARLIG_SAKSBEHANDLER, it));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER, it));
         return pdpRequest;
     }
 
