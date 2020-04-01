@@ -1,22 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.kontrakt.uttak.*;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Test;
-
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
-import no.nav.k9.sak.kontrakt.uttak.UttakUtbetalingsgrad;
-import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MapFraÅrskvantumResultatTest {
 
@@ -49,10 +44,10 @@ public class MapFraÅrskvantumResultatTest {
     }
 
     private UttaksperiodeOmsorgspenger innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgrad(arbeidsforhold, utbetalingsgrad), OmsorgspengerUtfall.INNVILGET, Duration.ofHours(1));
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(utbetalingsgrad), OmsorgspengerUtfall.INNVILGET, Duration.ofHours(1), arbeidsforhold);
     }
 
     private UttaksperiodeOmsorgspenger avslått(LocalDate fom, LocalDate tom, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgrad(arbeidsforhold, BigDecimal.ZERO), OmsorgspengerUtfall.AVSLÅTT, Duration.ofHours(1));
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(BigDecimal.ZERO), OmsorgspengerUtfall.AVSLÅTT, Duration.ofHours(1),arbeidsforhold);
     }
 }

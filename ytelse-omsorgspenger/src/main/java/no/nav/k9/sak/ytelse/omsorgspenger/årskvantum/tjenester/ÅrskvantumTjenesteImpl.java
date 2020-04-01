@@ -46,7 +46,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
                 null,
                 null,
-                fraværPeriode.getFraværPerDag());
+                fraværPeriode.getFraværPerDag(), null);
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
             if (arb == null) {

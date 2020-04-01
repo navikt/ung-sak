@@ -1,22 +1,10 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
-import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
-import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
+import no.nav.folketrygdloven.kalkulus.felles.v1.*;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -25,6 +13,13 @@ import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -51,7 +46,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
 
-        var arbeidsforholdPerioder = årskvantum.getUttaksperioder().stream().collect(Collectors.groupingBy(u -> u.getUtbetalingsgrad().getArbeidsforhold()));
+        var arbeidsforholdPerioder = årskvantum.getUttaksperioder().stream().collect(Collectors.groupingBy(
+            UttaksperiodeOmsorgspenger::getUttakArbeidsforhold));
         var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.entrySet().stream().map(e -> mapTilUtbetalingsgrad(e.getKey(), e.getValue())).collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
