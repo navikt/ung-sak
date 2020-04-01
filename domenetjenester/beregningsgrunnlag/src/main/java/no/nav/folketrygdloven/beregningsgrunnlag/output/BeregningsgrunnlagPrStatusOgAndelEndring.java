@@ -16,9 +16,11 @@ public class BeregningsgrunnlagPrStatusOgAndelEndring {
     private OpptjeningAktivitetType arbeidsforholdType;
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforholdRef;
+    private RefusjonEndring refusjonEndring;
 
     public BeregningsgrunnlagPrStatusOgAndelEndring(InntektEndring inntektEndring,
                                                     InntektskategoriEndring inntektskategoriEndring,
+                                                    RefusjonEndring refusjonEndring,
                                                     AktivitetStatus aktivitetStatus,
                                                     OpptjeningAktivitetType arbeidsforholdType,
                                                     Arbeidsgiver arbeidsgiver,
@@ -29,6 +31,7 @@ public class BeregningsgrunnlagPrStatusOgAndelEndring {
         this.arbeidsforholdType = arbeidsforholdType;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
+        this.refusjonEndring = refusjonEndring;
     }
 
     public Optional<InntektEndring> getInntektEndring() {
@@ -37,6 +40,10 @@ public class BeregningsgrunnlagPrStatusOgAndelEndring {
 
     public Optional<InntektskategoriEndring> getInntektskategoriEndring() {
         return Optional.ofNullable(inntektskategoriEndring);
+    }
+
+    public Optional<RefusjonEndring> getRefusjonEndring() {
+        return Optional.ofNullable(refusjonEndring);
     }
 
     public AktivitetStatus getAktivitetStatus() {

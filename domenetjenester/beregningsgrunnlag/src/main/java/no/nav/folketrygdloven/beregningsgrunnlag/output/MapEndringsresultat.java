@@ -118,11 +118,16 @@ public class MapEndringsresultat {
         return new BeregningsgrunnlagPrStatusOgAndelEndring(
             mapInntektEndring(beregningsgrunnlagPrStatusOgAndelEndring.getInntektEndring()),
             mapInntektskategoriEndring(beregningsgrunnlagPrStatusOgAndelEndring.getInntektskategoriEndring()),
+            mapRefusjonEndring(beregningsgrunnlagPrStatusOgAndelEndring.getRefusjonEndring()),
             AktivitetStatus.fraKode(beregningsgrunnlagPrStatusOgAndelEndring.getAktivitetStatus().getKode()),
             beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdType().getKode()),
             mapArbeidsgiver(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsgiver()),
             mapArbeidsforholdRef(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdRef())
         );
+    }
+
+    private static RefusjonEndring mapRefusjonEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.RefusjonEndring refusjonEndring) {
+        return refusjonEndring == null ? null : new RefusjonEndring(refusjonEndring.getFraRefusjon(), refusjonEndring.getTilRefusjon());
     }
 
     private static InternArbeidsforholdRef mapArbeidsforholdRef(String arbeidsforholdRef) {
