@@ -154,7 +154,7 @@ spec:
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
-      value: https://wasapp-q1.adeo.no/asm-pdp/authorize
+      value: http://abac-k9/application/authorize
     - name: FPFORMIDLING_ERDOKUMENTPRODUSERT_URL
       value: http://k9-formidling/k9-formidling/api/brev/dokument-sendt
     - name: FPFORMIDLING_BESTILLBREV_URL
