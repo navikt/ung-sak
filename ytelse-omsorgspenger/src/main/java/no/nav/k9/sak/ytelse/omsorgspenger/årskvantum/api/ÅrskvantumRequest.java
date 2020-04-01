@@ -22,10 +22,10 @@ public class ÅrskvantumRequest {
     @NotNull
     private String behandlingId;
 
-    @JsonProperty(value = "aktørid", required = true)
+    @JsonProperty(value = "aktørId", required = true)
     @Valid
     @NotNull
-    private String aktørid;
+    private String aktørId;
 
     @JsonProperty(value = "uttakperioder")
     @Valid
@@ -49,11 +49,11 @@ public class ÅrskvantumRequest {
         this.uttaksperioder = uttaksperioder;
     }
 
-    public String getAktørid() {
-        return aktørid;
+    public String getAktørId() {
+        return aktørId;
     }
 
-    public void setAktørid(String aktørid) {
-        this.aktørid = aktørid;
+    public void setAktørId(String aktørId) {
+        this.aktørId = aktørId;
     }
 }
