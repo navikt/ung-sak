@@ -24,7 +24,7 @@ public class UttaksperiodeOmsorgspenger {
     @NotNull
     private Periode periode;
 
-    @JsonProperty(value="utbetalingsgrad", required=false)
+    @JsonProperty(value="utbetalingsgrad", required = false)
     @Valid
     private UttakUtbetalingsgrad utbetalingsgrad;
 
@@ -32,7 +32,7 @@ public class UttaksperiodeOmsorgspenger {
     @Valid
     private Duration lengde;
 
-    @JsonProperty(value="arbeidsforhold", required=false)
+    @JsonProperty(value="arbeidsforhold", required = false)
     @Valid
     @NotNull
     private UttakArbeidsforhold uttakArbeidsforhold;
@@ -45,11 +45,13 @@ public class UttaksperiodeOmsorgspenger {
     public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
                                       @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgrad utbetalingsgrad,
                                       @JsonProperty(value = "utfall", required = false) @Valid OmsorgspengerUtfall utfall,
-                                      @JsonProperty(value = "lengde", required = false) @Valid Duration lengde) {
+                                      @JsonProperty(value = "lengde", required = false) @Valid Duration lengde,
+                                      @JsonProperty(value = "arbeidsforhold", required = false) @Valid UttakArbeidsforhold uttakArbeidsforhold) {
         this.periode = periode;
         this.utbetalingsgrad = utbetalingsgrad;
         this.utfall = utfall;
         this.lengde = lengde;
+        this.uttakArbeidsforhold = uttakArbeidsforhold;
     }
 
     public Periode getPeriode() {
