@@ -5,6 +5,7 @@ import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
@@ -36,10 +37,11 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var årskvantumRequest = new ÅrskvantumRequest();
 
+
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
 
         årskvantumRequest.setBehandlingId(ref.getBehandlingId().toString());
-        årskvantumRequest.setAktørid(ref.getAktørId().getId());
+        årskvantumRequest.setAktørId(ref.getAktørId().getId());
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
                 null,
