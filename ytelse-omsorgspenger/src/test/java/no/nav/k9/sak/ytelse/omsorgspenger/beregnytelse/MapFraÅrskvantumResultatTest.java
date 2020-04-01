@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -48,10 +49,10 @@ public class MapFraÅrskvantumResultatTest {
     }
 
     private UttaksperiodeOmsorgspenger innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgrad(arbeidsforhold, utbetalingsgrad), OmsorgspengerUtfall.INNVILGET);
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgrad(arbeidsforhold, utbetalingsgrad), OmsorgspengerUtfall.INNVILGET, Duration.ofHours(1));
     }
 
     private UttaksperiodeOmsorgspenger avslått(LocalDate fom, LocalDate tom, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgrad(arbeidsforhold, BigDecimal.ZERO), OmsorgspengerUtfall.AVSLÅTT);
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgrad(arbeidsforhold, BigDecimal.ZERO), OmsorgspengerUtfall.AVSLÅTT, Duration.ofHours(1));
     }
 }
