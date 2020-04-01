@@ -26,12 +26,10 @@ public class UttaksperiodeOmsorgspenger {
 
     @JsonProperty(value="utbetalingsgrad", required=false)
     @Valid
-    @NotNull
     private UttakUtbetalingsgrad utbetalingsgrad;
 
     @JsonProperty(value="lengde", required=false)
     @Valid
-    @NotNull
     private Duration lengde;
 
     @JsonProperty(value="arbeidsforhold", required=false)
@@ -41,14 +39,13 @@ public class UttaksperiodeOmsorgspenger {
 
     @JsonProperty(value="utfall", required=false)
     @Valid
-    @NotNull
     private OmsorgspengerUtfall utfall;
 
     @JsonCreator
     public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
-                                      @JsonProperty(value = "utbetalingsgrad", required = false) @Valid @NotNull UttakUtbetalingsgrad utbetalingsgrad,
-                                      @JsonProperty(value = "utfall", required = false) @Valid @NotNull OmsorgspengerUtfall utfall,
-                                      @JsonProperty(value = "lengde", required = false) @Valid @NotNull Duration lengde) {
+                                      @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgrad utbetalingsgrad,
+                                      @JsonProperty(value = "utfall", required = false) @Valid OmsorgspengerUtfall utfall,
+                                      @JsonProperty(value = "lengde", required = false) @Valid Duration lengde) {
         this.periode = periode;
         this.utbetalingsgrad = utbetalingsgrad;
         this.utfall = utfall;
