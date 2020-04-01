@@ -1,18 +1,12 @@
 package no.nav.k9.sak.kontrakt.uttak;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.k9.sak.typer.Arbeidsgiver;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -26,7 +20,7 @@ public class UttaksperiodeOmsorgspenger {
 
     @JsonProperty(value="utbetalingsgrad", required = false)
     @Valid
-    private UttakUtbetalingsgrad utbetalingsgrad;
+    private UttakUtbetalingsgradOmsorgspenger utbetalingsgrad;
 
     @JsonProperty(value="lengde", required=false)
     @Valid
@@ -43,7 +37,7 @@ public class UttaksperiodeOmsorgspenger {
 
     @JsonCreator
     public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
-                                      @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgrad utbetalingsgrad,
+                                      @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgradOmsorgspenger utbetalingsgrad,
                                       @JsonProperty(value = "utfall", required = false) @Valid OmsorgspengerUtfall utfall,
                                       @JsonProperty(value = "lengde", required = false) @Valid Duration lengde,
                                       @JsonProperty(value = "arbeidsforhold", required = false) @Valid UttakArbeidsforhold uttakArbeidsforhold) {
@@ -62,11 +56,11 @@ public class UttaksperiodeOmsorgspenger {
         this.periode = periode;
     }
 
-    public UttakUtbetalingsgrad getUtbetalingsgrad() {
+    public UttakUtbetalingsgradOmsorgspenger getUtbetalingsgrad() {
         return utbetalingsgrad;
     }
 
-    public void setUtbetalingsgrad(UttakUtbetalingsgrad utbetalingsgrad) {
+    public void setUtbetalingsgrad(UttakUtbetalingsgradOmsorgspenger utbetalingsgrad) {
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
