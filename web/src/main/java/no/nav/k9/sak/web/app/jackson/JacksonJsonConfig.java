@@ -23,6 +23,8 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
 import no.nav.k9.sak.web.app.IndexClasses;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
+import no.nav.k9.sak.ytelse.omsorgspenger.mottak.OmsorgspengerSøknadInnsending;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.PleiepengerBarnSøknadInnsending;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
@@ -56,6 +58,8 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         // hack - additional locations to scan (jars uten rest services) - trenger det her p.t. for å bestemme hvilke jars / maven moduler som skal scannes for andre dtoer
         scanClasses.add(AvklarArbeidsforholdDto.class);
         scanClasses.add(VurderFaktaOmBeregningDto.class);
+        scanClasses.add(OmsorgspengerSøknadInnsending.class);
+        scanClasses.add(PleiepengerBarnSøknadInnsending.class);
 
         // avled code location fra klassene
         scanClasses

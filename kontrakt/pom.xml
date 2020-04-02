@@ -21,10 +21,7 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>kodeverk</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>no.nav.k9</groupId>
-            <artifactId>soknad-pleiepenger-barn</artifactId>
-        </dependency>
+
 
 		<!-- for Bean validation -->
 		<dependency>
@@ -58,6 +55,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
+					<!-- denne modulen skal deployes til maven repo (eksponerte kontrakter) -->
 					<skip>false</skip>
 				</configuration>
 			</plugin>

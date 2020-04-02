@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -23,10 +22,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseSerializer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "ytelseType", defaultImpl = Void.class)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = PleiepengerBarnSøknadInnsending.class, name = PleiepengerBarnSøknadInnsending.YTELSE_TYPE),
-        @JsonSubTypes.Type(value = OmsorgspengerSøknadInnsending.class, name = OmsorgspengerSøknadInnsending.YTELSE_TYPE)
-})
 public abstract class InnsendingInnhold {
 
     /** bruker custom serializer her da default wrapper ytelsetype i et objekt. */

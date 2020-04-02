@@ -12,10 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.kontrakt.søknad.innsending.PleiepengerBarnSøknadInnsending;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.PleiepengerBarnSøknadInnsending;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
