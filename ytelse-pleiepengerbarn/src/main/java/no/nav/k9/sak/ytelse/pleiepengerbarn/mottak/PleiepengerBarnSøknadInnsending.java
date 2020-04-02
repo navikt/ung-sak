@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.søknad.innsending;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
