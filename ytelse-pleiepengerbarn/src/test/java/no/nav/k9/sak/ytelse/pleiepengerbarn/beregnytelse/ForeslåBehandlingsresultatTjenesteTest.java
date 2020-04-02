@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,6 +50,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
@@ -108,7 +109,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
             kalkulusInMermoryTjeneste,
             new HarEtablertYtelseImpl(vedtakVarselRepository),
             medlemTjeneste));
-        tjeneste = new ForeslåBehandlingsresultatTjeneste(repositoryProvider,
+        tjeneste = new UttakForeslåBehandlingsresultatTjeneste(repositoryProvider,
             vedtakVarselRepository,
             uttakRepository,
             revurderingBehandlingsresultatutleder);

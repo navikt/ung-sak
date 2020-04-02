@@ -1,8 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
@@ -10,7 +7,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.revurdering.felles.RevurderingBehandlingsresultatutlederFelles;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -20,11 +16,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-@ApplicationScoped
-@FagsakYtelseTypeRef
-class ForeslåBehandlingsresultatTjeneste {
+public abstract class ForeslåBehandlingsresultatTjeneste {
 
     private RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder;
     private VedtakVarselRepository vedtakVarselRepository;
@@ -32,20 +26,15 @@ class ForeslåBehandlingsresultatTjeneste {
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    private UttakRepository uttakRepository;
-
     private BehandlingRepository behandlingRepository;
 
-    ForeslåBehandlingsresultatTjeneste() {
-        // for CDI proxy
+    protected ForeslåBehandlingsresultatTjeneste() {
+        // for proxy
     }
 
-    @Inject
     public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                               VedtakVarselRepository vedtakVarselRepository,
-                                              UttakRepository uttakRepository,
-                                              @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
-        this.uttakRepository = uttakRepository;
+                                              RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.revurderingBehandlingsresultatutleder = revurderingBehandlingsresultatutleder;
         this.vedtakVarselRepository = vedtakVarselRepository;
@@ -61,7 +50,7 @@ class ForeslåBehandlingsresultatTjeneste {
         var vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        
+
         VedtakVarsel oppdatertVarsel;
         if (sjekkVilkårAvslått(behandlingId, vilkårene)) {
             oppdatertVarsel = foreslåVedtakVarselAvslått(ref, behandling, vedtakVarsel);
@@ -85,8 +74,7 @@ class ForeslåBehandlingsresultatTjeneste {
     }
 
     private boolean sjekkVilkårAvslått(Long behandlingId, Vilkårene vilkårene) {
-        var f = uttakRepository.hentOppgittUttak(behandlingId);
-        var maksPeriode = f.getMaksPeriode();
+        var maksPeriode = getMaksPeriode(behandlingId);
 
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
 
@@ -95,6 +83,8 @@ class ForeslåBehandlingsresultatTjeneste {
                 return !avslåttVilkårPeriode(timeline).isEmpty() && oppfylteVilkårPeriode(timeline).isEmpty();
             });
     }
+
+    protected abstract DatoIntervallEntitet getMaksPeriode(Long behandlingId);
 
     private LocalDateTimeline<VilkårPeriode> oppfylteVilkårPeriode(LocalDateTimeline<VilkårPeriode> timeline) {
         return timeline.filterValue(vp -> vp.getAvslagsårsak() == null && vp.getGjeldendeUtfall() == Utfall.OPPFYLT);
