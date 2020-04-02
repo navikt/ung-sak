@@ -323,7 +323,7 @@
 			<dependency>
 				<groupId>no.nav.fpsak.tidsserie</groupId>
 				<artifactId>fpsak-tidsserie</artifactId>
-				<version>2.3-20200331201106-1b3578b</version>
+				<version>2.3-20200402163257-54f755e</version>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.fpsak.nare</groupId>
