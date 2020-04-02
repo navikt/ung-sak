@@ -165,7 +165,7 @@ public class EndringskontrollerTest {
         Behandling revurdering = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .lagMocked();
-        internalManipulerBehandling.forceOppdaterBehandlingSteg(revurdering, BehandlingStegType.SØKERS_RELASJON_TIL_BARN, BehandlingStegStatus.INNGANG, BehandlingStegStatus.UTFØRT);
+        internalManipulerBehandling.forceOppdaterBehandlingSteg(revurdering, BehandlingStegType.KONTROLLER_FAKTA, BehandlingStegStatus.INNGANG, BehandlingStegStatus.UTFØRT);
         StartpunktType startpunktTypePåBehandling = StartpunktType.UDEFINERT;
         revurdering.setStartpunkt(startpunktTypePåBehandling);
 
@@ -187,9 +187,9 @@ public class EndringskontrollerTest {
         Behandling behandling = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .lagMocked();
-        internalManipulerBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.SØKERS_RELASJON_TIL_BARN, BehandlingStegStatus.UTGANG, BehandlingStegStatus.UTFØRT);
+        internalManipulerBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.KONTROLLER_FAKTA, BehandlingStegStatus.UTGANG, BehandlingStegStatus.UTFØRT);
 
-        var startpunktSrb = StartpunktType.SØKERS_RELASJON_TIL_BARNET;
+        var startpunktSrb = StartpunktType.KONTROLLER_FAKTA;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktSrb);
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
             historikkinnslagTjenesteMock, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
@@ -201,7 +201,7 @@ public class EndringskontrollerTest {
         endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
 
         // Assert
-        verify(behandlingskontrollTjenesteMock).behandlingTilbakeføringHvisTidligereBehandlingSteg(any(),eq(BehandlingStegType.SØKERS_RELASJON_TIL_BARN));
+        verify(behandlingskontrollTjenesteMock).behandlingTilbakeføringHvisTidligereBehandlingSteg(any(),eq(BehandlingStegType.KONTROLLER_FAKTA));
     }
 
     @Test
@@ -210,9 +210,9 @@ public class EndringskontrollerTest {
         Behandling behandling = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .lagMocked();
-        internalManipulerBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.SØKERS_RELASJON_TIL_BARN, BehandlingStegStatus.INNGANG, BehandlingStegStatus.UTFØRT);
+        internalManipulerBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.KONTROLLER_FAKTA, BehandlingStegStatus.INNGANG, BehandlingStegStatus.UTFØRT);
 
-        var startpunktSrb = StartpunktType.SØKERS_RELASJON_TIL_BARNET;
+        var startpunktSrb = StartpunktType.KONTROLLER_FAKTA;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktSrb);
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
             historikkinnslagTjenesteMock, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);

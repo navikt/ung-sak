@@ -25,7 +25,6 @@ public class Transisjoner {
         new SpolFremoverTransisjon(BehandlingStegType.KONTROLLER_FAKTA),
         new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING),
         new SpolFremoverTransisjon(BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT),
-        new SpolFremoverTransisjon(BehandlingStegType.SØKERS_RELASJON_TIL_BARN),
         new SpolFremoverTransisjon(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR),
         new SpolFremoverTransisjon(BehandlingStegType.KONTROLLER_LØPENDE_MEDLEMSKAP),
         new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE),

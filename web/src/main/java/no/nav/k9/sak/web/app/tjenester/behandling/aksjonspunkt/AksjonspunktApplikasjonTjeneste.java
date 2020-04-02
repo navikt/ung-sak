@@ -20,7 +20,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -61,7 +60,8 @@ import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 public class AksjonspunktApplikasjonTjeneste {
     private static final Logger LOGGER = LoggerFactory.getLogger(AksjonspunktApplikasjonTjeneste.class);
 
-    private static final Set<AksjonspunktDefinisjon> VEDTAK_AP = Set.of(AksjonspunktDefinisjon.FORESLÅ_VEDTAK, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL, AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+    private static final Set<AksjonspunktDefinisjon> VEDTAK_AP = Set.of(AksjonspunktDefinisjon.FORESLÅ_VEDTAK, AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL,
+        AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
     private BehandlingRepository behandlingRepository;
 
@@ -167,7 +167,9 @@ public class AksjonspunktApplikasjonTjeneste {
         Optional<TransisjonIdentifikator> fremoverTransisjon = overhoppResultat.finnFremoverTransisjon();
         if (fremoverTransisjon.isPresent()) {
             TransisjonIdentifikator riktigTransisjon = utledFremhoppTransisjon(kontekst, fremoverTransisjon.get());
-            behandlingskontrollTjeneste.fremoverTransisjon(riktigTransisjon, kontekst);
+            if (riktigTransisjon != null) {
+                behandlingskontrollTjeneste.fremoverTransisjon(riktigTransisjon, kontekst);
+            }
             return;
         }
     }
@@ -202,11 +204,10 @@ public class AksjonspunktApplikasjonTjeneste {
     private TransisjonIdentifikator utledFremhoppTransisjon(BehandlingskontrollKontekst kontekst, TransisjonIdentifikator transisjon) {
         if (FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR.equals(transisjon)) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            if (behandling.erRevurdering() && FagsakYtelseType.FORELDREPENGER.equals(behandling.getFagsak().getYtelseType())
-                && !harAvslåttForrigeBehandling(behandling)) {
-                return FellesTransisjoner.FREMHOPP_TIL_UTTAKSPLAN;
+            if (behandling.erRevurdering() && !harAvslåttForrigeBehandling(behandling)) {
+                // return FellesTransisjoner.FREMHOPP_TIL_UTTAKSPLAN; // NOSONAR
             }
-            return FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
+            return FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT; // NOSONAR
         }
         return transisjon;
     }
@@ -300,7 +301,6 @@ public class AksjonspunktApplikasjonTjeneste {
             behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, null, List.of(aksjonspunkt));
         }
     }
-
 
     private List<Aksjonspunkt> lagreHistorikkInnslag(Behandling behandling) {
 

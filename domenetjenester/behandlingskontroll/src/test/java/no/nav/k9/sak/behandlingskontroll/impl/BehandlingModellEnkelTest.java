@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl.TriFunction;
 public class BehandlingModellEnkelTest {
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
-    private static final BehandlingStegType STEG_2 = BehandlingStegType.SØKERS_RELASJON_TIL_BARN;
+    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
     private static final BehandlingStegType STEG_3 = BehandlingStegType.BEREGN_YTELSE;
 
     private static final BehandlingType BEHANDLING_TYPE = BehandlingType.UDEFINERT;

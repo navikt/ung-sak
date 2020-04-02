@@ -101,14 +101,23 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
 
     public Optional<LocalDate> getStartDatoPermisjon() {
         FagsakYtelseType ytelseType = getYtelse();
-        if (FagsakYtelseType.FORELDREPENGER.equals(ytelseType)) {
-            return Optional.ofNullable(getSkjemaInnhold().getStartdatoForeldrepengeperiode().getValue());
+        switch (ytelseType) {
+            case PLEIEPENGER_SYKT_BARN:
+                return Optional.empty();
+            case OMSORGSPENGER:
+                return Optional.empty();
+            case OPPLÆRINGSPENGER:
+                return Optional.empty();
+            case PLEIEPENGER_NÆRSTÅENDE:
+                return Optional.empty();
+            case FORELDREPENGER:
+                return Optional.ofNullable(getSkjemaInnhold().getStartdatoForeldrepengeperiode().getValue());
+            case SVANGERSKAPSPENGER:
+                var førsteFraværsdag = getSkjemaInnhold().getArbeidsforhold().getValue().getFoersteFravaersdag();
+                return Optional.ofNullable(førsteFraværsdag != null ? førsteFraværsdag.getValue() : null);
+            default:
+                return Optional.empty();
         }
-        if (FagsakYtelseType.SVANGERSKAPSPENGER.equals(ytelseType)) {
-            var førsteFraværsdag = getSkjemaInnhold().getArbeidsforhold().getValue().getFoersteFravaersdag();
-            return Optional.ofNullable(førsteFraværsdag != null ? førsteFraværsdag.getValue() : null);
-        }
-        return Optional.empty();
     }
 
     public Optional<Refusjon> getRefusjon() {

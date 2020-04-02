@@ -63,7 +63,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
 
     private AbstractTestScenario<?> lagScenarioMedAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(aksjonspunktDefinisjon, BehandlingStegType.SØKERS_RELASJON_TIL_BARN);
+        scenario.leggTilAksjonspunkt(aksjonspunktDefinisjon, BehandlingStegType.KONTROLLER_FAKTA);
         return scenario;
     }
 
@@ -178,7 +178,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     private Behandling opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var førstegangsscenario = TestScenarioBuilder.builderMedSøknad();
         førstegangsscenario.medSøknad().medMottattDato(LocalDate.now());
-        førstegangsscenario.leggTilAksjonspunkt(aksjonspunktDefinisjon, BehandlingStegType.SØKERS_RELASJON_TIL_BARN);
+        førstegangsscenario.leggTilAksjonspunkt(aksjonspunktDefinisjon, BehandlingStegType.KONTROLLER_FAKTA);
         Behandling behandling = førstegangsscenario.lagre(repositoryProvider);
         return behandling;
     }

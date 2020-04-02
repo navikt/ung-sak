@@ -24,6 +24,18 @@ public class OpptjeningsaktiviteterPerYtelse {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN, Set.of(
             OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
             OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
+            OpptjeningAktivitetType.ARBEIDSAVKLARING),
+        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, Set.of(
+            OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
+            OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
+            OpptjeningAktivitetType.ARBEIDSAVKLARING),
+        FagsakYtelseType.OPPLÆRINGSPENGER, Set.of(
+            OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
+            OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
+            OpptjeningAktivitetType.ARBEIDSAVKLARING),
+        FagsakYtelseType.OMSORGSPENGER, Set.of(
+            OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
+            OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
             OpptjeningAktivitetType.ARBEIDSAVKLARING)
         );
 
