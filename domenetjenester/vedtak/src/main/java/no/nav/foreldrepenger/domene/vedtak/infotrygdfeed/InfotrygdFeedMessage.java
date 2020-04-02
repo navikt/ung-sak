@@ -24,11 +24,11 @@ import java.util.Objects;
 
 @JsonDeserialize(builder = InfotrygdFeedMessage.Builder.class)
 public class InfotrygdFeedMessage {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        OBJECT_MAPPER.registerModule(new JavaTimeModule());
+        OBJECT_MAPPER.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
 
@@ -55,7 +55,7 @@ public class InfotrygdFeedMessage {
 
     public String toJson() {
         try {
-            return objectMapper.writeValueAsString(this);
+            return OBJECT_MAPPER.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
@@ -63,7 +63,7 @@ public class InfotrygdFeedMessage {
 
     public static InfotrygdFeedMessage fromJson(String json) {
         try {
-            return objectMapper.readValue(json, InfotrygdFeedMessage.class);
+            return OBJECT_MAPPER.readValue(json, InfotrygdFeedMessage.class);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

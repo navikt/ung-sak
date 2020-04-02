@@ -13,7 +13,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 @ProsessTask(PubliserInfotrygdFeedElementTask.TASKTYPE)
 public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
-    public static final String TASKTYPE = "iverksetteVedtak.sendVedtaksbrev";
+    public static final String TASKTYPE = "iverksetteVedtak.publiserInfotrygdFeedElement";
     public static final String KAFKA_KEY_PROPERTY = TASKTYPE + ".kafkaKey";
 
     private static final Logger logger = LoggerFactory.getLogger(PubliserInfotrygdFeedElementTask.class);
