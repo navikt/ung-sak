@@ -128,7 +128,9 @@ public class KalkulusTjeneste implements BeregningTjeneste {
 
     @Override
     public KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType) {
-        TilstandResponse tilstandResponse = restTjeneste.fortsettBeregning(new FortsettBeregningRequest(referanse.getBehandlingUuid(), YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN, new StegType(stegType.getKode())));
+        TilstandResponse tilstandResponse = restTjeneste.fortsettBeregning(new FortsettBeregningRequest(referanse.getBehandlingUuid(),
+                new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()), new StegType(stegType.getKode())));
+
         List<BeregningAksjonspunktResultat> beregningAksjonspunktResultats = mapFraTilstand(tilstandResponse);
 
         KalkulusResultat kalkulusResultat = new KalkulusResultat(beregningAksjonspunktResultats);
