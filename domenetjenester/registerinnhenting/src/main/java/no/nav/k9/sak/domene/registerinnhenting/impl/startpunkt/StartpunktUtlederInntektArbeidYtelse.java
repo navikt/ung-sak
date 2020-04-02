@@ -97,7 +97,7 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktørarbeid");
         }
         if (aktørYtelseEndringForSøker.erEksklusiveYtelserEndret()) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.SØKERS_RELASJON_TIL_BARNET, "aktør ytelse");
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "aktør ytelse");
         }
         if (aktørYtelseEndringForSøker.erAndreYtelserEndret()) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør ytelse andre tema");

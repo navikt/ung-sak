@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -16,12 +16,6 @@ import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingRelaterteYtelserMapper {
 
-    private static final Map<FagsakYtelseType, FagsakYtelseType> YTELSE_TYPE_MAP = Map.of(
-        FagsakYtelseType.ENGANGSTØNAD, FagsakYtelseType.ENGANGSTØNAD,
-        FagsakYtelseType.FORELDREPENGER, FagsakYtelseType.FORELDREPENGER,
-        FagsakYtelseType.SVANGERSKAPSPENGER, FagsakYtelseType.SVANGERSKAPSPENGER
-    );
-
     public static final List<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = List.of(
         FagsakYtelseType.FORELDREPENGER,
         FagsakYtelseType.ENGANGSTØNAD,
@@ -29,7 +23,11 @@ public class BehandlingRelaterteYtelserMapper {
         FagsakYtelseType.ENSLIG_FORSØRGER,
         FagsakYtelseType.DAGPENGER,
         FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
-        FagsakYtelseType.SVANGERSKAPSPENGER);
+        FagsakYtelseType.SVANGERSKAPSPENGER,
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+        FagsakYtelseType.OPPLÆRINGSPENGER,
+        FagsakYtelseType.OMSORGSPENGER);
 
     private BehandlingRelaterteYtelserMapper() {
     }
@@ -38,10 +36,6 @@ public class BehandlingRelaterteYtelserMapper {
         return ytelser.stream()
             .map(ytelse -> lagTilgrensendeYtelse(ytelse))
             .collect(Collectors.toList());
-    }
-
-    public static FagsakYtelseType mapFraFagsakYtelseTypeTilRelatertYtelseType(FagsakYtelseType type) {
-        return YTELSE_TYPE_MAP.getOrDefault(type, FagsakYtelseType.UDEFINERT);
     }
 
     private static TilgrensendeYtelserDto lagTilgrensendeYtelse(Ytelse ytelse) {
@@ -56,9 +50,8 @@ public class BehandlingRelaterteYtelserMapper {
 
     public static TilgrensendeYtelserDto mapFraFagsak(Fagsak fagsak, LocalDate periodeDato) {
         TilgrensendeYtelserDto tilgrensendeYtelserDto = new TilgrensendeYtelserDto();
-        FagsakYtelseType relatertYtelseType = YTELSE_TYPE_MAP.getOrDefault(fagsak.getYtelseType(), FagsakYtelseType.UDEFINERT);
-        tilgrensendeYtelserDto.setRelatertYtelseType(relatertYtelseType.getKode());
-        tilgrensendeYtelserDto.setStatus(fagsak.getStatus().getKode());
+        tilgrensendeYtelserDto.setRelatertYtelseType(Objects.requireNonNull(fagsak.getYtelseType(), "ytelseType").getKode());
+        tilgrensendeYtelserDto.setStatus(Objects.requireNonNull(fagsak.getStatus(), "status").getKode());
         tilgrensendeYtelserDto.setPeriodeFraDato(periodeDato);
         tilgrensendeYtelserDto.setPeriodeTilDato(endreTomDatoHvisLøpende(periodeDato));
         tilgrensendeYtelserDto.setSaksNummer(fagsak.getSaksnummer());
@@ -66,18 +59,15 @@ public class BehandlingRelaterteYtelserMapper {
     }
 
     private static LocalDate endreTomDatoHvisLøpende(LocalDate tomDato) {
-        if (Tid.TIDENES_ENDE.equals(tomDato)) {
-            return null;
-        }
-        return tomDato;
+        return Tid.TIDENES_ENDE.equals(tomDato) ? null : tomDato;
     }
 
     public static List<RelaterteYtelserDto> samleYtelserBasertPåYtelseType(List<TilgrensendeYtelserDto> tilgrensendeYtelser, List<FagsakYtelseType> ytelsesTyper) {
-        List<RelaterteYtelserDto> relaterteYtelserDtos = new LinkedList<>();
+        List<RelaterteYtelserDto> dtos = new LinkedList<>();
         for (FagsakYtelseType relatertYtelseType : ytelsesTyper) {
-            relaterteYtelserDtos.add(new RelaterteYtelserDto(relatertYtelseType.getKode(), sortTilgrensendeYtelser(tilgrensendeYtelser, relatertYtelseType.getKode())));
+            dtos.add(new RelaterteYtelserDto(relatertYtelseType.getKode(), sortTilgrensendeYtelser(tilgrensendeYtelser, relatertYtelseType.getKode())));
         }
-        return relaterteYtelserDtos;
+        return dtos;
     }
 
     private static List<TilgrensendeYtelserDto> sortTilgrensendeYtelser(List<TilgrensendeYtelserDto> relatertYtelser, String relatertYtelseType) {

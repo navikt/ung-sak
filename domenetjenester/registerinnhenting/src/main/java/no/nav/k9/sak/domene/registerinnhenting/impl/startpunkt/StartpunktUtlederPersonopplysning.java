@@ -104,13 +104,15 @@ class StartpunktUtlederPersonopplysning implements StartpunktUtleder {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), StartpunktType.UDEFINERT, "personopplysning - relasjon på grunn av fødsel", g1Id, g2Id);
             startpunkter.add(StartpunktType.UDEFINERT);
         }
+        
+        var relasjonStartpunkt = StartpunktType.KONTROLLER_FAKTA;
         if (poDiff.erRelasjonerEndretForSøkerUtenomNyeBarn()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), StartpunktType.SØKERS_RELASJON_TIL_BARNET, "personopplysning - brukers relasjoner annet enn fødsel", g1Id, g2Id);
-            startpunkter.add(StartpunktType.SØKERS_RELASJON_TIL_BARNET);
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), relasjonStartpunkt, "personopplysning - brukers relasjoner annet enn fødsel", g1Id, g2Id);
+            startpunkter.add(relasjonStartpunkt);
         }
         if (poDiff.erRelasjonerEndretForEksisterendeBarn()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), StartpunktType.SØKERS_RELASJON_TIL_BARNET, "personopplysning - barns relasjoner annet enn fødsel", g1Id, g2Id);
-            startpunkter.add(StartpunktType.SØKERS_RELASJON_TIL_BARNET);
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), relasjonStartpunkt, "personopplysning - barns relasjoner annet enn fødsel", g1Id, g2Id);
+            startpunkter.add(relasjonStartpunkt);
         }
     }
 

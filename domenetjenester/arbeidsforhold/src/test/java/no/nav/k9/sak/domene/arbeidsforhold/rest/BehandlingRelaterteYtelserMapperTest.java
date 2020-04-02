@@ -91,7 +91,7 @@ public class BehandlingRelaterteYtelserMapperTest {
         List<RelaterteYtelserDto> resultatListe = BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(Collections.EMPTY_LIST,
             RELATERT_YTELSE_TYPER_FOR_SØKER);
 
-        assertThat(resultatListe).hasSize(7);
+        assertThat(resultatListe).hasSize(RELATERT_YTELSE_TYPER_FOR_SØKER.size());
         IntStream.range(0, RELATERT_YTELSE_TYPER_FOR_SØKER.size()).forEach(i -> {
             assertThat(resultatListe.get(i).getRelatertYtelseType()).isEqualTo(RELATERT_YTELSE_TYPER_FOR_SØKER.get(i).getKode());
             assertThat(resultatListe.get(i).getTilgrensendeYtelserListe()).isEmpty();
@@ -119,7 +119,7 @@ public class BehandlingRelaterteYtelserMapperTest {
         List<RelaterteYtelserDto> resultatListe = BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(tilgrensendeYtelserDtos,
             RELATERT_YTELSE_TYPER_FOR_SØKER);
 
-        assertThat(resultatListe).hasSize(7);
+        assertThat(resultatListe).hasSize(RELATERT_YTELSE_TYPER_FOR_SØKER.size());
         assertThat(resultatListe.get(0).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.FORELDREPENGER.getKode());
         assertThat(resultatListe.get(0).getTilgrensendeYtelserListe()).hasSize(1);
         assertThat(resultatListe.get(2).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.SYKEPENGER.getKode());
