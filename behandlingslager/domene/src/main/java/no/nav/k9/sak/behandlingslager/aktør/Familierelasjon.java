@@ -1,9 +1,9 @@
 package no.nav.k9.sak.behandlingslager.aktør;
 
-import java.time.LocalDate;
-
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.typer.PersonIdent;
+
+import java.time.LocalDate;
 
 public class Familierelasjon {
     private PersonIdent personIdent;
@@ -54,6 +54,8 @@ public class Familierelasjon {
     public Boolean getHarSammeBosted() {
         return harSammeBosted;
     }
+
+    public LocalDate getFødselsdato(){return fødselsdato;}
 
     @Override
     public String toString() {

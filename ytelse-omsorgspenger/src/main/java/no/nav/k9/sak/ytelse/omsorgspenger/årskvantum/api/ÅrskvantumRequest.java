@@ -32,6 +32,11 @@ public class ÅrskvantumRequest {
     @Size(max = 1000)
     private List<UttaksperiodeOmsorgspenger> uttaksperioder = new ArrayList<>();
 
+    @JsonProperty(value = "barna")
+    @Valid
+    @Size(max = 20)
+    private List<Barn> barna = new ArrayList<>();
+
 
     public String getBehandlingId() {
         return behandlingId;
@@ -55,5 +60,13 @@ public class ÅrskvantumRequest {
 
     public void setAktørId(String aktørId) {
         this.aktørId = aktørId;
+    }
+
+    public List<Barn> getBarna() {
+        return barna;
+    }
+
+    public void setBarna(List<Barn> barna) {
+        this.barna = barna;
     }
 }

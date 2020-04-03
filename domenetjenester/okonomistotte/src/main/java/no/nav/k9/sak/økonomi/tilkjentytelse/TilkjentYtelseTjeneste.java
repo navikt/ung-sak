@@ -95,7 +95,7 @@ public class TilkjentYtelseTjeneste {
         TilkjentYtelseBehandlingInfoV1 behandlingInfo = hentilkjentYtelseBehandlingInfo(behandlingId);
         InntrekkBeslutning inntrekkBeslutning = utledInntrekkBeslutning(behandling);
 
-        TilkjentYtelseOppdrag tilkjentYtelseOppdrag = new TilkjentYtelseOppdrag(tilkjentYtelse, behandlingInfo, behandling.getUuid(), inntrekkBeslutning);
+        TilkjentYtelseOppdrag tilkjentYtelseOppdrag = new TilkjentYtelseOppdrag(tilkjentYtelse, behandlingInfo, inntrekkBeslutning);
         tilkjentYtelseOppdrag.getBehandlingsinfo().setBehandlingTidspunkt(OffsetDateTime.now(ZoneId.of("UTC")));
         validate(tilkjentYtelseOppdrag);
 
@@ -121,6 +121,26 @@ public class TilkjentYtelseTjeneste {
         return beregningsresultatRepository.hentBeregningsresultat(behandlingId);
     }
     
+
+
+    private Optional<BeregningsresultatEntitet> hentTilkjentYtelsePerioder(Long behandlingId) {
+        Optional<BeregningsresultatEntitet> resultatOpt = hentResultat(behandlingId);
+        if (!resultatOpt.isPresent()) {
+            return Optional.empty();
+        }
+        return resultatOpt;
+    }
+
+    private LocalDate hentEndringstidspunkt(Long behandlingId) {
+        return hentResultat(behandlingId)
+            .flatMap(BeregningsresultatEntitet::getEndringsdato)
+            .orElse(null);
+    }
+
+    private Optional<BeregningsresultatEntitet> hentResultat(Long behandlingId) {
+        return beregningsresultatRepository.hentBeregningsresultat(behandlingId);
+    }
+
 
     private void validate(Object object) {
         var valideringsfeil = validator.validate(object);
