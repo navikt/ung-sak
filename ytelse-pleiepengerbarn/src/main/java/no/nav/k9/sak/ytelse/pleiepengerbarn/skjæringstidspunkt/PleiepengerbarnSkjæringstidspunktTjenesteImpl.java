@@ -1,11 +1,15 @@
-package no.nav.k9.sak.skjæringstidspunkt;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.skjæringstidspunkt;
 
 import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -15,33 +19,40 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
-public class DefaultSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste, SkjæringstidspunktRegisterinnhentingTjeneste {
+public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private OpptjeningRepository opptjeningRepository;
     private UttakRepository uttakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private OpphørUttakTjeneste opphørUttakTjeneste;
 
-    DefaultSkjæringstidspunktTjenesteImpl() {
+    PleiepengerbarnSkjæringstidspunktTjenesteImpl() {
         // CDI
     }
 
     @Inject
-    public DefaultSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, OpptjeningRepository opptjeningRepository,
-                                                 UttakRepository uttakRepository, VilkårResultatRepository vilkårResultatRepository) {
+    public PleiepengerbarnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, 
+                                                 OpptjeningRepository opptjeningRepository,
+                                                 UttakRepository uttakRepository, 
+                                                 UttakTjeneste uttakTjeneste,
+                                                 VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
         this.uttakRepository = uttakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
     }
 
     @Override
-    public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId) {
+    public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         // FIXME K9 skjæringstidspunkt
         return førsteUttaksdag(behandlingId);
     }
@@ -62,6 +73,11 @@ public class DefaultSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
             });
 
         return builder.build();
+    }
+    
+    @Override
+    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
+        return null;
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
@@ -105,5 +121,9 @@ public class DefaultSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
+    }
+    
+    public boolean harAvslåttPeriode(UUID behandlingUuid) {
+        return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
     }
 }

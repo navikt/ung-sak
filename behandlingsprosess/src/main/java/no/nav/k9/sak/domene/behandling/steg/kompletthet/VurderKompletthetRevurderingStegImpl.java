@@ -4,6 +4,8 @@ import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.
 import static no.nav.k9.sak.domene.behandling.steg.kompletthet.VurderKompletthetStegFelles.autopunktAlleredeUtført;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -26,7 +28,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @ApplicationScoped
 public class VurderKompletthetRevurderingStegImpl implements VurderKompletthetSteg {
 
-    private Kompletthetsjekker kompletthetsjekker;
+    private Instance<Kompletthetsjekker> kompletthetsjekkerInstances;
     private BehandlingRepository behandlingRepository;
     private VurderKompletthetStegFelles vurderKompletthetStegFelles;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
@@ -35,11 +37,11 @@ public class VurderKompletthetRevurderingStegImpl implements VurderKompletthetSt
     }
 
     @Inject
-    public VurderKompletthetRevurderingStegImpl(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-004") Kompletthetsjekker kompletthetsjekker,
-                                                  BehandlingRepositoryProvider provider,
-                                                  VurderKompletthetStegFelles vurderKompletthetStegFelles,
-                                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
-        this.kompletthetsjekker = kompletthetsjekker;
+    public VurderKompletthetRevurderingStegImpl(@Any Instance<Kompletthetsjekker> kompletthetsjekker,
+                                                BehandlingRepositoryProvider provider,
+                                                VurderKompletthetStegFelles vurderKompletthetStegFelles,
+                                                SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+        this.kompletthetsjekkerInstances = kompletthetsjekker;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.vurderKompletthetStegFelles = vurderKompletthetStegFelles;
@@ -50,10 +52,15 @@ public class VurderKompletthetRevurderingStegImpl implements VurderKompletthetSt
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId());
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        KompletthetResultat kompletthetResultat = kompletthetsjekker.vurderForsendelseKomplett(ref);
+        KompletthetResultat kompletthetResultat = getKompletthetsjekker(ref).vurderForsendelseKomplett(ref);
         if (!kompletthetResultat.erOppfylt() && !autopunktAlleredeUtført(AUTO_VENTER_PÅ_KOMPLETT_SØKNAD, behandling)) {
             return vurderKompletthetStegFelles.evaluerUoppfylt(kompletthetResultat, AUTO_VENTER_PÅ_KOMPLETT_SØKNAD);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private Kompletthetsjekker getKompletthetsjekker(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.find(Kompletthetsjekker.class, kompletthetsjekkerInstances, ref.getFagsakYtelseType(), ref.getBehandlingType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + Kompletthetsjekker.class.getSimpleName() + " for " + ref));
     }
 }

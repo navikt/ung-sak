@@ -7,8 +7,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.medlem.DummySkjæringstidspunktTjeneste;
 import no.nav.k9.sak.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -63,8 +66,15 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    
+    @Inject @Any
+    private DummySkjæringstidspunktTjeneste dummySkjæringstidspunktTjenesteForTest;
 
-
+    @Before
+    public void setup() throws Exception {
+        dummySkjæringstidspunktTjenesteForTest.setUtledetSkjæringstidspunkt(DAGENS_DATO);
+    }
+    
     @Test
     public void skal_ikke_utlede_dato_når_overlappende_perioder_uten_endring_i_medl() {
         // Arrange

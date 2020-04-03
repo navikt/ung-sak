@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.sjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +23,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerSøknad;
+import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-004")

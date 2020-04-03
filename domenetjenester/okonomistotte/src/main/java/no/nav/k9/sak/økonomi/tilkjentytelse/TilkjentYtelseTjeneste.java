@@ -22,9 +22,12 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.skjæringstidspunkt.YtelseOpphørtidspunktTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 
@@ -36,20 +39,24 @@ public class TilkjentYtelseTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse;
+    private Instance<YtelseOpphørtidspunktTjeneste> tilkjentYtelse;
+
+    private BeregningsresultatRepository beregningsresultatRepository;
 
     TilkjentYtelseTjeneste() {
-        //for CDI proxy
+        // for CDI proxy
     }
 
     @Inject
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
-                                  @Any Instance<YtelseTypeTilkjentYtelseTjeneste> tilkjentYtelse) {
+                                  BeregningsresultatRepository beregningsresultatRepository,
+                                  @Any Instance<YtelseOpphørtidspunktTjeneste> tilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
+        this.beregningsresultatRepository = beregningsresultatRepository;
         this.tilkjentYtelse = tilkjentYtelse;
     }
 
@@ -64,13 +71,13 @@ public class TilkjentYtelseTjeneste {
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
-        YtelseTypeTilkjentYtelseTjeneste tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
 
-        List<TilkjentYtelsePeriodeV1> perioder = tjeneste.hentTilkjentYtelsePerioder(behandlingId);
+        List<TilkjentYtelsePeriodeV1> perioder = new MapperForTilkjentYtelse().mapTilkjentYtelse(hentTilkjentYtelsePerioder(behandlingId).orElse(null));
 
+        var tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
         boolean erOpphør = tjeneste.erOpphør(ref);
         Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(ref);
-        LocalDate endringsdato = tjeneste.hentEndringstidspunkt(behandlingId);
+        LocalDate endringsdato = hentEndringstidspunkt(behandlingId);
         return new TilkjentYtelse(endringsdato, perioder)
             .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)
             .setErOpphør(erOpphør)
@@ -94,6 +101,26 @@ public class TilkjentYtelseTjeneste {
 
         return tilkjentYtelseOppdrag;
     }
+    
+
+    private Optional<BeregningsresultatEntitet> hentTilkjentYtelsePerioder(Long behandlingId) {
+        Optional<BeregningsresultatEntitet> resultatOpt = hentResultat(behandlingId);
+        if (!resultatOpt.isPresent()) {
+            return Optional.empty();
+        }
+        return resultatOpt;
+    }
+
+    private LocalDate hentEndringstidspunkt(Long behandlingId) {
+        return hentResultat(behandlingId)
+            .flatMap(BeregningsresultatEntitet::getEndringsdato)
+            .orElse(null);
+    }
+
+    private Optional<BeregningsresultatEntitet> hentResultat(Long behandlingId) {
+        return beregningsresultatRepository.hentBeregningsresultat(behandlingId);
+    }
+    
 
     private void validate(Object object) {
         var valideringsfeil = validator.validate(object);
@@ -122,8 +149,8 @@ public class TilkjentYtelseTjeneste {
     }
 
     private String lagHenvisning(Behandling behandling) {
-        //FIXME K9 avklar hvilken verdi som skal brukes i 'henvisning'.
-        //den brukes til 3 formål:
+        // FIXME K9 avklar hvilken verdi som skal brukes i 'henvisning'.
+        // den brukes til 3 formål:
         // 1 kobling til kvitteringer
         // 2 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
         // 3 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik

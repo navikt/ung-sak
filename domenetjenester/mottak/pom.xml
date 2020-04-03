@@ -13,17 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>no.nav.k9</groupId>
-            <artifactId>soknad-pleiepenger-barn</artifactId>
-        </dependency>
-        <!-- Modul interne avhengigheter -->
-        <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandling-revurdering</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>uttak</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
@@ -53,13 +44,6 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>datavarehus</artifactId>
-        </dependency>
-
-        <!-- Prosjektinterne avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
@@ -67,10 +51,6 @@
         <dependency>
             <groupId>no.nav.foreldrepenger.kontrakter</groupId>
             <artifactId>inntektsmelding-v1</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-            <artifactId>hendelser-inntektsmelding</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>

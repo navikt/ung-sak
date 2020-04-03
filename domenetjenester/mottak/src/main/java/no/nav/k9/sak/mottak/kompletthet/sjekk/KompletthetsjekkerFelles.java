@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.sjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

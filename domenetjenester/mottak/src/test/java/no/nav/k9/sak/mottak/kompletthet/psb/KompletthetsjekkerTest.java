@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.psb;
 
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,8 +38,13 @@ import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerInntektsmelding;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerTestUtil;
+import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
+import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerTestUtil;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerImpl;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerInntektsmeldingImpl;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknadFørstegangsbehandlingImpl;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknadImpl;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;

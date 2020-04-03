@@ -18,8 +18,8 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
+import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetModell;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
