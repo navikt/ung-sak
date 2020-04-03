@@ -5,7 +5,6 @@ import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;

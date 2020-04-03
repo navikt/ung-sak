@@ -1,6 +1,7 @@
 package no.nav.k9.sak.økonomi.tilkjentytelse;
 
 import java.time.Year;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,13 +17,14 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFer
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
-class MapperForTilkjentYtelse {
+public class MapperForTilkjentYtelse {
 
-    private MapperForTilkjentYtelse() {
+    public MapperForTilkjentYtelse() {
         //hindrer instansiering, som gjør sonarqube glad
     }
 
-    static List<TilkjentYtelsePeriodeV1> mapTilkjentYtelse(BeregningsresultatEntitet beregningsresultat) {
+    public List<TilkjentYtelsePeriodeV1> mapTilkjentYtelse(BeregningsresultatEntitet beregningsresultat) {
+        if(beregningsresultat==null) return Collections.emptyList();
         return beregningsresultat.getBeregningsresultatPerioder()
             .stream()
             .map(MapperForTilkjentYtelse::mapPeriode)

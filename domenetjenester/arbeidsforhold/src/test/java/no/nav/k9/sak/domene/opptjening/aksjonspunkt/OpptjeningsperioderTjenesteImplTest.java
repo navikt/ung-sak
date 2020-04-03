@@ -456,7 +456,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         return builder;
     }
 
-    private Behandling opprettBehandling(LocalDate skjæringstidspunkt) {
+    private Behandling opprettBehandling(@SuppressWarnings("unused") LocalDate skjæringstidspunkt) {
         final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AKTØRID);
         @SuppressWarnings("unused")
         Long fagsakId = fagsakRepository.opprettNy(fagsak);

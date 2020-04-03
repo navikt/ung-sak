@@ -30,8 +30,8 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
+import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetModell;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 

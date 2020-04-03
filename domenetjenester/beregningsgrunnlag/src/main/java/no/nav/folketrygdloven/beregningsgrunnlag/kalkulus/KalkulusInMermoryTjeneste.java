@@ -146,7 +146,7 @@ public class KalkulusInMermoryTjeneste implements BeregningTjeneste {
                 .findFirst();
     }
 
-    public BeregningsgrunnlagGrunnlag hentGrunnlagForGrunnlagId(Long behandlingId, UUID inntektArbeidYtelseGrunnlagId) {
+    public BeregningsgrunnlagGrunnlag hentGrunnlagForGrunnlagId(@SuppressWarnings("unused") Long behandlingId, UUID inntektArbeidYtelseGrunnlagId) {
         return grunnlag.stream().filter(g -> Objects.equals(g.getEksternReferanse(), inntektArbeidYtelseGrunnlagId))
                 .findFirst().orElseThrow();
     }

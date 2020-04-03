@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.psb;
 
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -26,7 +26,8 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerTestUtil;
+import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerTestUtil;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknadRevurderingImpl;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class KompletthetssjekkerSøknadRevurderingTest {

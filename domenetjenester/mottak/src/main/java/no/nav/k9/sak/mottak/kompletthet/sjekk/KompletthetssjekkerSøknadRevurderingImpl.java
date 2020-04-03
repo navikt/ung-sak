@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.sjekk;
 
 import static java.util.stream.Collectors.toList;
 

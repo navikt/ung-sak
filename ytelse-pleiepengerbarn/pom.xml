@@ -39,6 +39,11 @@
 			<artifactId>domenetjenester-bom</artifactId>
 		</dependency>
 		
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>mottak</artifactId>
+		</dependency>
+
 		<!-- eksterne avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9</groupId>

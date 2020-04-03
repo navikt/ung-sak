@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.skjæringstidspunkt;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -6,46 +6,43 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 
-@ApplicationScoped
-public class OpphørUttakTjeneste {
+class OpphørUttakTjeneste {
 
     private UttakTjeneste uttakTjeneste;
 
-    OpphørUttakTjeneste() {
-        //
-    }
-
-    @Inject
-    public OpphørUttakTjeneste(UttakTjeneste uttakTjeneste) {
+    OpphørUttakTjeneste(UttakTjeneste uttakTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
     }
 
-    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
+    Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
         if (!ref.getBehandlingResultat().isBehandlingsresultatOpphørt()) {
             return Optional.empty();
         }
         LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
-        Uttaksplan uttaksplan = hentUttakResultatFor(ref.getBehandlingUuid());
+        Uttaksplan uttaksplan = hentUttakResultatFor(ref.getBehandlingUuid()).orElse(null);
         LocalDate opphørsdato = utledOpphørsdatoFraUttak(uttaksplan, skjæringstidspunkt);
 
         return Optional.ofNullable(opphørsdato);
     }
+    
+    boolean harAvslåttUttakPeriode(UUID behandlingUuid) {
+        var uttaksplanOpt = hentUttakResultatFor(behandlingUuid);
+        return uttaksplanOpt.map(ut -> ut.harAvslåttePerioder()).orElse(false);
+    }
 
-    private Uttaksplan hentUttakResultatFor(UUID behandlingId) {
-        return uttakTjeneste.hentUttaksplan(behandlingId).orElse(null);
+    private Optional<Uttaksplan> hentUttakResultatFor(UUID behandlingId) {
+        return uttakTjeneste.hentUttaksplan(behandlingId);
     }
 
     private LocalDate utledOpphørsdatoFraUttak(Uttaksplan uttaksplan, LocalDate skjæringstidspunkt) {
-        // FIXME K9 UTTAK: Mulig dette ikke trengs?  Kan ha flere perioder med avslått/innvilget om hverandre?
+        // FIXME K9 UTTAK: Mulig dette ikke trengs? Kan ha flere perioder med avslått/innvilget om hverandre?
         NavigableMap<Periode, Uttaksplanperiode> perioder = uttaksplan != null ? uttaksplan.getPerioderReversert() : Collections.emptyNavigableMap();
         // Finn fom-dato i første periode av de siste sammenhengende periodene med opphørårsaker
         LocalDate fom = null;

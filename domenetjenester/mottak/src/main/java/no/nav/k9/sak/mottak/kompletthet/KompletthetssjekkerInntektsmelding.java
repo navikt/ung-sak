@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste;
+package no.nav.k9.sak.mottak.kompletthet;
 
 import java.util.List;
 

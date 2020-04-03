@@ -47,7 +47,7 @@ public class BehandlingModellTest {
         for (BehandlingStegType stegType : modell.getAlleBehandlingStegTyper()) {
             BehandlingStegModell steg = modell.finnSteg(stegType);
             String description = String.format("Feilet for %s, %s, %s", ytelseType.getKode(), behandlingType.getKode(), stegType.getKode());
-            assertThat(steg).as(description) .isNotNull();
+            assertThat(steg).as(description).isNotNull();
             BehandlingSteg behandlingSteg = steg.getSteg();
             assertThat(behandlingSteg).as(description).isNotNull();
 

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.sjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerSøknad;
+import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerSøknad;
 
 public abstract class KompletthetssjekkerSøknadImpl implements KompletthetssjekkerSøknad {
 
