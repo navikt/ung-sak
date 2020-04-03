@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -72,7 +71,7 @@ public class SimulerOppdragStegTest {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         TilkjentYtelse ty = new TilkjentYtelse(LocalDate.now(), Collections.emptyList());
         InntrekkBeslutning ib = new InntrekkBeslutning(true);
-        TilkjentYtelseOppdrag tyo = new TilkjentYtelseOppdrag(ty, info, UUID.randomUUID(), ib);
+        TilkjentYtelseOppdrag tyo = new TilkjentYtelseOppdrag(ty, info, ib);
         when(tilkjentYtelseTjenesteMock.hentTilkjentYtelseOppdrag(behandling)).thenReturn(tyo);
     }
 
