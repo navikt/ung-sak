@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
