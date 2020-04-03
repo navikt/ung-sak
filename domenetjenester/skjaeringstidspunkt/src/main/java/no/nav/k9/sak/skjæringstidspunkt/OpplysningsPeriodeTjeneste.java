@@ -17,7 +17,7 @@ public class OpplysningsPeriodeTjeneste {
     private Period periodeFør;
     private Period periodeEtter;
 
-    private SkjæringstidspunktRegisterinnhentingTjeneste skjæringstidspunktTjeneste;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     OpplysningsPeriodeTjeneste() {
         // CDI
@@ -27,7 +27,7 @@ public class OpplysningsPeriodeTjeneste {
      * Konfig angir perioden med registerinnhenting før/etter skjæringstidspunktet (for en gitt ytelse)
      */
     @Inject
-    public OpplysningsPeriodeTjeneste(SkjæringstidspunktRegisterinnhentingTjeneste skjæringstidspunktTjeneste,
+    public OpplysningsPeriodeTjeneste(SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                       @KonfigVerdi(value = "PSB.registerinnhenting.opplysningsperiode.før", defaultVerdi = "P17M") Period periodeFør,
                                       @KonfigVerdi(value = "PSB.registerinnhenting.opplysningsperiode.etter", defaultVerdi = "P4Y") Period periodeEtter) {
 
@@ -53,7 +53,7 @@ public class OpplysningsPeriodeTjeneste {
     }
 
     private Interval beregning(Long behandlingId, @SuppressWarnings("unused") FagsakYtelseType ytelseType, boolean tilOgMedIdag) {
-        final LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.utledSkjæringstidspunktForRegisterInnhenting(behandlingId);
+        final LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
         // FIXME K9 Blir dette riktig for alle våre ytelser?
         return beregnInterval(skjæringstidspunkt, tilOgMedIdag);
     }

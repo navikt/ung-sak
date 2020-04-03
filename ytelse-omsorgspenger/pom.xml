@@ -1,49 +1,55 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>no.nav.k9.sak</groupId>
-        <artifactId>k9sak</artifactId>
-        <version>${revision}${sha1}${changelist}</version>
-    </parent>
+	<parent>
+		<groupId>no.nav.k9.sak</groupId>
+		<artifactId>k9sak</artifactId>
+		<version>${revision}${sha1}${changelist}</version>
+	</parent>
 
-    <groupId>no.nav.k9.sak.ytelse</groupId>
-    <artifactId>ytelse-omsorgspenger</artifactId>
-    <packaging>jar</packaging>
-    <name>K9SAK :: Ytelse - Omsorgspenger</name>
+	<groupId>no.nav.k9.sak.ytelse</groupId>
+	<artifactId>ytelse-omsorgspenger</artifactId>
+	<packaging>jar</packaging>
+	<name>K9SAK :: Ytelse - Omsorgspenger</name>
 
-    <dependencies>
+	<dependencies>
 
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingsprosess-steg</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingskontroll</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingslager-domene</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-db</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingsprosess-steg</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingskontroll</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-domene</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles</groupId>
+			<artifactId>felles-db</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>domenetjenester-bom</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>domenetjenester-bom</artifactId>
+		</dependency>
 
-        <!-- Test avhengigheter -->
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingslager-testutilities</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>mottak</artifactId>
+		</dependency>
+
+		<!-- Test avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-testutilities</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 </project>

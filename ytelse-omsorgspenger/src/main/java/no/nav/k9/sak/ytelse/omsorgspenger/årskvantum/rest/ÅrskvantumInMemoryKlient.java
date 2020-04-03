@@ -4,7 +4,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 
 @RequestScoped

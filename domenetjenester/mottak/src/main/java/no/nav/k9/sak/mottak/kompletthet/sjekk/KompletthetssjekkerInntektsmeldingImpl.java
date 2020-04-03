@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste.psb;
+package no.nav.k9.sak.mottak.kompletthet.sjekk;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthettjeneste.KompletthetssjekkerInntektsmelding;
+import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")

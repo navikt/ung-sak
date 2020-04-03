@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktRegisterinnhentingTjeneste;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
@@ -154,9 +154,8 @@ public class RegisterdataInnhenterTest {
     }
 
     private RegisterdataInnhenter lagRegisterdataInnhenter(BehandlingRepositoryProvider repositoryProvider) {
-        SkjæringstidspunktRegisterinnhentingTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktRegisterinnhentingTjeneste.class);
-        OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste = new OpplysningsPeriodeTjeneste(skjæringstidspunktTjeneste,
-            Period.of(1, 0, 0), Period.of(0, 6, 0));
+        var skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
+        var opplysningsPeriodeTjeneste = new OpplysningsPeriodeTjeneste(skjæringstidspunktTjeneste, Period.of(1, 0, 0), Period.of(0, 6, 0));
 
         PersoninfoAdapter personinfoAdapter = mock(PersoninfoAdapter.class);
         MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
@@ -165,6 +164,6 @@ public class RegisterdataInnhenterTest {
             medlemTjeneste,
             repositoryProvider,
             null,
-                opplysningsPeriodeTjeneste, null, Period.parse("P1W"));
+            opplysningsPeriodeTjeneste, null, Period.parse("P1W"));
     }
 }

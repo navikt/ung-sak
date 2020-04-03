@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -47,7 +48,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
@@ -73,10 +73,10 @@ public class VurderLøpendeMedlemskapStegTest {
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     @Inject
-    private UttakInMemoryTjeneste uttakTjeneste;
-
-    @Inject
     private VurderLøpendeMedlemskap vurdertLøpendeMedlemskapTjeneste;
+    
+    @Inject @Any
+    private DummySkjæringstidspunktTjeneste dummySkjæringstidspunktTjenesteForTest;
 
     @Before
     public void setUp() {
@@ -89,6 +89,9 @@ public class VurderLøpendeMedlemskapStegTest {
         LocalDate datoMedEndring = LocalDate.now().plusDays(10);
         LocalDate ettÅrSiden = LocalDate.now().minusYears(1);
         LocalDate iDag = LocalDate.now();
+
+        dummySkjæringstidspunktTjenesteForTest.setUtledetSkjæringstidspunkt(iDag);
+        
         var scenario = TestScenarioBuilder.builderMedSøknad();
         MedlemskapPerioderEntitet periode = opprettPeriode(ettÅrSiden, iDag, MedlemskapDekningType.FTL_2_6);
         scenario.leggTilMedlemskapPeriode(periode);
@@ -171,9 +174,6 @@ public class VurderLøpendeMedlemskapStegTest {
 
     private void avslutterBehandlingOgFagsak(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(),
-            behandling.getUuid(),
-            lagUttaksPeriode());
 
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, lås);

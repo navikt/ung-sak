@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthettjeneste;
+package no.nav.k9.sak.kompletthet;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD;
@@ -23,9 +23,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
-import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 
 @ApplicationScoped
 public class KompletthetModell {
