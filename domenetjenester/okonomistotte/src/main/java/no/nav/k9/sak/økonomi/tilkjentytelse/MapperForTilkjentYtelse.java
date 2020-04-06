@@ -24,7 +24,9 @@ public class MapperForTilkjentYtelse {
     }
 
     public List<TilkjentYtelsePeriodeV1> mapTilkjentYtelse(BeregningsresultatEntitet beregningsresultat) {
-        if(beregningsresultat==null) return Collections.emptyList();
+        if (beregningsresultat == null) {
+            return Collections.emptyList();
+        }
         return beregningsresultat.getBeregningsresultatPerioder()
             .stream()
             .map(MapperForTilkjentYtelse::mapPeriode)
@@ -36,12 +38,13 @@ public class MapperForTilkjentYtelse {
         List<TilkjentYtelseAndelV1> andeler = periode.getBeregningsresultatAndelList()
             .stream()
             .map(MapperForTilkjentYtelse::mapAndel)
+            .filter(andel -> andel.getSatsBeløp() != 0)
             .collect(Collectors.toList());
-        
+
         if (andeler.isEmpty()) {
             return null;
         }
-        
+
         return new TilkjentYtelsePeriodeV1(periode.getBeregningsresultatPeriodeFom(), periode.getBeregningsresultatPeriodeTom(), andeler);
     }
 
