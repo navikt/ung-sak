@@ -13,12 +13,16 @@ import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
+import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -27,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.domene.uttak.rest.JsonMapper;
 import no.nav.k9.sak.skjæringstidspunkt.YtelseOpphørtidspunktTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
@@ -35,6 +40,8 @@ import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 public class TilkjentYtelseTjeneste {
 
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private ObjectMapper objectMapper = JsonMapper.getMapper();
+    private TilkjentYtelseMaskerer maskerer = new TilkjentYtelseMaskerer(objectMapper).ikkeMaskerSats();
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -121,11 +128,15 @@ public class TilkjentYtelseTjeneste {
         return beregningsresultatRepository.hentBeregningsresultat(behandlingId);
     }
 
-
-    private void validate(Object object) {
-        var valideringsfeil = validator.validate(object);
+    private void validate(TilkjentYtelseOppdrag tilkjentYtelseOppdrag) {
+        var valideringsfeil = validator.validate(tilkjentYtelseOppdrag);
         if (!valideringsfeil.isEmpty()) {
-            throw new IllegalArgumentException("Kan ikke validate obj=" + object + "\n\tValideringsfeil:" + valideringsfeil);
+            try {
+                TilkjentYtelseOppdrag maskert = maskerer.masker(tilkjentYtelseOppdrag);
+                throw new IllegalArgumentException("Valideringsfeil:\"" + valideringsfeil + "\" for " + objectMapper.writeValueAsString(maskert));
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Det var valideringsfeil, men fikk også Json-feil i håndtering av feilen", e);
+            }
         }
     }
 
