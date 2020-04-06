@@ -1,17 +1,5 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
-/*
-data class VedtakMessage(
-        val uuid: String,
-        val saksnummer: String,
-        val aktoerId: String,
-        val aktoerIdPleietrengende: String?,
-        val foersteStoenadsdag: LocalDate?,
-        val sisteStoenadsdag: LocalDate?
-)
- */
-
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -33,6 +21,7 @@ public class InfotrygdFeedMessage {
 
 
     private final String uuid; // oblig
+    private final String ytelse; // oblig
     private final String saksnummer; // oblig
     private final String aktoerId; // oblig
 
@@ -44,8 +33,9 @@ public class InfotrygdFeedMessage {
         return new Builder();
     }
 
-    private InfotrygdFeedMessage(String uuid, String saksnummer, String aktoerId, String aktoerIdPleietrengende, LocalDate foersteStoenadsdag, LocalDate sisteStoenadsdag) {
+    private InfotrygdFeedMessage(String uuid, String ytelse, String saksnummer, String aktoerId, String aktoerIdPleietrengende, LocalDate foersteStoenadsdag, LocalDate sisteStoenadsdag) {
         this.uuid = Objects.requireNonNull(uuid, "uuid");
+        this.ytelse = Objects.requireNonNull(ytelse, "ytelse");
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
         this.aktoerId = Objects.requireNonNull(aktoerId, "aktoerId");
         this.aktoerIdPleietrengende = aktoerIdPleietrengende;
@@ -71,6 +61,10 @@ public class InfotrygdFeedMessage {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public String getYtelse() {
+        return ytelse;
     }
 
     public String getSaksnummer() {
@@ -99,6 +93,7 @@ public class InfotrygdFeedMessage {
         if (o == null || getClass() != o.getClass()) return false;
         InfotrygdFeedMessage that = (InfotrygdFeedMessage) o;
         return Objects.equals(uuid, that.uuid) &&
+            Objects.equals(ytelse, that.ytelse) &&
             Objects.equals(saksnummer, that.saksnummer) &&
             Objects.equals(aktoerId, that.aktoerId) &&
             Objects.equals(aktoerIdPleietrengende, that.aktoerIdPleietrengende) &&
@@ -108,13 +103,14 @@ public class InfotrygdFeedMessage {
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, saksnummer, aktoerId, aktoerIdPleietrengende, foersteStoenadsdag, sisteStoenadsdag);
+        return Objects.hash(uuid, ytelse, saksnummer, aktoerId, aktoerIdPleietrengende, foersteStoenadsdag, sisteStoenadsdag);
     }
 
     @Override
     public String toString() {
         return "InfotrygdFeedMessage{" +
             "uuid='" + uuid + '\'' +
+            ", ytelse='" + ytelse + '\'' +
             ", saksnummer='" + saksnummer + '\'' +
             ", aktoerId='" + aktoerId + '\'' +
             ", aktoerIdPleietrengende='" + aktoerIdPleietrengende + '\'' +
@@ -126,6 +122,7 @@ public class InfotrygdFeedMessage {
     @JsonPOJOBuilder(withPrefix = "")
     public static class Builder {
         private String uuid; // oblig
+        private String ytelse; // oblig
         private String saksnummer; // oblig
         private String aktoerId; // oblig
 
@@ -134,11 +131,16 @@ public class InfotrygdFeedMessage {
         private LocalDate sisteStoenadsdag;
 
         public InfotrygdFeedMessage build() {
-            return new InfotrygdFeedMessage(uuid, saksnummer, aktoerId, aktoerIdPleietrengende, foersteStoenadsdag, sisteStoenadsdag);
+            return new InfotrygdFeedMessage(uuid, ytelse, saksnummer, aktoerId, aktoerIdPleietrengende, foersteStoenadsdag, sisteStoenadsdag);
         }
 
         public Builder uuid(String uuid) {
             this.uuid = uuid;
+            return this;
+        }
+
+        public Builder ytelse(String ytelse) {
+            this.ytelse = ytelse;
             return this;
         }
 

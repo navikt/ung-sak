@@ -63,6 +63,7 @@ public class InfotrygdFeedService {
 
     private InfotrygdFeedMessage getInfotrygdFeedMessage(Behandling behandling) {
         InfotrygdFeedMessage.Builder builder = InfotrygdFeedMessage.builder()
+            .ytelse("PN")
             .uuid(UUID.randomUUID().toString());
 
         setSaksnummerOgAktørId(builder, behandling.getFagsak());
