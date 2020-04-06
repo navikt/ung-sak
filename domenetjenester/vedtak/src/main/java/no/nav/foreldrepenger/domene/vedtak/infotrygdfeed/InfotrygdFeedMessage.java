@@ -1,16 +1,18 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 
-@JsonDeserialize(builder = InfotrygdFeedMessage.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InfotrygdFeedMessage {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -20,20 +22,44 @@ public class InfotrygdFeedMessage {
     }
 
 
-    private final String uuid; // oblig
-    private final String ytelse; // oblig
-    private final String saksnummer; // oblig
-    private final String aktoerId; // oblig
+    @JsonProperty("uuid")
+    @NotNull
+    private final String uuid;
 
+    @JsonProperty("ytelse")
+    @NotNull
+    private final String ytelse;
+
+    @JsonProperty("saksnummer")
+    @NotNull
+    private final String saksnummer;
+
+    @JsonProperty("aktoerId")
+    @NotNull
+    private final String aktoerId;
+
+    @JsonProperty("aktoerIdPleietrengende")
     private final String aktoerIdPleietrengende;
+
+    @JsonProperty("foersteStoenadsdag")
     private final LocalDate foersteStoenadsdag;
+
+    @JsonProperty("sisteStoenadsdag")
     private final LocalDate sisteStoenadsdag;
 
     public static Builder builder() {
         return new Builder();
     }
 
-    private InfotrygdFeedMessage(String uuid, String ytelse, String saksnummer, String aktoerId, String aktoerIdPleietrengende, LocalDate foersteStoenadsdag, LocalDate sisteStoenadsdag) {
+    @JsonCreator
+    private InfotrygdFeedMessage(
+                @JsonProperty("uuid") String uuid,
+                @JsonProperty("ytelse") String ytelse,
+                @JsonProperty("saksnummer") String saksnummer,
+                @JsonProperty("aktoerId") String aktoerId,
+                @JsonProperty("aktoerIdPleietrengende") String aktoerIdPleietrengende,
+                @JsonProperty("foersteStoenadsdag") LocalDate foersteStoenadsdag,
+                @JsonProperty("sisteStoenadsdag") LocalDate sisteStoenadsdag) {
         this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.ytelse = Objects.requireNonNull(ytelse, "ytelse");
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
@@ -119,7 +145,6 @@ public class InfotrygdFeedMessage {
             '}';
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
     public static class Builder {
         private String uuid; // oblig
         private String ytelse; // oblig
