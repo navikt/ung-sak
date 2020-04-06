@@ -20,11 +20,17 @@ import no.nav.k9.abac.AbacAttributt;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FinnEllerOpprettSak {
 
-    @JsonProperty(value = "behandlingstemaOffisiellKode", required = true)
-    @NotNull
+    /** @deprecated erstattes av ytelseType. */
+    @Deprecated(forRemoval = true)
+    @JsonProperty(value = "behandlingstemaOffisiellKode")
     @Size(max = 8)
-    @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*$")
+    @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$")
     private String behandlingstemaOffisiellKode;
+
+    @JsonProperty(value = "ytelseType")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$")
+    private String ytelseType;
 
     @JsonProperty(value = "aktørId", required = true)
     @NotNull
@@ -39,11 +45,16 @@ public class FinnEllerOpprettSak {
     private LocalDate periodeStart;
 
     @JsonCreator
-    public FinnEllerOpprettSak(@JsonProperty(value = "behandlingstemaOffisiellKode", required = true) @NotNull @Size(max = 8) @Pattern(regexp = "^[a-zA-ZæøåÆØÅ_\\-0-9]*$") String behandlingstemaOffisiellKode,
+    public FinnEllerOpprettSak(@JsonProperty(value = "behandlingstemaOffisiellKode") @Size(max = 8) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String behandlingstemaOffisiellKode,
+                               @JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
                                @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0) String aktørId,
                                @JsonProperty(value = "pleietrengendeAktørId") @Digits(integer = 19, fraction = 0) String pleietrengendeAktørId,
                                @JsonProperty(value = "periodeStart") LocalDate periodeStart) {
+        if(behandlingstemaOffisiellKode==null && ytelseType==null) {
+            throw new IllegalArgumentException("Må oppgi enten behandlinstema eller ytelseType");
+        }
         this.behandlingstemaOffisiellKode = behandlingstemaOffisiellKode;
+        this.ytelseType = ytelseType;
         this.aktørId = aktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
         this.periodeStart = periodeStart;
@@ -51,6 +62,10 @@ public class FinnEllerOpprettSak {
 
     public String getBehandlingstemaOffisiellKode() {
         return behandlingstemaOffisiellKode;
+    }
+    
+    public String getYtelseType() {
+        return ytelseType;
     }
 
     public LocalDate getPeriodeStart() {
