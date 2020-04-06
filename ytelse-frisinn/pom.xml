@@ -11,9 +11,9 @@
 	</parent>
 
 	<groupId>no.nav.k9.sak.ytelse</groupId>
-	<artifactId>ytelse-pleiepengerbarn</artifactId>
+	<artifactId>ytelse-frisinn</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Ytelse - PSB</name>
+	<name>K9SAK :: Ytelse - FRISINN</name>
 
 	<dependencies>
 
@@ -47,7 +47,7 @@
 		<!-- eksterne avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9</groupId>
-			<artifactId>soknad-pleiepenger-barn</artifactId>
+			<artifactId>soknad-frisinn</artifactId>
 		</dependency>
 
 		<!-- Test avhengigheter -->

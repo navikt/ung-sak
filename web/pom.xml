@@ -81,6 +81,10 @@
 		<!-- Ytelsespesifikke moduler -->
 		<dependency>
 			<groupId>no.nav.k9.sak.ytelse</groupId>
+			<artifactId>ytelse-frisinn</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak.ytelse</groupId>
 			<artifactId>ytelse-pleiepengerbarn</artifactId>
 		</dependency>
 		<dependency>

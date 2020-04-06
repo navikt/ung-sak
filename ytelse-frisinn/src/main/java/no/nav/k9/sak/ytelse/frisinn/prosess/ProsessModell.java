@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
+package no.nav.k9.sak.ytelse.frisinn.prosess;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -14,8 +14,8 @@ import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final String YTELSE = "PSB";
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+    private static final String YTELSE = "FRISINN";
+    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.FRISINN;
 
     @FagsakYtelseTypeRef(YTELSE)
     @BehandlingTypeRef("BT-002")
@@ -25,7 +25,6 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         modellBuilder.medSteg(
             BehandlingStegType.START_STEG,
-            BehandlingStegType.VURDER_UTLAND,
             BehandlingStegType.VURDER_KOMPLETTHET,
             BehandlingStegType.INIT_PERIODER,
             BehandlingStegType.INIT_VILKÅR,
@@ -33,14 +32,9 @@ public class ProsessModell {
             BehandlingStegType.INREG_AVSL,
             BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD,
             BehandlingStegType.KONTROLLER_FAKTA,
-            BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
-            BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            BehandlingStegType.VURDER_OMSORG_FOR,
-            BehandlingStegType.VURDER_MEDISINSKVILKÅR,
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
             BehandlingStegType.VURDER_UTTAK,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
@@ -67,7 +61,6 @@ public class ProsessModell {
         modellBuilder.medSteg(
             BehandlingStegType.START_STEG,
             BehandlingStegType.VARSEL_REVURDERING,
-            BehandlingStegType.VURDER_UTLAND,
             BehandlingStegType.VURDER_KOMPLETTHET,
             BehandlingStegType.INIT_PERIODER,
             BehandlingStegType.INIT_VILKÅR,
@@ -75,14 +68,9 @@ public class ProsessModell {
             BehandlingStegType.INREG_AVSL,
             BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD,
             BehandlingStegType.KONTROLLER_FAKTA,
-            BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT,
-            BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            BehandlingStegType.VURDER_OMSORG_FOR,
-            BehandlingStegType.VURDER_MEDISINSKVILKÅR,
             BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
             BehandlingStegType.VURDER_OPPTJENING_FAKTA,
             BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
             BehandlingStegType.VURDER_UTTAK,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
             BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,

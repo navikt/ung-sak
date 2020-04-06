@@ -41,6 +41,13 @@ public class FordelRestTjenesteTest {
         assertThat(mottakTjeneste).isNotNull();
     }
     
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void skal_finne_søknad_mottaker_FRISINN() throws Exception {
+        SøknadMottakTjeneste mottakTjeneste = fordelRestTjeneste.finnSøknadMottakerTjeneste(FagsakYtelseType.FRISINN);
+        assertThat(mottakTjeneste).isNotNull();
+    }
+    
     @Test
     public void deserialiser_pleiepengersøknad() throws Exception {
         

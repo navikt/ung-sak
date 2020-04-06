@@ -27,7 +27,8 @@ public class BehandlingRelaterteYtelserMapper {
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
         FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
         FagsakYtelseType.OPPLÆRINGSPENGER,
-        FagsakYtelseType.OMSORGSPENGER);
+        FagsakYtelseType.OMSORGSPENGER,
+        FagsakYtelseType.FRISINN);
 
     private BehandlingRelaterteYtelserMapper() {
     }
