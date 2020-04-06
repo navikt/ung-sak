@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.skjæringstidspunkt;
+package no.nav.k9.sak.ytelse.frisinn.skjæringstidspunkt;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -14,7 +14,6 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -24,28 +23,25 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
-public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
+public class FrisinnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private OpptjeningRepository opptjeningRepository;
     private UttakRepository uttakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private OpphørUttakTjeneste opphørUttakTjeneste;
 
-    PleiepengerbarnSkjæringstidspunktTjenesteImpl() {
+    FrisinnSkjæringstidspunktTjenesteImpl() {
         // CDI
     }
 
     @Inject
-    public PleiepengerbarnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, 
-                                                 OpptjeningRepository opptjeningRepository,
+    public FrisinnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, 
                                                  UttakRepository uttakRepository, 
                                                  UttakTjeneste uttakTjeneste,
                                                  VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.opptjeningRepository = opptjeningRepository;
         this.uttakRepository = uttakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
@@ -64,14 +60,6 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         LocalDate førsteUttaksdato = førsteUttaksdag(behandlingId);
         builder.medFørsteUttaksdato(førsteUttaksdato);
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
-
-        opptjeningRepository.finnOpptjening(behandlingId)
-            .map(opptjening -> opptjening.getTom().plusDays(1))
-            .ifPresent(skjæringstidspunkt -> {
-                builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
-                builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
-            });
-
         return builder.build();
     }
     

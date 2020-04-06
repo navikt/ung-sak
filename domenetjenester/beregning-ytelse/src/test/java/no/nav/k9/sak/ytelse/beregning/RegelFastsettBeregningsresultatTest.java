@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.beregning.fp;
+package no.nav.k9.sak.ytelse.beregning;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
