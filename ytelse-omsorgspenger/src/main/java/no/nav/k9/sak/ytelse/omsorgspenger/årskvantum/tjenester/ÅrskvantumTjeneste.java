@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRest;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 
 public interface ÅrskvantumTjeneste {
@@ -12,6 +12,6 @@ public interface ÅrskvantumTjeneste {
 
     ÅrskvantumResultat hentÅrskvantumForFagsak(BehandlingReferanse ref);
 
-    ÅrskvantumRest hentResterendeKvantum(String aktørId);
+    ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId);
 
 }

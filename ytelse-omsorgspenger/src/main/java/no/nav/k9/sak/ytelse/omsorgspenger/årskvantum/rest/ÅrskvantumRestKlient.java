@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRest;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -99,10 +99,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public ÅrskvantumRest hentResterendeKvantum(String aktørId) {
+    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/hentresterendekvantum");
-            var result = restKlient.post(endpoint, aktørId, ÅrskvantumRest.class);
+            var result = restKlient.post(endpoint, aktørId, ÅrskvantumResterendeDager.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + aktørId + ": " + constraints);

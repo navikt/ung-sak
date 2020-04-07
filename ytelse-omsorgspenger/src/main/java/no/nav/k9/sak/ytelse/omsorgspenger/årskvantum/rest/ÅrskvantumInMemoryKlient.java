@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRest;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 
 import javax.enterprise.context.RequestScoped;
@@ -34,7 +34,7 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public ÅrskvantumRest hentResterendeKvantum(String aktørId) {
+    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId) {
         return null;
     }
 

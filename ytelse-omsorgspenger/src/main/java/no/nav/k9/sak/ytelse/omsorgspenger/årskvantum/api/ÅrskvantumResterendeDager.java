@@ -11,14 +11,14 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ÅrskvantumRest {
+public class ÅrskvantumResterendeDager {
 
     @JsonProperty(value = "antallDager", required = true)
     @Valid
     @NotNull
     private Integer antallDager;
 
-    public ÅrskvantumRest(@Valid @NotNull Integer antallDager) {
+    public ÅrskvantumResterendeDager(@Valid @NotNull Integer antallDager) {
         this.antallDager = antallDager;
     }
 
