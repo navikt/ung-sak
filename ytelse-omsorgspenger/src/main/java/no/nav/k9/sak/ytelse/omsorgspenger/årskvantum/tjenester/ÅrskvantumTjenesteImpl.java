@@ -84,7 +84,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
     @Override
     public ÅrskvantumResultat hentÅrskvantumForFagsak(BehandlingReferanse ref) {
-        return årskvantumKlient.hentÅrskvantumForFagsak(ref.getFagsakId().toString());
+        return årskvantumKlient.hentÅrskvantumForFagsak(ref.getSaksnummer().getVerdi());
     }
 
     @Override

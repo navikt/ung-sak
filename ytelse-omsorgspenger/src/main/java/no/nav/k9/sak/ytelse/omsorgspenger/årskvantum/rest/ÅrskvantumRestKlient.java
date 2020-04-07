@@ -75,7 +75,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
             var result = restKlient.post(endpoint, behandlingId, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + behandlingId + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingId=" + behandlingId + ": " + constraints);
             }
             return result;
         } catch (Exception e) {
@@ -84,13 +84,13 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForFagsak(String fagsakId) {
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(String saksnummer) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/hentkvantumforfagsak");
-            var result = restKlient.post(endpoint, fagsakId, ÅrskvantumResultat.class);
+            var result = restKlient.post(endpoint, saksnummer, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + fagsakId + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", saksnummer=" + saksnummer + ": " + constraints);
             }
             return result;
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
             var result = restKlient.post(endpoint, aktørId, ÅrskvantumResterendeDager.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + aktørId + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", aktørid=" + aktørId + ": " + constraints);
             }
             return result;
         } catch (Exception e) {

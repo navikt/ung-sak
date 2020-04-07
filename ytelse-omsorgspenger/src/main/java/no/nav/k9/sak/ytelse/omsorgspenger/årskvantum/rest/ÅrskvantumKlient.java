@@ -12,7 +12,7 @@ public interface ÅrskvantumKlient {
 
     ÅrskvantumResultat hentÅrskvantumForBehandling(String behandlingId);
 
-    ÅrskvantumResultat hentÅrskvantumForFagsak(String fagsakId);
+    ÅrskvantumResultat hentÅrskvantumForFagsak(String saksnummer);
 
     ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId);
 
