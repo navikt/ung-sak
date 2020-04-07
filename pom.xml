@@ -39,7 +39,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<felles.version>1.6-20200402134742-c0a3d62</felles.version>
+		<felles.version>1.6-20200406221452-1f25894</felles.version>
 
 		<metrics.version>4.1.5</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
@@ -78,7 +78,7 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
 				<artifactId>felles-sikkerhet</artifactId>
