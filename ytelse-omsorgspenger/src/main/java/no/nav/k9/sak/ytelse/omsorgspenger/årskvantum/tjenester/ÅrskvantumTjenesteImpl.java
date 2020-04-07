@@ -12,6 +12,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
@@ -53,7 +54,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
 
-        årskvantumRequest.setBehandlingId(ref.getBehandlingId().toString());
+        årskvantumRequest.setBehandlingUUID(ref.getBehandlingUuid().toString());
+        årskvantumRequest.setSaksnummer(ref.getSaksnummer().getVerdi());
         årskvantumRequest.setAktørId(ref.getAktørId().getId());
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
@@ -74,6 +76,21 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             årskvantumRequest.getUttaksperioder().add(uttaksperiodeOmsorgspenger);
         }
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForBehandling(BehandlingReferanse ref) {
+        return årskvantumKlient.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(BehandlingReferanse ref) {
+        return årskvantumKlient.hentÅrskvantumForFagsak(ref.getSaksnummer().getVerdi());
+    }
+
+    @Override
+    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørid) {
+        return årskvantumKlient.hentResterendeKvantum(aktørid);
     }
 
 }
