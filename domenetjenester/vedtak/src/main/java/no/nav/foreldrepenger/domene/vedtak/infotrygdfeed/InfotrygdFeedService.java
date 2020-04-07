@@ -30,6 +30,12 @@ public class InfotrygdFeedService {
     private final UttakTjeneste uttakTjeneste;
     private final ProsessTaskRepository prosessTaskRepository;
 
+    public InfotrygdFeedService() {
+        // for CDI
+        uttakTjeneste = null;
+        prosessTaskRepository = null;
+    }
+
     @Inject
     public InfotrygdFeedService(
         UttakTjeneste uttakTjeneste, ProsessTaskRepository prosessTaskRepository

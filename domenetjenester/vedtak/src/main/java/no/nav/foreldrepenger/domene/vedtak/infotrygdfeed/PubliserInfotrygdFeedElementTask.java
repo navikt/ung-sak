@@ -20,6 +20,11 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
 
     private final InfotrygdFeedMeldingProducer meldingProducer;
 
+    public PubliserInfotrygdFeedElementTask() {
+        // CDI
+        meldingProducer = null;
+    }
+
     @Inject
     public PubliserInfotrygdFeedElementTask(InfotrygdFeedMeldingProducer meldingProducer) {
         this.meldingProducer = meldingProducer;
