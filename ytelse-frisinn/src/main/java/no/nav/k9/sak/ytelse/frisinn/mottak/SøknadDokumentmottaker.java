@@ -20,7 +20,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @Dependent
-class SøknadDokumentmottaker {
+public class SøknadDokumentmottaker {
 
     private DokumentmottakerFelles dokumentmottakerFelles;
     private SaksnummerRepository saksnummerRepository;
@@ -33,18 +33,17 @@ class SøknadDokumentmottaker {
     }
 
     @Inject
-    SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
-                                                 SaksnummerRepository saksnummerRepository,
-                                                 Behandlingsoppretter behandlingsoppretter,
-                                                 SøknadOversetter pleiepengerBarnSoknadOversetter,
-                                                 FagsakTjeneste fagsakTjeneste) {
+    public SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
+                                  SaksnummerRepository saksnummerRepository,
+                                  Behandlingsoppretter behandlingsoppretter,
+                                  SøknadOversetter søknadOversetter,
+                                  FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
-        this.soknadOversetter = pleiepengerBarnSoknadOversetter;
+        this.soknadOversetter = søknadOversetter;
         this.fagsakTjeneste = fagsakTjeneste;
     }
-
 
     Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato) {
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, startDato.minusWeeks(25), startDato.plusWeeks(25));
@@ -60,7 +59,8 @@ class SøknadDokumentmottaker {
         Objects.requireNonNull(søknad);
 
         final Behandling behandling = tilknyttBehandling(saksnummer);
-        // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av historikk.
+        // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av
+        // historikk.
         // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
         soknadOversetter.persister(søknad, behandling);
 
