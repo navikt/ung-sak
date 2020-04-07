@@ -17,7 +17,7 @@ import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.søknad.pleiepengerbarn.FrisinnSøknad;
+import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @Dependent
 class SøknadDokumentmottaker {

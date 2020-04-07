@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
-import no.nav.k9.søknad.pleiepengerbarn.FrisinnSøknad;
+import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)

@@ -3,7 +3,7 @@ package no.nav.k9.sak.ytelse.frisinn.mottak;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
-import no.nav.k9.søknad.pleiepengerbarn.FrisinnSøknad;
+import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 class MapSøknadUttak {
     private FrisinnSøknad søknad;
