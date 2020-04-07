@@ -6,6 +6,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
+import java.util.UUID;
 
 @RequestScoped
 @Alternative
@@ -19,17 +20,17 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void avbrytÅrskvantumForBehandling(String behandlingId) {
+    public void avbrytÅrskvantumForBehandling(UUID behandlingUUID) {
 
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForBehandling(String behandlingId) {
+    public ÅrskvantumResultat hentÅrskvantumForBehandling(UUID behandlingUUID) {
         return null;
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForFagsak(String fagsakId) {
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(String saksnummer) {
         return null;
     }
 

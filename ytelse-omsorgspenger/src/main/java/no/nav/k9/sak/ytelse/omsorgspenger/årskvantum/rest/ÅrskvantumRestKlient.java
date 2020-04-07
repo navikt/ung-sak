@@ -20,6 +20,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 @ApplicationScoped
 @Default
@@ -59,23 +60,23 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void avbrytÅrskvantumForBehandling(String behandlingId) {
+    public void avbrytÅrskvantumForBehandling(UUID behandlingUUID) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/avbrytkvantumforbehandling");
-            restKlient.post(endpoint, behandlingId);
+            restKlient.post(endpoint, behandlingUUID.toString());
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForBehandling(e).toException();
         }
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForBehandling(String behandlingId) {
+    public ÅrskvantumResultat hentÅrskvantumForBehandling(UUID behandlingUUID) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/hentkvantumforbehandling");
-            var result = restKlient.post(endpoint, behandlingId, ÅrskvantumResultat.class);
+            var result = restKlient.post(endpoint, behandlingUUID.toString(), ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingId=" + behandlingId + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingUUID=" + behandlingUUID + ": " + constraints);
             }
             return result;
         } catch (Exception e) {
