@@ -18,7 +18,11 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(PubliserInfotrygdFeedElementTask.class);
 
-    private final InfotrygdFeedMeldingProducer meldingProducer;
+    private InfotrygdFeedMeldingProducer meldingProducer;
+
+    public PubliserInfotrygdFeedElementTask() {
+        // CDI
+    }
 
     @Inject
     public PubliserInfotrygdFeedElementTask(InfotrygdFeedMeldingProducer meldingProducer) {
