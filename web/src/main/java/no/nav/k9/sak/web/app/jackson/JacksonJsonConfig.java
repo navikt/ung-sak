@@ -23,6 +23,7 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
 import no.nav.k9.sak.web.app.IndexClasses;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
+import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.omsorgspenger.mottak.OmsorgspengerSøknadInnsending;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.PleiepengerBarnSøknadInnsending;
 import no.nav.k9.søknad.JsonUtils;
@@ -60,6 +61,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         scanClasses.add(VurderFaktaOmBeregningDto.class);
         scanClasses.add(OmsorgspengerSøknadInnsending.class);
         scanClasses.add(PleiepengerBarnSøknadInnsending.class);
+        scanClasses.add(FrisinnSøknadInnsending.class);
 
         // avled code location fra klassene
         scanClasses

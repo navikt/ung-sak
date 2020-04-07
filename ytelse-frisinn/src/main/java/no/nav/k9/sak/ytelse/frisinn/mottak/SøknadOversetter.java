@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -17,7 +16,7 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
-class SøknadOversetter {
+public class SøknadOversetter {
 
     private SøknadRepository søknadRepository;
     private UttakRepository uttakRepository;
@@ -25,16 +24,17 @@ class SøknadOversetter {
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
 
-    SøknadOversetter() {
+    protected SøknadOversetter() {
         // for CDI proxy
     }
 
     @Inject
-    SøknadOversetter(BehandlingRepositoryProvider repositoryProvider,
-                                           UttakRepository uttakRepository,
-                                           TpsTjeneste tpsTjeneste) {
-        this.fagsakRepository = repositoryProvider.getFagsakRepository();
-        this.søknadRepository = repositoryProvider.getSøknadRepository();
+    public SøknadOversetter(FagsakRepository fagsakRepository,
+                            UttakRepository uttakRepository,
+                            SøknadRepository søknadRepository,
+                            TpsTjeneste tpsTjeneste) {
+        this.fagsakRepository = fagsakRepository;
+        this.søknadRepository = søknadRepository;
         this.uttakRepository = uttakRepository;
         this.tpsTjeneste = tpsTjeneste;
     }
@@ -43,7 +43,6 @@ class SøknadOversetter {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
-        // TODO:
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
             .medElektroniskRegistrert(elektroniskSøknad)
