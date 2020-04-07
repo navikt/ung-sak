@@ -43,7 +43,6 @@ class SøknadOversetter {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
-        // TODO:
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
             .medElektroniskRegistrert(elektroniskSøknad)

@@ -31,7 +31,7 @@ public class FrisinnSøknadInnsending extends InnsendingInnhold {
     private FrisinnSøknad søknad;
 
     public FrisinnSøknadInnsending() {
-        super(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        super(FagsakYtelseType.FRISINN);
     }
     
     @JsonCreator
