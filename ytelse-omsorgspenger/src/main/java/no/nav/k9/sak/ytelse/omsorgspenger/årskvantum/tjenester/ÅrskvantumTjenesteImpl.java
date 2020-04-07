@@ -54,7 +54,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
 
-        årskvantumRequest.setBehandlingId(ref.getBehandlingId().toString());
+        årskvantumRequest.setBehandlingUUID(ref.getBehandlingUuid().toString());
+        årskvantumRequest.setSaksnummer(ref.getSaksnummer().getVerdi());
         årskvantumRequest.setAktørId(ref.getAktørId().getId());
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),

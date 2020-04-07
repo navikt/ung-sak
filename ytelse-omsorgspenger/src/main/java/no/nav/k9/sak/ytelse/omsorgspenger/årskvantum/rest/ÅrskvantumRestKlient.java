@@ -51,7 +51,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
             var result = restKlient.post(endpoint, årskvantumRequest, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + årskvantumRequest.getBehandlingId() + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + årskvantumRequest.getBehandlingUUID() + ": " + constraints);
             }
             return result;
         } catch (Exception e) {

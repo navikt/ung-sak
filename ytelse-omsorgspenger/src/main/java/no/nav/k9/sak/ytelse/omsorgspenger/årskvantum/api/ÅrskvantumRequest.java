@@ -20,7 +20,12 @@ public class ÅrskvantumRequest {
     @JsonProperty(value = "behandlingId", required = true)
     @Valid
     @NotNull
-    private String behandlingId;
+    private String behandlingUUID;
+
+    @JsonProperty(value = "saksnummer", required = true)
+    @Valid
+    @NotNull
+    private String saksnummer;
 
     @JsonProperty(value = "aktørId", required = true)
     @Valid
@@ -38,13 +43,6 @@ public class ÅrskvantumRequest {
     private List<Barn> barna = new ArrayList<>();
 
 
-    public String getBehandlingId() {
-        return behandlingId;
-    }
-
-    public void setBehandlingId(String behandlingId) {
-        this.behandlingId = behandlingId;
-    }
 
     public List<UttaksperiodeOmsorgspenger> getUttaksperioder() {
         return uttaksperioder;
@@ -68,5 +66,21 @@ public class ÅrskvantumRequest {
 
     public void setBarna(List<Barn> barna) {
         this.barna = barna;
+    }
+
+    public String getBehandlingUUID() {
+        return behandlingUUID;
+    }
+
+    public void setBehandlingUUID(String behandlingUUID) {
+        this.behandlingUUID = behandlingUUID;
+    }
+
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
     }
 }
