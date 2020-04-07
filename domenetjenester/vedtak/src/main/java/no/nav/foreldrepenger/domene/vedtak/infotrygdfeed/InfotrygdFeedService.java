@@ -27,13 +27,11 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 public class InfotrygdFeedService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final UttakTjeneste uttakTjeneste;
-    private final ProsessTaskRepository prosessTaskRepository;
+    private UttakTjeneste uttakTjeneste;
+    private ProsessTaskRepository prosessTaskRepository;
 
     public InfotrygdFeedService() {
         // for CDI
-        uttakTjeneste = null;
-        prosessTaskRepository = null;
     }
 
     @Inject
