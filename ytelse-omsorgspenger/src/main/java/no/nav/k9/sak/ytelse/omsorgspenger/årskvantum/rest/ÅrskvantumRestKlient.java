@@ -1,18 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRest;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -21,6 +10,16 @@ import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @ApplicationScoped
 @Default
@@ -59,6 +58,61 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         }
     }
 
+    @Override
+    public void avbrytÅrskvantumForBehandling(String behandlingId) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/avbrytkvantumforbehandling");
+            restKlient.post(endpoint, behandlingId);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForBehandling(e).toException();
+        }
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForBehandling(String behandlingId) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/hentkvantumforbehandling");
+            var result = restKlient.post(endpoint, behandlingId, ÅrskvantumResultat.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + behandlingId + ": " + constraints);
+            }
+            return result;
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForBehandling(e).toException();
+        }
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(String fagsakId) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/hentkvantumforfagsak");
+            var result = restKlient.post(endpoint, fagsakId, ÅrskvantumResultat.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + fagsakId + ": " + constraints);
+            }
+            return result;
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForFagsak(e).toException();
+        }
+    }
+
+    @Override
+    public ÅrskvantumRest hentResterendeKvantum(String aktørId) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/hentresterendekvantum");
+            var result = restKlient.post(endpoint, aktørId, ÅrskvantumRest.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + aktørId + ": " + constraints);
+            }
+            return result;
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilhentResterendeKvantum(e).toException();
+        }
+    }
+
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
         try {
@@ -71,7 +125,16 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     interface RestTjenesteFeil extends DeklarerteFeil {
         RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "K9SAK-AK-1000088", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente årskvantum for behandling: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-AK-1000088", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente Årskvantum For Behandling: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilhentÅrskvantumForBehandling(Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000089", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente Årskvantum For Fagsak: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilhentÅrskvantumForFagsak(Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000090", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente Resterende Kvantum: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilhentResterendeKvantum(Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000091", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke beregne uttaksplan for årskvantum: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilÅrskvantum(Throwable t);
 
     }

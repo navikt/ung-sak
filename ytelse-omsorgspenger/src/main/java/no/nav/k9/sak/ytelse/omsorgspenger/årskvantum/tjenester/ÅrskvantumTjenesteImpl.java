@@ -12,6 +12,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRest;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
@@ -74,6 +75,21 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             årskvantumRequest.getUttaksperioder().add(uttaksperiodeOmsorgspenger);
         }
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForBehandling(BehandlingReferanse ref) {
+        return årskvantumKlient.hentÅrskvantumForBehandling(ref.getBehandlingId().toString());
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(BehandlingReferanse ref) {
+        return årskvantumKlient.hentÅrskvantumForFagsak(ref.getFagsakId().toString());
+    }
+
+    @Override
+    public ÅrskvantumRest hentResterendeKvantum(String aktørid) {
+        return årskvantumKlient.hentResterendeKvantum(aktørid);
     }
 
 }
