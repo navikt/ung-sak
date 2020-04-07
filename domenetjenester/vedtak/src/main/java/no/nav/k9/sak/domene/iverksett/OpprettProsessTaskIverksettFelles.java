@@ -1,12 +1,6 @@
 package no.nav.k9.sak.domene.iverksett;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
@@ -20,19 +14,29 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 public abstract class OpprettProsessTaskIverksettFelles implements OpprettProsessTaskIverksett {
 
     protected ProsessTaskRepository prosessTaskRepository;
     protected OppgaveTjeneste oppgaveTjeneste;
+    protected InfotrygdFeedService infotrygdFeedService;
 
     protected OpprettProsessTaskIverksettFelles() {
         // for CDI proxy
     }
 
     public OpprettProsessTaskIverksettFelles(ProsessTaskRepository prosessTaskRepository,
-                                             OppgaveTjeneste oppgaveTjeneste) {
+                                             OppgaveTjeneste oppgaveTjeneste,
+                                             InfotrygdFeedService infotrygdFeedService) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
+        this.infotrygdFeedService = infotrygdFeedService;
     }
 
     @Override
@@ -71,6 +75,8 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         // Opprettes som egen task da den er uavhengig av de andre
         prosessTaskRepository.lagre(opprettTaskVurderOppgaveTilbakekreving(behandling));
+
+        infotrygdFeedService.publiserHendelse(behandling);
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {
