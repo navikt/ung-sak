@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -13,30 +13,32 @@ import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.søknad.felles.Språk;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
-import no.nav.vedtak.konfig.Tid;
 
-@ApplicationScoped
-public class SøknadOversetter {
+@Dependent
+class LagreSøknad {
 
     private SøknadRepository søknadRepository;
     private UttakRepository uttakRepository;
     @SuppressWarnings("unused")
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
+    private LagreOppgittOpptjening lagreOppgittOpptjening;
 
-    protected SøknadOversetter() {
+    LagreSøknad() {
         // for CDI proxy
     }
 
     @Inject
-    public SøknadOversetter(FagsakRepository fagsakRepository,
-                            UttakRepository uttakRepository,
-                            SøknadRepository søknadRepository,
-                            TpsTjeneste tpsTjeneste) {
+    LagreSøknad(FagsakRepository fagsakRepository,
+                UttakRepository uttakRepository,
+                SøknadRepository søknadRepository,
+                TpsTjeneste tpsTjeneste,
+                LagreOppgittOpptjening lagreOppgittOpptjening) {
         this.fagsakRepository = fagsakRepository;
         this.søknadRepository = søknadRepository;
         this.uttakRepository = uttakRepository;
         this.tpsTjeneste = tpsTjeneste;
+        this.lagreOppgittOpptjening = lagreOppgittOpptjening;
     }
 
     void persister(FrisinnSøknad soknad, Behandling behandling) {
@@ -47,28 +49,24 @@ public class SøknadOversetter {
         var søknadBuilder = new SøknadEntitet.Builder()
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(soknad.getMottattDato().toLocalDate())
-            .medErEndringssøknad(false)
-            .medSøknadsdato(soknad.getMottattDato().toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
+            .medErEndringssøknad(false) // støtter ikke endringssønader p.t.
+            .medSøknadsdato(soknad.getMottattDato().toLocalDate())
             .medSpråkkode(getSpraakValg(soknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
-        lagreUttakOgPerioder(soknad, behandlingId, fagsakId);
+        lagrePerioder(soknad, behandlingId, fagsakId);
+        
+        lagreOppgittOpptjening.lagreOpptjening(behandling, soknad.getInntekter(), soknad.getMottattDato());
+
     }
 
-    private void lagreUttakOgPerioder(FrisinnSøknad soknad, final Long behandlingId, Long fagsakId) {
-        var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
+    private void lagrePerioder(FrisinnSøknad soknad, final Long behandlingId, Long fagsakId) {
+        var mapUttakGrunnlag = new MapSøknadUttak(soknad).lagGrunnlag(behandlingId);
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
-        var maksPeriode = mapUttakGrunnlag.getOppgittUttak().getMaksPeriode();
-
-        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        var eksisterendeFom = fagsak.getPeriode().getFomDato();
-        var eksisterendeTom = fagsak.getPeriode().getTomDato();
-        var oppdatertFom = eksisterendeFom.isBefore(maksPeriode.getFomDato()) && !Tid.TIDENES_BEGYNNELSE.equals(eksisterendeFom) ? eksisterendeFom : maksPeriode.getFomDato();
-        var oppdatertTom = eksisterendeTom.isAfter(maksPeriode.getTomDato()) && !Tid.TIDENES_ENDE.equals(eksisterendeTom) ? eksisterendeTom : maksPeriode.getTomDato();
-
-        fagsakRepository.oppdaterPeriode(fagsakId, oppdatertFom, oppdatertTom);
+        var maksPeriode = mapUttakGrunnlag.getOppgittSøknadsperioder().getMaksPeriode();
+        fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
     private Språkkode getSpraakValg(Språk spraak) {

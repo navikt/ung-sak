@@ -22,6 +22,13 @@ public class OppgittUtenlandskVirksomhet implements IndexKey, Serializable {
         this.landkode = landkode == null? Landkoder.NOR : landkode;
         this.utenlandskVirksomhetNavn = utenlandskVirksomhetNavn;
     }
+    
+    /** deep copy ctor. */
+    OppgittUtenlandskVirksomhet(OppgittUtenlandskVirksomhet kopierFra) {
+        this.landkode=kopierFra.landkode;
+        this.utenlandskVirksomhetNavn =kopierFra.utenlandskVirksomhetNavn;
+    }
+
     @Override
     public String getIndexKey() {
         Object[] keyParts = { utenlandskVirksomhetNavn, landkode };

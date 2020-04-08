@@ -20,6 +20,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 public enum VirksomhetType implements Kodeverdi {
 
     DAGMAMMA("DAGMAMMA", "Dagmamma i eget hjem/familiebarnehage", Inntektskategori.DAGMAMMA),
+    ENKELTPERSONFORETAK("ENK", "Enkeltpersonforetak", Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE),
     FISKE("FISKE", "Fiske", Inntektskategori.FISKER),
     FRILANSER("FRILANSER", "Frilanser", Inntektskategori.FRILANSER),
     JORDBRUK_SKOGBRUK("JORDBRUK_SKOGBRUK", "Jordbruk", Inntektskategori.JORDBRUKER),

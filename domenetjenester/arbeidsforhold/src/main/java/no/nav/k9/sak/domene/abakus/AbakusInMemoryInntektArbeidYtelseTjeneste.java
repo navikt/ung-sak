@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.domene.abakus.mapping.IAYFraDtoMapper;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
@@ -232,6 +234,21 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
 
         var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
         iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
+
+        lagreOgFlush(behandlingId, iayGrunnlag.build());
+    }
+    
+    @Override
+    public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningDto oppgittOpptjening) {
+        if (oppgittOpptjening == null) {
+            return;
+        }
+        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
+
+        var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
+        
+        var oppgittOpptjeningBuilder = new IAYFraDtoMapper(null).mapOppgttOpptjening(oppgittOpptjening);
+        iayGrunnlag.medOppgittOpptjening(oppgittOpptjeningBuilder);
 
         lagreOgFlush(behandlingId, iayGrunnlag.build());
     }

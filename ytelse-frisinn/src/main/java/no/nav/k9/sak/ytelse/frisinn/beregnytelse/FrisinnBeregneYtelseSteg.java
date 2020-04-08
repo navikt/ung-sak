@@ -21,12 +21,10 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "BERYT")

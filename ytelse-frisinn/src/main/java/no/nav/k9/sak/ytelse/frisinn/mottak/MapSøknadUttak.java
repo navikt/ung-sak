@@ -12,13 +12,13 @@ class MapSøknadUttak {
         this.søknad = søknad;
     }
 
-    UttakGrunnlag getUttakGrunnlag(Long behandlingId) {
+    UttakGrunnlag lagGrunnlag(Long behandlingId) {
         var søknadsperioder = mapSøknadsperiode(søknad);
         return new UttakGrunnlag(behandlingId, null, søknadsperioder, null, null);
     }
 
     private static Søknadsperioder mapSøknadsperiode(FrisinnSøknad søknad) {
-        return new Søknadsperioder(new Søknadsperiode(søknad.getSøknadsperiode().fraOgMed, søknad.getSøknadsperiode().tilOgMed));
+        return new Søknadsperioder(new Søknadsperiode(søknad.getSøknadsperiode().getFraOgMed(), søknad.getSøknadsperiode().getTilOgMed()));
     }
 
 }
