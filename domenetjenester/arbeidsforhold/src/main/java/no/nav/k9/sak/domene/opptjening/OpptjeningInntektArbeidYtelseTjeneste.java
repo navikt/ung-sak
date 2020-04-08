@@ -16,6 +16,7 @@ import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -46,8 +47,8 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
     }
 
-    public Opptjening hentOpptjening(Long behandlingId) {
-        Optional<Opptjening> optional = opptjeningRepository.finnOpptjening(behandlingId);
+    public OpptjeningResultat hentOpptjening(Long behandlingId) {
+        Optional<OpptjeningResultat> optional = opptjeningRepository.finnOpptjening(behandlingId);
         return optional
             .orElseThrow(() -> new IllegalStateException("Utvikler-feil: Mangler Opptjening for Behandling: " + behandlingId));
     }
@@ -70,90 +71,9 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         return Collections.emptyList();
     }
 
-    /**
-     * Hent siste ytelse etter kapittel 8, 9 og 14 før skjæringstidspunkt for opptjening
-     * @param behandling en Behandling
-     * @return Ytelse hvis den finnes, ellers Optional.empty()
-     */
-    public Optional<Ytelse> hentSisteInfotrygdYtelseFørSkjæringstidspunktForOpptjening(Long behandlingId, AktørId aktørId) {
-        var grunnlagOpt = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
-        if (!grunnlagOpt.isPresent()) {
-            return Optional.empty();
-        }
-        Optional<Opptjening> opptjeningOpt = opptjeningRepository.finnOpptjening(behandlingId);
-        if (!opptjeningOpt.isPresent()) {
-            return Optional.empty();
-        }
-        var grunnlag = grunnlagOpt.get();
-        LocalDate skjæringstidspunktForOpptjening = opptjeningOpt.get().getTom();
-        var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(skjæringstidspunktForOpptjening);
-
-        if (filter.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return filter.getFiltrertYtelser().stream()
-            .filter(y -> !y.getPeriode().getFomDato().isAfter(skjæringstidspunktForOpptjening))
-            .filter(y -> Fagsystem.INFOTRYGD.equals(y.getKilde()))
-            .max(Comparator.comparing(y -> y.getPeriode().getFomDato()));
-    }
-
-    /**
-     * Hent siste ytelse etter kapittel 8, 9 og 14 før skjæringstidspunkt for opptjening
-     * @param behandling en Behandling
-     * @return liste med sammenhengende ytelser som gjelder før skjæringstidspunkt for opptjening
-     */
-    public List<Ytelse> hentSammenhengendeInfotrygdYtelserFørSkjæringstidspunktForOppjening(Long behandlingId, AktørId aktørId) {
-        var grunnlagOpt = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
-        if (!grunnlagOpt.isPresent()) {
-            return Collections.emptyList();
-        }
-        Optional<Opptjening> opptjeningOpt = opptjeningRepository.finnOpptjening(behandlingId);
-        if (!opptjeningOpt.isPresent()) {
-            return Collections.emptyList();
-        }
-        var grunnlag = grunnlagOpt.get();
-        LocalDate skjæringstidspunktForOpptjening = opptjeningOpt.get().getTom();
-        var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(skjæringstidspunktForOpptjening);
-
-        if (filter.isEmptyFiltered()) {
-            return Collections.emptyList();
-        }
-        return finnSammenhengendeInfotrygdYtelser(filter.getFiltrertYtelser(), skjæringstidspunktForOpptjening);
-    }
-
-    private List<Ytelse> finnSammenhengendeInfotrygdYtelser(Collection<Ytelse> ytelser, LocalDate skjæringstidspunktForOpptjening) {
-        List<Ytelse> ytelserFørSkjæringstidspunkt = ytelser.stream()
-            .filter(y -> !y.getPeriode().getFomDato().isAfter(skjæringstidspunktForOpptjening))
-            .filter(y -> Fagsystem.INFOTRYGD.equals(y.getKilde()))
-            .sorted(Comparator.comparing((Ytelse y) -> y.getPeriode().getFomDato()).reversed())
-            .collect(Collectors.toList());
-
-        if (ytelserFørSkjæringstidspunkt.isEmpty()) {
-            return ytelserFørSkjæringstidspunkt;
-        }
-
-        List<Ytelse> sammenhengende = new ArrayList<>(ytelserFørSkjæringstidspunkt.subList(0, 1));
-
-        for (int i = 0; i < ytelserFørSkjæringstidspunkt.size() - 1; i++) {
-            if (erPeriodeneSammenhengende(ytelserFørSkjæringstidspunkt.get(i).getPeriode(), ytelserFørSkjæringstidspunkt.get(i + 1).getPeriode())) {
-                Ytelse nesteSammenhengendeYtelse = ytelserFørSkjæringstidspunkt.get(i + 1);
-                sammenhengende.add(nesteSammenhengendeYtelse);
-            } else {
-                return sammenhengende;
-            }
-        }
-        return sammenhengende;
-
-    }
-
-    private boolean erPeriodeneSammenhengende(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
-        return !periode1.getFomDato().isAfter(periode2.getTomDato().plusDays(1));
-    }
-
-    public List<OpptjeningAktivitetPeriode> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse, LocalDate fomDato) {
+    public List<OpptjeningAktivitetPeriode> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsPeriode) {
         final List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste
-            .hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, fomDato);
+            .hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, vilkårsPeriode);
 
         return perioder.stream().map(this::mapTilPerioder).collect(Collectors.toList());
     }

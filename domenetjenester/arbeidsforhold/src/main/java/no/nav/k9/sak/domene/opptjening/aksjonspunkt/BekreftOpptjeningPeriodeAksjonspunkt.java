@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -40,7 +39,7 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
     }
 
     void oppdater(Long behandlingId, AktørId aktørId, Collection<BekreftOpptjeningPeriodeDto> bekreftOpptjeningPerioder,
-                  Skjæringstidspunkt skjæringstidspunkt) {
+                  DatoIntervallEntitet opptjeningPeriode) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
 
         var builder = inntektArbeidYtelseTjeneste.opprettBuilderForSaksbehandlet(behandlingId);
@@ -49,7 +48,7 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
         var kodeRelasjonMap = OpptjeningAktivitetType.hentTilArbeidTypeRelasjoner();
 
         var bekreftetOverstyrtPeriode = bekreftOpptjeningPerioder.stream()
-            .filter(it -> kanOverstyresOgSkalKunneLagreResultat(behandlingId, aktørId, iayGrunnlag, kodeRelasjonMap, it, skjæringstidspunkt))
+            .filter(it -> kanOverstyresOgSkalKunneLagreResultat(aktørId, iayGrunnlag, kodeRelasjonMap, it, opptjeningPeriode))
             .collect(Collectors.toList());
 
         for (var periode : bekreftetOverstyrtPeriode) {
@@ -100,32 +99,32 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
         }
     }
 
-    private boolean kanOverstyresOgSkalKunneLagreResultat(Long behandlingId, AktørId aktørId, Optional<InntektArbeidYtelseGrunnlag> iayg,
+    private boolean kanOverstyresOgSkalKunneLagreResultat(AktørId aktørId, Optional<InntektArbeidYtelseGrunnlag> iayg,
                                                           Map<OpptjeningAktivitetType, Set<ArbeidType>> kodeRelasjonMap, BekreftOpptjeningPeriodeDto periode,
-                                                          Skjæringstidspunkt skjæringstidspunkt) {
+                                                          DatoIntervallEntitet opptjeningPeriode) {
         if (!kodeRelasjonMap.containsKey(periode.getAktivitetType())) {
             return false;
         }
         final Set<ArbeidType> arbeidTypes = kodeRelasjonMap.get(periode.getAktivitetType());
-        return kanSaksbehandles(behandlingId, aktørId, iayg, arbeidTypes, periode, skjæringstidspunkt);
+        return kanSaksbehandles(aktørId, iayg, arbeidTypes, periode, opptjeningPeriode);
     }
 
-    private boolean kanSaksbehandles(Long behandlingId, AktørId aktørId, Optional<InntektArbeidYtelseGrunnlag> iaygOpt, Set<ArbeidType> arbeidTypes,
-                                     BekreftOpptjeningPeriodeDto periode, Skjæringstidspunkt skjæringstidspunkt) {
+    private boolean kanSaksbehandles(AktørId aktørId, Optional<InntektArbeidYtelseGrunnlag> iaygOpt, Set<ArbeidType> arbeidTypes,
+                                     BekreftOpptjeningPeriodeDto periode, DatoIntervallEntitet opptjeningPeriode) {
         if (OpptjeningAktivitetType.ARBEID.equals(periode.getAktivitetType())) {
-            if (!iaygOpt.isPresent()) {
+            if (iaygOpt.isEmpty()) {
                 return false;
             }
             var iayg = iaygOpt.get();
             var filter = new YrkesaktivitetFilter(iayg.getArbeidsforholdInformasjon(), iayg.getAktørArbeidFraRegister(aktørId))
-                .før(skjæringstidspunkt.getUtledetSkjæringstidspunkt());
+                .før(opptjeningPeriode.getTomDato());
             return harGittAksjonspunktForArbeidsforhold(filter, arbeidTypes, periode);
         } else if (OpptjeningAktivitetType.NÆRING.equals(periode.getAktivitetType())) {
-            if (!iaygOpt.isPresent()) {
+            if (iaygOpt.isEmpty()) {
                 return false;
             }
             var iayg = iaygOpt.get();
-            return harGittAksjonspunktForNæring(behandlingId, aktørId, iayg, skjæringstidspunkt);
+            return harGittAksjonspunktForNæring(aktørId, iayg, opptjeningPeriode);
         }
         return OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(periode.getAktivitetType());
     }
@@ -145,12 +144,12 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
                 return arbeidTypes.contains(it.getArbeidType())
                     && it.getArbeidsgiver().getIdentifikator().equals(periode.getArbeidsgiverIdentifikator())
                     && (erNullProsent
-                        || erKunstig);
+                    || erKunstig);
             });
     }
 
-    private boolean harGittAksjonspunktForNæring(Long behandlingId, AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, Skjæringstidspunkt skjæringstidspunkt) {
-        return vurderOpptjening.girAksjonspunktForOppgittNæring(behandlingId, aktørId, iayg, skjæringstidspunkt);
+    private boolean harGittAksjonspunktForNæring(AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
+        return vurderOpptjening.girAksjonspunktForOppgittNæring(aktørId, iayg, opptjeningPeriode);
     }
 
     private DatoIntervallEntitet getOrginalPeriode(BekreftOpptjeningPeriodeDto periode) {

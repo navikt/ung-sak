@@ -15,7 +15,7 @@ public class VilkårResultatBuilder {
     private int mellomliggendePeriodeAvstand = 0;
     private boolean built;
 
-    VilkårResultatBuilder() {
+    public VilkårResultatBuilder() {
         super();
     }
 

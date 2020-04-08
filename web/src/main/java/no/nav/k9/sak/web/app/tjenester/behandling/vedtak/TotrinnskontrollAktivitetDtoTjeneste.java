@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +12,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -31,6 +35,7 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
     private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
     private VirksomhetTjeneste virksomhetTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     protected TotrinnskontrollAktivitetDtoTjeneste() {
@@ -39,10 +44,12 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
 
     @Inject
     public TotrinnskontrollAktivitetDtoTjeneste(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
+                                                VilkårResultatRepository vilkårResultatRepository,
                                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                                 VirksomhetTjeneste virksomhetTjeneste,
                                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.forSaksbehandlingTjeneste = forSaksbehandlingTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
@@ -52,13 +59,14 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
                                                                                Behandling behandling,
                                                                                Optional<UUID> iayGrunnlagUuid) {
         if (AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING.equals(aksjonspunkt.getAksjonspunktDefinisjon())) {
-            List<OpptjeningsperiodeForSaksbehandling> aktivitetPerioder;
+            List<OpptjeningsperiodeForSaksbehandling> aktivitetPerioder = new ArrayList<>();
             LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
             BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-            if (iayGrunnlagUuid.isPresent()) {
-                aktivitetPerioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, iayGrunnlagUuid.get());
-            } else {
-                aktivitetPerioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse);
+            var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+            if (vilkår.isPresent()) {
+                for (VilkårPeriode opptjening : vilkår.get().getPerioder()) {
+                    aktivitetPerioder.addAll(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, iayGrunnlagUuid.orElse(null), opptjening.getPeriode()));
+                }
             }
             return aktivitetPerioder.stream()
                 .filter(periode -> periode.erManueltBehandlet() || periode.getBegrunnelse() != null)

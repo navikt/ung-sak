@@ -31,14 +31,14 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
     }
 
     public static List<OpptjeningsperiodeForSaksbehandling> mapYrkesaktivitet(BehandlingReferanse behandlingReferanse,
-                                                                       Yrkesaktivitet registerAktivitet,
-                                                                       InntektArbeidYtelseGrunnlag grunnlag,
-                                                                       OpptjeningAktivitetVurdering vurderForSaksbehandling,
-                                                                       Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                                                       Yrkesaktivitet overstyrtAktivitet) {
+                                                                              Yrkesaktivitet registerAktivitet,
+                                                                              InntektArbeidYtelseGrunnlag grunnlag,
+                                                                              OpptjeningAktivitetVurdering vurderForSaksbehandling,
+                                                                              Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
+                                                                              Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, registerAktivitet.getArbeidType());
         return new ArrayList<>(mapAktivitetsavtaler(behandlingReferanse, registerAktivitet, grunnlag,
-            vurderForSaksbehandling, type, overstyrtAktivitet));
+            vurderForSaksbehandling, type, overstyrtAktivitet, opptjeningPeriode));
     }
 
     private static OpptjeningAktivitetType utledOpptjeningType(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, ArbeidType arbeidType) {
@@ -53,7 +53,8 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                                   OpptjeningAktivitetType type,
-                                                                                  Yrkesaktivitet overstyrtAktivitet) {
+                                                                                  Yrkesaktivitet overstyrtAktivitet,
+                                                                                  DatoIntervallEntitet opptjeningPeriode) {
         List<OpptjeningsperiodeForSaksbehandling> perioderForAktivitetsavtaler = new ArrayList<>();
         LocalDate skjæringstidspunkt = behandlingReferanse.getUtledetSkjæringstidspunkt();
         for (AktivitetsAvtale avtale : gjeldendeAvtaler(grunnlag, skjæringstidspunkt, registerAktivitet, overstyrtAktivitet)) {
@@ -62,10 +63,9 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                 .medPeriode(avtale.getPeriode())
                 .medBegrunnelse(avtale.getBeskrivelse())
                 .medStillingsandel(finnStillingsprosent(registerAktivitet));
-            harSaksbehandlerVurdert(builder, type, behandlingReferanse, registerAktivitet, vurderForSaksbehandling, grunnlag);
+            harSaksbehandlerVurdert(builder, type, behandlingReferanse, registerAktivitet, vurderForSaksbehandling, grunnlag, opptjeningPeriode);
             settArbeidsgiverInformasjon(gjeldendeAktivitet(registerAktivitet, overstyrtAktivitet), builder);
-            builder.medVurderingsStatus(
-                vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, registerAktivitet, overstyrtAktivitet, grunnlag, grunnlag.harBlittSaksbehandlet()));
+            builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, registerAktivitet, overstyrtAktivitet, grunnlag, grunnlag.harBlittSaksbehandlet(), opptjeningPeriode));
             if (harEndretPåPeriode(avtale.getPeriode(), overstyrtAktivitet)) {
                 builder.medErPeriodenEndret();
             }
@@ -125,8 +125,8 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 
     private static void harSaksbehandlerVurdert(OpptjeningsperiodeForSaksbehandling.Builder builder, OpptjeningAktivitetType type,
                                                 BehandlingReferanse behandlingReferanse, Yrkesaktivitet registerAktivitet,
-                                                OpptjeningAktivitetVurdering vurderForSaksbehandling, InntektArbeidYtelseGrunnlag grunnlag) {
-        if (vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, registerAktivitet, grunnlag, false).equals(VurderingsStatus.TIL_VURDERING)) {
+                                                OpptjeningAktivitetVurdering vurderForSaksbehandling, InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet opptjeningPeriode) {
+        if (vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, registerAktivitet, grunnlag, false, opptjeningPeriode).equals(VurderingsStatus.TIL_VURDERING)) {
             builder.medErManueltBehandlet();
         }
     }

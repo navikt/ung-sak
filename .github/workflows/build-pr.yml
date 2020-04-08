@@ -9,7 +9,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:11.5
+        image: postgres:12.1
         env:
           POSTGRES_PASSWORD: postgres
         ports:
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.11
-      
+
       - name: Hent maven version
         run: |
           echo "::set-env name=CACHE_KEY::$(date +%U)"
@@ -40,7 +40,7 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ env.CACHE_KEY }}
-      
+
       - name: Build
         shell: bash
         run: |

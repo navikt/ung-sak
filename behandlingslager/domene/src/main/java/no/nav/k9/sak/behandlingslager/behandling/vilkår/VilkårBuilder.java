@@ -30,7 +30,7 @@ public class VilkårBuilder {
         this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder().stream().map(a -> new LocalDateSegment<>(a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), new WrappedVilkårPeriode(a))).collect(Collectors.toList()));
     }
 
-    public boolean erMindreEnn7DagerMellom(LocalDate firstDate, LocalDate secondDate) {
+    boolean erMellomliggendePeriode(LocalDate firstDate, LocalDate secondDate) {
         final long avstand;
         if (firstDate.isBefore(secondDate)) {
             avstand = ChronoUnit.DAYS.between(firstDate, secondDate);
@@ -118,7 +118,7 @@ public class VilkårBuilder {
         final var mellomliggendeSegmenter = new ArrayList<DatoIntervallEntitet>();
         LocalDate tom = null;
         for (LocalDateSegment<WrappedVilkårPeriode> periode : vilkårTidslinje.toSegments()) {
-            if (tom != null && erMindreEnn7DagerMellom(tom, periode.getFom())) {
+            if (tom != null && erMellomliggendePeriode(tom, periode.getFom())) {
                 mellomliggendeSegmenter.add(DatoIntervallEntitet.fraOgMedTilOgMed(tom, periode.getFom().minusDays(1)));
             }
             tom = periode.getTom();

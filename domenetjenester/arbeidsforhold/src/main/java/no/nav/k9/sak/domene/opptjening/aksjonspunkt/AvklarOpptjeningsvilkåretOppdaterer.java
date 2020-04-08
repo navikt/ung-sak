@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,7 +19,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -28,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.opptjening.Opptjeningsfeil;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto;
 import no.nav.vedtak.konfig.Tid;
@@ -36,13 +35,11 @@ import no.nav.vedtak.konfig.Tid;
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkåretDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdaterer<AvklarOpptjeningsvilkåretDto> {
 
-
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private HistorikkTjenesteAdapter historikkAdapter;
-
 
     AvklarOpptjeningsvilkåretOppdaterer() {
         // for CDI proxy
@@ -74,7 +71,8 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         final var fom = Tid.TIDENES_BEGYNNELSE; // FIXME (k9) : legge inn faktiske perioder fra dto
         final var tom = Tid.TIDENES_ENDE;
         if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-            sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId());
+            var periode = DatoIntervallEntitet.fraOgMedTilOgMed(dto.getOpptjeningFom(), dto.getOpptjeningTom());
+            sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
             oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), fom, tom);
 
             return OppdateringResultat.utenOveropp();
@@ -99,10 +97,10 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         behandlingRepository.lagre(behandling, skriveLås);
     }
 
-    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId) {
-        final Optional<Opptjening> opptjening = opptjeningRepository.finnOpptjening(behandlingId);
+    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId, DatoIntervallEntitet periode) {
+        var opptjening = opptjeningRepository.finnOpptjening(behandlingId).flatMap(it -> it.finnOpptjening(periode));
         if (opptjening.isPresent()) {
-            final long antall = opptjening.get().getOpptjeningAktivitet().stream()
+            long antall = opptjening.get().getOpptjeningAktivitet().stream()
                 .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();
             if (antall > 0) {
                 return;

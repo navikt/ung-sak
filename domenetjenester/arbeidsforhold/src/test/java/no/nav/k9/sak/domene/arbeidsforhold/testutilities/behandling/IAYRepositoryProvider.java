@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -32,7 +33,7 @@ public class IAYRepositoryProvider {
         this.fagsakRepository = new FagsakRepository(entityManager);
 
         // behandling aggregater
-        this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
+        this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository, new VilkårResultatRepository(entityManager));
         this.søknadRepository = new SøknadRepository(entityManager);
 
         // inntekt arbeid ytelser

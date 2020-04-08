@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.MergeOverlappendePeriodeHjelp;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
@@ -45,8 +47,8 @@ public class OpptjeningDtoTjeneste {
 
     @Inject
     public OpptjeningDtoTjeneste(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
-                                     ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                     InntektArbeidYtelseTjeneste iayTjeneste) {
+                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                 InntektArbeidYtelseTjeneste iayTjeneste) {
         this.forSaksbehandlingTjeneste = forSaksbehandlingTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.iayTjeneste = iayTjeneste;
@@ -54,10 +56,15 @@ public class OpptjeningDtoTjeneste {
 
     public Optional<OpptjeningDto> mapFra(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
-        Optional<Opptjening> fastsattOpptjening = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId);
+        // TODO (K9: Håndter at det er flere ...
+        var fastsattOpptjening = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId)
+            .map(OpptjeningResultat::getOpptjeningPerioder)
+            .orElse(List.of())
+            .stream()
+            .findFirst();
 
         OpptjeningDto resultat = new OpptjeningDto();
-        if (fastsattOpptjening.isPresent() && fastsattOpptjening.get().getAktiv()) {
+        if (fastsattOpptjening.isPresent()) {
             List<OpptjeningAktivitet> opptjeningAktivitet = fastsattOpptjening.get().getOpptjeningAktivitet();
             resultat.setFastsattOpptjening(new FastsattOpptjeningDto(fastsattOpptjening.get().getFom(),
                 fastsattOpptjening.get().getTom(), mapFastsattOpptjening(fastsattOpptjening.get()),
@@ -67,7 +74,8 @@ public class OpptjeningDtoTjeneste {
         List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getArbeidsforholdOverstyringer).orElse(Collections.emptyList());
 
         if (fastsattOpptjening.isPresent()) {
-            resultat.setOpptjeningAktivitetList(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, inntektArbeidYtelseGrunnlagOpt)
+            var iayGrunnlagUuid = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getEksternReferanse).orElse(null);
+            resultat.setOpptjeningAktivitetList(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, iayGrunnlagUuid, fastsattOpptjening.get().getOpptjeningPeriode())
                 .stream()
                 .map(oap -> lagDtoFraOAPeriode(oap, overstyringer))
                 .collect(Collectors.toList()));
@@ -160,8 +168,8 @@ public class OpptjeningDtoTjeneste {
         return false;
     }
 
-     private Optional<ArbeidsgiverOpplysninger> hentNavnTilManueltArbeidsforhold(List<ArbeidsforholdOverstyring> overstyringer) {
-         return FinnNavnForManueltLagtTilArbeidsforholdTjeneste.finnNavnTilManueltLagtTilArbeidsforhold(overstyringer);
+    private Optional<ArbeidsgiverOpplysninger> hentNavnTilManueltArbeidsforhold(List<ArbeidsforholdOverstyring> overstyringer) {
+        return FinnNavnForManueltLagtTilArbeidsforholdTjeneste.finnNavnTilManueltLagtTilArbeidsforhold(overstyringer);
     }
 
 }

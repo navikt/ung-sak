@@ -1,5 +1,22 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -11,17 +28,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 @ApplicationScoped
 public class InfotrygdFeedService {
@@ -35,11 +41,16 @@ public class InfotrygdFeedService {
     }
 
     @Inject
-    public InfotrygdFeedService(
-        UttakTjeneste uttakTjeneste, ProsessTaskRepository prosessTaskRepository
-    ) {
+    public InfotrygdFeedService(UttakTjeneste uttakTjeneste, ProsessTaskRepository prosessTaskRepository) {
         this.uttakTjeneste = uttakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
+    }
+
+    private static String tallMedPrefiks(long versjon, int antallSiffer) {
+        if (versjon >= Math.pow(10, antallSiffer)) {
+            throw new IllegalArgumentException("Versjonsnummeret er for stort");
+        }
+        return StringUtils.leftPad(Long.toString(versjon), antallSiffer, '0');
     }
 
     public void publiserHendelse(Behandling behandling) {
@@ -51,16 +62,16 @@ public class InfotrygdFeedService {
     }
 
     private void validerInput(Behandling behandling) {
-        if(behandling.getFagsak().getSaksnummer() == null) {
+        if (behandling.getFagsak().getSaksnummer() == null) {
             throw new ManglendeVerdiException("behandling.fagsak.saksnummer");
         }
-        if(behandling.getFagsak().getAktørId() == null) {
+        if (behandling.getFagsak().getAktørId() == null) {
             throw new ManglendeVerdiException("behandling.fagsak.aktørId");
         }
-        if(behandling.getVersjon() == null) {
+        if (behandling.getVersjon() == null) {
             throw new ManglendeVerdiException("behandling.versjon");
         }
-        if(!Objects.equals(PLEIEPENGER_SYKT_BARN, behandling.getFagsak().getYtelseType())) {
+        if (!Objects.equals(PLEIEPENGER_SYKT_BARN, behandling.getFagsak().getYtelseType())) {
             throw new IllegalArgumentException(String.format("Forventet ytelsestype '%s'. Fikk '%s'.", PLEIEPENGER_SYKT_BARN, behandling.getFagsak().getYtelseType()));
         }
     }
@@ -87,7 +98,7 @@ public class InfotrygdFeedService {
         Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
         Map<Saksnummer, Uttaksplan> saksnummerUttaksplanMap = uttakTjeneste.hentUttaksplaner(List.of(saksnummer));
         Uttaksplan uttaksplan = saksnummerUttaksplanMap.get(saksnummer);
-        if(uttaksplan == null) {
+        if (uttaksplan == null) {
             logger.info("Ingen treff i uttaksplaner. Antar at saken er annullert. Saksnummer: " + saksnummer);
             return;
         }
@@ -99,17 +110,17 @@ public class InfotrygdFeedService {
         LocalDate fom = perioder.stream().map(Periode::getFom).min(Comparator.naturalOrder()).orElse(null);
         LocalDate tom = perioder.stream().map(Periode::getTom).max(Comparator.naturalOrder()).orElse(null);
 
-        if(!Objects.equals(Tid.TIDENES_BEGYNNELSE, fom)) {
+        if (!Objects.equals(Tid.TIDENES_BEGYNNELSE, fom)) {
             builder.foersteStoenadsdag(fom);
         }
-        if(!Objects.equals(Tid.TIDENES_ENDE, tom)) {
+        if (!Objects.equals(Tid.TIDENES_ENDE, tom)) {
             builder.sisteStoenadsdag(tom);
         }
     }
 
     private void setAktørIdPleietrengende(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
         AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
-        if(pleietrengendeAktørId != null) {
+        if (pleietrengendeAktørId != null) {
             builder.aktoerIdPleietrengende(pleietrengendeAktørId.getId());
         }
     }
@@ -137,13 +148,6 @@ public class InfotrygdFeedService {
         String sekvensnummerFagsak = tallMedPrefiks(behandling.getFagsak().getVersjon(), antallSiffer);
         String sekvensnummerBehandling = tallMedPrefiks(behandling.getVersjon(), antallSiffer);
         return String.format("%s-%s", sekvensnummerFagsak, sekvensnummerBehandling);
-    }
-
-    private static String tallMedPrefiks(long versjon, int antallSiffer) {
-        if(versjon >= Math.pow(10, antallSiffer)) {
-            throw new IllegalArgumentException("Versjonsnummeret er for stort");
-        }
-        return StringUtils.leftPad(Long.toString(versjon), antallSiffer, '0');
     }
 
     public static class ManglendeVerdiException extends RuntimeException {
