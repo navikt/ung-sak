@@ -17,7 +17,7 @@ import java.util.List;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ÅrskvantumRequest {
-    @JsonProperty(value = "behandlingId", required = true)
+    @JsonProperty(value = "behandlingUUID", required = true)
     @Valid
     @NotNull
     private String behandlingUUID;
