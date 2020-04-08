@@ -43,7 +43,7 @@ public class OpptjeningResultatBuilderTest {
         assertThat(opptjeningResultat.getOpptjeningPerioder()).hasSize(1);
 
         var oppdateringsBuilder = new OpptjeningResultatBuilder(opptjeningResultat);
-        var oppdatertResultat = oppdateringsBuilder.deaktiver(periode)
+        var oppdatertResultat = oppdateringsBuilder.deaktiver(LocalDate.now())
             .validerMotVilkår(vilkår)
             .build();
 

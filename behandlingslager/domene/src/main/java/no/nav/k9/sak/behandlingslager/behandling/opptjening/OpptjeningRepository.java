@@ -98,22 +98,30 @@ public class OpptjeningRepository {
         var builder = new OpptjeningResultatBuilder(tidligereOpptjeninger.orElse(null));
         var opptjening = oppdateringsFunksjon.apply(builder);
 
-        var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
-        vilkår.ifPresent(builder::validerMotVilkår);
-        if (tidligereOpptjeninger.isPresent()) {
-            var forrigeOpptjening = tidligereOpptjeninger.get();
-            forrigeOpptjening.setInaktiv();
-            em.persist(forrigeOpptjening);
-            em.flush();
-        }
-        var opptjeningResultat = builder.build();
+        validerMotVilkårsPerioder(behandling, builder);
+        deaktiverTidligereOpptjening(tidligereOpptjeninger);
 
+        var opptjeningResultat = builder.build();
         opptjeningResultat.setBehandling(behandling);
         em.persist(opptjeningResultat);
         em.flush();
 
         behandlingRepository.verifiserBehandlingLås(behandlingLås);
         return opptjening;
+    }
+
+    private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder) {
+        var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+        vilkår.ifPresent(builder::validerMotVilkår);
+    }
+
+    private void deaktiverTidligereOpptjening(Optional<OpptjeningResultat> tidligereOpptjeninger) {
+        if (tidligereOpptjeninger.isPresent()) {
+            var forrigeOpptjening = tidligereOpptjeninger.get();
+            forrigeOpptjening.setInaktiv();
+            em.persist(forrigeOpptjening);
+            em.flush();
+        }
     }
 
     /**
@@ -196,7 +204,7 @@ public class OpptjeningRepository {
 
     public void deaktiverOpptjeningForPeriode(Behandling behandling, DatoIntervallEntitet vilkårsPeriode) {
         Function<OpptjeningResultatBuilder, Opptjening> oppdateringsfunksjon = (builder) -> {
-            builder.deaktiver(vilkårsPeriode);
+            builder.deaktiver(vilkårsPeriode.getFomDato());
             return null;
         };
 

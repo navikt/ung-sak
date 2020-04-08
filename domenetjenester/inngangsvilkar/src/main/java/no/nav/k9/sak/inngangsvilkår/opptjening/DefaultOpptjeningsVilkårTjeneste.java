@@ -44,7 +44,7 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
 
         List<OpptjeningAktivitetPeriode> relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, periode);
         List<OpptjeningInntektPeriode> relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, periode.getFomDato());
-        Opptjening opptjening = opptjeningTjeneste.hentOpptjening(behandlingId).finnOpptjening(periode).orElseThrow();
+        Opptjening opptjening = opptjeningTjeneste.hentOpptjening(behandlingId).finnOpptjening(periode.getFomDato()).orElseThrow();
 
         LocalDate behandlingstidspunkt = LocalDate.now();
 

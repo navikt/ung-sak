@@ -100,7 +100,7 @@ public class VilkårBuilder {
     Vilkår build() {
         validerBuilder();
         if (!vilkårTidslinje.isContinuous()) {
-            kobleSammenVilkårPerioderHvorMellomliggendeErMindreEnn7Dager();
+            kobleSammenMellomliggendeVilkårsPerioder();
         }
         bygget = true;
         final var collect = vilkårTidslinje.compress()
@@ -114,7 +114,7 @@ public class VilkårBuilder {
         return vilkåret;
     }
 
-    private void kobleSammenVilkårPerioderHvorMellomliggendeErMindreEnn7Dager() {
+    private void kobleSammenMellomliggendeVilkårsPerioder() {
         final var mellomliggendeSegmenter = new ArrayList<DatoIntervallEntitet>();
         LocalDate tom = null;
         for (LocalDateSegment<WrappedVilkårPeriode> periode : vilkårTidslinje.toSegments()) {

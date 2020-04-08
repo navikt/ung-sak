@@ -21,6 +21,7 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -41,7 +42,8 @@ public class OpptjeningResultat extends BaseEntitet {
     private Behandling behandling;
 
     /* Mapper kun fra denne og ikke bi-directional, gjør vedlikehold enklere. */
-    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true /* ok siden aktiviteter er eid av denne */, mappedBy = "opptjeningResultat")
+    @Immutable
+    @OneToMany(cascade = {CascadeType.ALL} /* ok siden aktiviteter er eid av denne */, mappedBy = "opptjeningResultat")
     private List<Opptjening> opptjeningPerioder = new ArrayList<>();
 
     @Column(name = "aktiv", nullable = false)
@@ -85,24 +87,29 @@ public class OpptjeningResultat extends BaseEntitet {
         this.behandling = behandlingId;
     }
 
-    public void setInaktiv() {
-        if (aktiv) {
-            this.aktiv = false;
-        }
+    void setInaktiv() {
+        this.aktiv = false;
         // else - can never go back
     }
 
     void leggTil(Opptjening opptjening) {
         if (getId() != null) {
-            throw new IllegalStateException("Immutable");
+            throw new IllegalStateException("Kan ikke modifisere på allerede persistert entitet.");
         }
         this.opptjeningPerioder.add(opptjening);
         opptjening.setOpptjeningResultat(this);
     }
 
+    void deaktiver(LocalDate skjæringstidspunkt) {
+        if (getId() != null) {
+            throw new IllegalStateException("Kan ikke modifisere på allerede persistert entitet.");
+        }
+        this.opptjeningPerioder.removeIf(it -> it.getOpptjeningPeriode().getTomDato().plusDays(1).equals(skjæringstidspunkt));
+    }
+
     void deaktiver(DatoIntervallEntitet periode) {
         if (getId() != null) {
-            throw new IllegalStateException("Immutable");
+            throw new IllegalStateException("Kan ikke modifisere på allerede persistert entitet.");
         }
         this.opptjeningPerioder.removeIf(it -> it.getOpptjeningPeriode().equals(periode));
     }
@@ -112,7 +119,7 @@ public class OpptjeningResultat extends BaseEntitet {
     }
 
     public Optional<Opptjening> finnOpptjening(LocalDate skjæringstidspunkt) {
-        return opptjeningPerioder.stream().filter(it -> it.getOpptjeningPeriode().grenserTil(DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt))).findFirst();
+        return opptjeningPerioder.stream().filter(it -> it.getOpptjeningPeriode().getTomDato().plusDays(1).equals(skjæringstidspunkt)).findFirst();
     }
 
     @Override

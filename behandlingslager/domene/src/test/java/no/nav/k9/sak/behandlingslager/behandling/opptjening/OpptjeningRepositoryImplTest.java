@@ -85,7 +85,7 @@ public class OpptjeningRepositoryImplTest {
 
         // Act
         opptjeningRepository.lagreOpptjeningsperiode(behandling, today, tomorrow, false);
-        opptjeningRepository.deaktiverOpptjeningForPeriode(behandling, DatoIntervallEntitet.fraOgMedTilOgMed(today, tomorrow));
+        opptjeningRepository.deaktiverOpptjeningForPeriode(behandling, DatoIntervallEntitet.fraOgMed(tomorrow.plusDays(1)));
 
         // Assert
         var funnetOpt = opptjeningRepository.finnOpptjening(behandling.getId());

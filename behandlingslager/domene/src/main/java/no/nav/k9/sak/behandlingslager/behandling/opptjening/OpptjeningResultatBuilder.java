@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.opptjening;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ class OpptjeningResultatBuilder {
     private boolean built = false;
 
     OpptjeningResultatBuilder(OpptjeningResultat kladd) {
-        this.kladd = new OpptjeningResultat(Objects.requireNonNullElseGet(kladd, OpptjeningResultat::new));
+        this.kladd = (kladd != null) ? new OpptjeningResultat(kladd) : new OpptjeningResultat();
     }
 
     OpptjeningResultatBuilder leggTil(Opptjening opptjening) {
@@ -30,19 +31,16 @@ class OpptjeningResultatBuilder {
         return this;
     }
 
-    OpptjeningResultatBuilder deaktiver(DatoIntervallEntitet periode) {
+    OpptjeningResultatBuilder deaktiver(LocalDate skjæringstidspunkt) {
         validerState();
-        Objects.requireNonNull(periode);
-        kladd.deaktiver(periode);
+        Objects.requireNonNull(skjæringstidspunkt);
+        kladd.deaktiver(skjæringstidspunkt);
         return this;
     }
 
     Optional<Opptjening> hentTidligereOpptjening(DatoIntervallEntitet periode) {
         validerState();
-        return kladd.getOpptjeningPerioder()
-            .stream()
-            .filter(it -> it.getOpptjeningPeriode().hengerSammen(periode))
-            .findFirst();
+        return kladd.finnOpptjening(periode);
     }
 
     OpptjeningResultatBuilder validerMotVilkår(Vilkår vilkår) {
