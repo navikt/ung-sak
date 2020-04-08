@@ -3,20 +3,14 @@ package no.nav.k9.sak.mottak.inntektsmelding;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingMottaker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParser;
@@ -27,15 +21,13 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 public class InntektsmeldingPersistererTjeneste {
 
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
-    private Instance<InntektsmeldingMottaker> inntektsmeldingMottakere;
 
     InntektsmeldingPersistererTjeneste() {
     }
 
     @Inject
-    public InntektsmeldingPersistererTjeneste(InntektsmeldingTjeneste inntektsmeldingTjeneste, @Any Instance<InntektsmeldingMottaker> inntektsmeldingMottakere) {
+    public InntektsmeldingPersistererTjeneste(InntektsmeldingTjeneste inntektsmeldingTjeneste) {
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
-        this.inntektsmeldingMottakere = inntektsmeldingMottakere;
     }
 
     @SuppressWarnings("unchecked")
@@ -59,13 +51,6 @@ public class InntektsmeldingPersistererTjeneste {
         }
         // lagre inntektsmeldinger til Abakus (dette korrelerer også arbeidsforhold referanser - genererer interne arbeidsforhold refs
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
-        var ref = BehandlingReferanse.fra(behandling);
-        var inntektsmeldingMottaker = FagsakYtelseTypeRef.Lookup.find(inntektsmeldingMottakere, behandling.getFagsakYtelseType());
-
-        inntektsmeldingMottaker.ifPresent(it -> {
-            var imPerioder = List.copyOf(inntektsmeldinger).stream().map(InntektsmeldingBuilder::build).collect(Collectors.toList());
-            it.mottattInntektsmelding(ref, imPerioder);
-        });
     }
 
     public void leggInntektsmeldingTilBehandling(Behandling behandling, MottattDokument... dokument) {
