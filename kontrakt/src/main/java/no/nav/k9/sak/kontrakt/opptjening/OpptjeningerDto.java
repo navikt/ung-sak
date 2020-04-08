@@ -24,8 +24,15 @@ public class OpptjeningerDto {
         this.opptjeninger = opptjeninger;
     }
 
+    public OpptjeningerDto() {
+    }
+
     public List<OpptjeningDto> getOpptjeninger() {
         return opptjeninger;
+    }
+
+    public void setOpptjeninger(List<OpptjeningDto> opptjeninger) {
+        this.opptjeninger = opptjeninger;
     }
 
     @Override
