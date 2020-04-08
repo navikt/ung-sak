@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
@@ -44,6 +45,25 @@ public class OppgittOpptjening {
         this.opprettetTidspunkt = opprettetTidspunktOriginalt;
     }
 
+    OppgittOpptjening(OppgittOpptjening kopierFra, UUID eksternReferanse, LocalDateTime opprettetTidspunktOriginalt) {
+        Objects.requireNonNull(eksternReferanse, "eksternReferanse");
+        this.uuid = eksternReferanse;
+        this.opprettetTidspunkt = opprettetTidspunktOriginalt;
+
+        this.oppgittArbeidsforhold = kopierFra.oppgittArbeidsforhold == null
+            ? Collections.emptyList()
+            : kopierFra.oppgittArbeidsforhold.stream().map(OppgittArbeidsforhold::new).collect(Collectors.toList());
+
+        this.egenNæring = kopierFra.egenNæring == null
+            ? Collections.emptyList()
+            : kopierFra.egenNæring.stream().map(OppgittEgenNæring::new).collect(Collectors.toList());
+
+        this.annenAktivitet = kopierFra.annenAktivitet == null
+            ? Collections.emptyList()
+            : kopierFra.annenAktivitet.stream().map(OppgittAnnenAktivitet::new).collect(Collectors.toList());
+
+    }
+
     /** Identifisere en immutable instans av grunnlaget unikt og er egnet for utveksling (eks. til abakus eller andre systemer) */
     public UUID getEksternReferanse() {
         return uuid;
@@ -74,13 +94,8 @@ public class OppgittOpptjening {
         return Optional.ofNullable(frilans);
     }
 
-    void leggTilFrilans(OppgittFrilans frilans) {
-        if (frilans != null) {
-            frilans.setOppgittOpptjening(this);
-            this.frilans = frilans;
-        } else {
-            this.frilans = null;
-        }
+    void setFrilans(OppgittFrilans frilans) {
+        this.frilans = frilans;
     }
 
     void leggTilAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet) {

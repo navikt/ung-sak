@@ -68,16 +68,18 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
 
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato.minusWeeks(25), startDato.plusWeeks(25));
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, startDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
-        final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato);
+        LocalDate yearFom = startDato.withDayOfYear(1);
+        LocalDate yearTom = startDato.withMonth(12).withDayOfMonth(31);
+        var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, yearFom, yearTom);
     }
 
-    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato) {
-        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, startDato, null);
+    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
+        var fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, fom, tom);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }

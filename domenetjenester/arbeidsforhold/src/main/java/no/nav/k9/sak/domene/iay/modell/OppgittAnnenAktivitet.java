@@ -8,7 +8,6 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-
 public class OppgittAnnenAktivitet implements IndexKey {
 
     @ChangeTracked
@@ -20,6 +19,12 @@ public class OppgittAnnenAktivitet implements IndexKey {
     public OppgittAnnenAktivitet(DatoIntervallEntitet periode, ArbeidType arbeidType) {
         this.periode = periode;
         this.arbeidType = arbeidType;
+    }
+
+    /** deep copy ctor. */
+    OppgittAnnenAktivitet(OppgittAnnenAktivitet kopierFra) {
+        this.periode = kopierFra.periode;
+        this.arbeidType = kopierFra.arbeidType;
     }
 
     OppgittAnnenAktivitet() {
@@ -41,11 +46,13 @@ public class OppgittAnnenAktivitet implements IndexKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof OppgittAnnenAktivitet)) return false;
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof OppgittAnnenAktivitet))
+            return false;
         OppgittAnnenAktivitet that = (OppgittAnnenAktivitet) o;
         return Objects.equals(periode, that.periode) &&
-                Objects.equals(arbeidType, that.arbeidType);
+            Objects.equals(arbeidType, that.arbeidType);
     }
 
     @Override
@@ -56,8 +63,8 @@ public class OppgittAnnenAktivitet implements IndexKey {
     @Override
     public String toString() {
         return "AnnenAktivitetEntitet{" +
-                "periode=" + periode +
-                ", arbeidType=" + arbeidType +
-                '}';
+            "periode=" + periode +
+            ", arbeidType=" + arbeidType +
+            '}';
     }
 }

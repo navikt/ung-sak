@@ -25,7 +25,7 @@ public class SøknadDokumentmottaker {
     private DokumentmottakerFelles dokumentmottakerFelles;
     private SaksnummerRepository saksnummerRepository;
     private Behandlingsoppretter behandlingsoppretter;
-    private SøknadOversetter soknadOversetter;
+    private LagreSøknad soknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
 
     SøknadDokumentmottaker() {
@@ -36,7 +36,7 @@ public class SøknadDokumentmottaker {
     public SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
                                   SaksnummerRepository saksnummerRepository,
                                   Behandlingsoppretter behandlingsoppretter,
-                                  SøknadOversetter søknadOversetter,
+                                  LagreSøknad søknadOversetter,
                                   FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;
@@ -46,12 +46,14 @@ public class SøknadDokumentmottaker {
     }
 
     Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, startDato.minusWeeks(25), startDato.plusWeeks(25));
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, startDato, startDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
-        final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato);
+        LocalDate yearFom = startDato.withDayOfYear(1);
+        LocalDate yearTom = startDato.withMonth(12).withDayOfMonth(31);
+        var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, yearFom, yearTom);
     }
 
     Behandling mottaSoknad(Saksnummer saksnummer, FrisinnSøknad søknad) {
@@ -59,9 +61,6 @@ public class SøknadDokumentmottaker {
         Objects.requireNonNull(søknad);
 
         final Behandling behandling = tilknyttBehandling(saksnummer);
-        // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av
-        // historikk.
-        // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
         soknadOversetter.persister(søknad, behandling);
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
@@ -76,8 +75,8 @@ public class SøknadDokumentmottaker {
         return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
     }
 
-    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato) {
-        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, startDato, null);
+    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
+        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, fom, tom);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }

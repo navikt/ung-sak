@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -95,6 +96,11 @@ public interface InntektArbeidYtelseTjeneste {
      */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
+    /**
+     * Lagre nytt grunnlag med angitt Oppgitt Opptjening.
+     */
+    void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningDto oppgittOpptjening);
+    
     /**
      * Lagre nytt grunnlag for ArbeidsforholdInformasjon.  Builder bør ikke gjenbrukes etter kall her.
      * @param behandlingId - Behandling Id

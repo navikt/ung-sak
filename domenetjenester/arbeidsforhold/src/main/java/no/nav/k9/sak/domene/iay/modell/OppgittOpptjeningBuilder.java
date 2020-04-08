@@ -24,6 +24,10 @@ public class OppgittOpptjeningBuilder {
     public static OppgittOpptjeningBuilder ny() {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(UUID.randomUUID()));
     }
+    
+    public static OppgittOpptjeningBuilder nyFraEksisterende(OppgittOpptjening eksisterende, UUID eksternReferanse, LocalDateTime tidspunkt) {
+        return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksisterende, eksternReferanse, tidspunkt));
+    }
 
     public static OppgittOpptjeningBuilder ny(UUID eksternReferanse, LocalDateTime opprettetTidspunktOriginalt) {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt));
@@ -33,6 +37,9 @@ public class OppgittOpptjeningBuilder {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
     }
 
+    public static OppgittOpptjeningBuilder oppdater(UUID eksternReferanse, OffsetDateTime opprettetTidspunktOriginalt) {
+        return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
+    }
 
     public OppgittOpptjeningBuilder leggTilAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet){
         this.kladd.leggTilAnnenAktivitet(annenAktivitet);
@@ -40,7 +47,7 @@ public class OppgittOpptjeningBuilder {
     }
 
     public OppgittOpptjeningBuilder leggTilFrilansOpplysninger(OppgittFrilans frilans) {
-        this.kladd.leggTilFrilans(frilans);
+        this.kladd.setFrilans(frilans);
         return this;
     }
 

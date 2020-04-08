@@ -110,7 +110,19 @@ public class FagsakRepository {
         entityManager.persist(fagsak);
         entityManager.flush();
     }
+    
+    public void utvidPeriode(Long fagsakId, LocalDate fom, LocalDate tom) {
+        Fagsak fagsak = finnEksaktFagsak(fagsakId);
 
+        var eksisterendeFom = fagsak.getPeriode().getFomDato();
+        var eksisterendeTom = fagsak.getPeriode().getTomDato();
+        var oppdatertFom = eksisterendeFom.isBefore(fom) && !Tid.TIDENES_BEGYNNELSE.equals(eksisterendeFom) ? eksisterendeFom : fom;
+        var oppdatertTom = eksisterendeTom.isAfter(tom) && !Tid.TIDENES_ENDE.equals(eksisterendeTom) ? eksisterendeTom : tom;
+
+        fagsak.setPeriode(oppdatertFom, oppdatertTom);
+        entityManager.persist(fagsak);
+        entityManager.flush();
+    }
 
     /**
      * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).

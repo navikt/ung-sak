@@ -7,10 +7,7 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-
 public class OppgittFrilansoppdrag implements IndexKey {
-
-    private OppgittFrilans frilans;
 
     @ChangeTracked
     private String oppdragsgiver;
@@ -26,14 +23,16 @@ public class OppgittFrilansoppdrag implements IndexKey {
         this.periode = periode;
     }
 
+    /** deep-copy ctor. */
+    OppgittFrilansoppdrag(OppgittFrilansoppdrag kopierFra) {
+        this.oppdragsgiver = kopierFra.oppdragsgiver;
+        this.periode = kopierFra.periode;
+    }
+
     @Override
     public String getIndexKey() {
         Object[] keyParts = { periode, oppdragsgiver };
         return IndexKeyComposer.createKey(keyParts);
-    }
-
-    void setOppgittOpptjening(OppgittFrilans frilans) {
-        this.frilans = frilans;
     }
 
     void setPeriode(DatoIntervallEntitet periode) {
@@ -42,26 +41,23 @@ public class OppgittFrilansoppdrag implements IndexKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof OppgittFrilansoppdrag)) return false;
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof OppgittFrilansoppdrag))
+            return false;
         OppgittFrilansoppdrag that = (OppgittFrilansoppdrag) o;
-        return Objects.equals(frilans, that.frilans) &&
-            Objects.equals(oppdragsgiver, that.oppdragsgiver) &&
+        return Objects.equals(oppdragsgiver, that.oppdragsgiver) &&
             Objects.equals(periode, that.periode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(frilans, oppdragsgiver, periode);
+        return Objects.hash(oppdragsgiver, periode);
     }
 
     @Override
     public String toString() {
-        return "FrilansoppdragEntitet{" +
-            "frilans=" + frilans +
-            ", oppdragsgiver='" + oppdragsgiver + '\'' +
-            ", periode=" + periode +
-            '}';
+        return "FrilansoppdragEntitet<" + "oppdragsgiver='" + oppdragsgiver + '\'' + ", periode=" + periode + '>';
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -72,8 +68,4 @@ public class OppgittFrilansoppdrag implements IndexKey {
         return oppdragsgiver;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setFrilans(OppgittFrilans frilans) {
-        this.frilans = frilans;
-    }
 }
