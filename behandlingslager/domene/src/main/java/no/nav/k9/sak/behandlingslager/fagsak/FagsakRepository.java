@@ -124,10 +124,8 @@ public class FagsakRepository {
         var eksisterendeTom = fagsak.getPeriode().getTomDato();
         var oppdatertFom = eksisterendeFom.isBefore(fom) && !Tid.TIDENES_BEGYNNELSE.equals(eksisterendeFom) ? eksisterendeFom : fom;
         var oppdatertTom = eksisterendeTom.isAfter(tom) && !Tid.TIDENES_ENDE.equals(eksisterendeTom) ? eksisterendeTom : tom;
-
-        fagsak.setPeriode(oppdatertFom, oppdatertTom);
-        entityManager.persist(fagsak);
-        entityManager.flush();
+        
+        oppdaterPeriode(fagsakId, oppdatertFom, oppdatertTom);
     }
 
     /**
