@@ -35,6 +35,20 @@ public class OpptjeningForBeregningTjeneste {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
     }
 
+
+    List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(BehandlingReferanse behandlingReferanse,
+                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                              LocalDate stp, LocalDate fomDato) {
+
+        var opptjeningsaktiviteterPerYtelse = new OpptjeningsaktiviteterPerYtelse(behandlingReferanse.getFagsakYtelseType());
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening);
+        return aktiviteter.stream()
+                .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
+                .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))
+                .filter(oa -> opptjeningsaktiviteterPerYtelse.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Henter aktiviteter vurdert i opptjening som er relevant for beregning.
      *
@@ -72,9 +86,29 @@ public class OpptjeningForBeregningTjeneste {
         return Optional.of(new OpptjeningAktiviteter(opptjeningsPerioder));
     }
 
+    public Optional<OpptjeningAktiviteter> hentOpptjeningForBeregningFrisinn(BehandlingReferanse ref,
+                                                                             InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp, LocalDate fom) {
+        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(ref, iayGrunnlag, stp, fom).stream()
+                .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
+        if(opptjeningsPerioder.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new OpptjeningAktiviteter(opptjeningsPerioder));
+    }
+
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag) {
         Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag);
+
+        if (opptjeningAktiviteter.isEmpty()) {
+            throw new IllegalStateException("Forventer opptjening!!!");
+        }
+        return opptjeningAktiviteter.get();
+    }
+
+    public OpptjeningAktiviteter hentEksaktOpptjeningForBeregningFrisinn(BehandlingReferanse ref,
+                                                                         InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp, LocalDate fom) {
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregningFrisinn(ref, iayGrunnlag, stp, fom);
 
         if (opptjeningAktiviteter.isEmpty()) {
             throw new IllegalStateException("Forventer opptjening!!!");
