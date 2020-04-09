@@ -51,7 +51,7 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     @Override
     public int maksMellomliggendePeriodeAvstand() {
-        return 7;
+        return 365;
     }
 
     private Set<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkår) {
