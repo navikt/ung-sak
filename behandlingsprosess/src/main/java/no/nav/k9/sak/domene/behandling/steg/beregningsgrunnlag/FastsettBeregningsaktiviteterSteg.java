@@ -1,5 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -64,8 +67,11 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
+        //FRISINN har ikke noe forhold til opptjening
+        LocalDate stp = ref.getFagsakYtelseType() == FRISINN ? skjæringstidspunkter.getFørsteUttaksdato() : skjæringstidspunkter.getSkjæringstidspunktOpptjening();
+
         //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
-        DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(skjæringstidspunkter.getSkjæringstidspunktOpptjening(), ANTALL_ARBEIDSDAGER);
+        DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(stp, ANTALL_ARBEIDSDAGER);
         boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
         if (sendtTilInfotrygd) {
             return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);

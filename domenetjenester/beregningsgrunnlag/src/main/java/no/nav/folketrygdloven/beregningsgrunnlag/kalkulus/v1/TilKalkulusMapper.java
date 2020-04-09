@@ -131,6 +131,7 @@ public class TilKalkulusMapper {
             new VirksomhetType(oppgittEgenNæring.getVirksomhetType().getKode()),
             oppgittEgenNæring.getNyoppstartet(),
             oppgittEgenNæring.getVarigEndring(),
+            oppgittEgenNæring.getEndringDato(),
             oppgittEgenNæring.getNærRelasjon(),
             oppgittEgenNæring.getNyIArbeidslivet(),
             oppgittEgenNæring.getBruttoInntekt()
