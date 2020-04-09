@@ -147,7 +147,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private InntektArbeidYtelseGrunnlagRequest initRequest(Behandling behandling, UUID inntektArbeidYtelseGrunnlagUuid) {
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(behandling.getAktørId().getId()));
         request.medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
-        request.medYtelseType(new YtelseType(behandling.getFagsakYtelseType().getKode()));
+        request.medYtelseType(YtelseType.fraKode(behandling.getFagsakYtelseType().getKode()));
         request.forKobling(behandling.getUuid());
         request.forGrunnlag(inntektArbeidYtelseGrunnlagUuid);
         request.medDataset(Arrays.asList(Dataset.values()));
@@ -322,7 +322,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var request = new KopierGrunnlagRequest(tilBehandling.getFagsak().getSaksnummer().getVerdi(),
             tilBehandling.getUuid(),
             fraBehandling.getUuid(),
-            new YtelseType(tilBehandling.getFagsakYtelseType().getKode()),
+            YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
             new AktørIdPersonident(tilBehandling.getAktørId().getId()),
             EnumSet.allOf(Dataset.class));
         try {
@@ -401,7 +401,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(behandling.getAktørId().getId()));
         request.medSisteKjenteGrunnlagReferanse(requestCache.getSisteAktiveGrunnlagReferanse(behandling.getUuid()));
         request.medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
-        request.medYtelseType(new YtelseType(behandling.getFagsakYtelseType().getKode()));
+        request.medYtelseType(YtelseType.fraKode(behandling.getFagsakYtelseType().getKode()));
         request.forKobling(behandling.getUuid());
         request.medDataset(Arrays.asList(Dataset.values()));
         return request;
@@ -410,14 +410,14 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private InntektsmeldingerRequest initInntektsmeldingerRequest(Fagsak fagsak) {
         var request = new InntektsmeldingerRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
         request.setSaksnummer(fagsak.getSaksnummer().getVerdi());
-        request.setYtelseType(new YtelseType(fagsak.getYtelseType().getKode()));
+        request.setYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
         return request;
     }
 
     private InntektArbeidYtelseGrunnlagRequest initSnapshotRequest(Fagsak fagsak) {
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
         request.medSaksnummer(fagsak.getSaksnummer().getVerdi());
-        request.medYtelseType(new YtelseType(fagsak.getYtelseType().getKode()));
+        request.medYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
         request.medDataset(Arrays.asList(Dataset.values()));
         request.hentGrunnlagVersjon(GrunnlagVersjon.SISTE);
         return request;

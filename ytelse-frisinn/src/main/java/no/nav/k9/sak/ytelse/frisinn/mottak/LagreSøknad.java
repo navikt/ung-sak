@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.frisinn.mottak;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -76,7 +75,4 @@ class LagreSøknad {
         return Språkkode.UDEFINERT;
     }
 
-    private Landkoder finnLandkode(String landKode) {
-        return Landkoder.fraKode(landKode);
-    }
 }
