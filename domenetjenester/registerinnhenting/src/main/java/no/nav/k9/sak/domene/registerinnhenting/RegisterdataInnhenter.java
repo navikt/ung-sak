@@ -432,7 +432,7 @@ public class RegisterdataInnhenter {
         var informasjonsElementer = utledBasertPå(behandlingType, fagsakYtelseType);
         final InnhentRegisterdataRequest innhentRegisterdataRequest = new InnhentRegisterdataRequest(behandling.getFagsak().getSaksnummer().getVerdi(),
             behandling.getUuid(),
-            new YtelseType(fagsakYtelseType.getKode()),
+            YtelseType.fraKode(fagsakYtelseType.getKode()),
             new Periode(LocalDate.ofInstant(opplysningsperiode.getStart(), ZoneId.systemDefault()),
                 LocalDate.ofInstant(opplysningsperiode.getEnd(), ZoneId.systemDefault())),
             new AktørIdPersonident(behandling.getAktørId().getId()),

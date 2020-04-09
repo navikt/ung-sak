@@ -135,7 +135,7 @@ public class IAYDtoMapperRoundtripTest {
                             new UtbetalingDto("INNTEKT_BEREGNING")
                                 .medArbeidsgiver(org)
                                 .medPoster(List.of(
-                                    new UtbetalingsPostDto(periode, new InntektspostType("LØNN"))
+                                    new UtbetalingsPostDto(periode, InntektspostType.LØNN)
                                         .medUtbetaltYtelseType(UtbetaltYtelseFraOffentligeType.FORELDREPENGER)
                                         .medBeløp(100)
                                         .medSkattAvgiftType(SkatteOgAvgiftsregelType.NETTOLØNN)))))))
@@ -144,7 +144,7 @@ public class IAYDtoMapperRoundtripTest {
                         .medYtelser(List.of(
                             new YtelseDto(Fagsystem.FPSAK, ytelseType, periode, YtelseStatus.LØPENDE)
                                 .medSaksnummer("1234")
-                                .medTemaUnderkategori(new TemaUnderkategori("FØ"))
+                                .medTemaUnderkategori(TemaUnderkategori.FORELDREPENGER_FODSEL)
                                 .medGrunnlag(
                                     new YtelseGrunnlagDto()
                                         .medArbeidskategoriDto(Arbeidskategori.ARBEIDSTAKER)
@@ -152,7 +152,7 @@ public class IAYDtoMapperRoundtripTest {
                                         .medDekningsgradProsent(100)
                                         .medInntektsgrunnlagProsent(100)
                                         .medGraderingProsent(100)
-                                        .medFordeling(List.of(new FordelingDto(org, InntektPeriodeType.PER_DAG, 100))))
+                                        .medFordeling(List.of(new FordelingDto(org, InntektPeriodeType.DAGLIG, 100))))
                                 .medAnvisninger(List.of(
                                     new AnvisningDto(periode)
                                         .medBeløp(100)
@@ -188,13 +188,13 @@ public class IAYDtoMapperRoundtripTest {
                             .medEndringerRefusjon(List.of(new RefusjonDto(fom, 100)))
                             .medGraderinger(List.of(new GraderingDto(periode, 50)))
                             .medNaturalytelser(List.of(new NaturalytelseDto(periode, NaturalytelseType.ELEKTRISK_KOMMUNIKASJON, 100)))
-                            .medUtsettelsePerioder(List.of(new UtsettelsePeriodeDto(periode, UtsettelseÅrsakType.LOVBESTEMT_FERIE))))))
+                            .medUtsettelsePerioder(List.of(new UtsettelsePeriodeDto(periode, UtsettelseÅrsakType.FERIE))))))
             .medOppgittOpptjening(
                 new OppgittOpptjeningDto(uuid, offTidspunkt)
                     .medArbeidsforhold(List.of(
                         new OppgittArbeidsforholdDto(periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
                             .medErUtenlandskInntekt(true)
-                            .medOppgittVirksomhetNavn("GammelDansk", Landkode.DANMARK)))
+                            .medOppgittVirksomhetNavn("GammelDansk", Landkode.DNK)))
                     .medEgenNæring(List.of(
                         new OppgittEgenNæringDto(periode)
                             .medBegrunnelse("MinBegrunnelse")
@@ -203,7 +203,7 @@ public class IAYDtoMapperRoundtripTest {
                             .medNyIArbeidslivet(false)
                             .medNyoppstartet(false)
                             .medNærRelasjon(false)
-                            .medOppgittVirksomhetNavn("DuGamleDuFria", Landkode.SVERIGE)
+                            .medOppgittVirksomhetNavn("DuGamleDuFria", Landkode.SWE)
                             .medRegnskapsførerNavn("Regnskapsfører")
                             .medRegnskapsførerTlf("+47902348732")
                             .medVarigEndring(true)
