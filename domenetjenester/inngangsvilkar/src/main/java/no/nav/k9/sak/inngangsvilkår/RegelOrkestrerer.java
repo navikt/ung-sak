@@ -48,7 +48,8 @@ public class RegelOrkestrerer {
     public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, List<DatoIntervallEntitet> perioder) {
         Objects.requireNonNull(perioder, "Perioden som skal vurderes må være satt");
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
-        List<Vilkår> matchendeVilkårPåBehandling = vilkårene.getVilkårene().stream()
+        List<Vilkår> matchendeVilkårPåBehandling = vilkårene.getVilkårene()
+            .stream()
             .filter(v -> vilkårHåndtertAvSteg.contains(v.getVilkårType()))
             .collect(toList());
         validerMaksEttVilkår(matchendeVilkårPåBehandling);
@@ -65,7 +66,6 @@ public class RegelOrkestrerer {
         for (DatoIntervallEntitet periode : perioder) {
             VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
             // Ekstraresultat
-            ekstraResultater = new HashMap<>();
             if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
                 final var ekstradataMap = ekstraResultater.getOrDefault(vilkårDataResultat.getVilkårType(), new HashMap<>());
                 ekstradataMap.put(vilkårDataResultat.getPeriode(), vilkårDataResultat.getEkstraVilkårresultat());
