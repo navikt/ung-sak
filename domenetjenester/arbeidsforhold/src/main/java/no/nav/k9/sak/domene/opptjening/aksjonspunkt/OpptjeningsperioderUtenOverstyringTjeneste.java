@@ -57,7 +57,8 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(opptjeningPeriode.getFomDato());
+        var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
+        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
         for (var yrkesaktivitet : filter.getYrkesaktiviteterForBeregning()) {
             var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(
                 behandlingReferanse, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, null, opptjeningPeriode);
