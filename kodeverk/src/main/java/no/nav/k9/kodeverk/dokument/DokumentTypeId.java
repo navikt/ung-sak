@@ -29,8 +29,8 @@ public enum DokumentTypeId implements Kodeverdi {
     UDEFINERT("-", null),
     ;
 
-    private static final Map<String, DokumentTypeId> KODER = new LinkedHashMap<>();
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
+    private static final Map<String, DokumentTypeId> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -74,6 +74,23 @@ public enum DokumentTypeId implements Kodeverdi {
         return ad;
     }
 
+    public static DokumentTypeId finnForKodeverkEiersKode(String offisiellDokumentType) {
+        if (offisiellDokumentType == null || offisiellDokumentType.isBlank())
+            return DokumentTypeId.UDEFINERT;
+
+        Optional<DokumentTypeId> dokId = KODER.values().stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst();
+        if (dokId.isPresent()) {
+            return dokId.get();
+        } else {
+            // FIXME K9 - erstatt DokumentTypeId helt med kodeverk vi kan ha tillit til
+            throw new IllegalArgumentException("Ukjent offisiellDokumentType: " + offisiellDokumentType);
+        }
+    }
+
+    public static Map<String, DokumentTypeId> kodeMap() {
+        return Collections.unmodifiableMap(KODER);
+    }
+
     @Override
     public String getNavn() {
         return getKode();
@@ -94,23 +111,6 @@ public enum DokumentTypeId implements Kodeverdi {
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
-    }
-
-    public static DokumentTypeId finnForKodeverkEiersKode(String offisiellDokumentType) {
-        if (offisiellDokumentType == null)
-            return DokumentTypeId.UDEFINERT;
-
-        Optional<DokumentTypeId> dokId = KODER.values().stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst();
-        if (dokId.isPresent()) {
-            return dokId.get();
-        } else {
-            // FIXME K9 - erstatt DokumentTypeId helt med kodeverk vi kan ha tillit til
-            throw new IllegalArgumentException("Ukjent offisiellDokumentType: " + offisiellDokumentType);
-        }
-    }
-
-    public static Map<String, DokumentTypeId> kodeMap() {
-        return Collections.unmodifiableMap(KODER);
     }
 
 }
