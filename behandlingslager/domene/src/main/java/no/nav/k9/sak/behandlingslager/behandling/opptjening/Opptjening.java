@@ -130,6 +130,16 @@ public class Opptjening extends BaseEntitet {
     }
 
     /**
+     * Returnerer skjæringstidspunktet for opptjening.
+     * T.o.m. dato for opptjeningsperioden plus 1 dag
+     *
+     * @return opptjeningsperioden t.o.m. + 1 dag
+     */
+    public LocalDate getSkjæringstidspunkt() {
+        return getTom().plusDays(1);
+    }
+
+    /**
      * fom/tom opptjening er gjort.
      */
     public DatoIntervallEntitet getOpptjeningPeriode() {

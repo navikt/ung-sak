@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.opptjening;
 import static no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType.NÆRING;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,42 +73,35 @@ public class OpptjeningsperioderTjeneste {
     /**
      * Hent alle opptjeningsaktiv fra et gitt grunnlag og utleder om noen perioder trenger vurdering av saksbehandler
      */
-    public List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningAktiveterForSaksbehandling(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
-        return hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, null, periode);
-    }
-
-    /**
-     * Hent alle opptjeningsaktiv fra et gitt grunnlag og utleder om noen perioder trenger vurdering av saksbehandler
-     */
-    public List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningAktiveterForSaksbehandling(BehandlingReferanse behandlingReferanse, UUID iayGrunnlagUuid, DatoIntervallEntitet periode) {
+    public List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningAktiveterForSaksbehandling(BehandlingReferanse behandlingReferanse, UUID iayGrunnlagUuid, LocalDate skjæringstidspunkt) {
 
         var grunnlag = Optional.ofNullable(iayGrunnlagUuid).map(uuid -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingReferanse.getBehandlingId(), uuid))
             .orElseGet(() -> inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId()).orElse(null));
         if (grunnlag == null) {
             return Collections.emptyList();
         }
-        return mapOpptjeningsperiodeForSaksbehandling(behandlingReferanse, grunnlag, vurderForSaksbehandling, periode);
+        return mapOpptjeningsperiodeForSaksbehandling(behandlingReferanse, grunnlag, vurderForSaksbehandling, skjæringstidspunkt);
     }
 
-    public List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
+    public List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse, LocalDate skjæringstidspunkt) {
         Optional<InntektArbeidYtelseGrunnlag> grunnlagOpt = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId());
         if (grunnlagOpt.isPresent()) {
-            return mapOpptjeningsperiodeForSaksbehandling(behandlingReferanse, grunnlagOpt.get(), vurderForVilkår, periode);
+            return mapOpptjeningsperiodeForSaksbehandling(behandlingReferanse, grunnlagOpt.get(), vurderForVilkår, skjæringstidspunkt);
         }
         return Collections.emptyList();
     }
 
     private List<OpptjeningsperiodeForSaksbehandling> mapOpptjeningsperiodeForSaksbehandling(BehandlingReferanse behandlingReferanse,
                                                                                              InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
-                                                                                             OpptjeningAktivitetVurdering vurderForSaksbehandling, DatoIntervallEntitet periode) {
-        return mapPerioderForSaksbehandling(behandlingReferanse, inntektArbeidYtelseGrunnlag, vurderForSaksbehandling, periode);
+                                                                                             OpptjeningAktivitetVurdering vurderForSaksbehandling, LocalDate skjæringstidspunkt) {
+        return mapPerioderForSaksbehandling(behandlingReferanse, inntektArbeidYtelseGrunnlag, vurderForSaksbehandling, skjæringstidspunkt);
     }
 
     private List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse behandlingReferanse,
                                                                                    InntektArbeidYtelseGrunnlag grunnlag,
-                                                                                   OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet vilkårsperiode) {
+                                                                                   OpptjeningAktivitetVurdering vurderOpptjening, LocalDate skjæringstidspunkt) {
         var opptjeningResultat = opptjeningRepository.finnOpptjening(behandlingReferanse.getBehandlingId());
-        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow();
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(skjæringstidspunkt)).orElseThrow();
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 

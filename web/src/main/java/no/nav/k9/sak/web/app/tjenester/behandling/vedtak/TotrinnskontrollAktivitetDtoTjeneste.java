@@ -65,7 +65,7 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
             var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
             if (vilkår.isPresent()) {
                 for (VilkårPeriode opptjening : vilkår.get().getPerioder()) {
-                    aktivitetPerioder.addAll(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, iayGrunnlagUuid.orElse(null), opptjening.getPeriode()));
+                    aktivitetPerioder.addAll(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, iayGrunnlagUuid.orElse(null), opptjening.getFom()));
                 }
             }
             return aktivitetPerioder.stream()

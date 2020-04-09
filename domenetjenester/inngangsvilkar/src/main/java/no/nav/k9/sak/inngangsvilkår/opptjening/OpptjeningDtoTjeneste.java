@@ -92,7 +92,7 @@ public class OpptjeningDtoTjeneste {
         List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getArbeidsforholdOverstyringer).orElse(Collections.emptyList());
 
         var iayGrunnlagUuid = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getEksternReferanse).orElse(null);
-        resultat.setOpptjeningAktivitetList(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, iayGrunnlagUuid, opptjening.getOpptjeningPeriode())
+        resultat.setOpptjeningAktivitetList(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, iayGrunnlagUuid, opptjening.getSkjæringstidspunkt())
             .stream()
             .map(oap -> lagDtoFraOAPeriode(oap, overstyringer))
             .collect(Collectors.toList()));

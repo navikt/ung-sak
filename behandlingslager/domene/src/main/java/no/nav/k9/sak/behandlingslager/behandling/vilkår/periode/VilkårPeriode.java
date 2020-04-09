@@ -136,17 +136,26 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
-    
-    public LocalDate getFom() {
-        return periode.getFomDato();
-    }
-    
-    public LocalDate getTom() {
-        return periode.getTomDato();
-    }
 
     void setPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
+    }
+
+    /**
+     * Vilkårsperiodens skjæringstidspunkt (første dagen i perioden)
+     *
+     * @return skjæringdstidspunktet
+     */
+    public LocalDate getSkjæringstidspunkt() {
+        return periode.getFomDato();
+    }
+
+    public LocalDate getFom() {
+        return periode.getFomDato();
+    }
+
+    public LocalDate getTom() {
+        return periode.getTomDato();
     }
 
     /**
@@ -240,13 +249,13 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     public String getRegelInput() {
         return regelInput;
     }
-    
-    public VilkårType getVilkårType() {
-        return vilkår.getVilkårType();
-    }
 
     void setRegelInput(String regelInput) {
         this.regelInput = regelInput;
+    }
+
+    public VilkårType getVilkårType() {
+        return vilkår.getVilkårType();
     }
 
     @Override

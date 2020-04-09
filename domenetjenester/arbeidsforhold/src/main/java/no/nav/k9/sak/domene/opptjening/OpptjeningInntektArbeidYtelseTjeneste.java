@@ -1,10 +1,7 @@
 package no.nav.k9.sak.domene.opptjening;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,17 +9,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -73,7 +66,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
 
     public List<OpptjeningAktivitetPeriode> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsPeriode) {
         final List<OpptjeningsperiodeForSaksbehandling> perioder = opptjeningsperioderTjeneste
-            .hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, vilkårsPeriode);
+            .hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, vilkårsPeriode.getFomDato());
 
         return perioder.stream().map(this::mapTilPerioder).collect(Collectors.toList());
     }

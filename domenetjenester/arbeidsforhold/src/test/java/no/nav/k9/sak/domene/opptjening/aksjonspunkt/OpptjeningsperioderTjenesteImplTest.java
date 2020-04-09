@@ -131,7 +131,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         // Act
         BehandlingReferanse behandlingRef = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingRef, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingRef, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.GODKJENT)).collect(Collectors.toList())).hasSize(1);
@@ -166,7 +166,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.GODKJENT)).collect(Collectors.toList())).hasSize(2);
@@ -194,7 +194,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
         // Act
         // Assert
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt))
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt)
             .stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.MILITÆR_ELLER_SIVILTJENESTE)).collect(Collectors.toList());
 
         assertThat(perioder).hasSize(1);
@@ -222,7 +222,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         // Act 1
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -235,7 +235,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         InntektArbeidYtelseAggregatBuilder saksbehandlet = opprettOverstyrtOppgittOpptjening(periode1,
             ArbeidType.MILITÆR_ELLER_SIVILTJENESTE, AKTØRID, VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -269,7 +269,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -282,7 +282,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         InntektArbeidYtelseAggregatBuilder saksbehandlet = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -313,7 +313,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -325,7 +325,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         InntektArbeidYtelseAggregatBuilder saksbehandlet = opprettOverstyrtOppgittOpptjening(periode1, ArbeidType.FRILANSER, AKTØRID,
             VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -349,7 +349,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         iayTjeneste.lagreArbeidsforhold(behandling.getId(), AKTØRID, informasjon);
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -376,7 +376,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         // Act
         @SuppressWarnings("unused")
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
     }
 
