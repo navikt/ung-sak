@@ -8,18 +8,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
@@ -27,9 +20,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @ApplicationScoped
 public class FrisinnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
-    private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
     private OpphørUttakTjeneste opphørUttakTjeneste;
 
     FrisinnSkjæringstidspunktTjenesteImpl() {
@@ -37,13 +28,9 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
     }
 
     @Inject
-    public FrisinnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, 
-                                                 UttakRepository uttakRepository, 
-                                                 UttakTjeneste uttakTjeneste,
-                                                 VilkårResultatRepository vilkårResultatRepository) {
-        this.behandlingRepository = behandlingRepository;
+    public FrisinnSkjæringstidspunktTjenesteImpl(UttakRepository uttakRepository,
+                                                 UttakTjeneste uttakTjeneste) {
         this.uttakRepository = uttakRepository;
-        this.vilkårResultatRepository = vilkårResultatRepository;
         this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
     }
 
@@ -59,58 +46,22 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
 
         LocalDate førsteUttaksdato = førsteUttaksdag(behandlingId);
         builder.medFørsteUttaksdato(førsteUttaksdato);
-        builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
+        builder.medUtledetSkjæringstidspunkt(LocalDate.of(2020, 03, 01));
         return builder.build();
     }
-    
+
     @Override
     public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
         return null;
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
-        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Mangler sønadsperiode for behandlingId=" + behandlingId));
 
-        if (søknadsperioder.isPresent()) {
-            final var oppgittFordeling = søknadsperioder.get();
-            final var førstePeriode = oppgittFordeling.getPerioder()
-                .stream()
-                .map(Søknadsperiode::getPeriode)
-                .min(DatoIntervallEntitet::compareTo);
-            final var førsteDagIUttaket = oppgittFordeling.getPerioder()
-                .stream()
-                .map(Søknadsperiode::getPeriode)
-                .map(DatoIntervallEntitet::getFomDato)
-                .min(LocalDate::compareTo)
-                .orElse(LocalDate.now());
-
-            if (vilkårene.isPresent()) {
-                final var spesifiktVilkår = vilkårene.get().getVilkårene().stream().filter(it -> VilkårType.OPPTJENINGSVILKÅRET.equals(it.getVilkårType())).findFirst();
-                if (spesifiktVilkår.isPresent() && førstePeriode.isPresent()) {
-                    final var vilkårPeriode = spesifiktVilkår.get().getPerioder()
-                        .stream()
-                        .filter(it -> it.getPeriode().hengerSammen(førstePeriode.get()))
-                        .map(VilkårPeriode::getPeriode)
-                        .min(DatoIntervallEntitet::compareTo);
-
-                    if (vilkårPeriode.isEmpty()) {
-                        throw new IllegalStateException("Utvikler feil: Fant ingen gyldig vilkårsperiode for dato=" + førsteDagIUttaket + ". Skal ikke forekomme!");
-                    } else {
-                        final var periode = vilkårPeriode.get();
-                        if (periode.getFomDato().isBefore(førsteDagIUttaket)) {
-                            return periode.getFomDato();
-                        }
-                    }
-                }
-            }
-
-            return førsteDagIUttaket;
-        }
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getOpprettetDato().toLocalDate();
+        return søknadsperioder.getMaksPeriode().getFomDato();
     }
-    
+
     @Override
     public boolean harAvslåttPeriode(UUID behandlingUuid) {
         return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
