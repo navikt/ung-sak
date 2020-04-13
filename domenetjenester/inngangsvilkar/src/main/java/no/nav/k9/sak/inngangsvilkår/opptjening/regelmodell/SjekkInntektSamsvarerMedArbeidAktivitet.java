@@ -60,7 +60,7 @@ public class SjekkInntektSamsvarerMedArbeidAktivitet extends LeafSpecification<M
 
         Evaluation evaluation = ja();
 
-        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_UNDERKJENTE_PERIODER, data.getUnderkjentePerioder());
+        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_UNDERKJENTE_PERIODER, data.getUnderkjentePerioder().toString());
 
         return evaluation;
     }

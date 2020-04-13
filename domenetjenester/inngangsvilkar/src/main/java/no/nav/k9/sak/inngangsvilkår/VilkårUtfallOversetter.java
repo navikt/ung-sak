@@ -90,7 +90,7 @@ public class VilkårUtfallOversetter {
         for (Evaluation ev : leafEvaluations) {
             Map<String, Object> evalProps = ev.getEvaluationProperties();
             if (evalProps != null) {
-                params.putAll(evalProps);
+                evalProps.forEach((key, value) -> params.put(key, String.valueOf(value)));
             }
         }
         return params;

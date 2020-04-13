@@ -135,8 +135,8 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Me
 
     private void loggAntattOpptjeningPeriode(MellomregningOpptjeningsvilkårData data, Evaluation ev) {
         OpptjentTidslinje antattTotalOpptjening = data.getAntattTotalOpptjening();
-        ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_ANTATT_AKTIVITET_TIDSLINJE, antattTotalOpptjening.getTidslinje());
-        ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_ANTATT_GODKJENT, antattTotalOpptjening.getOpptjentPeriode());
+        ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_ANTATT_AKTIVITET_TIDSLINJE, antattTotalOpptjening.getTidslinje().toString());
+        ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_ANTATT_GODKJENT, antattTotalOpptjening.getOpptjentPeriode().toString());
         if (data.getOpptjeningOpplysningerFrist() != null) {
             ev.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_FRIST_FOR_OPPTJENING_OPPLYSNINGER, data.getOpptjeningOpplysningerFrist());
         }

@@ -74,7 +74,7 @@ public class TraverseGraphConfig {
         }
         return true;
     }
-    
+
     public void addRootClasses(Class<?>... moreRootClasses) {
         this.rootClasses = new HashSet<>(this.rootClasses);
         this.rootClasses.addAll(asList(moreRootClasses));
@@ -142,5 +142,5 @@ public class TraverseGraphConfig {
     public void valider(Node currentPath, Class<?> targetClass) {
         // template method, ingen sjekk her
     }
-    
+
 }
