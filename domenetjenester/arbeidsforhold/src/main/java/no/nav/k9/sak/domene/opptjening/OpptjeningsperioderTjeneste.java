@@ -99,9 +99,12 @@ public class OpptjeningsperioderTjeneste {
 
     private List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse behandlingReferanse,
                                                                                    InntektArbeidYtelseGrunnlag grunnlag,
-                                                                                   OpptjeningAktivitetVurdering vurderOpptjening, LocalDate skjæringstidspunkt) {
+                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
+                                                                                   LocalDate skjæringstidspunkt) {
+
         var opptjeningResultat = opptjeningRepository.finnOpptjening(behandlingReferanse.getBehandlingId());
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(skjæringstidspunkt)).orElseThrow();
+
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 

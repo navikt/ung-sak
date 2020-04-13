@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class OpptjeningForBeregningTjeneste {
@@ -34,16 +36,16 @@ public class OpptjeningForBeregningTjeneste {
 
 
     List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(BehandlingReferanse behandlingReferanse,
-                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                              LocalDate stp, LocalDate fomDato) {
+                                                                                                     InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                                     LocalDate stp, LocalDate fomDato) {
 
         var opptjeningsaktiviteterPerYtelse = new OpptjeningsaktiviteterPerYtelse(behandlingReferanse.getFagsakYtelseType());
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening);
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato)); // TODO (OJR):
         return aktiviteter.stream()
-                .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
-                .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))
-                .filter(oa -> opptjeningsaktiviteterPerYtelse.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
-                .collect(Collectors.toList());
+            .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
+            .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))
+            .filter(oa -> opptjeningsaktiviteterPerYtelse.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -86,8 +88,8 @@ public class OpptjeningForBeregningTjeneste {
     public Optional<OpptjeningAktiviteter> hentOpptjeningForBeregningFrisinn(BehandlingReferanse ref,
                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp, LocalDate fom) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(ref, iayGrunnlag, stp, fom).stream()
-                .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
-        if(opptjeningsPerioder.isEmpty()) {
+            .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
+        if (opptjeningsPerioder.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(new OpptjeningAktiviteter(opptjeningsPerioder));
