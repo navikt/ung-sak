@@ -72,7 +72,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
         Yrkesaktivitet overstyrt = filter.getYrkesaktiviteter().iterator().next();
         // Act
-        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, behandling.getId(), null, overstyrt);
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, null, overstyrt, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt));
         // Assert
         assertThat(girAksjonspunkt).isTrue();
     }

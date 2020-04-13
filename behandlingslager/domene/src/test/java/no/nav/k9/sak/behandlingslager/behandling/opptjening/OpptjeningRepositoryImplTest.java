@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
@@ -22,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class OpptjeningRepositoryImplTest {
@@ -31,8 +31,8 @@ public class OpptjeningRepositoryImplTest {
 
     private final EntityManager em = repoRule.getEntityManager();
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(em);
+    private final OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
     private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(em);
-    private final OpptjeningRepository opptjeningRepository = new OpptjeningRepository(em, repositoryProvider.getBehandlingRepository());
 
     @Test
     public void skal_lagre_opptjeningsperiode() throws Exception {
@@ -53,7 +53,7 @@ public class OpptjeningRepositoryImplTest {
         assertThat(opptjeningsperiode.getOpptjentPeriode()).isNull();
 
         // Act
-        Opptjening funnet = opptjeningRepository.finnOpptjening(behandling.getId()).orElseThrow();
+        var funnet = opptjeningRepository.finnOpptjening(behandling.getId()).flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(today, tomorrow))).orElseThrow();
 
         // Assert
         assertThat(funnet).isEqualTo(opptjeningsperiode);
@@ -70,7 +70,7 @@ public class OpptjeningRepositoryImplTest {
 
         // Act
         opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(behandling, revurdering);
-        Opptjening funnet = opptjeningRepository.finnOpptjening(revurdering.getId()).orElseThrow();
+        var funnet = opptjeningRepository.finnOpptjening(revurdering.getId()).flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(today, tomorrow))).orElseThrow();
 
         // Assert
         assertThat(funnet).isEqualTo(opptjeningsperiode);
@@ -85,11 +85,11 @@ public class OpptjeningRepositoryImplTest {
 
         // Act
         opptjeningRepository.lagreOpptjeningsperiode(behandling, today, tomorrow, false);
-        opptjeningRepository.deaktiverOpptjening(behandling);
+        opptjeningRepository.deaktiverOpptjeningForPeriode(behandling, DatoIntervallEntitet.fraOgMed(tomorrow.plusDays(1)));
 
         // Assert
-        Optional<Opptjening> funnetOpt = opptjeningRepository.finnOpptjening(behandling.getId());
-        assertThat(funnetOpt).isEmpty();
+        var funnetOpt = opptjeningRepository.finnOpptjening(behandling.getId());
+        assertThat(funnetOpt).isPresent().hasValueSatisfying(it -> assertThat(it.getOpptjeningPerioder()).hasSize(0));
     }
 
     @Test
@@ -109,10 +109,12 @@ public class OpptjeningRepositoryImplTest {
 
         // Act
         opptjeningRepository.lagreOpptjeningsperiode(behandling, today, tomorrow, false);
-        opptjeningRepository.lagreOpptjeningResultat(behandling, Period.ofDays(100), aktiviteter);
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(today, tomorrow);
+        opptjeningRepository.lagreOpptjeningResultat(behandling, tomorrow.plusDays(1), Period.ofDays(100), aktiviteter);
 
         // Assert
-        Opptjening funnet = opptjeningRepository.finnOpptjening(behandling.getId()).orElseThrow();
+        var resultat = opptjeningRepository.finnOpptjening(behandling.getId()).orElseThrow();
+        var funnet = resultat.getOpptjeningPerioder().stream().filter(it -> it.getOpptjeningPeriode().equals(periode)).findFirst().orElseThrow();
         assertThat(funnet.getOpptjeningAktivitet()).hasSize(1);
         OpptjeningAktivitet aktivitet = funnet.getOpptjeningAktivitet().get(0);
         assertThat(aktivitet.getFom()).isEqualTo(tomorrow.minusMonths(10));
@@ -134,7 +136,7 @@ public class OpptjeningRepositoryImplTest {
         EndringsresultatSnapshot endringsresultatSnapshot = opptjeningRepository.finnAktivGrunnlagId(behandling);
 
         // Assert
-        assertThat(endringsresultatSnapshot.getGrunnlagId()).isEqualTo(opptjening.getId());
+        assertThat(endringsresultatSnapshot.getGrunnlagId()).isEqualTo(opptjening.getOpptjeningResultat().getId());
     }
 
     private Behandling opprettBehandling() {

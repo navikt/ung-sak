@@ -29,6 +29,6 @@ public class InngangsvilkårOpptjeningsperiode implements Inngangsvilkår {
 
     @Override
     public VilkårData vurderVilkår(BehandlingReferanse ref, DatoIntervallEntitet periode) {
-        return opptjeningsperiodeVilkårTjeneste.vurderOpptjeningsperiodeVilkår(ref, ref.getFørsteUttaksdato(), periode);
+        return opptjeningsperiodeVilkårTjeneste.vurderOpptjeningsperiodeVilkår(ref, periode);
     }
 }

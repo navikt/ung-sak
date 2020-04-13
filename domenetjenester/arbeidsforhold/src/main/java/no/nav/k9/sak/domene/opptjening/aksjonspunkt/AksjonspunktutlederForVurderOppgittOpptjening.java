@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
@@ -72,34 +71,36 @@ public class AksjonspunktutlederForVurderOppgittOpptjening implements Aksjonspun
         Long behandlingId = param.getBehandlingId();
 
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOptional = iayTjeneste.finnGrunnlag(behandlingId);
-        Optional<Opptjening> fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
-        if (!inntektArbeidYtelseGrunnlagOptional.isPresent() || !fastsattOpptjeningOptional.isPresent()) {
+        var fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
+        if (inntektArbeidYtelseGrunnlagOptional.isEmpty() || fastsattOpptjeningOptional.isEmpty()) {
             return INGEN_AKSJONSPUNKTER;
         }
         OppgittOpptjening oppgittOpptjening = inntektArbeidYtelseGrunnlagOptional.get().getOppgittOpptjening().orElse(null);
-        DatoIntervallEntitet opptjeningPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fastsattOpptjeningOptional.get().getFom(),
-            fastsattOpptjeningOptional.get().getTom());
 
-        if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjeningPeriode, finnRelevanteKoder()) == JA) {
-            logger.info("Utleder AP 5051 fra oppgitt opptjening");
-            return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
-        }
+        var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
-        if (harBrukerOppgittArbeidsforholdMed(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD, opptjeningPeriode, oppgittOpptjening) == JA) {
-            logger.info("Utleder AP 5051 fra utlandsk arbeidsforhold");
-            return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
-        }
-
-        if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjeningPeriode, Collections.singletonList(ArbeidType.FRILANSER)) == JA) {
-            logger.info("Utleder AP 5051 fra oppgitt eller bekreftet frilans: behandlingId={}", behandlingId);
-            return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
-        }
-
-        if (harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjeningPeriode) == JA) {
-            AktørId aktørId = param.getAktørId();
-            if (manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, inntektArbeidYtelseGrunnlagOptional.get(), opptjeningPeriode, param.getSkjæringstidspunkt()) == JA) {
-                logger.info("Utleder AP 5051 fra oppgitt næringsdrift");
+        for (Opptjening opptjening : opptjeningPerioder) {
+            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), finnRelevanteKoder()) == JA) {
+                logger.info("Utleder AP 5051 fra oppgitt opptjening");
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
+            }
+
+            if (harBrukerOppgittArbeidsforholdMed(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD, opptjening.getOpptjeningPeriode(), oppgittOpptjening) == JA) {
+                logger.info("Utleder AP 5051 fra utlandsk arbeidsforhold");
+                return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
+            }
+
+            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), Collections.singletonList(ArbeidType.FRILANSER)) == JA) {
+                logger.info("Utleder AP 5051 fra oppgitt eller bekreftet frilans: behandlingId={}", behandlingId);
+                return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
+            }
+
+            if (harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjening.getOpptjeningPeriode()) == JA) {
+                AktørId aktørId = param.getAktørId();
+                if (manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, inntektArbeidYtelseGrunnlagOptional.get(), opptjening.getOpptjeningPeriode()) == JA) {
+                    logger.info("Utleder AP 5051 fra oppgitt næringsdrift");
+                    return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
+                }
             }
         }
         return INGEN_AKSJONSPUNKTER;
@@ -154,13 +155,11 @@ public class AksjonspunktutlederForVurderOppgittOpptjening implements Aksjonspun
     }
 
     private Utfall manglerFerdiglignetNæringsinntekt(AktørId aktørId, OppgittOpptjening oppgittOpptjening,
-                                                     InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, DatoIntervallEntitet opptjeningPeriode,
-                                                     Skjæringstidspunkt skjæringstidspunkt) {
+                                                     InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, DatoIntervallEntitet opptjeningPeriode) {
         // Det siste ferdiglignede år vil alltid være året før behandlingstidspunktet
         // Bruker LocalDate.now() her etter avklaring med funksjonell.
         int sistFerdiglignetÅr = LocalDate.now().minusYears(1L).getYear();
-        if (inneholderSisteFerdiglignendeÅrNæringsinntekt(aktørId, inntektArbeidYtelseGrunnlag, sistFerdiglignetÅr, opptjeningPeriode,
-            skjæringstidspunkt) == NEI) {
+        if (inneholderSisteFerdiglignendeÅrNæringsinntekt(aktørId, inntektArbeidYtelseGrunnlag, sistFerdiglignetÅr, opptjeningPeriode) == NEI) {
             if (erDetRegistrertNæringEtterSisteFerdiglignendeÅr(oppgittOpptjening, sistFerdiglignetÅr) == NEI) {
                 return JA;
             }
@@ -171,15 +170,13 @@ public class AksjonspunktutlederForVurderOppgittOpptjening implements Aksjonspun
     private Utfall inneholderSisteFerdiglignendeÅrNæringsinntekt(AktørId aktørId,
                                                                  InntektArbeidYtelseGrunnlag grunnlag,
                                                                  int sistFerdiglignetÅr,
-                                                                 DatoIntervallEntitet opptjeningPeriode,
-                                                                 Skjæringstidspunkt skjæringstidspunkt) {
-        LocalDate stp = skjæringstidspunkt.getUtledetSkjæringstidspunkt();
+                                                                 DatoIntervallEntitet opptjeningPeriode) {
         var filter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId));
         if (filter.isEmpty()) {
             return NEI;
         }
 
-        var stpFilter = (opptjeningPeriode.getTomDato().getYear() >= sistFerdiglignetÅr) ? filter.før(stp) : filter.etter(stp);
+        var stpFilter = (opptjeningPeriode.getTomDato().getYear() >= sistFerdiglignetÅr) ? filter.før(opptjeningPeriode.getTomDato()) : filter.etter(opptjeningPeriode.getTomDato());
 
         return stpFilter.filterBeregnetSkatt().filter(InntektspostType.SELVSTENDIG_NÆRINGSDRIVENDE, InntektspostType.NÆRING_FISKE_FANGST_FAMBARNEHAGE)
             .anyMatchFilter(harInntektI(sistFerdiglignetÅr)) ? JA : NEI;
@@ -200,7 +197,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening implements Aksjonspun
     }
 
     private boolean erRegistrertNæring(OppgittEgenNæring eg, int sistFerdiglignetÅr) {
-        if(eg.getOrgnr()==null) {
+        if (eg.getOrgnr() == null) {
             return false;
         }
         Optional<Virksomhet> lagretVirksomhet = virksomhetTjeneste.finnOrganisasjon(eg.getOrgnr());
@@ -213,17 +210,13 @@ public class AksjonspunktutlederForVurderOppgittOpptjening implements Aksjonspun
         }
     }
 
-    boolean girAksjonspunktForOppgittNæring(Long behandlingId, AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, Skjæringstidspunkt skjæringstidspunkt) {
-        Optional<Opptjening> fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
-        if (!fastsattOpptjeningOptional.isPresent()) {
+    boolean girAksjonspunktForOppgittNæring(AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
+        if (opptjeningPeriode == null) {
             return false;
         }
         OppgittOpptjening oppgittOpptjening = iayg.getOppgittOpptjening().orElse(null);
-        DatoIntervallEntitet opptjeningPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fastsattOpptjeningOptional.get().getFom(),
-            fastsattOpptjeningOptional.get().getTom());
 
         return harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjeningPeriode) == JA &&
-            manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, iayg, opptjeningPeriode,
-                skjæringstidspunkt) == JA;
+            manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, iayg, opptjeningPeriode) == JA;
     }
 }

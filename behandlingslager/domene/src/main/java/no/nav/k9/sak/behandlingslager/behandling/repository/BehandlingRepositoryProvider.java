@@ -60,7 +60,6 @@ public class BehandlingRepositoryProvider {
 
         // behandling aggregater
         this.medlemskapRepository = new MedlemskapRepository(entityManager);
-        this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository);
         this.personopplysningRepository = new PersonopplysningRepository(entityManager);
         this.søknadRepository = new SøknadRepository(entityManager);
 
@@ -70,6 +69,7 @@ public class BehandlingRepositoryProvider {
         // behandling resultat aggregater
         this.vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         this.beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
+        this.opptjeningRepository = new OpptjeningRepository(entityManager, this.behandlingRepository, vilkårResultatRepository);
 
         // behandling støtte repositories
         this.historikkRepository = new HistorikkRepository(entityManager);

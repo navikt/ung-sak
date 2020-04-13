@@ -1,8 +1,10 @@
 package no.nav.k9.sak.kontrakt.opptjening;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -20,6 +22,16 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_PERIODER_MED_OPPTJENING_KODE)
 public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "opptjeningFom", required = true)
+    private LocalDate opptjeningFom;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "opptjeningTom", required = true)
+    private LocalDate opptjeningTom;
 
     @JsonProperty(value = "opptjeningAktivitetList")
     @Valid
@@ -43,4 +55,19 @@ public class AvklarAktivitetsPerioderDto extends BekreftetAksjonspunktDto {
         this.opptjeningAktivitetList = opptjeningAktivitetList;
     }
 
+    public LocalDate getOpptjeningFom() {
+        return opptjeningFom;
+    }
+
+    public void setOpptjeningFom(LocalDate opptjeningFom) {
+        this.opptjeningFom = opptjeningFom;
+    }
+
+    public LocalDate getOpptjeningTom() {
+        return opptjeningTom;
+    }
+
+    public void setOpptjeningTom(LocalDate opptjeningTom) {
+        this.opptjeningTom = opptjeningTom;
+    }
 }

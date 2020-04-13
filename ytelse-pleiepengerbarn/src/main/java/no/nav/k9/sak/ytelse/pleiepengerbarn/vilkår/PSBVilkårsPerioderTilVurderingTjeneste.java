@@ -11,8 +11,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.inngangsvilkår.DefaultVilkårUtleder;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
+import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
 
@@ -21,6 +21,7 @@ import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
 public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
+    private VilkårUtleder vilkårUtleder;
     private MaksSøktePeriode maksSøktePeriode;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
@@ -28,7 +29,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Inject
-    public PSBVilkårsPerioderTilVurderingTjeneste(UttakRepository uttakRepository) {
+    public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder, UttakRepository uttakRepository) {
+        this.vilkårUtleder = vilkårUtleder;
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         final var søktePerioder = new SøktePerioder(uttakRepository);
 
@@ -44,7 +46,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public Map<VilkårType, Set<DatoIntervallEntitet>> utled(Long behandlingId) {
         final var vilkårPeriodeSet = new HashMap<VilkårType, Set<DatoIntervallEntitet>>();
-        UtledeteVilkår utledeteVilkår = new DefaultVilkårUtleder().utledVilkår(null);
+        UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
 

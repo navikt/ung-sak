@@ -113,6 +113,8 @@ public class VedtattYtelseTjeneste {
     private YtelseType map(FagsakYtelseType type) {
         if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(type)) {
             return YtelseType.PLEIEPENGER_SYKT_BARN;
+        } else if (FagsakYtelseType.OMSORGSPENGER.equals(type)) {
+            return YtelseType.OMSORGSPENGER;
         }
         throw new IllegalStateException("Ukjent ytelsestype " + type);
     }

@@ -100,12 +100,16 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(kontekst.getBehandlingId(), vilkår);
         perioder.forEach(periode -> {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
-                Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-                RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
-                ryddVilkårTyper.ryddVedTilbakeføring();
-                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+                ryddOppVilkårsPeriode(kontekst, modell, periode);
             }
         });
+    }
+
+    protected void ryddOppVilkårsPeriode(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, DatoIntervallEntitet periode) {
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
+        ryddVilkårTyper.ryddVedTilbakeføring();
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
     @Override

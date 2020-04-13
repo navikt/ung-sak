@@ -1,6 +1,5 @@
 package no.nav.k9.sak.inngangsvilkår.opptjeningsperiode;
 
-import java.time.LocalDate;
 import java.time.Period;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -29,10 +28,10 @@ public class DefaultOpptjeningsperiodeVilkårTjeneste implements Opptjeningsperi
     }
 
     @Override
-    public VilkårData vurderOpptjeningsperiodeVilkår(BehandlingReferanse behandlingReferanse, LocalDate førsteUttaksdato, DatoIntervallEntitet periode) {
+    public VilkårData vurderOpptjeningsperiodeVilkår(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
         OpptjeningsperiodeGrunnlag grunnlag = new OpptjeningsperiodeGrunnlag();
 
-        grunnlag.setFørsteUttaksDato(førsteUttaksdato);
+        grunnlag.setFørsteUttaksDato(periode.getFomDato());
         grunnlag.setPeriodeLengde(antallDagerOpptjeningsperiode);
 
         final OpptjeningsPeriode data = new OpptjeningsPeriode();

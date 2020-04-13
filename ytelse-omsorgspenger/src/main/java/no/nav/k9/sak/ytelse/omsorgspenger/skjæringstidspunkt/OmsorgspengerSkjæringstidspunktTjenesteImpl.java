@@ -43,10 +43,10 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
     }
 
     @Inject
-    public OmsorgspengerSkjæringstidspunktTjenesteImpl(ÅrskvantumTjeneste årskvantumTjeneste, 
-                                                       BehandlingRepository behandlingRepository, 
+    public OmsorgspengerSkjæringstidspunktTjenesteImpl(ÅrskvantumTjeneste årskvantumTjeneste,
+                                                       BehandlingRepository behandlingRepository,
                                                        OpptjeningRepository opptjeningRepository,
-                                                       OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository, 
+                                                       OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
                                                        VilkårResultatRepository vilkårResultatRepository) {
         this.opphørTidspunktTjeneste = new OmsorgspengerOpphørtidspunktTjeneste(årskvantumTjeneste);
         this.behandlingRepository = behandlingRepository;
@@ -65,7 +65,7 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         // FIXME K9 skjæringstidspunkt
         return førsteUttaksdag(behandlingId);
     }
-    
+
     @Override
     public boolean harAvslåttPeriode(UUID behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid);
@@ -82,6 +82,7 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
 
         opptjeningRepository.finnOpptjening(behandlingId)
+            .flatMap(it -> it.finnOpptjening(førsteUttaksdato))
             .map(opptjening -> opptjening.getTom().plusDays(1))
             .ifPresent(skjæringstidspunkt -> {
                 builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);

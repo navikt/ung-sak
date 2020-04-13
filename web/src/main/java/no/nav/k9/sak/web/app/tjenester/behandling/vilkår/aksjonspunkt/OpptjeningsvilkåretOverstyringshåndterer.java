@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
 import no.nav.k9.sak.kontrakt.opptjening.OverstyringOpptjeningsvilkåretDto;
@@ -46,7 +47,7 @@ public class OpptjeningsvilkåretOverstyringshåndterer extends InngangsvilkårO
     @Override
     protected void precondition(Behandling behandling, OverstyringOpptjeningsvilkåretDto dto) {
         if (dto.getErVilkarOk()) {
-            final Optional<Opptjening> opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
+            final Optional<Opptjening> opptjening = opptjeningRepository.finnOpptjening(behandling.getId()).flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(dto.getOpptjeningFom(), dto.getOpptjeningTom())));
             if (opptjening.isPresent()) {
                 final long antall = opptjening.get().getOpptjeningAktivitet().stream()
                     .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();

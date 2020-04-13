@@ -1,5 +1,23 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import static java.util.Collections.emptyList;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.JA;
+import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.NEI;
+import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
@@ -8,28 +26,16 @@ import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.*;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.InntektFilter;
+import no.nav.k9.sak.domene.iay.modell.Inntektspost;
+import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyList;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING;
-import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.JA;
-import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.NEI;
-import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
 
 @ApplicationScoped
 public class AksjonspunktutlederForVurderBekreftetOpptjening implements AksjonspunktUtleder {
@@ -54,29 +60,31 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening implements Aksjonsp
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
         Long behandlingId = param.getBehandlingId();
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOptional = iayTjeneste.finnGrunnlag(behandlingId);
-        Optional<Opptjening> fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
-        if (!inntektArbeidYtelseGrunnlagOptional.isPresent() || !fastsattOpptjeningOptional.isPresent()) {
+        Optional<OpptjeningResultat> fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
+        if (inntektArbeidYtelseGrunnlagOptional.isEmpty() || fastsattOpptjeningOptional.isEmpty()) {
             return INGEN_AKSJONSPUNKTER;
         }
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseGrunnlagOptional.get();
-        DatoIntervallEntitet opptjeningPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fastsattOpptjeningOptional.get().getFom(),
-            fastsattOpptjeningOptional.get().getTom());
+        var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
-        LocalDate skjæringstidspunkt = param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
-        if (finnesDetArbeidsforholdMedStillingsprosentLik0(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
-            logger.info("Utleder AP 5051 fra stillingsprosent 0: behandlingId={}", behandlingId);
-            return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
-        }
+        for (Opptjening opptjening : opptjeningPerioder) {
+            DatoIntervallEntitet opptjeningPeriode = opptjening.getOpptjeningPeriode();
 
-        if (finnesDetBekreftetFrilans(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
-            logger.info("Utleder AP 5051 fra bekreftet frilans: behandlingId={}", behandlingId);
-            return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
-        }
+            LocalDate skjæringstidspunkt = param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
+            if (finnesDetArbeidsforholdMedStillingsprosentLik0(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
+                logger.info("Utleder AP 5051 fra stillingsprosent 0: behandlingId={}", behandlingId);
+                return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
+            }
 
-        if (finnesDetArbeidsforholdLagtTilAvSaksbehandler(param.getRef(), inntektArbeidYtelseGrunnlag, skjæringstidspunkt) == JA) {
-            logger.info("Utleder AP 5051 fra arbeidsforhold lagt til av saksbehandler: behandlingId={}", behandlingId);
-            return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
+            if (finnesDetBekreftetFrilans(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
+                logger.info("Utleder AP 5051 fra bekreftet frilans: behandlingId={}", behandlingId);
+                return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
+            }
 
+            if (finnesDetArbeidsforholdLagtTilAvSaksbehandler(param.getRef(), inntektArbeidYtelseGrunnlag, skjæringstidspunkt) == JA) {
+                logger.info("Utleder AP 5051 fra arbeidsforhold lagt til av saksbehandler: behandlingId={}", behandlingId);
+                return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
+            }
         }
         return INGEN_AKSJONSPUNKTER;
     }
@@ -94,8 +102,8 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening implements Aksjonsp
                     var arbeidsgiver = ya.getArbeidsgiver();
                     return arbeidsgiver.getErVirksomhet() && OrgNummer.erKunstig(arbeidsgiver.getOrgnr());
                 })
-                    ? JA
-                    : NEI;
+                ? JA
+                : NEI;
         }
         return NEI;
     }
@@ -162,15 +170,13 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening implements Aksjonsp
         return opptjeningsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(ip.getPeriode().getFomDato(), ip.getPeriode().getTomDato()));
     }
 
-    boolean girAksjonspunktForArbeidsforhold(YrkesaktivitetFilter filter, Long behandlingId, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet) {
+    boolean girAksjonspunktForArbeidsforhold(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
         if (overstyrtAktivitet != null && overstyrtAktivitet.getArbeidsgiver() != null && OrgNummer.erKunstig(overstyrtAktivitet.getArbeidsgiver().getOrgnr())) {
             return true;
         }
-        final Optional<Opptjening> opptjening = opptjeningRepository.finnOpptjening(behandlingId);
-        if (opptjening.isEmpty() || registerAktivitet == null) {
+        if (opptjeningPeriode == null || registerAktivitet == null) {
             return false;
         }
-        final DatoIntervallEntitet opptjeningPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjening.get().getFom(), opptjening.get().getTom());
         return girAksjonspunkt(filter, opptjeningPeriode, registerAktivitet);
     }
 }

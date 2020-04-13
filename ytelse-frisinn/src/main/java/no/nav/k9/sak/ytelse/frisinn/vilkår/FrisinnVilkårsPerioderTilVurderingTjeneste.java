@@ -11,8 +11,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.inngangsvilkår.DefaultVilkårUtleder;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
+import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
 
@@ -22,16 +22,18 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private MaksSøktePeriode maksSøktePeriode;
+    private VilkårUtleder vilkårUtleder;
 
     FrisinnVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
 
     @Inject
-    public FrisinnVilkårsPerioderTilVurderingTjeneste(UttakRepository uttakRepository) {
+    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder, UttakRepository uttakRepository) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         final var søktePerioder = new SøktePerioder(uttakRepository);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder);
+        this.vilkårUtleder = vilkårUtleder;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     @Override
     public Map<VilkårType, Set<DatoIntervallEntitet>> utled(Long behandlingId) {
         final var vilkårPeriodeSet = new HashMap<VilkårType, Set<DatoIntervallEntitet>>();
-        UtledeteVilkår utledeteVilkår = new DefaultVilkårUtleder().utledVilkår(null);
+        UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
 

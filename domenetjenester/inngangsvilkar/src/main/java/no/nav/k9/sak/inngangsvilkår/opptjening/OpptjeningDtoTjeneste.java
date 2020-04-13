@@ -1,6 +1,7 @@
 package no.nav.k9.sak.inngangsvilkår.opptjening;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.MergeOverlappendePeriodeHjelp;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
@@ -27,6 +29,7 @@ import no.nav.k9.sak.kontrakt.opptjening.FastsattOpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningAktivitetDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningPeriodeDto;
+import no.nav.k9.sak.kontrakt.opptjening.OpptjeningerDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -45,40 +48,74 @@ public class OpptjeningDtoTjeneste {
 
     @Inject
     public OpptjeningDtoTjeneste(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
-                                     ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                     InntektArbeidYtelseTjeneste iayTjeneste) {
+                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                 InntektArbeidYtelseTjeneste iayTjeneste) {
         this.forSaksbehandlingTjeneste = forSaksbehandlingTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.iayTjeneste = iayTjeneste;
     }
 
-    public Optional<OpptjeningDto> mapFra(BehandlingReferanse ref) {
+    /**
+     * mapOpptjening skal skal benyttes
+     *
+     * @param ref behandlingRef
+     * @return Opptjeningen
+     */
+    @Deprecated(forRemoval = true)
+    public Optional<OpptjeningDto> mapTilOpptjening(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
-        Optional<Opptjening> fastsattOpptjening = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId);
+        // TODO (K9: Håndter at det er flere ...
+        var fastsattOpptjening = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId)
+            .map(OpptjeningResultat::getOpptjeningPerioder)
+            .orElse(List.of())
+            .stream()
+            .findFirst();
 
-        OpptjeningDto resultat = new OpptjeningDto();
-        if (fastsattOpptjening.isPresent() && fastsattOpptjening.get().getAktiv()) {
-            List<OpptjeningAktivitet> opptjeningAktivitet = fastsattOpptjening.get().getOpptjeningAktivitet();
-            resultat.setFastsattOpptjening(new FastsattOpptjeningDto(fastsattOpptjening.get().getFom(),
-                fastsattOpptjening.get().getTom(), mapFastsattOpptjening(fastsattOpptjening.get()),
-                MergeOverlappendePeriodeHjelp.mergeOverlappenePerioder(opptjeningAktivitet)));
+        OpptjeningDto resultat = null;
+        if (fastsattOpptjening.isPresent()) {
+            resultat = mapOpptjeninger(ref, behandlingId, fastsattOpptjening.get());
+
+            if (resultat.getFastsattOpptjening() == null && resultat.getOpptjeningAktivitetList().isEmpty()) {
+                return Optional.empty();
+            }
         }
+        return Optional.ofNullable(resultat);
+    }
+
+    private OpptjeningDto mapOpptjeninger(BehandlingReferanse ref, Long behandlingId, Opptjening opptjening) {
+        OpptjeningDto resultat = new OpptjeningDto();
+        List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
+        resultat.setFastsattOpptjening(new FastsattOpptjeningDto(opptjening.getFom(),
+            opptjening.getTom(), mapFastsattOpptjening(opptjening),
+            MergeOverlappendePeriodeHjelp.mergeOverlappenePerioder(opptjeningAktivitet)));
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOpt = iayTjeneste.finnGrunnlag(behandlingId);
         List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getArbeidsforholdOverstyringer).orElse(Collections.emptyList());
 
-        if (fastsattOpptjening.isPresent()) {
-            resultat.setOpptjeningAktivitetList(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, inntektArbeidYtelseGrunnlagOpt)
-                .stream()
-                .map(oap -> lagDtoFraOAPeriode(oap, overstyringer))
-                .collect(Collectors.toList()));
-        } else {
-            resultat.setOpptjeningAktivitetList(Collections.emptyList());
-        }
+        var iayGrunnlagUuid = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getEksternReferanse).orElse(null);
+        resultat.setOpptjeningAktivitetList(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, iayGrunnlagUuid, opptjening.getSkjæringstidspunkt())
+            .stream()
+            .map(oap -> lagDtoFraOAPeriode(oap, overstyringer))
+            .collect(Collectors.toList()));
+        return resultat;
+    }
 
-        if (resultat.getFastsattOpptjening() == null && resultat.getOpptjeningAktivitetList().isEmpty()) {
-            return Optional.empty();
+    public OpptjeningerDto mapTilOpptjeninger(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+
+        var opptjening = new OpptjeningerDto();
+        var opptjeningResultat = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId);
+        if (opptjeningResultat.isPresent()) {
+            var opptjeninger = new ArrayList<OpptjeningDto>();
+            for (Opptjening opptjeningen : opptjeningResultat.get().getOpptjeningPerioder()) {
+                OpptjeningDto resultat = mapOpptjeninger(ref, behandlingId, opptjeningen);
+
+                if (resultat.getFastsattOpptjening() != null || !resultat.getOpptjeningAktivitetList().isEmpty()) {
+                    opptjeninger.add(resultat);
+                }
+            }
+            opptjening.setOpptjeninger(opptjeninger);
         }
-        return Optional.of(resultat);
+        return opptjening;
     }
 
     private OpptjeningPeriodeDto mapFastsattOpptjening(Opptjening fastsattOpptjening) {
@@ -160,8 +197,8 @@ public class OpptjeningDtoTjeneste {
         return false;
     }
 
-     private Optional<ArbeidsgiverOpplysninger> hentNavnTilManueltArbeidsforhold(List<ArbeidsforholdOverstyring> overstyringer) {
-         return FinnNavnForManueltLagtTilArbeidsforholdTjeneste.finnNavnTilManueltLagtTilArbeidsforhold(overstyringer);
+    private Optional<ArbeidsgiverOpplysninger> hentNavnTilManueltArbeidsforhold(List<ArbeidsforholdOverstyring> overstyringer) {
+        return FinnNavnForManueltLagtTilArbeidsforholdTjeneste.finnNavnTilManueltLagtTilArbeidsforhold(overstyringer);
     }
 
 }

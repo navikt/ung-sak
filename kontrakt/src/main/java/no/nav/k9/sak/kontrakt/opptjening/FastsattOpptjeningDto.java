@@ -26,15 +26,14 @@ public class FastsattOpptjeningDto {
     @JsonProperty(value = "opptjeningFom")
     @NotNull
     private LocalDate opptjeningFom;
+    @JsonProperty(value = "opptjeningTom")
+    @NotNull
+    private LocalDate opptjeningTom;
 
     @JsonProperty(value = "opptjeningperiode")
     @Valid
     @NotNull
     private OpptjeningPeriodeDto opptjeningperiode;
-
-    @JsonProperty(value = "opptjeningTom")
-    @NotNull
-    private LocalDate opptjeningTom;
 
     public FastsattOpptjeningDto() {
         // trengs for deserialisering av JSON

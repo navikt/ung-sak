@@ -1,5 +1,9 @@
 package no.nav.k9.sak.kontrakt.opptjening;
 
+import java.time.LocalDate;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -18,6 +22,16 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE)
 public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktDto {
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "opptjeningFom", required = true)
+    private LocalDate opptjeningFom;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "opptjeningTom", required = true)
+    private LocalDate opptjeningTom;
 
     @JsonProperty("avslagskode")
     @Size(min = 4, max = 5)
@@ -42,17 +56,32 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
         return avslagskode;
     }
 
+    public void setAvslagskode(String avslagskode) {
+        this.avslagskode = avslagskode;
+    }
+
     @Override
     public boolean getErVilkarOk() {
         return erVilkarOk;
-    }
-
-    public void setAvslagskode(String avslagskode) {
-        this.avslagskode = avslagskode;
     }
 
     public void setErVilkarOk(boolean erVilkarOk) {
         this.erVilkarOk = erVilkarOk;
     }
 
+    public LocalDate getOpptjeningFom() {
+        return opptjeningFom;
+    }
+
+    public void setOpptjeningFom(LocalDate opptjeningFom) {
+        this.opptjeningFom = opptjeningFom;
+    }
+
+    public LocalDate getOpptjeningTom() {
+        return opptjeningTom;
+    }
+
+    public void setOpptjeningTom(LocalDate opptjeningTom) {
+        this.opptjeningTom = opptjeningTom;
+    }
 }

@@ -44,11 +44,11 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     }
 
     @Inject
-    public PleiepengerbarnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, 
-                                                 OpptjeningRepository opptjeningRepository,
-                                                 UttakRepository uttakRepository, 
-                                                 UttakTjeneste uttakTjeneste,
-                                                 VilkårResultatRepository vilkårResultatRepository) {
+    public PleiepengerbarnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository,
+                                                         OpptjeningRepository opptjeningRepository,
+                                                         UttakRepository uttakRepository,
+                                                         UttakTjeneste uttakTjeneste,
+                                                         VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
         this.uttakRepository = uttakRepository;
@@ -71,6 +71,7 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
 
         opptjeningRepository.finnOpptjening(behandlingId)
+            .flatMap(it -> it.finnOpptjening(førsteUttaksdato)) // TODO: Dette er neppe optimalt ...
             .map(opptjening -> opptjening.getTom().plusDays(1))
             .ifPresent(skjæringstidspunkt -> {
                 builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
@@ -79,7 +80,7 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
 
         return builder.build();
     }
-    
+
     @Override
     public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
         return null;
@@ -127,7 +128,7 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
     }
-    
+
     @Override
     public boolean harAvslåttPeriode(UUID behandlingUuid) {
         return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
