@@ -3,6 +3,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
@@ -20,6 +22,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
+import java.time.LocalDateTime;
 
 @ApplicationScoped
 @Default
@@ -28,12 +31,15 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private ÅrskvantumKlient årskvantumKlient;
     private TpsTjeneste tpsTjeneste;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     @Inject
     public ÅrskvantumTjenesteImpl(OmsorgspengerGrunnlagRepository grunnlagRepository,
+                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                   ÅrskvantumRestKlient årskvantumRestKlient,
                                   TpsTjeneste tpsTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.årskvantumKlient = årskvantumRestKlient;
         this.tpsTjeneste = tpsTjeneste;
 
@@ -54,10 +60,18 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
 
+        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
+
+        LocalDateTime datoForSisteInntektsmelding = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().get().getInntektsmeldingerSomSkalBrukes().stream().map(
+            Inntektsmelding::getInnsendingstidspunkt).max(LocalDateTime::compareTo).get();
+
         årskvantumRequest.setBehandlingUUID(ref.getBehandlingUuid().toString());
         årskvantumRequest.setSaksnummer(ref.getSaksnummer().getVerdi());
         årskvantumRequest.setAktørId(ref.getAktørId().getId());
+        årskvantumRequest.setInnsendingstidspunkt(datoForSisteInntektsmelding);
+
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
+
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
                 null,
                 null,

@@ -22,6 +22,7 @@ public class UttaksperiodeOmsorgspenger {
     @Valid
     private UttakUtbetalingsgradOmsorgspenger utbetalingsgrad;
 
+
     @JsonProperty(value="lengde", required=false)
     @Valid
     private Duration lengde;
