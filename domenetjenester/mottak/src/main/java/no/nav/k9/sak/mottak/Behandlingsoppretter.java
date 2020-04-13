@@ -140,7 +140,7 @@ public class Behandlingsoppretter {
         behandlingskontrollTjeneste.henleggBehandling(kontekst, BehandlingResultatType.MERGET_OG_HENLAGT);
     }
 
-    public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(@SuppressWarnings("unused") Behandling forrigeBehandling, Behandling nyBehandling) {
+    public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(Behandling forrigeBehandling, Behandling nyBehandling) {
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
     }
 

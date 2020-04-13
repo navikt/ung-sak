@@ -1,11 +1,11 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.ARBEIDSFORHOLD;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.LIGNET_NÆRING;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.YTELSE;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.ARBEIDSFORHOLD;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
+import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
