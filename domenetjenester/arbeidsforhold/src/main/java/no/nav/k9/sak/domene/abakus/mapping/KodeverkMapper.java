@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
+import no.nav.abakus.iaygrunnlag.kodeverk.Kodeverdi;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -40,17 +41,21 @@ public final class KodeverkMapper {
         return FagsakYtelseType.fraKode(kode).getKode();
     }
 
+    /**
+     * @deprecated fjern YtelseType og eksponert abakus-kodeverk i stedet fra k9-sak
+     */
+    @Deprecated(forRemoval = true)
     static no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.k9.kodeverk.arbeidsforhold.YtelseType ytelseType) {
         if (ytelseType == null || "-".equals(ytelseType.getKode())) {
             return null;
         }
         switch (ytelseType.getKodeverk()) {
             case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
-                return new no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType(ytelseType.getKode());
+                return no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.fraKode(ytelseType.getKode());
             case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
-                return new no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType(ytelseType.getKode());
+                return no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.fraKode(ytelseType.getKode());
             case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
-                return new no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType(ytelseType.getKode());
+                return no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.fraKode(ytelseType.getKode());
             default:
                 throw new IllegalArgumentException("Ukjent YtelseType: " + ytelseType + ", kan ikke mappes til "
                     + no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType.class.getName());
@@ -96,9 +101,8 @@ public final class KodeverkMapper {
     static YtelseType mapUtbetaltYtelseTypeTilGrunnlag(no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType type) {
         if (type == null)
             return OffentligYtelseType.UDEFINERT;
-        var kodeverk = (no.nav.abakus.iaygrunnlag.kodeverk.Kodeverk) type; // NOSONAR
-        String kode = kodeverk.getKode();
-        switch (kodeverk.getKodeverk()) {
+        String kode = type.getKode();
+        switch (type.getKodeverk()) {
             case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
                 return OffentligYtelseType.fraKode(kode);
             case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
