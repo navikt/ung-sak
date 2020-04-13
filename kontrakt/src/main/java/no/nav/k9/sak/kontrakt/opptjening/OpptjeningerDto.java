@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.opptjening;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,8 +16,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OpptjeningerDto {
 
-    @JsonProperty(value = "opptjeninger")
     @Valid
+    @Size(max = 100)
+    @JsonProperty(value = "opptjeninger")
     private List<OpptjeningDto> opptjeninger;
 
     @JsonCreator
