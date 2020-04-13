@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.typer.Periode;
 
 @FagsakYtelseTypeRef
 @RequestScoped
@@ -44,6 +45,11 @@ public class DummySkjæringstidspunktTjeneste implements SkjæringstidspunktTjen
 
     public void setUtledetSkjæringstidspunkt(LocalDate utledetSkjæringstidspunkt) {
         this.utledetSkjæringstidspunkt = utledetSkjæringstidspunkt;
+    }
+
+    @Override
+    public Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato) {
+        return null;
     }
 
 }

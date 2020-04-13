@@ -1,15 +1,11 @@
 package no.nav.k9.sak.domene.person.tps;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.threeten.extra.Interval;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
@@ -112,14 +108,14 @@ public class TpsAdapterImpl implements TpsAdapter {
     }
 
     @Override
-    public Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, Interval interval) {
+    public Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, no.nav.k9.sak.typer.Periode historikkPeriode) {
         HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
         AktoerId aktoerId = new AktoerId();
         aktoerId.setAktoerId(aktørId.getId());
         Periode periode = new Periode();
 
-        periode.setTom(DateUtil.convertToXMLGregorianCalendar(LocalDateTime.ofInstant(interval.getEnd(), ZoneId.systemDefault())));
-        periode.setFom(DateUtil.convertToXMLGregorianCalendar(LocalDateTime.ofInstant(interval.getStart(), ZoneId.systemDefault())));
+        periode.setFom(DateUtil.convertToXMLGregorianCalendar(historikkPeriode.getFom()));
+        periode.setTom(DateUtil.convertToXMLGregorianCalendar(historikkPeriode.getTom().plusDays(1))); // må konvertere til start neste dag
 
         request.setAktoer(aktoerId);
         request.setPeriode(periode);

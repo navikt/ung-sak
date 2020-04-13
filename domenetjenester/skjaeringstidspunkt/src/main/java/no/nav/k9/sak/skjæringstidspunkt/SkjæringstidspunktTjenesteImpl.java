@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
@@ -66,6 +67,11 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
     public boolean harAvslåttPeriode(UUID behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
         return getTjeneste(behandling.getFagsakYtelseType()).harAvslåttPeriode(behandlingUuid);
+    }
+
+    @Override
+    public Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato) {
+        return getTjeneste(fagsakYtelseType).utledOpplysningsperiode(id, fagsakYtelseType, tomDagensDato);
     }
 
 }

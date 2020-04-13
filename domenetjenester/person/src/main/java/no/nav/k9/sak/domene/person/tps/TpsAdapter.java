@@ -3,14 +3,13 @@ package no.nav.k9.sak.domene.person.tps;
 import java.util.List;
 import java.util.Optional;
 
-import org.threeten.extra.Interval;
-
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 public interface TpsAdapter {
@@ -21,7 +20,7 @@ public interface TpsAdapter {
 
     Personinfo hentKjerneinformasjon(PersonIdent personIdent, AktørId aktørId);
 
-    Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, Interval periode);
+    Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, Periode periode);
 
     Adresseinfo hentAdresseinformasjon(PersonIdent personIdent);
 

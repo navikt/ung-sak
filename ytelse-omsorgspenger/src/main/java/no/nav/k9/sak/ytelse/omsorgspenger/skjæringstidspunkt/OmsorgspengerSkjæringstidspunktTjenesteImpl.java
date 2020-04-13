@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.skjæringstidspunkt;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
@@ -33,6 +35,8 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private OmsorgspengerOpphørtidspunktTjeneste opphørTidspunktTjeneste;
+    
+    private Period periodeFør = Period.parse("P12M");
 
     OmsorgspengerSkjæringstidspunktTjenesteImpl() {
         // CDI
@@ -128,5 +132,14 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
+    }
+    
+    @Override
+    public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        LocalDate tom = behandling.getFagsak().getPeriode().getTomDato();
+
+        LocalDate skjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
+        return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
 }
