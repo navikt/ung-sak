@@ -12,16 +12,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_OPPTJENINGSVILKÅRET_KODE)
-public class AvklarOpptjeningsvilkåretDto extends BekreftetAksjonspunktDto {
+public class AvklarOpptjeningsvilkåretDto {
 
     @Valid
     @NotNull
@@ -41,12 +36,17 @@ public class AvklarOpptjeningsvilkåretDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value = "erVilkarOk")
     private boolean erVilkarOk;
 
+    @JsonProperty("begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String begrunnelse;
+
     public AvklarOpptjeningsvilkåretDto() {
     }
 
     public AvklarOpptjeningsvilkåretDto(String begrunnelse, @Size(min = 4, max = 4) @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$") String avslagskode,
                                         boolean erVilkarOk) {
-        super(begrunnelse);
+        this.begrunnelse = begrunnelse;
         this.avslagskode = avslagskode;
         this.erVilkarOk = erVilkarOk;
     }
@@ -81,5 +81,13 @@ public class AvklarOpptjeningsvilkåretDto extends BekreftetAksjonspunktDto {
 
     public void setOpptjeningTom(LocalDate opptjeningTom) {
         this.opptjeningTom = opptjeningTom;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
     }
 }

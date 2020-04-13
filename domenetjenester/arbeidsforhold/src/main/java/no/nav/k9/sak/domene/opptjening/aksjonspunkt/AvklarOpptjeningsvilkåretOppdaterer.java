@@ -17,7 +17,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -28,12 +27,12 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.opptjening.Opptjeningsfeil;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto;
-import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkåretDto.class, adapter = AksjonspunktOppdaterer.class)
-public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdaterer<AvklarOpptjeningsvilkåretDto> {
+@DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
+public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdaterer<AvklarOpptjeningsvilkårDto> {
 
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
@@ -60,28 +59,24 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     }
 
     @Override
-    public OppdateringResultat oppdater(AvklarOpptjeningsvilkåretDto dto, AksjonspunktOppdaterParameter param) {
-        Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        Vilkårene vilkårene = vilkårResultatRepository.hent(param.getBehandlingId());
+    public OppdateringResultat oppdater(AvklarOpptjeningsvilkårDto dto, AksjonspunktOppdaterParameter param) {
+        for (AvklarOpptjeningsvilkåretDto avklarOpptjeningsvilkåretDto : dto.getPerioder()) {
+            Utfall nyttUtfall = avklarOpptjeningsvilkåretDto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            Vilkårene vilkårene = vilkårResultatRepository.hent(param.getBehandlingId());
 
-        Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
+            Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+            lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
+            BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
-        final var fom = Tid.TIDENES_BEGYNNELSE; // FIXME (k9) : legge inn faktiske perioder fra dto
-        final var tom = Tid.TIDENES_ENDE;
-        if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-            var periode = DatoIntervallEntitet.fraOgMedTilOgMed(dto.getOpptjeningFom(), dto.getOpptjeningTom());
-            sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
-            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), fom, tom);
-
-            return OppdateringResultat.utenOveropp();
-        } else {
-
-            oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), fom, tom);
-
-            return OppdateringResultat.medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR);
+            if (nyttUtfall.equals(Utfall.OPPFYLT)) {
+                var periode = DatoIntervallEntitet.fraOgMedTilOgMed(avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
+                sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
+                oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
+            } else {
+                oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
+            }
         }
+        return OppdateringResultat.utenOveropp();
     }
 
     private void oppdaterUtfallOgLagre(Behandling behandling, Vilkårene vilkårene, Utfall utfallType, BehandlingLås skriveLås, LocalDate fom, LocalDate tom) {
