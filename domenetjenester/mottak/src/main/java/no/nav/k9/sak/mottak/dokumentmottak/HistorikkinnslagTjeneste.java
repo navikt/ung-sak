@@ -1,6 +1,5 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +12,11 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
@@ -65,7 +62,7 @@ public class HistorikkinnslagTjeneste {
         leggTilHistorikkinnslagDokumentlinker(behandling.getType(), journalpostId, historikkinnslag);
 
         HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(BehandlingType.KLAGE.equals(behandling.getType()) ? HistorikkinnslagType.KLAGEBEH_STARTET : HistorikkinnslagType.BEH_STARTET);
+            .medHendelse(HistorikkinnslagType.BEH_STARTET);
         builder.build(historikkinnslag);
 
         historikkRepository.lagre(historikkinnslag);
@@ -190,18 +187,4 @@ public class HistorikkinnslagTjeneste {
         historikkRepository.lagre(historikkinnslag);
     }
 
-    public void opprettHistorikkinnslagForEndretStartdatoEtterFødselshendelse(Behandling behandling, LocalDate endretFra, LocalDate endretTil) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setBehandlingId(behandling.getId());
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        historikkinnslag.setType(HistorikkinnslagType.FAKTA_ENDRET);
-
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.FAKTA_ENDRET)
-            .medSkjermlenke(SkjermlenkeType.FAKTA_OM_MEDLEMSKAP)
-            .medEndretFelt(HistorikkEndretFeltType.STARTDATO_FRA_SOKNAD, endretFra, endretTil);
-
-        builder.build(historikkinnslag);
-        historikkRepository.lagre(historikkinnslag);
-    }
 }
