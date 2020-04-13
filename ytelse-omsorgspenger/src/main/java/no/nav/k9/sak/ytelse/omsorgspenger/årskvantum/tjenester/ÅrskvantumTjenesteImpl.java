@@ -62,17 +62,18 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
 
+        LocalDateTime datoForSisteInntektsmelding = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().get().getInntektsmeldingerSomSkalBrukes().stream().map(
+            Inntektsmelding::getInnsendingstidspunkt).max(LocalDateTime::compareTo).get();
+
         årskvantumRequest.setBehandlingUUID(ref.getBehandlingUuid().toString());
         årskvantumRequest.setSaksnummer(ref.getSaksnummer().getVerdi());
         årskvantumRequest.setAktørId(ref.getAktørId().getId());
-        for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
+        årskvantumRequest.setInnsendingstidspunkt(datoForSisteInntektsmelding);
 
-            LocalDateTime datoForSisteInntektsmelding = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().get().getInntektsmeldingerFor(fraværPeriode.getArbeidsgiver()).stream().map(
-                Inntektsmelding::getInnsendingstidspunkt).max(LocalDateTime::compareTo).get();
+        for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
 
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
                 null,
-                datoForSisteInntektsmelding,
                 null,
                 fraværPeriode.getFraværPerDag(), null);
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();

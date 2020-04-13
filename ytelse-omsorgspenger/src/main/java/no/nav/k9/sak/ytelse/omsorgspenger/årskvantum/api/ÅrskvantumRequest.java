@@ -10,6 +10,7 @@ import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class ÅrskvantumRequest {
     @Valid
     @NotNull
     private String aktørId;
+
+    @JsonProperty(value="innsendingstidspunkt", required = false)
+    @Valid
+    private LocalDateTime innsendingstidspunkt;
 
     @JsonProperty(value = "uttakperioder")
     @Valid
@@ -82,5 +87,13 @@ public class ÅrskvantumRequest {
 
     public void setSaksnummer(String saksnummer) {
         this.saksnummer = saksnummer;
+    }
+
+    public LocalDateTime getInnsendingstidspunkt() {
+        return innsendingstidspunkt;
+    }
+
+    public void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
+        this.innsendingstidspunkt = innsendingstidspunkt;
     }
 }

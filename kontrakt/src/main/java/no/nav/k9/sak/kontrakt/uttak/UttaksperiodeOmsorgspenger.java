@@ -6,7 +6,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,9 +22,6 @@ public class UttaksperiodeOmsorgspenger {
     @Valid
     private UttakUtbetalingsgradOmsorgspenger utbetalingsgrad;
 
-    @JsonProperty(value="innsendingstidspunkt", required = false)
-    @Valid
-    private LocalDateTime innsendingstidspunkt;
 
     @JsonProperty(value="lengde", required=false)
     @Valid
@@ -43,13 +39,11 @@ public class UttaksperiodeOmsorgspenger {
     @JsonCreator
     public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
                                       @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgradOmsorgspenger utbetalingsgrad,
-                                      @JsonProperty(value = "innsendingstidspunkt", required = false) @Valid LocalDateTime innsendingstidspunkt,
                                       @JsonProperty(value = "utfall", required = false) @Valid OmsorgspengerUtfall utfall,
                                       @JsonProperty(value = "lengde", required = false) @Valid Duration lengde,
                                       @JsonProperty(value = "arbeidsforhold", required = false) @Valid UttakArbeidsforhold uttakArbeidsforhold) {
         this.periode = periode;
         this.utbetalingsgrad = utbetalingsgrad;
-        this.innsendingstidspunkt = innsendingstidspunkt;
         this.utfall = utfall;
         this.lengde = lengde;
         this.uttakArbeidsforhold = uttakArbeidsforhold;
@@ -97,14 +91,6 @@ public class UttaksperiodeOmsorgspenger {
 
     public UttakArbeidsforhold getUttakArbeidsforhold() {
         return uttakArbeidsforhold;
-    }
-
-    public LocalDateTime getInnsendingstidspunkt() {
-        return innsendingstidspunkt;
-    }
-
-    public void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
-        this.innsendingstidspunkt = innsendingstidspunkt;
     }
 
     public void setUttakArbeidsforhold(UttakArbeidsforhold uttakArbeidsforhold) {

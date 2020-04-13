@@ -9,7 +9,6 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,13 +44,12 @@ public class MapFraÅrskvantumResultatTest {
     }
 
     private UttaksperiodeOmsorgspenger innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(utbetalingsgrad), LocalDateTime.now(),
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(utbetalingsgrad),
                                               OmsorgspengerUtfall.INNVILGET, Duration.ofHours(1), arbeidsforhold);
     }
 
     private UttaksperiodeOmsorgspenger avslått(LocalDate fom, LocalDate tom, UttakArbeidsforhold arbeidsforhold) {
         return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(BigDecimal.ZERO),
-                                              LocalDateTime.now(),
                                               OmsorgspengerUtfall.AVSLÅTT, Duration.ofHours(1), arbeidsforhold);
     }
 }
