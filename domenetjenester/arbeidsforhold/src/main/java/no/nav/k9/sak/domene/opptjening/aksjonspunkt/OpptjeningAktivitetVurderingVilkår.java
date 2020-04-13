@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import java.time.LocalDate;
-
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;

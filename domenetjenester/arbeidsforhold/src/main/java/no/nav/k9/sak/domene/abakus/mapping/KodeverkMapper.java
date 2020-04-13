@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
-import no.nav.abakus.iaygrunnlag.kodeverk.Kodeverdi;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;

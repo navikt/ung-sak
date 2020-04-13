@@ -41,8 +41,8 @@ public class KalkulatorInputTjeneste {
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
         var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
-        //FRISINN har ikke noe forhold til opptjening
-        LocalDate stp = referanse.getFagsakYtelseType() == FRISINN ? referanse.getSkjæringstidspunkt().getFørsteUttaksdato() : referanse.getSkjæringstidspunkt().getSkjæringstidspunktOpptjening();
+        
+        LocalDate stp = referanse.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
         var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, referanse.getAktørId(), stp);
 
         var opptjeningAktiviteter = hentOpptjeningAktiviteter(referanse, inntektArbeidYtelseGrunnlag, stp);
