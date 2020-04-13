@@ -13,9 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -24,7 +22,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "OpptjeningResultat")
@@ -37,16 +34,15 @@ public class OpptjeningResultat extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_RS_OPPTJENING")
     private Long id;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
+    @Column(name = "behandling_id", nullable = false, updatable = false)
+    private Long behandlingId;
 
     /* Mapper kun fra denne og ikke bi-directional, gjør vedlikehold enklere. */
     @Immutable
     @OneToMany(cascade = {CascadeType.ALL} /* ok siden aktiviteter er eid av denne */, mappedBy = "opptjeningResultat")
     private List<Opptjening> opptjeningPerioder = new ArrayList<>();
 
-    @Column(name = "aktiv", nullable = false)
+    @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
     @Version
@@ -83,8 +79,8 @@ public class OpptjeningResultat extends BaseEntitet {
         return Collections.unmodifiableList(opptjeningPerioder);
     }
 
-    void setBehandling(Behandling behandlingId) {
-        this.behandling = behandlingId;
+    void setBehandlingId(Long behandlingId) {
+        this.behandlingId = behandlingId;
     }
 
     void setInaktiv() {
@@ -126,7 +122,7 @@ public class OpptjeningResultat extends BaseEntitet {
     public String toString() {
         return "OpptjeningResultat{" +
             "id=" + id +
-            ", behandling=" + behandling +
+            ", behandlingId=" + behandlingId +
             ", opptjeningPerioder=" + opptjeningPerioder +
             ", aktiv=" + aktiv +
             '}';

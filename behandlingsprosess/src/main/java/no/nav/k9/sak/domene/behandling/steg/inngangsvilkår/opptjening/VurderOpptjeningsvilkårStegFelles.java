@@ -54,10 +54,10 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
             OpptjeningsvilkårResultat opres = getVilkårresultat(behandling, regelResultat, periode);
             MapTilOpptjeningAktiviteter mapper = new MapTilOpptjeningAktiviteter();
             List<OpptjeningAktivitet> aktiviteter = mapTilOpptjeningsaktiviteter(mapper, opres);
-            opptjeningRepository.lagreOpptjeningResultat(behandling, periode, opres.getResultatOpptjent(), aktiviteter);
+            opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), opres.getResultatOpptjent(), aktiviteter);
         } else {
             // rydd bort tidligere aktiviteter
-            opptjeningRepository.lagreOpptjeningResultat(behandling, periode, null, Collections.emptyList());
+            opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), null, Collections.emptyList());
         }
     }
 

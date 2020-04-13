@@ -43,6 +43,11 @@ class OpptjeningResultatBuilder {
         return kladd.finnOpptjening(periode);
     }
 
+    Optional<Opptjening> hentTidligereOpptjening(LocalDate skjæringstidspunkt) {
+        validerState();
+        return kladd.finnOpptjening(skjæringstidspunkt);
+    }
+
     OpptjeningResultatBuilder validerMotVilkår(Vilkår vilkår) {
         Objects.requireNonNull(vilkår);
         if (!VilkårType.OPPTJENINGSVILKÅRET.equals(vilkår.getVilkårType())) {

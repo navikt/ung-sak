@@ -56,7 +56,7 @@ public class OpptjeningRepository {
 
     private Optional<OpptjeningResultat> hentTidligereOpptjening(Long behandlingId, boolean readOnly) {
         // slår opp med HQL istedf. å traverse grafen
-        TypedQuery<OpptjeningResultat> query = em.createQuery("from OpptjeningResultat o where o.behandling.id=:id and o.aktiv = TRUE", OpptjeningResultat.class); //$NON-NLS-1$
+        TypedQuery<OpptjeningResultat> query = em.createQuery("from OpptjeningResultat o where o.behandlingId=:id and o.aktiv = TRUE", OpptjeningResultat.class); //$NON-NLS-1$
         query.setParameter("id", behandlingId); //$NON-NLS-1$
 
         if (readOnly) {
@@ -99,10 +99,10 @@ public class OpptjeningRepository {
         var opptjening = oppdateringsFunksjon.apply(builder);
 
         validerMotVilkårsPerioder(behandling, builder);
-        deaktiverTidligereOpptjening(tidligereOpptjeninger);
+        tidligereOpptjeninger.ifPresent(this::deaktiverTidligereOpptjening);
 
         var opptjeningResultat = builder.build();
-        opptjeningResultat.setBehandling(behandling);
+        opptjeningResultat.setBehandlingId(behandling.getId());
         em.persist(opptjeningResultat);
         em.flush();
 
@@ -115,26 +115,26 @@ public class OpptjeningRepository {
         vilkår.ifPresent(builder::validerMotVilkår);
     }
 
-    private void deaktiverTidligereOpptjening(Optional<OpptjeningResultat> tidligereOpptjeninger) {
-        if (tidligereOpptjeninger.isPresent()) {
-            var forrigeOpptjening = tidligereOpptjeninger.get();
-            forrigeOpptjening.setInaktiv();
-            em.persist(forrigeOpptjening);
-            em.flush();
-        }
+    private void deaktiverTidligereOpptjening(OpptjeningResultat tidligereOpptjeninger) {
+
+        var query = em.createNativeQuery("UPDATE rs_opptjening set aktiv = false WHERE id = :id")
+            .setParameter("id", tidligereOpptjeninger.getId());
+        tidligereOpptjeninger.setInaktiv();
+        query.executeUpdate();
+        em.flush();
     }
 
     /**
      * Opptjening* Lagre opptjeningresultat (opptjent periode og aktiviteter).
      */
-    public Opptjening lagreOpptjeningResultat(Behandling behandling, DatoIntervallEntitet periode,
+    public Opptjening lagreOpptjeningResultat(Behandling behandling, LocalDate skjæringstidspunkt,
                                               Period opptjentPeriode,
                                               Collection<OpptjeningAktivitet> opptjeningAktiviteter) {
 
         Set<OpptjeningAktivitet> kopiListe = duplikatSjekk(opptjeningAktiviteter);
 
         Function<OpptjeningResultatBuilder, Opptjening> oppdateringsfunksjon = (builder) -> {
-            var tidligereOpptjening = builder.hentTidligereOpptjening(periode).orElseThrow();
+            var tidligereOpptjening = builder.hentTidligereOpptjening(skjæringstidspunkt).orElseThrow();
 
             Opptjening ny = new Opptjening(tidligereOpptjening);
             ny.setOpptjeningAktivitet(kopiListe);
@@ -161,7 +161,7 @@ public class OpptjeningRepository {
         var builder = new OpptjeningResultatBuilder(origOpptjening);
         var opptjeningResultat = builder.build();
 
-        opptjeningResultat.setBehandling(nyBehandling);
+        opptjeningResultat.setBehandlingId(nyBehandling.getId());
         em.persist(opptjeningResultat);
         em.flush();
 
