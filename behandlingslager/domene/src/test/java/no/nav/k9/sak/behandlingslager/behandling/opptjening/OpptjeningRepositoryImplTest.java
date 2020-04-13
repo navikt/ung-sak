@@ -110,7 +110,7 @@ public class OpptjeningRepositoryImplTest {
         // Act
         opptjeningRepository.lagreOpptjeningsperiode(behandling, today, tomorrow, false);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(today, tomorrow);
-        opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), Period.ofDays(100), aktiviteter);
+        opptjeningRepository.lagreOpptjeningResultat(behandling, tomorrow.plusDays(1), Period.ofDays(100), aktiviteter);
 
         // Assert
         var resultat = opptjeningRepository.finnOpptjening(behandling.getId()).orElseThrow();

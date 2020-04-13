@@ -20,7 +20,7 @@ public class FastsettSkjæringsdato extends LeafSpecification<Opptjeningsperiode
 
     @Override
     public Evaluation evaluate(OpptjeningsperiodeGrunnlag regelmodell) {
-        regelmodell.setSkjæringsdatoOpptjening(regelmodell.getFørsteUttaksDato().minusDays(1));
+        regelmodell.setSkjæringsdatoOpptjening(regelmodell.getFørsteUttaksDato());
 
         Map<String, Object> resultater = new HashMap<>();
         resultater.put("skjæringstidspunktOpptjening", String.valueOf(regelmodell.getSkjæringsdatoOpptjening()));
