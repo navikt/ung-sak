@@ -35,6 +35,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarAktivitetsPerioderDto;
+import no.nav.k9.sak.kontrakt.opptjening.AvklarAktivitetsPerioderHolderDto;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningAktivitetDto;
 import no.nav.k9.sak.kontrakt.opptjening.BekreftOpptjeningPeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
@@ -43,8 +44,8 @@ import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = AvklarAktivitetsPerioderDto.class, adapter = AksjonspunktOppdaterer.class)
-public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdaterer<AvklarAktivitetsPerioderDto> {
+@DtoTilServiceAdapter(dto = AvklarAktivitetsPerioderHolderDto.class, adapter = AksjonspunktOppdaterer.class)
+public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdaterer<AvklarAktivitetsPerioderHolderDto> {
 
     private static final String CHARS = "a-z0-9_:-";
 
@@ -83,8 +84,21 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
     }
 
     @Override
-    public OppdateringResultat oppdater(AvklarAktivitetsPerioderDto dto, AksjonspunktOppdaterParameter param) {
-        Long behandlingId = param.getBehandlingId();
+    public OppdateringResultat oppdater(AvklarAktivitetsPerioderHolderDto dto, AksjonspunktOppdaterParameter param) {
+        boolean erEndret = false;
+
+        for (AvklarAktivitetsPerioderDto avklarAktivitetsPerioderDto : dto.getOpptjeningListe()) {
+            boolean erEndretPeriode = oppdater(avklarAktivitetsPerioderDto, param);
+            if (erEndretPeriode) {
+                erEndret = true;
+            }
+        }
+
+        return OppdateringResultat.utenTransisjon().medTotrinnHvis(erEndret).build();
+    }
+
+    private boolean oppdater(AvklarAktivitetsPerioderDto dto, AksjonspunktOppdaterParameter param) {
+        var behandlingId = param.getBehandlingId();
         if (dto.getOpptjeningAktivitetList().stream().anyMatch(oa -> oa.getErGodkjent() == null)) {
             throw new IllegalStateException("AvklarAktivitetsPerioder: Uavklarte aktiviteter til oppdaterer");
         }
@@ -96,9 +110,7 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
         new BekreftOpptjeningPeriodeAksjonspunkt(inntektArbeidYtelseTjeneste, vurderOppgittOpptjening)
             .oppdater(behandlingId, aktørId, bekreftOpptjeningPerioder, opptjening.getOpptjeningPeriode());
 
-        boolean erEndret = erDetGjortEndringer(dto, behandlingId, overstyringer, opptjening);
-
-        return OppdateringResultat.utenTransisjon().medTotrinnHvis(erEndret).build();
+        return erDetGjortEndringer(dto, behandlingId, overstyringer, opptjening);
     }
 
     private boolean erDetGjortEndringer(AvklarAktivitetsPerioderDto dto, Long behandlingId, List<ArbeidsforholdOverstyring> overstyringer, Opptjening opptjening) {

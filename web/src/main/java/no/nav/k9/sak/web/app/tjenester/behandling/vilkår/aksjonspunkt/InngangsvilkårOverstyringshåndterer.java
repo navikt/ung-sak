@@ -6,7 +6,6 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
@@ -22,9 +21,9 @@ public abstract class InngangsvilkårOverstyringshåndterer<T extends Overstyrin
     }
 
     public InngangsvilkårOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
-            AksjonspunktDefinisjon aksjonspunktDefinisjon,
-            VilkårType vilkårType,
-            InngangsvilkårTjeneste inngangsvilkårTjeneste) {
+                                               AksjonspunktDefinisjon aksjonspunktDefinisjon,
+                                               VilkårType vilkårType,
+                                               InngangsvilkårTjeneste inngangsvilkårTjeneste) {
         super(historikkAdapter, aksjonspunktDefinisjon);
         this.vilkårType = vilkårType;
         this.inngangsvilkårTjeneste = inngangsvilkårTjeneste;
@@ -35,10 +34,6 @@ public abstract class InngangsvilkårOverstyringshåndterer<T extends Overstyrin
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
 
         inngangsvilkårTjeneste.overstyrAksjonspunkt(behandling.getId(), vilkårType, utfall, dto.getAvslagskode(), kontekst);
-
-        if (utfall.equals(Utfall.IKKE_OPPFYLT)) {
-            return OppdateringResultat.medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR);
-        }
 
         return OppdateringResultat.utenOveropp();
     }
