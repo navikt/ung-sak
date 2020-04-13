@@ -16,7 +16,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.threeten.extra.Interval;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
@@ -28,8 +27,8 @@ import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.person.tps.TpsAdapter;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
@@ -144,9 +143,8 @@ public class TpsTjenesteTest {
                 .build();
         }
 
-        // TODO legg inn mock
         @Override
-        public Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, Interval periode) {
+        public Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, Periode periode) {
             return null;
         }
 

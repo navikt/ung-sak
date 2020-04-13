@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.skjæringstidspunkt;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.typer.Periode;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -33,6 +35,9 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     private UttakRepository uttakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private OpphørUttakTjeneste opphørUttakTjeneste;
+
+    private Period periodeEtter = Period.parse("P4Y");
+    private Period periodeFør = Period.parse("P17M");
 
     PleiepengerbarnSkjæringstidspunktTjenesteImpl() {
         // CDI
@@ -126,5 +131,12 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     @Override
     public boolean harAvslåttPeriode(UUID behandlingUuid) {
         return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
+    }
+    
+    @Override
+    public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
+        LocalDate skjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
+        LocalDate tom = skjæringstidspunkt.plus(periodeEtter);
+        return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
 }
