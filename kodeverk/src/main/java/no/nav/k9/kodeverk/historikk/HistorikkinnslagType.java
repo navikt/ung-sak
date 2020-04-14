@@ -27,19 +27,14 @@ public enum HistorikkinnslagType implements Kodeverdi {
     BEH_MAN_GJEN("BEH_MAN_GJEN", "Gjenoppta behandling", HistorikkinnslagMal.MAL_TYPE_1),
     BEH_GJEN("BEH_GJEN", "Behandling gjenopptatt", HistorikkinnslagMal.MAL_TYPE_1),
     BEH_AVBRUTT_VUR("BEH_AVBRUTT_VUR", "Vurdering før vedtak", HistorikkinnslagMal.MAL_TYPE_1),
-    ANKEBEH_STARTET("ANKEBEH_STARTET", "Anke mottatt", HistorikkinnslagMal.MAL_TYPE_1),
     VRS_REV_IKKE_SNDT("VRS_REV_IKKE_SNDT", "Varsel om revurdering ikke sendt", HistorikkinnslagMal.MAL_TYPE_1),
     VEDLEGG_MOTTATT("VEDLEGG_MOTTATT", "Vedlegg mottatt", HistorikkinnslagMal.MAL_TYPE_1),
-    TERMINBEKREFTELSE_UGYLDIG("TERMINBEKREFTELSE_UGYLDIG", "Terminbekreftelsens utstedt dato er før 22. svangerskapsuke. Behandlingen fortsatt uten ny terminbekreftelse", HistorikkinnslagMal.MAL_TYPE_1),
     SPOLT_TILBAKE("SPOLT_TILBAKE", "Behandlingen er flyttet", HistorikkinnslagMal.MAL_TYPE_1),
     REVURD_OPPR("REVURD_OPPR", "Revurdering opprettet", HistorikkinnslagMal.MAL_TYPE_1),
-    REGISTRER_PAPIRSØK("REGISTRER_PAPIRSØK", "Registrer papirsøknad", HistorikkinnslagMal.MAL_TYPE_1),
     NYE_REGOPPLYSNINGER("NYE_REGOPPLYSNINGER", "Nye registeropplysninger", HistorikkinnslagMal.MAL_TYPE_1),
     MIGRERT_FRA_INFOTRYGD_FJERNET("MIGRERT_FRA_INFOTRYGD_FJERNET", "Behandling gjelder ikke lenger flytting av sak fra Infotrygd", HistorikkinnslagMal.MAL_TYPE_1),
     MIGRERT_FRA_INFOTRYGD("MIGRERT_FRA_INFOTRYGD", "Behandling gjelder flytting av sak fra Infotrygd", HistorikkinnslagMal.MAL_TYPE_1),
     MANGELFULL_SØKNAD("MANGELFULL_SØKNAD", "Mangelfull søknad", HistorikkinnslagMal.MAL_TYPE_1),
-    KLAGEBEH_STARTET("KLAGEBEH_STARTET", "Klage mottatt", HistorikkinnslagMal.MAL_TYPE_1),
-    INNSYN_OPPR("INNSYN_OPPR", "Innsynsbehandling opprettet", HistorikkinnslagMal.MAL_TYPE_1),
     KØET_BEH_GJEN("KØET_BEH_GJEN", "Køet behandling er gjenopptatt", HistorikkinnslagMal.MAL_TYPE_1),
 
     // Mal Type 2
@@ -63,11 +58,8 @@ public enum HistorikkinnslagType implements Kodeverdi {
 
     // Mal Type 5
     UTTAK("UTTAK", "Behandlet soknadsperiode", HistorikkinnslagMal.MAL_TYPE_5),
-    KLAGE_BEH_NK("KLAGE_BEH_NK", "Klagebehandling KA", HistorikkinnslagMal.MAL_TYPE_5),
-    KLAGE_BEH_NFP("KLAGE_BEH_NFP", "Klagebehandling NFP", HistorikkinnslagMal.MAL_TYPE_5),
     FAKTA_ENDRET("FAKTA_ENDRET", "Fakta endret", HistorikkinnslagMal.MAL_TYPE_5),
     BYTT_ENHET("BYTT_ENHET", "Bytt enhet", HistorikkinnslagMal.MAL_TYPE_5),
-    ANKE_BEH("ANKE_BEH", "Ankebehandling", HistorikkinnslagMal.MAL_TYPE_5),
 
     // Mal Type 6
     NY_INFO_FRA_TPS("NY_INFO_FRA_TPS", "Ny info fra TPS", HistorikkinnslagMal.MAL_TYPE_6),
