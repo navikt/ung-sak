@@ -88,7 +88,7 @@ public class BehandlingDtoTjeneste {
     private TilbakekrevingRepository tilbakekrevingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakRepository uttakRepository;
-    
+
     BehandlingDtoTjeneste() {
         // for CDI proxy
     }
@@ -292,6 +292,7 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
         dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidQueryParams));
         dto.leggTil(getFraMap(VilkårRestTjeneste.V2_PATH, "vilkar", uuidQueryParams));
+        dto.leggTil(getFraMap(VilkårRestTjeneste.V3_PATH, "vilkar-v3", uuidQueryParams));
 
         dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidQueryParams));
 
@@ -304,6 +305,7 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
 
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH, "opptjening", uuidQueryParams));
+        dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
 
@@ -331,19 +333,19 @@ public class BehandlingDtoTjeneste {
         Fagsak fagsak = behandling.getFagsak();
         var fom = søknadsperioder.map(DatoIntervallEntitet::getFomDato).orElse(fagsak.getPeriode().getFomDato());
         var tom = søknadsperioder.map(DatoIntervallEntitet::getTomDato).orElse(fagsak.getPeriode().getTomDato());
-        
+
         var andreSaker = fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId(), fom, tom)
                 .stream().map(Fagsak::getSaksnummer)
                 .collect(Collectors.toList());
-        
-        // uttaksplaner link inkl 
+
+        // uttaksplaner link inkl
         var link = BehandlingDtoUtil.buildLink(UttakRestTjeneste.UTTAKSPLANER, "uttak-uttaksplaner", HttpMethod.GET, ub -> {
             ub.addParameter(BehandlingUuidDto.NAME, behandlingUuid.toString());
             for(var s: andreSaker) {
                 ub.addParameter("saksnummer", s.getVerdi());
             }
         });
-        
+
         dto.leggTil(link);
 
         dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", behandlingUuidQueryParams));
