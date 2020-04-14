@@ -13,9 +13,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.domene.risikoklassifisering.RisikoklassifiseringEventPubliserer;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikoklassifiseringEvent;
-
 
 @BehandlingStegRef(kode = "INREG")
 @BehandlingTypeRef
@@ -24,7 +21,6 @@ import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikoklassifiseringEv
 public class InnhentRegisteropplysningerStegImpl implements InnhentRegisteropplysningerSteg {
 
     private BehandlingRepository behandlingRepository;
-    private RisikoklassifiseringEventPubliserer eventPubliserer;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
 
     InnhentRegisteropplysningerStegImpl() {
@@ -33,11 +29,9 @@ public class InnhentRegisteropplysningerStegImpl implements InnhentRegisteropply
 
     @Inject
     public InnhentRegisteropplysningerStegImpl(BehandlingRepositoryProvider repositoryProvider,
-                                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                               RisikoklassifiseringEventPubliserer eventPubliserer) {
+                                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.eventPubliserer = eventPubliserer;
     }
 
     @Override
@@ -46,11 +40,6 @@ public class InnhentRegisteropplysningerStegImpl implements InnhentRegisteropply
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         behandlingProsesseringTjeneste.opprettTasksForInitiellRegisterInnhenting(behandling);
-
-        if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
-            RisikoklassifiseringEvent risikoklassifiseringEvent = new RisikoklassifiseringEvent(behandling);
-            eventPubliserer.fireEvent(risikoklassifiseringEvent);
-        }
 
         return BehandleStegResultat.settPåVent();
     }
