@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -26,6 +27,10 @@ public class Innsending {
     @Valid
     private Saksnummer saksnummer;
 
+    @JsonProperty(value = "journalpostId")
+    @Valid
+    private JournalpostId journalpostId;
+
     @JsonProperty(value = "innhold", required = true)
     @NotNull
     @Valid
@@ -33,7 +38,10 @@ public class Innsending {
 
     @JsonCreator
     public Innsending(@JsonProperty(value = "saksnummer", required = true) @NotNull @Valid Saksnummer saksnummer,
-                            @JsonProperty(value = "innhold", required = true) @NotNull @Valid InnsendingInnhold innhold) {
+                      @JsonProperty(value = "innhold", required = true) @NotNull @Valid InnsendingInnhold innhold,
+                      @JsonProperty(value = "journalpostId") @Valid JournalpostId journalpostId
+                      ) {
+        this.journalpostId = journalpostId;
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
         this.innhold = Objects.requireNonNull(innhold, "innhold");
     }
@@ -43,10 +51,15 @@ public class Innsending {
         return saksnummer;
     }
 
+    @AbacAttributt("journalpostId")
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
+    }
+    
     public InnsendingInnhold getInnhold() {
         return innhold;
     }
-    
+
     public FagsakYtelseType getYtelseType() {
         return innhold.getYtelseType();
     }

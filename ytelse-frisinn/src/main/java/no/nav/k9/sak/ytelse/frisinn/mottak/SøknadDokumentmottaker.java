@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
@@ -56,14 +57,14 @@ public class SøknadDokumentmottaker {
         return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, yearFom, yearTom);
     }
 
-    Behandling mottaSoknad(Saksnummer saksnummer, FrisinnSøknad søknad) {
+    Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknad søknad) {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknad);
 
         final Behandling behandling = tilknyttBehandling(saksnummer);
         soknadOversetter.persister(søknad, behandling);
 
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
+        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
     }
 

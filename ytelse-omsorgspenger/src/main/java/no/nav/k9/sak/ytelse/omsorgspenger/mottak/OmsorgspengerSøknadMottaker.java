@@ -18,6 +18,7 @@ import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("OMP")
@@ -45,21 +46,17 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Override
-    public void mottaSøknad(Saksnummer saksnummer, OmsorgspengerSøknadInnsending søknadInnsending) {
+    public void mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId,  OmsorgspengerSøknadInnsending søknadInnsending) {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknadInnsending);
         // FIXME K9 Legg til logikk for valg av fagsak og behandling type
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
         var behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
 
-        // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av
-        // historikk.
-        // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
-
         // FIXME K9 Persister søknad
         persisterSøknad(behandling, søknadInnsending);
 
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
+        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
     }
 
     private void persisterSøknad(Behandling behandling, OmsorgspengerSøknadInnsending søknad) {

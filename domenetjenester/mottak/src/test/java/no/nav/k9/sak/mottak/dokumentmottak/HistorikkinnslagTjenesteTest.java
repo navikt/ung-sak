@@ -61,7 +61,7 @@ public class HistorikkinnslagTjenesteTest {
         when(journalTjeneste.hentMetadata(JOURNALPOST_ID)).thenReturn(List.of(journalMetadataHoveddokumentXml, journalMetadataHoveddokumentPdf, journalMetadataVedlegg));
 
         // Act
-        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID);
+        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID, HistorikkinnslagType.BEH_STARTET);
 
         // Assert
         ArgumentCaptor<Historikkinnslag> captor = ArgumentCaptor.forClass(Historikkinnslag.class);
@@ -92,7 +92,7 @@ public class HistorikkinnslagTjenesteTest {
         when(historikkRepository.hentHistorikk(behandling.getId())).thenReturn(Collections.singletonList(eksisterendeHistorikkinnslag));
 
         // Act
-        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID);
+        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID, HistorikkinnslagType.BEH_STARTET);
 
         // Assert
         verify(historikkRepository, times(0)).lagre(any(Historikkinnslag.class));

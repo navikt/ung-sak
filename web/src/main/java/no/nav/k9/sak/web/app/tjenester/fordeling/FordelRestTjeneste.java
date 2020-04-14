@@ -146,8 +146,9 @@ public class FordelRestTjeneste {
     public InnsendingMottatt innsending(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid Innsending innsending) {
         var saksnummer = innsending.getSaksnummer();
         var ytelseType = innsending.getYtelseType();
+        var journalpostId = innsending.getJournalpostId();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
-        søknadMottaker.mottaSøknad(saksnummer, innsending.getInnhold());
+        søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
         return new InnsendingMottatt(saksnummer);
     }
 

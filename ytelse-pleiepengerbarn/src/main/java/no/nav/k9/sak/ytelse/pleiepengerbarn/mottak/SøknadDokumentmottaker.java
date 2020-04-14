@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknadValidator;
@@ -56,18 +57,17 @@ class SøknadDokumentmottaker {
         return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato);
     }
 
-    Behandling mottaSoknad(Saksnummer saksnummer, PleiepengerBarnSøknad søknad) {
+    Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, PleiepengerBarnSøknad søknad) {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknad);
 
         new PleiepengerBarnSøknadValidator().forsikreValidert(søknad);
 
-        final Behandling behandling = tilknyttBehandling(saksnummer);
-        // FIXME K9 Vurder hvordan historikk bør håndteres: Vi trenger ikke kallet under hvis dokumenter fra Joark blir flettet inn ved visning av historikk.
-        // dokumentmottakerFelles.opprettHistorikk(behandling, journalPostId);
+        Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, behandling);
 
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandling(behandling);
+        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        
         return behandling;
     }
 

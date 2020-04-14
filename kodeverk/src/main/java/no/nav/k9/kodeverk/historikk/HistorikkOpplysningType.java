@@ -14,16 +14,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
+/**
+ * @deprecated har ingen gyldige verdier?.
+ */
+@Deprecated(forRemoval = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum HistorikkOpplysningType implements Kodeverdi {
 
     UDEFINIERT("-", "Ikke definert"),
-    ANTALL_BARN("ANTALL_BARN", "Antall barn"),
-    TPS_ANTALL_BARN("TPS_ANTALL_BARN", "Antall barn"),
-    FODSELSDATO("FODSELSDATO", "Fødselsdato"),
-    UTTAK_PERIODE_FOM("UTTAK_PERIODE_FOM", "Fradato uttaksperiode"),
-    UTTAK_PERIODE_TOM("UTTAK_PERIODE_TOM", "Tildato uttaksperiode"),
     ;
 
     private static final Map<String, HistorikkOpplysningType> KODER = new LinkedHashMap<>();
