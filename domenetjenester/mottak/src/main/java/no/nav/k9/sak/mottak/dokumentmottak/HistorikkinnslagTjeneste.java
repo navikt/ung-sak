@@ -48,29 +48,26 @@ public class HistorikkinnslagTjeneste {
         this.journalTjeneste = journalTjeneste;
     }
 
-    public void opprettHistorikkinnslag(Behandling behandling, JournalpostId journalpostId) {
-        if (historikkinnslagForBehandlingStartetErLoggetTidligere(behandling.getId(), HistorikkinnslagType.BEH_STARTET)) {
+    public void opprettHistorikkinnslag(Behandling behandling, JournalpostId journalpostId, HistorikkinnslagType historikkinnslagType) {
+        if (historikkinnslagForBehandlingStartetErLoggetTidligere(behandling.getId(), historikkinnslagType)) {
             return;
         }
 
         Historikkinnslag historikkinnslag = new Historikkinnslag();
         historikkinnslag.setAktør(HistorikkAktør.SØKER);
-        historikkinnslag.setType(HistorikkinnslagType.BEH_STARTET);
+        historikkinnslag.setType(historikkinnslagType);
         historikkinnslag.setBehandlingId(behandling.getId());
         historikkinnslag.setFagsakId(behandling.getFagsakId());
 
         leggTilHistorikkinnslagDokumentlinker(behandling.getType(), journalpostId, historikkinnslag);
 
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.BEH_STARTET);
-        builder.build(historikkinnslag);
+        new HistorikkInnslagTekstBuilder().medHendelse(historikkinnslagType).build(historikkinnslag);
 
         historikkRepository.lagre(historikkinnslag);
     }
 
     private boolean historikkinnslagForBehandlingStartetErLoggetTidligere(Long behandlingId, HistorikkinnslagType historikkinnslagType) {
         List<Historikkinnslag> eksisterendeHistorikkListe = historikkRepository.hentHistorikk(behandlingId);
-
 
         if (!eksisterendeHistorikkListe.isEmpty()) {
             for (Historikkinnslag eksisterendeHistorikk : eksisterendeHistorikkListe) {
@@ -91,7 +88,7 @@ public class HistorikkinnslagTjeneste {
 
             Optional<JournalMetadata> elektroniskSøknad = hoveddokumentJournalMetadata.stream()
                 .filter(it -> VariantFormat.ORIGINAL.equals(it.getVariantFormat())
-                    || VariantFormat.FULLVERSJON.equals(it.getVariantFormat())) //Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
+                    || VariantFormat.FULLVERSJON.equals(it.getVariantFormat())) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
                 .filter(it -> ArkivFilType.XML.equals(it.getArkivFilType())).findFirst();
 
             leggTilSøknadDokumentLenke(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
@@ -102,7 +99,8 @@ public class HistorikkinnslagTjeneste {
         historikkinnslag.setDokumentLinker(dokumentLinker);
     }
 
-    private void leggTilSøknadDokumentLenke(BehandlingType behandlingType, JournalpostId journalpostId, Historikkinnslag historikkinnslag, List<HistorikkinnslagDokumentLink> dokumentLinker, List<JournalMetadata> hoveddokumentJournalMetadata, Optional<JournalMetadata> elektroniskSøknad) {
+    private void leggTilSøknadDokumentLenke(BehandlingType behandlingType, JournalpostId journalpostId, Historikkinnslag historikkinnslag, List<HistorikkinnslagDokumentLink> dokumentLinker,
+                                            List<JournalMetadata> hoveddokumentJournalMetadata, Optional<JournalMetadata> elektroniskSøknad) {
         if (elektroniskSøknad.isPresent()) {
             final JournalMetadata journalMetadata = elektroniskSøknad.get();
             String linkTekst = journalMetadata.getDokumentType().equals(DokumentTypeId.INNTEKTSMELDING) ? INNTEKTSMELDING : SØKNAD; // NOSONAR
@@ -123,7 +121,7 @@ public class HistorikkinnslagTjeneste {
         return historikkinnslagDokumentLink;
     }
 
-    public void opprettHistorikkinnslagForAutomatiskHenlegelsePgaNySøknad(Behandling behandling){
+    public void opprettHistorikkinnslagForAutomatiskHenlegelsePgaNySøknad(Behandling behandling) {
         HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
             .medHendelse(HistorikkinnslagType.AVBRUTT_BEH)
             .medÅrsak(BehandlingResultatType.MERGET_OG_HENLAGT);

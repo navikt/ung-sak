@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.dokumentmottak;
+package no.nav.k9.sak.mottak.inntektsmelding;
 
 import static java.time.LocalDate.now;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +29,11 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.inntektsmelding.DokumentmottakerInntektsmelding;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakTestUtil;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
+import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
+import no.nav.k9.sak.mottak.dokumentmottak.Kompletthetskontroller;
+import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
@@ -65,7 +69,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
     @Mock
     private UttakTjeneste uttakTjeneste;
 
-    private DokumentmottakerYtelsesesrelatertDokument dokumentmottaker;
+    private DokumentmottakerInntektsmelding dokumentmottaker;
 
     @Before
     public void oppsett() {
@@ -83,6 +87,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
             behandlingsoppretter,
             kompletthetskontroller,
             uttakTjeneste,
+            prosessTaskRepository,
             repositoryProvider));
 
         var enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
@@ -107,7 +112,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         // Assert
         verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
             BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(dokumentmottakerFelles).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
+        verify(dokumentmottaker).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
     }
 
     @Test
@@ -128,7 +133,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         // Assert
         verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
             BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(dokumentmottakerFelles).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
+        verify(dokumentmottaker).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
     }
 
     @Test

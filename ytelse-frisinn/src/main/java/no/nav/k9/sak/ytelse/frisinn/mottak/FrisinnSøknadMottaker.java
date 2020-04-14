@@ -10,6 +10,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("FRISINN")
@@ -28,8 +29,8 @@ public class FrisinnSøknadMottaker implements SøknadMottakTjeneste<FrisinnSøk
     }
 
     @Override
-    public void mottaSøknad(Saksnummer saksnummer, FrisinnSøknadInnsending søknadInnsending) {
-        dokumentMottaker.mottaSoknad(saksnummer, søknadInnsending.getSøknad());
+    public void mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknadInnsending søknadInnsending) {
+        dokumentMottaker.mottaSøknad(saksnummer, journalpostId, søknadInnsending.getSøknad());
     }
 
     @Override
