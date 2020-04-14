@@ -6,7 +6,7 @@ import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
 public class Oppgaveinfo{
 
-    public static final Oppgaveinfo VURDER_KONST_YTELSE_FORELDREPENGER = new Oppgaveinfo("VUR_KONS_YTE_FOR", null);
+    public static final Oppgaveinfo VURDER_KONST_YTELSE_OMSORGSPENGER = new Oppgaveinfo("VUR_KONS_YTE_OMS", null);
     public static final Oppgaveinfo VURDER_DOKUMENT = new Oppgaveinfo(OppgaveÅrsak.VURDER_DOKUMENT.getKode(), null);
 
     private String oppgaveType;

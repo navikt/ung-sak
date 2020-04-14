@@ -20,9 +20,12 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.k9.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class SjekkMotEksisterendeOppgaverTjeneste {
+    private static final Logger log = LoggerFactory.getLogger(SjekkMotEksisterendeOppgaverTjeneste.class);
 
     private HistorikkRepository historikkRepository;
     private OppgaveTjeneste oppgaveTjeneste;
@@ -32,12 +35,15 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
     }
 
     @Inject
-    public SjekkMotEksisterendeOppgaverTjeneste(HistorikkRepository historikkRepository, OppgaveTjeneste oppgaveTjeneste) {
+    public SjekkMotEksisterendeOppgaverTjeneste(HistorikkRepository historikkRepository, OppgaveTjeneste     oppgaveTjeneste) {
         this.historikkRepository = historikkRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
     }
 
     public List<AksjonspunktDefinisjon> sjekkMotEksisterendeGsakOppgaver(AktørId aktørid, Behandling behandling) {
+        log.error("Sjekk mot VKY utkoblet - venter på implementasjon");
+        return new ArrayList<AksjonspunktDefinisjon>();
+        /*
 
         if (sjekkMotEksisterendeGsakOppgaverUtført(behandling)) {
             return new ArrayList<>();
@@ -46,20 +52,18 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
         List<Historikkinnslag> historikkInnslagFraRepo = historikkRepository.hentHistorikk(behandling.getId());
         List<AksjonspunktDefinisjon> aksjonspunktliste = new ArrayList<>();
         List<String> oppgaveÅrsakerVurder = Arrays.asList(OppgaveÅrsak.VURDER_DOKUMENT.getKode(),
-            Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER.getOppgaveType()); // FIXME : Tilpass for K9
+            Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER.getOppgaveType()); // FIXME : Tilpass for K9
 
         List<Oppgaveinfo> oppgaveinfos = oppgaveTjeneste.hentOppgaveListe(aktørid, oppgaveÅrsakerVurder);
         if (oppgaveinfos != null && !oppgaveinfos.isEmpty()) {
-            if (oppgaveinfos.contains(Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER)) {
+            if (oppgaveinfos.contains(Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER)) {
                 aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
                 opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONS_FOR_YTELSE, historikkInnslagFraRepo);
             }
-            if (oppgaveinfos.contains(Oppgaveinfo.VURDER_DOKUMENT)) {
-                aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK);
-                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_DOKUMENT, historikkInnslagFraRepo);
-            }
         }
         return aksjonspunktliste;
+
+         */
     }
 
     private boolean sjekkMotEksisterendeGsakOppgaverUtført(Behandling behandling) {
