@@ -1,10 +1,7 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.ES;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FP;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.SVP;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
