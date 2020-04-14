@@ -1,10 +1,7 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.ES;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FP;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.SVP;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
@@ -245,7 +242,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AUTO_VENT_ETTERLYST_INNTEKTSMELDING(AksjonspunktKodeDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding",
         BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", EnumSet.of(OMP, PSB)),
     AUTO_VENT_BRUKER_70_ÅR(AksjonspunktKodeDefinisjon.AUTO_VENT_BRUKER_70_ÅR, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet, bruker 70år ved refusjonskrav",
-        BehandlingStegType.VURDER_OPPTJENING_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P3W", EnumSet.of(OMP, PSB)),
+        BehandlingStegType.VURDER_OPPTJENING_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(OMP, PSB)),
 
     UNDEFINED,
 

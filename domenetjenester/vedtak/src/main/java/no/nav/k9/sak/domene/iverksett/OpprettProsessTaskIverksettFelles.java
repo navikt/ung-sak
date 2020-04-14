@@ -62,7 +62,9 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         taskData.addNesteParallell(parallelle);
 
-        taskData.addNesteSekvensiell(new ProsessTaskData(SendTilkjentYtelseTask.TASKTYPE));
+        // FIXME: Antar at denne er dekket av opprettTaskSendTilØkonomi() ?
+        // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
+        //taskData.addNesteSekvensiell(new ProsessTaskData(SendTilkjentYtelseTask.TASKTYPE));
 
         taskData.addNesteSekvensiell(new ProsessTaskData(VurderOppgaveArenaTask.TASKTYPE));
         taskData.addNesteSekvensiell(new ProsessTaskData(AvsluttBehandlingTask.TASKTYPE));

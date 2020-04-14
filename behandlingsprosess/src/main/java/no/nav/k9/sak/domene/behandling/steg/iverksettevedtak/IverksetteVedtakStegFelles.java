@@ -54,6 +54,7 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
         }
         førIverksetting(behandling, vedtak);
         log.info("Behandling {}: Iverksetter vedtak", behandlingId);
+        iverksetter(behandling);
         return BehandleStegResultat.settPåVent();
     }
 
@@ -66,4 +67,6 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
     protected abstract Optional<Venteårsak> kanBegynneIverksetting(Behandling behandling);
 
     protected abstract void førIverksetting(Behandling behandling, BehandlingVedtak behandlingVedtak);
+
+    protected abstract void iverksetter(Behandling behandling);
 }
