@@ -299,7 +299,7 @@ public class OppgaveTjenesteTest {
 
         ArgumentCaptor<FinnOppgaveListeRequestMal> captor = ArgumentCaptor.forClass(FinnOppgaveListeRequestMal.class);
         List<String> oppgaveÅrsaker = List.of(OppgaveÅrsak.VURDER_DOKUMENT.getKode(),
-            Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER.getOppgaveType());
+            Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER.getOppgaveType());
         when(oppgaveConsumer.finnOppgaveListe(captor.capture())).thenReturn(mockResponse);
 
         // Act
