@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
@@ -16,7 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 /**
  * @see BehandlingLås
  */
-@ApplicationScoped
+@Dependent
 public class BehandlingLåsRepository {
 
     private static final Map<String, Object> BYPASS_PROPS = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);

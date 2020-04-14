@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -76,8 +76,7 @@ import no.nav.vedtak.konfig.PropertyUtil;
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
  */
-
-@ApplicationScoped
+@Dependent
 public class BehandlingDtoTjeneste {
 
     private FagsakRepository fagsakRepository;

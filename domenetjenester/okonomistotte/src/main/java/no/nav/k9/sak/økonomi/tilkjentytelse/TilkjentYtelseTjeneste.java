@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -36,7 +36,7 @@ import no.nav.k9.sak.skjæringstidspunkt.YtelseOpphørtidspunktTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 
-@ApplicationScoped
+@Dependent
 public class TilkjentYtelseTjeneste {
 
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();

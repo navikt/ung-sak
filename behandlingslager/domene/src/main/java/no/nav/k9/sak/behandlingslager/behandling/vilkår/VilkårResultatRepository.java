@@ -3,7 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
-@ApplicationScoped
+@Dependent
 public class VilkårResultatRepository {
 
     private static final Logger log = LoggerFactory.getLogger(VilkårResultatRepository.class);

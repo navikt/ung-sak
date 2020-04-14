@@ -3,7 +3,7 @@ package no.nav.k9.sak.domene.arbeidsforhold.impl;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-@ApplicationScoped
+@Dependent
 public class PåkrevdeInntektsmeldingerTjeneste {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VurderArbeidsforholdTjeneste.class);

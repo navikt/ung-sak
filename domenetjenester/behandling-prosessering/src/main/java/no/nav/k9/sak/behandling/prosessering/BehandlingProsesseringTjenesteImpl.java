@@ -4,7 +4,7 @@ import static no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskP
 
 import java.time.LocalDateTime;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -36,7 +36,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
  * - grunnlag endres ved ankomst av dokument, ved registerinnhenting og ved senere overstyring ("bekreft AP" eller egne overstyringAP)
  * - Hendelser: Ny behandling (Manuell, dokument, mv), Gjenopptak (Manuell/Frist), Interaktiv (Oppdater/Fortsett), Dokument, Datahendelse, Vedtak, KØ-hendelser
  **/
-@ApplicationScoped
+@Dependent
 public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesseringTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;

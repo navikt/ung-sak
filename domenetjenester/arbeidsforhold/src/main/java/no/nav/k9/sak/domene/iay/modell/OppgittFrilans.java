@@ -35,7 +35,6 @@ public class OppgittFrilans {
         this.frilansoppdrag = kopierFra.frilansoppdrag == null
             ? Collections.emptyList()
             : kopierFra.frilansoppdrag.stream().map(OppgittFrilansoppdrag::new).collect(Collectors.toList());
-        ;
     }
 
     @Override

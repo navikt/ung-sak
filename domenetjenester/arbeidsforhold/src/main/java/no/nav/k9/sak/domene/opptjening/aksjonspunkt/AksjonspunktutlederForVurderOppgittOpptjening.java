@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -42,8 +41,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
-@ApplicationScoped
-public class AksjonspunktutlederForVurderOppgittOpptjening implements AksjonspunktUtleder {
+@Dependent
+public class AksjonspunktutlederForVurderOppgittOpptjening {
 
     private static final List<AksjonspunktResultat> INGEN_AKSJONSPUNKTER = emptyList();
     private static final Logger logger = LoggerFactory.getLogger(AksjonspunktutlederForVurderOppgittOpptjening.class);
@@ -65,7 +64,6 @@ public class AksjonspunktutlederForVurderOppgittOpptjening implements Aksjonspun
         this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
-    @Override
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
 
         Long behandlingId = param.getBehandlingId();

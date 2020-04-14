@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
@@ -23,7 +23,7 @@ import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
  * <p>
  * Favor composition over inheritance
  */
-@ApplicationScoped
+@Dependent
 public class KompletthetsjekkerFelles {
 
 

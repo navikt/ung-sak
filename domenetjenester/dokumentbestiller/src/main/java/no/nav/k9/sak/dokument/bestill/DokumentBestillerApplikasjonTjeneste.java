@@ -2,7 +2,7 @@ package no.nav.k9.sak.dokument.bestill;
 
 import static no.nav.k9.sak.dokument.bestill.vedtak.VedtaksbrevUtleder.velgDokumentMalForVedtak;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
@@ -15,11 +15,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.dokument.bestill.kafka.DokumentKafkaBestiller;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 
-@ApplicationScoped
+@Dependent
 public class DokumentBestillerApplikasjonTjeneste {
 
     private BehandlingRepository behandlingRepository;
-
     private DokumentKafkaBestiller dokumentKafkaBestiller;
     private VedtakVarselRepository behandlingsresultatRepository;
 

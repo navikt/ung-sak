@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
@@ -49,7 +49,7 @@ import no.nav.k9.sak.typer.OrgNummer;
 /**
  * Håndterer administrasjon(saksbehandlers input) vedrørende arbeidsforhold.
  */
-@ApplicationScoped
+@Dependent
 public class ArbeidsforholdAdministrasjonTjeneste {
 
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;

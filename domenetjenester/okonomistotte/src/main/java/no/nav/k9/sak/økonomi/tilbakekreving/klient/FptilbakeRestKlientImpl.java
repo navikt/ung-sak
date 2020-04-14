@@ -1,18 +1,20 @@
 package no.nav.k9.sak.økonomi.tilbakekreving.klient;
 
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.net.URI;
-import java.net.URISyntaxException;
+import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
-@ApplicationScoped
+@Dependent
 public class FptilbakeRestKlientImpl implements FptilbakeRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(FptilbakeRestKlientImpl.class);

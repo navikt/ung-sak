@@ -1,5 +1,14 @@
 package no.nav.k9.sak.domene.risikoklassifisering.tjeneste;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
@@ -11,15 +20,7 @@ import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringEnti
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringRepository;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.Objects;
-import java.util.Optional;
-
-@ApplicationScoped
+@Dependent
 public class RisikovurderingTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(RisikovurderingTjeneste.class);

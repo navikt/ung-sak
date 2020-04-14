@@ -1,9 +1,9 @@
 package no.nav.k9.sak.domene.risikoklassifisering.kafka.config;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-@ApplicationScoped
+@Dependent
 class RisikoklassifiseringKafkaProducerImpl implements RisikoklassifiseringKafkaProducer {
 
     private MeldingProducer meldingProducer;

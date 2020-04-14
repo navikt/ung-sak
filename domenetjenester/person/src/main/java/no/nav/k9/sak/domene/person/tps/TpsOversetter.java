@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -52,7 +52,7 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkRespons
 import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
 import no.nav.vedtak.log.util.LoggerUtils;
 
-@ApplicationScoped
+@Dependent
 public class TpsOversetter {
 
     private static final Logger log = LoggerFactory.getLogger(TpsOversetter.class);

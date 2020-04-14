@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
@@ -17,7 +16,7 @@ import no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @SuppressWarnings("rawtypes")
-@ApplicationScoped
+@Dependent
 public class InntektsmeldingPersistererTjeneste {
 
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;

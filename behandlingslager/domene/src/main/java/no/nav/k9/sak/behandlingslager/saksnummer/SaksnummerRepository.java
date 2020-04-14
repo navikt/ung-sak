@@ -1,13 +1,14 @@
 package no.nav.k9.sak.behandlingslager.saksnummer;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Objects;
 
-@ApplicationScoped
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+@Dependent
 public class SaksnummerRepository {
 
     private EntityManager entityManager;

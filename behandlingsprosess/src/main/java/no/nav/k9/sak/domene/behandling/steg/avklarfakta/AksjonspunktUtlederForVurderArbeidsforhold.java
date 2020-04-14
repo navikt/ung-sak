@@ -21,7 +21,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -33,7 +32,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ApplicationScoped
-public class AksjonspunktUtlederForVurderArbeidsforhold implements AksjonspunktUtleder {
+public class AksjonspunktUtlederForVurderArbeidsforhold {
     private static final List<AksjonspunktResultat> INGEN_AKSJONSPUNKTER = emptyList();
 
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
@@ -56,7 +55,6 @@ public class AksjonspunktUtlederForVurderArbeidsforhold implements AksjonspunktU
         this.arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste = new ArbeidsforholdUtenRelevantOppgittOpptjening();
     }
 
-    @Override
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
         if (skalVentePåInntektsmelding(param)) {
             var skjæringstidspunkt = param.getSkjæringstidspunkt();

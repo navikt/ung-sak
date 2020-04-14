@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
@@ -32,7 +32,7 @@ import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagSoeknadsperiodeDto;
 import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagTotrinnsVurderingDto;
 import no.nav.k9.sak.typer.JournalpostId;
 
-@ApplicationScoped
+@Dependent
 public class HistorikkInnslagKonverter {
 
     @Inject

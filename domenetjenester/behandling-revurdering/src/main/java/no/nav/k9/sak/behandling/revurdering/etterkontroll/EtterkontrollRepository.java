@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -20,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 /**
  * Oppdatering av tilstand for etterkontroll av behandling.
  */
-@ApplicationScoped
+@Dependent
 public class EtterkontrollRepository {
 
     private EntityManager entityManager;

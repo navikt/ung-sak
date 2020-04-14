@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.Grunnbeløp;
@@ -12,7 +12,7 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 
-@ApplicationScoped
+@Dependent
 public class GrunnbeløpTjeneste {
 
     private BeregningsresultatRepository repository;

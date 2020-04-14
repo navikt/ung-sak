@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.sak.typer.Saksnummer;
 
-@ApplicationScoped
+@Dependent
 public class HistorikkRepository {
     private EntityManager entityManager;
 
