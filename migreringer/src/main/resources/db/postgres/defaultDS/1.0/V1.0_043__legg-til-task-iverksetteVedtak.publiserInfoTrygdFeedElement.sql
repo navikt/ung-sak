@@ -1,0 +1,2 @@
+delete from prosess_task_type where kode='iverksettVedtak.publisreInfoTrygdFeedElement';
+Insert into PROSESS_TASK_TYPE (KODE,NAVN,FEIL_MAKS_FORSOEK,FEIL_SEK_MELLOM_FORSOEK,FEILHANDTERING_ALGORITME,BESKRIVELSE,CRON_EXPRESSION) values ('iverksetteVedtak.publiserInfotrygdFeedElement','Publiserer melding om vedtak til infotrygd',3,60,'DEFAULT','Publiserer melding om vedtak til infotrygd (for visning i skyggelinje)',null);
