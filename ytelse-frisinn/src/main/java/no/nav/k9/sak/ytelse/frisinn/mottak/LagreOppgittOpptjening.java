@@ -60,7 +60,9 @@ class LagreOppgittOpptjening {
             }).collect(Collectors.toList());
 
             OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
-            OppgittFrilans oppgittFrilans = frilansBuilder.leggTilOppgittOppdrag(oppdrag)
+            OppgittFrilans oppgittFrilans = frilansBuilder
+                    .medErNyoppstartet(false)
+                    .leggTilOppgittOppdrag(oppdrag)
                     .build();
             opptjeningBuilder.leggTilFrilansOpplysninger(oppgittFrilans);
             erNyeOpplysninger = true;
