@@ -46,6 +46,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
@@ -139,7 +140,12 @@ public class TilKalkulusMapper {
     }
 
     private static OppgittFrilansDto mapOppgittFrilans(OppgittFrilans oppgittFrilans) {
-        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet());
+        List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
+                .stream()
+                .map(frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt()))
+                .collect(Collectors.toList());
+
+        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet(), oppdrag);
     }
 
     private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt) {
