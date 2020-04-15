@@ -69,18 +69,15 @@ public class OppgittFrilans {
         return harInntektFraFosterhjem;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
+    void setHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
         this.harInntektFraFosterhjem = harInntektFraFosterhjem;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setErNyoppstartet(boolean erNyoppstartet) {
+    void setErNyoppstartet(boolean erNyoppstartet) {
         this.erNyoppstartet = erNyoppstartet;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setHarNærRelasjon(boolean harNærRelasjon) {
+    void setHarNærRelasjon(boolean harNærRelasjon) {
         this.harNærRelasjon = harNærRelasjon;
     }
 
