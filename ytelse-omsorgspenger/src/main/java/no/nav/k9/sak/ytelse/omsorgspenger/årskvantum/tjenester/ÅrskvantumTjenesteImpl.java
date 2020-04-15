@@ -54,7 +54,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         for (Familierelasjon familierelasjon :personMedRelasjoner.get().getFamilierelasjoner()) {
             if (familierelasjon.getRelasjonsrolle().equals(RelasjonsRolleType.BARN) && familierelasjon.getHarSammeBosted()) {
-               årskvantumRequest.getBarna().add(new Barn(familierelasjon.getPersonIdent(), familierelasjon.getFødselsdato(), familierelasjon.getHarSammeBosted()));
+                var barn = tpsTjeneste.hentBrukerForFnr(familierelasjon.getPersonIdent());
+                årskvantumRequest.getBarna().add(new Barn(familierelasjon.getPersonIdent(), barn.get().getFødselsdato(), barn.get().getDødsdato(), familierelasjon.getHarSammeBosted()));
             }
         }
 

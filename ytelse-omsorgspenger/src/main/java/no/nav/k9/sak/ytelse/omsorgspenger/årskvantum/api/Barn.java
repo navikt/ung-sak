@@ -25,14 +25,19 @@ public class Barn {
     @NotNull
     private LocalDate fødselsdato;
 
+    @JsonProperty(value = "dødsdato")
+    @Valid
+    private LocalDate dødsdato;
+
     @JsonProperty(value = "harSammeBosted")
     @Valid
     private Boolean harSammeBosted;
 
     public Barn(@Valid @NotNull PersonIdent personIdent,
-                @Valid @NotNull LocalDate fødselsdato, @Valid Boolean harSammeBosted) {
+                @Valid @NotNull LocalDate fødselsdato, LocalDate dødsdato, @Valid Boolean harSammeBosted) {
         this.personIdent = personIdent;
         this.fødselsdato = fødselsdato;
+        this.dødsdato = dødsdato;
         this.harSammeBosted = harSammeBosted;
     }
 }
