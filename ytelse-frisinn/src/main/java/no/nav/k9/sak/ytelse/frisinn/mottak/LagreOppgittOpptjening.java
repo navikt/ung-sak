@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,8 +15,12 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.søknad.felles.Periode;
 import no.nav.k9.søknad.frisinn.Inntekter;
@@ -43,19 +48,29 @@ class LagreOppgittOpptjening {
         Long behandlingId = behandling.getId();
 
         OppgittOpptjeningBuilder opptjeningBuilder = initOpptjeningBuilder(behandling.getFagsakId(), tidspunkt);
-        
+
         boolean erNyeOpplysninger = false;
         if (inntekter.getFrilanser() != null) {
             var fri = inntekter.getFrilanser();
-            // FIXME K9: avgjør hvordan motta/håndtere frilansinntekt/perioder. Mulig ikke trenger i hele tatt dersom alt tas fra a-melding?
+            List<OppgittFrilansoppdrag> oppdrag = fri.getInntekterSøknadsperiode().entrySet().stream().map(entry -> {
+                OppgittFrilansOppdragBuilder builder = OppgittFrilansOppdragBuilder.ny();
+                return builder.medInntekt(entry.getValue().getBeløp())
+                        .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed()))
+                        .build();
+            }).collect(Collectors.toList());
+
+            OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
+            OppgittFrilans oppgittFrilans = frilansBuilder.leggTilOppgittOppdrag(oppdrag)
+                    .build();
+            opptjeningBuilder.leggTilFrilansOpplysninger(oppgittFrilans);
             erNyeOpplysninger = true;
         }
 
         if (inntekter.getSelvstendig() != null) {
             var selv = inntekter.getSelvstendig();
-            
+
             // slår sammen historiske og løpende inntekter her.  Bruker stp senere til håndtere før/etter inntektstap startet.
-            
+
             var egenNæringFør = selv.getInntekterFør().entrySet().stream().map(this::mapEgenNæring).collect(Collectors.toList());
             opptjeningBuilder.leggTilEgneNæringer(egenNæringFør);
 
@@ -73,7 +88,7 @@ class LagreOppgittOpptjening {
 
     private OppgittOpptjeningBuilder initOpptjeningBuilder(Long fagsakId, ZonedDateTime tidspunkt) {
         OppgittOpptjeningBuilder builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
-        
+
         // bygg på eksisterende hvis tidligere innrapportert for denne ytelsen (sikrer at vi får med originalt rapportert inntektsgrunnlag).
         // TODO: håndtere korreksjoner senere?  vil nå bare akkumulere innrappotert.
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);

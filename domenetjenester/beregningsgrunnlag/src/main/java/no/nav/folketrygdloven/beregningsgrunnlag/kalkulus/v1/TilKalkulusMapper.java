@@ -215,16 +215,20 @@ public class TilKalkulusMapper {
 
     private static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
         List<UtbetalingDto> utbetalingDtoer = alleInntektBeregningsgrunnlag.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
-        if (utbetalingDtoer.isEmpty()) {
+        if (!utbetalingDtoer.isEmpty()) {
             return new InntekterDto(utbetalingDtoer);
         }
         return null;
     }
 
     private static UtbetalingDto mapTilDto(Inntekt inntekt) {
-        return new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
-            inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
+        UtbetalingDto utbetalingDto = new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
+                inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
         );
+        if (inntekt.getArbeidsgiver() != null) {
+            return utbetalingDto.medArbeidsgiver(mapTilAktør(inntekt.getArbeidsgiver()));
+        }
+        return utbetalingDto;
     }
 
     private static UtbetalingsPostDto mapTilDto(Inntektspost inntektspost) {

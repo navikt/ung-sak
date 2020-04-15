@@ -25,9 +25,11 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 
@@ -188,7 +190,12 @@ class MapOppgittOpptjening {
         private static OppgittFrilansoppdragDto mapFrilansoppdrag(OppgittFrilansoppdrag frilansoppdrag) {
             var periode = new Periode(frilansoppdrag.getPeriode().getFomDato(), frilansoppdrag.getPeriode().getTomDato());
             var oppdragsgiver = frilansoppdrag.getOppdragsgiver();
-            return new OppgittFrilansoppdragDto(periode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(oppdragsgiver));
+            BigDecimal inntekt = frilansoppdrag.getInntekt();
+            OppgittFrilansoppdragDto oppgittFrilansoppdragDto = new OppgittFrilansoppdragDto(periode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(oppdragsgiver));
+            if (inntekt != null) {
+                return oppgittFrilansoppdragDto.medInntekt(inntekt);
+            }
+            return oppgittFrilansoppdragDto;
         }
 
         private static OppgittAnnenAktivitetDto mapAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet) {
@@ -238,15 +245,20 @@ class MapOppgittOpptjening {
                 return null;
 
             var frilans = new OppgittFrilans();
+            OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
 
-            frilans.setErNyoppstartet(dto.isErNyoppstartet());
-            frilans.setHarNærRelasjon(dto.isHarNærRelasjon());
-            frilans.setHarInntektFraFosterhjem(dto.isHarInntektFraFosterhjem());
+            frilansBuilder.medErNyoppstartet(dto.isErNyoppstartet());
+            frilansBuilder.medHarNærRelasjon(dto.isHarNærRelasjon());
+            frilansBuilder.medHarInntektFraFosterhjem(dto.isHarInntektFraFosterhjem());
 
             var frilansoppdrag = mapEach(dto.getFrilansoppdrag(),
-                f -> new OppgittFrilansoppdrag(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()),
-                    DatoIntervallEntitet.fraOgMedTilOgMed(f.getPeriode().getFom(), f.getPeriode().getTom())));
-            frilans.setFrilansoppdrag(frilansoppdrag);
+                    f -> OppgittFrilansOppdragBuilder.ny()
+                            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(f.getPeriode().getFom(), f.getPeriode().getTom()))
+                            .medInntekt(f.getInntekt())
+                            .medOppdragsgiver(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()))
+                            .build());
+
+            frilansBuilder.leggTilOppgittOppdrag(frilansoppdrag);
             return frilans;
         }
 

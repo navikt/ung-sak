@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.iay.modell;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import no.nav.k9.kodeverk.api.IndexKey;
@@ -15,18 +16,17 @@ public class OppgittFrilansoppdrag implements IndexKey {
     @ChangeTracked
     private DatoIntervallEntitet periode;
 
-    OppgittFrilansoppdrag() {
-    }
+    @ChangeTracked
+    private BigDecimal inntekt;
 
-    public OppgittFrilansoppdrag(String oppdragsgiver, DatoIntervallEntitet periode) {
-        this.oppdragsgiver = oppdragsgiver;
-        this.periode = periode;
+    OppgittFrilansoppdrag() {
     }
 
     /** deep-copy ctor. */
     OppgittFrilansoppdrag(OppgittFrilansoppdrag kopierFra) {
         this.oppdragsgiver = kopierFra.oppdragsgiver;
         this.periode = kopierFra.periode;
+        this.inntekt = kopierFra.inntekt;
     }
 
     @Override
@@ -39,25 +39,40 @@ public class OppgittFrilansoppdrag implements IndexKey {
         this.periode = periode;
     }
 
+    public BigDecimal getInntekt() {
+        return inntekt;
+    }
+
+    void setInntekt(BigDecimal inntekt) {
+        this.inntekt = inntekt;
+    }
+
+    void setOppdragsgiver(String oppdragsgiver) {
+        this.oppdragsgiver = oppdragsgiver;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || !(o instanceof OppgittFrilansoppdrag))
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         OppgittFrilansoppdrag that = (OppgittFrilansoppdrag) o;
         return Objects.equals(oppdragsgiver, that.oppdragsgiver) &&
-            Objects.equals(periode, that.periode);
+                periode.equals(that.periode) &&
+                Objects.equals(inntekt, that.inntekt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppdragsgiver, periode);
+        return Objects.hash(oppdragsgiver, periode, inntekt);
     }
 
     @Override
     public String toString() {
-        return "FrilansoppdragEntitet<" + "oppdragsgiver='" + oppdragsgiver + '\'' + ", periode=" + periode + '>';
+        return "OppgittFrilansoppdrag{" +
+                "oppdragsgiver='" + oppdragsgiver + '\'' +
+                ", periode=" + periode +
+                ", inntekt=" + inntekt +
+                '}';
     }
 
     public DatoIntervallEntitet getPeriode() {
