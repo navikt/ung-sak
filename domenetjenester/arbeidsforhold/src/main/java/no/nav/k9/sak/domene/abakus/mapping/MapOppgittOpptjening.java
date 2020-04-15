@@ -244,7 +244,6 @@ class MapOppgittOpptjening {
             if (dto == null)
                 return null;
 
-            var frilans = new OppgittFrilans();
             OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
 
             frilansBuilder.medErNyoppstartet(dto.isErNyoppstartet());
@@ -259,7 +258,7 @@ class MapOppgittOpptjening {
                             .build());
 
             frilansBuilder.leggTilOppgittOppdrag(frilansoppdrag);
-            return frilans;
+            return frilansBuilder.build();
         }
 
         private static EgenNæringBuilder mapEgenNæring(OppgittEgenNæringDto dto) {
