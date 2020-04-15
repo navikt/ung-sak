@@ -78,7 +78,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
             utførtRegler(kontekst, behandling, regelResultat, intervall);
         }
 
-        return regelResultat.getAksjonspunktDefinisjoner();
+        return new ArrayList<>(regelResultat.getAksjonspunktDefinisjoner());
     }
 
     protected BehandleStegResultat stegResultat(List<AksjonspunktDefinisjon> aksjonspunkter) {

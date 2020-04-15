@@ -2,14 +2,11 @@ package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
 import static java.util.Collections.singletonList;
 
-import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -18,7 +15,6 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårStegImpl;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -50,11 +46,15 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
     @Override
     protected void utførtRegler(BehandlingskontrollKontekst kontekst, Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        if (vilkårErVurdert(regelResultat, periode.getFomDato(), periode.getTomDato())) {
+        if (regelResultat.vilkårErVurdert(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
             OpptjeningsvilkårResultat opres = getVilkårresultat(behandling, regelResultat, periode);
             MapTilOpptjeningAktiviteter mapper = new MapTilOpptjeningAktiviteter();
             List<OpptjeningAktivitet> aktiviteter = mapTilOpptjeningsaktiviteter(mapper, opres);
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), opres.getResultatOpptjent(), aktiviteter);
+
+            if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
+                regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+            }
         } else {
             // rydd bort tidligere aktiviteter
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), null, Collections.emptyList());
@@ -72,18 +72,6 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
                 "Utvikler-feil: finner ikke resultat fra evaluering av Inngangsvilkår/Opptjeningsvilkåret:" + behandling.getId());
         }
         return op;
-    }
-
-    private boolean vilkårErVurdert(RegelResultat regelResultat, LocalDate fom, LocalDate tom) {
-        final var berørtePerioder = regelResultat.getVilkårene()
-            .getVilkårene()
-            .stream()
-            .filter(v -> v.getVilkårType().equals(OPPTJENINGSVILKÅRET))
-            .map(Vilkår::getPerioder)
-            .flatMap(Collection::stream)
-            .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
-            .collect(Collectors.toList());
-        return berørtePerioder.stream().noneMatch(it -> it.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT));
     }
 
     @Override
