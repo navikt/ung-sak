@@ -1,11 +1,11 @@
 package no.nav.k9.sak.domene.person.personopplysning;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 
-@ApplicationScoped
+@Dependent
 public class BasisPersonopplysningTjeneste extends AbstractPersonopplysningTjenesteImpl {
 
     BasisPersonopplysningTjeneste() {

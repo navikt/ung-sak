@@ -2,7 +2,7 @@ package no.nav.k9.sak.behandling;
 
 import java.util.Objects;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
@@ -13,7 +13,7 @@ import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
-@ApplicationScoped
+@Dependent
 public class FagsakStatusEventPubliserer {
     private static final Logger log = LoggerFactory.getLogger(FagsakStatusEventPubliserer.class);
 

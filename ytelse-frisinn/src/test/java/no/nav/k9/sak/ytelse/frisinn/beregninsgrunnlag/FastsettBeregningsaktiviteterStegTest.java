@@ -21,6 +21,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 @RunWith(CdiRunner.class)
 public class FastsettBeregningsaktiviteterStegTest {
 
+    @SuppressWarnings("rawtypes")
     @Inject
     private @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper> instances;
     

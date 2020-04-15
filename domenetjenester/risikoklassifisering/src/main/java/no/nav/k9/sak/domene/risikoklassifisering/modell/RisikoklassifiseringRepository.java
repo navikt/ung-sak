@@ -1,18 +1,18 @@
 package no.nav.k9.sak.domene.risikoklassifisering.modell;
 
-import javax.enterprise.context.ApplicationScoped;
+import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
+
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.kodeverk.risikoklassifisering.FaresignalVurdering;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
-
-@ApplicationScoped
+@Dependent
 public class RisikoklassifiseringRepository {
 
     private EntityManager entityManager;

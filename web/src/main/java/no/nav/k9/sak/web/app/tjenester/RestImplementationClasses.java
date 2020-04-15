@@ -27,7 +27,6 @@ import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.forsendelse.ForsendelseStatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.konfig.KonfigRestTjeneste;
@@ -56,7 +55,6 @@ public class RestImplementationClasses {
         classes.add(FordelRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
-        classes.add(ForsendelseStatusRestTjeneste.class);
         classes.add(PersonRestTjeneste.class);
         classes.add(SøknadRestTjeneste.class);
         classes.add(OpptjeningRestTjeneste.class);

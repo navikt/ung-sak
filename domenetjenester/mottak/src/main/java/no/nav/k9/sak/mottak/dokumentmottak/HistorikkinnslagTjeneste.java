@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -27,7 +27,7 @@ import no.nav.k9.sak.dokument.arkiv.journal.JournalTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
 
-@ApplicationScoped
+@Dependent
 public class HistorikkinnslagTjeneste {
 
     private static final String VEDLEGG = "Vedlegg";

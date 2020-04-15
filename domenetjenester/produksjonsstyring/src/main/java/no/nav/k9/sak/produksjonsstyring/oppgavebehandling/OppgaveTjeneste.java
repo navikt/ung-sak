@@ -387,7 +387,7 @@ public class OppgaveTjeneste {
         return builder
             .medOpprettetAvEnhetId(Integer.parseInt(enhetsId))
             .medAnsvarligEnhetId(enhetsId)
-            .medFagomradeKode(FagomradeKode.FOR.getKode())
+            .medFagomradeKode(FagomradeKode.OMS.getKode())
             .medFnr(personinfo.getPersonIdent().getIdent())
             .medBrukerTypeKode(BrukerType.PERSON)
             .medAktivFra(LocalDate.now())

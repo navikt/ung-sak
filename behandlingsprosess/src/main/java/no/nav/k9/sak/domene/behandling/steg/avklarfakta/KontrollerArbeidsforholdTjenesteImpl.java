@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -24,7 +22,6 @@ import no.nav.k9.sak.behandlingskontroll.StartpunktRef;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 
-
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
 @StartpunktRef("KONTROLLER_ARBEIDSFORHOLD")
@@ -32,7 +29,7 @@ import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtlede
 public class KontrollerArbeidsforholdTjenesteImpl implements KontrollerFaktaAksjonspunktUtleder {
 
     private static final Logger logger = LoggerFactory.getLogger(KontrollerArbeidsforholdTjenesteImpl.class);
-    private KontrollerArbeidsforholdUtledere utlederTjeneste;
+    private AksjonspunktUtlederForVurderArbeidsforhold aksjonspunktUtlederVurderArbeidsforhold;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     protected KontrollerArbeidsforholdTjenesteImpl() {
@@ -40,9 +37,9 @@ public class KontrollerArbeidsforholdTjenesteImpl implements KontrollerFaktaAksj
     }
 
     @Inject
-    public KontrollerArbeidsforholdTjenesteImpl(KontrollerArbeidsforholdUtledere utlederTjeneste,
+    public KontrollerArbeidsforholdTjenesteImpl(AksjonspunktUtlederForVurderArbeidsforhold utlederTjeneste,
                                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
-        this.utlederTjeneste = utlederTjeneste;
+        this.aksjonspunktUtlederVurderArbeidsforhold = utlederTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
 
@@ -69,21 +66,16 @@ public class KontrollerArbeidsforholdTjenesteImpl implements KontrollerFaktaAksj
             referanse.getFagsakYtelseType(), referanse.getBehandlingType(), startpunkt.getBehandlingSteg(), apDef);
         if (!skalBeholde) {
             logger.debug("Fjerner aksjonspunkt {} da det skal løses før startsteg {}.",
-                apDef.getKode(), startpunkt.getBehandlingSteg().getKode()); //NOSONAR
+                apDef.getKode(), startpunkt.getBehandlingSteg().getKode()); // NOSONAR
         }
         return skalBeholde;
     }
 
     private List<AksjonspunktResultat> utled(BehandlingReferanse ref) {
-        final List<AksjonspunktUtleder> aksjonspunktUtleders = utlederTjeneste.utledUtledereFor();
-        List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
-        for (AksjonspunktUtleder aksjonspunktUtleder : aksjonspunktUtleders) {
-            aksjonspunktResultater.addAll(aksjonspunktUtleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref)));
-        }
+        var input = new AksjonspunktUtlederInput(ref);
+        List<AksjonspunktResultat> aksjonspunktResultater = aksjonspunktUtlederVurderArbeidsforhold.utledAksjonspunkterFor(input);
         return aksjonspunktResultater.stream()
             .distinct() // Unngå samme aksjonspunkt flere multipliser
             .collect(toList());
     }
 }
-
-

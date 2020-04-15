@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.risikoklassifisering;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
@@ -12,7 +12,7 @@ import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikoklassifiseringEv
 /**
  * Håndterer fyring av events via CDI når det skjer en overgang i Behandlingskontroll mellom steg, eller statuser
  */
-@ApplicationScoped
+@Dependent
 public class RisikoklassifiseringEventPubliserer {
 
     private BeanManager beanManager;

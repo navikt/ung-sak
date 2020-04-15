@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
@@ -62,7 +62,7 @@ import no.nav.vedtak.feil.LogLevel;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 
-@ApplicationScoped
+@Dependent
 @Default
 public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTjeneste {
 

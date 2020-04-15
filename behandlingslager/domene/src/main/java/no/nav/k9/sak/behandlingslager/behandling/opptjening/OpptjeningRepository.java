@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -27,7 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
-@ApplicationScoped
+@Dependent
 public class OpptjeningRepository {
 
     private EntityManager em;

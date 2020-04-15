@@ -3,9 +3,8 @@ package no.nav.k9.sak.behandling.prosessering;
 import static no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties.GJENOPPTA_STEG;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -13,7 +12,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
-import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -38,7 +36,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
  * - grunnlag endres ved ankomst av dokument, ved registerinnhenting og ved senere overstyring ("bekreft AP" eller egne overstyringAP)
  * - Hendelser: Ny behandling (Manuell, dokument, mv), Gjenopptak (Manuell/Frist), Interaktiv (Oppdater/Fortsett), Dokument, Datahendelse, Vedtak, KØ-hendelser
  **/
-@ApplicationScoped
+@Dependent
 public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesseringTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -71,11 +69,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         registerdataEndringshåndterer.sikreInnhentingRegisteropplysningerVedNesteOppdatering(behandling);
     }
 
-    @Override
-    public boolean erStegAktueltForBehandling(Behandling behandling, BehandlingStegType behandlingStegType) {
-        return behandlingskontrollTjeneste.inneholderSteg(behandling, behandlingStegType);
-    }
-
     // AV/PÅ Vent
     @Override
     public void taBehandlingAvVent(Behandling behandling) {
@@ -94,12 +87,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
     }
 
-    // Returnerer snapshot av grunnlag før registerinnhentingen. Forutsetter at behandling ikke er på vent.
-    @Override
-    public EndringsresultatSnapshot oppdaterRegisterdata(Behandling behandling) {
-        return null; // TODO: trengs denne?
-    }
-
     // Returnerer endringer i grunnlag mellom snapshot og nåtilstand
     @Override
     public EndringsresultatDiff finnGrunnlagsEndring(Behandling behandling, EndringsresultatSnapshot før) {
@@ -109,19 +96,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     @Override
     public void reposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatDiff grunnlagDiff) {
         registerdataEndringshåndterer.reposisjonerBehandlingVedEndringer(behandling, grunnlagDiff);
-    }
-
-    @Override
-    public void reposisjonerBehandlingTilbakeTil(Behandling behandling, BehandlingStegType stegType) {
-        if (behandlingskontrollTjeneste.inneholderSteg(behandling, stegType)) {
-            BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-            behandlingskontrollTjeneste.behandlingTilbakeføringHvisTidligereBehandlingSteg(kontekst, stegType);
-        }
-    }
-
-    @Override
-    public void oppdaterRegisterdataReposisjonerVedEndringer(Behandling behandling) {
-        registerdataEndringshåndterer.oppdaterRegisteropplysningerOgReposisjonerBehandlingVedEndringer(behandling);
     }
 
     @Override
@@ -139,30 +113,12 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return gruppe;
     }
 
-    // Til bruk ved første prosessering av nyopprettet behandling
-    @Override
-    public String opprettTasksForStartBehandling(Behandling behandling) {
-        ProsessTaskData taskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        return lagreMedCallId(taskData);
-    }
-
     // Til bruk ved gjenopptak fra vent (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public String opprettTasksForFortsettBehandling(Behandling behandling) {
         ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskData.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
-        return lagreMedCallId(taskData);
-    }
-
-    @Override
-    public String opprettTasksForFortsettBehandlingSettUtført(Behandling behandling, Optional<AksjonspunktDefinisjon> autopunktUtført) {
-        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        autopunktUtført.ifPresent(apu -> {
-            taskData.setProperty(FortsettBehandlingTaskProperties.UTFORT_AUTOPUNKT, apu.getKode());
-        });
         return lagreMedCallId(taskData);
     }
 
@@ -174,22 +130,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         if (nesteKjøringEtter != null) {
             taskData.setNesteKjøringEtter(nesteKjøringEtter);
         }
-        return lagreMedCallId(taskData);
-    }
-
-    // Til bruk ved gjenopptak fra vent (Hendelse: Manuell input, Frist utløpt, mv)
-    @Override
-    public String opprettTasksForOppdaterFortsett(Behandling behandling) {
-        return prosessTaskRepository.lagre(lagOppdaterFortsettTasksForPolling(behandling));
-    }
-
-    // Til bruk ved gjenopptak fra vent (Hendelse: Manuell input, Frist utløpt, mv)
-    @Override
-    public String opprettTasksForGjenopptaFortsett(Behandling behandling) {
-        // TODO: trengs denne? Evt må den over ha manuell fortsettelse false
-        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        taskData.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
         return lagreMedCallId(taskData);
     }
 

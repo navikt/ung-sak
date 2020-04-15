@@ -3,7 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.søknad;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -12,7 +12,7 @@ import javax.persistence.TypedQuery;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
-@ApplicationScoped
+@Dependent
 public class SøknadRepository {
 
     private EntityManager entityManager;

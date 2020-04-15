@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
@@ -23,7 +23,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
-@ApplicationScoped
+@Dependent
 public class MottatteDokumentTjeneste {
 
     private Period fristForInnsendingAvDokumentasjon;

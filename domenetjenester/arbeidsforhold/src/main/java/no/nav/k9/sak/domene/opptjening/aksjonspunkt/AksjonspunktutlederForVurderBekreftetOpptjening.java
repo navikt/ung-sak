@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -38,7 +37,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
 
 @ApplicationScoped
-public class AksjonspunktutlederForVurderBekreftetOpptjening implements AksjonspunktUtleder {
+public class AksjonspunktutlederForVurderBekreftetOpptjening {
 
     private static final List<AksjonspunktResultat> INGEN_AKSJONSPUNKTER = emptyList();
     private static final Logger logger = LoggerFactory.getLogger(AksjonspunktutlederForVurderBekreftetOpptjening.class);
@@ -56,7 +55,6 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening implements Aksjonsp
         this.opptjeningRepository = opptjeningRepository;
     }
 
-    @Override
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
         Long behandlingId = param.getBehandlingId();
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOptional = iayTjeneste.finnGrunnlag(behandlingId);

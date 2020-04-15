@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -35,7 +35,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskEntitet;
 
 /** Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks. */
-@ApplicationScoped
+@Dependent
 public class FagsakProsessTaskRepository {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);

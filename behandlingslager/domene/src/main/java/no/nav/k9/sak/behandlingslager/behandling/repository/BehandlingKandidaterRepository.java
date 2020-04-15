@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -30,7 +30,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
  * Disse vil bil brukt i en trigging av videre prosessering, behandling, kontroll, evt. henlegging eller avslutting.
  */
 
-@ApplicationScoped
+@Dependent
 public class BehandlingKandidaterRepository {
 
     private static final Set<AksjonspunktDefinisjon> AUTOPUNKTER = List.of(AksjonspunktDefinisjon.values()).stream().filter(a -> AksjonspunktType.AUTOPUNKT.equals(a.getAksjonspunktType())).collect(Collectors.toSet());

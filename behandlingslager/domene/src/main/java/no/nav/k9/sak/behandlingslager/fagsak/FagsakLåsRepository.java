@@ -1,13 +1,13 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryFeil;
 
-@ApplicationScoped
+@Dependent
 public class FagsakLåsRepository {
 
     private EntityManager entityManager;

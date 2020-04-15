@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.behandling.steg.innhentsaksopplysninger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;

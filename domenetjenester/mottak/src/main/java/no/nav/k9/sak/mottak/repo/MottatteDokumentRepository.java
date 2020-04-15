@@ -5,15 +5,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
-@ApplicationScoped
+@Dependent
 public class MottatteDokumentRepository {
 
     private EntityManager entityManager;
@@ -62,17 +61,6 @@ public class MottatteDokumentRepository {
      * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
      * ikke å anbefale å bruke.
      */
-    public List<MottattDokument> hentMottattDokument(JournalpostId journalpostId) {
-        var query = entityManager.createQuery( "select m from MottattDokument m where m.journalpostId = :param", MottattDokument.class)
-            .setParameter(PARAM_KEY, journalpostId);
-        return query.getResultList();
-    }
-
-    /**
-     * Returnerer liste av MottattDokument.
-     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
-     * ikke å anbefale å bruke.
-     */
     public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId) {
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param";
         return entityManager.createQuery(
@@ -99,14 +87,6 @@ public class MottatteDokumentRepository {
             "update MottattDokument set behandlingId = :param WHERE id = :dokumentId")
             .setParameter("dokumentId", mottattDokument.getId())
             .setParameter(PARAM_KEY, behandlingId)
-            .executeUpdate();
-    }
-
-    public void oppdaterMedKanalreferanse(MottattDokument mottattDokument, String kanalreferanse) {
-        entityManager.createQuery(
-            "update MottattDokument set kanalreferanse = :param WHERE id = :dokumentId")
-            .setParameter("dokumentId", mottattDokument.getId())
-            .setParameter(PARAM_KEY, kanalreferanse)
             .executeUpdate();
     }
 }

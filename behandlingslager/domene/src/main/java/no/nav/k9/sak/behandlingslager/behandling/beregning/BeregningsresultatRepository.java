@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 
-@ApplicationScoped
+@Dependent
 public class BeregningsresultatRepository {
     private static final long G_MULTIPLIKATOR = 6L;
     private EntityManager entityManager;
