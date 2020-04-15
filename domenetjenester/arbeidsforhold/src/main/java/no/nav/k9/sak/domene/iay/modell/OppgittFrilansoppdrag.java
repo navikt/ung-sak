@@ -57,13 +57,12 @@ public class OppgittFrilansoppdrag implements IndexKey {
         if (o == null || getClass() != o.getClass()) return false;
         OppgittFrilansoppdrag that = (OppgittFrilansoppdrag) o;
         return Objects.equals(oppdragsgiver, that.oppdragsgiver) &&
-                periode.equals(that.periode) &&
-                Objects.equals(inntekt, that.inntekt);
+                periode.equals(that.periode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppdragsgiver, periode, inntekt);
+        return Objects.hash(oppdragsgiver, periode);
     }
 
     @Override
