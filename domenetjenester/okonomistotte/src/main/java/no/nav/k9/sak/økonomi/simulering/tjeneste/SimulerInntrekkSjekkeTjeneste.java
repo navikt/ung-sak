@@ -2,7 +2,7 @@ package no.nav.k9.sak.økonomi.simulering.tjeneste;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -20,7 +20,7 @@ import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 
-@ApplicationScoped
+@Dependent
 public class SimulerInntrekkSjekkeTjeneste {
 
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;

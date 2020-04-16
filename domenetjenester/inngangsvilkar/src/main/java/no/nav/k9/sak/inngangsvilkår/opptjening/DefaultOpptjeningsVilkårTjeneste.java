@@ -42,9 +42,9 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         Long behandlingId = behandlingReferanse.getBehandlingId();
         AktørId aktørId = behandlingReferanse.getAktørId();
 
-        List<OpptjeningAktivitetPeriode> relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, periode.getFomDato());
+        List<OpptjeningAktivitetPeriode> relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, periode);
         List<OpptjeningInntektPeriode> relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, periode.getFomDato());
-        Opptjening opptjening = opptjeningTjeneste.hentOpptjening(behandlingId);
+        Opptjening opptjening = opptjeningTjeneste.hentOpptjening(behandlingId).finnOpptjening(periode.getFomDato()).orElseThrow();
 
         LocalDate behandlingstidspunkt = LocalDate.now();
 
@@ -58,8 +58,8 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         grunnlag.setMinsteAntallDagerForVent(0);
         grunnlag.setMinsteAntallMånederForVent(0);
         //TODO(OJR) denne burde kanskje endres til false i en revurdering-kontekts i etterkant?
-        grunnlag.setSkalGodkjenneBasertPåAntatt(true);
-        grunnlag.setPeriodeAntattGodkjentFørBehandlingstidspunkt(Period.ofYears(1));
+        grunnlag.setSkalGodkjenneBasertPåAntatt(false);
+        grunnlag.setPeriodeAntattGodkjentFørBehandlingstidspunkt(Period.ofMonths(2));
 
         // returner egen output i tillegg for senere lagring
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();

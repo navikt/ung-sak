@@ -29,6 +29,9 @@ class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
         if (FagsakYtelseType.PSB.equals(ref.getFagsakYtelseType())) {
             utlederHolder.leggTil(AksjonspunktutlederForMedisinskvilkår.class);
         }
+        if (FagsakYtelseType.OMP.equals(ref.getFagsakYtelseType())) {
+            utlederHolder.leggTil(AksjonspunktutlederForAlder.class);
+        }
 
         return utlederHolder.getUtledere();
     }

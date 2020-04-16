@@ -10,8 +10,8 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkår.DefaultVilkårUtleder;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
+import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
@@ -21,6 +21,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
+    private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
 
     OMPVilkårsPerioderTilVurderingTjeneste() {
@@ -28,7 +29,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Inject
-    public OMPVilkårsPerioderTilVurderingTjeneste(OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository) {
+    public OMPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("OMP") VilkårUtleder vilkårUtleder, OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository) {
+        this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
 
         vilkårsPeriodisering.put(VilkårType.OPPTJENINGSVILKÅRET, søktePerioder);
@@ -43,7 +45,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public Map<VilkårType, Set<DatoIntervallEntitet>> utled(Long behandlingId) {
         final var vilkårPeriodeSet = new HashMap<VilkårType, Set<DatoIntervallEntitet>>();
-        UtledeteVilkår utledeteVilkår = new DefaultVilkårUtleder().utledVilkår(null);
+        UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
 

@@ -76,16 +76,16 @@ public class MapYtelseperioderTjeneste {
         return p1.isConnected(p2) || p2.isConnected(p1) || periode1.getTomDato().plusDays(1).equals(periode2.getFomDato()) || periode2.getTomDato().plusDays(1).equals(periode1.getFomDato());
     }
 
-    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, LocalDate skjæringstidspunkt) {
+    public List<OpptjeningsperiodeForSaksbehandling> mapYtelsePerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode) {
         AktørId aktørId = behandlingReferanse.getAktørId();
-        var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(skjæringstidspunkt);
+        var filter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
         filter.getFiltrertYtelser().stream()
             .filter(ytelse -> !(Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && RelatertYtelseTilstand.ÅPEN.equals(ytelse.getStatus())))
             .filter(ytelse -> !(ytelse.getKilde().equals(Fagsystem.K9SAK) && ytelse.getSaksnummer().equals(behandlingReferanse.getSaksnummer())))
             .filter(ytelse -> ytelse.getYtelseType().girOpptjeningsTid(behandlingReferanse.getFagsakYtelseType()))
             .forEach(behandlingRelaterteYtelse -> {
-                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, grunnlag, vurderOpptjening);
+                List<OpptjeningsperiodeForSaksbehandling> periode = mapYtelseAnvist(behandlingRelaterteYtelse, behandlingReferanse, grunnlag, vurderOpptjening, opptjeningPeriode);
                 ytelsePerioder.addAll(periode);
             });
         return slåSammenYtelsePerioder(ytelsePerioder);
@@ -93,7 +93,7 @@ public class MapYtelseperioderTjeneste {
 
     private List<OpptjeningsperiodeForSaksbehandling> mapYtelseAnvist(Ytelse ytelse, BehandlingReferanse behandlingReferanse,
                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      OpptjeningAktivitetVurdering vurderForSaksbehandling) {
+                                                                      OpptjeningAktivitetVurdering vurderForSaksbehandling, DatoIntervallEntitet opptjeningPeriode) {
         OpptjeningAktivitetType type = mapYtelseType(ytelse);
         List<OpptjeningsperiodeForSaksbehandling> ytelserAnvist = new ArrayList<>();
         List<YtelseStørrelse> grunnlagList = ytelse.getYtelseGrunnlag().map(YtelseGrunnlag::getYtelseStørrelse).orElse(Collections.emptyList());
@@ -107,7 +107,7 @@ public class MapYtelseperioderTjeneste {
                 OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                     .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
                     .medOpptjeningAktivitetType(type)
-                    .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, null, iayGrunnlag, false));
+                    .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, null, iayGrunnlag, false, opptjeningPeriode));
                 ytelserAnvist.add(builder.build());
             } else {
                 orgnumre.forEach(orgnr -> {
@@ -116,7 +116,7 @@ public class MapYtelseperioderTjeneste {
                         .medOpptjeningAktivitetType(type)
                         .medArbeidsgiver(Arbeidsgiver.virksomhet(orgnr))
                         .medOpptjeningsnøkkel(Opptjeningsnøkkel.forOrgnummer(orgnr))
-                        .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, null, iayGrunnlag, false));
+                        .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, null, iayGrunnlag, false, opptjeningPeriode));
                     ytelserAnvist.add(builder.build());
                 });
             }

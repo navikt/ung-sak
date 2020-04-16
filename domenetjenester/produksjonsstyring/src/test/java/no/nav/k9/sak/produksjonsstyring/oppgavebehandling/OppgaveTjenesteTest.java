@@ -1,7 +1,6 @@
 package no.nav.k9.sak.produksjonsstyring.oppgavebehandling;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -9,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +29,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveGodkjennVedtakTask;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -48,7 +44,6 @@ import no.nav.vedtak.felles.integrasjon.behandleoppgave.PrioritetKode;
 import no.nav.vedtak.felles.integrasjon.behandleoppgave.opprett.OpprettOppgaveRequest;
 import no.nav.vedtak.felles.integrasjon.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.vedtak.felles.integrasjon.oppgave.OppgaveConsumer;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
@@ -243,32 +238,6 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void skal_avslutte_oppgave_og_starte_task() {
-        // Arrange
-        String oppgaveId = "1";
-        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK, oppgaveId, behandling.getFagsak().getSaksnummer(), behandling);
-        when(oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(anyLong())).thenReturn(Collections.singletonList(kobling));
-
-        // Act
-        tjeneste.avsluttOppgaveOgStartTask(behandling, OppgaveÅrsak.BEHANDLE_SAK, OpprettOppgaveGodkjennVedtakTask.TASKTYPE);
-
-        // Assert
-        ArgumentCaptor<ProsessTaskGruppe> captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
-        verify(prosessTaskRepository).lagre(captor.capture());
-        assertThat(captor.getAllValues()).hasSize(1);
-        ProsessTaskGruppe gruppe = captor.getValue();
-        List<ProsessTaskGruppe.Entry> tasks = gruppe.getTasks();
-        assertThat(tasks.get(0).getTask().getTaskType()).isEqualTo(AvsluttOppgaveTaskProperties.TASKTYPE);
-        assertThat(tasks.get(0).getTask().getFagsakId()).isEqualTo(behandling.getFagsakId());
-        assertThat(tasks.get(0).getTask().getBehandlingId()).isEqualTo(String.valueOf(behandling.getId()));
-        assertThat(String.valueOf(tasks.get(0).getTask().getAktørId())).isEqualTo(behandling.getAktørId().getId());
-        assertThat(tasks.get(1).getTask().getTaskType()).isEqualTo(OpprettOppgaveGodkjennVedtakTask.TASKTYPE);
-        assertThat(tasks.get(1).getTask().getFagsakId()).isEqualTo(behandling.getFagsakId());
-        assertThat(tasks.get(1).getTask().getBehandlingId()).isEqualTo(String.valueOf(behandling.getId()));
-        assertThat(String.valueOf(tasks.get(1).getTask().getAktørId())).isEqualTo(behandling.getAktørId().getId());
-    }
-
-    @Test
     public void skal_hente_oppgave_liste() {
         // Arrange
         FinnOppgaveListeResponse mockResponse = mock(FinnOppgaveListeResponse.class);
@@ -299,7 +268,7 @@ public class OppgaveTjenesteTest {
 
         ArgumentCaptor<FinnOppgaveListeRequestMal> captor = ArgumentCaptor.forClass(FinnOppgaveListeRequestMal.class);
         List<String> oppgaveÅrsaker = List.of(OppgaveÅrsak.VURDER_DOKUMENT.getKode(),
-            Oppgaveinfo.VURDER_KONST_YTELSE_FORELDREPENGER.getOppgaveType());
+            Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER.getOppgaveType());
         when(oppgaveConsumer.finnOppgaveListe(captor.capture())).thenReturn(mockResponse);
 
         // Act
@@ -452,7 +421,7 @@ public class OppgaveTjenesteTest {
 
         OpprettOppgaveRequest request = captor.getValue();
         assertThat(request.getBeskrivelse()).isEqualTo(beskrivelse);
-        assertThat(request.getFagomradeKode()).isEqualTo(FagomradeKode.FOR);
+        assertThat(request.getFagomradeKode()).isEqualTo(FagomradeKode.OMS);
         assertThat(request.getOppgavetypeKode()).isEqualTo(OppgaveÅrsak.VURDER_KONS_FOR_YTELSE.getKode());
         assertThat(request.getUnderkategoriKode()).isEqualTo("FEILUTB_FOR");
         assertThat(request.getBrukerTypeKode()).isEqualTo(BrukerType.PERSON);

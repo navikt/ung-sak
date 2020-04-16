@@ -31,12 +31,6 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
 
     static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    public abstract LocalDate getFomDato();
-
-    public abstract LocalDate getTomDato();
-
-    protected abstract AbstractLocalDateInterval lagNyPeriode(LocalDate fomDato, LocalDate tomDato);
-
     protected static LocalDate finnTomDato(LocalDate fom, int antallArbeidsdager) {
         if (antallArbeidsdager < 1) {
             throw new IllegalArgumentException("Antall arbeidsdager må være 1 eller større.");
@@ -79,31 +73,11 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
         return fom;
     }
 
-    public Interval tilIntervall() {
-        return getIntervall(getFomDato(), getTomDato());
-    }
-
     private static Interval getIntervall(LocalDate fomDato, LocalDate tomDato) {
-        LocalDateTime døgnstart = TIDENES_ENDE.equals(tomDato) ? tomDato.atStartOfDay() : tomDato.atStartOfDay().plusDays(1);
+        LocalDateTime døgnstart = (TIDENES_ENDE.equals(tomDato) || TIDENES_ENDE.isBefore(tomDato)) ? TIDENES_ENDE.atStartOfDay() : tomDato.atStartOfDay().plusDays(1);
         return Interval.of(
                 fomDato.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant(),
                 døgnstart.atZone(ZoneId.systemDefault()).toInstant());
-    }
-
-    public boolean erFørEllerLikPeriodeslutt(ChronoLocalDate dato) {
-        return getTomDato() == null || getTomDato().isAfter(dato) || getTomDato().isEqual(dato);
-    }
-
-    public boolean erEtterEllerLikPeriodestart(ChronoLocalDate dato) {
-        return getFomDato().isBefore(dato) || getFomDato().isEqual(dato);
-    }
-
-    public boolean inkluderer(ChronoLocalDate dato) {
-        return erEtterEllerLikPeriodestart(dato) && erFørEllerLikPeriodeslutt(dato);
-    }
-
-    public boolean inkludererArbeidsdag(LocalDate dato) {
-        return erEtterEllerLikPeriodestart(nesteArbeidsdag(dato)) && erFørEllerLikPeriodeslutt(forrigeArbeidsdag(dato));
     }
 
     public static LocalDate forrigeArbeidsdag(LocalDate dato) {
@@ -132,6 +106,48 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
             }
         }
         return dato;
+    }
+
+    private static List<LocalDate> listArbeidsdager(LocalDate fomDato, LocalDate tomDato) { // NOSONAR
+        List<LocalDate> arbeidsdager = new ArrayList<>();
+        LocalDate dato = fomDato;
+        while (!dato.isAfter(tomDato)) {
+            if (erArbeidsdag(dato)) {
+                arbeidsdager.add(dato);
+            }
+            dato = dato.plusDays(1L);
+        }
+        return arbeidsdager;
+    }
+
+    protected static boolean erArbeidsdag(LocalDate dato) {
+        return !dato.getDayOfWeek().equals(SATURDAY) && !dato.getDayOfWeek().equals(SUNDAY); // NOSONAR
+    }
+
+    public abstract LocalDate getFomDato();
+
+    public abstract LocalDate getTomDato();
+
+    protected abstract AbstractLocalDateInterval lagNyPeriode(LocalDate fomDato, LocalDate tomDato);
+
+    public Interval tilIntervall() {
+        return getIntervall(getFomDato(), getTomDato());
+    }
+
+    public boolean erFørEllerLikPeriodeslutt(ChronoLocalDate dato) {
+        return getTomDato() == null || getTomDato().isAfter(dato) || getTomDato().isEqual(dato);
+    }
+
+    public boolean erEtterEllerLikPeriodestart(ChronoLocalDate dato) {
+        return getFomDato().isBefore(dato) || getFomDato().isEqual(dato);
+    }
+
+    public boolean inkluderer(ChronoLocalDate dato) {
+        return erEtterEllerLikPeriodestart(dato) && erFørEllerLikPeriodeslutt(dato);
+    }
+
+    public boolean inkludererArbeidsdag(LocalDate dato) {
+        return erEtterEllerLikPeriodestart(nesteArbeidsdag(dato)) && erFørEllerLikPeriodeslutt(forrigeArbeidsdag(dato));
     }
 
     public long antallDager() {
@@ -165,22 +181,6 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
 
     public List<LocalDate> arbeidsdager() {
         return listArbeidsdager(getFomDato(), getTomDato());
-    }
-
-    private static List<LocalDate> listArbeidsdager(LocalDate fomDato, LocalDate tomDato) { // NOSONAR
-        List<LocalDate> arbeidsdager = new ArrayList<>();
-        LocalDate dato = fomDato;
-        while (!dato.isAfter(tomDato)) {
-            if (erArbeidsdag(dato)) {
-                arbeidsdager.add(dato);
-            }
-            dato = dato.plusDays(1L);
-        }
-        return arbeidsdager;
-    }
-
-    protected static boolean erArbeidsdag(LocalDate dato) {
-        return !dato.getDayOfWeek().equals(SATURDAY) && !dato.getDayOfWeek().equals(SUNDAY); // NOSONAR
     }
 
     public boolean grenserTil(AbstractLocalDateInterval periode2) {
@@ -297,7 +297,7 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
             return likFom;
         }
         return likFom
-                || Objects.equals(nesteArbeidsdag(this.getFomDato()), nesteArbeidsdag(annen.getFomDato()));
+            || Objects.equals(nesteArbeidsdag(this.getFomDato()), nesteArbeidsdag(annen.getFomDato()));
     }
 
     private boolean likTom(AbstractLocalDateInterval annen) {
@@ -306,7 +306,7 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
             return likTom;
         }
         return likTom
-                || Objects.equals(forrigeArbeidsdag(this.getTomDato()), forrigeArbeidsdag(annen.getTomDato()));
+            || Objects.equals(forrigeArbeidsdag(this.getTomDato()), forrigeArbeidsdag(annen.getTomDato()));
     }
 
     @Override

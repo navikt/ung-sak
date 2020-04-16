@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.person.personopplysning;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
@@ -13,7 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.typer.AktørId;
 
-@ApplicationScoped
+@Dependent
 public class PersonopplysningTjeneste extends AbstractPersonopplysningTjenesteImpl {
 
     PersonopplysningTjeneste() {

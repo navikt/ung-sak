@@ -43,6 +43,23 @@ public class OppgittEgenNæring implements IndexKey {
     OppgittEgenNæring() {
     }
 
+    /** deep-copy ctor. */
+    OppgittEgenNæring(OppgittEgenNæring kopierFra) {
+        this.periode = kopierFra.periode;
+        this.virksomhetOrgnr = kopierFra.virksomhetOrgnr;
+        this.virksomhetType = kopierFra.virksomhetType;
+        this.regnskapsførerNavn = kopierFra.regnskapsførerNavn;
+        this.regnskapsførerTlf = kopierFra.regnskapsførerTlf;
+        this.endringDato = kopierFra.endringDato;
+        this.begrunnelse = kopierFra.begrunnelse;
+        this.bruttoInntekt = kopierFra.bruttoInntekt;
+        this.nyoppstartet = kopierFra.nyoppstartet;
+        this.varigEndring = kopierFra.varigEndring;
+        this.nærRelasjon = kopierFra.nærRelasjon;
+        this.nyIArbeidslivet = kopierFra.nyIArbeidslivet;
+        this.utenlandskVirksomhet = kopierFra.utenlandskVirksomhet;
+    }
+
     @Override
     public String getIndexKey() {
         Object[] keyParts = { periode, virksomhetOrgnr, utenlandskVirksomhet };
@@ -69,7 +86,7 @@ public class OppgittEgenNæring implements IndexKey {
         this.virksomhetType = virksomhetType;
     }
 
-    /** Samme som {@link #getVirksomhetOrgnr()} men returnerer string.*/
+    /** Samme som {@link #getVirksomhetOrgnr()} men returnerer string. */
     public String getOrgnr() {
         return virksomhetOrgnr == null ? null : virksomhetOrgnr.getId();
     }

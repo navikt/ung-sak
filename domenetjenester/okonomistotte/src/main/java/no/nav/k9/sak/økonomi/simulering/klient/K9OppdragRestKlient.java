@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
@@ -14,7 +14,7 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
-@ApplicationScoped
+@Dependent
 public class K9OppdragRestKlient {
     private OidcRestClient restClient;
     private URI uriIverksett;

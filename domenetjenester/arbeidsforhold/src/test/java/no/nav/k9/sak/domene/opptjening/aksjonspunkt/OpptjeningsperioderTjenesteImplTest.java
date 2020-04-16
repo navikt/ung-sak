@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -27,6 +29,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -36,7 +40,6 @@ import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
@@ -82,38 +85,15 @@ public class OpptjeningsperioderTjenesteImplTest {
     private InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
     private AktørId AKTØRID = AktørId.dummy();
 
-    @Test
-    public void skal_utlede_opptjening_aktivitet_periode_uten_overstyrt() {
-        // Arrange
-        final Behandling behandling = opprettBehandling(skjæringstidspunkt);
-
-        DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
-        DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(2), skjæringstidspunkt.minusMonths(1));
-
-        OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
-        oppgitt.leggTilAnnenAktivitet(new OppgittAnnenAktivitet(periode2, ArbeidType.MILITÆR_ELLER_SIVILTJENESTE));
-        iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgitt);
-
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(ORG_NUMMER);
-        InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, periode1,
-            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.TEN, virksomhet);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
-
-        InntektArbeidYtelseAggregatBuilder saksbehandlet = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.of(bekreftet.build()),
-            VersjonType.SAKSBEHANDLET);
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-
-        // Act
-        BehandlingReferanse behandlingRef = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForBeregning(behandlingRef, iayGrunnlag);
-
-        // Assert
-        assertThat(perioder).hasSize(2);
-        OpptjeningsperiodeForSaksbehandling saksbehandletPeriode = perioder.stream().filter(p -> p.getOpptjeningsnøkkel()
-            .getArbeidsforholdRef().map(r -> r.gjelderFor(ARBEIDSFORHOLD_ID)).orElse(false)).findFirst().get();
-        assertThat(saksbehandletPeriode.getPeriode()).isEqualTo(periode1);
+    @Before
+    public void setUp() throws Exception {
+        Virksomhet virksomhet = new VirksomhetEntitet.Builder().medOrgnr(ORG_NUMMER)
+            .medOppstart(LocalDate.now())
+            .oppdatertOpplysningerNå()
+            .medOrganisasjonstype(Organisasjonstype.VIRKSOMHET)
+            .medRegistrert(LocalDate.now())
+            .build();
+        repositoryProvider.getVirksomhetRepository().lagre(virksomhet);
     }
 
     @Test
@@ -124,6 +104,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
         DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(2), skjæringstidspunkt.minusMonths(1));
         DatoIntervallEntitet periode3 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(1), skjæringstidspunkt.minusMonths(0));
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
         oppgitt.leggTilAnnenAktivitet(new OppgittAnnenAktivitet(periode2, ArbeidType.MILITÆR_ELLER_SIVILTJENESTE));
@@ -150,7 +131,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         // Act
         BehandlingReferanse behandlingRef = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingRef);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingRef, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.GODKJENT)).collect(Collectors.toList())).hasSize(1);
@@ -164,6 +145,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
         DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(2), skjæringstidspunkt.minusMonths(1));
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
 
@@ -184,7 +166,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.GODKJENT)).collect(Collectors.toList())).hasSize(2);
@@ -200,6 +182,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
         DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(2), skjæringstidspunkt.minusMonths(1));
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
         oppgitt.leggTilAnnenAktivitet(new OppgittAnnenAktivitet(periode2, ArbeidType.MILITÆR_ELLER_SIVILTJENESTE));
@@ -211,7 +194,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
         // Act
         // Assert
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref)
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt)
             .stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.MILITÆR_ELLER_SIVILTJENESTE)).collect(Collectors.toList());
 
         assertThat(perioder).hasSize(1);
@@ -223,11 +206,11 @@ public class OpptjeningsperioderTjenesteImplTest {
     public void skal_returnere_oat_frilans_ved_bekreftet_frilans() {
         // Arrange
         final Behandling behandling = opprettBehandling(skjæringstidspunkt);
-
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
         final Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(ORG_NUMMER);
 
-        LocalDate fraOgMed = LocalDate.now().minusMonths(4);
-        LocalDate tilOgMed = LocalDate.now().minusMonths(3);
+        LocalDate fraOgMed = skjæringstidspunkt.minusMonths(4);
+        LocalDate tilOgMed = skjæringstidspunkt.minusMonths(3);
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed);
 
         InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, periode1,
@@ -236,10 +219,10 @@ public class OpptjeningsperioderTjenesteImplTest {
         iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         // Act 1
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -252,7 +235,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         InntektArbeidYtelseAggregatBuilder saksbehandlet = opprettOverstyrtOppgittOpptjening(periode1,
             ArbeidType.MILITÆR_ELLER_SIVILTJENESTE, AKTØRID, VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -286,7 +269,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
 
         // Act 1
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -299,7 +282,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         InntektArbeidYtelseAggregatBuilder saksbehandlet = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.SAKSBEHANDLET);
         iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandlet);
-        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.FRILANS)).collect(Collectors.toList()))
@@ -355,6 +338,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     public void skal_returnere_en_periode_med_fiktivt_bekreftet_arbeidsforhold() {
         // Arrange
         final Behandling behandling = opprettBehandling(skjæringstidspunkt);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
         LocalDate fraOgMed = LocalDate.of(2015, 1, 4);
         LocalDate tilOgMed = skjæringstidspunkt.plusMonths(2);
@@ -365,7 +349,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         iayTjeneste.lagreArbeidsforhold(behandling.getId(), AKTØRID, informasjon);
 
         // Act
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
         // Assert
         assertThat(perioder.size()).isEqualTo(1);
@@ -374,6 +358,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     @Test
     public void skal_kunne_bygge_opptjeninsperiode_basert_på_arbeidsforhold_lagt_til_avsaksbehandler() {
         final Behandling behandling = opprettBehandling(skjæringstidspunkt);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
         LocalDate start = LocalDate.now().minusMonths(5);
 
@@ -391,7 +376,7 @@ public class OpptjeningsperioderTjenesteImplTest {
 
         // Act
         @SuppressWarnings("unused")
-        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref);
+        List<OpptjeningsperiodeForSaksbehandling> perioder = forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(ref, null, skjæringstidspunkt);
 
     }
 
@@ -456,7 +441,7 @@ public class OpptjeningsperioderTjenesteImplTest {
         return builder;
     }
 
-    private Behandling opprettBehandling(LocalDate skjæringstidspunkt) {
+    private Behandling opprettBehandling(@SuppressWarnings("unused") LocalDate skjæringstidspunkt) {
         final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AKTØRID);
         @SuppressWarnings("unused")
         Long fagsakId = fagsakRepository.opprettNy(fagsak);

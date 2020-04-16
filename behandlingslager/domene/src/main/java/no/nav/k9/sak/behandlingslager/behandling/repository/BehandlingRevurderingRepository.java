@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -24,7 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.util.Tuple;
 
-@ApplicationScoped
+@Dependent
 public class BehandlingRevurderingRepository {
 
     private static final String AVSLUTTET_KEY = "avsluttet";

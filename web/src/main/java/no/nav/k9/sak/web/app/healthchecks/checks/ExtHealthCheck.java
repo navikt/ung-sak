@@ -17,10 +17,22 @@ public abstract class ExtHealthCheck extends HealthCheck implements SelftestHeal
 
     protected abstract InternalResult performCheck();
 
+    public boolean isSkipped() {
+        return false;
+    }
+    
     @Override
     protected Result check() {
+        HealthCheck.ResultBuilder builder = getResultBuilder();
+
+        if(isSkipped()) {
+            return builder.withMessage("Skipped").healthy().build();
+        }
         InternalResult intTestRes = performCheck();
-        HealthCheck.ResultBuilder builder = getResultBuilder(intTestRes);
+        Long respTime = intTestRes.getResponseTimeMs();
+        if (respTime != null) {
+            builder.withDetail(DETAIL_RESPONSE_TIME, String.format("%dms", respTime));
+        }
         if (intTestRes.isOk()) {
             builder.healthy();
         } else {
@@ -37,14 +49,10 @@ public abstract class ExtHealthCheck extends HealthCheck implements SelftestHeal
         return builder.build();
     }
 
-    protected ResultBuilder getResultBuilder(InternalResult internalResult) {
+    protected ResultBuilder getResultBuilder() {
         ResultBuilder builder = HealthCheck.Result.builder();
         builder.withDetail(DETAIL_DESCRIPTION, getDescription());
         builder.withDetail(DETAIL_ENDPOINT, getEndpoint());
-        Long respTime = internalResult.getResponseTimeMs();
-        if (respTime != null) {
-            builder.withDetail(DETAIL_RESPONSE_TIME, String.format("%dms", respTime));
-        }
         return builder;
     }
 

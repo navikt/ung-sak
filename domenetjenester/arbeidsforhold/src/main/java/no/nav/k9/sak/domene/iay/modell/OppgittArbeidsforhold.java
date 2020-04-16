@@ -32,6 +32,13 @@ public class OppgittArbeidsforhold implements IndexKey {
 
     OppgittArbeidsforhold() {
     }
+    
+    OppgittArbeidsforhold(OppgittArbeidsforhold kopierFra) {
+        this.periode = kopierFra.periode;
+        this.erUtenlandskInntekt=kopierFra.erUtenlandskInntekt;
+        this.arbeidType=kopierFra.arbeidType;
+        this.utenlandskVirksomhet = kopierFra.utenlandskVirksomhet;
+    }
 
     @Override
     public String getIndexKey() {

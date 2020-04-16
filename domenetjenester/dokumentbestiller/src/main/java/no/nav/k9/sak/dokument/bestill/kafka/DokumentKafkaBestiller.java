@@ -3,7 +3,7 @@ package no.nav.k9.sak.dokument.bestill.kafka;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
@@ -18,7 +18,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.util.StringUtils;
 
-@ApplicationScoped
+@Dependent
 public class DokumentKafkaBestiller {
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;

@@ -16,7 +16,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 /**
  * Slår sammen alle gjenværende aktivitet tidslinjer og akseptert mellomliggende perioder til en samlet tidslinje for
  * aktivitet, samt telle totalt antall godkjente perioder
- *
+ * <p>
  * Telling av dager for å finne aktiviteter i opptjeningsperioden skal gjøres etter følgende regler:
  * <ul>
  * <li>1 hel kalendermåned = 1 måned med godkjent opptjening</li>
@@ -45,7 +45,7 @@ public class BeregnOpptjening extends LeafSpecification<MellomregningOpptjenings
 
         // Pseudo-beregn "norske" aktiviteter og finn max-dato. underkjenne utlandsk aktivitet i perioden MAX(norsk) - END(opptjeningsperiode)
         if (evaluerEvtUnderkjennUtlandskeAktiviteteter(data)) {
-            evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_UNDERKJENTE_PERIODER, data.getUnderkjentePerioder());
+            evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_UNDERKJENTE_PERIODER, data.getUnderkjentePerioder().toString());
         }
 
         // beregn bekreftet opptjening
@@ -53,8 +53,8 @@ public class BeregnOpptjening extends LeafSpecification<MellomregningOpptjenings
 
         Period bekreftetOpptjening = beregnTotalOpptjeningPeriode(bekreftetOpptjeningTidslinje);
         data.setBekreftetTotalOpptjening(new OpptjentTidslinje(bekreftetOpptjening, bekreftetOpptjeningTidslinje));
-        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_BEKREFTET_AKTIVITET_TIDSLINJE, bekreftetOpptjeningTidslinje);
-        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_BEKREFTET_OPPTJENING, bekreftetOpptjening);
+        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_BEKREFTET_AKTIVITET_TIDSLINJE, bekreftetOpptjeningTidslinje.toString());
+        evaluation.setEvaluationProperty(Opptjeningsvilkår.EVAL_RESULT_BEKREFTET_OPPTJENING, bekreftetOpptjening.toString());
 
         // beregn inklusiv antatt opptjening
         LocalDateTimeline<Boolean> antattOpptjeningTidslinje = slåSammenTilFellesTidslinje(data, true, Collections.emptyList());
@@ -71,7 +71,7 @@ public class BeregnOpptjening extends LeafSpecification<MellomregningOpptjenings
         // slå sammen alle aktivitetperioder til en tidslinje (disse er fratrukket underkjente perioder allerede)
         Map<Aktivitet, LocalDateTimeline<Boolean>> aktivitetTidslinjer = data.getAktivitetTidslinjer(medAntattGodkjent, false);
         for (Map.Entry<Aktivitet, LocalDateTimeline<Boolean>> entry : aktivitetTidslinjer
-                .entrySet()) {
+            .entrySet()) {
             if (!unntak.contains(entry.getKey())) {
                 tidslinje = tidslinje.crossJoin(entry.getValue(), StandardCombinators::alwaysTrueForMatch);
             }
@@ -97,7 +97,7 @@ public class BeregnOpptjening extends LeafSpecification<MellomregningOpptjenings
 
         LocalDateTimeline<Boolean> tidslinje = slåSammenTilFellesTidslinje(data, false, Arrays.asList(utlandsFilter));
 
-        LocalDate maxDatoIkkeUtlandsk =  tidslinje.isEmpty() ? data.getGrunnlag().getFørsteDatoIOpptjening().minusDays(1) : tidslinje.getMaxLocalDate();
+        LocalDate maxDatoIkkeUtlandsk = tidslinje.isEmpty() ? data.getGrunnlag().getFørsteDatoIOpptjening().minusDays(1) : tidslinje.getMaxLocalDate();
 
         // Må overskrive manuell godkjenning da annen aktivitet gjerne er vurdert i aksjonspunkt i steg 82
         return data.splitOgUnderkjennSegmenterEtterDatoForAktivitet(utlandsFilter, maxDatoIkkeUtlandsk);

@@ -46,6 +46,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
@@ -131,6 +132,7 @@ public class TilKalkulusMapper {
             new VirksomhetType(oppgittEgenNæring.getVirksomhetType().getKode()),
             oppgittEgenNæring.getNyoppstartet(),
             oppgittEgenNæring.getVarigEndring(),
+            oppgittEgenNæring.getEndringDato(),
             oppgittEgenNæring.getNærRelasjon(),
             oppgittEgenNæring.getNyIArbeidslivet(),
             oppgittEgenNæring.getBruttoInntekt()
@@ -138,7 +140,12 @@ public class TilKalkulusMapper {
     }
 
     private static OppgittFrilansDto mapOppgittFrilans(OppgittFrilans oppgittFrilans) {
-        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet());
+        List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
+                .stream()
+                .map(frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt()))
+                .collect(Collectors.toList());
+
+        return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet(), oppdrag);
     }
 
     private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt) {
@@ -214,16 +221,20 @@ public class TilKalkulusMapper {
 
     private static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
         List<UtbetalingDto> utbetalingDtoer = alleInntektBeregningsgrunnlag.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
-        if (utbetalingDtoer.isEmpty()) {
+        if (!utbetalingDtoer.isEmpty()) {
             return new InntekterDto(utbetalingDtoer);
         }
         return null;
     }
 
     private static UtbetalingDto mapTilDto(Inntekt inntekt) {
-        return new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
-            inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
+        UtbetalingDto utbetalingDto = new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
+                inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
         );
+        if (inntekt.getArbeidsgiver() != null) {
+            return utbetalingDto.medArbeidsgiver(mapTilAktør(inntekt.getArbeidsgiver()));
+        }
+        return utbetalingDto;
     }
 
     private static UtbetalingsPostDto mapTilDto(Inntektspost inntektspost) {

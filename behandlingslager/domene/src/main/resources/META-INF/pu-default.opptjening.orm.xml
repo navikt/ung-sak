@@ -3,12 +3,13 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
       http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
 
+    <sequence-generator name="SEQ_RS_OPPTJENING" allocation-size="50" sequence-name="SEQ_RS_OPPTJENING" />
     <sequence-generator name="SEQ_OPPTJENING" allocation-size="50" sequence-name="SEQ_OPPTJENING" />
     <sequence-generator name="SEQ_OPPTJENING_AKTIVITET" allocation-size="50" sequence-name="SEQ_OPPTJENING_AKTIVITET" />
 
     <!-- Opptjening -->
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat"/>
     <entity class="no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening"/>
     <entity class="no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet"/>
-
 
 </entity-mappings>

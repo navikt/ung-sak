@@ -78,7 +78,7 @@ public class SendVedtaksbrev {
         if (behandlingVedtak.isBeslutningsvedtak()) {
             log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", ref); //$NON-NLS-1$
         } else {
-            log.info("Sender vedtaksbrev({}) for foreldrepenger i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref); // $NON-NLS-1
+            log.info("Sender vedtaksbrev({}) for {} i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref.getFagsakYtelseType(), ref); // $NON-NLS-1
         }
         dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(ref, behandlingVedtak);
     }

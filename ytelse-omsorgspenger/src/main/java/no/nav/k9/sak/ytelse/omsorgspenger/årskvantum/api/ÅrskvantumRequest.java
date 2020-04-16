@@ -10,6 +10,7 @@ import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,29 +18,36 @@ import java.util.List;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ÅrskvantumRequest {
-    @JsonProperty(value = "behandlingId", required = true)
+    @JsonProperty(value = "behandlingUUID", required = true)
     @Valid
     @NotNull
-    private String behandlingId;
+    private String behandlingUUID;
+
+    @JsonProperty(value = "saksnummer", required = true)
+    @Valid
+    @NotNull
+    private String saksnummer;
 
     @JsonProperty(value = "aktørId", required = true)
     @Valid
     @NotNull
     private String aktørId;
 
+    @JsonProperty(value="innsendingstidspunkt", required = false)
+    @Valid
+    private LocalDateTime innsendingstidspunkt;
+
     @JsonProperty(value = "uttakperioder")
     @Valid
     @Size(max = 1000)
     private List<UttaksperiodeOmsorgspenger> uttaksperioder = new ArrayList<>();
 
+    @JsonProperty(value = "barna")
+    @Valid
+    @Size(max = 20)
+    private List<Barn> barna = new ArrayList<>();
 
-    public String getBehandlingId() {
-        return behandlingId;
-    }
 
-    public void setBehandlingId(String behandlingId) {
-        this.behandlingId = behandlingId;
-    }
 
     public List<UttaksperiodeOmsorgspenger> getUttaksperioder() {
         return uttaksperioder;
@@ -55,5 +63,37 @@ public class ÅrskvantumRequest {
 
     public void setAktørId(String aktørId) {
         this.aktørId = aktørId;
+    }
+
+    public List<Barn> getBarna() {
+        return barna;
+    }
+
+    public void setBarna(List<Barn> barna) {
+        this.barna = barna;
+    }
+
+    public String getBehandlingUUID() {
+        return behandlingUUID;
+    }
+
+    public void setBehandlingUUID(String behandlingUUID) {
+        this.behandlingUUID = behandlingUUID;
+    }
+
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
+    }
+
+    public LocalDateTime getInnsendingstidspunkt() {
+        return innsendingstidspunkt;
+    }
+
+    public void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
+        this.innsendingstidspunkt = innsendingstidspunkt;
     }
 }

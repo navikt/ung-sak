@@ -20,7 +20,7 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>6.3.2</version><!--$NO-MVN-MAN-VER$ -->
+			<version>6.3.3</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -42,13 +42,13 @@
 		</dependency>
 
 		<!-- Prosjekt avhengigheter -->
-        	<dependency>
-		    <groupId>no.nav.vedtak.prosesstask</groupId>
-		    <artifactId>prosesstask-rest-api</artifactId>
+		<dependency>
+			<groupId>no.nav.vedtak.prosesstask</groupId>
+			<artifactId>prosesstask-rest-api</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>no.nav.vedtak.prosesstask</groupId>
-		    <artifactId>prosesstask-legacy</artifactId>
+			<groupId>no.nav.vedtak.prosesstask</groupId>
+			<artifactId>prosesstask-legacy</artifactId>
 		</dependency>
 
 		<dependency>
@@ -63,62 +63,33 @@
 			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			<artifactId>fordel-v1</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>no.nav.foreldrepenger.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
 
-	
-		<!-- Ytelsespesifikke moduler -->
-                <dependency>
-                        <groupId>no.nav.k9.sak.ytelse</groupId>
-                        <artifactId>ytelse-pleiepengerbarn</artifactId>
-                </dependency>
-                <dependency>
-                        <groupId>no.nav.k9.sak.ytelse</groupId>
-                        <artifactId>ytelse-omsorgspenger</artifactId>
-                </dependency>
-		
-		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde vært her da de trekkes inn av server. -->
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>woodstox-core-asl</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-util</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>ca.szc.thirdparty.nl.jworks.markdown_to_asciidoc</groupId>
-                    <artifactId>markdown_to_asciidoc</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>migreringer</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-			<artifactId>ldap-klient</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>behandlingsprosess-steg</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>domenetjenester-bom</artifactId>
+			<artifactId>vedtak</artifactId>
+		</dependency>
+
+		<!-- Ytelsespesifikke moduler -->
+		<dependency>
+			<groupId>no.nav.k9.sak.ytelse</groupId>
+			<artifactId>ytelse-frisinn</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak.ytelse</groupId>
+			<artifactId>ytelse-pleiepengerbarn</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak.ytelse</groupId>
+			<artifactId>ytelse-omsorgspenger</artifactId>
 		</dependency>
 
 		<dependency>
@@ -127,10 +98,39 @@
 			<scope>test</scope>
 		</dependency>
 
+
+		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde 
+			vært her da de trekkes inn av server. -->
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
+			<artifactId>felles-sikkerhet</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.codehaus.woodstox</groupId>
+					<artifactId>woodstox-core-asl</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles</groupId>
+			<artifactId>felles-util</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>ca.szc.thirdparty.nl.jworks.markdown_to_asciidoc</groupId>
+					<artifactId>markdown_to_asciidoc</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>vedtak</artifactId>
+			<artifactId>migreringer</artifactId>
+			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+			<artifactId>ldap-klient</artifactId>
+		</dependency>
+
 
 		<!-- REST + WebService -->
 		<dependency>
@@ -156,27 +156,27 @@
 
 		<!-- Server -->
 		<dependency>
-            <groupId>org.picketbox</groupId>
-            <artifactId>picketbox</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.woodstox</groupId>
-                    <artifactId>woodstox-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>stax2-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.hibernate</groupId>
-                    <artifactId>hibernate-entitymanager</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+			<groupId>org.picketbox</groupId>
+			<artifactId>picketbox</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.woodstox</groupId>
+					<artifactId>woodstox-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.woodstox</groupId>
+					<artifactId>stax2-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate-entitymanager</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

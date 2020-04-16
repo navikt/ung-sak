@@ -64,10 +64,6 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
             return Collections.emptyList();
         }
         var oms = omsorgspenger.get();
-        Boolean utbetaltPliktige = oms.getHarUtbetaltPliktigeDager().getValue();
-        if (utbetaltPliktige != null && !utbetaltPliktige) {
-            throw new UnsupportedOperationException("Har ikke støtte for mottak av inntektsmeldinger som ikke har utbetalt pliktige allerede: " + getSkjema());
-        }
         return new MapOmsorgspengerFravær(oms).getAndeler();
 
     }

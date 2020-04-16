@@ -3,13 +3,11 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
-
 public class OppgittFrilans {
-
-    private OppgittOpptjening oppgittOpptjening;
 
     private boolean harInntektFraFosterhjem;
 
@@ -23,60 +21,63 @@ public class OppgittFrilans {
     public OppgittFrilans() {
     }
 
-    public OppgittFrilans(boolean harInntektFraFosterhjem, boolean erNyoppstartet, boolean harNærRelasjon) {
+    OppgittFrilans(boolean harInntektFraFosterhjem, boolean erNyoppstartet, boolean harNærRelasjon) {
         this.harInntektFraFosterhjem = harInntektFraFosterhjem;
         this.erNyoppstartet = erNyoppstartet;
         this.harNærRelasjon = harNærRelasjon;
     }
 
+    /** deep copy ctor. */
+    OppgittFrilans(OppgittFrilans kopierFra) {
+        this.harInntektFraFosterhjem = kopierFra.harInntektFraFosterhjem;
+        this.erNyoppstartet = kopierFra.erNyoppstartet;
+        this.harNærRelasjon = kopierFra.harNærRelasjon;
+        this.frilansoppdrag = kopierFra.frilansoppdrag == null
+            ? Collections.emptyList()
+            : kopierFra.frilansoppdrag.stream().map(OppgittFrilansoppdrag::new).collect(Collectors.toList());
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof OppgittFrilans)) return false;
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof OppgittFrilans))
+            return false;
         OppgittFrilans that = (OppgittFrilans) o;
         return harInntektFraFosterhjem == that.harInntektFraFosterhjem &&
             erNyoppstartet == that.erNyoppstartet &&
             harNærRelasjon == that.harNærRelasjon &&
-            Objects.equals(oppgittOpptjening, that.oppgittOpptjening) &&
             Objects.equals(frilansoppdrag, that.frilansoppdrag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgittOpptjening, harInntektFraFosterhjem, erNyoppstartet, harNærRelasjon, frilansoppdrag);
+        return Objects.hash(harInntektFraFosterhjem, erNyoppstartet, harNærRelasjon, frilansoppdrag);
     }
 
     @Override
     public String toString() {
-        return "FrilansEntitet{" +
-            "oppgittOpptjening=" + oppgittOpptjening +
-            ", harInntektFraFosterhjem=" + harInntektFraFosterhjem +
+        return "FrilansEntitet<" +
+            "harInntektFraFosterhjem=" + harInntektFraFosterhjem +
             ", erNyoppstartet=" + erNyoppstartet +
             ", harNærRelasjon=" + harNærRelasjon +
             ", frilansoppdrag=" + frilansoppdrag +
-            '}';
-    }
-
-    void setOppgittOpptjening(OppgittOpptjening oppgittOpptjening) {
-        this.oppgittOpptjening = oppgittOpptjening;
+            '>';
     }
 
     public boolean getHarInntektFraFosterhjem() {
         return harInntektFraFosterhjem;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
+    void setHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
         this.harInntektFraFosterhjem = harInntektFraFosterhjem;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setErNyoppstartet(boolean erNyoppstartet) {
+    void setErNyoppstartet(boolean erNyoppstartet) {
         this.erNyoppstartet = erNyoppstartet;
     }
 
-    // FIXME (OJR) kan ikke ha mutators
-    public void setHarNærRelasjon(boolean harNærRelasjon) {
+    void setHarNærRelasjon(boolean harNærRelasjon) {
         this.harNærRelasjon = harNærRelasjon;
     }
 

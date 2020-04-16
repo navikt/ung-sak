@@ -1,10 +1,10 @@
 package no.nav.k9.sak.behandlingslager.behandling.vedtak;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-@ApplicationScoped
+@Dependent
 public class BehandlingOverlappInfotrygdRepository {
 
     private EntityManager entityManager;

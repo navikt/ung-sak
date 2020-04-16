@@ -6,9 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -47,11 +47,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
@@ -73,10 +69,10 @@ public class VurderLøpendeMedlemskapStegTest {
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     @Inject
-    private UttakInMemoryTjeneste uttakTjeneste;
-
-    @Inject
     private VurderLøpendeMedlemskap vurdertLøpendeMedlemskapTjeneste;
+    
+    @Inject @Any
+    private DummySkjæringstidspunktTjeneste dummySkjæringstidspunktTjenesteForTest;
 
     @Before
     public void setUp() {
@@ -89,6 +85,9 @@ public class VurderLøpendeMedlemskapStegTest {
         LocalDate datoMedEndring = LocalDate.now().plusDays(10);
         LocalDate ettÅrSiden = LocalDate.now().minusYears(1);
         LocalDate iDag = LocalDate.now();
+
+        dummySkjæringstidspunktTjenesteForTest.setUtledetSkjæringstidspunkt(iDag);
+        
         var scenario = TestScenarioBuilder.builderMedSøknad();
         MedlemskapPerioderEntitet periode = opprettPeriode(ettÅrSiden, iDag, MedlemskapDekningType.FTL_2_6);
         scenario.leggTilMedlemskapPeriode(periode);
@@ -171,22 +170,10 @@ public class VurderLøpendeMedlemskapStegTest {
 
     private void avslutterBehandlingOgFagsak(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(),
-            behandling.getUuid(),
-            lagUttaksPeriode());
 
         behandling.avsluttBehandling();
         behandlingRepository.lagre(behandling, lås);
         fagsakRepository.oppdaterFagsakStatus(behandling.getFagsakId(), FagsakStatus.AVSLUTTET);
-    }
-
-    private Uttaksplan lagUttaksPeriode() {
-        LocalDate idag = LocalDate.now();
-
-        var periode = new Periode(idag, idag.plusDays(6));
-        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
-
-        return uttaksplan;
     }
 
     private void oppdaterMedlem(LocalDate datoMedEndring, MedlemskapPerioderEntitet periode, Long behandlingId) {

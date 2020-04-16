@@ -111,7 +111,7 @@ public class FordelRestTjeneste {
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public SaksnummerDto opprettSak(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnEllerOpprettSak opprettSakDto) {
-        BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(opprettSakDto.getBehandlingstemaOffisiellKode());
+        var ytelseType = finnYtelseType(opprettSakDto);
 
         AktørId aktørId = new AktørId(opprettSakDto.getAktørId());
         AktørId pleietrengendeAktørId = null;
@@ -119,13 +119,21 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
-        var ytelseType = behandlingTema.getFagsakYtelseType();
         var startDato = opprettSakDto.getPeriodeStart() != null ? opprettSakDto.getPeriodeStart() : LocalDate.now();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
 
         var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, startDato);
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
+    }
+
+    private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
+        if (dto.getYtelseType() != null) {
+            return FagsakYtelseType.fraKode(dto.getYtelseType());
+        } else {
+            BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(dto.getBehandlingstemaOffisiellKode());
+            return behandlingTema.getFagsakYtelseType();
+        }
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -138,8 +146,9 @@ public class FordelRestTjeneste {
     public InnsendingMottatt innsending(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid Innsending innsending) {
         var saksnummer = innsending.getSaksnummer();
         var ytelseType = innsending.getYtelseType();
+        var journalpostId = innsending.getJournalpostId();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
-        søknadMottaker.mottaSøknad(saksnummer, innsending.getInnhold());
+        søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
         return new InnsendingMottatt(saksnummer);
     }
 

@@ -14,7 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class RyddOpptjening {
 
@@ -30,12 +30,12 @@ public class RyddOpptjening {
         this.kontekst = kontekst;
     }
 
-    public void ryddOpp() {
+    public void ryddOpp(DatoIntervallEntitet periode) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        Optional<Vilkår> vilkår = ryddOppVilkårsvurderinger(behandling, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+        Optional<Vilkår> vilkår = ryddOppVilkårsvurderinger(behandling, periode.getFomDato(), periode.getTomDato());
         if (vilkår.isPresent()) {
-            opptjeningRepository.deaktiverOpptjening(behandling);
-            tilbakestillOpptjenigsperiodevilkår(behandling);
+            opptjeningRepository.deaktiverOpptjeningForPeriode(behandling, periode);
+            tilbakestillOpptjenigsperiodevilkår(behandling, periode);
         }
     }
 
@@ -70,7 +70,7 @@ public class RyddOpptjening {
         return vilkårResultatOpt.orElse(null);
     }
 
-    private void tilbakestillOpptjenigsperiodevilkår(Behandling behandling) {
+    private void tilbakestillOpptjenigsperiodevilkår(Behandling behandling, DatoIntervallEntitet periode) {
         Vilkårene vilkårene = hentVilkårResultat(behandling.getId());
         if (vilkårene == null) {
             return;
@@ -81,7 +81,7 @@ public class RyddOpptjening {
         if (opptjeningPeriodeVilkår.isPresent()) {
             VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
             final var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSPERIODEVILKÅR);
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) må stille tilbake de periodene under vurdering
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medUtfall(IKKE_VURDERT));
             builder.leggTil(vilkårBuilder);
             final var nyttResultat = builder.build();

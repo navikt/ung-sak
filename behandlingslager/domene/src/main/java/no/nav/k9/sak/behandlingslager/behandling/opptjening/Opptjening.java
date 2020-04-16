@@ -17,8 +17,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -26,7 +26,6 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -41,17 +40,17 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @DynamicUpdate
 public class Opptjening extends BaseEntitet {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OPPTJENING")
+    private Long id;
 
-    @Column(name = "aktiv", nullable = false)
-    private boolean aktiv = true;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "opptjening_resultat_id", nullable = false, updatable = false)
+    private OpptjeningResultat opptjeningResultat;
 
     @ChangeTracked
     @Embedded
     private DatoIntervallEntitet opptjeningPeriode;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OPPTJENING")
-    private Long id;
 
     /* Mapper kun fra denne og ikke bi-directional, gjør vedlikehold enklere. */
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true /* ok siden aktiviteter er eid av denne */)
@@ -65,10 +64,6 @@ public class Opptjening extends BaseEntitet {
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
-
-    @OneToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
 
     public Opptjening(LocalDate fom, LocalDate tom) {
         Objects.requireNonNull(fom, "opptjeningsperiodeFom");
@@ -104,10 +99,6 @@ public class Opptjening extends BaseEntitet {
             && Objects.equals(this.getTom(), other.getTom());
     }
 
-    public Boolean getAktiv() {
-        return aktiv;
-    }
-
     public LocalDate getFom() {
         return opptjeningPeriode.getFomDato();
     }
@@ -139,6 +130,16 @@ public class Opptjening extends BaseEntitet {
     }
 
     /**
+     * Returnerer skjæringstidspunktet for opptjening.
+     * T.o.m. dato for opptjeningsperioden plus 1 dag
+     *
+     * @return opptjeningsperioden t.o.m. + 1 dag
+     */
+    public LocalDate getSkjæringstidspunkt() {
+        return getTom().plusDays(1);
+    }
+
+    /**
      * fom/tom opptjening er gjort.
      */
     public DatoIntervallEntitet getOpptjeningPeriode() {
@@ -150,15 +151,12 @@ public class Opptjening extends BaseEntitet {
         return Objects.hash(opptjeningPeriode);
     }
 
-    void setBehandling(Behandling behandlingId) {
-        this.behandling = behandlingId;
+    OpptjeningResultat getOpptjeningResultat() {
+        return opptjeningResultat;
     }
 
-    public void setInaktiv() {
-        if (aktiv) {
-            this.aktiv = false;
-        }
-        // else - can never go back
+    void setOpptjeningResultat(OpptjeningResultat opptjeningResultat) {
+        this.opptjeningResultat = opptjeningResultat;
     }
 
     @Override

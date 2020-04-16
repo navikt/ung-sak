@@ -14,24 +14,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
+/**
+ * @deprecated har ingen gyldige verdier?.
+ */
+@Deprecated(forRemoval = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum HistorikkAvklartSoeknadsperiodeType implements Kodeverdi {
-
-    GRADERING("GRADERING", "Uttak: gradering"),
-    UTSETTELSE_ARBEID("UTSETTELSE_ARBEID", "Utsettelse: arbeid"),
-    UTSETTELSE_FERIE("UTSETTELSE_FERIE", "Utsettelse: ferie"),
-    UTSETTELSE_SKYDOM("UTSETTELSE_SKYDOM", "Utsettelse: sykdom/skade"),
-    UTSETTELSE_INSTITUSJON_SØKER("UTSETTELSE_INSTITUSJON_SØKER", "Utsettelse: innleggelse av forelder"),
-    UTSETTELSE_INSTITUSJON_BARN("UTSETTELSE_INSTITUSJON_BARN", "Utsettelse: innleggelse av barn"),
-    NY_SOEKNADSPERIODE("NY_SOEKNADSPERIODE", "Ny periode er lagt til"),
-    SLETTET_SOEKNASPERIODE("SLETTET_SOEKNASPERIODE", "Perioden er slettet"),
-    OVERFOERING_ALENEOMSORG("OVERFOERING_ALENEOMSORG", "Overføring: søker har aleneomsorg"),
-    OVERFOERING_SKYDOM("OVERFOERING_SKYDOM", "Overføring: sykdom/skade"),
-    OVERFOERING_INNLEGGELSE("OVERFOERING_INNLEGGELSE", "Overføring: innleggelse"),
-    OVERFOERING_IKKE_RETT("OVERFOERING_IKKE_RETT", "Overføring: annen forelder har ikke rett"),
-    UTTAK("UTTAK", "Uttak"),
-    OPPHOLD("OPPHOLD", "Opphold: annen foreldres uttak"),
 
     UDEFINERT("-", "Ikke definert"),
     ;

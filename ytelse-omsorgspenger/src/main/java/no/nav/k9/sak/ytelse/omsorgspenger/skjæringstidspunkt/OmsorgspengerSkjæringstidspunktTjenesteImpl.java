@@ -1,11 +1,16 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.skjæringstidspunkt;
 
 import java.time.LocalDate;
+import java.time.Period;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -15,27 +20,35 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktRegisterinnhentingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
-public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste, SkjæringstidspunktRegisterinnhentingTjeneste {
+public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private OpptjeningRepository opptjeningRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private OmsorgspengerOpphørtidspunktTjeneste opphørTidspunktTjeneste;
+    
+    private Period periodeFør = Period.parse("P12M");
 
     OmsorgspengerSkjæringstidspunktTjenesteImpl() {
         // CDI
     }
 
     @Inject
-    public OmsorgspengerSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository, OpptjeningRepository opptjeningRepository,
-                                                       OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository, VilkårResultatRepository vilkårResultatRepository) {
+    public OmsorgspengerSkjæringstidspunktTjenesteImpl(ÅrskvantumTjeneste årskvantumTjeneste,
+                                                       BehandlingRepository behandlingRepository,
+                                                       OpptjeningRepository opptjeningRepository,
+                                                       OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+                                                       VilkårResultatRepository vilkårResultatRepository) {
+        this.opphørTidspunktTjeneste = new OmsorgspengerOpphørtidspunktTjeneste(årskvantumTjeneste);
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
         this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
@@ -43,9 +56,21 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
     }
 
     @Override
-    public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId) {
+    public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
+        return opphørTidspunktTjeneste.getOpphørsdato(ref);
+    }
+
+    @Override
+    public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         // FIXME K9 skjæringstidspunkt
         return førsteUttaksdag(behandlingId);
+    }
+
+    @Override
+    public boolean harAvslåttPeriode(UUID behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid);
+        var ref = BehandlingReferanse.fra(behandling);
+        return opphørTidspunktTjeneste.harAvslåttPeriode(ref);
     }
 
     @Override
@@ -57,6 +82,7 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
 
         opptjeningRepository.finnOpptjening(behandlingId)
+            .flatMap(it -> it.finnOpptjening(førsteUttaksdato))
             .map(opptjening -> opptjening.getTom().plusDays(1))
             .ifPresent(skjæringstidspunkt -> {
                 builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
@@ -107,5 +133,14 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
+    }
+    
+    @Override
+    public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        LocalDate tom = behandling.getFagsak().getPeriode().getTomDato();
+
+        LocalDate skjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
+        return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
     }
 }

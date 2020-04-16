@@ -216,8 +216,7 @@ public class OppdatererDtoMapper {
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.VurderteArbeidsforholdDto mapVurdertArbeidsforhold(VurderteArbeidsforholdDto vurderteArbeidsforholdDto) {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.VurderteArbeidsforholdDto(
             vurderteArbeidsforholdDto.getAndelsnr(),
-            vurderteArbeidsforholdDto.isTidsbegrensetArbeidsforhold(),
-            vurderteArbeidsforholdDto.isOpprinneligVerdi()
+            vurderteArbeidsforholdDto.isTidsbegrensetArbeidsforhold()
         );
     }
 

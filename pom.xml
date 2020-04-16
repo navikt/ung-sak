@@ -21,6 +21,7 @@
 
 		<module>ytelse-omsorgspenger</module>
 		<module>ytelse-pleiepengerbarn</module>
+		<module>ytelse-frisinn</module>
 
 		<!-- Web klient og server -->
 		<module>web</module>
@@ -38,11 +39,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<felles.version>1.6-20200401094715-c18d662</felles.version>
+		<felles.version>1.6-20200407144318-a5d1a2b</felles.version>
 
-		<metrics.version>4.1.5</metrics.version>
+		<metrics.version>4.1.6</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-		<kalkulus.version>1.0-2020.03.31.181744-6621631</kalkulus.version>
+		<kalkulus.version>1.0-2020.04.15.152408-955626b</kalkulus.version>
+		<k9format.version>3.2.0-20200416115512-0f27431</k9format.version>
 	</properties>
 
     <repositories>
@@ -72,9 +74,21 @@
 			<dependency>
 				<groupId>no.nav.vedtak.prosesstask</groupId>
 				<artifactId>prosesstask-root</artifactId>
-				<version>2.2-20200327071839-ab53957</version>
+				<version>2.3-20200416081441-06b31dc</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
+				<artifactId>felles-sikkerhet</artifactId>
+				<version>${felles.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.json</groupId>
+						<artifactId>javax.json-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -102,7 +116,7 @@
 			<dependency>
 				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
 				<artifactId>oppdrag-kontrakter</artifactId>
-				<version>1.1-20200316141210-009d68e</version>
+				<version>1.1-20200406125014-7e43ca0</version>
 			</dependency>
 
 			<dependency>
@@ -131,11 +145,6 @@
 				<version>${fp-kontrakter.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>hendelser-inntektsmelding</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>no.nav.foreldrepenger.kontrakter</groupId>
 				<artifactId>inntektsmelding-v1</artifactId>
 				<version>${fp-kontrakter.version}</version>
@@ -143,7 +152,7 @@
 			<dependency>
 				<groupId>no.nav.foreldrepenger.abakus</groupId>
 				<artifactId>abakus-kontrakt</artifactId>
-				<version>1.1-20200327132948-abd2fad</version>
+				<version>1.2-2020.04.15.144854-7ceec87</version>
 			</dependency>
 
 			<dependency>
@@ -311,6 +320,11 @@
 
 			<dependency>
 				<groupId>no.nav.k9.sak.ytelse</groupId>
+				<artifactId>ytelse-frisinn</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9.sak.ytelse</groupId>
 				<artifactId>ytelse-omsorgspenger</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -323,7 +337,7 @@
 			<dependency>
 				<groupId>no.nav.fpsak.tidsserie</groupId>
 				<artifactId>fpsak-tidsserie</artifactId>
-				<version>2.3-20200331201106-1b3578b</version>
+				<version>2.3-20200402163257-54f755e</version>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.fpsak.nare</groupId>
@@ -333,8 +347,13 @@
 
 			<dependency>
 				<groupId>no.nav.k9</groupId>
+				<artifactId>soknad-frisinn</artifactId>
+				<version>${k9format.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.k9</groupId>
 				<artifactId>soknad-pleiepenger-barn</artifactId>
-				<version>3.0.0.f341850</version>
+				<version>${k9format.version}</version>
 			</dependency>
 
 			<!-- Prosjektets egne TEST AVHENGIGHETER -->
@@ -469,7 +488,7 @@
 			<dependency>
 				<groupId>com.vladmihalcea</groupId>
 				<artifactId>hibernate-types-52</artifactId>
-				<version>2.9.7</version>
+				<version>2.9.8</version>
 			</dependency>
 
 		</dependencies>
@@ -584,7 +603,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
-					<version>1.2.1</version>
+					<version>1.2.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>

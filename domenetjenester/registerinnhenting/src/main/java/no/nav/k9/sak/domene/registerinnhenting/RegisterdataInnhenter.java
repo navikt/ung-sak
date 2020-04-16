@@ -1,16 +1,14 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.ARBEIDSFORHOLD;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.LIGNET_NÆRING;
-import static no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType.YTELSE;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.ARBEIDSFORHOLD;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,13 +23,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.threeten.extra.Interval;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.kodeverk.RegisterdataType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
+import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -43,7 +40,6 @@ import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.AdressePeriode;
-import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.StatsborgerskapPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -64,9 +60,8 @@ import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.DefaultRelasjo
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleiepengerRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
@@ -97,30 +92,26 @@ public class RegisterdataInnhenter {
     private PersonopplysningRepository personopplysningRepository;
     private BehandlingRepository behandlingRepository;
     private MedlemskapRepository medlemskapRepository;
-    private OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste;
     private AbakusTjeneste abakusTjeneste;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     RegisterdataInnhenter() {
         // for CDI proxy
     }
 
-    /**
-     * @param etterkontrollTidsromFørSøknadsdato - Periode før søknadsdato hvor det skal etterkontrolleres barn er født
-     */
     @Inject
     public RegisterdataInnhenter(PersoninfoAdapter personinfoAdapter, // NOSONAR - krever mange parametere
                                  MedlemTjeneste medlemTjeneste,
                                  BehandlingRepositoryProvider repositoryProvider,
                                  MedlemskapRepository medlemskapRepository,
-                                 OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste,
-                                 AbakusTjeneste abakusTjeneste,
-                                 @KonfigVerdi(value = "etterkontroll.førsøknad.periode", defaultVerdi = "P1W") Period etterkontrollTidsromFørSøknadsdato) {
+                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                 AbakusTjeneste abakusTjeneste) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
+        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.medlemskapRepository = medlemskapRepository;
-        this.opplysningsPeriodeTjeneste = opplysningsPeriodeTjeneste;
         this.abakusTjeneste = abakusTjeneste;
     }
 
@@ -162,12 +153,12 @@ public class RegisterdataInnhenter {
     private PersonInformasjonBuilder byggPersonopplysningMedRelasjoner(Personinfo søkerPersonInfo,
                                                                        Behandling behandling) {
 
-        final PersonInformasjonBuilder informasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandling.getId());
+        var informasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandling.getId());
         informasjonBuilder.tilbakestill(behandling.getAktørId());
 
         // Historikk for søker
-        final Interval opplysningsperioden = opplysningsPeriodeTjeneste.beregnTilOgMedIdag(behandling.getId(), behandling.getFagsakYtelseType());
-        final Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(søkerPersonInfo.getAktørId(), opplysningsperioden);
+        var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), true);
+        var personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(søkerPersonInfo.getAktørId(), opplysningsperioden);
         if (personhistorikkinfo != null) {
             mapAdresser(personhistorikkinfo.getAdressehistorikk(), informasjonBuilder, søkerPersonInfo);
             mapStatsborgerskap(personhistorikkinfo.getStatsborgerskaphistorikk(), informasjonBuilder, søkerPersonInfo);
@@ -388,13 +379,13 @@ public class RegisterdataInnhenter {
     }
 
     private List<MedlemskapPerioderEntitet> innhentMedlemskapsopplysningerFor(Personinfo søkerInfo, Behandling behandling) {
-        final Interval opplysningsperiode = opplysningsPeriodeTjeneste.beregn(behandling.getId(), behandling.getFagsakYtelseType());
-        FinnMedlemRequest finnMedlemRequest = new FinnMedlemRequest(søkerInfo.getPersonIdent(),
-            LocalDateTime.ofInstant(opplysningsperiode.getStart(), ZoneId.systemDefault()).toLocalDate(),
-            LocalDateTime.ofInstant(opplysningsperiode.getEnd(), ZoneId.systemDefault()).toLocalDate());
+        var opplysningsperiode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), false);
+        LocalDate fom = opplysningsperiode.getFom();
+        LocalDate tom = opplysningsperiode.getTom();
+        var finnMedlemRequest = new FinnMedlemRequest(søkerInfo.getPersonIdent(), fom, tom);
         List<Medlemskapsperiode> medlemskapsperioder = medlemTjeneste.finnMedlemskapPerioder(finnMedlemRequest);
-        ArrayList<MedlemskapPerioderEntitet> resultat = new ArrayList<>();
-        for (Medlemskapsperiode medlemskapsperiode : medlemskapsperioder) {
+        List<MedlemskapPerioderEntitet> resultat = new ArrayList<>();
+        for (var medlemskapsperiode : medlemskapsperioder) {
             resultat.add(lagMedlemskapPeriode(medlemskapsperiode));
         }
         return resultat;
@@ -427,17 +418,19 @@ public class RegisterdataInnhenter {
     }
 
     private void doInnhentIAYIAbakus(Behandling behandling, BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
-        log.info("Trigger innhenting i abakus for behandling med id={} og uuid={}", behandling.getId(), behandling.getUuid());
-        final var opplysningsperiode = opplysningsPeriodeTjeneste.beregn(behandling.getId(), fagsakYtelseType);
-        var informasjonsElementer = utledBasertPå(behandlingType, fagsakYtelseType);
-        final InnhentRegisterdataRequest innhentRegisterdataRequest = new InnhentRegisterdataRequest(behandling.getFagsak().getSaksnummer().getVerdi(),
-            behandling.getUuid(),
-            new YtelseType(fagsakYtelseType.getKode()),
-            new Periode(LocalDate.ofInstant(opplysningsperiode.getStart(), ZoneId.systemDefault()),
-                LocalDate.ofInstant(opplysningsperiode.getEnd(), ZoneId.systemDefault())),
-            new AktørIdPersonident(behandling.getAktørId().getId()),
-            informasjonsElementer);
+        var behandlingUuid = behandling.getUuid();
+        var saksnummer = behandling.getFagsak().getSaksnummer().getVerdi();
+        var opplysningsperiode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, false);
+        var ytelseType = YtelseType.fraKode(fagsakYtelseType.getKode());
 
+        log.info("Trigger innhenting i abakus for behandling med id={} og uuid={}, saksnummer={}, opplysningsperiode={}, ytelseType={}",
+            behandling.getId(), behandlingUuid, saksnummer, opplysningsperiode, ytelseType);
+
+        var informasjonsElementer = utledBasertPå(behandlingType, fagsakYtelseType);
+        var periode = new Periode(opplysningsperiode.getFom(), opplysningsperiode.getTom());
+        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
+        
+        var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
 
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);

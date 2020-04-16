@@ -30,7 +30,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.uttak.OpphørUttakTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
@@ -40,6 +39,7 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -51,7 +51,7 @@ public class BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private OpphørUttakTjeneste opphørUttakTjeneste;
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     BeregningsresultatMapper() {
         // For inject
@@ -60,10 +60,10 @@ public class BeregningsresultatMapper {
     @Inject
     public BeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                    OpphørUttakTjeneste opphørUttakTjeneste) {
+                                    SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.opphørUttakTjeneste = opphørUttakTjeneste;
+        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     public BeregningsresultatDto lagBeregningsresultatMedUttaksplan(
@@ -71,7 +71,7 @@ public class BeregningsresultatMapper {
                                                                     BehandlingBeregningsresultatEntitet beregningsresultatAggregat,
                                                                     Optional<Uttaksplan> uttakResultat) {
         var ref = BehandlingReferanse.fra(behandling);
-        LocalDate opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref).orElse(null);
+        LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
             .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttakResultat))

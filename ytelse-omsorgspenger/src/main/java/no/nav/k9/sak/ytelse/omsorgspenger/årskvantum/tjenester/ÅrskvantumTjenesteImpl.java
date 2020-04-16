@@ -1,10 +1,10 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
@@ -12,10 +12,17 @@ import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import java.time.LocalDateTime;
 
 @ApplicationScoped
 @Default
@@ -23,12 +30,18 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private ÅrskvantumKlient årskvantumKlient;
+    private TpsTjeneste tpsTjeneste;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     @Inject
     public ÅrskvantumTjenesteImpl(OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                  ÅrskvantumRestKlient årskvantumRestKlient) {
+                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                  ÅrskvantumRestKlient årskvantumRestKlient,
+                                  TpsTjeneste tpsTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.årskvantumKlient = årskvantumRestKlient;
+        this.tpsTjeneste = tpsTjeneste;
 
     }
 
@@ -37,12 +50,29 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var årskvantumRequest = new ÅrskvantumRequest();
 
+        var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId());
+
+        for (Familierelasjon familierelasjon :personMedRelasjoner.get().getFamilierelasjoner()) {
+            if (familierelasjon.getRelasjonsrolle().equals(RelasjonsRolleType.BARN) && familierelasjon.getHarSammeBosted()) {
+                var barn = tpsTjeneste.hentBrukerForFnr(familierelasjon.getPersonIdent());
+                årskvantumRequest.getBarna().add(new Barn(familierelasjon.getPersonIdent(), barn.get().getFødselsdato(), barn.get().getDødsdato(), familierelasjon.getHarSammeBosted()));
+            }
+        }
 
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
 
-        årskvantumRequest.setBehandlingId(ref.getBehandlingId().toString());
+        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
+
+        LocalDateTime datoForSisteInntektsmelding = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().get().getInntektsmeldingerSomSkalBrukes().stream().map(
+            Inntektsmelding::getInnsendingstidspunkt).max(LocalDateTime::compareTo).get();
+
+        årskvantumRequest.setBehandlingUUID(ref.getBehandlingUuid().toString());
+        årskvantumRequest.setSaksnummer(ref.getSaksnummer().getVerdi());
         årskvantumRequest.setAktørId(ref.getAktørId().getId());
+        årskvantumRequest.setInnsendingstidspunkt(datoForSisteInntektsmelding);
+
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
+
             UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
                 null,
                 null,
@@ -61,6 +91,21 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             årskvantumRequest.getUttaksperioder().add(uttaksperiodeOmsorgspenger);
         }
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForBehandling(BehandlingReferanse ref) {
+        return årskvantumKlient.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(BehandlingReferanse ref) {
+        return årskvantumKlient.hentÅrskvantumForFagsak(ref.getSaksnummer().getVerdi());
+    }
+
+    @Override
+    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørid) {
+        return årskvantumKlient.hentResterendeKvantum(aktørid);
     }
 
 }

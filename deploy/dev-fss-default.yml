@@ -172,7 +172,7 @@ spec:
     - name: URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING
       value: http://fptilbake.q1/fptilbake/api/behandlinger/tilbakekreving/aapen
     - name: K9_OMS_AARSKVANTUM_URL
-      value: http://k9-aarskvantum/k9/aarskvantum
+      value: http://k9-aarskvantum
 
     # Web services
     - name: AKTOER_V2_URL

@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.konfig.Tid;
 
 
 @BehandlingStegRef(kode = "VURDER_OPPTJ_PERIODE")
@@ -50,24 +49,14 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     }
 
     @Override
-    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg,
-                                   BehandlingStegType sisteSteg) {
-        if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
-            super.vedHoppOverBakover(kontekst, modell, førsteSteg, sisteSteg);
-            new RyddOpptjening(behandlingRepository, opptjeningRepository, vilkårResultatRepository, kontekst).ryddOpp();
-        }
+    protected void ryddOppVilkårsPeriode(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, DatoIntervallEntitet periode) {
+        super.ryddOppVilkårsPeriode(kontekst, modell, periode);
+        new RyddOpptjening(behandlingRepository, opptjeningRepository, vilkårResultatRepository, kontekst).ryddOpp(periode);
     }
 
     @Override
     public void vedHoppOverFramover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg,
                                     BehandlingStegType sisteSteg) {
-        if (!behandlingRepository.hentBehandling(kontekst.getBehandlingId()).erRevurdering()) {
-            if (!erVilkårOverstyrt(kontekst.getBehandlingId(), Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)) {
-                super.vedHoppOverFramover(kontekst, modell, førsteSteg, sisteSteg);
-                new RyddOpptjening(behandlingRepository, opptjeningRepository, vilkårResultatRepository, kontekst).ryddOpp();
-            }
-
-        }
     }
 
     @Override

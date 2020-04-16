@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.domene.uttak.OpphørUttakTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
@@ -25,7 +24,6 @@ public class BehandlingVedtakTjeneste {
 
     private BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private OpphørUttakTjeneste opphørUttakTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     BehandlingVedtakTjeneste() {
@@ -34,11 +32,10 @@ public class BehandlingVedtakTjeneste {
 
     @Inject
     public BehandlingVedtakTjeneste(BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer,
-                                    BehandlingRepositoryProvider repositoryProvider, OpphørUttakTjeneste opphørUttakTjeneste,
+                                    BehandlingRepositoryProvider repositoryProvider,
                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-        this.opphørUttakTjeneste = opphørUttakTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
@@ -52,7 +49,7 @@ public class BehandlingVedtakTjeneste {
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
         if (behandling.erRevurdering()) {
-            opphørsdato = opphørUttakTjeneste.getOpphørsdato(ref);
+            opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref);
             skjæringstidspunkt = skjæringstidspunkter.getSkjæringstidspunktHvisUtledet();
         }
         vedtakResultatType = UtledVedtakResultatType.utled(behandling, behandling.getBehandlingResultatType(), opphørsdato, skjæringstidspunkt);

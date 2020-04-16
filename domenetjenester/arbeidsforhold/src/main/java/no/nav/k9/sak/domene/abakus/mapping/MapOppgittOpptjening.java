@@ -25,9 +25,11 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 
@@ -121,14 +123,14 @@ class MapOppgittOpptjening {
 
             var virksomhet = arbeidsforhold.getUtenlandskVirksomhet();
             if (virksomhet != null) {
-                var landKode = virksomhet.getLandkode() == null ? Landkode.NORGE : new Landkode(virksomhet.getLandkode().getKode());
+                var landKode = virksomhet.getLandkode() == null ? Landkode.NOR : Landkode.fraKode(virksomhet.getLandkode().getKode());
                 if (virksomhet.getNavn() != null) {
                     dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(virksomhet.getNavn()), landKode);
                 } else {
                     dto.setLandkode(landKode);
                 }
             } else {
-                dto.setLandkode(Landkode.NORGE);
+                dto.setLandkode(Landkode.NOR);
             }
 
             return dto;
@@ -158,7 +160,7 @@ class MapOppgittOpptjening {
 
             var virksomhet = egenNæring.getVirksomhet();
             if (virksomhet != null) {
-                var landkode = virksomhet.getLandkode() == null ? Landkode.NORGE : new Landkode(virksomhet.getLandkode().getKode());
+                var landkode = virksomhet.getLandkode() == null ? Landkode.NOR : Landkode.fraKode(virksomhet.getLandkode().getKode());
                 var navn = virksomhet.getNavn();
                 if (navn != null) {
                     dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(navn), landkode);
@@ -166,7 +168,7 @@ class MapOppgittOpptjening {
                     dto.setLandkode(landkode);
                 }
             } else {
-                dto.setLandkode(Landkode.NORGE);
+                dto.setLandkode(Landkode.NOR);
             }
 
             return dto;
@@ -188,7 +190,12 @@ class MapOppgittOpptjening {
         private static OppgittFrilansoppdragDto mapFrilansoppdrag(OppgittFrilansoppdrag frilansoppdrag) {
             var periode = new Periode(frilansoppdrag.getPeriode().getFomDato(), frilansoppdrag.getPeriode().getTomDato());
             var oppdragsgiver = frilansoppdrag.getOppdragsgiver();
-            return new OppgittFrilansoppdragDto(periode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(oppdragsgiver));
+            BigDecimal inntekt = frilansoppdrag.getInntekt();
+            OppgittFrilansoppdragDto oppgittFrilansoppdragDto = new OppgittFrilansoppdragDto(periode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(oppdragsgiver));
+            if (inntekt != null) {
+                return oppgittFrilansoppdragDto.medInntekt(inntekt);
+            }
+            return oppgittFrilansoppdragDto;
         }
 
         private static OppgittAnnenAktivitetDto mapAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet) {
@@ -237,17 +244,21 @@ class MapOppgittOpptjening {
             if (dto == null)
                 return null;
 
-            var frilans = new OppgittFrilans();
+            OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
 
-            frilans.setErNyoppstartet(dto.isErNyoppstartet());
-            frilans.setHarNærRelasjon(dto.isHarNærRelasjon());
-            frilans.setHarInntektFraFosterhjem(dto.isHarInntektFraFosterhjem());
+            frilansBuilder.medErNyoppstartet(dto.isErNyoppstartet());
+            frilansBuilder.medHarNærRelasjon(dto.isHarNærRelasjon());
+            frilansBuilder.medHarInntektFraFosterhjem(dto.isHarInntektFraFosterhjem());
 
             var frilansoppdrag = mapEach(dto.getFrilansoppdrag(),
-                f -> new OppgittFrilansoppdrag(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()),
-                    DatoIntervallEntitet.fraOgMedTilOgMed(f.getPeriode().getFom(), f.getPeriode().getTom())));
-            frilans.setFrilansoppdrag(frilansoppdrag);
-            return frilans;
+                    f -> OppgittFrilansOppdragBuilder.ny()
+                            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(f.getPeriode().getFom(), f.getPeriode().getTom()))
+                            .medInntekt(f.getInntekt())
+                            .medOppdragsgiver(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()))
+                            .build());
+
+            frilansBuilder.leggTilOppgittOppdrag(frilansoppdrag);
+            return frilansBuilder.build();
         }
 
         private static EgenNæringBuilder mapEgenNæring(OppgittEgenNæringDto dto) {

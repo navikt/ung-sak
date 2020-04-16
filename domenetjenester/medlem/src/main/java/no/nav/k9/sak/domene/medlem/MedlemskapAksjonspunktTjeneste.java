@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.medlem;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -15,7 +15,7 @@ import no.nav.k9.sak.kontrakt.medlem.BekreftBosattVurderingAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftOppholdVurderingAksjonspunktDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
-@ApplicationScoped
+@Dependent
 public class MedlemskapAksjonspunktTjeneste {
 
     private BehandlingRepositoryProvider repositoryProvider;

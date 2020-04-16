@@ -20,7 +20,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum Venteårsak implements Kodeverdi {
 
     UDEFINERT("-", "Ikke definert"),
-    
+
     AAP_DP_ENESTE_AKTIVITET_SVP("AAP_DP_ENESTE_AKTIVITET_SVP", "Bruker har ikke rett til svangerskapspenger når eneste aktivitet er AAP/DP"),
     ANKE_OVERSENDT_TIL_TRYGDERETTEN("ANKE_OVERSENDT_TIL_TRYGDERETTEN", "Venter på at saken blir behandlet hos Trygderetten"),
     ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER("ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "Venter på merknader fra bruker"),
@@ -49,7 +49,7 @@ public enum Venteårsak implements Kodeverdi {
     VENT_SØKNAD_SENDT_INFORMASJONSBREV("VENT_SØKNAD_SENDT_INFORMASJONSBREV", "Sendt informasjonsbrev venter søknad."),
     VENT_TIDLIGERE_BEHANDLING("VENT_TIDLIGERE_BEHANDLING", "Venter på iverksettelse av en tidligere behandling i denne saken"),
     VENT_ÅPEN_BEHANDLING("VENT_ÅPEN_BEHANDLING", "Søker eller den andre forelderen har en åpen behandling"),
-    
+
     OPPD_ÅPEN_BEH("OPPD_ÅPEN_BEH", "Venter på oppdatering av åpen behandling"),
     VENT_DEKGRAD_REGEL("VENT_DEKGRAD_REGEL", "Venter på 80% dekningsgrad-regel"),
     VENT_ØKONOMI("VENT_ØKONOMI", "Venter på økonomiløsningen"),
@@ -57,11 +57,12 @@ public enum Venteårsak implements Kodeverdi {
     VENT_BEREGNING_TILBAKE_I_TID("VENT_BEREGNING_TILBAKE_I_TID", "Endring i tilkjent ytelse bakover i tid. Dette håndteres ikke i løsningen enda."),
     AAP_DP_SISTE_10_MND_SVP("AAP_DP_SISTE_10_MND_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
     FL_SN_IKKE_STOTTET_FOR_SVP("FL_SN_IKKE_STOTTET_FOR_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
-    
+    BRUKER_70ÅR_VED_REFUSJON("BRUKER_70ÅR_VED_REFUSJON", "Mangel i løsning for brukere som er 70 år eller eldre"),
+
 ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
@@ -95,7 +96,7 @@ public enum Venteårsak implements Kodeverdi {
         }
         return ad;
     }
-    
+
     public static Map<String, Venteårsak> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -114,7 +115,7 @@ public enum Venteårsak implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

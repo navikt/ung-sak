@@ -65,6 +65,7 @@ public class ProsessModell {
     public BehandlingModell revurdering() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, YTELSE_TYPE);
         modellBuilder.medSteg(
+            BehandlingStegType.START_STEG,
             BehandlingStegType.VARSEL_REVURDERING,
             BehandlingStegType.VURDER_UTLAND,
             BehandlingStegType.VURDER_KOMPLETTHET,

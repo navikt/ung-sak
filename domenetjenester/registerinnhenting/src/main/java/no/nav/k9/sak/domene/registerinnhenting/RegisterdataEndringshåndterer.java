@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -30,7 +30,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
  * Oppdaterer registeropplysninger for engangsstønader og skrur behandlingsprosessen tilbake
  * til innhent-steget hvis det har skjedd endringer siden forrige innhenting.
  */
-@ApplicationScoped
+@Dependent
 public class RegisterdataEndringshåndterer {
 
     private RegisterdataInnhenter registerdataInnhenter;

@@ -30,11 +30,6 @@
 			<artifactId>felles-db</artifactId>
 		</dependency>
 
-		<!-- Domenetjenester avhengigheter -->
-		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>uttak</artifactId>
-		</dependency>
 		<!-- Prosjekt avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

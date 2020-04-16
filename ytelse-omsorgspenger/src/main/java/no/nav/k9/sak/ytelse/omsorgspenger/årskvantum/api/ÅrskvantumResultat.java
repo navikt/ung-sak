@@ -5,25 +5,26 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Comparator;
 import java.util.List;
-
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ÅrskvantumResultat {
 
-    @JsonProperty(value = "behandlingId", required = true)
+    @JsonProperty(value = "behandlingUUID", required = true)
     @Valid
     @NotNull
-    private String behandlingId;
+    private String behandlingUUID;
 
-    @JsonProperty(value="utfall", required=true)
+    @JsonProperty(value = "utfall", required = true)
     @Valid
     @NotNull
     private OmsorgspengerUtfall samletUtfall;
@@ -33,13 +34,12 @@ public class ÅrskvantumResultat {
     @Size(max = 1000)
     private List<UttaksperiodeOmsorgspenger> uttaksperioder;
 
-
-    public String getBehandlingId() {
-        return behandlingId;
+    public String getBehandlingUUID() {
+        return behandlingUUID;
     }
 
-    public void setBehandlingId(String behandlingId) {
-        this.behandlingId = behandlingId;
+    public void setBehandlingUUID(String behandlingUUID) {
+        this.behandlingUUID = behandlingUUID;
     }
 
     public OmsorgspengerUtfall getSamletUtfall() {
@@ -56,5 +56,11 @@ public class ÅrskvantumResultat {
 
     public void setUttaksperioder(List<UttaksperiodeOmsorgspenger> uttaksperioder) {
         this.uttaksperioder = uttaksperioder;
+    }
+
+    public Periode getMaksPeriode() {
+        var fom = uttaksperioder.stream().map(UttaksperiodeOmsorgspenger::getFom).min(Comparator.nullsFirst(Comparator.naturalOrder())).orElse(null);
+        var tom = uttaksperioder.stream().map(UttaksperiodeOmsorgspenger::getTom).max(Comparator.nullsLast(Comparator.naturalOrder())).orElse(null);
+        return fom != null && tom != null ? new Periode(fom, tom) : null;
     }
 }

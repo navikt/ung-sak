@@ -79,14 +79,7 @@ class SøknadOversetter {
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
         var maksPeriode = mapUttakGrunnlag.getOppgittUttak().getMaksPeriode();
-
-        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        var eksisterendeFom = fagsak.getPeriode().getFomDato();
-        var eksisterendeTom = fagsak.getPeriode().getTomDato();
-        var oppdatertFom = eksisterendeFom.isBefore(maksPeriode.getFomDato()) && !Tid.TIDENES_BEGYNNELSE.equals(eksisterendeFom) ? eksisterendeFom : maksPeriode.getFomDato();
-        var oppdatertTom = eksisterendeTom.isAfter(maksPeriode.getTomDato()) && !Tid.TIDENES_ENDE.equals(eksisterendeTom) ? eksisterendeTom : maksPeriode.getTomDato();
-
-        fagsakRepository.oppdaterPeriode(fagsakId, oppdatertFom, oppdatertTom);
+        fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
     private void lagrePleietrengende(Long fagsakId, Barn barn) {

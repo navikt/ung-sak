@@ -2,14 +2,12 @@ package no.nav.k9.sak.domene.risikoklassifisering;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.threeten.extra.Interval;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
@@ -18,10 +16,11 @@ import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.AktoerId;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.Opplysningsperiode;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RequestWrapper;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RisikovurderingRequest;
-import no.nav.k9.sak.skjæringstidspunkt.OpplysningsPeriodeTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.log.mdc.MDCOperations;
 
 @ApplicationScoped
@@ -31,7 +30,6 @@ public class Risikoklassifisering {
     private ProsessTaskRepository prosessTaskRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private RisikovurderingTjeneste risikovurderingTjeneste;
-    private OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste;
 
     Risikoklassifisering() {
         // CDI proxy
@@ -40,23 +38,21 @@ public class Risikoklassifisering {
     @Inject
     public Risikoklassifisering(ProsessTaskRepository prosessTaskRepository,
                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                RisikovurderingTjeneste risikovurderingTjeneste,
-                                OpplysningsPeriodeTjeneste opplysningsPeriodeTjeneste) {
+                                RisikovurderingTjeneste risikovurderingTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.risikovurderingTjeneste = risikovurderingTjeneste;
-        this.opplysningsPeriodeTjeneste = opplysningsPeriodeTjeneste;
     }
 
     public void opprettProsesstaskForRisikovurdering(Behandling behandling) {
         try {
             LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
-            Interval interval = opplysningsPeriodeTjeneste.beregn(behandling.getId(), behandling.getFagsakYtelseType());
+            Periode periode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), false);
             RisikovurderingRequest risikovurderingRequest = RisikovurderingRequest.builder()
                 .medSoekerAktoerId(new AktoerId(behandling.getAktørId()))
                 .medBehandlingstema(hentBehandlingTema(behandling))
                 .medSkjæringstidspunkt(skjæringstidspunkt)
-                .medOpplysningsperiode(leggTilOpplysningsperiode(interval))
+                .medOpplysningsperiode(leggTilOpplysningsperiode(periode))
                 .medKonsumentId(behandling.getUuid()).build();
             opprettProsesstask(behandling, risikovurderingRequest);
         } catch (Exception ex) {
@@ -83,9 +79,9 @@ public class Risikoklassifisering {
         }
     }
 
-    private Opplysningsperiode leggTilOpplysningsperiode(Interval interval) {
-        LocalDate tilOgMed = interval.getEnd() == null ? null : LocalDate.ofInstant(interval.getEnd(), ZoneId.systemDefault());
-        return new Opplysningsperiode(LocalDate.ofInstant(interval.getStart(), ZoneId.systemDefault()), tilOgMed);
+    private Opplysningsperiode leggTilOpplysningsperiode(Periode periode) {
+        LocalDate tilOgMed = Tid.TIDENES_ENDE.equals(periode.getTom()) ? Tid.TIDENES_ENDE : periode.getTom();
+        return new Opplysningsperiode(periode.getFom(), tilOgMed);
     }
 
     private String getJson(RequestWrapper risikovurderingRequest) throws IOException {

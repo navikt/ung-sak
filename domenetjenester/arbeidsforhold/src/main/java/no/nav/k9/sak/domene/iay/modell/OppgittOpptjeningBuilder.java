@@ -25,6 +25,10 @@ public class OppgittOpptjeningBuilder {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(UUID.randomUUID()));
     }
 
+    public static OppgittOpptjeningBuilder nyFraEksisterende(OppgittOpptjening eksisterende, UUID eksternReferanse, LocalDateTime tidspunkt) {
+        return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksisterende, eksternReferanse, tidspunkt));
+    }
+
     public static OppgittOpptjeningBuilder ny(UUID eksternReferanse, LocalDateTime opprettetTidspunktOriginalt) {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt));
     }
@@ -33,6 +37,9 @@ public class OppgittOpptjeningBuilder {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
     }
 
+    public static OppgittOpptjeningBuilder oppdater(UUID eksternReferanse, OffsetDateTime opprettetTidspunktOriginalt) {
+        return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
+    }
 
     public OppgittOpptjeningBuilder leggTilAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet){
         this.kladd.leggTilAnnenAktivitet(annenAktivitet);
@@ -40,7 +47,7 @@ public class OppgittOpptjeningBuilder {
     }
 
     public OppgittOpptjeningBuilder leggTilFrilansOpplysninger(OppgittFrilans frilans) {
-        this.kladd.leggTilFrilans(frilans);
+        this.kladd.setFrilans(frilans);
         return this;
     }
 
@@ -142,6 +149,74 @@ public class OppgittOpptjeningBuilder {
         public EgenNæringBuilder medVirksomhet(OrgNummer orgNr) {
             this.entitet.setVirksomhetOrgnr(orgNr);
             return this;
+        }
+    }
+
+    public static class OppgittFrilansBuilder {
+
+        private final OppgittFrilans kladd;
+
+        private OppgittFrilansBuilder(OppgittFrilans kladd) {
+            this.kladd = kladd;
+        }
+
+        public static OppgittFrilansBuilder ny() {
+            return new OppgittFrilansBuilder(new OppgittFrilans());
+        }
+
+        public OppgittFrilansBuilder leggTilOppgittOppdrag(List<OppgittFrilansoppdrag> frilansoppdrag) {
+            this.kladd.setFrilansoppdrag(frilansoppdrag);
+            return this;
+        }
+
+        public OppgittFrilansBuilder medHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
+            this.kladd.setHarInntektFraFosterhjem(harInntektFraFosterhjem);
+            return this;
+        }
+
+        public OppgittFrilansBuilder medErNyoppstartet(boolean erNyoppstartet) {
+            this.kladd.setErNyoppstartet(erNyoppstartet);
+            return this;
+        }
+
+        public OppgittFrilansBuilder medHarNærRelasjon(boolean harNærRelasjon) {
+            this.kladd.setHarNærRelasjon(harNærRelasjon);
+            return this;
+        }
+
+        public OppgittFrilans build () {
+            return kladd;
+        }
+    }
+
+    public static class OppgittFrilansOppdragBuilder{
+        private final OppgittFrilansoppdrag kladd;
+
+        private OppgittFrilansOppdragBuilder(OppgittFrilansoppdrag kladd) {
+            this.kladd = kladd;
+        }
+
+        public static OppgittFrilansOppdragBuilder ny() {
+            return new OppgittFrilansOppdragBuilder(new OppgittFrilansoppdrag());
+        }
+
+        public OppgittFrilansOppdragBuilder medPeriode(DatoIntervallEntitet periode) {
+            this.kladd.setPeriode(periode);
+            return this;
+        }
+
+        public OppgittFrilansOppdragBuilder medInntekt(BigDecimal inntekt) {
+            this.kladd.setInntekt(inntekt);
+            return this;
+        }
+
+        public OppgittFrilansOppdragBuilder medOppdragsgiver(String oppdragsgiver) {
+            this.kladd.setOppdragsgiver(oppdragsgiver);
+            return this;
+        }
+
+        public OppgittFrilansoppdrag build() {
+            return this.kladd;
         }
     }
 

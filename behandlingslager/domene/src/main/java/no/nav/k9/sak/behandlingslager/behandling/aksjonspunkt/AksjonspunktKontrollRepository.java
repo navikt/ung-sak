@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 /**
  * Håndter all endring av aksjonspunkt for behandlingskontroll. Skal IKKE brukes utenfor Behandlingskontroll uten avklaring
  */
-@ApplicationScoped
+@Dependent
 public class AksjonspunktKontrollRepository {
 
     private static final Logger log = LoggerFactory.getLogger(AksjonspunktKontrollRepository.class);

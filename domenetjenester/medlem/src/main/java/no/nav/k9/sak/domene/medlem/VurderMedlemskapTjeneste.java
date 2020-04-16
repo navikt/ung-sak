@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -19,7 +19,7 @@ import no.nav.k9.sak.domene.medlem.impl.AvklaringFaktaMedlemskap;
 import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 
-@ApplicationScoped
+@Dependent
 public class VurderMedlemskapTjeneste {
 
     private AvklarOmErBosatt avklarOmErBosatt;

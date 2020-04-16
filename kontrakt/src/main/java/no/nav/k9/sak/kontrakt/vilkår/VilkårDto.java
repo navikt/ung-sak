@@ -87,63 +87,63 @@ public class VilkårDto {
         return avslagKode;
     }
 
-    public String getEvaluering() {
-        return evaluering;
-    }
-
-    public String getInput() {
-        return input;
-    }
-
-    public String getLovReferanse() {
-        return lovReferanse;
-    }
-
-    public Properties getMerknadParametere() {
-        return merknadParametere;
-    }
-
-    public Utfall getVilkarStatus() {
-        return vilkarStatus;
-    }
-
-    public VilkårType getVilkarType() {
-        return vilkarType;
-    }
-
-    public boolean isOverstyrbar() {
-        return overstyrbar;
-    }
-
     public void setAvslagKode(String avslagKode) {
         this.avslagKode = avslagKode;
+    }
+
+    public String getEvaluering() {
+        return evaluering;
     }
 
     public void setEvaluering(String evaluering) {
         this.evaluering = evaluering;
     }
 
+    public String getInput() {
+        return input;
+    }
+
     public void setInput(String input) {
         this.input = input;
+    }
+
+    public String getLovReferanse() {
+        return lovReferanse;
     }
 
     public void setLovReferanse(String lovReferanse) {
         this.lovReferanse = lovReferanse;
     }
 
+    public Properties getMerknadParametere() {
+        return merknadParametere;
+    }
+
     public void setMerknadParametere(Properties merknadParametere) {
         this.merknadParametere = merknadParametere;
     }
 
-    public void setOverstyrbar(boolean overstyrbar) {
-        this.overstyrbar = overstyrbar;
+    public Utfall getVilkarStatus() {
+        return vilkarStatus;
     }
 
     public void setVilkarStatus(Utfall vilkarStatus) {
         this.vilkarStatus = vilkarStatus;
     }
 
+    public VilkårType getVilkarType() {
+        return vilkarType;
+    }
+
     public void setVilkarType(VilkårType vilkarType) {
         this.vilkarType = vilkarType;
+    }
+
+    public boolean isOverstyrbar() {
+        return overstyrbar;
+    }
+
+    public void setOverstyrbar(boolean overstyrbar) {
+        this.overstyrbar = overstyrbar;
     }
 }

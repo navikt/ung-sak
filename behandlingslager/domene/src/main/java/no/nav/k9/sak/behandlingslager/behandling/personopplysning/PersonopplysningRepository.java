@@ -3,7 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.personopplysning;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -34,7 +34,7 @@ import no.nav.vedtak.felles.jpa.HibernateVerktøy;
  * Ved multiple endringer i et grunnlat for en Behandling vil alltid kun et innslag i grunnlag være aktiv for angitt
  * Behandling.
  */
-@ApplicationScoped
+@Dependent
 public class PersonopplysningRepository {
 
     private EntityManager entityManager;

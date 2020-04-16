@@ -7,8 +7,10 @@ import java.util.UUID;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 
 /** Merk denne mapper alltid hele aggregat tilbake til nye instanser av IAY Aggregat. (i motsetning til tilsvarende implementasjon i ABakus som mapper til eksisterende instans). */
@@ -67,12 +69,16 @@ public class IAYFraDtoMapper {
         var mapInntektsmeldinger = new MapInntektsmeldinger.MapFraDto();
         var inntektsmeldinger = mapInntektsmeldinger.map(arbeidsforholdInformasjonBuilder, dto.getInntektsmeldinger());
 
-        var oppgittOpptjening = new MapOppgittOpptjening().mapFraDto(dto.getOppgittOpptjening());
+        var oppgittOpptjening = mapOppgttOpptjening(dto.getOppgittOpptjening());
         var arbeidsforholdInformasjon = arbeidsforholdInformasjonBuilder.build();
 
         builder.medOppgittOpptjening(oppgittOpptjening);
         builder.setInntektsmeldinger(inntektsmeldinger);
         builder.medInformasjon(arbeidsforholdInformasjon);
+    }
+
+    public OppgittOpptjeningBuilder mapOppgttOpptjening(OppgittOpptjeningDto oppgittOpptjening) {
+        return new MapOppgittOpptjening().mapFraDto(oppgittOpptjening);
     }
 
     private void mapSaksbehandlerDataTilBuilder(InntektArbeidYtelseGrunnlagDto dto, InntektArbeidYtelseGrunnlagBuilder builder) {

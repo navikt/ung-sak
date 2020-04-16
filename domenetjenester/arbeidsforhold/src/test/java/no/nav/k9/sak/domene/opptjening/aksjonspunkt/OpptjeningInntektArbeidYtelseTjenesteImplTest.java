@@ -1,12 +1,10 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import static no.nav.k9.sak.domene.arbeidsforhold.YtelseTestHelper.leggTilYtelse;
 import static no.nav.k9.sak.domene.arbeidsforhold.YtelseTestHelper.opprettInntektArbeidYtelseAggregatForYrkesaktivitet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -34,14 +31,12 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
-import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
@@ -92,6 +87,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         var virksomhetRepository = repositoryProvider.getVirksomhetRepository();
         virksomhetRepository.lagre(virksomhet);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         var oppgitt = OppgittOpptjeningBuilder.ny();
         oppgitt.leggTilEgneNæringer(Collections.singletonList(OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
@@ -105,7 +101,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Assert
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, periode.getFomDato())
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt))
             .stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.NÆRING)).collect(Collectors.toList());
 
         assertThat(perioder).hasSize(1);
@@ -120,6 +116,8 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         final Behandling behandling = opprettBehandling(skjæringstidspunkt);
         var sisteLønnsendringsdato = skjæringstidspunkt;
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusMonths(2));
+
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
 
         InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
             AKTØRID, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
@@ -136,7 +134,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Act
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, skjæringstidspunkt);
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
         assertThat(perioder).hasSize(1);
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_GODKJENT)).collect(Collectors.toList()))
             .hasSize(1);
@@ -149,7 +147,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         final Behandling behandling = opprettBehandling(iDag);
         var sisteLønnsendringsdato = skjæringstidspunkt;
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(3), iDag.minusMonths(2));
-
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt.minusDays(1), false);
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(ORG_NUMMER);
         InntektArbeidYtelseAggregatBuilder bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(AKTØRID, ARBEIDSFORHOLD_ID, periode1,
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, virksomhet,
@@ -168,212 +166,10 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Act
         BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, skjæringstidspunkt);
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
         assertThat(perioder).hasSize(1);
         assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_UNDERKJENT)).collect(Collectors.toList()))
             .hasSize(1);
-    }
-
-    @Test
-    public void skal_hente_ytelse_før_stp() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-        var sisteLønnsendringsdato = skjæringstidspunkt;
-
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-        InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.REGISTER);
-
-        builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10),
-            RelatertYtelseTilstand.AVSLUTTET, "12342234", FagsakYtelseType.FORELDREPENGER));
-        builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(3), skjæringstidspunkt.minusDays(1),
-            RelatertYtelseTilstand.LØPENDE, "1222433", FagsakYtelseType.SYKEPENGER));
-
-        Long behandlingId = behandling.getId();
-        iayTjeneste.lagreIayAggregat(behandlingId, builder);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
-
-        // Act
-        Optional<Ytelse> sisteYtelseOpt = opptjeningTjeneste.hentSisteInfotrygdYtelseFørSkjæringstidspunktForOpptjening(behandlingId, søkerAktørId);
-
-        // Assert
-        assertThat(sisteYtelseOpt.isPresent()).isTrue();
-        assertThat(sisteYtelseOpt.get().getSaksnummer().getVerdi()).isEqualTo("1222433");
-    }
-
-    @Test
-    public void skal_lage_sammehengende_liste() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-        var sisteLønnsendringsdato = skjæringstidspunkt;
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-
-        var builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.REGISTER);
-
-        builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.minusDays(2),
-            RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(15), skjæringstidspunkt.minusDays(11),
-            RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(16),
-            RelatertYtelseTilstand.AVSLUTTET, "124234", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(30), skjæringstidspunkt.minusDays(22),
-            RelatertYtelseTilstand.AVSLUTTET, "123253254", FagsakYtelseType.SYKEPENGER));
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
-
-        // Act
-        Collection<Ytelse> sammenhengendeYtelser = opptjeningTjeneste.hentSammenhengendeInfotrygdYtelserFørSkjæringstidspunktForOppjening(behandling.getId(), behandling.getAktørId());
-
-        // Assert
-        assertThat(sammenhengendeYtelser).hasSize(3);
-        assertThat(sammenhengendeYtelser.stream().map(s -> s.getSaksnummer().getVerdi()).collect(Collectors.toList())).containsOnly("12342234", "1222433",
-            "124234");
-    }
-
-    @Test
-    public void skal_lage_sammehengende_liste_med_overlappende_ytelser() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-        var sisteLønnsendringsdato = skjæringstidspunkt;
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-
-        InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.REGISTER);
-
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(30), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(29), skjæringstidspunkt.minusDays(20), RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(19), skjæringstidspunkt.minusDays(10), RelatertYtelseTilstand.AVSLUTTET, "124234", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(9), skjæringstidspunkt.minusDays(1), RelatertYtelseTilstand.AVSLUTTET, "123253254", FagsakYtelseType.SYKEPENGER));
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
-
-        // Act
-        Collection<Ytelse> sammenhengendeYtelser = opptjeningTjeneste.hentSammenhengendeInfotrygdYtelserFørSkjæringstidspunktForOppjening(behandling.getId(), behandling.getAktørId());
-
-        // Assert
-        assertThat(sammenhengendeYtelser).hasSize(4);
-        assertThat(sammenhengendeYtelser.stream().map(s -> s.getSaksnummer().getVerdi()).collect(Collectors.toList())).containsOnly("12342234", "1222433",
-            "124234", "123253254");
-    }
-
-    @Test
-    public void skal_lage_sammehengende_liste_med_delvis_overlappende_ytelser() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-        var sisteLønnsendringsdato = skjæringstidspunkt;
-
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-
-        InntektArbeidYtelseAggregatBuilder builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.REGISTER);
-
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(10), RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
-
-        // Act
-        Collection<Ytelse> sammenhengendeYtelser = opptjeningTjeneste.hentSammenhengendeInfotrygdYtelserFørSkjæringstidspunktForOppjening(behandling.getId(), behandling.getAktørId());
-
-        // Assert
-        assertThat(sammenhengendeYtelser).hasSize(2);
-        assertThat(sammenhengendeYtelser.stream().map(s -> s.getSaksnummer().getVerdi()).collect(Collectors.toList())).containsOnly("12342234", "1222433");
-    }
-
-    @Test
-    public void skal_ikke_lage_sammehengende_liste_med_1_dag_mellom_ytelser() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-        var sisteLønnsendringsdato = skjæringstidspunkt;
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-        var builder = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.REGISTER);
-
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(10), skjæringstidspunkt.plusDays(10), RelatertYtelseTilstand.LØPENDE, "12342234", FagsakYtelseType.SYKEPENGER));
-        builder.leggTilAktørYtelse(
-            leggTilYtelse(builder.getAktørYtelseBuilder(søkerAktørId), skjæringstidspunkt.minusDays(20), skjæringstidspunkt.minusDays(12), RelatertYtelseTilstand.AVSLUTTET, "1222433", FagsakYtelseType.SYKEPENGER));
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
-
-        // Act
-        Collection<Ytelse> sammenhengendeYtelser = opptjeningTjeneste.hentSammenhengendeInfotrygdYtelserFørSkjæringstidspunktForOppjening(behandling.getId(), behandling.getAktørId());
-
-        // Assert
-        assertThat(sammenhengendeYtelser).hasSize(1);
-        assertThat(sammenhengendeYtelser.stream().map(s -> s.getSaksnummer().getVerdi()).collect(Collectors.toList())).containsOnly("12342234");
-    }
-
-    @Test
-    public void skal_lage_tom_sammehengende_liste_uten_ytelser() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
-        var sisteLønnsendringsdato = skjæringstidspunkt;
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt);
-
-        var builder = InntektArbeidYtelseAggregatBuilder
-            .oppdatere(Optional.empty(), VersjonType.SAKSBEHANDLET);
-
-
-        var bekreftet = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.REGISTER);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), bekreftet);
-
-        // simulerer at det har blitt godkjent i GUI
-        var saksbehandling = opprettInntektArbeidYtelseAggregatForYrkesaktivitet(
-            søkerAktørId, ARBEIDSFORHOLD_ID, periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.ZERO, Arbeidsgiver.virksomhet(ORG_NUMMER),
-            sisteLønnsendringsdato,
-            VersjonType.SAKSBEHANDLET);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), saksbehandling);
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusDays(30), skjæringstidspunkt, false);
-
-        // Act
-        Collection<Ytelse> sammenhengendeYtelser = opptjeningTjeneste.hentSammenhengendeInfotrygdYtelserFørSkjæringstidspunktForOppjening(behandling.getId(), behandling.getAktørId());
-
-        // Assert
-        assertThat(sammenhengendeYtelser).isEmpty();
     }
 
     private Behandling opprettBehandling(LocalDate iDag) {
