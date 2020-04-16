@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
 import java.time.LocalDate;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -14,8 +14,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.UtledBeregningSkjæringstidspunktForBehandlingTjeneste;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 
+@ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
-@Dependent
 public class OmsorgspengerUtledBeregningSkjæringstidspunktForBehandlingTjeneste implements UtledBeregningSkjæringstidspunktForBehandlingTjeneste {
 
     private VilkårResultatRepository vilkårResultatRepository;

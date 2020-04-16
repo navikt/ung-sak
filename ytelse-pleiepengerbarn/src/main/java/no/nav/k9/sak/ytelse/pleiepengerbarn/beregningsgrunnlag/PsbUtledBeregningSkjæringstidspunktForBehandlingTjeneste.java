@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import java.time.LocalDate;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -14,8 +15,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.UtledBeregningSkjæringstidspunktForBehandlingTjeneste;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 
+@ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
-@Dependent
 public class PsbUtledBeregningSkjæringstidspunktForBehandlingTjeneste implements UtledBeregningSkjæringstidspunktForBehandlingTjeneste {
 
     private VilkårResultatRepository vilkårResultatRepository;
@@ -28,6 +29,12 @@ public class PsbUtledBeregningSkjæringstidspunktForBehandlingTjeneste implement
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
+    /**
+     * Utleder første opptjeningsperiode som er til vurdering i denne behandlingen og som oppfyller vilkåret
+     *
+     * @param referanse behandlingen
+     * @return skjæringstidspunkt (dato)
+     */
     @Override
     public LocalDate utled(BehandlingReferanse referanse) {
         var vilkårsperioder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
