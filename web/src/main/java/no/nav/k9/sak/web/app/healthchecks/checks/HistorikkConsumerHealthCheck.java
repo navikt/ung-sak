@@ -14,6 +14,12 @@ public class HistorikkConsumerHealthCheck extends ExtHealthCheck {
 
     HistorikkConsumerHealthCheck() {
     }
+    
+    @Override
+    public boolean isSkipped() {
+        // FIXME K9 avgjør om vi skal beholde denne kafka topicen for å skape en lineage av historikk eventer på tvers av tjenester for visning i gui
+        return true;
+    }
 
     @Inject
     public HistorikkConsumerHealthCheck(HistorikkConsumer consumer) {

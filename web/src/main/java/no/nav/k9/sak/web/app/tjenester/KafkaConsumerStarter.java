@@ -9,13 +9,15 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 /**
- * Triggers start of Kafka consum
+ * Triggers start of Kafka consumere
  */
 @WebListener
 public class KafkaConsumerStarter implements ServletContextListener {
 
+    @SuppressWarnings("unused")
     @Inject //NOSONAR
     private HistorikkConsumer historikkConsumer; //NOSONAR
+    
     @Inject //NOSONAR
     private RisikoklassifiseringConsumer risikoklassifiseringConsumer; //NOSONAR
 
@@ -25,13 +27,14 @@ public class KafkaConsumerStarter implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        historikkConsumer.start();
+        // FIXME K9 : avgjør om vi beholder denne for å skape lineage av historikk på tvers av tjenester
+        //historikkConsumer.start();
         risikoklassifiseringConsumer.start();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        historikkConsumer.stop();
+        //historikkConsumer.stop();
         risikoklassifiseringConsumer.stop();
     }
 }
