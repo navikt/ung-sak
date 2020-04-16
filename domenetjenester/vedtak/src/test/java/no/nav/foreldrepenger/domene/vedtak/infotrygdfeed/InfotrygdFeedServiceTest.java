@@ -2,13 +2,9 @@ package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -18,6 +14,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
+import javax.enterprise.inject.Instance;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -28,7 +25,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class InfotrygdFeedServiceTest {
 
     @Mock
-    UttakTjeneste uttakTjeneste;
+    Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
 
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
@@ -38,7 +35,7 @@ public class InfotrygdFeedServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        service = new InfotrygdFeedService(uttakTjeneste, prosessTaskRepository);
+        service = new InfotrygdFeedService(prosessTaskRepository, periodeBeregnere);
     }
 
     @Test
@@ -58,9 +55,9 @@ public class InfotrygdFeedServiceTest {
             .medSaksnummer("saksnummer")
             .medAktørId("123")
             .medAktørIdPleietrengende("321")
-            .medInnvilgetPeriode(førsteStønadsdag, vilkårligDato)
-            .medInnvilgetPeriode(vilkårligDato, sisteStønadsdag)
-            .medAvslåttPeriode(sisteStønadsdag, sisteStønadsdag.plusMonths(1))
+            .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
+            .medOmsorgspengerPeriode(førsteStønadsdag, sisteStønadsdag)
+            .medPleiepengerPeriode(vilkårligDato, sisteStønadsdag)
             .medVersjonFagsak(99L)
             .medVersjonBehandling(88L)
             .hentBehandling();
@@ -79,6 +76,7 @@ public class InfotrygdFeedServiceTest {
         assertThat(pd.getPayload()).isNotNull();
         InfotrygdFeedMessage message = InfotrygdFeedMessage.fromJson(pd.getPayloadAsString());
         assertThat(message.getUuid()).hasSameSizeAs(UUID.randomUUID().toString());
+        assertThat(message.getYtelse()).isEqualTo("OM");
         assertThat(message.getSaksnummer()).isEqualTo("saksnummer");
         assertThat(message.getAktoerId()).isEqualTo("123");
         assertThat(message.getAktoerIdPleietrengende()).isEqualTo("321");
@@ -106,9 +104,28 @@ public class InfotrygdFeedServiceTest {
     }
 
     @Test
-    public void publiserHendelse_uten_treff_i_uttak() {
+    public void publiserHendelse_uten_treff_i_tjeneste() {
         Behandling behandling = mockHelper()
-            .utenUttaksplaner()
+            .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
+            .utenOmsorgspenger()
+            .hentBehandling();
+
+        ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
+        when(prosessTaskRepository.lagre(captor.capture())).thenReturn("urelevant");
+
+        service.publiserHendelse(behandling);
+
+        ProsessTaskData pd = captor.getValue();
+        InfotrygdFeedMessage message = InfotrygdFeedMessage.fromJson(pd.getPayloadAsString());
+        assertThat(message.getFoersteStoenadsdag()).isNull();
+        assertThat(message.getSisteStoenadsdag()).isNull();
+    }
+
+    @Test
+    public void publiserHendelse_med_min_max_dato() {
+        Behandling behandling = mockHelper()
+            .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
+            .medOmsorgspengerPeriode(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
             .hentBehandling();
 
         ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
@@ -159,14 +176,13 @@ public class InfotrygdFeedServiceTest {
     }
 
     private FeedServiceMockHelper mockHelper() {
-        return new FeedServiceMockHelper(uttakTjeneste, prosessTaskRepository);
+        return new FeedServiceMockHelper(periodeBeregnere);
     }
 }
 
 class FeedServiceMockHelper {
     // Mocks
-    private final UttakTjeneste uttakTjeneste;
-    private final ProsessTaskRepository prosessTaskRepository;
+    Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
 
     // Builder-parametere
     private Saksnummer saksnummer = new Saksnummer("x123");
@@ -175,15 +191,18 @@ class FeedServiceMockHelper {
     private FagsakYtelseType fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
     private Long versjonFagsak = 1L;
     private Long versjonBehandling = 2L;
-    private List<FomTom> perioder = new ArrayList<>();
-    private boolean harUttaksplaner = true;
+
+    private InfotrygdFeedPeriodeberegner omsorgspengerPeriodeberegner;
+    private InfotrygdFeedPeriodeberegner pleiepengerPeriodeberegner;
 
     // Annen tilstand
     private long sisteBehandlingsId = 0L;
 
-    FeedServiceMockHelper(UttakTjeneste uttakTjeneste, ProsessTaskRepository prosessTaskRepository) {
-        this.uttakTjeneste = uttakTjeneste;
-        this.prosessTaskRepository = prosessTaskRepository;
+    FeedServiceMockHelper(Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere) {
+        this.periodeBeregnere = periodeBeregnere;
+
+        utenOmsorgspenger();
+        utenPleiepenger();
     }
 
     FeedServiceMockHelper medSaksnummer(String saksnummer) {
@@ -213,18 +232,23 @@ class FeedServiceMockHelper {
         return this;
     }
 
-    FeedServiceMockHelper medInnvilgetPeriode(LocalDate fom, LocalDate tom) {
-        perioder.add(new FomTom(fom, tom, true));
+    FeedServiceMockHelper medOmsorgspengerPeriode(LocalDate fom, LocalDate tom) {
+        omsorgspengerPeriodeberegner = new StubPeriodeberegner(fom, tom, FagsakYtelseType.OMSORGSPENGER, "OM");
         return this;
     }
 
-    FeedServiceMockHelper medAvslåttPeriode(LocalDate fom, LocalDate tom) {
-        perioder.add(new FomTom(fom, tom, false));
+    FeedServiceMockHelper medPleiepengerPeriode(LocalDate fom, LocalDate tom) {
+        pleiepengerPeriodeberegner = new StubPeriodeberegner(fom, tom, FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "PN");
         return this;
     }
 
-    FeedServiceMockHelper utenUttaksplaner() {
-        harUttaksplaner = false;
+    FeedServiceMockHelper utenOmsorgspenger() {
+        medOmsorgspengerPeriode(null, null);
+        return this;
+    }
+
+    FeedServiceMockHelper utenPleiepenger() {
+        medPleiepengerPeriode(null, null);
         return this;
     }
 
@@ -246,41 +270,13 @@ class FeedServiceMockHelper {
     Behandling hentBehandling() {
         long behandlingsId = nesteBehandlingsId();
 
-        if(harUttaksplaner) {
-            lagUttaksplaner(saksnummer);
-        }
+        when(periodeBeregnere.iterator())
+            .thenReturn(List.of(
+                omsorgspengerPeriodeberegner,
+                pleiepengerPeriodeberegner
+            ).iterator());
 
         return mockBehandling(behandlingsId);
-    }
-
-    private void lagUttaksplaner(Saksnummer saksnummer) {
-        if(saksnummer == null) {
-            return;
-        }
-        Uttaksplan uttaksplan = mockUttaksplan();
-        when(uttakTjeneste.hentUttaksplaner(List.of(saksnummer)))
-            .thenReturn(Map.of(saksnummer, uttaksplan));
-    }
-
-    private Uttaksplan mockUttaksplan() {
-        Uttaksplan uttaksplan = mock(Uttaksplan.class);
-
-        NavigableMap<Periode, Uttaksplanperiode> perioder = new TreeMap<>();
-
-        for(FomTom fomTom : this.perioder) {
-            Periode periode = new Periode(fomTom.fom, fomTom.tom);
-            Uttaksplanperiode uttaksplanperiode = mock(Uttaksplanperiode.class);
-            if(fomTom.innvilget) {
-                when(uttaksplanperiode.getUtfall()).thenReturn(UtfallType.INNVILGET);
-            } else {
-                when(uttaksplanperiode.getUtfall()).thenReturn(UtfallType.AVSLÅTT);
-            }
-            perioder.put(periode, uttaksplanperiode);
-        }
-
-        when(uttaksplan.getPerioder()).thenReturn(perioder);
-
-        return uttaksplan;
     }
 
     // ==== Behandling ====
@@ -311,17 +307,33 @@ class FeedServiceMockHelper {
         return sisteBehandlingsId++;
     }
 
+    private static final class StubPeriodeberegner implements InfotrygdFeedPeriodeberegner {
 
-
-    private static final class FomTom {
         private final LocalDate fom;
         private final LocalDate tom;
-        private final boolean innvilget;
+        private final FagsakYtelseType fagsakYtelseType;
+        private final String infotrygdYtelseKode;
 
-        private FomTom(LocalDate fom, LocalDate tom, boolean innvilget) {
+        private StubPeriodeberegner(LocalDate fom, LocalDate tom, FagsakYtelseType fagsakYtelseType, String infotrygdYtelseKode) {
+            this.fagsakYtelseType = fagsakYtelseType;
+            this.infotrygdYtelseKode = infotrygdYtelseKode;
             this.fom = fom;
             this.tom = tom;
-            this.innvilget = innvilget;
+        }
+
+        @Override
+        public FagsakYtelseType getFagsakYtelseType() {
+            return fagsakYtelseType;
+        }
+
+        @Override
+        public String getInfotrygdYtelseKode() {
+            return infotrygdYtelseKode;
+        }
+
+        @Override
+        public InfotrygdFeedPeriode finnInnvilgetPeriode(Saksnummer saksnummer) {
+            return new InfotrygdFeedPeriode(fom, tom);
         }
     }
 }
