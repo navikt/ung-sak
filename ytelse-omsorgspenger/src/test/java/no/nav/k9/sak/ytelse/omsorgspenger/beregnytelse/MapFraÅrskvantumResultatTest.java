@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,13 +22,34 @@ public class MapFraÅrskvantumResultatTest {
     public void map_fra_årskvantum_resultat() throws Exception {
 
         var år = new ÅrskvantumResultat();
-        år.setUttaksperioder(lagUttaksperioder());
+        år.setUttaksplan(lagUttaksplan());
 
         List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
         assertThat(perioder).hasSize(4);
 
         assertThat(perioder.stream().filter(p -> p.getErOppholdsPeriode())).hasSize(2);
         assertThat(perioder.stream().filter(p -> !p.getErOppholdsPeriode())).hasSize(2);
+    }
+
+
+    private UttaksplanOmsorgspenger lagUttaksplan() {
+        UttaksplanOmsorgspenger uttaksplanOmsorgspenger = new UttaksplanOmsorgspenger();
+        uttaksplanOmsorgspenger.setAktiviteter(lagAktiviteter());
+        return uttaksplanOmsorgspenger;
+    }
+
+    private List<UttaksPlanOmsorgspengerAktivitet> lagAktiviteter() {
+        List<UttaksPlanOmsorgspengerAktivitet> aktiviteter = new ArrayList<>();
+
+        var arbeidsforhold1 = new UttakArbeidsforhold("921484240", null, UttakArbeidType.ARBEIDSTAKER, null);
+
+        UttaksPlanOmsorgspengerAktivitet uttaksPlanOmsorgspengerAktivitet = new UttaksPlanOmsorgspengerAktivitet();
+        uttaksPlanOmsorgspengerAktivitet.setUttaksperioder(lagUttaksperioder());
+        uttaksPlanOmsorgspengerAktivitet.setArbeidsforhold(arbeidsforhold1);
+
+        aktiviteter.add(uttaksPlanOmsorgspengerAktivitet);
+
+        return aktiviteter;
     }
 
     private List<UttaksperiodeOmsorgspenger> lagUttaksperioder() {

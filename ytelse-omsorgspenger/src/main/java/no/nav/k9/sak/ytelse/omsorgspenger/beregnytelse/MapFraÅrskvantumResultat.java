@@ -57,7 +57,7 @@ class MapFraÅrskvantumResultat {
     }
 
     private static List<UttakResultatPeriode> getInnvilgetTimeline(ÅrskvantumResultat årskvantumResultat) {
-        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksperioder().stream()
+        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksplan().getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream())
             .filter(p -> p.getUtfall() == OmsorgspengerUtfall.INNVILGET)
             .map(e -> new LocalDateSegment<>(e.getFom(), e.getPeriode().getTom(), mapTilUttaksAktiviteter(e)))
             .collect(Collectors.toList());
@@ -72,7 +72,7 @@ class MapFraÅrskvantumResultat {
     }
 
     private static List<UttakResultatPeriode> getAvslåttTimeline(ÅrskvantumResultat årskvantumResultat) {
-        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksperioder().stream()
+        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksplan().getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream())
             .filter(p -> p.getUtfall() == OmsorgspengerUtfall.AVSLÅTT)
             .map(e -> new LocalDateSegment<>(e.getFom(), e.getPeriode().getTom(), mapTilUttaksAktiviteter(e)))
             .collect(Collectors.toList());

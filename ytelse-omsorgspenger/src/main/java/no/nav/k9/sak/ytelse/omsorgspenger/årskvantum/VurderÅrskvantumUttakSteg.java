@@ -1,20 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.*;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
@@ -50,7 +44,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
 
-        if (vurderUtfall(årskvantumResultat)) {
+        if (OmsorgspengerUtfall.INNVILGET.equals(årskvantumResultat.hentSamletUtfall())) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else {
             //TODO 1 lage aksjonspunkt for manglende årskvantum.
@@ -66,11 +60,6 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         // 2. Lag REST tjeneste for GUI - vise hvor mye brukt (basert på samme tjeneste som kalles her
         // 3. Lag AksjonspunktOppdaterer for å skrive ned oppdatert kvantum til Årskvantum og la steget kjøre på nytt.
 
-    }
-
-    private boolean vurderUtfall(ÅrskvantumResultat årskvantumResultat) {
-        return årskvantumResultat.getSamletUtfall() != null && OmsorgspengerUtfall.INNVILGET.equals(årskvantumResultat.getSamletUtfall())
-            || årskvantumResultat.getSamletUtfall() == null && årskvantumResultat.getUttaksperioder().stream().anyMatch(it -> OmsorgspengerUtfall.INNVILGET.equals(it.getUtfall()));
     }
 
 }

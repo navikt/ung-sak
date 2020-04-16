@@ -4,15 +4,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
+import no.nav.k9.sak.kontrakt.uttak.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.Comparator;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -24,15 +20,15 @@ public class ÅrskvantumResultat {
     @NotNull
     private String behandlingUUID;
 
-    @JsonProperty(value = "utfall", required = true)
+    @JsonProperty(value = "årskvantum")
     @Valid
     @NotNull
-    private OmsorgspengerUtfall samletUtfall;
+    private Årskvantum årskvantum;
 
-    @JsonProperty(value = "uttaksperioder")
+    @JsonProperty(value = "uttaksplan")
     @Valid
-    @Size(max = 1000)
-    private List<UttaksperiodeOmsorgspenger> uttaksperioder;
+    @NotNull
+    private UttaksplanOmsorgspenger uttaksplan;
 
     public String getBehandlingUUID() {
         return behandlingUUID;
@@ -42,25 +38,36 @@ public class ÅrskvantumResultat {
         this.behandlingUUID = behandlingUUID;
     }
 
-    public OmsorgspengerUtfall getSamletUtfall() {
-        return samletUtfall;
+    public Årskvantum getÅrskvantum() {
+        return årskvantum;
     }
 
-    public void setSamletUtfall(OmsorgspengerUtfall samletUtfall) {
-        this.samletUtfall = samletUtfall;
+    public void setÅrskvantum(Årskvantum årskvantum) {
+        this.årskvantum = årskvantum;
     }
 
-    public List<UttaksperiodeOmsorgspenger> getUttaksperioder() {
-        return uttaksperioder;
+    public UttaksplanOmsorgspenger getUttaksplan() {
+        return uttaksplan;
     }
 
-    public void setUttaksperioder(List<UttaksperiodeOmsorgspenger> uttaksperioder) {
-        this.uttaksperioder = uttaksperioder;
+    public void setUttaksplan(UttaksplanOmsorgspenger uttaksplan) {
+        this.uttaksplan = uttaksplan;
     }
-
     public Periode getMaksPeriode() {
-        var fom = uttaksperioder.stream().map(UttaksperiodeOmsorgspenger::getFom).min(Comparator.nullsFirst(Comparator.naturalOrder())).orElse(null);
-        var tom = uttaksperioder.stream().map(UttaksperiodeOmsorgspenger::getTom).max(Comparator.nullsLast(Comparator.naturalOrder())).orElse(null);
+        var fom = uttaksplan.getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(UttaksperiodeOmsorgspenger::getFom).min(Comparator.nullsFirst(Comparator.naturalOrder())).orElse(null);
+        var tom = uttaksplan.getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(UttaksperiodeOmsorgspenger::getFom).max(Comparator.nullsLast(Comparator.naturalOrder())).orElse(null);
         return fom != null && tom != null ? new Periode(fom, tom) : null;
+    }
+
+    public OmsorgspengerUtfall hentSamletUtfall() {
+        for(UttaksPlanOmsorgspengerAktivitet uttaksPlanOmsorgspengerAktivitet : getUttaksplan().getAktiviteter()) {
+            for (UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
+                if (OmsorgspengerUtfall.INNVILGET.equals(uttaksperiodeOmsorgspenger.getUtfall())) {
+                    return OmsorgspengerUtfall.INNVILGET;
+                }
+            }
+        }
+
+        return OmsorgspengerUtfall.AVSLÅTT;
     }
 }

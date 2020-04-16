@@ -6,9 +6,9 @@ import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.kontrakt.uttak.FraværPeriodeOmsorgspenger;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
-import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -69,14 +69,17 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         årskvantumRequest.setBehandlingUUID(ref.getBehandlingUuid().toString());
         årskvantumRequest.setSaksnummer(ref.getSaksnummer().getVerdi());
         årskvantumRequest.setAktørId(ref.getAktørId().getId());
+        årskvantumRequest.setPersonIdent(personMedRelasjoner.get().getPersonIdent());
+        årskvantumRequest.setSøkersFødselsdato(personMedRelasjoner.get().getFødselsdato());
         årskvantumRequest.setInnsendingstidspunkt(datoForSisteInntektsmelding);
 
         for (OppgittFraværPeriode fraværPeriode : grunnlag.getPerioder()) {
 
-            UttaksperiodeOmsorgspenger uttaksperiodeOmsorgspenger = new UttaksperiodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
-                null,
-                null,
-                fraværPeriode.getFraværPerDag(), null);
+            FraværPeriodeOmsorgspenger
+                uttaksperiodeOmsorgspenger = new FraværPeriodeOmsorgspenger(new Periode(fraværPeriode.getFom(), fraværPeriode.getTom()),
+                                                                            null,
+                                                                            null,
+                                                                            fraværPeriode.getFraværPerDag(), null);
             Arbeidsgiver arb = fraværPeriode.getArbeidsgiver();
 
             if (arb == null) {
