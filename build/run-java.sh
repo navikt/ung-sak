@@ -1,15 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-echo "TZ=${TZ:-}"
-cat /etc/localtime
-grep -rl '/usr/share/zoneinfo/' -e $(cat /etc/localtime | tail -1)
-date -Ins
-date +%Z
-
 export JAVA_OPTS="${JAVA_OPTS:-} -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo"
 export STARTUP_CLASS=${STARTUP_CLASS:-"no.nav.k9.sak.web.server.jetty.JettyServer"}
-
 
 if test -f /var/run/secrets/nais.io/serviceuser/username
 then
