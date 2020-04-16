@@ -38,6 +38,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
+    private Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester;
     private BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste;
 
     protected FastsettBeregningsaktiviteterSteg() {
@@ -49,12 +50,14 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
+                                             @Any Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester,
                                              BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.utledStpTjenester = utledStpTjenester;
         this.beregningInfotrygdsakTjeneste = beregningInfotrygdsakTjeneste;
     }
 
@@ -65,7 +68,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
-        LocalDate stp = skjæringstidspunkter.getUtledetSkjæringstidspunkt();
+        LocalDate stp = utledSkjæringstidspunkt(ref);
 
         //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
         DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(stp, ANTALL_ARBEIDSDAGER);
@@ -80,6 +83,13 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         }
     }
 
+    private LocalDate utledSkjæringstidspunkt(BehandlingReferanse ref) {
+        String ytelseTypeKode = ref.getFagsakYtelseType().getKode();
+        var mapper = FagsakYtelseTypeRef.Lookup.find(utledStpTjenester, ytelseTypeKode).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + UtledBeregningSkjæringstidspunktForBehandlingTjeneste.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
+        return mapper.utled(ref);
+    }
+
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
@@ -90,7 +100,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {
         String ytelseTypeKode = ytelseType.getKode();
         var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
-                () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
+            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
         return mapper;
     }
 }

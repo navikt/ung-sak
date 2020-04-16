@@ -25,7 +25,8 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
                                          BehandlingReferanse behandlingReferanse,
                                          Yrkesaktivitet overstyrtAktivitet,
                                          InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                         boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {
+                                         boolean harVærtSaksbehandlet,
+                                         DatoIntervallEntitet opptjeningPeriode) {
         return vurderStatus(type, behandlingReferanse, null, overstyrtAktivitet, iayGrunnlag, harVærtSaksbehandlet, opptjeningPeriode);
     }
 
