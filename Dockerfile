@@ -15,9 +15,3 @@ COPY web/target/lib/*.jar /app/lib/
 COPY build/run-java.sh /
 RUN chmod +x /run-java.sh
 
-# TODO alt under bør bygges i egen docker container / layer?
-
-# Prep for running in VTP environment, correct log format
-RUN mkdir /app/vtp-lib
-COPY web/target/test-classes/logback-dev.xml /app/vtp-lib/logback-test.xml
-
