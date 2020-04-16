@@ -3,10 +3,11 @@ package no.nav.k9.sak.behandling.prosessering;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
@@ -18,12 +19,14 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
-@ApplicationScoped
+@Dependent
 public class ProsesseringAsynkTjeneste {
 
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
+    private final Set<ProsessTaskStatus> ferdigStatuser= Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
+    
     ProsesseringAsynkTjeneste() {
         // For CDI proxy
     }
@@ -86,7 +89,7 @@ public class ProsesseringAsynkTjeneste {
             && (nestePerGruppe.isEmpty()
                 || (nestePerGruppe.size() == 1
                     && nestePerGruppe.containsKey(gruppe)
-                    && ProsessTaskStatus.FERDIG.equals(nestePerGruppe.get(gruppe).getStatus())));
+                    && ferdigStatuser.contains(nestePerGruppe.get(gruppe).getStatus())));
     }
 
     private Map<String, List<ProsessTaskData>> sjekkStatusProsessTasksGrouped(Long fagsakId, String behandlingId, String gruppe) {

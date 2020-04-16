@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -18,7 +19,8 @@ public class VurderProsessTaskStatusForPollingApi {
 
     private ProsessTaskFeilmelder feilmelder;
     private Long entityId;
-
+    private static final Set<ProsessTaskStatus> FERDIG_STATUSER = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
+    
     public interface ProsessTaskFeilmelder {
         Feil feilIProsessTaskGruppe(String callId, Long entityId, String gruppe, Long taskId, ProsessTaskStatus taskStatus);
 
@@ -35,7 +37,7 @@ public class VurderProsessTaskStatusForPollingApi {
     public Optional<AsyncPollingStatus> sjekkStatusNesteProsessTask(String gruppe, Map<String, ProsessTaskData> nesteTask) {
         LocalDateTime maksTidFørNesteKjøring = LocalDateTime.now().plusMinutes(2);
         nesteTask = nesteTask.entrySet().stream()
-            .filter(e -> !ProsessTaskStatus.FERDIG.equals(e.getValue().getStatus())) // trenger ikke FERDIG
+            .filter(e -> !FERDIG_STATUSER.contains(e.getValue().getStatus())) // trenger ikke FERDIG
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         if (!nesteTask.isEmpty()) {
