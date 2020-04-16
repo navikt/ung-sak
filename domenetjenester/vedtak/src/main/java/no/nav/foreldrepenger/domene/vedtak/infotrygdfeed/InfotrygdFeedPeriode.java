@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
+import no.nav.k9.kodeverk.uttak.Tid;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -8,12 +10,31 @@ public final class InfotrygdFeedPeriode {
     private final LocalDate tom;
 
     public InfotrygdFeedPeriode(LocalDate fom, LocalDate tom) {
-        this.fom = fom;
-        this.tom = tom;
+        this.fom = fjernMinMaxVerdier(fom);
+        this.tom = fjernMinMaxVerdier(tom);
+        valider();
     }
 
     public static InfotrygdFeedPeriode annullert() {
         return new InfotrygdFeedPeriode(null, null);
+    }
+
+    private LocalDate fjernMinMaxVerdier(LocalDate dato) {
+        if(Objects.equals(dato, Tid.TIDENES_BEGYNNELSE) || Objects.equals(dato, Tid.TIDENES_ENDE)) {
+            return null;
+        } else {
+            return dato;
+        }
+    }
+
+    private void valider() {
+        if(fom != null && tom != null && tom.isBefore(fom)) {
+            throw new IllegalArgumentException("Tom-dato kan ikke være før fom-dato.");
+        }
+
+        if(fom == null && tom != null) {
+            throw new IllegalArgumentException("Kan ikke ha en tom-dato dersom fom-datoen er null.");
+        }
     }
 
     public LocalDate getFom() {
