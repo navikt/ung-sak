@@ -21,7 +21,7 @@ public class HistorikkMeldingsHåndterer {
     public HistorikkMeldingsHåndterer(ProsessTaskRepository prosessTaskRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
     }
-
+    
     void lagreMelding(@SuppressWarnings("unused") String header, String payload) { // NOSONAR
         ProsessTaskData data = new ProsessTaskData(LagreHistorikkTask.TASKTYPE);
         data.setPayload(payload);
