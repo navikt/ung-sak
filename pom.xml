@@ -522,11 +522,6 @@
 
 		<pluginManagement>
 			<plugins>
-                <plugin>
-                         <groupId>org.apache.maven.wagon</groupId>
-                          <artifactId>wagon</artifactId>
-                          <version>3.3.4</version>
-                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-remote-resources-plugin</artifactId>
