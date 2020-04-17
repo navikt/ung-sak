@@ -21,7 +21,7 @@ public class HistorikkStreamKafkaProperties {
     HistorikkStreamKafkaProperties(@KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                    @KonfigVerdi("systembruker.username") String username,
                                    @KonfigVerdi("systembruker.password") String password,
-                                   @KonfigVerdi("kafka.historikkinnslag.topic") String topic) {
+                                   @KonfigVerdi(value = "kafka.historikkinnslag.topic", defaultVerdi = "privat-k9-historikkinnslag") String topic) {
         this.topic = topic;
         this.bootstrapServers = bootstrapServers;
         this.username = username;

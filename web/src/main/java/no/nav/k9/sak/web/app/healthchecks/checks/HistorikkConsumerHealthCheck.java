@@ -14,16 +14,16 @@ public class HistorikkConsumerHealthCheck extends ExtHealthCheck {
 
     HistorikkConsumerHealthCheck() {
     }
-    
-    @Override
-    public boolean isSkipped() {
-        // FIXME K9 avgjør om vi skal beholde denne kafka topicen for å skape en lineage av historikk eventer på tvers av tjenester for visning i gui
-        return true;
-    }
 
     @Inject
     public HistorikkConsumerHealthCheck(HistorikkConsumer consumer) {
         this.consumer = consumer;
+    }
+
+    @Override
+    public boolean isSkipped() {
+        // FIXME K9 avgjør om vi skal beholde denne kafka topicen for å skape en lineage av historikk eventer på tvers av tjenester for visning i gui
+        return true;
     }
 
     @Override
@@ -50,5 +50,13 @@ public class HistorikkConsumerHealthCheck extends ExtHealthCheck {
 
     private boolean holderPåÅKonsumere(KafkaStreams.State tilstand) {
         return tilstand.isRunning() || KafkaStreams.State.CREATED.equals(tilstand);
+    }
+
+    @Override
+    public boolean erKritiskTjeneste() {
+        if (isSkipped()) {
+            return false;
+        }
+        return super.erKritiskTjeneste();
     }
 }
