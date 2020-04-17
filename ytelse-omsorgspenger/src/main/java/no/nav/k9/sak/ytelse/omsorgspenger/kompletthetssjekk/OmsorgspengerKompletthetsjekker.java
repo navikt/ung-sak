@@ -93,7 +93,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref);
             return ventefristManglendeIM
                 .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
-                .orElse(KompletthetResultat.oppfylt()); // Setter til oppfylt om fristen er passert
+                .orElse(KompletthetResultat.fristUtløpt()); // Setter til oppfylt om fristen er passert
         }
         return KompletthetResultat.oppfylt();
     }

@@ -14,6 +14,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -70,7 +71,7 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
         KompletthetResultat etterlysIM = kompletthetModell.vurderKompletthet(ref, List.of(AUTO_VENT_ETTERLYST_INNTEKTSMELDING));
-        if (!etterlysIM.erOppfylt()) {
+        if (!etterlysIM.erOppfylt() && erIkkeOmsorgspenger(ref)) {
             // Dette autopunktet har tilbakehopp/gjenopptak. Går ut av steget hvis auto utført før frist (manuelt av vent). Utført på/etter frist antas automatisk gjenopptak.
             if (!etterlysIM.erFristUtløpt() && !autopunktAlleredeUtført(AUTO_VENT_ETTERLYST_INNTEKTSMELDING, behandling)) {
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(singletonList(opprettForAksjonspunkt(AUTO_VENT_ETTERLYST_INNTEKTSMELDING)));
@@ -79,6 +80,11 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
 
         return BehandleStegResultat.utførtMedAksjonspunkter(sjekkPersonstatus(ref));
 
+    }
+
+    private boolean erIkkeOmsorgspenger(BehandlingReferanse ref) {
+        // FIXME : Finn noe bedre
+        return !FagsakYtelseType.OMSORGSPENGER.equals(ref.getFagsakYtelseType());
     }
 
     private List<AksjonspunktDefinisjon> sjekkPersonstatus(BehandlingReferanse ref) {
