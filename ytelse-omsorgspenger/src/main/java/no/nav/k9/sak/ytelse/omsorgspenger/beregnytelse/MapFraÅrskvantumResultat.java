@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.UttaksPlanOmsorgspengerAktivitet;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
@@ -15,23 +16,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class MapFraÅrskvantumResultat {
     private static final Comparator<UttakResultatPeriode> COMP_PERIODE = Comparator.comparing(per -> per.getPeriode(),
         Comparator.nullsFirst(Comparator.naturalOrder()));
 
-    private static UttakAktivitet mapTilUttaksAktiviteter(UttaksperiodeOmsorgspenger uttaksperiode) {
+    private static UttakAktivitet mapTilUttaksAktiviteter(UttaksperiodeOmsorgspenger uttaksperiode, UttakArbeidsforhold uttakArbeidsforhold) {
         BigDecimal stillingsgrad = BigDecimal.ZERO; // bruker ikke for Omsorgspenger, bruker kun utbetalingsgrad
         boolean erGradering = false; // setter alltid false (bruker alltid utbetalingsgrad, framfor stillingsprosent)
 
         if (uttaksperiode.getUtbetalingsgrad() == null) {
             return new UttakAktivitet(stillingsgrad, BigDecimal.ZERO, null, null, false);
         } else {
-            var utbetalingsgrad = uttaksperiode.getUtbetalingsgrad().getUtbetalingsgrad();
-            var arb = uttaksperiode.getUttakArbeidsforhold();
-            var arbeidsforhold = mapArbeidsforhold(arb);
-            return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, arb.getType(), erGradering);
+            var utbetalingsgrad = uttaksperiode.getUtbetalingsgrad();
+            var arbeidsforhold = mapArbeidsforhold(uttakArbeidsforhold);
+            return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, uttakArbeidsforhold.getType(), erGradering);
         }
 
     }
@@ -57,10 +56,16 @@ class MapFraÅrskvantumResultat {
     }
 
     private static List<UttakResultatPeriode> getInnvilgetTimeline(ÅrskvantumResultat årskvantumResultat) {
-        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksperioder().stream()
-            .filter(p -> p.getUtfall() == OmsorgspengerUtfall.INNVILGET)
-            .map(e -> new LocalDateSegment<>(e.getFom(), e.getPeriode().getTom(), mapTilUttaksAktiviteter(e)))
-            .collect(Collectors.toList());
+        List<LocalDateSegment<UttakAktivitet>> segmenter = new ArrayList<>();
+        for (UttaksPlanOmsorgspengerAktivitet aktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
+            for (UttaksperiodeOmsorgspenger p : aktivitet.getUttaksperioder()) {
+                if (p.getUtfall() == OmsorgspengerUtfall.INNVILGET) {
+                    LocalDateSegment<UttakAktivitet> uttakAktivitetLocalDateSegment =
+                        new LocalDateSegment<>(p.getFom(), p.getPeriode().getTom(), mapTilUttaksAktiviteter(p, aktivitet.getArbeidsforhold()));
+                    segmenter.add(uttakAktivitetLocalDateSegment);
+                }
+            }
+        }
 
         var timeline = LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
 
@@ -72,10 +77,16 @@ class MapFraÅrskvantumResultat {
     }
 
     private static List<UttakResultatPeriode> getAvslåttTimeline(ÅrskvantumResultat årskvantumResultat) {
-        List<LocalDateSegment<UttakAktivitet>> segmenter = årskvantumResultat.getUttaksperioder().stream()
-            .filter(p -> p.getUtfall() == OmsorgspengerUtfall.AVSLÅTT)
-            .map(e -> new LocalDateSegment<>(e.getFom(), e.getPeriode().getTom(), mapTilUttaksAktiviteter(e)))
-            .collect(Collectors.toList());
+        List<LocalDateSegment<UttakAktivitet>> segmenter = new ArrayList<>();
+        for (UttaksPlanOmsorgspengerAktivitet aktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
+            for (UttaksperiodeOmsorgspenger p : aktivitet.getUttaksperioder()) {
+                if (p.getUtfall() == OmsorgspengerUtfall.AVSLÅTT) {
+                    LocalDateSegment<UttakAktivitet> uttakAktivitetLocalDateSegment =
+                        new LocalDateSegment<>(p.getFom(), p.getPeriode().getTom(), mapTilUttaksAktiviteter(p, aktivitet.getArbeidsforhold()));
+                    segmenter.add(uttakAktivitetLocalDateSegment);
+                }
+            }
+        }
 
         var timeline = LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
 

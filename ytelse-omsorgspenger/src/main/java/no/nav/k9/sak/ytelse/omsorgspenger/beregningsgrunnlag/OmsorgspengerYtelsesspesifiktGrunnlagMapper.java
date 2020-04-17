@@ -42,13 +42,12 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
         var årskvantum = årskvantumTjeneste.hentÅrskvantumUttak(ref);
-        if (årskvantum.getUttaksperioder() == null || årskvantum.getUttaksperioder().isEmpty()) {
+        if (årskvantum.getUttaksplan().getAktiviteter() == null || årskvantum.getUttaksplan().getAktiviteter().isEmpty()) {
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
 
-        var arbeidsforholdPerioder = årskvantum.getUttaksperioder().stream().collect(Collectors.groupingBy(
-            UttaksperiodeOmsorgspenger::getUttakArbeidsforhold));
-        var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.entrySet().stream().map(e -> mapTilUtbetalingsgrad(e.getKey(), e.getValue())).collect(Collectors.toList());
+        var arbeidsforholdPerioder = årskvantum.getUttaksplan().getAktiviteter();
+        var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.stream().map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder())).collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
 
@@ -57,7 +56,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         var utbetalingsgrad = perioder.stream()
             .filter(p -> p.getUtfall() == OmsorgspengerUtfall.INNVILGET)
             .sorted(COMP_PERIODE) // stabil rekkefølge output
-            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad().getUtbetalingsgrad()))
+            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad()))
             .collect(Collectors.toList());
         return new UtbetalingsgradPrAktivitetDto(arbeidsforhold, utbetalingsgrad);
     }

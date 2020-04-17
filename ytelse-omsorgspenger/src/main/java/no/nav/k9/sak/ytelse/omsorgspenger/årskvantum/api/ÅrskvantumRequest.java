@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
+import no.nav.k9.sak.kontrakt.uttak.FraværPeriodeOmsorgspenger;
+import no.nav.k9.sak.typer.PersonIdent;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,16 @@ public class ÅrskvantumRequest {
     @NotNull
     private String aktørId;
 
+    @JsonProperty(value = "personIdent", required = true)
+    @Valid
+    @NotNull
+    private PersonIdent personIdent;
+
+    @JsonProperty(value = "søkersFødselsdato", required = true)
+    @Valid
+    @NotNull
+    private LocalDate søkersFødselsdato;
+
     @JsonProperty(value="innsendingstidspunkt", required = false)
     @Valid
     private LocalDateTime innsendingstidspunkt;
@@ -40,7 +52,7 @@ public class ÅrskvantumRequest {
     @JsonProperty(value = "uttakperioder")
     @Valid
     @Size(max = 1000)
-    private List<UttaksperiodeOmsorgspenger> uttaksperioder = new ArrayList<>();
+    private List<FraværPeriodeOmsorgspenger> uttaksperioder = new ArrayList<>();
 
     @JsonProperty(value = "barna")
     @Valid
@@ -49,11 +61,11 @@ public class ÅrskvantumRequest {
 
 
 
-    public List<UttaksperiodeOmsorgspenger> getUttaksperioder() {
+    public List<FraværPeriodeOmsorgspenger> getUttaksperioder() {
         return uttaksperioder;
     }
 
-    public void setUttaksperioder(List<UttaksperiodeOmsorgspenger> uttaksperioder) {
+    public void setUttaksperioder(List<FraværPeriodeOmsorgspenger> uttaksperioder) {
         this.uttaksperioder = uttaksperioder;
     }
 
@@ -95,5 +107,21 @@ public class ÅrskvantumRequest {
 
     public void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
         this.innsendingstidspunkt = innsendingstidspunkt;
+    }
+
+    public PersonIdent getPersonIdent() {
+        return personIdent;
+    }
+
+    public void setPersonIdent(PersonIdent personIdent) {
+        this.personIdent = personIdent;
+    }
+
+    public LocalDate getSøkersFødselsdato() {
+        return søkersFødselsdato;
+    }
+
+    public void setSøkersFødselsdato(LocalDate søkersFødselsdato) {
+        this.søkersFødselsdato = søkersFødselsdato;
     }
 }
