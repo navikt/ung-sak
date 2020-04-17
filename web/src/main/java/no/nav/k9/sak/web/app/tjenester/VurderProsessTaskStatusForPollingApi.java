@@ -22,11 +22,11 @@ public class VurderProsessTaskStatusForPollingApi {
     private static final Set<ProsessTaskStatus> FERDIG_STATUSER = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
     
     public interface ProsessTaskFeilmelder {
-        Feil feilIProsessTaskGruppe(String callId, Long entityId, String gruppe, Long taskId, ProsessTaskStatus taskStatus);
+        Feil feilIProsessTaskGruppe(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime sistKjørt);
 
-        Feil utsattKjøringAvProsessTask(String callId, Long entityId, String gruppe, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime nesteKjøringEtter);
+        Feil utsattKjøringAvProsessTask(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime nesteKjøringEtter);
 
-        Feil venterPåSvar(String callId, Long entityId, String gruppe, Long id, ProsessTaskStatus status);
+        Feil venterPåSvar(String callId, Long entityId, String gruppe, String taskType, Long id, ProsessTaskStatus status, LocalDateTime sistKjørt);
     }
 
     public VurderProsessTaskStatusForPollingApi(ProsessTaskFeilmelder feilmelder, Long entityId) {
@@ -72,7 +72,7 @@ public class VurderProsessTaskStatusForPollingApi {
     }
 
     private Optional<AsyncPollingStatus> håndterFeil(String gruppe, ProsessTaskData task, String callId) {
-        Feil feil = feilmelder.feilIProsessTaskGruppe(callId, entityId, gruppe, task.getId(), task.getStatus());
+        Feil feil = feilmelder.feilIProsessTaskGruppe(callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getSistKjørt());
         feil.log(log);
 
         AsyncPollingStatus status = new AsyncPollingStatus(AsyncPollingStatus.Status.HALTED,
@@ -81,7 +81,7 @@ public class VurderProsessTaskStatusForPollingApi {
     }
 
     private Optional<AsyncPollingStatus> ventPåSvar(String gruppe, ProsessTaskData task, String callId) {
-        Feil feil = feilmelder.venterPåSvar(callId, entityId, gruppe, task.getId(), task.getStatus());
+        Feil feil = feilmelder.venterPåSvar(callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getSistKjørt());
         feil.log(log);
 
         AsyncPollingStatus status = new AsyncPollingStatus(
@@ -104,7 +104,7 @@ public class VurderProsessTaskStatusForPollingApi {
             return Optional.of(status);// fortsett å polle på gruppe, er ikke ferdig.
         } else {
             Feil feil = feilmelder.utsattKjøringAvProsessTask(
-               callId, entityId, gruppe, task.getId(), task.getStatus(), task.getNesteKjøringEtter());
+               callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getNesteKjøringEtter());
             feil.log(log);
 
             AsyncPollingStatus status = new AsyncPollingStatus(
