@@ -40,9 +40,9 @@ public class OmsorgspengerParametere implements InfotrygdFeedPeriodeberegnerTest
 
     @Override
     public void konfigurerMock(Saksnummer saksnummer, List<TestPeriode> perioder, boolean harTreffITjeneste) {
-        ÅrskvantumResultat årskvantumResultat = mockÅrskvantumResultat(perioder, harTreffITjeneste);
-        when(årskvantumTjeneste.hentÅrskvantumForFagsak(saksnummer))
-            .thenReturn(årskvantumResultat);
+        //ÅrskvantumResultat årskvantumResultat = mockÅrskvantumResultat(perioder, harTreffITjeneste);
+        //when(årskvantumTjeneste.hentÅrskvantumForFagsak(saksnummer))
+        //    .thenReturn(årskvantumResultat);
     }
 
     private ÅrskvantumResultat mockÅrskvantumResultat(List<TestPeriode> perioder, boolean harTreffITjeneste) {
@@ -52,7 +52,7 @@ public class OmsorgspengerParametere implements InfotrygdFeedPeriodeberegnerTest
 
         ÅrskvantumResultat resultat = Mockito.mock(ÅrskvantumResultat.class);
         List<UttaksperiodeOmsorgspenger> uttaksperioder = mockUttaksperioder(perioder);
-        when(resultat.getUttaksperioder()).thenReturn(uttaksperioder);
+        //when(resultat.getUttaksperioder()).thenReturn(uttaksperioder);
         return resultat;
     }
 
