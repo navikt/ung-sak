@@ -103,8 +103,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForFagsak(Saksnummer saksnummer) {
-        return årskvantumKlient.hentÅrskvantumForFagsak(saksnummer.getVerdi());
+    public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
+        return årskvantumKlient.hentPeriodeForFagsak(saksnummer.getVerdi());
     }
 
     @Override
