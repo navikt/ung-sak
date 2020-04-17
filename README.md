@@ -19,4 +19,3 @@ Start postgres først for å kjøre alle enhetstester. Bruker schema k9sak_unit 
    Start `JettyDevServer --vtp` 
    
    
-
