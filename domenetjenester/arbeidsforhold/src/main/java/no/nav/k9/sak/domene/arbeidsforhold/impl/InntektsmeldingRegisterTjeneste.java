@@ -140,8 +140,7 @@ public class InntektsmeldingRegisterTjeneste {
      */
     protected Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> utledManglendeInntektsmeldingerFraGrunnlagForVurdering(BehandlingReferanse referanse, boolean erEndringssøknad) {
         Objects.requireNonNull(referanse, VALID_REF);
-        final Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(
-            referanse.getBehandlingId());
+        final Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(referanse.getBehandlingId());
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> påkrevdeInntektsmeldinger = utledPåkrevdeInntektsmeldingerFraGrunnlag(referanse, inntektArbeidYtelseGrunnlag);
         logInntektsmeldinger(referanse, påkrevdeInntektsmeldinger, "UFILTRERT");
 

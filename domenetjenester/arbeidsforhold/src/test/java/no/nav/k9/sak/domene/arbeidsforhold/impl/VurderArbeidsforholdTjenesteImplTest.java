@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.inject.Instance;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,23 +50,21 @@ import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 public class VurderArbeidsforholdTjenesteImplTest {
 
     private static final LocalDate IDAG = LocalDate.now();
-    private LocalDateTime nåTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-    private volatile int nåTidTeller;
-
     private final LocalDate skjæringstidspunkt = IDAG.minusDays(30);
-
     @Rule
     public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+    private LocalDateTime nåTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    private volatile int nåTidTeller;
     private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
     private InntektsmeldingFilterYtelse inntektsmeldingFilterYtelse = new InntektsmeldingFilterYtelseImpl();
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
-    private PåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste = new PåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository());
+    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
     private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
 
     @Before
-    public void setup(){
+    public void setup() {
     }
 
     @Test
@@ -96,7 +96,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         assertThat(vurder).isEmpty();
 
         avsluttBehandlingOgFagsak(behandling);
-        
+
         @SuppressWarnings("unused")
         var revurdering = opprettRevurderingsbehandling(behandling);
 
@@ -141,7 +141,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         assertThat(vurder).isEmpty();
 
         avsluttBehandlingOgFagsak(behandling);
-        
+
         @SuppressWarnings("unused")
         var revurdering = opprettRevurderingsbehandling(behandling);
 
@@ -320,16 +320,16 @@ public class VurderArbeidsforholdTjenesteImplTest {
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
     }
 
-    private void sendNyInntektsmelding(Behandling behandling, Arbeidsgiver arbeidsgiver,  EksternArbeidsforholdRef ref) {
+    private void sendNyInntektsmelding(Behandling behandling, Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef ref) {
 
         JournalpostId journalpostId = new JournalpostId(1L);
         InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
-        .medArbeidsgiver(arbeidsgiver)
-        .medArbeidsforholdId(ref)
-        .medBeløp(BigDecimal.TEN)
-        .medStartDatoPermisjon(skjæringstidspunkt)
-        .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY)
-        .medInnsendingstidspunkt(nyTid()).medJournalpostId(journalpostId);
+            .medArbeidsgiver(arbeidsgiver)
+            .medArbeidsforholdId(ref)
+            .medBeløp(BigDecimal.TEN)
+            .medStartDatoPermisjon(skjæringstidspunkt)
+            .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY)
+            .medInnsendingstidspunkt(nyTid()).medJournalpostId(journalpostId);
 
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }
@@ -340,12 +340,12 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     private void sendInnInntektsmelding(Behandling behandling, Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef ref) {
         var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
-        .medArbeidsgiver(arbeidsgiver)
-        .medArbeidsforholdId(ref)
-        .medBeløp(BigDecimal.TEN)
-        .medStartDatoPermisjon(skjæringstidspunkt)
-        .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.ENDRING)
-        .medInnsendingstidspunkt(nyTid()).medJournalpostId(new JournalpostId("123"));
+            .medArbeidsgiver(arbeidsgiver)
+            .medArbeidsforholdId(ref)
+            .medBeløp(BigDecimal.TEN)
+            .medStartDatoPermisjon(skjæringstidspunkt)
+            .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.ENDRING)
+            .medInnsendingstidspunkt(nyTid()).medJournalpostId(new JournalpostId("123"));
 
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
     }

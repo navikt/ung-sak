@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,13 +37,11 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = Mockito.mock(InntektsmeldingRegisterTjeneste.class);
 
     private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
-    private PåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste;
-    private Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result;
+    private DefaultManglendePåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste;
 
     @Before
     public void setup(){
-        påkrevdeInntektsmeldingerTjeneste = new PåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository());
-        result = new HashMap<>();
+        påkrevdeInntektsmeldingerTjeneste = new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository());
     }
 
     @Test
@@ -62,7 +59,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
 
         // Act
-        påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling), result);
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling));
 
         // Assert
         assertThat(result).isEmpty();
@@ -85,10 +82,10 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
 
         // Act
-        påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling), result);
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling));
 
         // Assert
-        assertMap(virksomhet, ref1, ref2);
+        assertMap(result, virksomhet, ref1, ref2);
 
     }
 
@@ -108,10 +105,10 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
 
         // Act
-        påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling), result);
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling));
 
         // Assert
-        assertMap(person, ref1, ref2);
+        assertMap(result, person, ref1, ref2);
 
     }
 
@@ -125,7 +122,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         repositoryProvider.getSøknadRepository().lagreOgFlush(behandling, søknad);
     }
 
-    private void assertMap(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref1, InternArbeidsforholdRef ref2) {
+    private void assertMap(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref1, InternArbeidsforholdRef ref2) {
         assertThat(result).hasEntrySatisfying(arbeidsgiver, årsaker -> {
             assertThat(årsaker).hasSize(2);
             assertThat(årsaker).anySatisfy(årsak -> {

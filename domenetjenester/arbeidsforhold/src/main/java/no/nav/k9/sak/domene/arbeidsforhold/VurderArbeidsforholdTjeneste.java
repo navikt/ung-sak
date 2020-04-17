@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -28,12 +30,13 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.EndringIArbeidsforholdId;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.PåkrevdeInntektsmeldingerTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.ManglendePåkrevdeInntektsmeldingerTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.VurderPermisjonTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
@@ -56,7 +59,7 @@ public class VurderArbeidsforholdTjeneste {
     private static final Logger logger = LoggerFactory.getLogger(VurderArbeidsforholdTjeneste.class);
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private PåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste;
+    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjenester;
 
     VurderArbeidsforholdTjeneste() {
         // CDI
@@ -64,31 +67,9 @@ public class VurderArbeidsforholdTjeneste {
 
     @Inject
     public VurderArbeidsforholdTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                            PåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste) {
+                                        @Any Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjenester) {
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
-        this.påkrevdeInntektsmeldingerTjeneste = påkrevdeInntektsmeldingerTjeneste;
-    }
-
-    /**
-     * Vurderer alle arbeidsforhold innhentet i en behandling.
-     * <p>
-     * Gjør vurderinger for å se om saksbehandler må ta stilling til enkelte av disse og returener sett med hvilke
-     * saksbehandler må ta stilling til.
-     * <p>
-     *
-     * @param behandlingReferanse      behandlingen
-     * @param iayGrunnlag - grunnlag for behandlingen
-     * @param SakInntektsmeldinger - alle inntektsmeldinger for saken behandlingen tilhører
-     * @param skalTaStillingTilEndring skal ta stilling til endring i arbeidsforholdRef i inntektsmeldingen
-     * @return Arbeidsforholdene det må tas stilling til
-     */
-    public Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder(BehandlingReferanse behandlingReferanse,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                  SakInntektsmeldinger sakInntektsmeldinger,
-                                                                  boolean skalTaStillingTilEndringArbeidsforhold) {
-        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderMedÅrsak(behandlingReferanse, iayGrunnlag, sakInntektsmeldinger, skalTaStillingTilEndringArbeidsforhold);
-        return arbeidsgiverSetMap.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, VurderArbeidsforholdTjeneste::mapTilArbeidsforholdRef));
+        this.påkrevdeInntektsmeldingerTjenester = påkrevdeInntektsmeldingerTjenester;
     }
 
     private static Set<InternArbeidsforholdRef> mapTilArbeidsforholdRef(Map.Entry<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> entry) {
@@ -102,12 +83,35 @@ public class VurderArbeidsforholdTjeneste {
      * <p>
      * Gjør vurderinger for å se om saksbehandler må ta stilling til enkelte av disse og returener sett med hvilke
      * saksbehandler må ta stilling til.
+     * <p>
      *
+     * @param behandlingReferanse                    behandlingen
+     * @param iayGrunnlag                            - grunnlag for behandlingen
+     * @param sakInntektsmeldinger                   - alle inntektsmeldinger for saken behandlingen tilhører
+     * @param skalTaStillingTilEndringArbeidsforhold skal ta stilling til endring i arbeidsforholdRef i inntektsmeldingen
+     * @return Arbeidsforholdene det må tas stilling til
+     */
+    public Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder(BehandlingReferanse behandlingReferanse,
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                  SakInntektsmeldinger sakInntektsmeldinger,
+                                                                  boolean skalTaStillingTilEndringArbeidsforhold) {
+        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderMedÅrsak(behandlingReferanse, iayGrunnlag, sakInntektsmeldinger, skalTaStillingTilEndringArbeidsforhold);
+        return arbeidsgiverSetMap.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, VurderArbeidsforholdTjeneste::mapTilArbeidsforholdRef));
+    }
+
+    /**
+     * Vurderer alle arbeidsforhold innhentet i en behandling.
+     * <p>
+     * Gjør vurderinger for å se om saksbehandler må ta stilling til enkelte av disse og returener sett med hvilke
+     * saksbehandler må ta stilling til.
+     * <p>
      * Legger også på en årsak for hvorfor arbeidsforholdet har fått et aksjonspunkt.
      * <p>
      *
-     * @param ref      behandlingen
-     * @param skalTaStillingTilEndring skal ta stilling til endring i arbeidsforholdRef i inntektsmeldingen
+     * @param ref                                    behandlingen
+     * @param iayGrunnlag                            I(nntekt)A(rbeid)Y(telse) grunnlaget
+     * @param skalTaStillingTilEndringArbeidsforhold skal ta stilling til endring i arbeidsforholdRef i inntektsmeldingen
      * @return Arbeidsforholdene det må tas stilling til
      */
     public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurderMedÅrsak(BehandlingReferanse ref,
@@ -123,12 +127,27 @@ public class VurderArbeidsforholdTjeneste {
         }
 
         VurderPermisjonTjeneste.leggTilArbeidsforholdMedRelevantPermisjon(ref, result, iayGrunnlag);
-        påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(ref, result);
+        leggTilManglendePåkrevdeInntektsmeldinger(ref, result);
         erRapportertNormalInntektUtenArbeidsforhold(iayGrunnlag, ref);
         erMottattInntektsmeldingUtenArbeidsforhold(result, iayGrunnlag, ref);
 
         return result;
 
+    }
+
+    private void leggTilManglendePåkrevdeInntektsmeldinger(BehandlingReferanse ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result) {
+        var manglendePåkrevdeInntektsmeldinger = finnPåkrevdeInntektsmeldingerTjeneste(ref).leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(ref);
+        manglendePåkrevdeInntektsmeldinger.forEach((k, v) -> result.merge(k, v, this::mergeSets));
+    }
+
+    private Set<ArbeidsforholdMedÅrsak> mergeSets(Set<ArbeidsforholdMedÅrsak> a, Set<ArbeidsforholdMedÅrsak> b) {
+        a.addAll(b);
+        return a;
+    }
+
+    private ManglendePåkrevdeInntektsmeldingerTjeneste finnPåkrevdeInntektsmeldingerTjeneste(BehandlingReferanse ref) {
+        var tjeneste = FagsakYtelseTypeRef.Lookup.find(påkrevdeInntektsmeldingerTjenester, ref.getFagsakYtelseType());
+        return tjeneste.orElseThrow(() -> new IllegalStateException("Finner ikke implementasjon for PåkrevdeInntektsmeldingerTjeneste for behandling " + ref));
     }
 
     /**
@@ -257,8 +276,8 @@ public class VurderArbeidsforholdTjeneste {
         return Stream.of(InternArbeidsforholdRef.nullRef()).collect(Collectors.toSet());
     }
 
-    private void vurderOmArbeidsforholdKanGjenkjennes(Map<Arbeidsgiver, 
-                                                      Set<ArbeidsforholdMedÅrsak>> result,
+    private void vurderOmArbeidsforholdKanGjenkjennes(Map<Arbeidsgiver,
+        Set<ArbeidsforholdMedÅrsak>> result,
                                                       SakInntektsmeldinger sakInntektsmeldinger,
                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                       BehandlingReferanse behandlingReferanse) {
@@ -331,14 +350,14 @@ public class VurderArbeidsforholdTjeneste {
         var lønnFilter = filter.filterPensjonsgivende().filter(InntektspostType.LØNN);
         var arbeidsforholdInformasjon = grunnlag.getArbeidsforholdInformasjon();
         var filterYrkesaktivitet = new YrkesaktivitetFilter(arbeidsforholdInformasjon, grunnlag.getAktørArbeidFraRegister(referanse.getAktørId()));
-        
+
         lønnFilter.getAlleInntekter().forEach(inntekt -> rapporterHvisHarIkkeArbeidsforhold(grunnlag, inntekt, filterYrkesaktivitet, skjæringstidspunkt));
     }
 
     private void rapporterHvisHarIkkeArbeidsforhold(InntektArbeidYtelseGrunnlag grunnlag,
-                                            Inntekt inntekt,
-                                            YrkesaktivitetFilter filterYrkesaktivitet,
-                                            LocalDate skjæringstidspunkt) {
+                                                    Inntekt inntekt,
+                                                    YrkesaktivitetFilter filterYrkesaktivitet,
+                                                    LocalDate skjæringstidspunkt) {
         var filterFør = filterYrkesaktivitet.før(skjæringstidspunkt);
         var filterEtter = filterYrkesaktivitet.etter(skjæringstidspunkt);
 
@@ -379,11 +398,11 @@ public class VurderArbeidsforholdTjeneste {
             .stream()
             .noneMatch(yr -> ARBEIDSFORHOLD_TYPER.contains(yr.getArbeidType()) && yr.getArbeidsgiver().equals(inntekt.getArbeidsgiver()))
             && filter.getArbeidsforholdOverstyringer()
-                .stream()
-                .noneMatch(it -> Objects.equals(it.getArbeidsgiver(), inntekt.getArbeidsgiver())
-                    && Objects.equals(it.getHandling(), ArbeidsforholdHandlingType.IKKE_BRUK));
+            .stream()
+            .noneMatch(it -> Objects.equals(it.getArbeidsgiver(), inntekt.getArbeidsgiver())
+                && Objects.equals(it.getHandling(), ArbeidsforholdHandlingType.IKKE_BRUK));
     }
-    
+
     /**
      * Henter ut forrige versjon av inntektsmeldinger
      *
