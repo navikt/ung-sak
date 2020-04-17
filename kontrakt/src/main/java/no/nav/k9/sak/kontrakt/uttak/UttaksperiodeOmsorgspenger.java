@@ -3,7 +3,10 @@ package no.nav.k9.sak.kontrakt.uttak;
 import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -18,10 +21,11 @@ public class UttaksperiodeOmsorgspenger {
     @NotNull
     private Periode periode;
 
-    @JsonProperty(value="utbetalingsgrad", required = false)
-    @Valid
-    private UttakUtbetalingsgradOmsorgspenger utbetalingsgrad;
-
+    @JsonProperty(value = "utbetalingsgrad", required = true)
+    @NotNull
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    private BigDecimal utbetalingsgrad;
 
     @JsonProperty(value="delvisFravær", required=false)
     @Valid
@@ -33,7 +37,7 @@ public class UttaksperiodeOmsorgspenger {
 
     @JsonCreator
     public UttaksperiodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
-                                      @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgradOmsorgspenger utbetalingsgrad,
+                                      @JsonProperty(value = "utbetalingsgrad", required = false) @Valid BigDecimal utbetalingsgrad,
                                       @JsonProperty(value = "utfall", required = false) @Valid OmsorgspengerUtfall utfall,
                                       @JsonProperty(value = "delvisFravær", required = false) @Valid Duration delvisFravær,
                                       @JsonProperty(value = "arbeidsforhold", required = false) @Valid UttakArbeidsforhold uttakArbeidsforhold) {
@@ -51,11 +55,11 @@ public class UttaksperiodeOmsorgspenger {
         this.periode = periode;
     }
 
-    public UttakUtbetalingsgradOmsorgspenger getUtbetalingsgrad() {
+    public BigDecimal getUtbetalingsgrad() {
         return utbetalingsgrad;
     }
 
-    public void setUtbetalingsgrad(UttakUtbetalingsgradOmsorgspenger utbetalingsgrad) {
+    public void setUtbetalingsgrad(BigDecimal utbetalingsgrad) {
         this.utbetalingsgrad = utbetalingsgrad;
     }
 

@@ -66,12 +66,12 @@ public class MapFraÅrskvantumResultatTest {
     }
 
     private UttaksperiodeOmsorgspenger innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(utbetalingsgrad),
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), utbetalingsgrad,
                                               OmsorgspengerUtfall.INNVILGET, Duration.ofHours(1), arbeidsforhold);
     }
 
     private UttaksperiodeOmsorgspenger avslått(LocalDate fom, LocalDate tom, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), new UttakUtbetalingsgradOmsorgspenger(BigDecimal.ZERO),
+        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), BigDecimal.ZERO,
                                               OmsorgspengerUtfall.AVSLÅTT, Duration.ofHours(1), arbeidsforhold);
     }
 }

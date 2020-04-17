@@ -56,7 +56,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         var utbetalingsgrad = perioder.stream()
             .filter(p -> p.getUtfall() == OmsorgspengerUtfall.INNVILGET)
             .sorted(COMP_PERIODE) // stabil rekkefølge output
-            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad().getUtbetalingsgrad()))
+            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad()))
             .collect(Collectors.toList());
         return new UtbetalingsgradPrAktivitetDto(arbeidsforhold, utbetalingsgrad);
     }

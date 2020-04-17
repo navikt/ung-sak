@@ -28,7 +28,7 @@ class MapFraÅrskvantumResultat {
         if (uttaksperiode.getUtbetalingsgrad() == null) {
             return new UttakAktivitet(stillingsgrad, BigDecimal.ZERO, null, null, false);
         } else {
-            var utbetalingsgrad = uttaksperiode.getUtbetalingsgrad().getUtbetalingsgrad();
+            var utbetalingsgrad = uttaksperiode.getUtbetalingsgrad();
             var arbeidsforhold = mapArbeidsforhold(uttakArbeidsforhold);
             return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, uttakArbeidsforhold.getType(), erGradering);
         }
