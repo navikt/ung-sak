@@ -15,11 +15,6 @@ import java.util.Comparator;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ÅrskvantumResultat {
 
-    @JsonProperty(value = "behandlingUUID", required = true)
-    @Valid
-    @NotNull
-    private String behandlingUUID;
-
     @JsonProperty(value = "årskvantum")
     @Valid
     @NotNull
@@ -30,13 +25,6 @@ public class ÅrskvantumResultat {
     @NotNull
     private UttaksplanOmsorgspenger uttaksplan;
 
-    public String getBehandlingUUID() {
-        return behandlingUUID;
-    }
-
-    public void setBehandlingUUID(String behandlingUUID) {
-        this.behandlingUUID = behandlingUUID;
-    }
 
     public Årskvantum getÅrskvantum() {
         return årskvantum;

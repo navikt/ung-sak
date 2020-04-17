@@ -21,10 +21,10 @@ public class UttaksplanOmsorgspenger {
     @NotNull
     private String saksnummer;
 
-    @JsonProperty(value = "behandlingId", required = true)
+    @JsonProperty(value = "behandlingUUID", required = true)
     @Valid
     @NotNull
-    private String behandlingId;
+    private String behandlingUUID;
 
     @JsonProperty(value = "innsendingstidspunkt", required = true)
     @Valid
@@ -46,12 +46,12 @@ public class UttaksplanOmsorgspenger {
         this.saksnummer = saksnummer;
     }
 
-    public String getBehandlingId() {
-        return behandlingId;
+    public String getBehandlingUUID() {
+        return behandlingUUID;
     }
 
-    public void setBehandlingId(String behandlingId) {
-        this.behandlingId = behandlingId;
+    public void setBehandlingId(String behandlingUUID) {
+        this.behandlingUUID = behandlingUUID;
     }
 
     public LocalDateTime getInnsendingstidspunkt() {
