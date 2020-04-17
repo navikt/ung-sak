@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           echo "Building $(echo $GITHUB_SHA | cut -c1-7)"
-          mvn dependency:go-offline --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml
+          mvn dependency:go-offline --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Dmaven.wagon.http.retryHandler.class=standard -Dmaven.wagon.http.retryHandler.count=3
           mvn package -U --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -DtrimStackTrace=false -Dchangelist= -Dsha1=-$(git log -1 --pretty='%ad' --date=format:'%Y%m%d%H%M%S')-$(echo $GITHUB_SHA | cut -c1-7)
         env:
           GITHUB_USERNAME: x-access-token
