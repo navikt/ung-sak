@@ -48,7 +48,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     @Override
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, ref.getUtledetSkjæringstidspunkt(), LocalDate.of(2019, 1, 1));
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, ref.getUtledetSkjæringstidspunkt(), LocalDate.of(2017, 3, 1));
 
         if (opptjeningAktiviteter.isEmpty()) {
             throw new IllegalStateException("Forventer opptjening!!!");
