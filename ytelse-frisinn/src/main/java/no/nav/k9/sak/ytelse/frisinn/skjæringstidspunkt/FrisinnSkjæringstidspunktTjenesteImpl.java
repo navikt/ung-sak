@@ -24,7 +24,7 @@ import no.nav.k9.sak.typer.Periode;
 public class FrisinnSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
 
     private final LocalDate skjæringstidspunkt = LocalDate.of(2020, 03, 01);
-    private final Period periodeFør = Period.parse("P17M");
+    private final Period periodeFør = Period.parse("P36M");
 
     private UttakRepository uttakRepository;
     private OpphørUttakTjeneste opphørUttakTjeneste;
