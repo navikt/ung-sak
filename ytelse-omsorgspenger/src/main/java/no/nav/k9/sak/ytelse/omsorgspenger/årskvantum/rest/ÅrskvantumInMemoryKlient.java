@@ -31,7 +31,7 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public Periode hentÅrskvantumForFagsak(String saksnummer) {
+    public Periode hentPeriodeForFagsak(String saksnummer) {
         return null;
     }
 

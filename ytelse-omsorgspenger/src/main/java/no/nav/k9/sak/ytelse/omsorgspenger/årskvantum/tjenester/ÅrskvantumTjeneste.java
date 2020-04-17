@@ -12,7 +12,7 @@ public interface ÅrskvantumTjeneste {
 
     ÅrskvantumResultat hentÅrskvantumForBehandling(BehandlingReferanse ref);
 
-    Periode hentÅrskvantumForFagsak(Saksnummer ref);
+    Periode hentPeriodeForFagsak(Saksnummer ref);
 
     ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId);
 

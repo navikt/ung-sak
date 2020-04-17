@@ -15,7 +15,7 @@ public interface ÅrskvantumKlient {
 
     ÅrskvantumResultat hentÅrskvantumForBehandling(UUID behandlingUUID);
 
-    Periode hentÅrskvantumForFagsak(String saksnummer);
+    Periode hentPeriodeForFagsak(String saksnummer);
 
     ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId);
 

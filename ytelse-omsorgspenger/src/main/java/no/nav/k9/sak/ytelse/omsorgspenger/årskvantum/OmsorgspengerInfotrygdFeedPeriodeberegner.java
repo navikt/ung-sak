@@ -23,7 +23,7 @@ public class OmsorgspengerInfotrygdFeedPeriodeberegner implements InfotrygdFeedP
 
     @Override
     public InfotrygdFeedPeriode finnInnvilgetPeriode(Saksnummer saksnummer) {
-        Periode periode = årskvantumTjeneste.hentÅrskvantumForFagsak(saksnummer);
+        Periode periode = årskvantumTjeneste.hentPeriodeForFagsak(saksnummer);
         if(periode == null) {
             return InfotrygdFeedPeriode.annullert();
         }

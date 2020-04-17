@@ -86,7 +86,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public Periode hentÅrskvantumForFagsak(String saksnummer) {
+    public Periode hentPeriodeForFagsak(String saksnummer) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/minmax");
             var result = restKlient.post(endpoint, saksnummer, Periode.class);
