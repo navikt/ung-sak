@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.enterprise.inject.Instance;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Spy;
@@ -30,9 +32,10 @@ import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.DefaultManglendePåkrevdeInntektsmeldingerTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingFilterYtelseImpl;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.PåkrevdeInntektsmeldingerTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.ManglendePåkrevdeInntektsmeldingerTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
@@ -57,7 +60,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(new InntektsmeldingFilterYtelseImpl()));
-    private PåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste = new PåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository());
+    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
     private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
 
     @Spy

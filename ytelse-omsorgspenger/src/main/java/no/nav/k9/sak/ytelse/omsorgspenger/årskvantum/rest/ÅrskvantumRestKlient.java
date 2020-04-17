@@ -1,6 +1,24 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.ws.rs.core.HttpHeaders;
+
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.MinMaxRequest;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
@@ -11,17 +29,6 @@ import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.UUID;
 
 @ApplicationScoped
 @Default
@@ -89,7 +96,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     public Periode hentPeriodeForFagsak(String saksnummer) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/minmax");
-            var result = restKlient.post(endpoint, saksnummer, Periode.class);
+            var result = restKlient.post(endpoint, new MinMaxRequest(saksnummer), Set.of(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())), Periode.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", saksnummer=" + saksnummer + ": " + constraints);
