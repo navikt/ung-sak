@@ -78,7 +78,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
         // Opprettes som egen task da den er uavhengig av de andre
         prosessTaskRepository.lagre(opprettTaskVurderOppgaveTilbakekreving(behandling));
 
-        //infotrygdFeedService.publiserHendelse(behandling);
+        infotrygdFeedService.publiserHendelse(behandling);
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {

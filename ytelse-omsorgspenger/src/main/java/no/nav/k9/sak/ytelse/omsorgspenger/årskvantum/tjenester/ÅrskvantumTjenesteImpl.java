@@ -10,6 +10,7 @@ import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.Barn;
@@ -99,8 +100,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForFagsak(BehandlingReferanse ref) {
-        return årskvantumKlient.hentÅrskvantumForFagsak(ref.getSaksnummer().getVerdi());
+    public ÅrskvantumResultat hentÅrskvantumForFagsak(Saksnummer saksnummer) {
+        return årskvantumKlient.hentÅrskvantumForFagsak(saksnummer.getVerdi());
     }
 
     @Override
