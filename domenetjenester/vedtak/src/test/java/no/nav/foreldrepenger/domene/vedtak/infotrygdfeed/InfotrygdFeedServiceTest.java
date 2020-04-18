@@ -1,6 +1,23 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import javax.enterprise.inject.Instance;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -9,23 +26,13 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-
-import javax.enterprise.inject.Instance;
-import java.time.LocalDate;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class InfotrygdFeedServiceTest {
 
-    @Mock
-    Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
+    private InfotrygdFeedPeriodeberegner periodeberegner;
+
+    private Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
 
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
@@ -35,6 +42,12 @@ public class InfotrygdFeedServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        initServices(LocalDate.now(), LocalDate.now().plusDays(1));
+    }
+
+    private void initServices(LocalDate fom, LocalDate tom) {
+        periodeberegner = new FeedServiceMockHelper.StubPeriodeberegner(fom, tom, "OM");
+        periodeBeregnere = new UnitTestLookupInstanceImpl<>(periodeberegner);
         service = new InfotrygdFeedService(prosessTaskRepository, periodeBeregnere);
     }
 
@@ -47,17 +60,11 @@ public class InfotrygdFeedServiceTest {
 
     @Test
     public void publiserHendelse_med_all_tilgjengelig_info() {
-        LocalDate vilkårligDato = LocalDate.of(2020, 1, 1);
-        LocalDate førsteStønadsdag = vilkårligDato.minusMonths(1);
-        LocalDate sisteStønadsdag = vilkårligDato.plusMonths(1);
-
         Behandling behandling = mockHelper()
             .medSaksnummer("saksnummer")
             .medAktørId("123")
             .medAktørIdPleietrengende("321")
             .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
-            .medOmsorgspengerPeriode(førsteStønadsdag, sisteStønadsdag)
-            .medPleiepengerPeriode(vilkårligDato, sisteStønadsdag)
             .medVersjonFagsak(99L)
             .medVersjonBehandling(88L)
             .hentBehandling();
@@ -80,8 +87,8 @@ public class InfotrygdFeedServiceTest {
         assertThat(message.getSaksnummer()).isEqualTo("saksnummer");
         assertThat(message.getAktoerId()).isEqualTo("123");
         assertThat(message.getAktoerIdPleietrengende()).isEqualTo("321");
-        assertThat(message.getFoersteStoenadsdag()).isEqualTo(førsteStønadsdag);
-        assertThat(message.getSisteStoenadsdag()).isEqualTo(sisteStønadsdag);
+        assertThat(message.getFoersteStoenadsdag()).isEqualTo(LocalDate.now());
+        assertThat(message.getSisteStoenadsdag()).isEqualTo(LocalDate.now().plusDays(1));
     }
 
     @Test
@@ -105,9 +112,9 @@ public class InfotrygdFeedServiceTest {
 
     @Test
     public void publiserHendelse_uten_treff_i_tjeneste() {
+        initServices(null, null);
         Behandling behandling = mockHelper()
             .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
-            .utenOmsorgspenger()
             .hentBehandling();
 
         ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
@@ -123,9 +130,9 @@ public class InfotrygdFeedServiceTest {
 
     @Test
     public void publiserHendelse_med_min_max_dato() {
+        initServices(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
         Behandling behandling = mockHelper()
             .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
-            .medOmsorgspengerPeriode(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
             .hentBehandling();
 
         ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
@@ -138,16 +145,6 @@ public class InfotrygdFeedServiceTest {
         assertThat(message.getFoersteStoenadsdag()).isNull();
         assertThat(message.getSisteStoenadsdag()).isNull();
     }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void publiserHendelse_feil_ytelse() {
-        Behandling behandling = mockHelper()
-            .medFagsakYtelsesType(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER)
-            .hentBehandling();
-        service.publiserHendelse(behandling);
-    }
-
-    // ==== ProsessTask-felt ====
 
     @Test(expected = InfotrygdFeedService.ManglendeVerdiException.class)
     public void publiserHendelse_uten_saksnummer() {
@@ -192,21 +189,16 @@ class FeedServiceMockHelper {
     private Long versjonFagsak = 1L;
     private Long versjonBehandling = 2L;
 
-    private InfotrygdFeedPeriodeberegner omsorgspengerPeriodeberegner;
-    private InfotrygdFeedPeriodeberegner pleiepengerPeriodeberegner;
-
     // Annen tilstand
     private long sisteBehandlingsId = 0L;
 
     FeedServiceMockHelper(Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere) {
         this.periodeBeregnere = periodeBeregnere;
 
-        utenOmsorgspenger();
-        utenPleiepenger();
     }
 
     FeedServiceMockHelper medSaksnummer(String saksnummer) {
-        if(saksnummer == null) {
+        if (saksnummer == null) {
             this.saksnummer = null;
         } else {
             this.saksnummer = new Saksnummer(saksnummer);
@@ -215,7 +207,7 @@ class FeedServiceMockHelper {
     }
 
     FeedServiceMockHelper medAktørId(String aktørId) {
-        if(aktørId == null) {
+        if (aktørId == null) {
             this.aktørId = null;
         } else {
             this.aktørId = new AktørId(aktørId);
@@ -224,31 +216,11 @@ class FeedServiceMockHelper {
     }
 
     FeedServiceMockHelper medAktørIdPleietrengende(String aktørIdPleietrengende) {
-        if(aktørIdPleietrengende == null) {
+        if (aktørIdPleietrengende == null) {
             this.aktørIdPleietrengende = null;
         } else {
             this.aktørIdPleietrengende = new AktørId(aktørIdPleietrengende);
         }
-        return this;
-    }
-
-    FeedServiceMockHelper medOmsorgspengerPeriode(LocalDate fom, LocalDate tom) {
-        omsorgspengerPeriodeberegner = new StubPeriodeberegner(fom, tom, FagsakYtelseType.OMSORGSPENGER, "OM");
-        return this;
-    }
-
-    FeedServiceMockHelper medPleiepengerPeriode(LocalDate fom, LocalDate tom) {
-        pleiepengerPeriodeberegner = new StubPeriodeberegner(fom, tom, FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "PN");
-        return this;
-    }
-
-    FeedServiceMockHelper utenOmsorgspenger() {
-        medOmsorgspengerPeriode(null, null);
-        return this;
-    }
-
-    FeedServiceMockHelper utenPleiepenger() {
-        medPleiepengerPeriode(null, null);
         return this;
     }
 
@@ -269,12 +241,6 @@ class FeedServiceMockHelper {
 
     Behandling hentBehandling() {
         long behandlingsId = nesteBehandlingsId();
-
-        when(periodeBeregnere.iterator())
-            .thenReturn(List.of(
-                omsorgspengerPeriodeberegner,
-                pleiepengerPeriodeberegner
-            ).iterator());
 
         return mockBehandling(behandlingsId);
     }
@@ -307,23 +273,16 @@ class FeedServiceMockHelper {
         return sisteBehandlingsId++;
     }
 
-    private static final class StubPeriodeberegner implements InfotrygdFeedPeriodeberegner {
+    static final class StubPeriodeberegner implements InfotrygdFeedPeriodeberegner {
 
         private final LocalDate fom;
         private final LocalDate tom;
-        private final FagsakYtelseType fagsakYtelseType;
         private final String infotrygdYtelseKode;
 
-        private StubPeriodeberegner(LocalDate fom, LocalDate tom, FagsakYtelseType fagsakYtelseType, String infotrygdYtelseKode) {
-            this.fagsakYtelseType = fagsakYtelseType;
+        StubPeriodeberegner(LocalDate fom, LocalDate tom, String infotrygdYtelseKode) {
             this.infotrygdYtelseKode = infotrygdYtelseKode;
             this.fom = fom;
             this.tom = tom;
-        }
-
-        @Override
-        public FagsakYtelseType getFagsakYtelseType() {
-            return fagsakYtelseType;
         }
 
         @Override

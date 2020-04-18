@@ -1,23 +1,27 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.UUID;
 
 @ApplicationScoped
 public class InfotrygdFeedService {
@@ -32,10 +36,8 @@ public class InfotrygdFeedService {
     }
 
     @Inject
-    public InfotrygdFeedService(
-        ProsessTaskRepository prosessTaskRepository,
-        Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere
-    ) {
+    public InfotrygdFeedService(ProsessTaskRepository prosessTaskRepository,
+                                @Any Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.periodeBeregnere = periodeBeregnere;
     }
@@ -128,18 +130,8 @@ public class InfotrygdFeedService {
     private InfotrygdFeedPeriodeberegner getInfotrygdFeedPeriodeBeregner(Behandling behandling) {
         FagsakYtelseType ytelseType = behandling.getFagsak().getYtelseType();
 
-        InfotrygdFeedPeriodeberegner periodeBeregner = null;
-        for (InfotrygdFeedPeriodeberegner beregner : periodeBeregnere) {
-            if(Objects.equals(ytelseType, beregner.getFagsakYtelseType())) {
-                periodeBeregner = beregner;
-                break;
-            }
-        }
-
-        if (periodeBeregner == null) {
-            throw new IllegalArgumentException("Kan ikke beregne periode for ytelse: " + ytelseType);
-        }
-        return periodeBeregner;
+        return FagsakYtelseTypeRef.Lookup.find(periodeBeregnere, ytelseType)
+            .orElseThrow(() -> new IllegalArgumentException("Kan ikke beregne periode for ytelse: " + ytelseType));
     }
 
     private String lagSekvensnummer(Behandling behandling) {

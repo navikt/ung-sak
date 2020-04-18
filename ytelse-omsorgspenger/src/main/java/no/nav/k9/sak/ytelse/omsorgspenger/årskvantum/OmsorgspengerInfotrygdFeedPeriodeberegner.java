@@ -5,11 +5,12 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriode;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriodeberegner;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
+@FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
 public class OmsorgspengerInfotrygdFeedPeriodeberegner implements InfotrygdFeedPeriodeberegner {
     private ÅrskvantumTjeneste årskvantumTjeneste;
@@ -31,11 +32,6 @@ public class OmsorgspengerInfotrygdFeedPeriodeberegner implements InfotrygdFeedP
         }
 
         return new InfotrygdFeedPeriode(periode.getFom(), periode.getTom());
-    }
-
-    @Override
-    public FagsakYtelseType getFagsakYtelseType() {
-        return FagsakYtelseType.OMSORGSPENGER;
     }
 
     @Override

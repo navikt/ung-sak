@@ -3,6 +3,7 @@ package no.nav.k9.sak.infotrygdfeed;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriode;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriodeberegner;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.infotrygdfeed.ytelser.OmsorgspengerParametere;
 import no.nav.k9.sak.infotrygdfeed.ytelser.PleiepengerBarnParametere;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -117,8 +118,9 @@ public class InfotrygdFeedPeriodeberegnerTest {
 
     @Test
     public void støtter_fagsak() {
-        assertThat(getBeregner().getFagsakYtelseType()).isNotNull();
-        assertThat(getBeregner().getFagsakYtelseType()).isEqualTo(fagsakYtelseType());
+        var ytelsesTypeKode = getBeregner().getClass().getAnnotation(FagsakYtelseTypeRef.class).value();
+        assertThat(ytelsesTypeKode).isNotNull();
+        assertThat(ytelsesTypeKode).isEqualTo(fagsakYtelseType().getKode());
     }
 
     @Test
