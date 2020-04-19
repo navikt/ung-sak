@@ -32,8 +32,6 @@ public class Inntektspost implements IndexKey {
 
     private SkatteOgAvgiftsregelType skatteOgAvgiftsregelType = SkatteOgAvgiftsregelType.UDEFINERT;
 
-    private Inntekt inntekt;
-
     /** Brukes kun til FK validering. Default OffentligYtelseType. Må settes sammen med {@link #ytelse} */
     private String ytelseType = OffentligYtelseType.KODEVERK;
 
@@ -123,14 +121,6 @@ public class Inntektspost implements IndexKey {
     public YtelseType getYtelseType() {
         var yt = YTELSE_TYPER.getOrDefault(ytelseType, Collections.emptyMap()).get(ytelse);
         return yt != null ? yt : OffentligYtelseType.UDEFINERT;
-    }
-
-    public Inntekt getInntekt() {
-        return inntekt;
-    }
-
-    void setInntekt(Inntekt inntekt) {
-        this.inntekt = inntekt;
     }
 
     void setYtelse(YtelseType ytelse) {

@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 import java.time.LocalDate;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;

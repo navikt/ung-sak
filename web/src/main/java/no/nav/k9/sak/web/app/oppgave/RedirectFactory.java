@@ -1,12 +1,12 @@
 package no.nav.k9.sak.web.app.oppgave;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.ContextPathHolder;
 
-@ApplicationScoped
+@Dependent
 public class RedirectFactory {
 
     private String loadBalancerUrl;

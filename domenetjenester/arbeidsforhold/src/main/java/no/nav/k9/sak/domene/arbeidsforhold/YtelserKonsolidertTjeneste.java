@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
@@ -22,7 +22,7 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@ApplicationScoped
+@Dependent
 public class YtelserKonsolidertTjeneste {
 
     private FagsakRepository fagsakRepository;

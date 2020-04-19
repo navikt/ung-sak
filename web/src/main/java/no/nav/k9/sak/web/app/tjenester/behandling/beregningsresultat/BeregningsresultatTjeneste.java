@@ -2,7 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -12,7 +12,7 @@ import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 
-@ApplicationScoped
+@Dependent
 public class BeregningsresultatTjeneste {
 
     private BeregningsresultatRepository beregningsresultatRepository;

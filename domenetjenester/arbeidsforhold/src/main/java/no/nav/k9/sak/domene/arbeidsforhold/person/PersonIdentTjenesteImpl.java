@@ -2,14 +2,14 @@ package no.nav.k9.sak.domene.arbeidsforhold.person;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
-@ApplicationScoped
+@Dependent
 class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
 
     private TpsAdapterImpl tpsAdapter;

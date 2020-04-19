@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
@@ -18,7 +18,7 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 /**
  * Historikktjeneste for endring av inntekt
  */
-@ApplicationScoped
+@Dependent
 class InntektHistorikkTjeneste {
 
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;

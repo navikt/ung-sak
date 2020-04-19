@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.validation.Validation;
@@ -43,7 +43,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.util.Tuple;
 
-@ApplicationScoped
+@Dependent
 @Default
 public class DefaultUttakTjeneste implements UttakTjeneste {
 

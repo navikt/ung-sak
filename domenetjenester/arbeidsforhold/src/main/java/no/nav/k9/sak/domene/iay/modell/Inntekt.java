@@ -34,11 +34,7 @@ public class Inntekt implements IndexKey {
     Inntekt(Inntekt inntektMal) {
         this.inntektsKilde = inntektMal.getInntektsKilde();
         this.arbeidsgiver = inntektMal.getArbeidsgiver();
-        this.inntektspost = inntektMal.getAlleInntektsposter().stream().map(ip -> {
-            Inntektspost inntektspost = new Inntektspost(ip);
-            inntektspost.setInntekt(this);
-            return inntektspost;
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
+        this.inntektspost = inntektMal.getAlleInntektsposter().stream().map(Inntektspost::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
@@ -99,7 +95,6 @@ public class Inntekt implements IndexKey {
     }
 
     void leggTilInntektspost(Inntektspost inntektspost) {
-        inntektspost.setInntekt(this);
         this.inntektspost.add(inntektspost);
     }
 

@@ -24,9 +24,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.inngangsvilkår.opptjening.OpptjeningDtoTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.opptjening.InntekterDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningerDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -42,10 +42,12 @@ public class OpptjeningRestTjeneste {
 
     public static final String PATH = "/behandling/opptjening";
     public static final String PATH_V2 = "/behandling/opptjening-v2";
+    public static final String INNTEKT_PATH = PATH + "/inntekt";
 
     private BehandlingRepository behandlingRepository;
-    private OpptjeningDtoTjeneste dtoMapper;
+    private MapOpptjening dtoMapper;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private MapInntekter mapInntekter;
 
     public OpptjeningRestTjeneste() {
         // for CDI proxy
@@ -54,9 +56,11 @@ public class OpptjeningRestTjeneste {
     @Inject
     public OpptjeningRestTjeneste(BehandlingRepository behandlingRepository,
                                   SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                  OpptjeningDtoTjeneste dtoMapper) {
+                                  MapInntekter mapInntekter,
+                                  MapOpptjening dtoMapper) {
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.mapInntekter = mapInntekter;
         this.dtoMapper = dtoMapper;
     }
 
@@ -64,7 +68,7 @@ public class OpptjeningRestTjeneste {
     @Path(PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent informasjon om opptjening", tags = "opptjening", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Deprecated
@@ -80,7 +84,7 @@ public class OpptjeningRestTjeneste {
     @GET
     @Path(PATH)
     @Operation(description = "Hent informasjon om opptjening", tags = "opptjening", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -90,9 +94,23 @@ public class OpptjeningRestTjeneste {
     }
 
     @GET
+    @Path(INNTEKT_PATH)
+    @Operation(description = "Hent informasjon om inntekt", tags = "opptjening", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer inntekter, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public InntekterDto getInntekt(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        Long behandlingId = behandling.getId();
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId));
+        return mapInntekter.hentPgiInntekterFørStp(ref);
+    }
+
+    @GET
     @Path(PATH_V2)
     @Operation(description = "Hent informasjon om opptjening", tags = "opptjening", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningerDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningerDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -103,13 +121,13 @@ public class OpptjeningRestTjeneste {
 
     private OpptjeningDto getOpptjeningFraBehandling(Behandling behandling) {
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-        BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        return dtoMapper.mapTilOpptjening(behandlingReferanse).orElse(null);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        return dtoMapper.mapTilOpptjening(ref).orElse(null);
     }
 
     private OpptjeningerDto getOpptjeningerFraBehandling(Behandling behandling) {
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-        BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        return dtoMapper.mapTilOpptjeninger(behandlingReferanse);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        return dtoMapper.mapTilOpptjeninger(ref);
     }
 }

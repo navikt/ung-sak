@@ -1,5 +1,10 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.kontroll;
 
+import java.util.Optional;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalGruppeWrapper;
@@ -8,11 +13,7 @@ import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjenest
 import no.nav.k9.sak.kontrakt.kontroll.FaresignalgruppeDto;
 import no.nav.k9.sak.kontrakt.kontroll.KontrollresultatDto;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.Optional;
-
-@ApplicationScoped
+@Dependent
 public class KontrollDtoTjeneste {
 
     private RisikovurderingTjeneste risikovurderingTjeneste;
