@@ -2,7 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPeriodeEndring;
@@ -15,7 +15,7 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 /**
  * Lager historikk for endret inntekt og inntektskategori etter oppdatering fra Kalkulus.
  */
-@ApplicationScoped
+@Dependent
 public class BeregningsgrunnlagVerdierHistorikkTjeneste {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;

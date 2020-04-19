@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -46,7 +46,7 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.vedtak.util.Tuple;
 
-@ApplicationScoped
+@Dependent
 public class BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;

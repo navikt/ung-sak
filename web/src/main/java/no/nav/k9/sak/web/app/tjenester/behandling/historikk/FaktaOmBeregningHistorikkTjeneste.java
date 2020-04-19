@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPeriodeEndring;
@@ -13,7 +13,7 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 /**
  * Lager historikk for aksjonspunkter løst i fakta om beregning.
  */
-@ApplicationScoped
+@Dependent
 public class FaktaOmBeregningHistorikkTjeneste {
 
     private HistorikkTjenesteAdapter historikkAdapter;

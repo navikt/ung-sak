@@ -11,7 +11,8 @@ import static no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType.SELVSTENDIG_N
 import static no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType.VURDER_ETTERLØNN_SLUTTPAKKE;
 
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
+
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.ErMottattYtelseEndring;
@@ -30,7 +31,7 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 /**
  * Lager historikk for radioknapp-vurderinger i fakta om beregning.
  */
-@ApplicationScoped
+@Dependent
 public class FaktaOmBeregningVurderingHistorikkTjeneste {
 
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;

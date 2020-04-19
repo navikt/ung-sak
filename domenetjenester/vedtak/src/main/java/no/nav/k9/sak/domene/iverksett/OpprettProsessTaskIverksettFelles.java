@@ -8,7 +8,6 @@ import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
-import no.nav.k9.sak.økonomi.task.SendTilkjentYtelseTask;
 import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;

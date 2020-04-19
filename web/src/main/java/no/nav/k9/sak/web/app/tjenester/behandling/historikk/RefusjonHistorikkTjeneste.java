@@ -1,5 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
+import java.util.List;
+import java.util.Optional;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.RefusjonEndring;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -8,15 +14,10 @@ import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinn
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Historikktjeneste for endring av inntekt
  */
-@ApplicationScoped
+@Dependent
 class RefusjonHistorikkTjeneste {
 
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;

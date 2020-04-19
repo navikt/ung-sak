@@ -297,14 +297,11 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidQueryParams));
 
-        dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
-
         dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidQueryParams));
-        dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", uuidQueryParams));
-        dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
 
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH, "opptjening", uuidQueryParams));
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
+        dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
 
@@ -319,7 +316,30 @@ public class BehandlingDtoTjeneste {
     }
 
     private void leggTilYtelsespesifikkResourceLinks(Behandling behandling, BehandlingDto dto) {
-        leggTilUttakEndepunkt(behandling, dto);
+        var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+
+        var ytelseType = behandling.getFagsakYtelseType();
+        switch (ytelseType) {
+            case FRISINN:
+                // har ikke noe å tilføye
+                break;
+            case OMSORGSPENGER:
+                dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
+                dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
+                break;
+            case PLEIEPENGER_NÆRSTÅENDE:
+            case OPPLÆRINGSPENGER:
+            case PLEIEPENGER_SYKT_BARN:
+                dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", uuidQueryParams));
+                dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
+                leggTilUttakEndepunkt(behandling, dto);
+                break;
+            default:
+                throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
+        }
+        
+        
     }
 
     private void leggTilUttakEndepunkt(Behandling behandling, BehandlingDto dto) {
@@ -334,13 +354,13 @@ public class BehandlingDtoTjeneste {
         var tom = søknadsperioder.map(DatoIntervallEntitet::getTomDato).orElse(fagsak.getPeriode().getTomDato());
 
         var andreSaker = fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId(), fom, tom)
-                .stream().map(Fagsak::getSaksnummer)
-                .collect(Collectors.toList());
+            .stream().map(Fagsak::getSaksnummer)
+            .collect(Collectors.toList());
 
         // uttaksplaner link inkl
         var link = BehandlingDtoUtil.buildLink(UttakRestTjeneste.UTTAKSPLANER, "uttak-uttaksplaner", HttpMethod.GET, ub -> {
             ub.addParameter(BehandlingUuidDto.NAME, behandlingUuid.toString());
-            for(var s: andreSaker) {
+            for (var s : andreSaker) {
                 ub.addParameter("saksnummer", s.getVerdi());
             }
         });

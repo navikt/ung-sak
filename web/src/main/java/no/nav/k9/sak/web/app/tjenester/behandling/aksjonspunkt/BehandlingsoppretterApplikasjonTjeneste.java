@@ -6,7 +6,7 @@ import static no.nav.vedtak.feil.LogLevel.INFO;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -25,7 +25,7 @@ import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 
-@ApplicationScoped
+@Dependent
 public class BehandlingsoppretterApplikasjonTjeneste {
 
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;

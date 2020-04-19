@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -31,7 +31,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-@ApplicationScoped
+@Dependent
 public class AksjonspunktUtlederForVurderArbeidsforhold {
     private static final List<AksjonspunktResultat> INGEN_AKSJONSPUNKTER = emptyList();
 

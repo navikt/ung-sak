@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
 
-@ApplicationScoped
+@Dependent
 public class AksjonspunktutlederForVurderBekreftetOpptjening {
 
     private static final List<AksjonspunktResultat> INGEN_AKSJONSPUNKTER = emptyList();

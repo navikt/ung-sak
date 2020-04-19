@@ -32,9 +32,8 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
-        if(true)  throw new UnsupportedOperationException("Ikke implementert for FRISINN ennå");
-        var f = uttakRepository.hentOppgittUttak(behandlingId);
-        var maksPeriode = f.getMaksPeriode();
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioder(behandlingId);
+        var maksPeriode = søknadsperioder.getMaksPeriode();
         return maksPeriode;
     }
 

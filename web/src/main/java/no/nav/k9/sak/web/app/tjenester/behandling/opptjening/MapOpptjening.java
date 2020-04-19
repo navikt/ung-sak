@@ -1,4 +1,4 @@
-package no.nav.k9.sak.inngangsvilkår.opptjening;
+package no.nav.k9.sak.web.app.tjenester.behandling.opptjening;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -36,18 +36,14 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
-@ApplicationScoped
-public class OpptjeningDtoTjeneste {
+@Dependent
+class MapOpptjening {
     private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
-    OpptjeningDtoTjeneste() {
-        // Hibernate
-    }
-
     @Inject
-    public OpptjeningDtoTjeneste(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
+    MapOpptjening(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
                                  ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                  InntektArbeidYtelseTjeneste iayTjeneste) {
         this.forSaksbehandlingTjeneste = forSaksbehandlingTjeneste;
@@ -62,7 +58,7 @@ public class OpptjeningDtoTjeneste {
      * @return Opptjeningen
      */
     @Deprecated(forRemoval = true)
-    public Optional<OpptjeningDto> mapTilOpptjening(BehandlingReferanse ref) {
+    Optional<OpptjeningDto> mapTilOpptjening(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
         // TODO (K9: Håndter at det er flere ...
         var fastsattOpptjening = forSaksbehandlingTjeneste.hentOpptjeningHvisFinnes(behandlingId)
@@ -99,7 +95,7 @@ public class OpptjeningDtoTjeneste {
         return resultat;
     }
 
-    public OpptjeningerDto mapTilOpptjeninger(BehandlingReferanse ref) {
+    OpptjeningerDto mapTilOpptjeninger(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
 
         var opptjening = new OpptjeningerDto();

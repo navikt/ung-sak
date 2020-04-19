@@ -9,6 +9,9 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+import no.nav.k9.sak.kontrakt.opptjening.InntektDto;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemV2Dto {
 
+    /** @deprecated bruk InntekterDto fra inntekt endepunktet. */
+    @Deprecated(forRemoval = true)
     @JsonProperty(value = "inntekt")
     @Size(max = 200)
     @Valid

@@ -1,6 +1,7 @@
-package no.nav.k9.sak.kontrakt.medlem;
+package no.nav.k9.sak.kontrakt.opptjening;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -14,24 +15,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class InntektDto {
 
-    @JsonProperty(value = "belop")
-    @Min(0)
-    @Max(10 * 1000 * 1000)
-    private Integer belop;
-
     @JsonProperty(value = "fom", required = true)
     @NotNull
     private LocalDate fom;
-
-    @JsonProperty(value = "navn")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
-    private String navn;
 
     @JsonProperty(value = "tom", required = true)
     @NotNull
@@ -42,8 +36,30 @@ public class InntektDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String utbetaler;
 
+    /** Inntektspost - om det er vanlig LØNN, en ytelse, etc.*/
+    @JsonProperty(value = "inntektspostType")
+    private InntektspostType inntektspostType;
+
+    /** Hvis {@link #inntektspostType} er en YTELSE, så angir dette ytelse type. */
+    @JsonProperty(value = "ytelseType")
+    private YtelseType ytelseType;
+
+    @JsonProperty(value = "belop")
+    @Min(0)
+    @Max(10 * 1000 * 1000)
+    private Integer belop;
+
+    /** @deprecated bruk heller #inntektspostType. */
+    @Deprecated(forRemoval = true)
     @JsonProperty(value = "ytelse")
     private Boolean ytelse;
+
+    /** @deprecated skal ikke trenge navn her - er samme som søkers navn. */
+    @Deprecated(forRemoval = true)
+    @JsonProperty(value = "navn")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String navn;
 
     public InntektDto() {
         // trengs for deserialisering av JSON
@@ -96,4 +112,39 @@ public class InntektDto {
     public void setYtelse(Boolean ytelse) {
         this.ytelse = ytelse;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+        var other = this.getClass().cast(obj);
+
+        return Objects.equals(fom, other.fom)
+            && Objects.equals(tom, other.tom)
+            && Objects.equals(utbetaler, other.utbetaler)
+            && Objects.equals(ytelse, other.ytelse)
+            && Objects.equals(navn, other.navn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fom, tom, utbetaler, ytelse, navn);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<utbetaler=" + utbetaler + ", fom=" + fom + ", tom=" + tom + ", ytelse=" + ytelse + ", navn=" + navn + ", beløp=" + belop + ">";
+    }
+
+    public void setInntektspostType(InntektspostType inntektspostType) {
+        this.inntektspostType = inntektspostType;
+
+    }
+
+    public void setYtelseType(YtelseType ytelseType) {
+        this.ytelseType = ytelseType;
+    }
+
 }

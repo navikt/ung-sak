@@ -121,7 +121,6 @@ public class PersonRestTjeneste {
             @ApiResponse(responseCode = "200", description = "Returnerer Medlemskap, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MedlemV2Dto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @Deprecated
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public MedlemV2Dto hentMedlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());

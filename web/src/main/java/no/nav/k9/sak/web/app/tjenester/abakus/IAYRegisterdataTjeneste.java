@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 @SuppressWarnings("unused")
-@ApplicationScoped
+@Dependent
 public class IAYRegisterdataTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(IAYRegisterdataTjeneste.class);
