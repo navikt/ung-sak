@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.TreeSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.felles.Barn;
@@ -40,8 +43,8 @@ class SøknadOversetter {
 
     @Inject
     SøknadOversetter(BehandlingRepositoryProvider repositoryProvider,
-                                           UttakRepository uttakRepository,
-                                           TpsTjeneste tpsTjeneste) {
+                     UttakRepository uttakRepository,
+                     TpsTjeneste tpsTjeneste) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -49,18 +52,22 @@ class SøknadOversetter {
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    void persister(PleiepengerBarnSøknad soknad, Behandling behandling) {
+    void persister(PleiepengerBarnSøknad søknad, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
+        var søknadsperioder = new TreeSet<>(søknad.perioder == null ? Collections.emptySortedSet() : søknad.perioder.keySet());
+        var maksSøknadsperiode = søknadsperioder.isEmpty() ? null : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperioder.first().fraOgMed, søknadsperioder.last().tilOgMed);
+        
         // TODO:
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
+            .medSøknadsperiode(maksSøknadsperiode)
             .medElektroniskRegistrert(elektroniskSøknad)
-            .medMottattDato(soknad.mottattDato.toLocalDate())
+            .medMottattDato(søknad.mottattDato.toLocalDate())
             .medErEndringssøknad(false)
-            .medSøknadsdato(soknad.mottattDato.toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
-            .medSpråkkode(getSpraakValg(soknad.språk));
+            .medSøknadsdato(søknad.mottattDato.toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
+            .medSpråkkode(getSpraakValg(søknad.språk));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
@@ -68,10 +75,10 @@ class SøknadOversetter {
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
         // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
 
-        lagreMedlemskapinfo(soknad.bosteder, behandlingId, soknad.mottattDato.toLocalDate());
-        lagrePleietrengende(fagsakId, soknad.barn);
+        lagreMedlemskapinfo(søknad.bosteder, behandlingId, søknad.mottattDato.toLocalDate());
+        lagrePleietrengende(fagsakId, søknad.barn);
 
-        lagreUttakOgPerioder(soknad, behandlingId, fagsakId);
+        lagreUttakOgPerioder(søknad, behandlingId, fagsakId);
     }
 
     private void lagreUttakOgPerioder(PleiepengerBarnSøknad soknad, final Long behandlingId, Long fagsakId) {

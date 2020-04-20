@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
+package no.nav.k9.sak.web.app.tjenester.behandling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ public class BehandlingsprosessApplikasjonTjenesteTest {
     @Test
     public void skal_returnere_gruppe_når_ikke_er_kjørt() throws Exception {
 
-        BehandlingsprosessApplikasjonTjeneste sut = initSut(GRUPPE_1, taskData);
+        var sut = initSut(GRUPPE_1, taskData);
         Optional<AsyncPollingStatus> status = sut.sjekkProsessTaskPågårForBehandling(behandling, null);
         assertThat(status.get().getStatus()).isEqualTo(Status.PENDING);
 
@@ -45,7 +45,7 @@ public class BehandlingsprosessApplikasjonTjenesteTest {
     public void skal_ikke_returnere_gruppe_når_er_kjørt() throws Exception {
         markerFerdig(taskData);
 
-        BehandlingsprosessApplikasjonTjeneste sut = initSut(GRUPPE_1, taskData);
+        var sut = initSut(GRUPPE_1, taskData);
         Optional<AsyncPollingStatus> status = sut.sjekkProsessTaskPågårForBehandling(behandling, null);
         assertThat(status).isEmpty();
 
@@ -58,7 +58,7 @@ public class BehandlingsprosessApplikasjonTjenesteTest {
     public void skal_kaste_exception_når_task_har_feilet_null_gruppe() throws Exception {
         markerFeilet(taskData);
 
-        BehandlingsprosessApplikasjonTjeneste sut = initSut(GRUPPE_1, taskData);
+        var sut = initSut(GRUPPE_1, taskData);
         Optional<AsyncPollingStatus> status = sut.sjekkProsessTaskPågårForBehandling(behandling, null);
 
         assertThat(status.get().getStatus()).isEqualTo(Status.HALTED);
@@ -68,7 +68,7 @@ public class BehandlingsprosessApplikasjonTjenesteTest {
     public void skal_kaste_exception_når_task_har_feilet_angitt_gruppe() throws Exception {
         markerFeilet(taskData);
 
-        BehandlingsprosessApplikasjonTjeneste sut = initSut(GRUPPE_1, taskData);
+        var sut = initSut(GRUPPE_1, taskData);
 
         Optional<AsyncPollingStatus> status = sut.sjekkProsessTaskPågårForBehandling(behandling, GRUPPE_1);
 
@@ -79,7 +79,7 @@ public class BehandlingsprosessApplikasjonTjenesteTest {
     public void skal_kaste_exception_når_task_neste_kjøring_er_utsatt() throws Exception {
         taskData.medNesteKjøringEtter(LocalDateTime.now().plusHours(1));
 
-        BehandlingsprosessApplikasjonTjeneste sut = initSut(GRUPPE_1, taskData);
+        var sut = initSut(GRUPPE_1, taskData);
         Optional<AsyncPollingStatus> status = sut.sjekkProsessTaskPågårForBehandling(behandling, GRUPPE_1);
 
         assertThat(status.get().getStatus()).isEqualTo(Status.DELAYED);
@@ -100,14 +100,14 @@ public class BehandlingsprosessApplikasjonTjenesteTest {
         pt.setSistKjørt(LocalDateTime.now());
     }
 
-    private BehandlingsprosessApplikasjonTjeneste initSut(String gruppe, ProsessTaskData taskData) {
+    private SjekkProsessering initSut(String gruppe, ProsessTaskData taskData) {
         ProsesseringAsynkTjeneste tjeneste = Mockito.mock(ProsesseringAsynkTjeneste.class);
 
         Map<String, ProsessTaskData> data = new HashMap<>();
         data.put(gruppe, taskData);
 
         Mockito.when(tjeneste.sjekkProsessTaskPågårForBehandling(Mockito.any(), Mockito.any())).thenReturn(data);
-        BehandlingsprosessApplikasjonTjeneste sut = new BehandlingsprosessApplikasjonTjeneste(tjeneste);
+        var sut = new SjekkProsessering(tjeneste);
         return sut;
     }
 }

@@ -12,8 +12,10 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
@@ -21,7 +23,6 @@ import no.nav.k9.sak.kontrakt.behandling.*;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsoppretterApplikasjonTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.feil.Feil;
@@ -80,6 +81,7 @@ public class BehandlingRestTjeneste {
     private FagsakTjeneste fagsakTjeneste;
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
+    private SjekkProsessering sjekkProsessering;
 
     public BehandlingRestTjeneste() {
         // for resteasy
@@ -91,13 +93,15 @@ public class BehandlingRestTjeneste {
                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
                                   FagsakTjeneste fagsakTjeneste,
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste,
-                                  BehandlingDtoTjeneste behandlingDtoTjeneste) {
+                                  BehandlingDtoTjeneste behandlingDtoTjeneste,
+                                  SjekkProsessering sjekkProsessering) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
+        this.sjekkProsessering = sjekkProsessering;
     }
 
     @POST
@@ -115,7 +119,7 @@ public class BehandlingRestTjeneste {
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        Optional<String> gruppeOpt = behandlingsprosessTjeneste.sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling);
+        Optional<String> gruppeOpt = sjekkProsessering.sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling);
 
         // sender alltid til poll status slik at vi får sjekket på utestående prosess tasks også.
         return Redirect.tilBehandlingPollStatus(behandling.getUuid(), gruppeOpt);
@@ -138,7 +142,7 @@ public class BehandlingRestTjeneste {
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
-        Optional<AsyncPollingStatus> prosessTaskGruppePågår = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
+        Optional<AsyncPollingStatus> prosessTaskGruppePågår = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
         return Redirect.tilBehandlingEllerPollStatus(behandling.getUuid(), prosessTaskGruppePågår.orElse(null));
     }
 
@@ -157,7 +161,7 @@ public class BehandlingRestTjeneste {
             throws URISyntaxException {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
-        Optional<AsyncPollingStatus> prosessTaskGruppePågår = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
+        Optional<AsyncPollingStatus> prosessTaskGruppePågår = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
         return Redirect.tilBehandlingEllerPollStatus(behandling.getUuid(), prosessTaskGruppePågår.orElse(null));
     }
 
@@ -173,7 +177,7 @@ public class BehandlingRestTjeneste {
         var behandling = behandlingId != null
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
-        AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
+        AsyncPollingStatus taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
         BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
@@ -187,8 +191,8 @@ public class BehandlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
+        var behandling = sjekkProsessering.hentBehandling(behandlingUuid.getBehandlingUuid());
+        AsyncPollingStatus taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
         var dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
@@ -388,7 +392,7 @@ public class BehandlingRestTjeneste {
         if (behandling.harBehandlingÅrsak(BehandlingÅrsakType.BERØRT_BEHANDLING)) {
             throw BehandlingRestTjenesteFeil.FACTORY.erBerørtBehandling(behandlingId).toException();
         }
-        behandlingsprosessTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId);
+        behandlingsprosessTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId, StartpunktType.KONTROLLER_ARBEIDSFORHOLD.getBehandlingSteg());
         behandling = behandlingsprosessTjeneste.hentBehandling(behandlingId);
         return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.empty());
     }

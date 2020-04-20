@@ -1,7 +1,10 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknad;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -69,7 +72,8 @@ public class SøknadRepository {
     private Optional<SøknadGrunnlagEntitet> hentEksisterendeGrunnlag(Long behandlingId) {
         final TypedQuery<SøknadGrunnlagEntitet> query = entityManager.createQuery(
             "FROM SøknadGrunnlag s " +
-                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", SøknadGrunnlagEntitet.class);
+                "WHERE s.behandlingId = :behandlingId AND s.aktiv = true",
+            SøknadGrunnlagEntitet.class);
 
         query.setParameter("behandlingId", behandlingId);
 
@@ -97,5 +101,29 @@ public class SøknadRepository {
         query.setParameter("fagsakId", fagsakId);
 
         return query.getResultStream().findFirst().map(v -> Long.valueOf(((Number) v).longValue()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Behandling> hentBehandlingerMedOverlappendeSøknaderIPeriode(Long fagsakId, LocalDate pFom, LocalDate pTom) {
+        Objects.requireNonNull(pFom, "pFom");
+        Objects.requireNonNull(pTom, "pTom");
+        Query query = entityManager.createNativeQuery(""
+            + "select gr.behandling_id from GR_SOEKNAD gr "
+            + " inner join SO_SOEKNAD so ON so.id = gr.soeknad_id "
+            + " inner join BEHANDLING b on b.id = gr.behandling_id "
+            + " where b.fagsak_id = :fagsakId"
+            + "   AND so.fom <= :pTom AND so.tom >=pFom"
+            + "   AND gr.aktiv=TRUE");
+        query.setParameter("fagsakId", fagsakId);
+        query.setParameter("pFom", pFom);
+        query.setParameter("pTom", pTom);
+        
+        List<Long> behandlingIder = (List<Long>) query.getResultStream().map(v -> Long.valueOf(((Number) v).longValue())).collect(Collectors.<Long>toList());
+        
+        Query queryBeh = entityManager.createQuery("from Behandling where id in (:ids)")
+                .setParameter("ids", behandlingIder);
+               
+        return queryBeh.getResultList();
+
     }
 }

@@ -1,7 +1,5 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
+package no.nav.k9.sak.behandling.prosessering;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,47 +7,35 @@ import java.util.UUID;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
-import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
+import no.nav.k9.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.registerinnhenting.impl.ÅpneBehandlingForEndringerTask;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
-import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
-import no.nav.k9.sak.web.app.util.LdapUtil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Dependent
 public class BehandlingsprosessApplikasjonTjeneste {
 
-    private static final BehandlingsprosessApplikasjonFeil FEIL = FeilFactory.create(BehandlingsprosessApplikasjonFeil.class);
-
     private BehandlingRepository behandlingRepository;
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private String gruppenavnSaksbehandler;
-    private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
     private HistorikkRepository historikkRepository;
+    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
 
     BehandlingsprosessApplikasjonTjeneste() {
         // for CDI proxy
     }
 
     // test only
-    BehandlingsprosessApplikasjonTjeneste(ProsesseringAsynkTjeneste prosesseringAsynkTjeneste) {
+    public BehandlingsprosessApplikasjonTjeneste(ProsesseringAsynkTjeneste prosesseringAsynkTjeneste) {
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
     }
 
@@ -58,13 +44,11 @@ public class BehandlingsprosessApplikasjonTjeneste {
                                                      BehandlingRepository behandlingRepository,
                                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                                      BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                                     @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler") String gruppenavnSaksbehandler,
                                                      HistorikkRepository historikkRepository) {
 
         Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.behandlingRepository = behandlingRepository;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.gruppenavnSaksbehandler = gruppenavnSaksbehandler;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.historikkRepository = historikkRepository;
     }
@@ -97,29 +81,6 @@ public class BehandlingsprosessApplikasjonTjeneste {
         return prosesseringAsynkTjeneste.asynkStartBehandlingProsess(behandling);
     }
 
-    /** Hvorvidt betingelser for å hente inn registeropplysninger på nytt er oppfylt. */
-    private boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
-        BehandlingStatus behandlingStatus = behandling.getStatus();
-        return BehandlingStatus.UTREDES.equals(behandlingStatus)
-            && !behandling.isBehandlingPåVent()
-            && harRolleSaksbehandler()
-            && behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling);
-    }
-
-    /**
-     * Betinget sjekk om innhent registeropplysninger (conditionally) og kjør prosess. Alt gjøres asynkront i form av prosess tasks.
-     * Intern sjekk på om hvorvidt registeropplysninger må reinnhentes.
-     *
-     * @return optional Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
-     */
-    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
-        if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
-            return Optional.empty();
-        }
-        // henter alltid registeropplysninger og kjører alltid prosess
-        return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
-    }
-
     /**
      * Innhent registeropplysninger og kjør prosess asynkront.
      *
@@ -142,23 +103,6 @@ public class BehandlingsprosessApplikasjonTjeneste {
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
     }
 
-    /** Sjekker om det pågår åpne prosess tasks (for angitt gruppe). Returnerer eventuelt task gruppe for eventuell åpen prosess task gruppe. */
-    public Optional<AsyncPollingStatus> sjekkProsessTaskPågårForBehandling(Behandling behandling, String gruppe) {
-
-        Long behandlingId = behandling.getId();
-
-        Map<String, ProsessTaskData> nesteTask = prosesseringAsynkTjeneste.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
-        return new VurderProsessTaskStatusForPollingApi(FEIL, behandlingId).sjekkStatusNesteProsessTask(gruppe, nesteTask);
-
-    }
-
-    private boolean harRolleSaksbehandler() {
-        String ident = SubjectHandler.getSubjectHandler().getUid();
-        LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-        Collection<String> grupper = LdapUtil.filtrerGrupper(ldapBruker.getGroups());
-        return grupper.contains(gruppenavnSaksbehandler);
-    }
-
     public Behandling hentBehandling(Long behandlingsId) {
         return behandlingRepository.hentBehandling(behandlingsId);
     }
@@ -173,21 +117,24 @@ public class BehandlingsprosessApplikasjonTjeneste {
      *
      * @return ProsessTask gruppe
      */
-    public String asynkTilbakestillOgÅpneBehandlingForEndringer(Long behandlingsId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
+    public String asynkTilbakestillOgÅpneBehandlingForEndringer(Long behandlingId, BehandlingStegType startSteg) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        AktørId aktørId = behandling.getAktørId();
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
         ProsessTaskData åpneBehandlingForEndringerTask = new ProsessTaskData(ÅpneBehandlingForEndringerTask.TASKTYPE);
-        åpneBehandlingForEndringerTask.setBehandling(behandling.getFagsakId(), behandlingsId, behandling.getAktørId().getId());
+        åpneBehandlingForEndringerTask.setProperty(ÅpneBehandlingForEndringerTask.START_STEG, startSteg.getKode());
+        åpneBehandlingForEndringerTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         gruppe.addNesteSekvensiell(åpneBehandlingForEndringerTask);
+        
         ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
-        fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
 
         opprettHistorikkinnslagForBehandlingStartetPåNytt(behandling);
 
-        return prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandlingsId), gruppe);
+        return prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandlingId), gruppe);
     }
 
     /**

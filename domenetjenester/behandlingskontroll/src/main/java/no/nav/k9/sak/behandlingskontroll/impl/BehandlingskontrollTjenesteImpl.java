@@ -199,7 +199,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
         validerOgFlaggStartetProsessering();
         try {
-            doTilbakeføringTilTidligereBehandlngSteg(behandling, modell, tidligereStegType, stegType, startStatusForNyttSteg);
+            doTilbakeføringTilTidligereBehandlingSteg(behandling, modell, tidligereStegType, stegType, startStatusForNyttSteg);
         } finally {
             ferdigProsessering();
         }
@@ -599,7 +599,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
             BehandlingStegStatus.AVBRUTT);
     }
 
-    protected void doTilbakeføringTilTidligereBehandlngSteg(Behandling behandling, BehandlingModell modell,
+    protected void doTilbakeføringTilTidligereBehandlingSteg(Behandling behandling, BehandlingModell modell,
                                                             BehandlingStegType tidligereStegType, BehandlingStegType stegType,
                                                             final BehandlingStegStatus startStatusForNyttSteg) {
         if (behandling.erSaksbehandlingAvsluttet()) {

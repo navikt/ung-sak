@@ -1,15 +1,18 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
@@ -28,6 +31,7 @@ public class SøknadDokumentmottaker {
     private Behandlingsoppretter behandlingsoppretter;
     private LagreSøknad soknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
+    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
 
     SøknadDokumentmottaker() {
         // for CDI proxy
@@ -61,19 +65,54 @@ public class SøknadDokumentmottaker {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknad);
 
-        final Behandling behandling = tilknyttBehandling(saksnummer);
-        soknadOversetter.persister(søknad, behandling);
+        final Behandling behandling = tilknyttBehandling(saksnummer, journalpostId, søknad);
+        return behandling;
+    }
 
+    private Behandling tilknyttBehandling(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknad søknad) {
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
+        var periode = søknad.getSøknadsperiode();
+        var eksisterendeBehandlinger = soknadOversetter.finnesSøknadForSammePeriode(fagsak.getId(), periode.getFraOgMed(), periode.getTilOgMed());
+
+        Behandling behandling;
+        if (eksisterendeBehandlinger.isEmpty()) {
+            behandling = opprettNyBehandling(journalpostId, søknad, fagsak);
+        } else {
+            Optional<Behandling> åpen = finnÅpenBehandling(eksisterendeBehandlinger);
+            if (åpen.isEmpty()) {
+                behandling = opprettEndringBehandling(journalpostId, søknad, fagsak);
+            } else {
+                behandling = åpen.get();
+                leggTilÅpenBehandlingOgTilbakefør(søknad, behandling);
+            }
+        }
+        return behandling;
+    }
+
+    private void leggTilÅpenBehandlingOgTilbakefør(FrisinnSøknad søknad, Behandling behandling) {
+        soknadOversetter.persister(søknad, behandling);
+        behandlingsprosessApplikasjonTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandling.getId(), BehandlingStegType.START_STEG);
+    }
+
+    private Behandling opprettEndringBehandling(JournalpostId journalpostId, FrisinnSøknad søknad, Fagsak fagsak) {
+        Behandling behandling;
+        behandling = behandlingsoppretter.opprettRevurdering(fagsak, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
+        soknadOversetter.persister(søknad, behandling);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
     }
 
-    private Behandling tilknyttBehandling(Saksnummer saksnummer) {
-        // FIXME K9 Legg til logikk for valg av fagsak
-        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
+    private Behandling opprettNyBehandling(JournalpostId journalpostId, FrisinnSøknad søknad, Fagsak fagsak) {
+        Behandling behandling;
+        // førstegangssøknad
+        behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+        soknadOversetter.persister(søknad, behandling);
+        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        return behandling;
+    }
 
-        // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType
-        return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+    private Optional<Behandling> finnÅpenBehandling(List<Behandling> eksisterendeBehandlinger) {
+        return eksisterendeBehandlinger.stream().filter(b -> b.erÅpnetForEndring()).findFirst();
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
