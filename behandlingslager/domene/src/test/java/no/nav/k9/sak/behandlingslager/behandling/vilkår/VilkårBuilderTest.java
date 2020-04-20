@@ -9,6 +9,7 @@ import org.junit.Test;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårBuilderTest {
@@ -137,5 +138,39 @@ public class VilkårBuilderTest {
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+    }
+
+    @Test
+    public void skal_håndtere_tilbakestilling_av_periode() {
+        final var vilkårBuilder = new VilkårBuilder()
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
+
+        final var førsteSkjæringstidspunkt = LocalDate.now();
+        final var sluttFørstePeriode = LocalDate.now().plusMonths(3);
+        final var førstePeriode = vilkårBuilder.hentBuilderFor(førsteSkjæringstidspunkt, sluttFørstePeriode)
+            .medUtfall(Utfall.OPPFYLT);
+        final var andreSkjæringstidspunkt = LocalDate.now().plusMonths(3).plusDays(7);
+        final var andrePeriode = vilkårBuilder.hentBuilderFor(andreSkjæringstidspunkt, LocalDate.now().plusMonths(5))
+            .medUtfall(Utfall.OPPFYLT);
+
+        vilkårBuilder.leggTil(førstePeriode)
+            .leggTil(andrePeriode);
+
+        final var vilkår = vilkårBuilder.build();
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+
+        var vilkårTilbakestilt = new VilkårBuilder(vilkår)
+            .tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(førsteSkjæringstidspunkt, førsteSkjæringstidspunkt.plusMonths(1)))
+            .leggTil(new VilkårPeriodeBuilder()
+                .medPeriode(førsteSkjæringstidspunkt.plusDays(10), førsteSkjæringstidspunkt.plusDays(14))
+                .medUtfall(Utfall.IKKE_VURDERT))
+            .build();
+
+        assertThat(vilkårTilbakestilt).isNotNull();
+        assertThat(vilkårTilbakestilt.getPerioder()).hasSize(3);
     }
 }

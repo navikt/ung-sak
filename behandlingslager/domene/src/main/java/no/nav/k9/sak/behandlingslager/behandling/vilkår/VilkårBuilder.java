@@ -79,9 +79,9 @@ public class VilkårBuilder {
                                                                   LocalDateSegment<WrappedVilkårPeriode> førsteVersjon,
                                                                   LocalDateSegment<WrappedVilkårPeriode> sisteVersjon) {
 
-        if (førsteVersjon == null && sisteVersjon != null) {
+        if ((førsteVersjon == null || førsteVersjon.getValue() == null) && sisteVersjon != null) {
             return lagSegment(di, sisteVersjon.getValue());
-        } else if (sisteVersjon == null && førsteVersjon != null) {
+        } else if ((sisteVersjon == null || sisteVersjon.getValue() == null) && førsteVersjon != null) {
             return lagSegment(di, førsteVersjon.getValue());
         }
 
@@ -102,6 +102,9 @@ public class VilkårBuilder {
     }
 
     private LocalDateSegment<WrappedVilkårPeriode> lagSegment(LocalDateInterval di, WrappedVilkårPeriode siste) {
+        if (siste == null) {
+            return new LocalDateSegment<>(di, null);
+        }
         VilkårPeriodeBuilder builder = new VilkårPeriodeBuilder(siste.getVilkårPeriode());
         var aktivitetPeriode = new WrappedVilkårPeriode(builder.medPeriode(di.getFomDato(), di.getTomDato()).build());
         return new LocalDateSegment<>(di, aktivitetPeriode);
