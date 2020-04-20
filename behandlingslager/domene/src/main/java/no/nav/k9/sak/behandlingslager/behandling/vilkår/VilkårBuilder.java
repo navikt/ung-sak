@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -56,12 +57,21 @@ public class VilkårBuilder {
 
     public VilkårBuilder leggTil(VilkårPeriodeBuilder periodeBuilder) {
         validerBuilder();
-        final var periode = periodeBuilder.build();
-        final var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new WrappedVilkårPeriode(periode));
-        final var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
+        var periode = periodeBuilder.build();
+        var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new WrappedVilkårPeriode(periode));
+        var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
 
         this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
+        return this;
+    }
+
+    public VilkårBuilder tilbakestill(DatoIntervallEntitet periode) {
+        validerBuilder();
+        var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
+        var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
+
+        this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         return this;
     }
 
@@ -95,28 +105,6 @@ public class VilkårBuilder {
         VilkårPeriodeBuilder builder = new VilkårPeriodeBuilder(siste.getVilkårPeriode());
         var aktivitetPeriode = new WrappedVilkårPeriode(builder.medPeriode(di.getFomDato(), di.getTomDato()).build());
         return new LocalDateSegment<>(di, aktivitetPeriode);
-    }
-
-    /**
-     * Benyttes utenfor repository kun for testing
-     *
-     * @return vilkåret
-     */
-    public Vilkår build() {
-        validerBuilder();
-        if (!vilkårTidslinje.isContinuous()) {
-            kobleSammenMellomliggendeVilkårsPerioder();
-        }
-        bygget = true;
-        final var collect = vilkårTidslinje.compress()
-            .toSegments()
-            .stream()
-            .filter(it -> it.getValue() != null)
-            .map(this::opprettHoldKonsistens)
-            .map(WrappedVilkårPeriode::getVilkårPeriode)
-            .collect(Collectors.toList());
-        vilkåret.setPerioder(collect);
-        return vilkåret;
     }
 
     private void kobleSammenMellomliggendeVilkårsPerioder() {
@@ -157,5 +145,27 @@ public class VilkårBuilder {
 
     public VilkårPeriodeBuilder hentBuilderFor(DatoIntervallEntitet periode) {
         return hentBuilderFor(periode.getFomDato(), periode.getTomDato());
+    }
+
+    /**
+     * Benyttes utenfor repository kun for testing
+     *
+     * @return vilkåret
+     */
+    public Vilkår build() {
+        validerBuilder();
+        if (!vilkårTidslinje.isContinuous()) {
+            kobleSammenMellomliggendeVilkårsPerioder();
+        }
+        bygget = true;
+        final var collect = vilkårTidslinje.compress()
+            .toSegments()
+            .stream()
+            .filter(it -> it.getValue() != null)
+            .map(this::opprettHoldKonsistens)
+            .map(WrappedVilkårPeriode::getVilkårPeriode)
+            .collect(Collectors.toList());
+        vilkåret.setPerioder(collect);
+        return vilkåret;
     }
 }

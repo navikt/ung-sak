@@ -22,11 +22,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 class BeregningsgrunnlagVilkårTjeneste {
-
 
     private BehandlingRepository behandlingRepository;
     private VedtakVarselRepository behandlingsresultatRepository;
@@ -45,9 +45,9 @@ class BeregningsgrunnlagVilkårTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, boolean vilkårOppfylt) {
+    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, boolean vilkårOppfylt, DatoIntervallEntitet vilkårsPeriode, DatoIntervallEntitet orginalVilkårsPeriode) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene);
+        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode, orginalVilkårsPeriode);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (!vilkårOppfylt) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
@@ -62,11 +62,11 @@ class BeregningsgrunnlagVilkårTjeneste {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         vilkårBuilder.leggTil(vilkårBuilder
-                .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) - Sett reelle perioder
-                .medUtfall(Utfall.IKKE_OPPFYLT)
-                //FIXME (k9) bestem riktig avslagsårsak og utfall
-                .medMerknad(VilkårUtfallMerknad.VM_1041)
-                .medAvslagsårsak(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
+            .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .medUtfall(Utfall.IKKE_OPPFYLT)
+            //FIXME (k9) bestem riktig avslagsårsak og utfall
+            .medMerknad(VilkårUtfallMerknad.VM_1041)
+            .medAvslagsårsak(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
         builder.leggTil(vilkårBuilder);
 
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -76,11 +76,15 @@ class BeregningsgrunnlagVilkårTjeneste {
     }
 
 
-    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene) {
+    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene, DatoIntervallEntitet vilkårsPeriode, DatoIntervallEntitet orginalVilkårsPeriode) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        vilkårBuilder.leggTil(vilkårBuilder
-                .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME (k9) - Sett reelle perioder
+        if (!vilkårsPeriode.equals(orginalVilkårsPeriode)) {
+            vilkårBuilder.tilbakestill(orginalVilkårsPeriode);
+        }
+        vilkårBuilder
+            .leggTil(vilkårBuilder
+                .hentBuilderFor(vilkårsPeriode)
                 .medUtfall(oppfylt ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)
                 .medMerknad(oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041)
                 .medAvslagsårsak(oppfylt ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
@@ -88,28 +92,28 @@ class BeregningsgrunnlagVilkårTjeneste {
         return builder;
     }
 
-    void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst) {
+    void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
         Optional<VedtakVarsel> behandlingresultatOpt = behandlingsresultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        ryddOppVilkårsvurdering(kontekst, behandlingresultatOpt);
+        ryddOppVilkårsvurdering(kontekst, behandlingresultatOpt, vilkårsPeriode);
         nullstillVedtaksresultat(kontekst, behandlingresultatOpt);
     }
 
-    private void ryddOppVilkårsvurdering(BehandlingskontrollKontekst kontekst, Optional<VedtakVarsel> behandlingresultatOpt) {
+    private void ryddOppVilkårsvurdering(BehandlingskontrollKontekst kontekst, Optional<VedtakVarsel> behandlingresultatOpt, DatoIntervallEntitet vilkårsPeriode) {
         Optional<Vilkårene> vilkårResultatOpt = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         if (vilkårResultatOpt.isEmpty()) {
             return;
         }
         Vilkårene vilkårene = vilkårResultatOpt.get();
         Optional<Vilkår> beregningsvilkåret = vilkårene.getVilkårene().stream()
-                .filter(vilkår -> vilkår.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-                .findFirst();
+            .filter(vilkår -> vilkår.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+            .findFirst();
         if (beregningsvilkåret.isEmpty()) {
             return;
         }
         var behandlingsresultat = behandlingresultatOpt.get();
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);// FIXME (k9) hent ut for perioden(e) som skal evalueres
+        var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(vilkårsPeriode);
         vilkårBuilder.leggTil(vilkårPeriodeBuilder.medUtfall(IKKE_VURDERT));
         var nyttResultat = builder.build();
         behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), behandlingsresultat);

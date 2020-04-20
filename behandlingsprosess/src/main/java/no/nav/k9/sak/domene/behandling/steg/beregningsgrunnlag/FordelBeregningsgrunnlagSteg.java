@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @FagsakYtelseTypeRef("*")
 @BehandlingStegRef(kode = "FORDEL_BERGRUNN")
@@ -27,6 +28,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 @ApplicationScoped
 public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
+    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private BehandletPeriodeTjeneste behandletPeriodeTjeneste;
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private KalkulusTjeneste kalkulusTjeneste;
@@ -38,20 +41,27 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
     @Inject
     public FordelBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
                                         BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                        KalkulusTjeneste kalkulusTjeneste) {
+                                        KalkulusTjeneste kalkulusTjeneste,
+                                        SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                        BehandletPeriodeTjeneste behandletPeriodeTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
+        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.behandletPeriodeTjeneste = behandletPeriodeTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        KalkulusResultat kalkulusResultat = kalkulusTjeneste.fortsettBeregning(BehandlingReferanse.fra(behandling), FORDEL_BEREGNINGSGRUNNLAG);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId()));
+        KalkulusResultat kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, FORDEL_BEREGNINGSGRUNNLAG);
 
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
-        beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, vilkårOppfylt);
+        var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
+        var orginalVilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
+        beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, vilkårOppfylt, vilkårsPeriode, orginalVilkårsPeriode);
 
         if (vilkårOppfylt) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
@@ -70,7 +80,10 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 //                            .anyMatch(a -> !a.erAvbrutt()));
 //            beregningsgrunnlagTjeneste.getRyddBeregningsgrunnlag(kontekst).ryddFordelBeregningsgrunnlagVedTilbakeføring(harAksjonspunktSomErUtførtIUtgang);
         } else {
-            beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst);
+            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+            var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId()));
+            var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
+            beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, vilkårsPeriode);
         }
     }
 }

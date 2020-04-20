@@ -33,9 +33,10 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
 
-        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, new MaksSøktePeriode(omsorgspengerGrunnlagRepository));
+        var maksSøktePeriode = new MaksSøktePeriode(omsorgspengerGrunnlagRepository);
+        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
         vilkårsPeriodisering.put(VilkårType.OPPTJENINGSVILKÅRET, søktePerioder);
-        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder);
+        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, maksSøktePeriode); // Støtter da bare et skjæringstidspunkt per behandling
     }
 
     @Override
