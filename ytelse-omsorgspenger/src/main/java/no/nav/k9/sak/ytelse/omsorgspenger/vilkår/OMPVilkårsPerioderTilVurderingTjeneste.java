@@ -33,6 +33,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
 
+        vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, new MaksSøktePeriode(omsorgspengerGrunnlagRepository));
         vilkårsPeriodisering.put(VilkårType.OPPTJENINGSVILKÅRET, søktePerioder);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder);
     }
