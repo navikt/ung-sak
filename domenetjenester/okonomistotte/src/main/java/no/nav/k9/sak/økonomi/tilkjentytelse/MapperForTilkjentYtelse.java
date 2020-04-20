@@ -7,6 +7,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
@@ -18,6 +21,8 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPer
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class MapperForTilkjentYtelse {
+
+    private static final Logger logger = LoggerFactory.getLogger(MapperForTilkjentYtelse.class);
 
     public MapperForTilkjentYtelse() {
         //hindrer instansiering, som gjør sonarqube glad
@@ -42,6 +47,7 @@ public class MapperForTilkjentYtelse {
             .collect(Collectors.toList());
 
         if (andeler.isEmpty()) {
+            logger.info("Periode {}-{} hadde ingen beløp over 0 og ble ignorert", periode.getBeregningsresultatPeriodeFom(), periode.getBeregningsresultatPeriodeTom());
             return null;
         }
 
