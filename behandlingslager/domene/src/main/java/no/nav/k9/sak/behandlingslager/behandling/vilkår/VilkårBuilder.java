@@ -135,7 +135,7 @@ public class VilkårBuilder {
     public VilkårPeriodeBuilder hentBuilderFor(LocalDate fom, LocalDate tom) {
         validerBuilder();
         final var intersection = vilkårTidslinje.getSegment(new LocalDateInterval(fom, tom));
-        if (intersection == null) {
+        if (intersection == null || intersection.getValue() == null) {
             return new VilkårPeriodeBuilder()
                 .medPeriode(fom, tom);
         }
