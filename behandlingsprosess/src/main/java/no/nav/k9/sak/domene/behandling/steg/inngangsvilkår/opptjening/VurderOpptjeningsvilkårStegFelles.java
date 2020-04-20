@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -25,10 +26,9 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
     protected static final VilkårType OPPTJENINGSVILKÅRET = VilkårType.OPPTJENINGSVILKÅRET;
     private static List<VilkårType> STØTTEDE_VILKÅR = singletonList(OPPTJENINGSVILKÅRET);
-
+    protected BehandlingRepositoryProvider repositoryProvider;
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
-    protected BehandlingRepositoryProvider repositoryProvider;
 
     protected VurderOpptjeningsvilkårStegFelles() {
         // CDI proxy
@@ -52,12 +52,18 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
             List<OpptjeningAktivitet> aktiviteter = mapTilOpptjeningsaktiviteter(mapper, opres);
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), opres.getResultatOpptjent(), aktiviteter);
 
-            if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
-                regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
-            }
+            håndtereAutomatiskAvslag(behandling, regelResultat, periode);
         } else {
             // rydd bort tidligere aktiviteter
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), null, Collections.emptyList());
+        }
+    }
+
+    private void håndtereAutomatiskAvslag(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        if (FagsakYtelseType.PSB.equals(behandling.getFagsakYtelseType())
+            && regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
+            // Legger til aksjonspunspunkt for å håndtere eventuelle 8-47 innvilgelser
+            regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
         }
     }
 
