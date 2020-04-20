@@ -3,7 +3,6 @@ package no.nav.k9.sak.mottak.repo;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -66,19 +65,6 @@ public class MottatteDokumentRepository {
         return entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
             .setParameter(PARAM_KEY, fagsakId)
-            .getResultList();
-    }
-
-    /**
-     * Returnerer liste av MottattDokument.
-     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
-     * ikke å anbefale å bruke.
-     */
-    public List<MottattDokument> hentMottatteDokumentMedForsendelseId(UUID forsendelseId) {
-        String strQueryTemplate = "select m from MottattDokument m where m.forsendelseId = :param";
-        return entityManager.createQuery(
-            strQueryTemplate, MottattDokument.class)
-            .setParameter(PARAM_KEY, forsendelseId)
             .getResultList();
     }
 

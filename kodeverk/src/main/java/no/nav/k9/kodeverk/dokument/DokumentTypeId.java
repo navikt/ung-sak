@@ -24,9 +24,9 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentTypeId implements Kodeverdi {
 
-    INNTEKTSMELDING("INNTEKTSMELDING", "I000067"),
-    LEGEERKLÆRING("LEGEERKLÆRING", "I000023"),
-    UDEFINERT("-", null),
+    INNTEKTSMELDING("INNTEKTSMELDING", "I000067", DokumentGruppe.INNTEKTSMELDING),
+    LEGEERKLÆRING("LEGEERKLÆRING", "I000023", DokumentGruppe.VEDLEGG),
+    UDEFINERT("-", null, null),
     ;
 
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
@@ -50,10 +50,14 @@ public enum DokumentTypeId implements Kodeverdi {
     private String offisiellKode;
 
     private String kode;
+    
+    @JsonIgnore
+    private DokumentGruppe dokumentGruppe;
 
-    private DokumentTypeId(String kode, String offisiellKode) {
+    private DokumentTypeId(String kode, String offisiellKode, DokumentGruppe dokumentGruppe) {
         this.kode = kode;
         this.offisiellKode = offisiellKode;
+        this.dokumentGruppe = dokumentGruppe;
 
     }
 
@@ -94,6 +98,10 @@ public enum DokumentTypeId implements Kodeverdi {
     @Override
     public String getNavn() {
         return getKode();
+    }
+    
+    public DokumentGruppe getDokumentGruppe() {
+        return dokumentGruppe;
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

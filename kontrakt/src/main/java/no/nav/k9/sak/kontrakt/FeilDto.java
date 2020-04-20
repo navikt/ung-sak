@@ -11,6 +11,8 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
@@ -25,6 +27,7 @@ public class FeilDto implements Serializable {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
     private String feilmelding;
 
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "feltFeil")
     @Valid
     @Size(max = 20)
