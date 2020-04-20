@@ -18,8 +18,8 @@ public class FrisinnYtelsesspesifiktGrunnlagMapper implements Beregningsgrunnlag
 
     @Override
     public FrisinnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
-        return new FrisinnGrunnlag();
+        boolean søkerYtelseForFrilans = true;
+        boolean søkerYtelseForNæring = true;
+        return new FrisinnGrunnlag(søkerYtelseForFrilans, søkerYtelseForNæring);
     }
-
-
 }
