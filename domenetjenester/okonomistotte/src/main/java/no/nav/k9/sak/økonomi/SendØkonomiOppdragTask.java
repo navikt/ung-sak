@@ -6,6 +6,9 @@ import java.time.format.DateTimeFormatter;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -20,6 +23,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class SendØkonomiOppdragTask extends BehandlingProsessTask {
 
+    public static final Logger logger = LoggerFactory.getLogger(SendØkonomiOppdragTask.class);
     public static final String TASKTYPE = "iverksetteVedtak.oppdragTilØkonomi";
 
     private K9OppdragRestKlient restKlient;
@@ -41,6 +45,9 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         TilkjentYtelseOppdrag input = tilkjentYtelseTjeneste.hentTilkjentYtelseOppdrag(behandlingId);
         input.getBehandlingsinfo().setBehandlingTidspunkt(hentOpprinneligIverksettelseTidspunkt(prosessTaskData));
+
+        logger.info("Sender {} perioder med tilkjent ytelse for behandlingId={}", input.getTilkjentYtelse().getPerioder().size(), input.getBehandlingId());
+
         restKlient.startIverksettelse(input);
     }
 
