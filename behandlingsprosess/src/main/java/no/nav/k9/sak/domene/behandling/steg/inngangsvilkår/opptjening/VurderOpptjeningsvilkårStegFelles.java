@@ -28,7 +28,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingRepositoryProvider repositoryProvider;
+    protected BehandlingRepositoryProvider repositoryProvider;
 
     protected VurderOpptjeningsvilkårStegFelles() {
         // CDI proxy

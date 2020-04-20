@@ -97,7 +97,12 @@ public class VilkårBuilder {
         return new LocalDateSegment<>(di, aktivitetPeriode);
     }
 
-    Vilkår build() {
+    /**
+     * Benyttes utenfor repository kun for testing
+     *
+     * @return vilkåret
+     */
+    public Vilkår build() {
         validerBuilder();
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
@@ -148,5 +153,9 @@ public class VilkårBuilder {
         }
         return new VilkårPeriodeBuilder(intersection.getValue().getVilkårPeriode())
             .medPeriode(fom, tom);
+    }
+
+    public VilkårPeriodeBuilder hentBuilderFor(DatoIntervallEntitet periode) {
+        return hentBuilderFor(periode.getFomDato(), periode.getTomDato());
     }
 }
