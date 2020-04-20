@@ -43,11 +43,11 @@ public class FeilDto implements Serializable {
     }
 
     public FeilDto(String feilmelding) {
-        this.feilmelding = feilmelding;
+        this(FeilType.GENERELL_FEIL, feilmelding);
     }
 
     public FeilDto(String feilmelding, Collection<FeltFeilDto> feltFeil) {
-        this.feilmelding = feilmelding;
+        this(feilmelding);
         this.feltFeil = feltFeil;
     }
 
