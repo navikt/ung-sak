@@ -71,7 +71,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import no.nav.vedtak.konfig.PropertyUtil;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
@@ -88,6 +88,11 @@ public class BehandlingDtoTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakRepository uttakRepository;
 
+    /**
+     * denne kan overstyres for testing lokalt
+     */
+    private String k9OppdragProxyUrl;
+
     BehandlingDtoTjeneste() {
         // for CDI proxy
     }
@@ -100,7 +105,8 @@ public class BehandlingDtoTjeneste {
                                  UttakRepository uttakRepository,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 VilkårResultatRepository vilkårResultatRepository) {
+                                 VilkårResultatRepository vilkårResultatRepository,
+                                 @KonfigVerdi(value = "k9.oppdrag.proxy.url") String k9OppdragProxyUrl) {
 
         this.fagsakRepository = fagsakRepository;
         this.uttakRepository = uttakRepository;
@@ -110,6 +116,7 @@ public class BehandlingDtoTjeneste {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.k9OppdragProxyUrl = k9OppdragProxyUrl;
     }
 
     private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
@@ -415,9 +422,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        String oppdragOverrideUrl = PropertyUtil.getProperty("fpoppdrag.override.proxy.url");
-        String baseUrl = oppdragOverrideUrl != null ? oppdragOverrideUrl : "/k9/oppdrag/api";
-        return Optional.of(ResourceLink.post(baseUrl + "/simulering/resultat-uten-inntrekk", "simuleringResultat", behandling.getUuid()));
+        return Optional.of(ResourceLink.post(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {

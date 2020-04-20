@@ -26,7 +26,7 @@ public class K9OppdragRestKlient {
     }
 
     @Inject
-    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "url.k9oppdrag") String urlK9Oppdrag) {
+    public K9OppdragRestKlient(OidcRestClient restClient, @KonfigVerdi(value = "k9.oppdrag.direkte.url", defaultVerdi = "http://k9-oppdrag/k9/oppdrag/api") String urlK9Oppdrag) {
         this.restClient = restClient;
         this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
         this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
