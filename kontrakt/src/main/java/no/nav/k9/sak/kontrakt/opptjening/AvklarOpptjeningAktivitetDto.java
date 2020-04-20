@@ -55,7 +55,6 @@ public class AvklarOpptjeningAktivitetDto {
     private LocalDate naringRegistreringsdato;
 
     @JsonProperty(value = "oppdragsgiverOrg")
-    @Size(min = 11, max = 13)
     @Pattern(regexp = "\\d{9}|\\d{13}")
     private String oppdragsgiverOrg;
 
