@@ -117,6 +117,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
             .medElektroniskRegistrert(true)
             .medSøknadsdato(DAGENS_DATO)
             .medMottattDato(DAGENS_DATO)
+            .medSøknadsperiode(DAGENS_DATO, DAGENS_DATO)
             .medErEndringssøknad(erEndringssøknad)
             .build();
         repositoryProvider.getSøknadRepository().lagreOgFlush(behandling, søknad);

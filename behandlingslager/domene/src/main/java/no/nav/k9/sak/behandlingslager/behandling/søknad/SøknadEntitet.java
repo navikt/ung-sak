@@ -75,8 +75,8 @@ public class SøknadEntitet extends BaseEntitet {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
+            @AttributeOverride(name = "fomDato", column = @Column(name = "fom", updatable = false)),
+            @AttributeOverride(name = "tomDato", column = @Column(name = "tom", updatable = false))
     })
     private DatoIntervallEntitet periode;
 
@@ -94,7 +94,7 @@ public class SøknadEntitet extends BaseEntitet {
         this.søknadsdato = søknadMal.getSøknadsdato();
         this.erEndringssøknad = søknadMal.erEndringssøknad();
         this.tilleggsopplysninger = søknadMal.getTilleggsopplysninger();
-
+        this.periode = søknadMal.getSøknadsperiode();
         if (søknadMal.getSpråkkode() != null) {
             this.språkkode = søknadMal.getSpråkkode();
         }
@@ -201,6 +201,7 @@ public class SøknadEntitet extends BaseEntitet {
             && Objects.equals(this.begrunnelseForSenInnsending, other.begrunnelseForSenInnsending)
             && Objects.equals(this.erEndringssøknad, other.erEndringssøknad)
             && Objects.equals(this.språkkode, other.språkkode)
+            && Objects.equals(this.periode, other.periode)
             && Objects.equals(this.elektroniskRegistrert, other.elektroniskRegistrert);
     }
 
@@ -213,6 +214,7 @@ public class SøknadEntitet extends BaseEntitet {
             tilleggsopplysninger,
             språkkode,
             søknadVedlegg,
+            periode,
             begrunnelseForSenInnsending);
     }
 
@@ -225,6 +227,7 @@ public class SøknadEntitet extends BaseEntitet {
             + ", erEndringssøknad=" + erEndringssøknad
             + ", tilleggsopplysninger=" + tilleggsopplysninger
             + ", språkkode=" + språkkode
+            + ", søknadperiode=" + periode
             + ", begrunnelseForSenInnsending=" + begrunnelseForSenInnsending
             + ">"; //$NON-NLS-1$
     }
@@ -291,7 +294,6 @@ public class SøknadEntitet extends BaseEntitet {
             return this;
         }
 
-
         public Builder medSøknadsperiode(DatoIntervallEntitet søknadsperiode) {
             søknadMal.setSøknadsperiode(søknadsperiode);
             return this;
@@ -299,6 +301,10 @@ public class SøknadEntitet extends BaseEntitet {
 
         public SøknadEntitet build() {
             return søknadMal;
+        }
+
+        public Builder medSøknadsperiode(LocalDate fom, LocalDate tom) {
+            return medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         }
     }
 

@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverte
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.konfig.Tid;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
@@ -244,6 +245,8 @@ public class Fagsak extends BaseEntitet {
     }
 
     public void setPeriode(LocalDate fom, LocalDate tom) {
-        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom).toRange();
+        this.periode = DatoIntervallEntitet
+            .fraOgMedTilOgMed(fom == null ? Tid.TIDENES_BEGYNNELSE : fom, tom == null ? Tid.TIDENES_ENDE : tom)
+            .toRange();
     }
 }

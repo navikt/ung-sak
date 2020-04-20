@@ -52,7 +52,6 @@ public class BehandlingsgrunnlagEntitetTest {
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
     private final PersonopplysningRepository personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
 
-
     private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private SøknadRepository søknadRepository = repositoryProvider.getSøknadRepository();
 
@@ -70,10 +69,10 @@ public class BehandlingsgrunnlagEntitetTest {
         Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = behandlingBuilder.build();
 
-
         lagreBehandling(behandling);
 
         SøknadEntitet.Builder søknadBuilder = new SøknadEntitet.Builder()
+            .medSøknadsperiode(søknadsdato, søknadsdato)
             .medSøknadsdato(søknadsdato);
         søknadRepository.lagreOgFlush(behandling, søknadBuilder.build());
         repository.flush();
@@ -171,20 +170,19 @@ public class BehandlingsgrunnlagEntitetTest {
                 .medFødselsdato(fødselsdato)
                 .medDødsdato(dødsdatoForelder1)
                 .medSivilstand(SivilstandType.GIFT)
-                .medRegion(Region.NORDEN)
-        ).leggTil(informasjonBuilder
-            .getPersonstatusBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1)).medPersonstatus(PersonstatusType.BOSA)
-        ).leggTil(informasjonBuilder
-        .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), AdresseType.BOSTEDSADRESSE)
-        .medAdresselinje1("Testadresse")
-        .medLand("NOR").medPostnummer("1234")
-        ).leggTil(informasjonBuilder
-            .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND)
-            .medAdresselinje1("Testadresse")
-            .medLand("Sverige").medPostnummer("1234")
-        ).leggTil(informasjonBuilder
-            .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), Landkoder.NOR, Region.NORDEN)
-        );
+                .medRegion(Region.NORDEN))
+            .leggTil(informasjonBuilder
+                .getPersonstatusBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1)).medPersonstatus(PersonstatusType.BOSA))
+            .leggTil(informasjonBuilder
+                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), AdresseType.BOSTEDSADRESSE)
+                .medAdresselinje1("Testadresse")
+                .medLand("NOR").medPostnummer("1234"))
+            .leggTil(informasjonBuilder
+                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND)
+                .medAdresselinje1("Testadresse")
+                .medLand("Sverige").medPostnummer("1234"))
+            .leggTil(informasjonBuilder
+                .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), Landkoder.NOR, Region.NORDEN));
 
         personopplysningRepository.lagre(behandlingId, informasjonBuilder);
         repository.flushAndClear();

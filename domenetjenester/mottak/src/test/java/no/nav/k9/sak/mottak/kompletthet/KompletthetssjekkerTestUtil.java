@@ -58,10 +58,11 @@ public class KompletthetssjekkerTestUtil {
         fagsakRepository.oppdaterFagsakStatus(behandling.getFagsakId(), FagsakStatus.LØPENDE);
     }
 
-    public void byggOgLagreSøknadMed(Behandling behandling, boolean erEndringssøknad, LocalDate søknadsDato) {
+    public void byggOgLagreSøknadMed(Behandling behandling, boolean erEndringssøknad, LocalDate søknadsdato) {
         SøknadEntitet søknad = new SøknadEntitet.Builder().medElektroniskRegistrert(true)
-            .medSøknadsdato(søknadsDato)
+            .medSøknadsdato(søknadsdato)
             .medMottattDato(LocalDate.now())
+            .medSøknadsperiode(søknadsdato, søknadsdato)
             .medErEndringssøknad(erEndringssøknad)
             .build();
         repositoryProvider.getSøknadRepository().lagreOgFlush(behandling, søknad);
@@ -72,6 +73,7 @@ public class KompletthetssjekkerTestUtil {
         SøknadEntitet søknad = new SøknadEntitet.Builder().medElektroniskRegistrert(true)
             .medSøknadsdato(søknadsdato)
             .medMottattDato(søknadsdato)
+            .medSøknadsperiode(søknadsdato, søknadsdato)
             .medErEndringssøknad(false)
             .build();
         repositoryProvider.getSøknadRepository().lagreOgFlush(behandling, søknad);

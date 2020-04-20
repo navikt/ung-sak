@@ -102,8 +102,10 @@ public class SøknadRepositoryImplTest {
     }
 
     private SøknadEntitet opprettSøknad(boolean erEndringssøknad) {
+        LocalDate søknadsdato = LocalDate.now().minusDays(1);
         return new SøknadEntitet.Builder()
-            .medSøknadsdato(LocalDate.now().minusDays(1))
+            .medSøknadsperiode(søknadsdato.minusMonths(1), søknadsdato)
+            .medSøknadsdato(søknadsdato)
             .medErEndringssøknad(erEndringssøknad)
             .build();
     }
