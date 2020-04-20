@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -40,6 +40,7 @@ public class BehandlingBackendRestTjeneste {
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
+    private SjekkProsessering sjekkProsessering;
 
     public BehandlingBackendRestTjeneste() {
         // for resteasy
@@ -47,9 +48,11 @@ public class BehandlingBackendRestTjeneste {
 
     @Inject
     public BehandlingBackendRestTjeneste(BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-                                         BehandlingDtoTjeneste behandlingDtoTjeneste) {
+                                         BehandlingDtoTjeneste behandlingDtoTjeneste,
+                                         SjekkProsessering sjekkProsessering) {
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
+        this.sjekkProsessering = sjekkProsessering;
     }
 
     @GET
@@ -63,7 +66,7 @@ public class BehandlingBackendRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingResultatForBackend(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        AsyncPollingStatus taskStatus = behandlingsprosessTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
+        AsyncPollingStatus taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null).orElse(null);
         BehandlingDto dto = behandlingDtoTjeneste.lagUtvidetBehandlingDto(behandling, taskStatus);
         ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import com.vladmihalcea.hibernate.type.range.Range;
+
 /**
  * Hibernate entitet som modellerer et dato intervall.
  */
@@ -64,6 +66,29 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
     @Override
     protected DatoIntervallEntitet lagNyPeriode(LocalDate fomDato, LocalDate tomDato) {
         return fraOgMedTilOgMed(fomDato, tomDato);
+    }
+
+    public static DatoIntervallEntitet fra(Range<LocalDate> periode) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(
+            periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.lower(),
+            periode.upper() == null ? DatoIntervallEntitet.TIDENES_ENDE : periode.upper());
+    }
+
+    public Range<LocalDate> toRange() {
+        var fom = fomDato == null || DatoIntervallEntitet.TIDENES_BEGYNNELSE.equals(fomDato) ? null : fomDato;
+        var tom = tomDato == null || DatoIntervallEntitet.TIDENES_ENDE.equals(tomDato) ? null : tomDato;
+
+        if (fom != null && tom != null) {
+            return Range.closed(fom, tom);
+        } else if (fom == null) {
+            if (tom != null) {
+                return Range.infiniteClosed(tom);
+            } else {
+                return Range.infinite(LocalDate.class);
+            }
+        } else {
+            return Range.closedInfinite(fom);
+        }
     }
 
 }

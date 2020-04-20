@@ -66,6 +66,16 @@ public class UttakGrunnlag extends BaseEntitet {
         this(behandlingId, oppgittUttak, null, søknadsperioder, ferie, tilsynsordning);
     }
 
+    /** Opprett uten fastsattUttak - kommer fra saksbehandler senere. */
+    public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, Søknadsperioder søknadsperioder) {
+        this(behandlingId, oppgittUttak, null, søknadsperioder, null, null);
+    }
+    
+    /** Opprett med oppgitt og fastsatt uttak (kan være samme) */
+    public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder) {
+        this(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder, null, null);
+    }
+    
     public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder, Ferie ferie, OppgittTilsynsordning tilsynsordning) {
         this.behandlingId = behandlingId;
         this.oppgittUttak = oppgittUttak;

@@ -6,9 +6,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,6 +28,7 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.SpråkKodeverdiConverter;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Søknad")
 @Table(name = "SO_SOEKNAD")
@@ -56,7 +60,7 @@ public class SøknadEntitet extends BaseEntitet {
     @Column(name = "sprak_kode", nullable = false)
     private Språkkode språkkode = Språkkode.UDEFINERT;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "søknad")
+    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "søknad")
     private Set<SøknadVedleggEntitet> søknadVedlegg = new HashSet<>(2);
 
     @Column(name = "begrunnelse_for_sen_innsending")
@@ -66,8 +70,15 @@ public class SøknadEntitet extends BaseEntitet {
     private boolean erEndringssøknad;
 
     @Convert(converter = RelasjonsRolleTypeKodeverdiConverter.class)
-    @Column(name="bruker_rolle", nullable = false)
+    @Column(name = "bruker_rolle", nullable = false)
     private RelasjonsRolleType brukerRolle = RelasjonsRolleType.UDEFINERT;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "fomDato", column = @Column(name = "fom", updatable = false)),
+            @AttributeOverride(name = "tomDato", column = @Column(name = "tom", updatable = false))
+    })
+    private DatoIntervallEntitet periode;
 
     SøknadEntitet() {
         // hibernate
@@ -83,7 +94,7 @@ public class SøknadEntitet extends BaseEntitet {
         this.søknadsdato = søknadMal.getSøknadsdato();
         this.erEndringssøknad = søknadMal.erEndringssøknad();
         this.tilleggsopplysninger = søknadMal.getTilleggsopplysninger();
-
+        this.periode = søknadMal.getSøknadsperiode();
         if (søknadMal.getSpråkkode() != null) {
             this.språkkode = søknadMal.getSpråkkode();
         }
@@ -98,7 +109,6 @@ public class SøknadEntitet extends BaseEntitet {
     public Long getId() {
         return id;
     }
-
 
     public LocalDate getSøknadsdato() {
         return søknadsdato;
@@ -116,7 +126,6 @@ public class SøknadEntitet extends BaseEntitet {
         this.elektroniskRegistrert = elektroniskRegistrert;
     }
 
-
     public LocalDate getMottattDato() {
         return mottattDato;
     }
@@ -125,7 +134,6 @@ public class SøknadEntitet extends BaseEntitet {
         this.mottattDato = mottattDato;
     }
 
-
     public String getTilleggsopplysninger() {
         return tilleggsopplysninger;
     }
@@ -133,7 +141,6 @@ public class SøknadEntitet extends BaseEntitet {
     void setTilleggsopplysninger(String tilleggsopplysninger) {
         this.tilleggsopplysninger = tilleggsopplysninger;
     }
-
 
     public Språkkode getSpråkkode() {
         return språkkode;
@@ -147,7 +154,6 @@ public class SøknadEntitet extends BaseEntitet {
         return Collections.unmodifiableSet(søknadVedlegg);
     }
 
-
     public String getBegrunnelseForSenInnsending() {
         return begrunnelseForSenInnsending;
     }
@@ -155,7 +161,6 @@ public class SøknadEntitet extends BaseEntitet {
     void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
         this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
     }
-
 
     public boolean erEndringssøknad() {
         return erEndringssøknad;
@@ -169,11 +174,17 @@ public class SøknadEntitet extends BaseEntitet {
         this.brukerRolle = brukerRolle;
     }
 
+    void setSøknadsperiode(DatoIntervallEntitet søknadsperiode) {
+        this.periode = søknadsperiode;
+    }
+
+    public DatoIntervallEntitet getSøknadsperiode() {
+        return periode;
+    }
 
     public RelasjonsRolleType getRelasjonsRolleType() {
         return brukerRolle;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -184,40 +195,41 @@ public class SøknadEntitet extends BaseEntitet {
         }
         SøknadEntitet other = (SøknadEntitet) obj;
         return Objects.equals(this.mottattDato, other.mottattDato)
-                && Objects.equals(this.søknadsdato, other.søknadsdato)
-                && Objects.equals(this.tilleggsopplysninger, other.tilleggsopplysninger)
-                && Objects.equals(this.søknadVedlegg, other.søknadVedlegg)
-                && Objects.equals(this.begrunnelseForSenInnsending, other.begrunnelseForSenInnsending)
-                && Objects.equals(this.erEndringssøknad, other.erEndringssøknad)
-                && Objects.equals(this.språkkode, other.språkkode)
-                && Objects.equals(this.elektroniskRegistrert, other.elektroniskRegistrert);
+            && Objects.equals(this.søknadsdato, other.søknadsdato)
+            && Objects.equals(this.tilleggsopplysninger, other.tilleggsopplysninger)
+            && Objects.equals(this.søknadVedlegg, other.søknadVedlegg)
+            && Objects.equals(this.begrunnelseForSenInnsending, other.begrunnelseForSenInnsending)
+            && Objects.equals(this.erEndringssøknad, other.erEndringssøknad)
+            && Objects.equals(this.språkkode, other.språkkode)
+            && Objects.equals(this.periode, other.periode)
+            && Objects.equals(this.elektroniskRegistrert, other.elektroniskRegistrert);
     }
-
 
     @Override
     public int hashCode() {
-        return Objects.hash(elektroniskRegistrert, 
-            mottattDato, 
+        return Objects.hash(elektroniskRegistrert,
+            mottattDato,
             erEndringssøknad,
-            søknadsdato, 
-            tilleggsopplysninger, 
-            språkkode, 
-            søknadVedlegg, 
+            søknadsdato,
+            tilleggsopplysninger,
+            språkkode,
+            søknadVedlegg,
+            periode,
             begrunnelseForSenInnsending);
     }
-
 
     @Override
     public String toString() {
         return getClass().getSimpleName() +
-                "<termindato=" + søknadsdato //$NON-NLS-1$
-                + ", elektroniskRegistrert=" + elektroniskRegistrert
-                + ", mottattDato=" + mottattDato
-                + ", erEndringssøknad=" + erEndringssøknad
-                + ", tilleggsopplysninger=" + tilleggsopplysninger
-                + ", språkkode=" + språkkode
-                + ", begrunnelseForSenInnsending=" + begrunnelseForSenInnsending
-                + ">"; //$NON-NLS-1$
+            "<termindato=" + søknadsdato //$NON-NLS-1$
+            + ", elektroniskRegistrert=" + elektroniskRegistrert
+            + ", mottattDato=" + mottattDato
+            + ", erEndringssøknad=" + erEndringssøknad
+            + ", tilleggsopplysninger=" + tilleggsopplysninger
+            + ", språkkode=" + språkkode
+            + ", søknadperiode=" + periode
+            + ", begrunnelseForSenInnsending=" + begrunnelseForSenInnsending
+            + ">"; //$NON-NLS-1$
     }
 
     public static class Builder {
@@ -282,8 +294,18 @@ public class SøknadEntitet extends BaseEntitet {
             return this;
         }
 
+        public Builder medSøknadsperiode(DatoIntervallEntitet søknadsperiode) {
+            søknadMal.setSøknadsperiode(søknadsperiode);
+            return this;
+        }
+
         public SøknadEntitet build() {
             return søknadMal;
         }
+
+        public Builder medSøknadsperiode(LocalDate fom, LocalDate tom) {
+            return medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        }
     }
+
 }

@@ -1,6 +1,6 @@
-package no.nav.k9.sak.domene.registerinnhenting.impl;
+package no.nav.k9.sak.behandling.prosessering.task;
 
-import static no.nav.k9.sak.domene.registerinnhenting.impl.ÅpneBehandlingForEndringerTask.TASKTYPE;
+import static no.nav.k9.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask.TASKTYPE;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -16,7 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -26,6 +26,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class ÅpneBehandlingForEndringerTask extends BehandlingProsessTask {
     public static final String TASKTYPE = "behandlingskontroll.åpneBehandlingForEndringer";
+    
+    public static final String START_STEG = "behandlingskontroll.startSteg";
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -45,19 +47,20 @@ public class ÅpneBehandlingForEndringerTask extends BehandlingProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
-        StartpunktType startpunkt = StartpunktType.KONTROLLER_ARBEIDSFORHOLD;
+        var steg = BehandlingStegType.fraKode(prosessTaskData.getPropertyValue(START_STEG));
+        
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        reaktiverAksjonspunkter(kontekst, behandling, startpunkt);
+        reaktiverAksjonspunkter(kontekst, behandling, steg);
         behandling.setÅpnetForEndring(true);
-        behandlingskontrollTjeneste.behandlingTilbakeføringHvisTidligereBehandlingSteg(kontekst, startpunkt.getBehandlingSteg());
+        behandlingskontrollTjeneste.behandlingTilbakeføringHvisTidligereBehandlingSteg(kontekst, steg);
         if (behandling.isBehandlingPåVent()) {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
         }
     }
 
-    private void reaktiverAksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling, StartpunktType startpunkt) {
+    private void reaktiverAksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingStegType steg) {
         Set<String> aksjonspunkterFraOgMedStartpunkt = behandlingskontrollTjeneste
-            .finnAksjonspunktDefinisjonerFraOgMed(behandling, startpunkt.getBehandlingSteg(), true);
+            .finnAksjonspunktDefinisjonerFraOgMed(behandling, steg, true);
 
         behandling.getAksjonspunkter().stream()
             .filter(ap -> aksjonspunkterFraOgMedStartpunkt.contains(ap.getAksjonspunktDefinisjon().getKode()))

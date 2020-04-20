@@ -131,5 +131,5 @@ public class ProsesseringAsynkTjeneste {
         gruppe.addNesteSekvensiell(taskData);
         return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()), gruppe);
     }
-
+    
 }

@@ -157,6 +157,10 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
     public boolean overlapper(AbstractLocalDateInterval periode) {
         return tilIntervall().overlaps(getIntervall(periode.getFomDato(), periode.getTomDato()));
     }
+    
+    public boolean overlapper(LocalDate fom, LocalDate tom) {
+        return tilIntervall().overlaps(getIntervall(fom, tom));
+    }
 
     public boolean hengerSammen(AbstractLocalDateInterval periode) {
         return tilIntervall().overlaps(getIntervall(periode.getFomDato(), periode.getTomDato()));

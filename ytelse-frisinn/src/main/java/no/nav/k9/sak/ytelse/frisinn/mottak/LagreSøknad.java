@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -9,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.søknad.felles.Språk;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
@@ -40,24 +44,31 @@ class LagreSøknad {
         this.lagreOppgittOpptjening = lagreOppgittOpptjening;
     }
 
-    void persister(FrisinnSøknad soknad, Behandling behandling) {
+    void persister(FrisinnSøknad søknad, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
+        var søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(søknad.getSøknadsperiode().getFraOgMed(), søknad.getSøknadsperiode().getTilOgMed());
 
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
+            .medSøknadsperiode(søknadsperiode)
             .medElektroniskRegistrert(elektroniskSøknad)
-            .medMottattDato(soknad.getMottattDato().toLocalDate())
+            .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false) // støtter ikke endringssønader p.t.
-            .medSøknadsdato(soknad.getMottattDato().toLocalDate())
-            .medSpråkkode(getSpraakValg(soknad.getSpråk()));
+            .medSøknadsdato(søknad.getMottattDato().toLocalDate())
+            .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
-        lagrePerioder(soknad, behandlingId, fagsakId);
-        
-        lagreOppgittOpptjening.lagreOpptjening(behandling, soknad.getInntekter(), soknad.getMottattDato());
+        lagrePerioder(søknad, behandlingId, fagsakId);
 
+        lagreOppgittOpptjening.lagreOpptjening(behandling, søknad.getInntekter(), søknad.getMottattDato());
+
+    }
+
+    List<Behandling> finnesSøknadForSammePeriode(Long fagsakId, LocalDate fom, LocalDate tom) {
+        var behandlinger = søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsakId, fom, tom);
+        return behandlinger;
     }
 
     private void lagrePerioder(FrisinnSøknad soknad, final Long behandlingId, Long fagsakId) {

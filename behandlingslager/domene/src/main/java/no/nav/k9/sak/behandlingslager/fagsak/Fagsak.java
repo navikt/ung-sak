@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverte
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.konfig.Tid;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
@@ -119,9 +120,7 @@ public class Fagsak extends BaseEntitet {
     }
 
     public DatoIntervallEntitet getPeriode() {
-        return DatoIntervallEntitet.fraOgMedTilOgMed(
-            periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.lower(),
-            periode.upper() == null ? DatoIntervallEntitet.TIDENES_ENDE : periode.upper());
+        return DatoIntervallEntitet.fra(periode);
     }
 
     public Long getId() {
@@ -246,16 +245,8 @@ public class Fagsak extends BaseEntitet {
     }
 
     public void setPeriode(LocalDate fom, LocalDate tom) {
-        if (fom != null && tom != null) {
-            this.periode = Range.closed(fom, tom);
-        } else if (fom == null) {
-            if (tom != null) {
-                this.periode = Range.infiniteClosed(tom);
-            } else {
-                this.periode = Range.infinite(LocalDate.class);
-            }
-        } else {
-            this.periode = Range.closedInfinite(fom);
-        }
+        this.periode = DatoIntervallEntitet
+            .fraOgMedTilOgMed(fom == null ? Tid.TIDENES_BEGYNNELSE : fom, tom == null ? Tid.TIDENES_ENDE : tom)
+            .toRange();
     }
 }

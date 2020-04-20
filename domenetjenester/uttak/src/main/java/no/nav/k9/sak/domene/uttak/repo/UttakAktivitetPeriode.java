@@ -104,8 +104,14 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
         validerTilstand();
     }
 
-    public UttakAktivitetPeriode(DatoIntervallEntitet periode) {
-        this.periode = periode;
+    public UttakAktivitetPeriode(UttakArbeidType aktivitetType, DatoIntervallEntitet periode) {
+        this.periode = Objects.requireNonNull(periode, "periode");
+        this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
+    }
+    
+    public UttakAktivitetPeriode(UttakArbeidType aktivitetType, LocalDate fom, LocalDate tom) {
+        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
     }
 
     @Override
