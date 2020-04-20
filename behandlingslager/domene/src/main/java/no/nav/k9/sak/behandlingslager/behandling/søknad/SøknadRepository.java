@@ -112,7 +112,7 @@ public class SøknadRepository {
             + " inner join SO_SOEKNAD so ON so.id = gr.soeknad_id "
             + " inner join BEHANDLING b on b.id = gr.behandling_id "
             + " where b.fagsak_id = :fagsakId"
-            + "   AND so.fom <= :pTom AND so.tom >=pFom"
+            + "   AND so.fom <= :pTom AND so.tom >= :pFom"
             + "   AND gr.aktiv=TRUE");
         query.setParameter("fagsakId", fagsakId);
         query.setParameter("pFom", pFom);

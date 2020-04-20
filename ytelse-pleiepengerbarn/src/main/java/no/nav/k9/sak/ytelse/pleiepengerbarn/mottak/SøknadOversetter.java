@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.TreeSet;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -28,7 +28,7 @@ import no.nav.k9.søknad.felles.Språk;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 import no.nav.vedtak.konfig.Tid;
 
-@ApplicationScoped
+@Dependent
 class SøknadOversetter {
 
     private SøknadRepository søknadRepository;

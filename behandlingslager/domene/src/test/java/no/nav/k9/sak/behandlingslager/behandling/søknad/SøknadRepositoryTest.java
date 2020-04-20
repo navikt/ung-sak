@@ -1,8 +1,9 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknad;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -16,9 +17,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
-public class SøknadRepositoryImplTest {
+public class SøknadRepositoryTest {
 
     @Rule
     public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
@@ -26,6 +28,8 @@ public class SøknadRepositoryImplTest {
     private SøknadRepository søknadRepository;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
+    
+    private DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1), LocalDate.now().minusDays(1));
 
     @Before
     public void setup() {
@@ -59,6 +63,24 @@ public class SøknadRepositoryImplTest {
         assertThat(endringssøknad).isPresent();
         assertThat(endringssøknad2).isPresent();
         assertThat(endringssøknad.get()).isNotEqualTo(endringssøknad2.get());
+    }
+    
+    @Test
+    public void skal_finne_søknad_med_overlapp() {
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
+        fagsakRepository.opprettNy(fagsak);
+
+        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        behandlingRepository.lagre(behandling, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling));
+
+        SøknadEntitet søknad = opprettSøknad(false);
+        søknadRepository.lagreOgFlush(behandling, søknad);
+        
+        var dato = søknadsperiode.getTomDato().minusDays(1);
+        List<Behandling> behandlinger = søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), dato, dato);
+        
+        assertThat(behandlinger).containsOnly(behandling);
+
     }
 
     @Test
@@ -102,10 +124,9 @@ public class SøknadRepositoryImplTest {
     }
 
     private SøknadEntitet opprettSøknad(boolean erEndringssøknad) {
-        LocalDate søknadsdato = LocalDate.now().minusDays(1);
         return new SøknadEntitet.Builder()
-            .medSøknadsperiode(søknadsdato.minusMonths(1), søknadsdato)
-            .medSøknadsdato(søknadsdato)
+            .medSøknadsperiode(søknadsperiode)
+            .medSøknadsdato(søknadsperiode.getTomDato().plusDays(1))
             .medErEndringssøknad(erEndringssøknad)
             .build();
     }
