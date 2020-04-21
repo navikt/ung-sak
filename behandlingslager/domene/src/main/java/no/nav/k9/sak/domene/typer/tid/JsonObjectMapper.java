@@ -45,7 +45,7 @@ public class JsonObjectMapper {
 
     public static String getJson(Object object) throws IOException {
         Writer jsonWriter = new StringWriter();
-        OM.writeValue(jsonWriter, object);
+        OM.writerWithDefaultPrettyPrinter().writeValue(jsonWriter, object);
         jsonWriter.flush();
         return jsonWriter.toString();
     }

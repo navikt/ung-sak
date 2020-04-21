@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -10,6 +11,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
@@ -19,6 +23,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.uttak.FraværPeriodeOmsorgspenger;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
@@ -38,6 +43,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient
 @ApplicationScoped
 @Default
 public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(ÅrskvantumTjenesteImpl.class);
 
     private final MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
@@ -121,6 +128,12 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                     arbeidsforholdId));
             }
             årskvantumRequest.getUttaksperioder().add(uttaksperiodeOmsorgspenger);
+        }
+        try {
+            log.info("Sender request til årskvantum" +
+                "\nrequest='{}'", JsonObjectMapper.getJson(årskvantumRequest));
+        } catch (IOException e) {
+            log.info("Feilet i serialisering av årskvantum request: " + årskvantumRequest);
         }
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
     }
