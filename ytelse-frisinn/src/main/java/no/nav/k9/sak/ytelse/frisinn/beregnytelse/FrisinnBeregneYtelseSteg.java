@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
-import java.util.UUID;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -21,10 +19,13 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "BERYT")
@@ -38,6 +39,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private UttakRepository uttakRepository;
 
     protected FrisinnBeregneYtelseSteg() {
         // for proxy
@@ -45,16 +47,18 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
     @Inject
     public FrisinnBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 BeregningTjeneste kalkulusTjeneste,
-                                 FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
+                                    BeregningTjeneste kalkulusTjeneste,
+                                    FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
+                                    SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                    @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
+                                    UttakRepository uttakRepository) {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
+        this.uttakRepository = uttakRepository;
     }
 
     @Override
@@ -63,14 +67,14 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        UUID behandlingUuid = ref.getBehandlingUuid();
-        
+
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
-        if(true)  throw new UnsupportedOperationException("Ikke implementert steg BERYT for FRISINN ennå");
-        
+        UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
+        UttakResultat uttakResultat = new UttakResultat(ref.getFagsakYtelseType(), MapUttakFrisinnTilRegel.map(fastsattUttak));
+
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, null);
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
