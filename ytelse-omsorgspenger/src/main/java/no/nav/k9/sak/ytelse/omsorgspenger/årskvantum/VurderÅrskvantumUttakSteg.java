@@ -1,20 +1,33 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.*;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import java.io.IOException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
+import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP")
 public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
+
+    private static final Logger log = LoggerFactory.getLogger(VurderÅrskvantumUttakSteg.class);
 
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste stpTjeneste;
@@ -47,6 +60,12 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         if (OmsorgspengerUtfall.INNVILGET.equals(årskvantumResultat.hentSamletUtfall())) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else {
+            try {
+                log.info("Setter behandling på vent etter følgende respons fra årskvantum" +
+                    "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat));
+            } catch (IOException e) {
+                log.info("Feilet i serialisering av årskvantum respons: " + årskvantumResultat);
+            }
             //TODO 1 lage aksjonspunkt for manglende årskvantum.
             return BehandleStegResultat.settPåVent();
 
