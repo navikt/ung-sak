@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
+import java.util.Objects;
+
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -39,5 +41,23 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
             return this.getClass().getDeclaredAnnotation(JsonTypeName.class).value();
         }
         throw new IllegalStateException("Utvikler-feil:" + this.getClass().getSimpleName() + " er uten JsonTypeName annotation.");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj==this) return true;
+        if(obj ==null || obj.getClass()!=this.getClass()) return false;
+        var other = (OverstyringAksjonspunktDto) obj;
+        return Objects.equals(getKode(), other.getKode());
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(getKode());
+    }
+    
+    @Override
+    public String toString() {
+        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ">";
     }
 }

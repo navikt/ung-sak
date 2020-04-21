@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -168,5 +169,40 @@ public class AksjonspunktDto {
 
     public void setVurderPaNyttArsaker(Set<VurderÅrsak> vurderPaNyttArsaker) {
         this.vurderPaNyttArsaker = vurderPaNyttArsaker;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+        var other = (AksjonspunktDto) obj;
+
+        return Objects.equals(aksjonspunktType, other.aksjonspunktType)
+            && Objects.equals(definisjon, other.definisjon);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(aksjonspunktType, definisjon);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<"
+            + "def=" + definisjon
+            + ", type=" + aksjonspunktType
+            + ", erAktivt=" + erAktivt
+            + ", fristTid=" + fristTid
+            + ", status=" + status
+            + ", kanLoses=" + kanLoses
+            + ", toTrinnsBehandling=" + toTrinnsBehandling
+            + ", toTrinnsBehandlingGodkjent=" + toTrinnsBehandlingGodkjent
+            + ", vilkarType=" + vilkarType
+            + ", begrunnelse=" + begrunnelse
+            + ", besluttersBegrunnelse=" + besluttersBegrunnelse
+            + ", vurderPaNyttArsaker=" + vurderPaNyttArsaker
+            + ">";
     }
 }

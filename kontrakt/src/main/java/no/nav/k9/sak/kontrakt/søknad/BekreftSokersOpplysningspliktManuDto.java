@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.søknad;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -65,5 +66,24 @@ public class BekreftSokersOpplysningspliktManuDto extends BekreftetAksjonspunktD
 
     public void setInntektsmeldingerSomIkkeKommer(List<InntektsmeldingSomIkkeKommerDto> inntektsmeldingerSomIkkeKommer) {
         this.inntektsmeldingerSomIkkeKommer = inntektsmeldingerSomIkkeKommer;
+    }
+    
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj==this) return true;
+        if(obj ==null || obj.getClass()!=this.getClass()) return false;
+        var other = (BekreftSokersOpplysningspliktManuDto) obj;
+        return Objects.equals(getKode(), other.getKode());
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(getKode());
+    }
+    
+    @Override
+    public String toString() {
+        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ">";
     }
 }
