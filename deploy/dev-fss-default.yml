@@ -173,6 +173,11 @@ spec:
       value: http://fptilbake.q1/fptilbake/api/behandlinger/tilbakekreving/aapen
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum
+    - name: KAFKA_INFOTRYGDFEED_TOPIC
+      value: privat-k9-infotrygdFeedHendelse
+    - name: KAFKA_INFOTRYGDFEED_CLIENT_ID
+      value: k9-sak
+
 
     # Web services
     - name: AKTOER_V2_URL
