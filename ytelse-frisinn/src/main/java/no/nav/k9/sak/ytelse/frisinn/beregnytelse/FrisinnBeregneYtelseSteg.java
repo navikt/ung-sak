@@ -1,10 +1,5 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -72,15 +67,12 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        UUID behandlingUuid = ref.getBehandlingUuid();
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
-        if(true)  throw new UnsupportedOperationException("Ikke implementert steg BERYT for FRISINN ennå");
-
         UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
-
         UttakResultat uttakResultat = new UttakResultat(ref.getFagsakYtelseType(), MapUttakFrisinnTilRegel.map(fastsattUttak));
+
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
