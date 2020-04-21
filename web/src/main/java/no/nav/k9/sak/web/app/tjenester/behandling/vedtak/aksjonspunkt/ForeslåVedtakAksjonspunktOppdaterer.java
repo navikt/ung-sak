@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -60,8 +59,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
     }
 
     private boolean skalNullstilleFritekstfelt(Behandling behandling, VedtakVarsel behandlingsresultat) {
-        return !BehandlingType.KLAGE.equals(behandling.getType())
-            && !behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()
+        return !behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()
             && behandlingsresultat.getAvslagarsakFritekst() != null;
     }
 

@@ -21,8 +21,6 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum BehandlingTema implements Kodeverdi {
     PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN),  // ny ordning fom 011017
     OMSORGSPENGER("OMS_OMSORG", "Omsorgspenger", "ab0149", FagsakYtelseType.OMSORGSPENGER),
-
-    SVANGERSKAPSPENGER("SVP", "Svangerskapspenger", "ab0126", FagsakYtelseType.SVANGERSKAPSPENGER),
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 
     ;
