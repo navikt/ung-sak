@@ -50,6 +50,10 @@ public class InfotrygdFeedService {
     }
 
     public void publiserHendelse(Behandling behandling) {
+        if(FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
+            return;
+        }
+
         validerInput(behandling);
 
         InfotrygdFeedMessage infotrygdFeedMessage = getInfotrygdFeedMessage(behandling);
