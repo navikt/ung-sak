@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +51,7 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
+import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -62,7 +64,6 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
-import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
@@ -78,13 +79,12 @@ import no.nav.k9.sak.typer.Beløp;
 public class TilKalkulusMapper {
 
     public static InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag, AktørId aktørId, LocalDate skjæringstidspunktBeregning) {
-        var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
-
+        Optional<AktørArbeid> arbeid = grunnlag.getAktørArbeidFraRegister(aktørId);
 
         var inntektsmeldinger = grunnlag.getInntektsmeldinger();
-        var yrkesaktiviteterForBeregning = yrkesaktivitetFilter.getYrkesaktiviteterForBeregning();
+        var yrkesaktiviteterForBeregning = arbeid.map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(Collections.emptyList());
         var alleInntektBeregningsgrunnlag = inntektFilter.getAlleInntektBeregningsgrunnlag();
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
@@ -261,9 +261,10 @@ public class TilKalkulusMapper {
 
         ).collect(Collectors.toList());
 
+        String arbeidsforholdRef = yrkesaktivitet.getArbeidsforholdRef().getReferanse();
         return new YrkesaktivitetDto(
             mapTilAktør(yrkesaktivitet.getArbeidsgiver()),
-            yrkesaktivitet.getArbeidsforholdRef() != null ? new InternArbeidsforholdRefDto(yrkesaktivitet.getArbeidsforholdRef().getReferanse()) : null,
+            arbeidsforholdRef != null ? new InternArbeidsforholdRefDto(arbeidsforholdRef) : null,
             new ArbeidType(yrkesaktivitet.getArbeidType().getKode()),
             aktivitetsAvtaleDtos
         );
