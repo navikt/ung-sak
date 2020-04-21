@@ -130,7 +130,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
             .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef))
             .filter(it -> it.getOppgittFravær().stream()
-                .anyMatch(fravære -> fravære.getPeriode().equals(new no.nav.k9.sak.typer.Periode(periode.getFomDato(), periode.getTomDato()))))
+                .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
             .map(Inntektsmelding::getRefusjonBeløpPerMnd)
             .collect(Collectors.toSet());
 
@@ -143,7 +143,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             return inntektsmeldinger.stream()
                 .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef))
                 .filter(it -> it.getOppgittFravær().stream()
-                    .anyMatch(fravære -> fravære.getPeriode().equals(new no.nav.k9.sak.typer.Periode(periode.getFomDato(), periode.getTomDato()))))
+                    .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
                 .max(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt))
                 .map(Inntektsmelding::getRefusjonBeløpPerMnd)
                 .map(Beløp::getVerdi)
