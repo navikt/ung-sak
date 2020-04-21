@@ -625,7 +625,6 @@
 					<execution>
 						<id>flatten</id>
 						<phase>process-resources</phase>
-						<?m2e ignore?>
 						<goals>
 							<goal>flatten</goal>
 						</goals>
@@ -633,7 +632,6 @@
 					<execution>
 						<id>flatten.clean</id>
 						<phase>clean</phase>
-						<?m2e ignore?>
 						<goals>
 							<goal>clean</goal>
 						</goals>
@@ -683,7 +681,6 @@
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>
 					<execution>
-						<?m2e ignore?>
 						<id>attach-sources</id>
 						<goals>
 							<goal>jar</goal>
@@ -699,7 +696,6 @@
 				<executions>
 					<execution>
 						<id>make-index</id>
-						<?m2e ignore?>
 						<goals>
 							<goal>jandex</goal>
 						</goals>

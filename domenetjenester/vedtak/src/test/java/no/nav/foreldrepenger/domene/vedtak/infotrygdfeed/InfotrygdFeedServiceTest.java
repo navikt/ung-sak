@@ -27,6 +27,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
+import org.mockito.Mockito;
 
 public class InfotrygdFeedServiceTest {
 
@@ -146,6 +147,17 @@ public class InfotrygdFeedServiceTest {
         assertThat(message.getSisteStoenadsdag()).isNull();
     }
 
+    @Test
+    public void publiserHendelse_ikke_publiser_FRISINN() {
+        Behandling behandling = mockHelper()
+            .medFagsakYtelsesType(FagsakYtelseType.FRISINN)
+            .hentBehandling();
+
+        service.publiserHendelse(behandling);
+
+        Mockito.verifyNoInteractions(prosessTaskRepository);
+    }
+
     @Test(expected = InfotrygdFeedService.ManglendeVerdiException.class)
     public void publiserHendelse_uten_saksnummer() {
         Behandling behandling = mockHelper()
@@ -251,6 +263,7 @@ class FeedServiceMockHelper {
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(behandlingId);
         when(behandling.getVersjon()).thenReturn(versjonBehandling);
+        when(behandling.getFagsakYtelseType()).thenReturn(fagsakYtelseType);
 
         Fagsak fagsak = mockFagsak();
         when(behandling.getFagsak()).thenReturn(fagsak);
