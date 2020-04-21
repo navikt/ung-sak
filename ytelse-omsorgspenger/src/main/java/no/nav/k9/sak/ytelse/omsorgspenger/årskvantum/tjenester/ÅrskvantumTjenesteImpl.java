@@ -111,8 +111,9 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             if (arb == null) {
                 uttaksperiodeOmsorgspenger.setUttakArbeidsforhold(new UttakArbeidsforhold(null, null, fraværPeriode.getAktivitetType(), null));
             } else {
-                String arbeidsforholdId = fraværPeriode.getArbeidsforholdRef() == null ? null : fraværPeriode.getArbeidsforholdRef().getReferanse();
-                var kreverRefusjon = kreverArbeidsgiverRefusjon(inntektsmeldingAggregat, arb, fraværPeriode.getArbeidsforholdRef(), fraværPeriode.getPeriode());
+                var arbeidsforholdRef = fraværPeriode.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : fraværPeriode.getArbeidsforholdRef();
+                String arbeidsforholdId = arbeidsforholdRef.getReferanse();
+                var kreverRefusjon = kreverArbeidsgiverRefusjon(inntektsmeldingAggregat, arb, arbeidsforholdRef, fraværPeriode.getPeriode());
                 uttaksperiodeOmsorgspenger.setKreverRefusjon(kreverRefusjon);
                 uttaksperiodeOmsorgspenger.setUttakArbeidsforhold(new UttakArbeidsforhold(arb.getOrgnr(),
                     arb.getAktørId(),
