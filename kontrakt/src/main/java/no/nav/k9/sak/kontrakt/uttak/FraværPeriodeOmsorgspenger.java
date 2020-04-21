@@ -32,6 +32,10 @@ public class FraværPeriodeOmsorgspenger {
     @Valid
     private OmsorgspengerUtfall utfall;
 
+    @JsonProperty(value="kreverRefusjon", required=false)
+    @Valid
+    private Boolean kreverRefusjon;
+
     @JsonCreator
     public FraværPeriodeOmsorgspenger(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
                                       @JsonProperty(value = "utbetalingsgrad", required = false) @Valid UttakUtbetalingsgradOmsorgspenger utbetalingsgrad,
@@ -83,5 +87,13 @@ public class FraværPeriodeOmsorgspenger {
 
     public void setUtfall(OmsorgspengerUtfall utfall) {
         this.utfall = utfall;
+    }
+
+    public Boolean getKreverRefusjon() {
+        return kreverRefusjon;
+    }
+
+    public void setKreverRefusjon(Boolean kreverRefusjon) {
+        this.kreverRefusjon = kreverRefusjon;
     }
 }

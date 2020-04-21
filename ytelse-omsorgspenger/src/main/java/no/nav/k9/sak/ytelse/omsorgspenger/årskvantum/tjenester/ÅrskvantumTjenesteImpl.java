@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -111,7 +112,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                 uttaksperiodeOmsorgspenger.setUttakArbeidsforhold(new UttakArbeidsforhold(null, null, fraværPeriode.getAktivitetType(), null));
             } else {
                 String arbeidsforholdId = fraværPeriode.getArbeidsforholdRef() == null ? null : fraværPeriode.getArbeidsforholdRef().getReferanse();
-                var refusjonsbeløp = utledRefusjonsbeløp(inntektsmeldingAggregat, arb, fraværPeriode.getArbeidsforholdRef(), fraværPeriode.getPeriode());
+                var kreverRefusjon = kreverArbeidsgiverRefusjon(inntektsmeldingAggregat, arb, fraværPeriode.getArbeidsforholdRef(), fraværPeriode.getPeriode());
+                uttaksperiodeOmsorgspenger.setKreverRefusjon(kreverRefusjon);
                 uttaksperiodeOmsorgspenger.setUttakArbeidsforhold(new UttakArbeidsforhold(arb.getOrgnr(),
                     arb.getAktørId(),
                     fraværPeriode.getAktivitetType(),
@@ -122,32 +124,34 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
     }
 
-    private BigDecimal utledRefusjonsbeløp(InntektsmeldingAggregat inntektsmeldingAggregat,
-                                           Arbeidsgiver arbeidsgiver,
-                                           InternArbeidsforholdRef arbeidsforholdRef,
-                                           DatoIntervallEntitet periode) {
+    private boolean kreverArbeidsgiverRefusjon(InntektsmeldingAggregat inntektsmeldingAggregat,
+                                               Arbeidsgiver arbeidsgiver,
+                                               InternArbeidsforholdRef arbeidsforholdRef,
+                                               DatoIntervallEntitet periode) {
         var inntektsmeldinger = inntektsmeldingAggregat.getInntektsmeldingerFor(arbeidsgiver);
         var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
-            .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef))
+            .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef)) // TODO: Bør vi matcher på gjelderfor her? Perioder som er sendt inn med arbeidsforholdsId vil da matche med inntekstmeldinger uten for samme arbeidsgiver men hvor perioden overlapper
             .filter(it -> it.getOppgittFravær().stream()
                 .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
             .map(Inntektsmelding::getRefusjonBeløpPerMnd)
             .collect(Collectors.toSet());
 
         if (inntektsmeldingSomMatcherUttak.isEmpty()) {
-            return null;
+            return false;
         } else if (inntektsmeldingSomMatcherUttak.size() == 1) {
-            return inntektsmeldingSomMatcherUttak.iterator().next().getVerdi();
+            var verdi = Optional.ofNullable(inntektsmeldingSomMatcherUttak.iterator().next()).map(Beløp::getVerdi).orElse(BigDecimal.ZERO);
+            return BigDecimal.ZERO.compareTo(verdi) < 0;
         } else {
             // Tar nyeste
-            return inntektsmeldinger.stream()
+            var verdi = inntektsmeldinger.stream()
                 .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef))
                 .filter(it -> it.getOppgittFravær().stream()
                     .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
                 .max(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt))
                 .map(Inntektsmelding::getRefusjonBeløpPerMnd)
                 .map(Beløp::getVerdi)
-                .orElse(null);
+                .orElse(BigDecimal.ZERO);
+            return BigDecimal.ZERO.compareTo(verdi) < 0;
         }
     }
 
