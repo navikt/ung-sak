@@ -68,6 +68,10 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return id;
     }
 
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
+    }
+
     public LocalDate getBeregningsresultatPeriodeFom() {
         return periode.getFomDato();
     }
@@ -75,7 +79,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     public LocalDate getBeregningsresultatPeriodeTom() {
         return periode.getTomDato();
     }
-    
+
     public List<BeregningsresultatAndel> getBeregningsresultatAndelList() {
         return Collections.unmodifiableList(beregningsresultatAndelList)
                 .stream()
@@ -162,7 +166,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             Objects.requireNonNull(beregningsresultatPeriodeMal.periode.getTomDato(), "beregningsresultaPeriodeTom");
         }
     }
-    
+
     private static final Comparator<BeregningsresultatAndel> COMP_BEREGININGSRESULTAT_ANDEL = Comparator
             .comparing((BeregningsresultatAndel ba) -> ba.getArbeidsforholdIdentifikator(), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(ba -> ba.getArbeidsforholdRef().getReferanse(), Comparator.nullsLast(Comparator.naturalOrder()))

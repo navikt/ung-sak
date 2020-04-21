@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat;
+package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.psb;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -30,6 +32,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
@@ -43,33 +46,50 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.vedtak.util.Tuple;
 
-@Dependent
-public class BeregningsresultatMapper {
+@FagsakYtelseTypeRef("PSB")
+@ApplicationScoped
+public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private UttakTjeneste uttakTjeneste;
 
-    BeregningsresultatMapper() {
+    PSBBeregningsresultatMapper() {
         // For inject
     }
 
     @Inject
-    public BeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                    SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+    public PSBBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                       InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                       UttakTjeneste uttakTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.uttakTjeneste = uttakTjeneste;
     }
 
-    public BeregningsresultatDto lagBeregningsresultatMedUttaksplan(
-                                                                    Behandling behandling,
-                                                                    BehandlingBeregningsresultatEntitet beregningsresultatAggregat,
-                                                                    Optional<Uttaksplan> uttakResultat) {
+    private static UttakArbeidsforhold toUttakArbeidsforhold(BeregningsresultatPeriodeAndelDto a) {
+        return new UttakArbeidsforhold(
+            a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
+            a.getAktørId(),
+            UttakArbeidType.mapFra(a.getAktivitetStatus()),
+            a.getArbeidsforholdId());
+    }
+
+    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
+        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
+    }
+
+    @Override
+    public BeregningsresultatDto map(Behandling behandling,
+                                     BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
+        Optional<Uttaksplan> uttakResultat = uttakTjeneste.hentUttaksplan(behandling.getUuid());
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
@@ -251,21 +271,8 @@ public class BeregningsresultatMapper {
         return ny;
     }
 
-    private static UttakArbeidsforhold toUttakArbeidsforhold(BeregningsresultatPeriodeAndelDto a) {
-        return new UttakArbeidsforhold(
-            a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
-            a.getAktørId(),
-            UttakArbeidType.mapFra(a.getAktivitetStatus()),
-            a.getArbeidsforholdId());
-    }
-    
     private LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
         return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
     }
-
-    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
-    }
-    
 
 }
