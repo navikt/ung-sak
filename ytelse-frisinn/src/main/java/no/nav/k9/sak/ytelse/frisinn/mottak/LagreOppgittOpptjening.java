@@ -55,14 +55,15 @@ class LagreOppgittOpptjening {
             var fri = inntekter.getFrilanser();
             List<OppgittFrilansoppdrag> oppdrag = fri.getInntekterSøknadsperiode().entrySet().stream().map(entry -> {
                 OppgittFrilansOppdragBuilder builder = OppgittFrilansOppdragBuilder.ny();
-                return builder.medInntekt(entry.getValue().getBeløp())
+                return builder
+                        .medInntekt(entry.getValue().getBeløp())
                         .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed()))
                         .build();
             }).collect(Collectors.toList());
 
             OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
             OppgittFrilans oppgittFrilans = frilansBuilder
-                    .medErNyoppstartet(false)
+                    .medErNyoppstartet(fri.getErNyetablert())
                     .leggTilOppgittOppdrag(oppdrag)
                     .build();
             opptjeningBuilder.leggTilFrilansOpplysninger(oppgittFrilans);

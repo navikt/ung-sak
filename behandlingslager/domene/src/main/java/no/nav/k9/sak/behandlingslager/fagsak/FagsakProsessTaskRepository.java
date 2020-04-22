@@ -173,8 +173,9 @@ public class FagsakProsessTaskRepository {
         }
 
         if (tasks.isEmpty()) {
-            // ignorerer alle ferdig, suspendert, veto når vi søker blant alle grupper
+            // ignorerer alle ferdig, suspendert, når vi søker blant alle grupper
             statuser.remove(ProsessTaskStatus.FERDIG);
+            statuser.remove(ProsessTaskStatus.KJOERT);
             statuser.remove(ProsessTaskStatus.SUSPENDERT);
             tasks = finnAlleForAngittSøk(fagsakId, behandlingId, null, new ArrayList<>(statuser), fom, tom);
         }
@@ -236,7 +237,7 @@ public class FagsakProsessTaskRepository {
                 fjern(fagsakId, ptEvent.getId(), fagsakProsessTaskOpt.get().getGruppeSekvensNr());
             }
         }
-
+        
     }
 
     protected EntityManager getEntityManager() {
