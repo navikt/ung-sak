@@ -19,7 +19,7 @@ public class UttakResultat {
     public List<UttakResultatPeriode> getUttakResultatPerioder() {
         return uttakResultatPerioder;
     }
-    
+
     public FagsakYtelseType getYtelseType() {
         return ytelseType;
     }

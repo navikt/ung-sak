@@ -71,7 +71,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
 
         UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
-        UttakResultat uttakResultat = new UttakResultat(ref.getFagsakYtelseType(), MapUttakFrisinnTilRegel.map(fastsattUttak));
+        UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, ref.getFagsakYtelseType());
 
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);

@@ -19,10 +19,10 @@ public class OpptjeningsaktiviteterPerYtelse {
         if (OpptjeningAktivitetType.FRILANS.equals(opptjeningAktivitetType)) {
             return harOppgittFrilansISøknad(iayGrunnlag);
         }
-        return erRelevantAktivitet(opptjeningAktivitetType);
+        return erInkludert(opptjeningAktivitetType);
     }
 
-    boolean erRelevantAktivitet(OpptjeningAktivitetType opptjeningAktivitetType) {
+    public boolean erInkludert(OpptjeningAktivitetType opptjeningAktivitetType) {
         return !ekskluderteAktiviteter.contains(opptjeningAktivitetType);
     }
 

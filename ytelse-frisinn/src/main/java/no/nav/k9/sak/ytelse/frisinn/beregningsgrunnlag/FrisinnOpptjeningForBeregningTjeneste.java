@@ -64,7 +64,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))
-            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
+            .filter(oa -> opptjeningsaktiviteter.erInkludert(oa.getOpptjeningAktivitetType()))
             .collect(Collectors.toList());
     }
 
