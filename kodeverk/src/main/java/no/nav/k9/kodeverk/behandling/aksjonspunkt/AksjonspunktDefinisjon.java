@@ -12,8 +12,7 @@ import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.*;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.*;
 
 /**
@@ -153,11 +152,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN, VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
-        AksjonspunktType.MANUELL, "OMPorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
+        AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
-    //VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
-    //                    AksjonspunktType.MANUELL, "OMPorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
-    //                    SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
+    VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
+                        AksjonspunktType.MANUELL, "Årskvantum", BehandlingStegType.VURDER_ÅRSKVANTUM, VurderingspunktType.UT, VilkårType.ÅRSKVANTUM,
+                        SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, EnumSet.of(OMSORGSPENGER)),
     // Gruppe : 600
 
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,

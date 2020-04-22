@@ -1,18 +1,14 @@
 package no.nav.k9.kodeverk.vilkår;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -37,6 +33,11 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
     DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-16\"}]}]}"),
     IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM("1069", "Ikke behov for kontinuerlig pleie.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"9-10\"}]}]}"),
+    ÅRSKVANTUM_AVSLÅTT_IKKE_RETT("1072", "Ikke tett til omsorgsp.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
+    ÅRSKVANTUM_IKKE_FLERE_DAGER("1073", "Ikke nok dager i årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
+    ÅRSKVANTUM_AVSLÅTT_OPPTJENING("1074", "Ikke nok opptejning til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
+    ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP("1075", "Ikke nok medlemskap til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
+    ÅRSKVANTUM_AVSLÅTT_70ÅR("1076", "Ikke ung nok for årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
     UDEFINERT("-", "Ikke definert", null),
 

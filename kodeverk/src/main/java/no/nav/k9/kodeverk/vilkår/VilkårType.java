@@ -1,27 +1,18 @@
 package no.nav.k9.kodeverk.vilkår;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
+
+import java.io.IOException;
+import java.util.*;
 
 @JsonSerialize(keyUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
@@ -52,6 +43,14 @@ public enum VilkårType implements Kodeverdi {
             Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
             Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
             Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
+    ÅRSKVANTUM(VilkårTypeKoder.OMS_VK_1,
+               "Årskvantum",
+               Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 9-6"),
+               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_70ÅR,
+               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_IKKE_RETT,
+               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP,
+               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_OPPTJENING,
+               Avslagsårsak.ÅRSKVANTUM_IKKE_FLERE_DAGER),
     MEDISINSKEVILKÅR_UNDER_18_ÅR(VilkårTypeKoder.PSB_VK_2a,
             "Medisinskevilkår under 18 år",
             Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
