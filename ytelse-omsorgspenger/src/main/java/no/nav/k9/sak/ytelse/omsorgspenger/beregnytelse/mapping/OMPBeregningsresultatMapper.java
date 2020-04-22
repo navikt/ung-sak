@@ -1,7 +1,7 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat;
+package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse.mapping;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -10,17 +10,15 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -30,57 +28,79 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
+import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.kontrakt.uttak.UttaksPlanOmsorgspengerAktivitet;
+import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.util.Tuple;
 
-@Dependent
-public class BeregningsresultatMapper {
+@ApplicationScoped
+@FagsakYtelseTypeRef("OMP")
+public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private ÅrskvantumTjeneste årskvantumTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
-    BeregningsresultatMapper() {
+    OMPBeregningsresultatMapper() {
         // For inject
     }
 
     @Inject
-    public BeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                    SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+    public OMPBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                       InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                       ÅrskvantumTjeneste årskvantumTjeneste,
+                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
-    public BeregningsresultatDto lagBeregningsresultatMedUttaksplan(
-                                                                    Behandling behandling,
-                                                                    BehandlingBeregningsresultatEntitet beregningsresultatAggregat,
-                                                                    Optional<Uttaksplan> uttakResultat) {
+    @Override
+    public BeregningsresultatDto map(Behandling behandling,
+                                     BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
+        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumUttak(ref));
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttakResultat))
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttaksplan))
+            .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
+            .create();
+    }
+
+    @Override
+    public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
+        var ref = BehandlingReferanse.fra(behandling);
+        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumUttak(ref));
+        LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
+        return BeregningsresultatMedUtbetaltePeriodeDto.build()
+            .medOpphoersdato(opphørsdato)
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttaksplan))
+            .medUtbetaltePerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getUtbetBeregningsresultat(), uttaksplan))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat,
-                                                          Optional<Uttaksplan> uttaksplan) {
+                                                          Optional<ÅrskvantumResultat> uttaksplan) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
         var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
         var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(
@@ -91,40 +111,12 @@ public class BeregningsresultatMapper {
         var dtoer = brpTimline.toSegments().stream()
             .map(seg -> BeregningsresultatPeriodeDto.build(seg.getFom(), seg.getTom())
                 .medDagsats(seg.getValue().getDagsats())
-                .medAndeler(lagAndeler(seg.getValue(), andelTilSisteUtbetalingsdatoMap, iayGrunnlag))
+                .medAndeler(lagAndeler(seg.getValue(), andelTilSisteUtbetalingsdatoMap, iayGrunnlag, uttaksplan))
                 .create())
             .collect(Collectors.toList());
         var resultatTimeline = toTimeline(dtoer);
 
-        if (uttaksplan.isPresent()) {
-            leggTilUttak(uttaksplan, resultatTimeline);
-        }
-
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
-    }
-
-    private void leggTilUttak(Optional<Uttaksplan> uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
-        @SuppressWarnings("unchecked")
-        LocalDateTimeline<Uttaksplanperiode> uttTimeline = uttaksplan.map(this::getTimeline).orElse(LocalDateTimeline.EMPTY_TIMELINE);
-        resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
-    }
-
-    private LocalDateSegment<Void> kombinerMedUttak(@SuppressWarnings("unused") LocalDateInterval interval,
-                                                    LocalDateSegment<BeregningsresultatPeriodeDto> brpDto,
-                                                    LocalDateSegment<Uttaksplanperiode> uttPeriode) {
-        var ut = uttPeriode == null ? null : uttPeriode.getValue();
-        var innvilget = (InnvilgetUttaksplanperiode) ut;
-        brpDto.getValue().getAndeler().forEach(a -> {
-            if (ut != null) {
-                // setter uttak rett på andel 'a' - Ok her
-                a.setUttak(new UttakDto(ut.getUtfall(), BigDecimal.ZERO)); // default uttak, overskrives under
-                if (UtfallType.INNVILGET.equals(ut.getUtfall())) {
-                    var key = toUttakArbeidsforhold(a);
-                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> a.setUttak(new UttakDto(innvilget.getUtfall(), utbet.getUtbetalingsgrad())));
-                }
-            }
-        });
-        return null;
     }
 
     private LocalDateTimeline<BeregningsresultatPeriodeDto> toTimeline(List<BeregningsresultatPeriodeDto> resultatDtoListe) {
@@ -134,7 +126,8 @@ public class BeregningsresultatMapper {
 
     List<BeregningsresultatPeriodeAndelDto> lagAndeler(BeregningsresultatPeriode beregningsresultatPeriode,
                                                        Map<Tuple<AktivitetStatus, Optional<String>>, Optional<LocalDate>> andelTilSisteUtbetalingsdatoMap,
-                                                       Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag) {
+                                                       Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag,
+                                                       Optional<ÅrskvantumResultat> uttaksplan) {
 
         var beregningsresultatAndelList = beregningsresultatPeriode.getBeregningsresultatAndelList();
 
@@ -158,7 +151,9 @@ public class BeregningsresultatMapper {
                         : null)
                     .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).orElse(null))
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
-                    .medStillingsprosent(brukersAndel.getStillingsprosent());
+                    .medStillingsprosent(brukersAndel.getStillingsprosent())
+                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad());
+                uttaksplan.ifPresent(it -> mapUttakForAndel(beregningsresultatPeriode.getPeriode(), brukersAndel, it, dtoBuilder));
                 var internArbeidsforholdId = brukersAndel.getArbeidsforholdRef() != null ? brukersAndel.getArbeidsforholdRef().getReferanse() : null;
                 dtoBuilder.medArbeidsforholdId(internArbeidsforholdId);
                 iayGrunnlag.ifPresent(iay -> iay.getArbeidsforholdInformasjon().ifPresent(arbeidsforholdInformasjon -> {
@@ -172,6 +167,50 @@ public class BeregningsresultatMapper {
                     .create();
             })
             .collect(Collectors.toList());
+    }
+
+    private void mapUttakForAndel(DatoIntervallEntitet periode, BeregningsresultatAndel brukersAndel, ÅrskvantumResultat årskvantumResultat, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder) {
+        var uttaksPeriodeForAndel = årskvantumResultat.getUttaksplan().getAktiviteter().stream()
+            .filter(it -> matcherArbeidsforhold(it.getArbeidsforhold(), brukersAndel))
+            .map(UttaksPlanOmsorgspengerAktivitet::getUttaksperioder)
+            .flatMap(Collection::stream)
+            .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()).overlapper(periode))
+            .map(it -> mapUttakDto(periode, it))
+            .collect(Collectors.toList());
+
+        dtoBuilder.medUttak(uttaksPeriodeForAndel);
+    }
+
+    private UttakDto mapUttakDto(DatoIntervallEntitet periode, UttaksperiodeOmsorgspenger uttaksPeriode) {
+        var utfallType = OmsorgspengerUtfall.INNVILGET.equals(uttaksPeriode.getUtfall()) ? UtfallType.INNVILGET : UtfallType.AVSLÅTT;
+        return new UttakDto(avgrensPeriode(periode, uttaksPeriode), utfallType, uttaksPeriode.getUtbetalingsgrad());
+    }
+
+    private Periode avgrensPeriode(DatoIntervallEntitet periode, UttaksperiodeOmsorgspenger uttaksPeriode) {
+        var fom = uttaksPeriode.getFom();
+        var tom = uttaksPeriode.getTom();
+        if (fom.isBefore(periode.getFomDato())) {
+            fom = periode.getFomDato();
+        }
+        if (tom.isAfter(periode.getTomDato())) {
+            tom = periode.getTomDato();
+        }
+        return new Periode(fom, tom);
+    }
+
+    private boolean matcherArbeidsforhold(UttakArbeidsforhold arbeidsforhold, BeregningsresultatAndel brukersAndel) {
+        if (brukersAndel.getArbeidsgiver().isPresent()) {
+            var arbeidsgiver = brukersAndel.getArbeidsgiver().get();
+            if (arbeidsgiver.erAktørId()) {
+                return arbeidsforhold.getAktørId() != null && arbeidsforhold.getAktørId().getId() != null
+                    && arbeidsgiver.getAktørId().equals(arbeidsforhold.getAktørId())
+                    && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(brukersAndel.getArbeidsforholdRef());
+            } else if (arbeidsgiver.getErVirksomhet()) {
+                return Objects.equals(arbeidsgiver.getOrgnr(), arbeidsforhold.getOrganisasjonsnummer())
+                    && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(brukersAndel.getArbeidsforholdRef());
+            }
+        }
+        return false;
     }
 
     private void settArbeidsgiverfelter(Arbeidsgiver arb, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder) {
@@ -250,22 +289,5 @@ public class BeregningsresultatMapper {
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());
         return ny;
     }
-
-    private static UttakArbeidsforhold toUttakArbeidsforhold(BeregningsresultatPeriodeAndelDto a) {
-        return new UttakArbeidsforhold(
-            a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
-            a.getAktørId(),
-            UttakArbeidType.mapFra(a.getAktivitetStatus()),
-            a.getArbeidsforholdId());
-    }
-    
-    private LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
-        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
-    }
-
-    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
-    }
-    
 
 }
