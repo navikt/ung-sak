@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.frisinn.skjæringstidspunkt;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
@@ -61,7 +63,12 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
 
     @Override
     public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
-        return null;
+        UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
+        if (fastsattUttak != null && !fastsattUttak.getPerioder().isEmpty()) {
+            LocalDate sisteUttaksdag = fastsattUttak.getMaksPeriode().getTomDato();
+            return Optional.of(sisteUttaksdag.with(TemporalAdjusters.lastDayOfMonth()));
+        }
+        return Optional.empty();
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
