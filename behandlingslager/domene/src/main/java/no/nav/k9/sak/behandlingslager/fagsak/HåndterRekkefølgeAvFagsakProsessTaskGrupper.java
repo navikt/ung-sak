@@ -56,7 +56,7 @@ public class HåndterRekkefølgeAvFagsakProsessTaskGrupper implements ProsessTas
             log.info("Vetoer kjøring av prosesstask[{}] av type[{}] for fagsak [{}] , er blokkert av prosesstask[{}] av type[{}] for samme fagsak.",
                 ptData.getId(), ptData.getTaskType(), ptData.getFagsakId(), blokker.getId(), blokker.getTaskType());
 
-            return new ProsessTaskVeto(false, ptData.getId(), blokker.getId(), getClass().getSimpleName()
+            return new ProsessTaskVeto(true, ptData.getId(), blokker.getId(), getClass().getSimpleName()
                 + " vetoer pga definert rekkefølge i FAGSAK_PROSESS_TASK.GRUPPE_SEKVENSNR. Blir pukket når blokkerende task kjøres FERDIG.");
         }
 

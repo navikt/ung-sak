@@ -333,25 +333,6 @@ public class BehandlingRepository {
         return optionalFirst(query.getResultList());
     }
 
-    public Optional<Behandling> finnSisteIkkeHenlagteBehandlingavAvBehandlingTypeForFagsakId(Long fagsakId, BehandlingType behandlingType) {
-        Objects.requireNonNull(fagsakId, FAGSAK_ID);
-        Objects.requireNonNull(behandlingType, "behandlingType");
-
-        TypedQuery<Behandling> query = getEntityManager().createQuery(
-            " FROM Behandling b WHERE b.fagsak.id=:fagsakId " +
-                " AND b.behandlingType=:behandlingType " +
-                " AND b.behandlingResultatType NOT IN :henlagtKoder " +
-                " ORDER BY b.opprettetTidspunkt DESC",
-            Behandling.class);
-
-        query.setMaxResults(1);
-        query.setParameter(FAGSAK_ID, fagsakId);
-        query.setParameter("behandlingType", behandlingType);
-        query.setParameter("henlagtKoder", BehandlingResultatType.getAlleHenleggelseskoder());
-
-        return optionalFirst(query.getResultList());
-    }
-
     private TypedQuery<Behandling> lagBehandlingQuery(Long behandlingId) {
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR //$NON-NLS-1$
 
