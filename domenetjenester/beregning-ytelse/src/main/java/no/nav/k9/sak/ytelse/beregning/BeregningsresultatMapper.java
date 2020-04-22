@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper;
+package no.nav.k9.sak.ytelse.beregning;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;

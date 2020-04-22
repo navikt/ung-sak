@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.psb;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -46,7 +46,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.BeregningsresultatMapper;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.vedtak.util.Tuple;
 

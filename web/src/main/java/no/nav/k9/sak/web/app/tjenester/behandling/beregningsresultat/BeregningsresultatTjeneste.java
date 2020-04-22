@@ -14,7 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsr
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
-import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.BeregningsresultatMapper;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 
 @ApplicationScoped
 public class BeregningsresultatTjeneste {

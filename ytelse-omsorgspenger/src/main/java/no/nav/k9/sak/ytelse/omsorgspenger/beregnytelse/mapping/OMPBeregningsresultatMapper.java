@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.omp;
+package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse.mapping;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -43,14 +43,14 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.BeregningsresultatMapper;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.util.Tuple;
 
-@FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
+@FagsakYtelseTypeRef("OMP")
 public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;

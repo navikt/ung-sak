@@ -188,6 +188,7 @@ public class BeregningsresultatPeriodeAndelDto {
     private BigDecimal utbetalingsgrad;
 
     @JsonProperty(value = "uttak")
+    @Size(max = 100)
     @Valid
     private List<UttakDto> uttak;
 
