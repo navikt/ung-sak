@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
@@ -81,6 +82,19 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
             .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttaksplan))
+            .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
+            .create();
+    }
+
+    @Override
+    public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
+        var ref = BehandlingReferanse.fra(behandling);
+        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumUttak(ref));
+        LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
+        return BeregningsresultatMedUtbetaltePeriodeDto.build()
+            .medOpphoersdato(opphørsdato)
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttaksplan))
+            .medUtbetaltePerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getUtbetBeregningsresultat(), uttaksplan))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }

@@ -313,6 +313,7 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
 
         dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
+        dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
 
         lagVarselOmRevurderingLink(behandling).ifPresent(dto::leggTil);
         lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
@@ -345,8 +346,8 @@ public class BehandlingDtoTjeneste {
             default:
                 throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
         }
-        
-        
+
+
     }
 
     private void leggTilUttakEndepunkt(Behandling behandling, BehandlingDto dto) {

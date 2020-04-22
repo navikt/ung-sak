@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -14,6 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
+import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.mapper.BeregningsresultatMapper;
 
 @ApplicationScoped
@@ -44,4 +44,10 @@ public class BeregningsresultatTjeneste {
         return FagsakYtelseTypeRef.Lookup.find(mappere, fagsakYtelseType).orElseThrow();
     }
 
+    public Optional<BeregningsresultatMedUtbetaltePeriodeDto> lagBeregningsresultatMedUtbetaltePerioder(Behandling behandling) {
+        Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregatEntitet = beregningsresultatRepository
+            .hentBeregningsresultatAggregat(behandling.getId());
+        return beregningsresultatAggregatEntitet
+            .map(bresAggregat -> getMapper(behandling.getFagsakYtelseType()).mapMedUtbetaltePerioder(behandling, bresAggregat));
+    }
 }
