@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoRule;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -42,7 +43,7 @@ public class SendVedtaksbrevTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    
+
     @Inject
     private VedtakVarselRepository vedtakVarselRepository;
 
@@ -126,4 +127,15 @@ public class SendVedtaksbrevTest {
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
     }
 
+    @Test
+    public void senderIkkeBrevForRefusjonTilArbeidsgiver() {
+        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER)
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
+
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
+    }
 }

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -64,6 +65,11 @@ public class SendVedtaksbrev {
             return;
         }
 
+        if (erKunRefusjonTilArbeidsgiver(ref)) {
+            log.info("Sender ikke vedtaksbrev for omsorgspenger - refusjon til arbeidsgiver. Gjelder behandlingId {}", ref); //$NON-NLS-1$
+            return;
+        }
+
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde())) {
             var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
@@ -83,4 +89,7 @@ public class SendVedtaksbrev {
         dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(ref, behandlingVedtak);
     }
 
+    private boolean erKunRefusjonTilArbeidsgiver(BehandlingReferanse ref) {
+        return ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER;
+    }
 }
