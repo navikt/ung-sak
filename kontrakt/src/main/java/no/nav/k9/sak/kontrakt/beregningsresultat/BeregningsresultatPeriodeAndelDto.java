@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.beregningsresultat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -44,7 +45,7 @@ public class BeregningsresultatPeriodeAndelDto {
         private BigDecimal stillingsprosent;
         private Integer tilSøker;
         private BigDecimal utbetalingsgrad;
-        private UttakDto uttak;
+        private List<UttakDto> uttak;
         private Inntektskategori inntektskategori;
 
         private Builder() {
@@ -114,7 +115,7 @@ public class BeregningsresultatPeriodeAndelDto {
             return this;
         }
 
-        public Builder medUttak(UttakDto uttak) {
+        public Builder medUttak(List<UttakDto> uttak) {
             this.uttak = uttak;
             return this;
         }
@@ -128,7 +129,7 @@ public class BeregningsresultatPeriodeAndelDto {
     @JsonProperty(value = "aktivitetStatus")
     @Valid
     private AktivitetStatus aktivitetStatus;
-    
+
     @JsonProperty(value = "inntektskategori", required = true)
     @Valid
     private Inntektskategori inntektskategori;
@@ -188,7 +189,7 @@ public class BeregningsresultatPeriodeAndelDto {
 
     @JsonProperty(value = "uttak")
     @Valid
-    private UttakDto uttak;
+    private List<UttakDto> uttak;
 
     public BeregningsresultatPeriodeAndelDto() {
         // Deserialisering av JSON
@@ -242,7 +243,7 @@ public class BeregningsresultatPeriodeAndelDto {
     public String getEksternArbeidsforholdId() {
         return eksternArbeidsforholdId;
     }
-    
+
     public Inntektskategori getInntektskategori() {
         return inntektskategori;
     }
@@ -267,7 +268,7 @@ public class BeregningsresultatPeriodeAndelDto {
         return utbetalingsgrad;
     }
 
-    public UttakDto getUttak() {
+    public List<UttakDto> getUttak() {
         return uttak;
     }
 
@@ -319,10 +320,10 @@ public class BeregningsresultatPeriodeAndelDto {
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
-    public void setUttak(UttakDto uttak) {
+    public void setUttak(List<UttakDto> uttak) {
         this.uttak = uttak;
     }
-    
+
     public void setInntektskategori(Inntektskategori inntektskategori) {
         this.inntektskategori = inntektskategori;
     }

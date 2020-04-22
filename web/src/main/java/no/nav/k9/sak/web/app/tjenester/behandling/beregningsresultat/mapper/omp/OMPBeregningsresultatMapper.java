@@ -34,8 +34,10 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelD
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksPlanOmsorgspengerAktivitet;
+import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -74,7 +76,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     public BeregningsresultatDto map(Behandling behandling,
                                      BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
-        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumForBehandling(ref));
+        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumUttak(ref));
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
@@ -159,16 +161,27 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
             .map(UttaksPlanOmsorgspengerAktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()).overlapper(periode))
+            .map(it -> mapUttakDto(periode, it))
             .collect(Collectors.toList());
 
+        dtoBuilder.medUttak(uttaksPeriodeForAndel);
+    }
 
-        if (uttaksPeriodeForAndel.size() > 1) {
-            throw new IllegalStateException("Fant to uttaksperioder for en andel");
-        } else if (!uttaksPeriodeForAndel.isEmpty()) {
-            var uttaksperiodeOmsorgspenger = uttaksPeriodeForAndel.get(0);
-            var utfallType = OmsorgspengerUtfall.INNVILGET.equals(uttaksperiodeOmsorgspenger.getUtfall()) ? UtfallType.INNVILGET : UtfallType.AVSLÅTT;
-            dtoBuilder.medUttak(new UttakDto(utfallType, uttaksperiodeOmsorgspenger.getUtbetalingsgrad()));
+    private UttakDto mapUttakDto(DatoIntervallEntitet periode, UttaksperiodeOmsorgspenger uttaksPeriode) {
+        var utfallType = OmsorgspengerUtfall.INNVILGET.equals(uttaksPeriode.getUtfall()) ? UtfallType.INNVILGET : UtfallType.AVSLÅTT;
+        return new UttakDto(avgrensPeriode(periode, uttaksPeriode), utfallType, uttaksPeriode.getUtbetalingsgrad());
+    }
+
+    private Periode avgrensPeriode(DatoIntervallEntitet periode, UttaksperiodeOmsorgspenger uttaksPeriode) {
+        var fom = uttaksPeriode.getFom();
+        var tom = uttaksPeriode.getTom();
+        if (fom.isBefore(periode.getFomDato())) {
+            fom = periode.getFomDato();
         }
+        if (tom.isAfter(periode.getTomDato())) {
+            tom = periode.getTomDato();
+        }
+        return new Periode(fom, tom);
     }
 
     private boolean matcherArbeidsforhold(UttakArbeidsforhold arbeidsforhold, BeregningsresultatAndel brukersAndel) {

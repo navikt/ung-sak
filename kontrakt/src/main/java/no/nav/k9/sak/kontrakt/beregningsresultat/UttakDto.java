@@ -15,11 +15,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class UttakDto {
+
+    @JsonProperty(value = "periode", required = true)
+    @Valid
+    @NotNull
+    private Periode periode;
 
     @JsonProperty(value = "utbetalingsgrad", required = true)
     @DecimalMin("0.00")
@@ -38,8 +44,14 @@ public class UttakDto {
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
-    public UttakDto() {
-        //
+    public UttakDto(Periode periode, UtfallType utfallType, BigDecimal utbetalingsgrad) {
+        this.periode = periode;
+        this.utfall = utfallType;
+        this.utbetalingsgrad = utbetalingsgrad;
+    }
+
+    public Periode getPeriode() {
+        return periode;
     }
 
     public UtfallType getUtfall() {

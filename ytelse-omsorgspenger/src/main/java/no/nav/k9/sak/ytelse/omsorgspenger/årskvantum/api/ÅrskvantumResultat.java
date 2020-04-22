@@ -51,7 +51,7 @@ public class ÅrskvantumResultat {
 
     public Periode getMaksPeriode() {
         var fom = uttaksplan.getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(UttaksperiodeOmsorgspenger::getFom).min(Comparator.nullsFirst(Comparator.naturalOrder())).orElse(null);
-        var tom = uttaksplan.getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(UttaksperiodeOmsorgspenger::getFom).max(Comparator.nullsLast(Comparator.naturalOrder())).orElse(null);
+        var tom = uttaksplan.getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(UttaksperiodeOmsorgspenger::getTom).max(Comparator.nullsLast(Comparator.naturalOrder())).orElse(null);
         return fom != null && tom != null ? new Periode(fom, tom) : null;
     }
 

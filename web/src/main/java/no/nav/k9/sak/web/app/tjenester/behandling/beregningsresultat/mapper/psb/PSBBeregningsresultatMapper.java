@@ -11,7 +11,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -137,10 +136,10 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         brpDto.getValue().getAndeler().forEach(a -> {
             if (ut != null) {
                 // setter uttak rett på andel 'a' - Ok her
-                a.setUttak(new UttakDto(ut.getUtfall(), BigDecimal.ZERO)); // default uttak, overskrives under
+                a.setUttak(List.of(new UttakDto(ut.getUtfall(), BigDecimal.ZERO))); // default uttak, overskrives under
                 if (UtfallType.INNVILGET.equals(ut.getUtfall())) {
                     var key = toUttakArbeidsforhold(a);
-                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> a.setUttak(new UttakDto(innvilget.getUtfall(), utbet.getUtbetalingsgrad())));
+                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> a.setUttak(List.of(new UttakDto(innvilget.getUtfall(), utbet.getUtbetalingsgrad()))));
                 }
             }
         });
