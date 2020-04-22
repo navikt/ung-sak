@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
+import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -25,6 +25,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.søknad.felles.Periode;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
+import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
 
 @Dependent
 class LagreOppgittOpptjening {
@@ -54,14 +55,15 @@ class LagreOppgittOpptjening {
             var fri = inntekter.getFrilanser();
             List<OppgittFrilansoppdrag> oppdrag = fri.getInntekterSøknadsperiode().entrySet().stream().map(entry -> {
                 OppgittFrilansOppdragBuilder builder = OppgittFrilansOppdragBuilder.ny();
-                return builder.medInntekt(entry.getValue().getBeløp())
+                return builder
+                        .medInntekt(entry.getValue().getBeløp())
                         .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed()))
                         .build();
             }).collect(Collectors.toList());
 
             OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
             OppgittFrilans oppgittFrilans = frilansBuilder
-                    .medErNyoppstartet(false)
+                    .medErNyoppstartet(fri.getErNyetablert())
                     .leggTilOppgittOppdrag(oppdrag)
                     .build();
             opptjeningBuilder.leggTilFrilansOpplysninger(oppgittFrilans);
@@ -73,10 +75,10 @@ class LagreOppgittOpptjening {
 
             // slår sammen historiske og løpende inntekter her.  Bruker stp senere til håndtere før/etter inntektstap startet.
 
-            var egenNæringFør = selv.getInntekterFør().entrySet().stream().map(this::mapEgenNæring).collect(Collectors.toList());
+            var egenNæringFør = selv.getInntekterFør().entrySet().stream().map(e -> mapEgenNæring(selv, e)).collect(Collectors.toList());
             opptjeningBuilder.leggTilEgneNæringer(egenNæringFør);
 
-            var egenNæringSøknadsperiode = selv.getInntekterSøknadsperiode().entrySet().stream().map(this::mapEgenNæring).collect(Collectors.toList());
+            var egenNæringSøknadsperiode = selv.getInntekterSøknadsperiode().entrySet().stream().map(e -> mapEgenNæring(selv, e)).collect(Collectors.toList());
             opptjeningBuilder.leggTilEgneNæringer(egenNæringSøknadsperiode);
 
             erNyeOpplysninger |= !egenNæringFør.isEmpty() || !egenNæringSøknadsperiode.isEmpty();
@@ -92,7 +94,7 @@ class LagreOppgittOpptjening {
         OppgittOpptjeningBuilder builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
 
         // bygg på eksisterende hvis tidligere innrapportert for denne ytelsen (sikrer at vi får med originalt rapportert inntektsgrunnlag).
-        // TODO: håndtere korreksjoner senere?  vil nå bare akkumulere innrappotert.
+        // TODO: håndtere korreksjoner senere?  vil nå bare akkumulere innrapportert.
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
         if (sisteBehandling.isPresent()) {
             Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = sisteBehandling.isPresent() ? iayTjeneste.finnGrunnlag(sisteBehandling.get().getId()) : Optional.empty();
@@ -106,14 +108,16 @@ class LagreOppgittOpptjening {
         return builder;
     }
 
-    private EgenNæringBuilder mapEgenNæring(Map.Entry<Periode, PeriodeInntekt> entry) {
+    private EgenNæringBuilder mapEgenNæring(SelvstendigNæringsdrivende selvstendig, Map.Entry<Periode, PeriodeInntekt> entry) {
         Periode periode = entry.getKey();
         PeriodeInntekt inntekt = entry.getValue();
 
         var builder = EgenNæringBuilder.ny();
         builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()));
         builder.medBruttoInntekt(inntekt.getBeløp());
-        builder.medVirksomhetType(VirksomhetType.ENKELTPERSONFORETAK);
+        builder.medVirksomhetType(VirksomhetType.ANNEN);
+        builder.medRegnskapsførerNavn(selvstendig.getRegnskapsførerNavn());
+        builder.medRegnskapsførerTlf(selvstendig.getRegnskapsførerTlf());
         return builder;
     }
 }

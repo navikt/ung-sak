@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -52,7 +53,6 @@ import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
@@ -69,9 +69,9 @@ import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.Enhetsstatus;
 @ApplicationScoped
 public class HentKodeverkTjeneste {
 
-    public static final Map<String, Collection<? extends Kodeverdi>> KODEVERDIER_SOM_BRUKES_PÅ_KLIENT;
+    public static final Map<String, Collection<?>> KODEVERDIER_SOM_BRUKES_PÅ_KLIENT;
     static {
-        Map<String, Collection<? extends Kodeverdi>> map = new LinkedHashMap<>();
+        Map<String, Collection<?>> map = new LinkedHashMap<>();
 
         map.put(RelatertYtelseTilstand.class.getSimpleName(), RelatertYtelseTilstand.kodeMap().values());
         map.put(FagsakStatus.class.getSimpleName(), FagsakStatus.kodeMap().values());
@@ -123,10 +123,10 @@ public class HentKodeverkTjeneste {
         map.put(VedtakResultatType.class.getSimpleName(), VedtakResultatType.kodeMap().values());
         map.put(DokumentTypeId.class.getSimpleName(), DokumentTypeId.kodeMap().values());
 
-        Map<String, Collection<? extends Kodeverdi>> mapFiltered = new LinkedHashMap<>();
+        Map<String, Collection<?>> mapFiltered = new LinkedHashMap<>();
 
         map.entrySet().forEach(e -> {
-            mapFiltered.put(e.getKey(), e.getValue().stream().filter(f -> !"-".equals(f.getKode())).collect(Collectors.toSet()));
+            mapFiltered.put(e.getKey(), e.getValue().stream().filter(f -> !(f instanceof Kodeverdi) || !"-".equals(((Kodeverdi)f).getKode())).collect(Collectors.toSet()));
         });
 
         KODEVERDIER_SOM_BRUKES_PÅ_KLIENT = Collections.unmodifiableMap(mapFiltered);
@@ -153,9 +153,9 @@ public class HentKodeverkTjeneste {
         this.enhetsTjeneste = enhetsTjeneste;
     }
 
-    public Map<String, Collection<? extends Kodeverdi>> hentGruppertKodeliste() {
+    public Map<String, Collection<?>> hentGruppertKodeliste() {
         // slå sammen kodeverdi og kodeliste maps
-        Map<String, Collection<? extends Kodeverdi>> kodelistMap = new LinkedHashMap<>();
+        Map<String, Collection<?>> kodelistMap = new LinkedHashMap<>();
         kodelistMap.putAll(KODEVERDIER_SOM_BRUKES_PÅ_KLIENT);
 
         return kodelistMap;

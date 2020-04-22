@@ -24,7 +24,6 @@ public enum BehandlingType implements Kodeverdi {
      * for å hente offisiell kode for et Nav kodeverk).
      */
     FØRSTEGANGSSØKNAD("BT-002", "Førstegangsbehandling", "ae0034", 6, true),
-    KLAGE("BT-003", "Klage", "ae0058", 10, false),
     REVURDERING("BT-004", "Revurdering", "ae0028", 6, false),
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Priority(2)
 public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     public static final String ABAC_DOMAIN = "k9";
-    private static final MdcExtendedLogContext MDC_EXTENDED_LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørConsumerMedCache aktørConsumer;
 
@@ -51,6 +51,8 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     @Override
     public PdpRequest lagPdpRequest(AbacAttributtSamling attributter) {
+        LOG_CONTEXT.clear();
+        
         Optional<Long> behandlingIder = utledBehandlingIder(attributter);
         Optional<PipBehandlingsData> behandlingData = behandlingIder.isPresent()
             ? pipRepository.hentDataForBehandling(behandlingIder.get())
@@ -62,12 +64,10 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         behandlingData.ifPresent(pipBehandlingsData -> validerSamsvarBehandlingOgFagsak(behandlingIder.get(), pipBehandlingsData.getFagsakId(), fagsakIder));
 
         if (!fagsakIder.isEmpty()) {
-            MDC_EXTENDED_LOG_CONTEXT.remove("fagsak");
-            MDC_EXTENDED_LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
+            LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
         }
         behandlingIder.ifPresent(behId -> {
-            MDC_EXTENDED_LOG_CONTEXT.remove("behandling");
-            MDC_EXTENDED_LOG_CONTEXT.add("behandling", behId);
+            LOG_CONTEXT.add("behandling", behId);
         });
 
         Set<AktørId> aktørIder = utledAktørIder(attributter, fagsakIder);

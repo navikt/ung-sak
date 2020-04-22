@@ -31,33 +31,29 @@ public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
         this.kontekst = kontekst;
     }
 
-
     @Override
     public StegProsesseringResultat prosesser(BehandlingStegModell steg) {
-        LOG_CONTEXT.add("fagsak", kontekst.getFagsakId()); // NOSONAR //$NON-NLS-1$
-        LOG_CONTEXT.add("behandling", kontekst.getBehandlingId()); // NOSONAR //$NON-NLS-1$
         LOG_CONTEXT.add("steg", steg.getBehandlingStegType().getKode()); // NOSONAR //$NON-NLS-1$
 
-        Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
-        BehandlingStegTilstandSnapshot forrigeTilstand = BehandlingModellImpl.tilBehandlingsStegSnapshot(behandling.getSisteBehandlingStegTilstand());
-        // lag ny for hvert steg som kjøres
-        BehandlingStegVisitor stegVisitor = new BehandlingStegVisitor(serviceProvider, behandling, steg, kontekst);
+        try {
+            Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
+            BehandlingStegTilstandSnapshot forrigeTilstand = BehandlingModellImpl.tilBehandlingsStegSnapshot(behandling.getSisteBehandlingStegTilstand());
+            // lag ny for hvert steg som kjøres
+            BehandlingStegVisitor stegVisitor = new BehandlingStegVisitor(serviceProvider, behandling, steg, kontekst);
 
-        // kjøres utenfor savepoint. Ellers står vi nakne, med kun utførte steg
-        stegVisitor.markerOvergangTilNyttSteg(steg.getBehandlingStegType(), forrigeTilstand);
+            // kjøres utenfor savepoint. Ellers står vi nakne, med kun utførte steg
+            stegVisitor.markerOvergangTilNyttSteg(steg.getBehandlingStegType(), forrigeTilstand);
 
-        StegProsesseringResultat resultat = prosesserStegISavepoint(behandling, stegVisitor);
-
-        /*
-         * NB: nullstiller her og ikke i finally block, siden det da fjernes før vi får logget det.
-         * Hele settet fjernes så i MDCFilter eller tilsvarende uansett. Steg er del av koden så fanges uansett i
-         * stacktrace men trengs her for å kunne ta med i log eks. på DEBUG/INFO/WARN nivå.
-         *
-         * behandling og fagsak kan være satt utenfor, så nullstiller ikke de i log context her
-         */
-        LOG_CONTEXT.remove("steg"); // NOSONAR //$NON-NLS-1$
-
-        return resultat;
+            StegProsesseringResultat resultat = prosesserStegISavepoint(behandling, stegVisitor);
+            return resultat;
+        } finally {
+            /*
+             * NB: nullstiller her og ikke i finally block, siden det da fjernes før vi får logget det.
+             * Hele settet fjernes så i MDCFilter eller tilsvarende uansett. Steg er del av koden så fanges uansett i
+             * stacktrace men trengs her for å kunne ta med i log eks. på DEBUG/INFO/WARN nivå.
+             */
+            LOG_CONTEXT.remove("steg"); // NOSONAR //$NON-NLS-1$
+        }
     }
 
     protected StegProsesseringResultat prosesserStegISavepoint(Behandling behandling, BehandlingStegVisitor stegVisitor) {

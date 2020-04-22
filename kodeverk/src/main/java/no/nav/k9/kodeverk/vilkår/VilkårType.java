@@ -29,55 +29,57 @@ import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
 public enum VilkårType implements Kodeverdi {
 
     MEDLEMSKAPSVILKÅRET(VilkårTypeKoder.FP_VK_2,
-        "Medlemskapsvilkåret",
-        Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-2"),
-        Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
-        Avslagsårsak.SØKER_ER_UTVANDRET,
-        Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
-        Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT,
-        Avslagsårsak.SØKER_ER_IKKE_BOSATT),
+            "Medlemskapsvilkåret",
+            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
+                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "2"),
+            Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
+            Avslagsårsak.SØKER_ER_UTVANDRET,
+            Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
+            Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT,
+            Avslagsårsak.SØKER_ER_IKKE_BOSATT),
     MEDLEMSKAPSVILKÅRET_LØPENDE(VilkårTypeKoder.FP_VK_2_L,
-        "Løpende medlemskapsvilkår",
-        Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-2"),
-        Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
-        Avslagsårsak.SØKER_ER_UTVANDRET,
-        Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
-        Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT,
-        Avslagsårsak.SØKER_ER_IKKE_BOSATT),
+            "Løpende medlemskapsvilkår",
+            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
+                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2"),
+            Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
+            Avslagsårsak.SØKER_ER_UTVANDRET,
+            Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
+            Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT,
+            Avslagsårsak.SØKER_ER_IKKE_BOSATT),
     OMSORGEN_FOR(VilkårTypeKoder.PSB_VK_1,
-        "Omsorgen for",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
-        Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
-        Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
-        Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
+            "Omsorgen for",
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
+            Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
+            Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     MEDISINSKEVILKÅR_UNDER_18_ÅR(VilkårTypeKoder.PSB_VK_2a,
-        "Medisinskevilkår under 18 år",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
-        Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
-        Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
-        Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
+            "Medisinskevilkår under 18 år",
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
+            Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
+            Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     MEDISINSKEVILKÅR_18_ÅR(VilkårTypeKoder.PSB_VK_2b,
-        "Medisinskevilkår 18 år eller eldre",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
-        Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
-        Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
-        Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
+            "Medisinskevilkår 18 år eller eldre",
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
+            Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
+            Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     SØKERSOPPLYSNINGSPLIKT(VilkårTypeKoder.FP_VK_34,
-        "Søkers opplysningsplikt",
-        Map.of(FagsakYtelseType.ENGANGSTØNAD, "§§ 21-3 og 21-7", FagsakYtelseType.FORELDREPENGER, "§§ 21-3 og 21-7"),
-        Avslagsårsak.MANGLENDE_DOKUMENTASJON),
+            "Søkers opplysningsplikt",
+            Map.of(FagsakYtelseType.ENGANGSTØNAD, "§§ 21-3 og 21-7", FagsakYtelseType.FORELDREPENGER, "§§ 21-3 og 21-7"),
+            Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     OPPTJENINGSPERIODEVILKÅR(VilkårTypeKoder.FP_VK_21,
-        "Opptjeningsperiode",
-        Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2"),
-        Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
+            "Opptjeningsperiode",
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2"),
+            Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
     OPPTJENINGSVILKÅRET(VilkårTypeKoder.FP_VK_23,
-        "Opptjeningsvilkåret",
-        Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2"),
-        Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
+            "Opptjeningsvilkåret",
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2"),
+            Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
     BEREGNINGSGRUNNLAGVILKÅR(VilkårTypeKoder.FP_VK_41,
-        "Beregning",
-        Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7"),
-        Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG),
+            "Beregning",
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7"),
+            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG),
 
     /**
      * Brukes i stedet for null der det er optional.
@@ -107,9 +109,9 @@ public enum VilkårType implements Kodeverdi {
     }
 
     private VilkårType(String kode,
-                      String navn,
-                      Map<FagsakYtelseType, String> lovReferanser,
-                      Avslagsårsak... avslagsårsaker) {
+                       String navn,
+                       Map<FagsakYtelseType, String> lovReferanser,
+                       Avslagsårsak... avslagsårsaker) {
         this.kode = kode;
         this.navn = navn;
         this.lovReferanser = lovReferanser;
@@ -119,11 +121,6 @@ public enum VilkårType implements Kodeverdi {
 
     public String getLovReferanse(FagsakYtelseType fagsakYtelseType) {
         return lovReferanser.get(fagsakYtelseType);
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + lovReferanser;
     }
 
     @Override
@@ -186,18 +183,18 @@ public enum VilkårType implements Kodeverdi {
             // fra 2.11 er følgende workaround (respekterer fortsatt ikke JsonProperty på enum)
             // https://github.com/FasterXML/jackson-databind/issues/2503
             KODER.putIfAbsent(v.name(), v);
-            
+
             INDEKS_VILKÅR_AVSLAGSÅRSAKER.put(v, v.avslagsårsaker);
             v.avslagsårsaker.forEach(a -> INDEKS_AVSLAGSÅRSAK_VILKÅR.computeIfAbsent(a, (k) -> new HashSet<>(4)).add(v));
         }
     }
-
 
     static class Serializer extends StdSerializer<VilkårType> {
 
         public Serializer() {
             super(VilkårType.class);
         }
+
         @Override
         public void serialize(VilkårType value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
             jgen.writeStartObject();

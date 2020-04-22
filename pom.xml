@@ -44,7 +44,7 @@
 		<metrics.version>4.1.6</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
 		<kalkulus.version>1.0-2020.04.20.163650-ada3a1d</kalkulus.version>
-		<k9format.version>3.2.0-20200422075849-44c8471</k9format.version>
+		<k9format.version>3.2.0-20200422143239-2b3223e</k9format.version>
 	</properties>
 
     <repositories>
@@ -152,7 +152,7 @@
 			<dependency>
 				<groupId>no.nav.foreldrepenger.abakus</groupId>
 				<artifactId>abakus-kontrakt</artifactId>
-				<version>1.2-2020.04.16.154252-0f6b947</version>
+				<version>1.2-2020.04.22.115051-0094214</version>
 			</dependency>
 
 			<dependency>

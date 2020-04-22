@@ -21,7 +21,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
 import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 
 public final class KodeverkMapper {
 
@@ -246,12 +245,6 @@ public final class KodeverkMapper {
             : NaturalYtelseType.fraKode(dto.getKode());
     }
 
-    static VirksomhetType mapVirksomhetTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType dto) {
-        return dto == null
-            ? VirksomhetType.UDEFINERT
-            : VirksomhetType.fraKode(dto.getKode());
-    }
-
     static SkatteOgAvgiftsregelType mapSkatteOgAvgiftsregelFraDto(no.nav.abakus.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType dto) {
         return dto == null
             ? SkatteOgAvgiftsregelType.UDEFINERT
@@ -292,12 +285,6 @@ public final class KodeverkMapper {
         return dto == null
             ? UtsettelseÅrsak.UDEFINERT
             : UtsettelseÅrsak.fraKode(dto.getKode());
-    }
-
-    static no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType mapVirksomhetTypeTilDto(VirksomhetType kode) {
-        return kode == null || VirksomhetType.UDEFINERT.equals(kode)
-            ? null
-            : no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType.fraKode(kode.getKode());
     }
 
     public static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapFagsakYtelseTypeTilDto(FagsakYtelseType ytelseType) {
