@@ -150,10 +150,13 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         brpDto.getValue().getAndeler().forEach(a -> {
             if (ut != null) {
                 // setter uttak rett på andel 'a' - Ok her
-                a.setUttak(List.of(new UttakDto(ut.getUtfall(), BigDecimal.ZERO))); // default uttak, overskrives under
+                var periode = new no.nav.k9.sak.typer.Periode(interval.getFomDato(), interval.getTomDato());
+                a.setUttak(List.of(new UttakDto(periode, ut.getUtfall(), BigDecimal.ZERO))); // default uttak, overskrives under
                 if (UtfallType.INNVILGET.equals(ut.getUtfall())) {
                     var key = toUttakArbeidsforhold(a);
-                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> a.setUttak(List.of(new UttakDto(innvilget.getUtfall(), utbet.getUtbetalingsgrad()))));
+                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> {
+                        a.setUttak(List.of(new UttakDto(periode, innvilget.getUtfall(), utbet.getUtbetalingsgrad())));
+                    });
                 }
             }
         });
