@@ -47,6 +47,9 @@
     </appender>
 
     <logger name="no.nav" level="${log.level.no.nav:-INFO}" />
+    <logger name="no.nav.vedtak.sikkerhet" level="${log.level.no.nav.vedtak.sikkerhet:-WARN}" />
+    <logger name="no.nav.modig" level="${log.level.no.nav.modig:-WARN}" />
+    <logger name="no.nav.vedtak.felles.integrasjon.unleash" level="${log.level.no.nav.vedtak.felles.integrasjon.unleash:-WARN}" />
 
     <!-- skru paa for aa logge all sql statements med parametere -->
     <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}" />
@@ -62,8 +65,6 @@
     <logger name="org.jboss.weld" level="${log.level.org.jboss.weld:-WARN}" />
     <logger name="org.jboss.resteasy" level="${log.level.org.jboss.resteasy:-WARN}" />
 
-    <logger name="no.nav.modig" level="${log.level.no.nav.modig:-WARN}" />
-    <logger name="no.nav.vedtak.felles.integrasjon.unleash" level="${log.level.no.nav.vedtak.felles.integrasjon.unleash:-WARN}" />
     <logger name="Hibernate Types" level="ERROR" />
     <!-- denne logger passord på INFO nivå!-->
     <logger name="no.nav.modig.core.test.PropertySetter" level="${log.level.no.nav.modig.core.test.PropertySetter:-WARN}" />
