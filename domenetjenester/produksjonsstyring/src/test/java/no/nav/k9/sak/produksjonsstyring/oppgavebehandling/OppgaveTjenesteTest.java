@@ -101,122 +101,6 @@ public class OppgaveTjenesteTest {
     }
 
     @Test
-    public void skal_opprette_oppgave_når_det_ikke_finnes_fra_før() {
-        // Arrange
-        Long behandlingId = behandling.getId();
-        String gsakOppgaveId = "GSAK1110";
-        WSOpprettOppgaveResponse mockResponse = new WSOpprettOppgaveResponse();
-        mockResponse.setOppgaveId(gsakOppgaveId);
-        ArgumentCaptor<OpprettOppgaveRequest> captor = ArgumentCaptor.forClass(OpprettOppgaveRequest.class);
-        when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
-
-        // Act
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-
-        // Assert
-        List<OppgaveBehandlingKobling> oppgaver = repository.hentAlle(OppgaveBehandlingKobling.class);
-        assertThat(oppgaver).hasSize(1);
-        List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandlingId);
-        OppgaveBehandlingKobling oppgaveBehandlingKobling = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(OppgaveÅrsak.BEHANDLE_SAK, oppgaveBehandlingKoblinger).orElseThrow(
-            () -> new IllegalStateException("Mangler AktivOppgaveMedÅrsak"));
-        assertThat(oppgaveBehandlingKobling.getOppgaveÅrsak()).isEqualTo(OppgaveÅrsak.BEHANDLE_SAK);
-        assertThat(oppgaveBehandlingKobling.getOppgaveId()).isEqualTo(gsakOppgaveId);
-
-        verify(tpsTjeneste).hentBrukerForAktør(behandling.getAktørId());
-    }
-
-    @Test
-    public void skal_ikke_opprette_en_ny_oppgave_av_samme_type_når_det_finnes_fra_før_og_den_ikke_er_ferdigstilt() {
-        // Arrange
-        Long behandlingId = behandling.getId();
-        String gsakOppgaveId = "GSAK1110";
-        WSOpprettOppgaveResponse mockResponse = new WSOpprettOppgaveResponse();
-        mockResponse.setOppgaveId(gsakOppgaveId);
-        ArgumentCaptor<OpprettOppgaveRequest> captor = ArgumentCaptor.forClass(OpprettOppgaveRequest.class);
-        when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
-
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-        List<OppgaveBehandlingKobling> oppgaver = repository.hentAlle(OppgaveBehandlingKobling.class);
-        assertThat(oppgaver).hasSize(1);
-        oppgaver.get(0).setFerdigstilt(false);
-        repository.lagre(oppgaver.get(0));
-
-        // Act
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-
-        // Assert
-        oppgaver = repository.hentAlle(OppgaveBehandlingKobling.class);
-        assertThat(oppgaver).hasSize(1);
-    }
-
-    @Test
-    public void skal_opprette_en_ny_oppgave_når_det_finnes_fra_før_og_den_er_ferdigstilt() {
-        // Arrange
-        Long behandlingId = behandling.getId();
-        String gsakOppgaveId = "GSAK1110";
-        WSOpprettOppgaveResponse mockResponse = new WSOpprettOppgaveResponse();
-        mockResponse.setOppgaveId(gsakOppgaveId);
-        ArgumentCaptor<OpprettOppgaveRequest> captor = ArgumentCaptor.forClass(OpprettOppgaveRequest.class);
-        when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
-
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-        List<OppgaveBehandlingKobling> oppgaver = repository.hentAlle(OppgaveBehandlingKobling.class);
-        assertThat(oppgaver).hasSize(1);
-        oppgaver.get(0).setFerdigstilt(true);
-        repository.lagre(oppgaver.get(0));
-
-        // Act
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.GODKJENNE_VEDTAK);
-
-        // Assert
-        oppgaver = repository.hentAlle(OppgaveBehandlingKobling.class);
-        assertThat(oppgaver).hasSize(2);
-    }
-
-    @Test
-    public void skal_kunne_opprette_en_ny_oppgave_med_en_annen_årsak_selv_om_det_finnes_en_aktiv_oppgave() throws Exception {
-        // Arrange
-        Long behandlingId = behandling.getId();
-        String gsakOppgaveId = "GSAK1110";
-        WSOpprettOppgaveResponse mockResponse = new WSOpprettOppgaveResponse();
-        mockResponse.setOppgaveId(gsakOppgaveId);
-        ArgumentCaptor<OpprettOppgaveRequest> captor = ArgumentCaptor.forClass(OpprettOppgaveRequest.class);
-        when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
-
-        // Act
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.GODKJENNE_VEDTAK);
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.GODKJENNE_VEDTAK);
-
-        // Assert
-        List<OppgaveBehandlingKobling> aktiveOppgaver = repository.hentAlle(OppgaveBehandlingKobling.class).stream()
-            .filter(oppgave -> !oppgave.isFerdigstilt())
-            .collect(Collectors.toList());
-        assertThat(aktiveOppgaver).hasSize(2);
-    }
-
-    @Test
-    public void skal_avslutte_oppgave() {
-        // Arrange
-        Long behandlingId = behandling.getId();
-        String gsakOppgaveId = "GSAK1110";
-        WSOpprettOppgaveResponse mockResponse = new WSOpprettOppgaveResponse();
-        mockResponse.setOppgaveId(gsakOppgaveId);
-        ArgumentCaptor<OpprettOppgaveRequest> captor = ArgumentCaptor.forClass(OpprettOppgaveRequest.class);
-        when(oppgavebehandlingConsumer.opprettOppgave(captor.capture())).thenReturn(mockResponse);
-        tjeneste.opprettBasertPåBehandlingId(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-
-        // Act
-        tjeneste.avslutt(behandlingId, OppgaveÅrsak.BEHANDLE_SAK);
-
-        // Assert
-        List<OppgaveBehandlingKobling> oppgaver = repository.hentAlle(OppgaveBehandlingKobling.class);
-        OppgaveBehandlingKobling behandlingKobling = oppgaver.get(0);
-        assertThat(behandlingKobling.isFerdigstilt()).isTrue();
-    }
-
-    @Test
     public void skal_opprette_oppgave_basert_på_fagsakId() {
         // Arrange
         String gsakOppgaveId = "GSAK1110";
@@ -326,7 +210,7 @@ public class OppgaveTjenesteTest {
         assertThat(new Saksnummer(request.getSaksnummer())).isEqualTo(behandling.getFagsak().getSaksnummer());
         assertThat(request.getOppgavetypeKode()).isEqualTo(OppgaveÅrsak.GODKJENNE_VEDTAK.getKode());
         assertThat(request.getBeskrivelse()).isEqualTo("noe tekst");
-        assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.HOY_FOR);
+        assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.HOY_OMS);
         assertThat(request.getAktivTil()).isEqualTo(Optional.of(forventetFrist));
     }
 
@@ -352,7 +236,7 @@ public class OppgaveTjenesteTest {
         assertThat(request.getAnsvarligEnhetId()).isEqualTo("4151");
         assertThat(request.getFagomradeKode()).isEqualTo(FagomradeKode.STO);
         assertThat(request.getOppgavetypeKode()).isEqualTo("SETTVENT_STO");
-        assertThat(request.getUnderkategoriKode()).isEqualTo("FORELDREPE_STO");
+        assertThat(request.getUnderkategoriKode()).isEqualTo("OMS_STO");
         assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.HOY_STO);
         assertThat(request.isLest()).isFalse();
         assertThat(request.getAktivTil()).isEqualTo(Optional.of(forventetFrist));
@@ -392,7 +276,7 @@ public class OppgaveTjenesteTest {
         assertThat(request.getAnsvarligEnhetId()).isEqualTo("4151");
         assertThat(request.getFagomradeKode()).isEqualTo(FagomradeKode.STO);
         assertThat(request.getOppgavetypeKode()).isEqualTo("SETTVENT_STO");
-        assertThat(request.getUnderkategoriKode()).isEqualTo("FORELDREPE_STO");
+        assertThat(request.getUnderkategoriKode()).isEqualTo("OMS_STO");
         assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.HOY_STO);
         assertThat(request.isLest()).isFalse();
         assertThat(request.getAktivTil()).isEqualTo(Optional.of(forventetFrist));
@@ -422,14 +306,14 @@ public class OppgaveTjenesteTest {
         OpprettOppgaveRequest request = captor.getValue();
         assertThat(request.getBeskrivelse()).isEqualTo(beskrivelse);
         assertThat(request.getFagomradeKode()).isEqualTo(FagomradeKode.OMS);
-        assertThat(request.getOppgavetypeKode()).isEqualTo(OppgaveÅrsak.VURDER_KONS_FOR_YTELSE.getKode());
-        assertThat(request.getUnderkategoriKode()).isEqualTo("FEILUTB_FOR");
+        assertThat(request.getOppgavetypeKode()).isEqualTo(OppgaveÅrsak.VURDER_KONS_OMS_YTELSE.getKode());
+        assertThat(request.getUnderkategoriKode()).isEqualTo("FEILUTB_OMS");
         assertThat(request.getBrukerTypeKode()).isEqualTo(BrukerType.PERSON);
         assertThat(request.isLest()).isFalse();
         assertThat(request.getFnr()).isEqualTo(FNR);
         assertThat(request.getAnsvarligEnhetId()).isEqualTo(behandling.getBehandlendeEnhet());
         assertThat(request.getOpprettetAvEnhetId()).isEqualTo(Integer.parseInt(behandling.getBehandlendeEnhet()));
-        assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.NORM_FOR);
+        assertThat(request.getPrioritetKode()).isEqualTo(PrioritetKode.NORM_OMS);
     }
 
     private LocalDate helgeJustert(LocalDate dato) {

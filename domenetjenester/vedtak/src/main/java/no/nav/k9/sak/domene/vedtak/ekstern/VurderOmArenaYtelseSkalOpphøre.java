@@ -66,7 +66,7 @@ public class VurderOmArenaYtelseSkalOpphøre {
             return;
         }
         LocalDate vedtaksDato = vedtak.getVedtaksdato();
-        LocalDate startdatoFP = finnFørsteAnvistDatoFP(behandlingId).orElse(skjæringstidspunkt);
+        LocalDate startdatoFP = finnFørsteAnvistDato(behandlingId).orElse(skjæringstidspunkt);
 
         if (vurderArenaYtelserOpphøres(behandlingId, aktørId, startdatoFP, vedtaksDato)) {
             String oppgaveId = oppgaveTjeneste.opprettOppgaveStopUtbetalingAvARENAYtelse(behandlingId, startdatoFP);
@@ -80,16 +80,16 @@ public class VurderOmArenaYtelseSkalOpphøre {
      * startdatoen for foreldrepenger overlapper med ytelse i ARENA.
      *
      * @param behandling         behandling til saken i FP
-     * @param førsteAnvistDatoFP første dato for utbetaling
+     * @param førsteAnvistDato første dato for utbetaling
      * @param vedtaksDato        vedtaksdato
      * @return true hvis det finnes en overlappende ytelse i ARENA, ellers false
      */
-    boolean vurderArenaYtelserOpphøres(Long behandlingId, AktørId aktørId, LocalDate førsteAnvistDatoFP, LocalDate vedtaksDato) {
-        LocalDate senesteInputDato = vedtaksDato.isAfter(førsteAnvistDatoFP) ? vedtaksDato : førsteAnvistDatoFP;
+    boolean vurderArenaYtelserOpphøres(Long behandlingId, AktørId aktørId, LocalDate førsteAnvistDato, LocalDate vedtaksDato) {
+        LocalDate senesteInputDato = vedtaksDato.isAfter(førsteAnvistDato) ? vedtaksDato : førsteAnvistDato;
         var arenaYtelser = hentArenaYtelser(behandlingId, aktørId, senesteInputDato);
 
         // Ser både på løpende og avsluttede vedtak som overlapper første anvist dato
-        if (!finnesYtelseVedtakPåEtterStartdato(arenaYtelser, førsteAnvistDatoFP)) {
+        if (!finnesYtelseVedtakPåEtterStartdato(arenaYtelser, førsteAnvistDato)) {
             return false;
         }
 
@@ -98,11 +98,11 @@ public class VurderOmArenaYtelseSkalOpphøre {
             return false;
         }
         Optional<LocalDate> nesteArenaAnvistDatoEtterVedtaksdato = finnNesteArenaAnvistDatoEtterVedtaksdato(arenaYtelser, vedtaksDato, sisteArenaAnvistDatoFørVedtaksdato);
-        if (førsteAnvistDatoFP.isBefore(sisteArenaAnvistDatoFørVedtaksdato)) {
+        if (førsteAnvistDato.isBefore(sisteArenaAnvistDatoFørVedtaksdato)) {
             return true;
         }
         return (nesteArenaAnvistDatoEtterVedtaksdato.isPresent() &&
-            DatoIntervallEntitet.fraOgMedTilOgMed(sisteArenaAnvistDatoFørVedtaksdato, nesteArenaAnvistDatoEtterVedtaksdato.get()).inkluderer(førsteAnvistDatoFP) &&
+            DatoIntervallEntitet.fraOgMedTilOgMed(sisteArenaAnvistDatoFørVedtaksdato, nesteArenaAnvistDatoEtterVedtaksdato.get()).inkluderer(førsteAnvistDato) &&
             vedtaksDato.isAfter(nesteArenaAnvistDatoEtterVedtaksdato.get().minusDays(HALV_MELDEKORT_PERIODE)));
     }
 
@@ -115,7 +115,7 @@ public class VurderOmArenaYtelseSkalOpphøre {
             .getFiltrertYtelser();
     }
 
-    private Optional<LocalDate> finnFørsteAnvistDatoFP(Long behandlingId) {
+    private Optional<LocalDate> finnFørsteAnvistDato(Long behandlingId) {
         return beregningsresultatRepository.hentUtbetBeregningsresultat(behandlingId)
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
             .filter(brp -> brp.getBeregningsresultatAndelList().stream().anyMatch(a -> a.getDagsats() > 0))

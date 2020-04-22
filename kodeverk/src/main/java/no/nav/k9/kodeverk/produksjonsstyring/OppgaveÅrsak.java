@@ -26,6 +26,7 @@ public enum OppgaveÅrsak implements Kodeverdi {
     REVURDER("RV_VL", "Revurdere i VL"),
     VURDER_DOKUMENT("VUR_VL", "Vurder dokument i VL"),
     VURDER_KONS_FOR_YTELSE("VUR_KONS_YTE_FOR", "Vurder konsekvens for ytelse foreldrepenger"),
+    VURDER_KONS_OMS_YTELSE("VUR_KONS_YTE_OMS", "Vurder konsekvens for OMS-ytelser"),
     UDEFINERT("-", "Ikke definert"),
     ;
 
