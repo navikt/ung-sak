@@ -58,9 +58,14 @@ public class OppgaveTjeneste {
     private static final String OMSORGSPENGERSAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Omsorgspengersak må flyttes til Infotrygd";
 
     private static final String NØS_ANSVARLIG_ENHETID = "4151";
-    private static final String NØS_FP_UNDERKATEGORI = "FORELDREPE_STO";
+    private static final String NØS_OMS_UNDERKATEGORI = "OMS_STO";
 
-    private static final String FEILUTBETALING_UNDERKATEGORI = "FEILUTB_FOR";
+    /* 
+     * TODO K9: Denne koden var "FEILUTB_FOR". Tror ikke det er opprettet en kode for OMS ennå,
+     *          men bruker "FEILUTB_OMS" (bedre at det feiler grunnet manglende kode enn at
+     *          oppgaven ligger feil.
+     */
+    private static final String FEILUTBETALING_UNDERKATEGORI = "FEILUTB_OMS";
 
     private Logger logger = LoggerFactory.getLogger(OppgaveTjeneste.class);
     private FagsakRepository fagsakRepository;
@@ -90,39 +95,6 @@ public class OppgaveTjeneste {
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    public String opprettBasertPåBehandlingId(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
-        return opprettBasertPåBehandlingId(String.valueOf(behandlingId), oppgaveÅrsak);
-    }
-
-    public String opprettBasertPåBehandlingId(String behandlingId, OppgaveÅrsak oppgaveÅrsak) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return opprettOppgave(behandling, oppgaveÅrsak, DEFAULT_OPPGAVEBESKRIVELSE, PrioritetKode.NORM_FOR, DEFAULT_OPPGAVEFRIST_DAGER);
-    }
-
-    public String opprettBehandleOppgaveForBehandling(String behandlingId) {
-        return opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(behandlingId, DEFAULT_OPPGAVEBESKRIVELSE, false, DEFAULT_OPPGAVEFRIST_DAGER);
-    }
-
-    public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(String behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
-        return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, hentPrioritetKode(høyPrioritet), fristDager);
-    }
-
-    private String opprettOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String beskrivelse, PrioritetKode prioritetKode, int fristDager) {
-        List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandling.getId());
-        if (OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger).isPresent()) {
-            // skal ikke opprette oppgave med samme årsak når behandlingen allerede har en åpen oppgave med den årsaken knyttet til seg
-            return null;
-        }
-        Fagsak fagsak = behandling.getFagsak();
-        Personinfo personSomBehandles = hentPersonInfo(behandling.getAktørId());
-        OpprettOppgaveRequest request = createRequest(fagsak, personSomBehandles, oppgaveÅrsak, behandling.getBehandlendeEnhet(),
-            beskrivelse, prioritetKode, fristDager);
-
-        WSOpprettOppgaveResponse response = service.opprettOppgave(request);
-        return behandleRespons(behandling, oppgaveÅrsak, response, fagsak.getSaksnummer());
-    }
 
     /**
      * Observer endringer i BehandlingStatus og håndter oppgaver deretter.
@@ -137,7 +109,7 @@ public class OppgaveTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         Fagsak fagsak = behandling.getFagsak();
         Personinfo personSomBehandles = hentPersonInfo(behandling.getAktørId());
-        OpprettOppgaveRequest request = createRequest(fagsak, personSomBehandles, OppgaveÅrsak.VURDER_KONS_FOR_YTELSE, behandling.getBehandlendeEnhet(),
+        OpprettOppgaveRequest request = createRequest(fagsak, personSomBehandles, OppgaveÅrsak.VURDER_KONS_OMS_YTELSE, behandling.getBehandlendeEnhet(),
             beskrivelse, hentPrioritetKode(false), DEFAULT_OPPGAVEFRIST_DAGER, FEILUTBETALING_UNDERKATEGORI);
         WSOpprettOppgaveResponse response = service.opprettOppgave(request);
         return response.getOppgaveId();
@@ -153,17 +125,18 @@ public class OppgaveTjeneste {
     }
 
     public String opprettOppgaveStopUtbetalingAvARENAYtelse(long behandlingId, LocalDate førsteUttaksdato) {
-        final String BESKRIVELSE = "Samordning arenaytelse. Vedtak foreldrepenger fra %s";
-
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
+        final String BESKRIVELSE = "Samordning arenaytelse. Vedtak på %s fra %s";
+        final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        final String ytelsesnavn = behandling.getFagsakYtelseType().getNavn();
+        final Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
+        
         OpprettOppgaveRequest request = OpprettOppgaveRequest.builder()
-            .medBeskrivelse(String.format(BESKRIVELSE, førsteUttaksdato))
+            .medBeskrivelse(String.format(BESKRIVELSE, ytelsesnavn, førsteUttaksdato))
             .medOpprettetAvEnhetId(Integer.parseInt(behandling.getBehandlendeEnhet()))
             .medAnsvarligEnhetId(NØS_ANSVARLIG_ENHETID)
             .medFagomradeKode(FagomradeKode.STO.getKode())
             .medOppgavetypeKode(OppgaveÅrsak.SETT_ARENA_UTBET_VENT.getKode())
-            .medUnderkategoriKode(NØS_FP_UNDERKATEGORI)
+            .medUnderkategoriKode(NØS_OMS_UNDERKATEGORI)
             .medPrioritetKode(PrioritetKode.HOY_STO.name())
             .medLest(false)
             .medAktivFra(LocalDate.now())
@@ -198,7 +171,7 @@ public class OppgaveTjeneste {
             .medAnsvarligEnhetId(NØS_ANSVARLIG_ENHETID)
             .medFagomradeKode(FagomradeKode.STO.getKode())
             .medOppgavetypeKode(OppgaveÅrsak.SETT_ARENA_UTBET_VENT.getKode())
-            .medUnderkategoriKode(NØS_FP_UNDERKATEGORI)
+            .medUnderkategoriKode(NØS_OMS_UNDERKATEGORI)
             .medPrioritetKode(PrioritetKode.HOY_STO.name())
             .medLest(false)
             .medAktivFra(LocalDate.now())
@@ -233,7 +206,7 @@ public class OppgaveTjeneste {
     }
 
     private PrioritetKode hentPrioritetKode(boolean høyPrioritet) {
-        return høyPrioritet ? PrioritetKode.HOY_FOR : PrioritetKode.NORM_FOR;
+        return høyPrioritet ? PrioritetKode.HOY_OMS : PrioritetKode.NORM_OMS;
     }
 
     public void avslutt(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
@@ -313,7 +286,7 @@ public class OppgaveTjeneste {
         if (oppgave.isPresent()) {
             OppgaveBehandlingKobling aktivOppgave = oppgave.get();
             // skal ikke avslutte oppgave av denne typen
-            if (OppgaveÅrsak.BEHANDLE_SAK_INFOTRYGD.equals(aktivOppgave.getOppgaveÅrsak())) {
+            if (OppgaveÅrsak.BEHANDLE_SAK_INFOTRYGD_OMS.equals(aktivOppgave.getOppgaveÅrsak())) {
                 return Optional.empty();
             }
             ferdigstillOppgaveBehandlingKobling(aktivOppgave);
@@ -343,15 +316,6 @@ public class OppgaveTjeneste {
         return builder.build();
     }
 
-    private String behandleRespons(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, WSOpprettOppgaveResponse response,
-                                   Saksnummer saksnummer) {
-
-        String oppgaveId = response.getOppgaveId();
-        OppgaveBehandlingKobling oppgaveBehandlingKobling = new OppgaveBehandlingKobling(oppgaveÅrsak, oppgaveId, saksnummer, behandling);
-        oppgaveBehandlingKoblingRepository.lagre(oppgaveBehandlingKobling);
-        return oppgaveId;
-    }
-
     private Personinfo hentPersonInfo(AktørId aktørId) {
         return tpsTjeneste.hentBrukerForAktør(aktørId)
             .orElseThrow(() -> OppgaveFeilmeldinger.FACTORY.identIkkeFunnet(aktørId).toException());
@@ -363,19 +327,15 @@ public class OppgaveTjeneste {
         return createRequest(fagsak, personinfo, oppgaveÅrsak, enhetsId, beskrivelse, prioritetKode, fristDager, finnUnderkategoriKode(fagsak.getYtelseType()));
     }
 
-    private String finnUnderkategoriKode(@SuppressWarnings("unused") FagsakYtelseType fagsakYtelseType) {
-        // FIXME K9 Ser ut som om dette er noe som brukes mot Gosys. Skal dette også være der for PSB?
-        return "PLEIEPENGER_FOR";
-        /*
-        if (fagsakYtelseType.gjelderForeldrepenger()) {
-            return FP_UNDERKATEGORI;
-        } else if (fagsakYtelseType.gjelderEngangsstønad()) {
-            return ES_UNDERKATEGORI;
-        } else if (fagsakYtelseType.gjelderSvangerskapspenger()) {
-            return SVP_UNDERKATEGORI;
+    private String finnUnderkategoriKode(FagsakYtelseType fagsakYtelseType) {
+        switch (fagsakYtelseType) {
+        case PLEIEPENGER_SYKT_BARN: return "PLEIEPENGERSY_OMS";
+        case OMSORGSPENGER: return "OMSORGSPE_OMS";
+        case FRISINN: throw new IllegalStateException("Frisinn har ikke Gosyskode -- skal dette bestilles?");
+        case OPPLÆRINGSPENGER: return "OPPLARINGSPE_OMS";
+        case PLEIEPENGER_NÆRSTÅENDE: return "PLEIEPENGERPA_OMS";
+        default: throw OppgaveFeilmeldinger.FACTORY.underkategoriIkkeFunnetForFagsakYtelseType(fagsakYtelseType).toException();
         }
-        throw OppgaveFeilmeldinger.FACTORY.underkategoriIkkeFunnetForFagsakYtelseType(fagsakYtelseType).toException();
-         */
     }
 
     private OpprettOppgaveRequest createRequest(Fagsak fagsak, Personinfo personinfo, OppgaveÅrsak oppgaveÅrsak,
