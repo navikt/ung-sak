@@ -1,10 +1,22 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.*;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
+import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
+import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -13,13 +25,6 @@ import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -76,7 +81,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     private static Aktør mapTilKalkulusAktør(UttakArbeidsforhold arb) {
         if (arb != null && arb.getAktørId() != null) {
             return new AktørIdPersonident(arb.getAktørId().getId());
-        } else if (arb != null && arb.getOrganisasjonsnummer() == null) {
+        } else if (arb != null && arb.getOrganisasjonsnummer() != null) {
             return new Organisasjon(arb.getOrganisasjonsnummer());
         } else {
             return null;
