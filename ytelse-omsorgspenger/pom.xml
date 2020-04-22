@@ -44,6 +44,11 @@
 			<artifactId>mottak</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.aarskvantum</groupId>
+            <artifactId>kontrakter</artifactId>
+        </dependency>
+
 		<!-- Test avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
