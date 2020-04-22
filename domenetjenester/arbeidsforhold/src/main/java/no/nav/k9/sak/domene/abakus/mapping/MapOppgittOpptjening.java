@@ -143,7 +143,7 @@ class MapOppgittOpptjening {
             var periode = new Periode(egenNæring.getPeriode().getFomDato(), egenNæring.getPeriode().getTomDato());
 
             var org = egenNæring.getOrgnr() == null ? null : new Organisasjon(egenNæring.getOrgnr());
-            var virksomhetType = KodeverkMapper.mapVirksomhetTypeTilDto(egenNæring.getVirksomhetType());
+            var virksomhetType = egenNæring.getVirksomhetType();
 
             var dto = new OppgittEgenNæringDto(periode)
                 .medBegrunnelse(egenNæring.getBegrunnelse())
@@ -277,7 +277,7 @@ class MapOppgittOpptjening {
                 .medEndringDato(dto.getEndringDato())
                 .medUtenlandskVirksomhet(virksomhet)
                 .medVirksomhet(org)
-                .medVirksomhetType(KodeverkMapper.mapVirksomhetTypeFraDto(dto.getVirksomhetTypeDto()))
+                .medVirksomhetType(dto.getVirksomhetTypeDto())
                 .medRegnskapsførerNavn(dto.getRegnskapsførerNavn())
                 .medRegnskapsførerTlf(dto.getRegnskapsførerTlf())
                 .medNyIArbeidslivet(dto.isNyIArbeidslivet())

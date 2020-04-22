@@ -14,12 +14,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Spy;
 
+import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;

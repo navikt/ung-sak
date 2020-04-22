@@ -8,8 +8,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
+import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.organisasjon.VirksomhetType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 
