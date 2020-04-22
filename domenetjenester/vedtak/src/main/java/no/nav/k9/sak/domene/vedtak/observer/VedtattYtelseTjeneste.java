@@ -115,6 +115,8 @@ public class VedtattYtelseTjeneste {
             return YtelseType.PLEIEPENGER_SYKT_BARN;
         } else if (FagsakYtelseType.OMSORGSPENGER.equals(type)) {
             return YtelseType.OMSORGSPENGER;
+        } else if (FagsakYtelseType.FRISINN.equals(type)) {
+            return YtelseType.FRISINN;
         }
         throw new IllegalStateException("Ukjent ytelsestype " + type);
     }
