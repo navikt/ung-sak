@@ -12,7 +12,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import no.nav.familie.topic.TopicManifest;
+import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -22,7 +22,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.abakus.vedtak.ytelse.Ytelse;
 
 @ApplicationScoped
 @ProsessTask(PubliserVedtattYtelseHendelseTask.TASKTYPE)
@@ -44,13 +43,14 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
     @Inject
     public PubliserVedtattYtelseHendelseTask(BehandlingRepositoryProvider repositoryProvider,
                                              VedtattYtelseTjeneste vedtakTjeneste,
+                                             @KonfigVerdi("kafka.fattevedtak.topic") String topic,
                                              @KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                              @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
                                              @KonfigVerdi("systembruker.username") String username,
                                              @KonfigVerdi("systembruker.password") String password) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
-        this.producer = new HendelseProducer(TopicManifest.FATTET_VEDTAK, bootstrapServers, schemaRegistryUrl, username, password);
+        this.producer = new HendelseProducer(topic, bootstrapServers, schemaRegistryUrl, username, password);
 
         @SuppressWarnings("resource")
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

@@ -177,6 +177,8 @@ spec:
       value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_INFOTRYGDFEED_CLIENT_ID
       value: k9-sak
+    - name: KAFKA_FATTEVEDTAK_TOPIC
+      value: privat-familie-vedtakFattet-v1-q1
 
 
     # Web services
