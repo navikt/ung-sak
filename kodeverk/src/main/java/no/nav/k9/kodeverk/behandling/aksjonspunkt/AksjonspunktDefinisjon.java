@@ -1,19 +1,38 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
-import com.fasterxml.jackson.annotation.*;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_FRIST;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_SKJERMLENKE;
+import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_VILKÅR;
+
+import java.time.Period;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-
-import java.time.Period;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.*;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.*;
 
 /**
  * Definerer mulige Aksjonspunkter inkludert hvilket Vurderingspunkt de må løses i.
@@ -155,8 +174,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
-                        AksjonspunktType.MANUELL, "Årskvantum", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, VilkårType.ÅRSKVANTUM,
-                        SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, EnumSet.of(OMSORGSPENGER)),
+        AksjonspunktType.MANUELL, "Årskvantum", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, VilkårType.ÅRSKVANTUM,
+        SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, EnumSet.of(OMSORGSPENGER)),
     // Gruppe : 600
 
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,

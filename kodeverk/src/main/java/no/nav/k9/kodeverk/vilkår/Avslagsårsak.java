@@ -1,14 +1,18 @@
 package no.nav.k9.kodeverk.vilkår;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -38,6 +42,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
     ÅRSKVANTUM_AVSLÅTT_OPPTJENING("1074", "Ikke nok opptejning til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP("1075", "Ikke nok medlemskap til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     ÅRSKVANTUM_AVSLÅTT_70ÅR("1076", "Ikke ung nok for årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
+    ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK("1076", "Uidentifisert rammevedtak", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
     UDEFINERT("-", "Ikke definert", null),
 
