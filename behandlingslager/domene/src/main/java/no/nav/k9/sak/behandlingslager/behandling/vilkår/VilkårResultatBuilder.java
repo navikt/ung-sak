@@ -67,7 +67,7 @@ public class VilkårResultatBuilder {
 
     public VilkårResultatBuilder leggTilIkkeVurderteVilkår(List<DatoIntervallEntitet> intervaller, List<VilkårType> vilkår) {
         vilkår.stream()
-            .map(type -> new VilkårBuilder()
+            .map(type -> hentBuilderFor(type)
                 .medType(type)
                 .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand))
             .peek(v -> intervaller.forEach(p -> v.leggTil(v.hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT))))
