@@ -5,6 +5,8 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
@@ -25,7 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private Instance<KalkulusTjeneste> kalkulusTjeneste;
 
     protected KontrollerFaktaBeregningSteg() {
         // for CDI proxy
@@ -33,7 +35,7 @@ public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {
 
     @Inject
     public KontrollerFaktaBeregningSteg(BehandlingRepository behandlingRepository,
-                                        KalkulusTjeneste kalkulusTjeneste) {
+                                        @Any Instance<KalkulusTjeneste> kalkulusTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
@@ -43,7 +45,9 @@ public class KontrollerFaktaBeregningSteg implements BeregningsgrunnlagSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        KalkulusResultat kalkulusResultat = kalkulusTjeneste.fortsettBeregning(BehandlingReferanse.fra(behandling), KONTROLLER_FAKTA_BEREGNING);
+        KalkulusResultat kalkulusResultat = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+            .fortsettBeregning(BehandlingReferanse.fra(behandling), KONTROLLER_FAKTA_BEREGNING);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
     }
 

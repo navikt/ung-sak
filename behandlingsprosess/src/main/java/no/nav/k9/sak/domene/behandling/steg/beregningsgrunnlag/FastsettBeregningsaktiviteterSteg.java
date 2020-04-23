@@ -36,7 +36,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
     //FIXME(k9) hvor langt tilbake skal k9 se etter arbeid med FL og SN
     public static final int ANTALL_ARBEIDSDAGER = 100;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private Instance<KalkulusTjeneste> kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
@@ -50,7 +50,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     }
 
     @Inject
-    public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste,
+    public FastsettBeregningsaktiviteterSteg(@Any Instance<KalkulusTjeneste> kalkulusTjeneste,
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
@@ -86,7 +86,9 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         } else {
             var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
             var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
-            var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
+            var kalkulusResultat = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, ref.getFagsakYtelseType())
+                .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+                .startBeregning(ref, ytelseGrunnlag);
             Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
             if (vilkårOppfylt != null && !vilkårOppfylt) {
                 var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
