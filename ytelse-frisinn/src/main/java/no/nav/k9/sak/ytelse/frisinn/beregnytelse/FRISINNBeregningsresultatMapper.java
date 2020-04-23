@@ -6,7 +6,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -18,14 +17,11 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -73,10 +69,11 @@ public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper
     public BeregningsresultatDto map(Behandling behandling,
                                      BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         UttakAktivitet fastsattUttak = uttakrepository.hentFastsattUttak(behandling.getId());
-        LocalDate opphørsdato = null; //skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), fastsattUttak))
+            .medPerioder(lagPerioder(beregningsresultatAggregat.getBgBeregningsresultat(), fastsattUttak))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
@@ -88,13 +85,13 @@ public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatMedUtbetaltePeriodeDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), bresAggregat.getBgBeregningsresultat(), uttakResultat))
-            .medUtbetaltePerioder(lagPerioder(behandling.getId(), bresAggregat.getUtbetBeregningsresultat(), uttakResultat))
+            .medPerioder(lagPerioder(bresAggregat.getBgBeregningsresultat(), uttakResultat))
+            .medUtbetaltePerioder(lagPerioder(bresAggregat.getUtbetBeregningsresultat(), uttakResultat))
             .medSkalHindreTilbaketrekk(bresAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
 
-    public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat,
+    public List<BeregningsresultatPeriodeDto> lagPerioder(BeregningsresultatEntitet beregningsresultat,
                                                           UttakAktivitet fastsattUttak) {
         var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
         var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(beregningsresultatPerioder);
