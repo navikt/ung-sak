@@ -81,24 +81,32 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
         DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(stp, ANTALL_ARBEIDSDAGER);
         boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
-        if (sendtTilInfotrygd) {
+        if (!sendtTilInfotrygd) {
             return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
         } else {
-            var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-            var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
-            var kalkulusResultat = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, ref.getFagsakYtelseType())
-                .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
-                .startBeregning(ref, ytelseGrunnlag);
-            Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
-            if (vilkårOppfylt != null && !vilkårOppfylt) {
-                var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
-                var orginalVilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
-                beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, vilkårOppfylt, vilkårsPeriode, orginalVilkårsPeriode);
-                return BehandleStegResultat.fremoverført(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-            } else {
-                return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
-            }
+            return utførBeregning(kontekst, ref);
         }
+    }
+
+    private BehandleStegResultat utførBeregning(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
+        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
+        var kalkulusResultat = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, ref.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+            .startBeregning(ref, ytelseGrunnlag);
+        Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
+        if (vilkårOppfylt != null && !vilkårOppfylt) {
+            return avslåVilkår(kontekst, ref);
+        } else {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+        }
+    }
+
+    private BehandleStegResultat avslåVilkår(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
+        var orginalVilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
+        beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, false, vilkårsPeriode, orginalVilkårsPeriode);
+        return BehandleStegResultat.fremoverført(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
     }
 
     private LocalDate utledSkjæringstidspunkt(BehandlingReferanse ref) {
