@@ -5,6 +5,8 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_BEREGNIN
 import java.util.Collections;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
@@ -26,7 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private Instance<KalkulusTjeneste> kalkulusTjeneste;
 
     protected FastsettBeregningsgrunnlagSteg() {
         // for CDI proxy
@@ -34,7 +36,7 @@ public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     @Inject
     public FastsettBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
-                                          KalkulusTjeneste kalkulusTjeneste) {
+                                          @Any Instance<KalkulusTjeneste> kalkulusTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -43,7 +45,9 @@ public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        kalkulusTjeneste.fortsettBeregning(BehandlingReferanse.fra(behandling), FASTSETT_BEREGNINGSGRUNNLAG);
+        FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+            .fortsettBeregning(BehandlingReferanse.fra(behandling), FASTSETT_BEREGNINGSGRUNNLAG);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
     }
 

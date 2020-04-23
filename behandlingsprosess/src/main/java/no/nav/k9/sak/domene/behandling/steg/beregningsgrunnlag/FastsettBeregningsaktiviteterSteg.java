@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
+
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
@@ -34,24 +36,28 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
     //FIXME(k9) hvor langt tilbake skal k9 se etter arbeid med FL og SN
     public static final int ANTALL_ARBEIDSDAGER = 100;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private Instance<KalkulusTjeneste> kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester;
     private BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste;
+    private BehandletPeriodeTjeneste behandletPeriodeTjeneste;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
     protected FastsettBeregningsaktiviteterSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public FastsettBeregningsaktiviteterSteg(KalkulusTjeneste kalkulusTjeneste,
+    public FastsettBeregningsaktiviteterSteg(@Any Instance<KalkulusTjeneste> kalkulusTjeneste,
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
                                              @Any Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester,
-                                             BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste) {
+                                             BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste,
+                                             BehandletPeriodeTjeneste behandletPeriodeTjeneste,
+                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
@@ -59,6 +65,8 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.utledStpTjenester = utledStpTjenester;
         this.beregningInfotrygdsakTjeneste = beregningInfotrygdsakTjeneste;
+        this.behandletPeriodeTjeneste = behandletPeriodeTjeneste;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
     @Override
@@ -73,14 +81,32 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
         DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(stp, ANTALL_ARBEIDSDAGER);
         boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
-        if (sendtTilInfotrygd) {
+        if (!sendtTilInfotrygd) {
             return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
         } else {
-            var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-            var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
-            var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+            return utførBeregning(kontekst, ref);
         }
+    }
+
+    private BehandleStegResultat utførBeregning(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
+        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
+        var kalkulusResultat = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, ref.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+            .startBeregning(ref, ytelseGrunnlag);
+        Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
+        if (vilkårOppfylt != null && !vilkårOppfylt) {
+            return avslåVilkår(kontekst, ref);
+        } else {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+        }
+    }
+
+    private BehandleStegResultat avslåVilkår(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
+        var orginalVilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
+        beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, false, vilkårsPeriode, orginalVilkårsPeriode);
+        return BehandleStegResultat.fremoverført(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
     }
 
     private LocalDate utledSkjæringstidspunkt(BehandlingReferanse ref) {
@@ -93,7 +119,10 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
-            kalkulusTjeneste.deaktiverBeregningsgrunnlag(kontekst.getBehandlingId());
+            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+            FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, behandling.getFagsakYtelseType())
+                .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+                .deaktiverBeregningsgrunnlag(kontekst.getBehandlingId());
         }
     }
 

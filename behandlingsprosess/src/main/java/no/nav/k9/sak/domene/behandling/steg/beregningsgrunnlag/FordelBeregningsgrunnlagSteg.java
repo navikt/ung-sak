@@ -6,6 +6,8 @@ import static no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner.
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
@@ -32,7 +34,7 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
     private BehandletPeriodeTjeneste behandletPeriodeTjeneste;
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private Instance<KalkulusTjeneste> kalkulusTjeneste;
 
     protected FordelBeregningsgrunnlagSteg() {
         // CDI Proxy
@@ -41,7 +43,7 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
     @Inject
     public FordelBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
                                         BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                        KalkulusTjeneste kalkulusTjeneste,
+                                        @Any Instance<KalkulusTjeneste> kalkulusTjeneste,
                                         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                         BehandletPeriodeTjeneste behandletPeriodeTjeneste) {
 
@@ -56,7 +58,9 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId()));
-        KalkulusResultat kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, FORDEL_BEREGNINGSGRUNNLAG);
+        KalkulusResultat kalkulusResultat = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+            .fortsettBeregning(ref, FORDEL_BEREGNINGSGRUNNLAG);
 
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);

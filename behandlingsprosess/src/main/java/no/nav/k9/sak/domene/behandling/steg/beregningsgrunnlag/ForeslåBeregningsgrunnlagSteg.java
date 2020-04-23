@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
@@ -26,7 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 public class ForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private Instance<KalkulusTjeneste> kalkulusTjeneste;
 
     protected ForeslåBeregningsgrunnlagSteg() {
         // for CDI proxy
@@ -34,7 +36,7 @@ public class ForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     @Inject
     public ForeslåBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
-                                         KalkulusTjeneste kalkulusTjeneste) {
+                                         @Any Instance<KalkulusTjeneste> kalkulusTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
@@ -44,7 +46,10 @@ public class ForeslåBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
-        List<AksjonspunktResultat> aksjonspunkter = kalkulusTjeneste.fortsettBeregning(ref, FORESLÅ_BEREGNINGSGRUNNLAG).getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
+        List<AksjonspunktResultat> aksjonspunkter = FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+            .fortsettBeregning(ref, FORESLÅ_BEREGNINGSGRUNNLAG)
+            .getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
     }
 

@@ -52,6 +52,7 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -70,10 +71,11 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
  */
 @ApplicationScoped
+@FagsakYtelseTypeRef()
 @Default
 public class KalkulusTjeneste implements BeregningTjeneste {
 
-    private KalkulusRestTjeneste restTjeneste;
+    protected KalkulusRestTjeneste restTjeneste;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
@@ -120,7 +122,7 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public List<BeregningAksjonspunktResultat> startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
+    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
         StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag);
         TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
@@ -130,14 +132,7 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     public KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType) {
         TilstandResponse tilstandResponse = restTjeneste.fortsettBeregning(new FortsettBeregningRequest(referanse.getBehandlingUuid(),
                 new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()), new StegType(stegType.getKode())));
-
-        List<BeregningAksjonspunktResultat> beregningAksjonspunktResultats = mapFraTilstand(tilstandResponse);
-
-        KalkulusResultat kalkulusResultat = new KalkulusResultat(beregningAksjonspunktResultats);
-        if (tilstandResponse.getVilkarOppfylt() != null) {
-            return kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
-        }
-        return kalkulusResultat;
+        return mapFraTilstand(tilstandResponse);
     }
 
     @Override
@@ -271,7 +266,7 @@ public class KalkulusTjeneste implements BeregningTjeneste {
         );
     }
 
-    private StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
+    protected StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
         Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
 
@@ -286,12 +281,14 @@ public class KalkulusTjeneste implements BeregningTjeneste {
                 kalkulatorInputDto);
     }
 
-    private List<BeregningAksjonspunktResultat> mapFraTilstand(TilstandResponse tilstandResponse) {
-        if (tilstandResponse.getAksjonspunktMedTilstandDto().isEmpty()) {
-            return Collections.emptyList();
+    protected KalkulusResultat mapFraTilstand(TilstandResponse tilstandResponse) {
+        List<BeregningAksjonspunktResultat> aksjonspunktResultatList = tilstandResponse.getAksjonspunktMedTilstandDto().stream().map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
+            dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist())).collect(Collectors.toList());
+        KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
+        if (tilstandResponse.getVilkarOppfylt() != null) {
+            return kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
         }
-        return tilstandResponse.getAksjonspunktMedTilstandDto().stream().map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
-                dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist())).collect(Collectors.toList());
+        return kalkulusResultat;
     }
 
     private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(Long behandlingId, BehandlingReferanse referanse) {

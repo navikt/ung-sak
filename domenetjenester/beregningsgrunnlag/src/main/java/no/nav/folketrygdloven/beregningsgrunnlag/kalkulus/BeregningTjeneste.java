@@ -25,9 +25,9 @@ public interface BeregningTjeneste {
      * Steg 1. FASTSETT_STP_BER
      * @param referanse {@link BehandlingReferanse}
      * @param ytelseGrunnlag - ytelsespesifikt grunnlag
-     * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
+     * @return KalkulusResultat {@link KalkulusResultat}
      */
-    List<BeregningAksjonspunktResultat> startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag);
+    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag);
 
     /** Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
@@ -37,7 +37,7 @@ public interface BeregningTjeneste {
      *
      * @param referanse {@link BehandlingReferanse}
      * @param stegType {@link BehandlingStegType}
-     * @return BeregningAksjonspunktResultat {@link BeregningAksjonspunktResultat}
+     * @return KalkulusResultat {@link KalkulusResultat}
      */
     KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType);
 
