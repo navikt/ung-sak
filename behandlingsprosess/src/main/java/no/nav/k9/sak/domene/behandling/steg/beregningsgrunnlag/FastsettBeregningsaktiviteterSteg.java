@@ -111,7 +111,10 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
-            kalkulusTjeneste.deaktiverBeregningsgrunnlag(kontekst.getBehandlingId());
+            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+            FagsakYtelseTypeRef.Lookup.find(kalkulusTjeneste, behandling.getFagsakYtelseType())
+                .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste"))
+                .deaktiverBeregningsgrunnlag(kontekst.getBehandlingId());
         }
     }
 
