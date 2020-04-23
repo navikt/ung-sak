@@ -78,6 +78,8 @@ import no.nav.k9.sak.typer.Beløp;
  */
 public class TilKalkulusMapper {
 
+    public static final String KODEVERDI_UNDEFINED = "-";
+
     public static InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag, AktørId aktørId, LocalDate skjæringstidspunktBeregning) {
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
@@ -141,9 +143,9 @@ public class TilKalkulusMapper {
 
     private static OppgittFrilansDto mapOppgittFrilans(OppgittFrilans oppgittFrilans) {
         List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
-                .stream()
-                .map(frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt()))
-                .collect(Collectors.toList());
+            .stream()
+            .map(frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt()))
+            .collect(Collectors.toList());
 
         return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet(), oppdrag);
     }
@@ -192,13 +194,21 @@ public class TilKalkulusMapper {
             mapYtelseAnvist(ytelse.getYtelseAnvist()),
             new RelatertYtelseType(ytelse.getYtelseType().getKode()),
             mapPeriode(ytelse.getPeriode()),
-            new TemaUnderkategori(ytelse.getBehandlingsTema().getKode())))
+            mapTemaUnderkategori(ytelse)))
             .collect(Collectors.toList());
 
         if (!ytelserDto.isEmpty()) {
             return new YtelserDto(ytelserDto);
         }
         return null;
+    }
+
+    // TODO (OJR): Skal vi mappe dette slik eller tåler Kalkulus UNDEFINED("-")
+    private static TemaUnderkategori mapTemaUnderkategori(Ytelse ytelse) {
+        if (KODEVERDI_UNDEFINED.equals(ytelse.getBehandlingsTema().getKode())) {
+            return null;
+        }
+        return new TemaUnderkategori(ytelse.getBehandlingsTema().getKode());
     }
 
     private static BeløpDto mapBeløp(Optional<Beløp> beløp) {
@@ -229,7 +239,7 @@ public class TilKalkulusMapper {
 
     private static UtbetalingDto mapTilDto(Inntekt inntekt) {
         UtbetalingDto utbetalingDto = new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
-                inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
+            inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
         );
         if (inntekt.getArbeidsgiver() != null) {
             return utbetalingDto.medArbeidsgiver(mapTilAktør(inntekt.getArbeidsgiver()));
