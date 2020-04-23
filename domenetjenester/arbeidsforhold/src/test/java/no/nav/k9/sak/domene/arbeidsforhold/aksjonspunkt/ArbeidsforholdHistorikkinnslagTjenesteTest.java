@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSu
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
+import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.k9.sak.historikk.HistorikkInnslagKonverter;
@@ -32,7 +33,6 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.felles.integrasjon.journal.v3.JournalConsumer;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class ArbeidsforholdHistorikkinnslagTjenesteTest {
@@ -45,12 +45,12 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     @Mock
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslagTjeneste = Mockito.mock(ArbeidsgiverHistorikkinnslag.class);
 
-    private JournalConsumer mockJournalProxyService = mock(JournalConsumer.class);
+    private SafTjeneste mockSafTjeneste = mock(SafTjeneste.class);
     private IAYRepositoryProvider provider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
     private HistorikkRepository historikkRepository = new HistorikkRepository(repositoryRule.getEntityManager());
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     private HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
-    private DokumentArkivTjeneste dokumentApplikasjonTjeneste = new DokumentArkivTjeneste(mockJournalProxyService, provider.getFagsakRepository());
+    private DokumentArkivTjeneste dokumentApplikasjonTjeneste = new DokumentArkivTjeneste(mockSafTjeneste);
     private HistorikkTjenesteAdapter historikkAdapter;
     private ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste;
     private Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("1");

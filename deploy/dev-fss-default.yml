@@ -190,6 +190,8 @@ spec:
       value: https://dokarkiv-q1.nais.preprod.local/services/journal/v3
     - name: INNGAAENDEJOURNAL_V1_URL
       value: https://dokarkiv-q1.nais.preprod.local/services/inngaaendejournal/v1
+    - name: SAF_BASE_URL
+      value: http://saf
     - name: DOKUMENTPRODUKSJON_V2_URL
       value: https://dokprod-q1.nais.preprod.local/dokprod/ws/dokumentproduksjon/v2
     - name: BEHANDLESAK_V2_URL
