@@ -1,11 +1,11 @@
 package no.nav.k9.sak.behandling.hendelse;
 
 import static java.time.Month.JANUARY;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,6 +44,8 @@ public class FagsakTjenesteTest {
     private Personinfo personinfo;
     private LocalDate forelderFødselsdato = LocalDate.of(1990, JANUARY, 1);
 
+    private final FagsakYtelseType ytelseType = FagsakYtelseType.FORELDREPENGER;
+
     @Before
     public void oppsett() {
         tjeneste = new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null);
@@ -63,21 +65,18 @@ public class FagsakTjenesteTest {
     }
 
     private Fagsak lagNyFagsak(Personinfo personinfo) {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, personinfo.getAktørId());
+        Fagsak fagsak = Fagsak.opprettNy(ytelseType, personinfo.getAktørId());
         tjeneste.opprettFagsak(fagsak);
         return fagsak;
     }
 
-    @Test
-    public void opprettFlereFagsakerSammeBruker() throws Exception {
+    @Test(expected = PersistenceException.class)
+    public void opprettFlereFagsakerSammeBrukerDuplikaterSkalFeile_1() throws Exception {
         // Opprett en fagsak i systemet
         Whitebox.setInternalState(fagsak, "fagsakStatus", FagsakStatus.LØPENDE); // dirty, men eksponerer ikke status nå
 
-        // Ifølgeregler i mottak skal vi opprette en nyTerminbekreftelse sak hvis vi ikke har sak nyere enn 10 mnd:
-        Fagsak fagsakNy = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, personinfo.getAktørId());
+        Fagsak fagsakNy = Fagsak.opprettNy(ytelseType, personinfo.getAktørId());
         tjeneste.opprettFagsak(fagsakNy);
-        assertThat(fagsak.getAktørId()).as("Forventer at fagsakene peker til samme bruker")
-            .isEqualTo(fagsakNy.getAktørId());
     }
 
 }

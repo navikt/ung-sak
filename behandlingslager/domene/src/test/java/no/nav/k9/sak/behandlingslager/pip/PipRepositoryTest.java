@@ -45,8 +45,6 @@ public class PipRepositoryTest {
 
     @Test
     public void skal_finne_behandligstatus_og_sakstatus_for_behandling() throws Exception {
-//        leggTilBarnPåFagsakRelasjon(fagsak.getFagsakRelasjon(), 201L);
-//        leggTilBarnPåFagsakRelasjon(fagsak.getFagsakRelasjon(), 202L);
         this.behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
         lagreBehandling(behandling);
 
@@ -66,7 +64,7 @@ public class PipRepositoryTest {
     public void skal_finne_alle_fagsaker_for_en_søker() throws Exception {
         Fagsak fagsak1 = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
         AktørId aktørId1 = fagsak1.getAktørId();
-        Fagsak fagsak2 = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER, aktørId1);
+        Fagsak fagsak2 = behandlingBuilder.opprettFagsak(FagsakYtelseType.SVANGERSKAPSPENGER, aktørId1);
         @SuppressWarnings("unused")
         Fagsak fagsakAnnenAktør = new BasicBehandlingBuilder(repoRule.getEntityManager()).opprettFagsak(FagsakYtelseType.FORELDREPENGER);
 
