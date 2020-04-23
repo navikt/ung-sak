@@ -91,6 +91,27 @@ jobs:
                       "image": "${{ env.IMAGE }}"
                   }}'
 
+      - name: Lukk gamle issues
+        uses: actions/github-script@0.8.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['deployment']
+            }).then(response => {
+              response.data.forEach(issue => {
+                github.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+              });
+            });
+
       - name: Opprett deployment issue
         if: success()
         uses: maxkomarychev/oction-create-issue@v0.7.1
