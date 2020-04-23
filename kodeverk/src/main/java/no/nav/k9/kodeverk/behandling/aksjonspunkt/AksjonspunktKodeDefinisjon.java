@@ -97,7 +97,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // OMS
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
-    public static final String VURDER_ÅRSKVANTUM_KVOTE = "7036";
+    public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
 
     // Andre koder
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;
