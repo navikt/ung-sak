@@ -81,7 +81,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
         DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(stp, ANTALL_ARBEIDSDAGER);
         boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
-        if (!sendtTilInfotrygd) {
+        if (sendtTilInfotrygd) {
             return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
         } else {
             return utførBeregning(kontekst, ref);
