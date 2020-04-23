@@ -57,8 +57,6 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.kodeverk.uttak.IkkeOppfyltÅrsak;
-import no.nav.k9.kodeverk.uttak.InnvilgetÅrsak;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -87,8 +85,6 @@ public class HentKodeverkTjeneste {
         map.put(Venteårsak.class.getSimpleName(), Venteårsak.kodeMap().values());
         map.put(BehandlingType.class.getSimpleName(), BehandlingType.kodeMap().values());
         map.put(ArbeidType.class.getSimpleName(), filtrerArbeidType(ArbeidType.kodeMap().values()));
-        map.put(IkkeOppfyltÅrsak.class.getSimpleName(), IkkeOppfyltÅrsak.kodeMap().values());
-        map.put(InnvilgetÅrsak.class.getSimpleName(), InnvilgetÅrsak.kodeMap().values());
         map.put(OpptjeningAktivitetType.class.getSimpleName(), OpptjeningAktivitetType.kodeMap().values());
         map.put(RevurderingVarslingÅrsak.class.getSimpleName(), RevurderingVarslingÅrsak.kodeMap().values());
         map.put(Inntektskategori.class.getSimpleName(), Inntektskategori.kodeMap().values());

@@ -4,15 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
@@ -21,7 +20,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
@@ -32,7 +30,12 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
 public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
+    
+    /** alle må starte et sted. */
+    private static final LocalDate THE_FOM = LocalDate.of(2017, 3, 1);
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
     private OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste;
 
@@ -54,25 +57,13 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag) {
         LocalDate stp = ref.getUtledetSkjæringstidspunkt();
-        LocalDate fom = LocalDate.of(2017, 3, 1);
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp, fom);
+        LocalDate fom = THE_FOM;
+        OpptjeningAktiviteter opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp, fom);
 
-        if (opptjeningAktiviteter.isEmpty()) {
-            String iayDump = dumpForDebug(ref, iayGrunnlag);
-            throw new IllegalStateException(String.format("Forventer opptjening!!! ref=%s, stp=%s, fom=%s: iay=", ref, stp, fom, iayDump));
+        if (opptjeningAktiviteter.getOpptjeningPerioder().isEmpty()) {
+            log.debug("Har ikke opptjening.ref={}, stp={}, fom={}", ref, stp, fom);
         }
-        return opptjeningAktiviteter.get();
-    }
-
-    private String dumpForDebug(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        var dto = new IAYTilDtoMapper(ref.getAktørId(), UUID.randomUUID(), UUID.randomUUID()).mapTilDto(iayGrunnlag);
-        String iayDump;
-        try {
-            iayDump = IayGrunnlagJsonMapper.getMapper().writeValueAsString(dto);
-        } catch (JsonProcessingException e) {
-            iayDump = e.getMessage();
-        }
-        return iayDump;
+        return opptjeningAktiviteter;
     }
 
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(BehandlingReferanse behandlingReferanse,
@@ -87,16 +78,13 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
             .collect(Collectors.toList());
     }
 
-    private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
+    private OpptjeningAktiviteter hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                        LocalDate stp,
                                                                        LocalDate fom) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(ref, iayGrunnlag, stp, fom).stream()
             .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
-        if (opptjeningsPerioder.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(new OpptjeningAktiviteter(opptjeningsPerioder));
+        return new OpptjeningAktiviteter(opptjeningsPerioder);
     }
 
     private OpptjeningPeriode mapOpptjeningPeriode(OpptjeningsperiodeForSaksbehandling ops) {
