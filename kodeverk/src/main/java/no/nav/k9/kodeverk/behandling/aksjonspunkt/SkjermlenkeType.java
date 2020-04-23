@@ -1,18 +1,13 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import no.nav.k9.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -25,6 +20,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     FAKTA_OM_FORDELING("FAKTA_OM_FORDELING", "Fakta om fordeling"),
     FAKTA_OM_MEDLEMSKAP("FAKTA_OM_MEDLEMSKAP", "Fakta om medlemskap"),
     FAKTA_OM_MEDISINSK("FAKTA_OM_MEDISINSK", "Fakta om medisinsk"),
+    FAKTA_OM_ÅRSKVANTUM("FAKTA_OM_ÅRSKVANTUM", "Fakta om årskvantum"),
     FAKTA_OM_OPPTJENING("FAKTA_OM_OPPTJENING", "Fakta om opptjening"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     FAKTA_OM_UTTAK("FAKTA_OM_UTTAK", "Fakta om uttak"),

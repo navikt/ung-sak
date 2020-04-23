@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent", Map.of()),
@@ -34,6 +35,12 @@ public enum Avslagsårsak implements Kodeverdi {
     DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", Map.of(FagsakYtelseType.PSB, "9-16")),
     IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM("1069", "Ikke behov for kontinuerlig pleie.", Map.of(FagsakYtelseType.PSB, "9-10 1. ledd")),
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.", Map.of(FagsakYtelseType.PSB, "9-10")),
+    ÅRSKVANTUM_AVSLÅTT_IKKE_RETT("1072", "Ikke tett til omsorgsp.",  Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_IKKE_FLERE_DAGER("1073", "Ikke nok dager i årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_OPPTJENING("1074", "Ikke nok opptejning til årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP("1075", "Ikke nok medlemskap til årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_70ÅR("1076", "Ikke ung nok for årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK("1077", "Uidentifisert rammevedtak", Map.of(FagsakYtelseType.OMP, "9-6")),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", Map.of()),
     UDEFINERT("-", "Ikke definert", Map.of()),
 
