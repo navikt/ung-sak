@@ -174,8 +174,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN, VilkårType.OMSORGEN_FOR,
         SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
-        AksjonspunktType.MANUELL, "Årskvantum", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.INN, VilkårType.ÅRSKVANTUM,
-        SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, EnumSet.of(OMSORGSPENGER)),
+        AksjonspunktType.MANUELL, "Årskvantum", BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT, VilkårType.ÅRSKVANTUM,
+        SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM,TOTRINN,TILBAKE, "P30D", EnumSet.of(OMSORGSPENGER)),
     // Gruppe : 600
 
     SØKERS_OPPLYSNINGSPLIKT_OVST(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING,
