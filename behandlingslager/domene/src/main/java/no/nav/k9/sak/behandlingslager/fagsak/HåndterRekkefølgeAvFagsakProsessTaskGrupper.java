@@ -52,11 +52,12 @@ public class HåndterRekkefølgeAvFagsakProsessTaskGrupper implements ProsessTas
         // dersom blokkerende task er tom, vetoes ikke tasken
         boolean vetoed = blokkerendeTask.isPresent();
         if (vetoed) {
-            ProsessTaskData blokker = prosessTaskRepository.finn(blokkerendeTask.get().getProsessTaskId());
+            Long prosessTaskId = blokkerendeTask.get().getProsessTaskId();
+            ProsessTaskData blokker = prosessTaskRepository.finn(prosessTaskId);
             log.info("Vetoer kjøring av prosesstask[{}] av type[{}] for fagsak [{}] , er blokkert av prosesstask[{}] av type[{}] for samme fagsak.",
                 ptData.getId(), ptData.getTaskType(), ptData.getFagsakId(), blokker.getId(), blokker.getTaskType());
 
-            return new ProsessTaskVeto(true, ptData.getId(), blokker.getId(), getClass().getSimpleName()
+            return new ProsessTaskVeto(true, ptData.getId(), prosessTaskId, getClass().getSimpleName()
                 + " vetoer pga definert rekkefølge i FAGSAK_PROSESS_TASK.GRUPPE_SEKVENSNR. Blir pukket når blokkerende task kjøres FERDIG.");
         }
 
