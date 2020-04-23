@@ -664,6 +664,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     private void lagFagsak(FagsakRepository fagsakRepo) {
+        if(fagsak!=null) return;
+        
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
         fagsak = fagsakBuilder.build();
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
@@ -857,6 +859,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     @SuppressWarnings("unchecked")
     private S medOriginalBehandling(Behandling originalBehandling, BehandlingÅrsakType behandlingÅrsakType, boolean manueltOpprettet) {
         this.originalBehandling = originalBehandling;
+        this.fagsak = originalBehandling.getFagsak();
         this.behandlingÅrsakType = behandlingÅrsakType;
         this.manueltOpprettet = manueltOpprettet;
         return (S) this;
