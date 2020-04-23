@@ -54,7 +54,7 @@ public class SafTjenesteImpl implements SafTjeneste {
     }
 
     @Inject
-    public SafTjenesteImpl(@KonfigVerdi("SAF_BASE_URL") URI endpoint, OidcRestClient restKlient) {
+    public SafTjenesteImpl(@KonfigVerdi("Saf.base.url") URI endpoint, OidcRestClient restKlient) {
         this.graphqlEndpoint = URI.create(endpoint.toString() + "/graphql");
         this.hentDokumentEndpoint = URI.create(endpoint.toString() + "/rest/hentdokument");
         this.restKlient = restKlient;
