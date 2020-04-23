@@ -42,7 +42,7 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
     ÅRSKVANTUM_AVSLÅTT_OPPTJENING("1074", "Ikke nok opptejning til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP("1075", "Ikke nok medlemskap til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     ÅRSKVANTUM_AVSLÅTT_70ÅR("1076", "Ikke ung nok for årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK("1076", "Uidentifisert rammevedtak", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
+    ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK("1077", "Uidentifisert rammevedtak", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
     UDEFINERT("-", "Ikke definert", null),
 
