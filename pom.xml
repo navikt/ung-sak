@@ -43,9 +43,7 @@
 
 		<metrics.version>4.1.6</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-		<kalkulus.version>1.0-2020.04.20.163650-ada3a1d</kalkulus.version>
 		<k9format.version>3.2.0-20200422143239-2b3223e</k9format.version>
-        <aarskvantum-kontrakter.version>2.0_20200422221644_1073268</aarskvantum-kontrakter.version>
 	</properties>
 
     <repositories>
@@ -75,7 +73,7 @@
 			<dependency>
 				<groupId>no.nav.vedtak.prosesstask</groupId>
 				<artifactId>prosesstask-root</artifactId>
-				<version>2.3-20200421064631-ce9889f</version>
+				<version>2.3-20200423163622-ec2f1d6</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -123,7 +121,7 @@
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>${aarskvantum-kontrakter.version}</version>
+                <version>2.0_20200422221644_1073268</version>
             </dependency>
 
 			<dependency>
@@ -165,7 +163,7 @@
 			<dependency>
 				<groupId>no.nav.folketrygdloven.kalkulus</groupId>
 				<artifactId>kontrakt</artifactId>
-				<version>${kalkulus.version}</version>
+				<version>1.0-2020.04.20.163650-ada3a1d</version>
 			</dependency>
 
 			<dependency>
