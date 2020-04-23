@@ -54,9 +54,15 @@ public class FagsakRepository {
     }
 
     public List<Fagsak> hentForBruker(AktørId aktørId) {
-        TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak f where f.brukerAktørId=:aktørId and f.skalTilInfotrygd=:ikkestengt", Fagsak.class);
+        TypedQuery<Fagsak> query = entityManager
+            .createQuery("from Fagsak f "
+                + " where f.brukerAktørId=:aktørId"
+                + " and f.skalTilInfotrygd=:ikkestengt"
+                + " and f.ytelseType in (:ytelseTyper)",
+                Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
         query.setParameter("ikkestengt", false); // NOSONAR
+        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
         return query.getResultList();
     }
 
@@ -110,7 +116,7 @@ public class FagsakRepository {
         entityManager.persist(fagsak);
         entityManager.flush();
     }
-    
+
     public void utvidPeriode(Long fagsakId, LocalDate fom, LocalDate tom) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);
 
