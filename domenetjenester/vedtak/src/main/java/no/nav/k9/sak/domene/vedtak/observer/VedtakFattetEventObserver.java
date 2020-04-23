@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -34,7 +35,8 @@ public class VedtakFattetEventObserver {
     }
 
     public void observerStegOvergang(@Observes BehandlingVedtakEvent event) {
-        if (erBehandlingAvRettType(event.getBehandlingId())) {
+        if (erBehandlingAvRettType(event.getBehandlingId())
+            && IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
             opprettTaskForPubliseringAvVedtak(event.getBehandlingId());
         }
     }

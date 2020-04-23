@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -31,8 +33,8 @@ public class OverstyrBeregningsaktiviteterDto extends OverstyringAksjonspunktDto
         //
     }
 
-    public OverstyrBeregningsaktiviteterDto(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList, String begrunnelse) { // NOSONAR
-        super(begrunnelse);
+    public OverstyrBeregningsaktiviteterDto(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList, String begrunnelse, @Valid @NotNull Periode periode) { // NOSONAR
+        super(periode, begrunnelse);
         this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
     }
 

@@ -29,8 +29,8 @@ class PubliserEventTaskImpl implements PubliserEventTask {
     }
 
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        String eventJson = prosessTaskData.getPropertyValue(PROPERTY_EVENT);
         String key = prosessTaskData.getPropertyValue(PROPERTY_KEY);
+        var eventJson = prosessTaskData.getPayloadAsString();
         kafkaProducer.sendJsonMedNøkkel(key, eventJson);
         log.info("Publisert aksjonspunktevent for behandling med id='{}' & value='{}'", key, eventJson);
     }

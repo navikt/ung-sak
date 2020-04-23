@@ -54,8 +54,7 @@ public class SøkersopplysningspliktOverstyringhåndtererTest {
             .build();
         repositoryProvider.getVilkårResultatRepository().lagre(behandling.getId(), vilkårene);
         // Dto
-        OverstyringSokersOpplysingspliktDto overstyringspunktDto = new OverstyringSokersOpplysingspliktDto(false,
-            "test av overstyring");
+        OverstyringSokersOpplysingspliktDto overstyringspunktDto = new OverstyringSokersOpplysingspliktDto(false, "test av overstyring");
         assertThat(behandling.getAksjonspunkter()).hasSize(1);
 
         // Act

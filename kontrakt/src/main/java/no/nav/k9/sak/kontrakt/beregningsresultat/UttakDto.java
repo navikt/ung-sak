@@ -39,6 +39,10 @@ public class UttakDto {
     @Valid
     private UtfallType utfall;
 
+    public UttakDto() {
+        // Deserialisering av JSON
+    }
+
     public UttakDto(UtfallType utfall, BigDecimal utbetalingsgrad) {
         this.utfall = utfall;
         this.utbetalingsgrad = utbetalingsgrad;

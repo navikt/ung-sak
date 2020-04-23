@@ -2,6 +2,8 @@ package no.nav.k9.sak.kontrakt.aksjonspunkt;
 
 import java.util.Objects;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -12,10 +14,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import no.nav.k9.sak.typer.Periode;
+
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, OverstyringAksjonspunkt {
+
+    @JsonProperty(value = "periode", required = true)
+    @Valid
+    @NotNull
+    private Periode periode;
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
@@ -26,13 +35,23 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
         // For Jackson
     }
 
-    protected OverstyringAksjonspunktDto(String begrunnelse) { // NOSONAR
+    protected OverstyringAksjonspunktDto(Periode periode, String begrunnelse) {
+        this.periode = periode; // NOSONAR
+        this.begrunnelse = begrunnelse;
+    }
+
+    public OverstyringAksjonspunktDto(String begrunnelse) {
         this.begrunnelse = begrunnelse;
     }
 
     @Override
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    @Override
+    public Periode getPeriode() {
+        return periode;
     }
 
     @Override
@@ -45,19 +64,19 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
 
     @Override
     public boolean equals(Object obj) {
-        if(obj==this) return true;
-        if(obj ==null || obj.getClass()!=this.getClass()) return false;
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
         var other = (OverstyringAksjonspunktDto) obj;
         return Objects.equals(getKode(), other.getKode());
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(getKode());
     }
-    
+
     @Override
     public String toString() {
-        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ">";
+        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ", periode=" + getPeriode() + ">";
     }
 }

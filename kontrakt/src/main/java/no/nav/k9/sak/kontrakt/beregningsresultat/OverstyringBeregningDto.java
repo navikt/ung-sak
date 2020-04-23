@@ -1,7 +1,9 @@
 package no.nav.k9.sak.kontrakt.beregningsresultat;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -13,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -29,8 +32,8 @@ public class OverstyringBeregningDto extends OverstyringAksjonspunktDto {
         //
     }
 
-    public OverstyringBeregningDto(long beregnetTilkjentYtelse, String begrunnelse) { // NOSONAR
-        super(begrunnelse);
+    public OverstyringBeregningDto(long beregnetTilkjentYtelse, String begrunnelse, @Valid @NotNull Periode periode) { // NOSONAR
+        super(periode, begrunnelse);
         this.beregnetTilkjentYtelse = beregnetTilkjentYtelse;
     }
 

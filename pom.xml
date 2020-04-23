@@ -45,6 +45,7 @@
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
 		<kalkulus.version>1.0-2020.04.20.163650-ada3a1d</kalkulus.version>
 		<k9format.version>3.2.0-20200422143239-2b3223e</k9format.version>
+        <aarskvantum-kontrakter.version>2.0_20200422221644_1073268</aarskvantum-kontrakter.version>
 	</properties>
 
     <repositories>
@@ -118,6 +119,12 @@
 				<artifactId>oppdrag-kontrakter</artifactId>
 				<version>1.1-20200420110619-1d03a13</version>
 			</dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.aarskvantum</groupId>
+                <artifactId>kontrakter</artifactId>
+                <version>${aarskvantum-kontrakter.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>

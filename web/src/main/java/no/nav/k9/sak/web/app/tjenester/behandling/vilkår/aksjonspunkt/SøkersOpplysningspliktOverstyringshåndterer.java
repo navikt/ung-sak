@@ -20,6 +20,7 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
 import no.nav.k9.sak.kontrakt.søker.OverstyringSokersOpplysingspliktDto;
+import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyringSokersOpplysingspliktDto.class, adapter = Overstyringshåndterer.class)
@@ -49,7 +50,7 @@ public class SøkersOpplysningspliktOverstyringshåndterer extends AbstractOvers
                                                   BehandlingskontrollKontekst kontekst) {
 
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        inngangsvilkårTjeneste.overstyrAksjonspunktForSøkersopplysningsplikt(behandling.getId(), utfall, kontekst);
+        inngangsvilkårTjeneste.overstyrAksjonspunktForSøkersopplysningsplikt(behandling.getId(), utfall, kontekst, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (Utfall.OPPFYLT.equals(utfall)) {

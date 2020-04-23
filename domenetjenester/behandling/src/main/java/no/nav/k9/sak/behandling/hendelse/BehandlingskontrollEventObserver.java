@@ -91,7 +91,7 @@ public class BehandlingskontrollEventObserver {
         BehandlingProsessEventDto behandlingProsessEventDto = getProduksjonstyringEventDto(eventHendelse, behandling.get());
 
         String json = getJson(behandlingProsessEventDto);
-        taskData.setProperty(PubliserEventTask.PROPERTY_EVENT, json);
+        taskData.setPayload(json);
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
         return taskData;
     }

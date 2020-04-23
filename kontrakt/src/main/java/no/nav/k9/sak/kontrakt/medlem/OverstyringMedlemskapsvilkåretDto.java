@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -31,7 +32,13 @@ public class OverstyringMedlemskapsvilkåretDto extends OverstyringAksjonspunktD
         //
     }
 
-    public OverstyringMedlemskapsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
+    public OverstyringMedlemskapsvilkåretDto(Periode periode, boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
+        super(periode, begrunnelse);
+        this.erVilkarOk = erVilkarOk;
+        this.avslagskode = avslagskode;
+    }
+
+    public OverstyringMedlemskapsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode) {
         super(begrunnelse);
         this.erVilkarOk = erVilkarOk;
         this.avslagskode = avslagskode;

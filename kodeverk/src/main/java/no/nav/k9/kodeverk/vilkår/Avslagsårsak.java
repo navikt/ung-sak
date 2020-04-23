@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -14,37 +13,36 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
 
-    SØKT_FOR_SENT("1007", "Søkt for sent", null),
-    MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_34\", \"lovreferanse\": \"21-3,21-7\"}]}]}"),
-    SØKER_ER_IKKE_MEDLEM("1020", "Søker er ikke medlem", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_2\", \"lovreferanse\": \"14-2\"}]}]}"),
-    SØKER_ER_UTVANDRET("1021", "Søker er utvandret", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_2\", \"lovreferanse\": \"14-2\"}]}]}"),
-    SØKER_HAR_IKKE_LOVLIG_OPPHOLD("1023", "Søker har ikke lovlig opphold", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_2\", \"lovreferanse\": \"14-2\"}]}]}"),
-    SØKER_HAR_IKKE_OPPHOLDSRETT("1024", "Søker har ikke oppholdsrett", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_2\", \"lovreferanse\": \"14-2\"}]}]}"),
-    SØKER_ER_IKKE_BOSATT("1025", "Søker er ikke bosatt", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_2\", \"lovreferanse\": \"14-2\"}]}]}"),
-    IKKE_TILSTREKKELIG_OPPTJENING("1035", "Ikke tilstrekkelig opptjening", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_23\", \"lovreferanse\": \"9-2\"}]}]}"),
-    FOR_LAVT_BEREGNINGSGRUNNLAG("1041", "For lavt brutto beregningsgrunnlag", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_41\", \"lovreferanse\": \"14-7\"}]}]}"),
-    STEBARNSADOPSJON_IKKE_FLERE_DAGER_IGJEN("1051", "Stebarnsadopsjon ikke flere dager igjen", "{\"fagsakYtelseType\": [{\"FP\": [{\"kategori\": \"FP_VK_16\", \"lovreferanse\": \"14-5\"}]}]}"),
-    SØKER_IKKE_GRAVID_KVINNE("1060", "§14-4 første ledd: Søker er ikke gravid kvinne", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 1. ledd\"}]}]}"),
-    SØKER_ER_IKKE_I_ARBEID("1061", "§14-4 tredje ledd: Søker er ikke i arbeid/har ikke tap av pensjonsgivende inntekt", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 3. ledd\"}]}]}"),
-    ARBEIDSTAKER_HAR_IKKE_DOKUMENTERT_RISIKOFAKTORER("1063", "§14-4 første ledd: Arbeidstaker har ikke dokumentert risikofaktorer", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 1. ledd\"}]}]}"),
-    ARBEIDSTAKER_KAN_OMPLASSERES("1064", "§14-4 første ledd: Arbeidstaker kan omplasseres til annet høvelig arbeid", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 1. ledd\"}]}]}"),
-    SN_FL_HAR_IKKE_DOKUMENTERT_RISIKOFAKTORER("1065", "§14-4 andre ledd: Næringsdrivende/frilanser har ikke dokumentert risikofaktorer", "{\"fagsakYtelseType\": [{\"SVP\": [{\"kategori\": \"SVP_VK_1\", \"lovreferanse\": \"14-4 2. ledd\"}]}]}"),
-    IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE("1067", "Ikke dokumentert sykdom, skade eller lyte.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
-    DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-16\"}]}]}"),
-    IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM("1069", "Ikke behov for kontinuerlig pleie.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_2a\", \"lovreferanse\": \"9-10 1. ledd\"}]}]}"),
-    IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.", "{\"fagsakYtelseType\": [{\"PSB\": [{\"kategori\": \"PSB_VK_1\", \"lovreferanse\": \"9-10\"}]}]}"),
-    ÅRSKVANTUM_AVSLÅTT_IKKE_RETT("1072", "Ikke tett til omsorgsp.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    ÅRSKVANTUM_IKKE_FLERE_DAGER("1073", "Ikke nok dager i årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    ÅRSKVANTUM_AVSLÅTT_OPPTJENING("1074", "Ikke nok opptejning til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP("1075", "Ikke nok medlemskap til årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    ÅRSKVANTUM_AVSLÅTT_70ÅR("1076", "Ikke ung nok for årskvantum.", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK("1077", "Uidentifisert rammevedtak", "{\"fagsakYtelseType\": [{\"OMS\": [{\"kategori\": \"OMS_VK_1\", \"lovreferanse\": \"9-6\"}]}]}"),
-    INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", null),
-    UDEFINERT("-", "Ikke definert", null),
+public enum Avslagsårsak implements Kodeverdi {
+
+    SØKT_FOR_SENT("1007", "Søkt for sent", Map.of()),
+    MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon", Map.of(FagsakYtelseType.FP, "21-3,21-7")),
+    SØKER_ER_IKKE_MEDLEM("1020", "Søker er ikke medlem", Map.of(FagsakYtelseType.FP, "14-2")),
+    SØKER_ER_UTVANDRET("1021", "Søker er utvandret", Map.of(FagsakYtelseType.FP, "14-2")),
+    SØKER_HAR_IKKE_LOVLIG_OPPHOLD("1023", "Søker har ikke lovlig opphold", Map.of(FagsakYtelseType.FP, "14-2")),
+    SØKER_HAR_IKKE_OPPHOLDSRETT("1024", "Søker har ikke oppholdsrett", Map.of(FagsakYtelseType.FP, "14-2")),
+    SØKER_ER_IKKE_BOSATT("1025", "Søker er ikke bosatt", Map.of(FagsakYtelseType.FP, "14-2")),
+    IKKE_TILSTREKKELIG_OPPTJENING("1035", "Ikke tilstrekkelig opptjening", Map.of(FagsakYtelseType.FP, "9-2")),
+    FOR_LAVT_BEREGNINGSGRUNNLAG("1041", "For lavt brutto beregningsgrunnlag", Map.of(FagsakYtelseType.FP, "14-7")),
+
+    IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE("1067", "Ikke dokumentert sykdom, skade eller lyte.", Map.of(FagsakYtelseType.PSB, "9-10 1. ledd")),
+    DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", Map.of(FagsakYtelseType.PSB, "9-16")),
+    IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM("1069", "Ikke behov for kontinuerlig pleie.", Map.of(FagsakYtelseType.PSB, "9-10 1. ledd")),
+    IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.", Map.of(FagsakYtelseType.PSB, "9-10")),
+    ÅRSKVANTUM_AVSLÅTT_IKKE_RETT("1072", "Ikke tett til omsorgsp.",  Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_IKKE_FLERE_DAGER("1073", "Ikke nok dager i årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_OPPTJENING("1074", "Ikke nok opptejning til årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP("1075", "Ikke nok medlemskap til årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_70ÅR("1076", "Ikke ung nok for årskvantum.", Map.of(FagsakYtelseType.OMP, "9-6")),
+    ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK("1077", "Uidentifisert rammevedtak", Map.of(FagsakYtelseType.OMP, "9-6")),
+    INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen", Map.of()),
+    UDEFINERT("-", "Ikke definert", Map.of()),
 
     ;
 
@@ -59,19 +57,18 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
         }
     }
 
-    // TODO endre fra raw json
-    @JsonIgnore
-    private String lovReferanse;
-
     @JsonIgnore
     private String navn;
 
     private String kode;
 
-    private Avslagsårsak(String kode, String navn, String lovReferanse) {
+    @JsonIgnore
+    private Map<FagsakYtelseType, String> lovReferanser;
+
+    private Avslagsårsak(String kode, String navn, Map<FagsakYtelseType, String> lovReferanser) {
         this.kode = kode;
         this.navn = navn;
-        this.lovReferanse = lovReferanse;
+        this.lovReferanser = lovReferanser;
     }
 
     @JsonCreator
@@ -88,10 +85,6 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
 
     public static Map<String, Avslagsårsak> kodeMap() {
         return Collections.unmodifiableMap(KODER);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
     }
 
     @Override
@@ -123,10 +116,8 @@ public enum Avslagsårsak implements ÅrsakskodeMedLovreferanse {
         return VilkårType.getVilkårTyper(this);
     }
 
-    @Override
-    public String getLovHjemmelData() {
-        return lovReferanse;
+    public String getLovHjemmelData(FagsakYtelseType ytelseType) {
+        return lovReferanser.getOrDefault(ytelseType, "<mangler knytning lovhjemmel>");
     }
-
 
 }
