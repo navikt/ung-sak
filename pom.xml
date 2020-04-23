@@ -54,6 +54,7 @@
         </repository>
     </repositories>
 
+
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det
 		har uheldige virkninger ved bruk av import og dependency (bruk composition
 		over arv) da de overstyrer andre scope definisjoner. Sett det heller der
@@ -73,7 +74,7 @@
 			<dependency>
 				<groupId>no.nav.vedtak.prosesstask</groupId>
 				<artifactId>prosesstask-root</artifactId>
-				<version>2.3-20200423163622-ec2f1d6</version>
+				<version>2.3-20200423175740-c25db0f</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
