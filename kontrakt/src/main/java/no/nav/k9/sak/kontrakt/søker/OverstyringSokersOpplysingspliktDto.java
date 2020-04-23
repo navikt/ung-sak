@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_OVST_KODE)
@@ -20,7 +21,12 @@ public class OverstyringSokersOpplysingspliktDto extends OverstyringAksjonspunkt
         //
     }
 
-    public OverstyringSokersOpplysingspliktDto(boolean erVilkarOk, String begrunnelse) { // NOSONAR
+    public OverstyringSokersOpplysingspliktDto(Periode periode, boolean erVilkarOk, String begrunnelse) { // NOSONAR
+        super(periode, begrunnelse);
+        this.erVilkarOk = erVilkarOk;
+    }
+
+    public OverstyringSokersOpplysingspliktDto(boolean erVilkarOk, String begrunnelse) {
         super(begrunnelse);
         this.erVilkarOk = erVilkarOk;
     }

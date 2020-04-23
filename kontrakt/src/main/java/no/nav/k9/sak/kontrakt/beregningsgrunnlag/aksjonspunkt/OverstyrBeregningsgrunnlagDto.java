@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -43,8 +44,8 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
         //
     }
 
-    public OverstyrBeregningsgrunnlagDto(List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler, String begrunnelse) { // NOSONAR
-        super(begrunnelse);
+    public OverstyrBeregningsgrunnlagDto(List<FastsettBeregningsgrunnlagAndelDto> overstyrteAndeler, String begrunnelse, @Valid @NotNull Periode periode) { // NOSONAR
+        super(periode, begrunnelse);
         this.overstyrteAndeler = overstyrteAndeler;
     }
 

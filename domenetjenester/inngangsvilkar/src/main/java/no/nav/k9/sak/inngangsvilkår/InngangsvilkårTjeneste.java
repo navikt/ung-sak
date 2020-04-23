@@ -1,5 +1,7 @@
 package no.nav.k9.sak.inngangsvilkår;
 
+import java.time.LocalDate;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -20,7 +22,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.inngangsvilkår.VilkårTypeRef.VilkårTypeRefLiteral;
-import no.nav.vedtak.konfig.Tid;
 
 /**
  * Denne angir implementasjon som skal brukes for en gitt {@link VilkårType} slik at {@link Vilkår} og
@@ -77,7 +78,7 @@ public class InngangsvilkårTjeneste {
     /**
      * Overstyr søkers opplysningsplikt.
      */
-    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, Utfall utfall, BehandlingskontrollKontekst kontekst) {
+    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, Utfall utfall, BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom) {
         Avslagsårsak avslagsårsak = Avslagsårsak.MANGLENDE_DOKUMENTASJON;
         VilkårType vilkårType = VilkårType.SØKERSOPPLYSNINGSPLIKT;
 
@@ -88,7 +89,7 @@ public class InngangsvilkårTjeneste {
 
         final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
         builder.leggTil(vilkårBuilder
-            .leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE) // FIXME k9 : Benytte virkelige datoer
+            .leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
                 .medUtfallOverstyrt(utfall)
                 .medAvslagsårsak(Utfall.IKKE_OPPFYLT.equals(utfall) ? avslagsårsak : null)
             )
@@ -102,7 +103,7 @@ public class InngangsvilkårTjeneste {
      * Overstyr gitt aksjonspunkt på Inngangsvilkår.
      */
     public void overstyrAksjonspunkt(Long behandlingId, VilkårType vilkårType, Utfall utfall, String avslagsårsakKode,
-                                     BehandlingskontrollKontekst kontekst) {
+                                     BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
@@ -110,7 +111,7 @@ public class InngangsvilkårTjeneste {
 
         Avslagsårsak avslagsårsak = finnAvslagsårsak(avslagsårsakKode, utfall);
         final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
-        builder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+        builder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallOverstyrt(utfall)
             .medAvslagsårsak(avslagsårsak)));
 

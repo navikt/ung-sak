@@ -47,7 +47,7 @@ public class OpptjeningsvilkåretOverstyringshåndterer extends InngangsvilkårO
     @Override
     protected void precondition(Behandling behandling, OverstyringOpptjeningsvilkåretDto dto) {
         if (dto.getErVilkarOk()) {
-            final Optional<Opptjening> opptjening = opptjeningRepository.finnOpptjening(behandling.getId()).flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(dto.getOpptjeningFom(), dto.getOpptjeningTom())));
+            final Optional<Opptjening> opptjening = opptjeningRepository.finnOpptjening(behandling.getId()).flatMap(it -> it.finnOpptjening(dto.getPeriode().getFom()));
             if (opptjening.isPresent()) {
                 final long antall = opptjening.get().getOpptjeningAktivitet().stream()
                     .filter(oa -> !oa.getAktivitetType().equals(OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD)).count();

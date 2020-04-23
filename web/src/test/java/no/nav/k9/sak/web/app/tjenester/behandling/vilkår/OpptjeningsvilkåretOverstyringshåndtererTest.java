@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vilkår;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.kontrakt.opptjening.OverstyringOpptjeningsvilkåretDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
 import no.nav.vedtak.exception.FunksjonellException;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -39,6 +41,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     @Inject
     private AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjeneste;
+    private Periode periode = new Periode(LocalDate.now().minusMonths(3), LocalDate.now());;
 
     @Test
     public void skal_opprette_aksjonspunkt_for_overstyring() {
@@ -52,7 +55,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
 
         Behandling behandling = scenario.getBehandling();
         // Dto
-        OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(false,
+        OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(periode, false,
             "test av overstyring opptjeningsvilkåret", "1035");
         assertThat(behandling.getAksjonspunkter()).hasSize(1);
 
@@ -81,7 +84,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
 
         Behandling behandling = scenario.getBehandling();
         // Dto
-        OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(false,
+        OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(periode, false,
             "test av overstyring opptjeningsvilkåret", "1035");
 
         // Act
@@ -110,7 +113,8 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
 
         Behandling behandling = scenario.getBehandling();
         // Dto
-        OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(true,
+
+        OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(periode, true,
             "test av overstyring opptjeningsvilkåret", "1035");
 
         // Act

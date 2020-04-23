@@ -16,22 +16,13 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE)
 public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktDto {
-
-    @Valid
-    @NotNull
-    @JsonProperty(value = "opptjeningFom", required = true)
-    private LocalDate opptjeningFom;
-
-    @Valid
-    @NotNull
-    @JsonProperty(value = "opptjeningTom", required = true)
-    private LocalDate opptjeningTom;
 
     @JsonProperty("avslagskode")
     @Size(min = 4, max = 5)
@@ -45,7 +36,13 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
         //
     }
 
-    public OverstyringOpptjeningsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
+    public OverstyringOpptjeningsvilkåretDto(Periode periode, boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
+        super(periode, begrunnelse);
+        this.erVilkarOk = erVilkarOk;
+        this.avslagskode = avslagskode;
+    }
+
+    public OverstyringOpptjeningsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode) {
         super(begrunnelse);
         this.erVilkarOk = erVilkarOk;
         this.avslagskode = avslagskode;
@@ -69,19 +66,4 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
         this.erVilkarOk = erVilkarOk;
     }
 
-    public LocalDate getOpptjeningFom() {
-        return opptjeningFom;
-    }
-
-    public void setOpptjeningFom(LocalDate opptjeningFom) {
-        this.opptjeningFom = opptjeningFom;
-    }
-
-    public LocalDate getOpptjeningTom() {
-        return opptjeningTom;
-    }
-
-    public void setOpptjeningTom(LocalDate opptjeningTom) {
-        this.opptjeningTom = opptjeningTom;
-    }
 }

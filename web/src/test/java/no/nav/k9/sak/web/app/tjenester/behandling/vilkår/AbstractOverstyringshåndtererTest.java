@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -25,6 +26,7 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.medlem.OverstyringMedlemskapsvilkåretDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
@@ -55,7 +57,7 @@ public class AbstractOverstyringshåndtererTest {
         Aksjonspunkt ap = aksjonspunktRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET);
         aksjonspunktRepository.setTilUtført(ap, "OK");
 
-        var dto = new OverstyringMedlemskapsvilkåretDto(false, IKKE_OK, Avslagsårsak.MANGLENDE_DOKUMENTASJON.getKode());
+        var dto = new OverstyringMedlemskapsvilkåretDto(new Periode(LocalDate.now(), Tid.TIDENES_ENDE),     false, IKKE_OK, Avslagsårsak.MANGLENDE_DOKUMENTASJON.getKode());
 
         aksjonspunktApplikasjonTjeneste.overstyrAksjonspunkter(Set.of(dto), behandling.getId());
 

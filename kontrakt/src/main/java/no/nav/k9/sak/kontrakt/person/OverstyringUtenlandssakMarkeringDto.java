@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.person;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -31,7 +34,7 @@ public class OverstyringUtenlandssakMarkeringDto extends OverstyringAksjonspunkt
     }
 
     public OverstyringUtenlandssakMarkeringDto(String begrunnelse, String gammelVerdi) {
-        super(begrunnelse);
+        super(null, begrunnelse);
         this.gammelVerdi = gammelVerdi;
     }
 
