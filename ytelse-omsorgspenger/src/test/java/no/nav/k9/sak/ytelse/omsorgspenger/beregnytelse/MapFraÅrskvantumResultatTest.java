@@ -1,16 +1,27 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.Årsak;
+import no.nav.k9.aarskvantum.kontrakter.Årskvantum;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.kontrakt.uttak.*;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
+
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,8 +32,8 @@ public class MapFraÅrskvantumResultatTest {
     @Test
     public void map_fra_årskvantum_resultat() throws Exception {
 
-        var år = new ÅrskvantumResultat();
-        år.setUttaksplan(lagUttaksplan());
+        var år = new ÅrskvantumResultat(new Årskvantum("2020","1234567890",20,BigDecimal.TEN),lagUttaksplan());
+
 
         List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
         assertThat(perioder).hasSize(4);
@@ -32,46 +43,42 @@ public class MapFraÅrskvantumResultatTest {
     }
 
 
-    private UttaksplanOmsorgspenger lagUttaksplan() {
-        UttaksplanOmsorgspenger uttaksplanOmsorgspenger = new UttaksplanOmsorgspenger();
-        uttaksplanOmsorgspenger.setAktiviteter(lagAktiviteter());
+    private Uttaksplan lagUttaksplan() {
+        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(),lagAktiviteter());
+
         return uttaksplanOmsorgspenger;
     }
 
-    private List<UttaksPlanOmsorgspengerAktivitet> lagAktiviteter() {
-        List<UttaksPlanOmsorgspengerAktivitet> aktiviteter = new ArrayList<>();
+    private List<Aktivitet> lagAktiviteter() {
+        List<Aktivitet> aktiviteter = new ArrayList<>();
 
-        var arbeidsforhold1 = new UttakArbeidsforhold("921484240", null, UttakArbeidType.ARBEIDSTAKER, null);
+        var arbeidsforhold1 = new Arbeidsforhold("ARBEIDSTAKER", "12434422323", "12345555", null);
 
-        UttaksPlanOmsorgspengerAktivitet uttaksPlanOmsorgspengerAktivitet = new UttaksPlanOmsorgspengerAktivitet();
-        uttaksPlanOmsorgspengerAktivitet.setUttaksperioder(lagUttaksperioder());
-        uttaksPlanOmsorgspengerAktivitet.setArbeidsforhold(arbeidsforhold1);
+        Aktivitet uttaksPlanOmsorgspengerAktivitet = new Aktivitet(arbeidsforhold1, lagUttaksperioder());
 
         aktiviteter.add(uttaksPlanOmsorgspengerAktivitet);
 
         return aktiviteter;
     }
 
-    private List<UttaksperiodeOmsorgspenger> lagUttaksperioder() {
+    private List<Uttaksperiode> lagUttaksperioder() {
         var fom = LocalDate.now();
         var tom = fom.plusDays(3);
         var arbeidsforhold1 = new UttakArbeidsforhold("921484240", null, UttakArbeidType.ARBEIDSTAKER, null);
         var arbeidsforhold2 = new UttakArbeidsforhold("90589477", null, UttakArbeidType.ARBEIDSTAKER, null);
         var arbeidsforhold3 = new UttakArbeidsforhold("980484939", null, UttakArbeidType.ARBEIDSTAKER, null);
         return List.of(
-            innvilget(fom, tom, _100, arbeidsforhold1),
-            avslått(fom, tom, arbeidsforhold2),
-            avslått(tom.plusDays(1), tom.plusDays(10), arbeidsforhold1),
-            innvilget(tom.plusDays(1), tom.plusDays(10), _100, arbeidsforhold3));
+            innvilget(fom, tom, _100),
+            avslått(fom, tom),
+            avslått(tom.plusDays(1), tom.plusDays(10)),
+            innvilget(tom.plusDays(1), tom.plusDays(10), _100));
     }
 
-    private UttaksperiodeOmsorgspenger innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), utbetalingsgrad,
-                                              OmsorgspengerUtfall.INNVILGET, Duration.ofHours(1), arbeidsforhold);
+    private Uttaksperiode innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad) {
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, Årsak.AVSLÅTT_70ÅR, utbetalingsgrad);
     }
 
-    private UttaksperiodeOmsorgspenger avslått(LocalDate fom, LocalDate tom, UttakArbeidsforhold arbeidsforhold) {
-        return new UttaksperiodeOmsorgspenger(new Periode(fom, tom), BigDecimal.ZERO,
-                                              OmsorgspengerUtfall.AVSLÅTT, Duration.ofHours(1), arbeidsforhold);
+    private Uttaksperiode avslått(LocalDate fom, LocalDate tom) {
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, Årsak.AVSLÅTT_70ÅR, BigDecimal.ZERO);
     }
 }

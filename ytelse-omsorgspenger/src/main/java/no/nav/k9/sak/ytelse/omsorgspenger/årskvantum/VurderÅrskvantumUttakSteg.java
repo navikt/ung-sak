@@ -1,6 +1,12 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -8,7 +14,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.Årsak;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -18,6 +31,9 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
+import no.nav.k9.sak.kontrakt.uttak.UttaksPlanOmsorgspengerAktivitet;
+import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
+import no.nav.k9.sak.kontrakt.uttak.UttaksplanOmsorgspenger;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
@@ -57,18 +73,17 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
 
-        if (OmsorgspengerUtfall.INNVILGET.equals(årskvantumResultat.hentSamletUtfall())) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else {
+        if (skalDetLagesAksjonspunkt(årskvantumResultat.getUttaksplan())) {
             try {
                 log.info("Setter behandling på vent etter følgende respons fra årskvantum" +
                     "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat));
             } catch (IOException e) {
                 log.info("Feilet i serialisering av årskvantum respons: " + årskvantumResultat);
             }
-            //TODO 1 lage aksjonspunkt for manglende årskvantum.
-            return BehandleStegResultat.settPåVent();
 
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(opprettAksjonspunktForÅrskvantum().getAksjonspunktDefinisjon()));
+        } else {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
             //TODO 2 kan vi innvilge deler av periodene og avslå resten?
         }
 
@@ -81,4 +96,23 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     }
 
+    private AksjonspunktResultat opprettAksjonspunktForÅrskvantum() {
+        AksjonspunktDefinisjon apDef = AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE;
+        return AksjonspunktResultat.opprettForAksjonspunkt(apDef);
+    }
+
+
+    public boolean skalDetLagesAksjonspunkt(Uttaksplan uttaksplanOmsorgspenger) {
+        for (Aktivitet uttaksPlanOmsorgspengerAktivitet : uttaksplanOmsorgspenger.getAktiviteter()) {
+            for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
+                if (Årsak.AVSLÅTT_IKKE_FLERE_DAGER.equals(uttaksperiodeOmsorgspenger.getårsak())
+                    || Årsak.AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK.equals(uttaksperiodeOmsorgspenger.getårsak())
+                    || Årsak.AVSLÅTT_KREVER_LEGEERKLÆRING.equals(uttaksperiodeOmsorgspenger.getårsak())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

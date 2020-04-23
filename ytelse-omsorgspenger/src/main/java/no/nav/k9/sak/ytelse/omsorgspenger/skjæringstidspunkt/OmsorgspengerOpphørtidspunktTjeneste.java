@@ -1,16 +1,25 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.skjæringstidspunkt;
 
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.kontrakt.uttak.UttaksPlanOmsorgspengerAktivitet;
+import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
+import no.nav.k9.sak.kontrakt.uttak.Årskvantum;
 import no.nav.k9.sak.skjæringstidspunkt.YtelseOpphørtidspunktTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Optional;
 
 @FagsakYtelseTypeRef("OMP")
@@ -46,7 +55,7 @@ public class OmsorgspengerOpphørtidspunktTjeneste implements YtelseOpphørtidsp
     @Override
     public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
         ÅrskvantumResultat årskvantumResultat = hentÅrskvantumResultat(ref);
-        return årskvantumResultat == null ? Optional.empty() : Optional.ofNullable(årskvantumResultat.getMaksPeriode()).map(Periode::getTom);
+        return årskvantumResultat == null ? Optional.empty() : Optional.ofNullable(getMaksPeriode(årskvantumResultat)).map(Periode::getTom);
     }
 
     private ÅrskvantumResultat hentÅrskvantumResultat(BehandlingReferanse ref) {
@@ -54,13 +63,28 @@ public class OmsorgspengerOpphørtidspunktTjeneste implements YtelseOpphørtidsp
         return årskvantumResultat;
     }
 
+
+
+
+    public Periode getMaksPeriode(ÅrskvantumResultat årskvantumResultat) {
+        var fom = årskvantumResultat.getUttaksplan().getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(Uttaksperiode::getPeriode).map(LukketPeriode::getFom).min(Comparator.nullsFirst(Comparator.naturalOrder())).orElse(null);
+        var tom = årskvantumResultat.getUttaksplan().getAktiviteter().stream().flatMap(aktivitet -> aktivitet.getUttaksperioder().stream()).map(Uttaksperiode::getPeriode).map(LukketPeriode::getTom).max(Comparator.nullsLast(Comparator.naturalOrder())).orElse(null);
+        return fom != null && tom != null ? new Periode(fom, tom) : null;
+    }
+
+
     public boolean harAvslåttPeriode(BehandlingReferanse ref) {
         var resultat = hentÅrskvantumResultat(ref);
         if (resultat == null) {
             return false;
-        } else if (resultat.hentSamletUtfall() == OmsorgspengerUtfall.AVSLÅTT) {
-            return true;
         } else {
+            for (Aktivitet uttaksPlanOmsorgspengerAktivitet : resultat.getUttaksplan().getAktiviteter()) {
+                for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
+                    if (Utfall.AVSLÅTT.equals(uttaksperiodeOmsorgspenger.getUtfall())) {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
     }
