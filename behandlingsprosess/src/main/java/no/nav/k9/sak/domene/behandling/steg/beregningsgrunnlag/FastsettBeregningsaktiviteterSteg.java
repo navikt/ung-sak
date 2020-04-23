@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
+
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
@@ -40,6 +42,8 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester;
     private BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste;
+    private BehandletPeriodeTjeneste behandletPeriodeTjeneste;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
     protected FastsettBeregningsaktiviteterSteg() {
         // for CDI proxy
@@ -51,7 +55,9 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
                                              @Any Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester,
-                                             BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste) {
+                                             BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste,
+                                             BehandletPeriodeTjeneste behandletPeriodeTjeneste,
+                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
@@ -59,6 +65,8 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.utledStpTjenester = utledStpTjenester;
         this.beregningInfotrygdsakTjeneste = beregningInfotrygdsakTjeneste;
+        this.behandletPeriodeTjeneste = behandletPeriodeTjeneste;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
     @Override
@@ -78,8 +86,16 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         } else {
             var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
             var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
-            var beregningAksjonspunktResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(beregningAksjonspunktResultat.stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+            var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag);
+            Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
+            if (vilkårOppfylt != null && !vilkårOppfylt) {
+                var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
+                var orginalVilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
+                beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, vilkårOppfylt, vilkårsPeriode, orginalVilkårsPeriode);
+                return BehandleStegResultat.fremoverført(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
+            } else {
+                return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+            }
         }
     }
 
