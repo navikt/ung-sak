@@ -86,7 +86,7 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
         } else {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
             var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId()));
-            var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
+            var vilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
             beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, vilkårsPeriode);
         }
     }
