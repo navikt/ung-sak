@@ -20,7 +20,7 @@ public class VurderProsessTaskStatusForPollingApi {
     private ProsessTaskFeilmelder feilmelder;
     private Long entityId;
     private static final Set<ProsessTaskStatus> FERDIG_STATUSER = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
-    
+
     public interface ProsessTaskFeilmelder {
         Feil feilIProsessTaskGruppe(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime sistKjørt);
 
@@ -93,7 +93,7 @@ public class VurderProsessTaskStatusForPollingApi {
     }
 
     private Optional<AsyncPollingStatus> ventPåKlar(String gruppe, LocalDateTime maksTidFørNesteKjøring, ProsessTaskData task, String callId) {
-        if (task.getNesteKjøringEtter().isBefore(maksTidFørNesteKjøring)) {
+        if (task.getNesteKjøringEtter() == null || task.getNesteKjøringEtter().isBefore(maksTidFørNesteKjøring)) {
 
             AsyncPollingStatus status = new AsyncPollingStatus(
                 AsyncPollingStatus.Status.PENDING,
