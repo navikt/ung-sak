@@ -1,5 +1,18 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -31,18 +44,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.vedtak.util.Tuple;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
@@ -93,6 +94,9 @@ public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(BeregningsresultatEntitet beregningsresultat,
                                                           UttakAktivitet fastsattUttak) {
+        if (beregningsresultat == null) {
+            return List.of();
+        }
         var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
         var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(beregningsresultatPerioder);
 

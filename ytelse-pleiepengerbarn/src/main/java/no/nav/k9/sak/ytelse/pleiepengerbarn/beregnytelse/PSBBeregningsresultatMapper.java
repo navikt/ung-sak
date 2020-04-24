@@ -114,6 +114,9 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat,
                                                           Optional<Uttaksplan> uttaksplan) {
+        if (beregningsresultat == null) {
+            return List.of();
+        }
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
         var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
         var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(
