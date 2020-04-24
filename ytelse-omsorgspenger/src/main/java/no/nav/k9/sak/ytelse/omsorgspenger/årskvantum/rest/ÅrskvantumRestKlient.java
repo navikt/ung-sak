@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.aarskvantum.kontrakter.MinMaxRequest;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumRequest;
@@ -78,10 +79,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForBehandling(UUID behandlingUUID) {
+    public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID) {
         try {
-            var endpoint = URI.create(endpointUttaksplan.toString() + "/hentkvantumforbehandling");
-            var result = restKlient.post(endpoint, behandlingUUID.toString(), ÅrskvantumResultat.class);
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/forbruktedager?behandlingUUID=" + behandlingUUID.toString());
+            var result = restKlient.get(endpoint, ÅrskvantumForbrukteDager.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingUUID=" + behandlingUUID + ": " + constraints);

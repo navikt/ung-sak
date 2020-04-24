@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
@@ -10,7 +11,7 @@ public interface ÅrskvantumTjeneste {
 
     ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref);
 
-    ÅrskvantumResultat hentÅrskvantumForBehandling(BehandlingReferanse ref);
+    ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(BehandlingReferanse ref);
 
     Periode hentPeriodeForFagsak(Saksnummer ref);
 

@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -170,7 +171,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumForBehandling(BehandlingReferanse ref) {
+    public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(BehandlingReferanse ref) {
         return årskvantumKlient.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
     }
 
