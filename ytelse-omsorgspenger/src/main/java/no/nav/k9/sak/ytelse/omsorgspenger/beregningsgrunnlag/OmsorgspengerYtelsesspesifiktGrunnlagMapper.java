@@ -18,6 +18,10 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
@@ -30,8 +34,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 @ApplicationScoped
 public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<OmsorgspengerGrunnlag> {
 
-    private static final Comparator<UttaksperiodeOmsorgspenger> COMP_PERIODE = Comparator.comparing(per -> per.getPeriode(),
-        Comparator.nullsFirst(Comparator.naturalOrder()));
 
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
@@ -56,17 +58,17 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
 
-    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(UttakArbeidsforhold uttakArbeidsforhold, List<UttaksperiodeOmsorgspenger> perioder) {
+    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(Arbeidsforhold uttakArbeidsforhold, List<Uttaksperiode> perioder) {
         var arbeidsforhold = mapTilKalkulusArbeidsforhold(uttakArbeidsforhold);
         var utbetalingsgrad = perioder.stream()
-            .filter(p -> p.getUtfall() == OmsorgspengerUtfall.INNVILGET)
-            .sorted(COMP_PERIODE) // stabil rekkefølge output
+            .filter(p -> p.getUtfall() == Utfall.INNVILGET)
+            .sorted() // stabil rekkefølge output
             .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad()))
             .collect(Collectors.toList());
         return new UtbetalingsgradPrAktivitetDto(arbeidsforhold, utbetalingsgrad);
     }
 
-    private UtbetalingsgradArbeidsforholdDto mapTilKalkulusArbeidsforhold(UttakArbeidsforhold arb) {
+    private UtbetalingsgradArbeidsforholdDto mapTilKalkulusArbeidsforhold(Arbeidsforhold arb) {
         var aktør = mapTilKalkulusAktør(arb);
         var type = mapType(arb.getType());
         var internArbeidsforholdId = mapArbeidsforholdId(arb.getArbeidsforholdId());
@@ -78,9 +80,9 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return arbeidsforholdId == null ? null : new InternArbeidsforholdRefDto(arbeidsforholdId);
     }
 
-    private static Aktør mapTilKalkulusAktør(UttakArbeidsforhold arb) {
+    private static Aktør mapTilKalkulusAktør(Arbeidsforhold arb) {
         if (arb != null && arb.getAktørId() != null) {
-            return new AktørIdPersonident(arb.getAktørId().getId());
+            return new AktørIdPersonident(arb.getAktørId());
         } else if (arb != null && arb.getOrganisasjonsnummer() != null) {
             return new Organisasjon(arb.getOrganisasjonsnummer());
         } else {
@@ -88,11 +90,11 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         }
     }
 
-    private static UttakArbeidType mapType(no.nav.k9.kodeverk.uttak.UttakArbeidType type) {
-        return new UttakArbeidType(type.getKode());
+    private static UttakArbeidType mapType(String type) {
+        return new UttakArbeidType(type);
     }
 
-    private static Periode tilKalkulusPeriode(no.nav.k9.sak.kontrakt.uttak.Periode periode) {
+    private static Periode tilKalkulusPeriode(LukketPeriode periode) {
         return new Periode(periode.getFom(), periode.getTom());
     }
 

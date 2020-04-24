@@ -15,6 +15,12 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -45,7 +51,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.util.Tuple;
 
@@ -174,21 +179,21 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     private void mapUttakForAndel(DatoIntervallEntitet periode, BeregningsresultatAndel brukersAndel, ÅrskvantumResultat årskvantumResultat, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder) {
         var uttaksPeriodeForAndel = årskvantumResultat.getUttaksplan().getAktiviteter().stream()
             .filter(it -> matcherArbeidsforhold(it.getArbeidsforhold(), brukersAndel))
-            .map(UttaksPlanOmsorgspengerAktivitet::getUttaksperioder)
+            .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
-            .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()).overlapper(periode))
+            .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()).overlapper(periode))
             .map(it -> mapUttakDto(periode, it))
             .collect(Collectors.toList());
 
         dtoBuilder.medUttak(uttaksPeriodeForAndel);
     }
 
-    private UttakDto mapUttakDto(DatoIntervallEntitet periode, UttaksperiodeOmsorgspenger uttaksPeriode) {
+    private UttakDto mapUttakDto(DatoIntervallEntitet periode, Uttaksperiode uttaksPeriode) {
         var utfallType = OmsorgspengerUtfall.INNVILGET.equals(uttaksPeriode.getUtfall()) ? UtfallType.INNVILGET : UtfallType.AVSLÅTT;
-        return new UttakDto(avgrensPeriode(periode, uttaksPeriode), utfallType, uttaksPeriode.getUtbetalingsgrad());
+        return new UttakDto(avgrensPeriode(periode, uttaksPeriode.getPeriode()), utfallType, uttaksPeriode.getUtbetalingsgrad());
     }
 
-    private Periode avgrensPeriode(DatoIntervallEntitet periode, UttaksperiodeOmsorgspenger uttaksPeriode) {
+    private Periode avgrensPeriode(DatoIntervallEntitet periode, LukketPeriode uttaksPeriode) {
         var fom = uttaksPeriode.getFom();
         var tom = uttaksPeriode.getTom();
         if (fom.isBefore(periode.getFomDato())) {
@@ -200,12 +205,12 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
         return new Periode(fom, tom);
     }
 
-    private boolean matcherArbeidsforhold(UttakArbeidsforhold arbeidsforhold, BeregningsresultatAndel brukersAndel) {
+    private boolean matcherArbeidsforhold(Arbeidsforhold arbeidsforhold, BeregningsresultatAndel brukersAndel) {
         if (brukersAndel.getArbeidsgiver().isPresent()) {
             var arbeidsgiver = brukersAndel.getArbeidsgiver().get();
             if (arbeidsgiver.erAktørId()) {
-                return arbeidsforhold.getAktørId() != null && arbeidsforhold.getAktørId().getId() != null
-                    && arbeidsgiver.getAktørId().equals(arbeidsforhold.getAktørId())
+                return arbeidsforhold.getAktørId() != null
+                    && arbeidsgiver.getAktørId().getId().equals(arbeidsforhold.getAktørId())
                     && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(brukersAndel.getArbeidsforholdRef());
             } else if (arbeidsgiver.getErVirksomhet()) {
                 return Objects.equals(arbeidsgiver.getOrgnr(), arbeidsforhold.getOrganisasjonsnummer())
