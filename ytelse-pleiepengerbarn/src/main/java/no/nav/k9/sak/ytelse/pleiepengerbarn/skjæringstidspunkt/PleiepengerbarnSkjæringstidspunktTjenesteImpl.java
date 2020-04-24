@@ -83,7 +83,7 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
 
     @Override
     public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
-        return null;
+        return Optional.empty();
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
@@ -133,7 +133,7 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     public boolean harAvslåttPeriode(UUID behandlingUuid) {
         return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
     }
-    
+
     @Override
     public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
         LocalDate skjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
