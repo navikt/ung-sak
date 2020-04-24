@@ -140,7 +140,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                 kreverRefusjon = kreverArbeidsgiverRefusjon(inntektsmeldingAggregat, arb, arbeidsforholdRef, fraværPeriode.getPeriode());
                 arbeidsforhold = new Arbeidsforhold(fraværPeriode.getAktivitetType().getKode(),
                     arb.getOrgnr(),
-                    arb.getAktørId().getId(),
+                    arb.getAktørId() != null ? arb.getAktørId().getId() : null,
                     arbeidsforholdId);
             }
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
