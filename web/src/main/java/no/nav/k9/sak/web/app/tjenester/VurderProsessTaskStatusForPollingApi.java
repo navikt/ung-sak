@@ -61,12 +61,12 @@ public class VurderProsessTaskStatusForPollingApi {
         String gruppe = task.getGruppe();
         String callId = task.getPropertyValue("callId");
         ProsessTaskStatus taskStatus = task.getStatus();
-        if (ProsessTaskStatus.KLAR.equals(taskStatus)) {
+        if (ProsessTaskStatus.KLAR.equals(taskStatus) || ProsessTaskStatus.VETO.equals(taskStatus)) {
             return ventPåKlar(gruppe, maksTidFørNesteKjøring, task, callId);
         } else if (ProsessTaskStatus.VENTER_SVAR.equals(taskStatus)) {
             return ventPåSvar(gruppe, task, callId);
         } else {
-            // dekker SUSPENDERT, FEILET, VETO
+            // dekker SUSPENDERT, FEILET
             return håndterFeil(gruppe, task, callId);
         }
     }
