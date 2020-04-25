@@ -1,5 +1,6 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PSB;
@@ -247,6 +248,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", EnumSet.of(OMP, PSB)),
     AUTO_VENT_BRUKER_70_ÅR(AksjonspunktKodeDefinisjon.AUTO_VENT_BRUKER_70_ÅR, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet, bruker 70år ved refusjonskrav",
         BehandlingStegType.VURDER_OPPTJENING_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(OMP, PSB)),
+
+    // Gruppe : 800 (FRISINN)
+    AUTO_VENT_FRISINN_INGEN_PERIODER_UTEN_YTELSE(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_INGEN_PERIODER_UTEN_YTELSE, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet. Ingen perioder uten ytelse.",
+        BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(FRISINN)),
+
 
     UNDEFINED,
 
