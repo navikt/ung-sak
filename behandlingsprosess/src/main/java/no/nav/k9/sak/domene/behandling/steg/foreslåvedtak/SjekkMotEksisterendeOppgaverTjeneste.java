@@ -51,6 +51,7 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
         List<String> oppgaveÅrsakerVurder = Arrays.asList(OppgaveÅrsak.VURDER_DOKUMENT.getKode(),
             Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER.getOppgaveType()); // FIXME : Tilpass for K9
 
+        //TODO (OL): må kobles inn
         //List<Oppgaveinfo> oppgaveinfos = oppgaveTjeneste.hentOppgaveListe(aktørid, oppgaveÅrsakerVurder);
         List<Oppgaveinfo> oppgaveinfos = new ArrayList<>();
         log.error("Sjekk mot oppgaver er utkoblet p.g.a teknisk feil (TSF-335) - må håndteres");
