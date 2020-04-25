@@ -59,6 +59,8 @@ public enum Venteårsak implements Kodeverdi {
     FL_SN_IKKE_STOTTET_FOR_SVP("FL_SN_IKKE_STOTTET_FOR_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
     BRUKER_70ÅR_VED_REFUSJON("BRUKER_70ÅR_VED_REFUSJON", "Mangel i løsning for brukere som er 70 år eller eldre"),
 
+    INGEN_PERIODE_UTEN_YTELSE("INGEN_PERIODE_UTEN_YTELSE", "Mangel i løsning for brukere som har 36 måneder med ytelse før stp."),
+
 ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();

@@ -99,6 +99,10 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
 
+    // FRISINN
+    public static final String AUTO_VENT_FRISINN_INGEN_PERIODER_UTEN_YTELSE = "8000";
+
+
     // Andre koder
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;
     public static final VilkårType UTEN_VILKÅR = null;
