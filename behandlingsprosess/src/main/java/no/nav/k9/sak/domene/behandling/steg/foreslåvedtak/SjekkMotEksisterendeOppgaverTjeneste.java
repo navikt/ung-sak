@@ -36,7 +36,7 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
     }
 
     @Inject
-    public SjekkMotEksisterendeOppgaverTjeneste(HistorikkRepository historikkRepository, OppgaveTjeneste     oppgaveTjeneste) {
+    public SjekkMotEksisterendeOppgaverTjeneste(HistorikkRepository historikkRepository, OppgaveTjeneste oppgaveTjeneste) {
         this.historikkRepository = historikkRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
     }
@@ -51,7 +51,10 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
         List<String> oppgaveÅrsakerVurder = Arrays.asList(OppgaveÅrsak.VURDER_DOKUMENT.getKode(),
             Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER.getOppgaveType()); // FIXME : Tilpass for K9
 
-        List<Oppgaveinfo> oppgaveinfos = oppgaveTjeneste.hentOppgaveListe(aktørid, oppgaveÅrsakerVurder);
+        //TODO (OL): må kobles inn
+        //List<Oppgaveinfo> oppgaveinfos = oppgaveTjeneste.hentOppgaveListe(aktørid, oppgaveÅrsakerVurder);
+        List<Oppgaveinfo> oppgaveinfos = new ArrayList<>();
+        log.error("Sjekk mot oppgaver er utkoblet p.g.a teknisk feil (TSF-335) - må håndteres");
         if (oppgaveinfos != null && !oppgaveinfos.isEmpty()) {
             if (oppgaveinfos.contains(Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER)) {
                 aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
