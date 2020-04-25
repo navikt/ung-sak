@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.DokumentoversiktFagsakQuery;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.GrapQlData;
+import no.nav.k9.sak.dokument.arkiv.saf.graphql.GraphQlError;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.GraphQlRequest;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.GraphQlResponse;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.HentDokumentQuery;
@@ -29,12 +30,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.opensaml.xmlsec.signature.G;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -81,6 +84,9 @@ public class SafTjenesteImpl implements SafTjeneste {
         if (graphQlResponse == null) {
             return null;
         }
+        if (graphQlResponse.getErrors() != null && graphQlResponse.getErrors().size() > 0) {
+            throw  FEILFACTORY.queryReturnerteFeil(graphQlResponse).toException();
+        }
         return Optional.of(graphQlResponse)
             .map(GraphQlResponse::getData)
             .map(GrapQlData::getDokumentoversiktFagsak)
@@ -104,6 +110,9 @@ public class SafTjenesteImpl implements SafTjeneste {
         if (graphQlResponse == null) {
             return null;
         }
+        if (graphQlResponse.getErrors() != null && graphQlResponse.getErrors().size() > 0) {
+            throw  FEILFACTORY.queryReturnerteFeil(graphQlResponse).toException();
+        }
         return Optional.of(graphQlResponse)
             .map(GraphQlResponse::getData)
             .map(GrapQlData::getJournalpost)
@@ -111,13 +120,13 @@ public class SafTjenesteImpl implements SafTjeneste {
     }
 
     @Override
-    public String hentDokument(HentDokumentQuery query) {
+    public byte[] hentDokument(HentDokumentQuery query) {
         var uri = URI.create(hentDokumentEndpoint.toString() +
             String.format("/%s/%s/%s", query.getJournalpostId(), query.getDokumentInfoId(), query.getVariantFormat()));
         var getRequest = new HttpGet(uri);
 
         try {
-            return utførForespørsel(getRequest, new OidcRestClientResponseHandler.StringResponseHandler(uri));
+            return utførForespørsel(getRequest);
         } catch (Exception e) {
             throw FEILFACTORY.hentDokumentRequestFeilet(query, e).toException();
         }
@@ -140,19 +149,24 @@ public class SafTjenesteImpl implements SafTjeneste {
                 }
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
                 String feilmelding = "Kunne ikke hente informasjon for query mot SAF: " + request.getURI()
-                    + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+                    + ", HTTP request=" + request.getEntity()
+                    + ", HTTP status=" + httpResponse.getStatusLine()
+                    + ". HTTP Errormessage=" + responseBody;
                 throw new SafException(feilmelding);
             }
         }
     }
 
 
-    private <T> T utførForespørsel(HttpGet request, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
+    private <T> byte[] utførForespørsel(HttpGet request) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode == HttpStatus.SC_OK) {
-                return responseHandler.handleResponse(httpResponse);
+                return EntityUtils.toByteArray(httpResponse.getEntity());
             } else {
+                if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
+                    return null;
+                }
                 if (responseCode == HttpStatus.SC_NO_CONTENT) {
                     return null;
                 }
@@ -181,6 +195,9 @@ public class SafTjenesteImpl implements SafTjeneste {
 
         @TekniskFeil(feilkode = "K9-969998", feilmelding = "Feil ved respons hentJournalpost: %s", logLevel = LogLevel.WARN)
         Feil hentJournalpostResponseFeilet(JournalpostQuery query);
+
+        @TekniskFeil(feilkode = "K9-588730", feilmelding = "Feil fra SAF ved utført query: %s", logLevel = LogLevel.WARN)
+        Feil queryReturnerteFeil(GraphQlResponse response);
 
         @TekniskFeil(feilkode = "K9-969999", feilmelding = "Feil ved request hentDokument: %s", logLevel = LogLevel.WARN)
         Feil hentDokumentRequestFeilet(HentDokumentQuery query, Throwable t);

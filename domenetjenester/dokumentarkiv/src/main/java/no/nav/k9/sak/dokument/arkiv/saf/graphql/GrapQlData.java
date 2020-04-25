@@ -31,4 +31,12 @@ public class GrapQlData {
     public DokumentoversiktFagsak getDokumentoversiktFagsak() {
         return dokumentoversiktFagsak;
     }
+
+    @Override
+    public String toString() {
+        return "GrapQlData{" +
+            "journalpost=" + journalpost +
+            ", dokumentoversiktFagsak=" + dokumentoversiktFagsak +
+            '}';
+    }
 }

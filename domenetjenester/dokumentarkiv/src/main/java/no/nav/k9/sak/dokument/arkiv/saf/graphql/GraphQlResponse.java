@@ -27,4 +27,12 @@ public class GraphQlResponse {
     public List<GraphQlError> getErrors() {
         return errors;
     }
+
+    @Override
+    public String toString() {
+        return "GraphQlResponse{" +
+            "data=" + data +
+            ", errors=" + errors +
+            '}';
+    }
 }

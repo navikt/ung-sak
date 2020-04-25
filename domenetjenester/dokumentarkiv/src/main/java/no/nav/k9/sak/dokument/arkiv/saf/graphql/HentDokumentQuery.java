@@ -13,7 +13,7 @@ public class HentDokumentQuery {
     @NotNull
     private final String variantFormat;
 
-    public HentDokumentQuery(String journalpostId, String dokumentId, String variantFormat) {
+    public HentDokumentQuery(@NotNull String journalpostId, @NotNull String dokumentId, @NotNull String variantFormat) {
         this.journalpostId = journalpostId;
         this.dokumentId = dokumentId;
         this.variantFormat = variantFormat;

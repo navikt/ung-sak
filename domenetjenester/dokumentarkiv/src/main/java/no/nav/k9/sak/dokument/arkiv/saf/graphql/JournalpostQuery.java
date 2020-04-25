@@ -7,7 +7,7 @@ public class JournalpostQuery {
     @NotNull
     private String journalpostId;
 
-    public JournalpostQuery(String journalpostId) {
+    public JournalpostQuery(@NotNull String journalpostId) {
         this.journalpostId = journalpostId;
     }
 

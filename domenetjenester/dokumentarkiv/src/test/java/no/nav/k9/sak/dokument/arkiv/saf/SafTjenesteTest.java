@@ -91,8 +91,8 @@ public class SafTjenesteTest {
         HentDokumentQuery query = new HentDokumentQuery("journalpostId", "dokumentInfoId", VariantFormat.ARKIV.name());
         when(entity.getContent()).thenReturn(new ByteArrayInputStream("<dokument_as_bytes>".getBytes()));
 
-        String dokument = safTjeneste.hentDokument(query);
+        byte[] dokument = safTjeneste.hentDokument(query);
 
-        assertThat(dokument).isEqualTo("<dokument_as_bytes>");
+        assertThat(dokument).isEqualTo("<dokument_as_bytes>".getBytes());
     }
 }

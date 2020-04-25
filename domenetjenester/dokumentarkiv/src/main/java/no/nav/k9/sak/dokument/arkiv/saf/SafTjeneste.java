@@ -11,5 +11,5 @@ public interface SafTjeneste {
 
     Journalpost hentJournalpostInfo(JournalpostQuery journalpostId);
 
-    String hentDokument(HentDokumentQuery query);
+    byte[] hentDokument(HentDokumentQuery query);
 }

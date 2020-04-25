@@ -68,11 +68,11 @@ public class DokumentArkivTjeneste {
             dokumentId,
             VariantFormat.ARKIV.getOffisiellKode());
 
-        String pdfDokument = safTjeneste.hentDokument(query);
+        byte[] pdfDokument = safTjeneste.hentDokument(query);
         if (pdfDokument == null){
             throw DokumentArkivTjenesteFeil.FACTORY.hentDokumentIkkeFunnet(query).toException();
         }
-        return pdfDokument.getBytes();
+        return pdfDokument;
     }
 
     public List<ArkivJournalPost> hentAlleDokumenterForVisning(Saksnummer saksnummer) {
@@ -203,7 +203,8 @@ public class DokumentArkivTjeneste {
 
     // TODO (ESSV): Workaround mens vi venter på avklaring mapping Brevkode -> DokumentTypeId
     private DokumentTypeId mapTilDokumentTypeId(String brevkodeVerdi) {
-        Brevkode brevKode = Brevkode.finnForKodeverkEiersKode(brevkodeVerdi);
+        Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
+
         DokumentTypeId dokumentTypeId = Arrays.stream(DokumentTypeId.values())
             .filter(typeId -> typeId.name().equals(brevKode.name()))
             .findFirst()
@@ -215,9 +216,20 @@ public class DokumentArkivTjeneste {
         return dokumentTypeId;
     }
 
+    private Brevkode finnBrevKodeFraKodeverk(String brevkodeVerdi) {
+        Brevkode brevKode;
+        try {
+            brevKode = Brevkode.finnForKodeverkEiersKode(brevkodeVerdi);
+        } catch (Exception e) {
+            brevKode = Brevkode.UDEFINERT;
+        }
+        return brevKode;
+    }
+
     // TODO (ESSV): Workaround mens vi venter på avklaring mapping Brevkode -> DokumentKategori
     private DokumentKategori mapTilDokumentKategori(String brevkodeVerdi) {
-        Brevkode brevKode = Brevkode.finnForKodeverkEiersKode(brevkodeVerdi);
+        Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
+
         DokumentKategori dokumentKategori = Arrays.stream(DokumentKategori.values())
             .filter(typeId -> typeId.name().equals(brevKode.name()))
             .findFirst()

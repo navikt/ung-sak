@@ -209,7 +209,7 @@ public class DokumentArkivTjenesteImplTest {
         final byte[] bytesExpected = {1, 2, 7};
         HentDokumentResponse response = new HentDokumentResponse();
         response.setDokument(bytesExpected);
-        when(safTjeneste.hentDokument(any(HentDokumentQuery.class))).thenReturn(new String(bytesExpected));
+        when(safTjeneste.hentDokument(any(HentDokumentQuery.class))).thenReturn(bytesExpected);
 
         // Act
 

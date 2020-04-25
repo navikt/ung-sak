@@ -10,7 +10,7 @@ public class DokumentoversiktFagsakQuery {
     @NotNull
     private String fagsaksystem;
 
-    public DokumentoversiktFagsakQuery(String fagsakId, String fagsaksystem) {
+    public DokumentoversiktFagsakQuery(@NotNull String fagsakId, @NotNull String fagsaksystem) {
         this.fagsakId = fagsakId;
         this.fagsaksystem = fagsaksystem;
     }
