@@ -6,12 +6,12 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
+import no.nav.k9.formidling.kontrakt.hendelse.kodeverk.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.vedtak.felles.dokumentbestilling.kodeverk.FagsakYtelseType;
-import no.nav.vedtak.felles.dokumentbestilling.v1.DokumentbestillingV1;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -44,11 +44,13 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dokumentbestillingProducer.publiserDokumentbestillingJson(serialiser(mapDokumentbestilling(prosessTaskData)));
     }
 
-    private DokumentbestillingV1 mapDokumentbestilling(ProsessTaskData prosessTaskData) {
+    private Dokumentbestilling mapDokumentbestilling(ProsessTaskData prosessTaskData) {
         Behandling behandling = behandlingRepository
             .hentBehandling(Long.valueOf(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)));
 
-        DokumentbestillingV1 dokumentbestillingDto = new DokumentbestillingV1();
+        Dokumentbestilling dokumentbestillingDto = new Dokumentbestilling();
+        dokumentbestillingDto.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+        dokumentbestillingDto.setAktørId(behandling.getAktørId().getId());
         dokumentbestillingDto.setArsakskode(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK));
         dokumentbestillingDto.setBehandlingUuid(behandling.getUuid());
         dokumentbestillingDto
@@ -61,7 +63,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         return dokumentbestillingDto;
     }
 
-    private String serialiser(DokumentbestillingV1 dto) {
+    private String serialiser(Dokumentbestilling dto) {
         try {
             return JsonObjectMapper.getJson(dto);
         } catch (IOException e) {

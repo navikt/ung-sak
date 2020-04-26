@@ -124,7 +124,11 @@
                 <artifactId>kontrakter</artifactId>
                 <version>2.0_20200424145727_42220af</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.k9.formidling</groupId>
+                <artifactId>eksterne-kontrakter</artifactId>
+                <version>0.0.1-20200425223822-f2a231a</version>
+            </dependency>
 			<dependency>
 				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
 				<artifactId>fp-topics-manifest</artifactId>
@@ -138,11 +142,6 @@
 			<dependency>
 				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
 				<artifactId>hendelse-historikk-innslag</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>hendelse-dokumentbestilling</artifactId>
 				<version>${fp-kontrakter.version}</version>
 			</dependency>
 			<dependency>
