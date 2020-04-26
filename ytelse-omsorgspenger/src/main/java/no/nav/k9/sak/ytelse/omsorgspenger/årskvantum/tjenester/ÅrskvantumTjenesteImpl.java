@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -196,18 +197,13 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(BehandlingReferanse ref) {
-        return årskvantumKlient.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+    public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUuid) {
+        return årskvantumKlient.hentÅrskvantumForBehandling(behandlingUuid);
     }
 
     @Override
     public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
         return årskvantumKlient.hentPeriodeForFagsak(saksnummer.getVerdi());
-    }
-
-    @Override
-    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørid) {
-        return årskvantumKlient.hentResterendeKvantum(aktørid);
     }
 
 }

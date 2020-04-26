@@ -108,21 +108,6 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         }
     }
 
-    @Override
-    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId) {
-        try {
-            var endpoint = URI.create(endpointUttaksplan.toString() + "/hentresterendekvantum");
-            var result = restKlient.post(endpoint, aktørId, ÅrskvantumResterendeDager.class);
-            var constraints = VALIDATOR.validate(result);
-            if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", aktørid=" + aktørId + ": " + constraints);
-            }
-            return result;
-        } catch (Exception e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilhentResterendeKvantum(e).toException();
-        }
-    }
-
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
         try {
