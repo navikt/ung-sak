@@ -69,7 +69,7 @@ jobs:
 
       - name: Bygg og laste opp docker-image
         run: |
-          docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest .
+          docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest --label "version=${TAG}" .
           echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
           docker push ${IMAGE_BASE}:latest
           docker push ${IMAGE}
