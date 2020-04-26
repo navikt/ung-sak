@@ -37,11 +37,6 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
         return null;
     }
 
-    @Override
-    public ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId) {
-        return null;
-    }
-
     public void setÅrskvantumResultat(ÅrskvantumResultat årskvantumResultat) {
         this.årskvantumResultat = årskvantumResultat;
 
