@@ -6,7 +6,6 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.api.ÅrskvantumResterendeDager;
 
 public interface ÅrskvantumKlient {
 
@@ -17,7 +16,5 @@ public interface ÅrskvantumKlient {
     ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID);
 
     Periode hentPeriodeForFagsak(String saksnummer);
-
-    ÅrskvantumResterendeDager hentResterendeKvantum(String aktørId);
 
 }

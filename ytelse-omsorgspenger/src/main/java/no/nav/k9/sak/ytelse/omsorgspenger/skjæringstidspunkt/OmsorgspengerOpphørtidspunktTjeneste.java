@@ -55,7 +55,7 @@ public class OmsorgspengerOpphørtidspunktTjeneste implements YtelseOpphørtidsp
     }
 
     private ÅrskvantumForbrukteDager hentÅrskvantumResultat(BehandlingReferanse ref) {
-        var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumForBehandling(ref);
+        var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
         return årskvantumResultat;
     }
 

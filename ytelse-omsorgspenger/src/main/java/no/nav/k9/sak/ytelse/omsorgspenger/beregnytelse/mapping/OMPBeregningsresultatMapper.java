@@ -92,7 +92,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     @Override
     public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
-        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumForBehandling(ref)).map(ÅrskvantumForbrukteDager::getSisteUttaksplan);
+        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid())).map(ÅrskvantumForbrukteDager::getSisteUttaksplan);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatMedUtbetaltePeriodeDto.build()
             .medOpphoersdato(opphørsdato)
