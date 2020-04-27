@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENCE'
+      - 'CODEOWNERS'
+      - 'dev/**'
 env:
   IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/k9-sak
   CLUSTER: dev-fss
