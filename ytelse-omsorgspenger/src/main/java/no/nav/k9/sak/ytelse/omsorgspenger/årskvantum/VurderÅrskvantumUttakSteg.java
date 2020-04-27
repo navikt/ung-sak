@@ -1,12 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,7 +14,6 @@ import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.Årsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -30,10 +24,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
-import no.nav.k9.sak.kontrakt.uttak.UttaksPlanOmsorgspengerAktivitet;
-import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
-import no.nav.k9.sak.kontrakt.uttak.UttaksplanOmsorgspenger;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 

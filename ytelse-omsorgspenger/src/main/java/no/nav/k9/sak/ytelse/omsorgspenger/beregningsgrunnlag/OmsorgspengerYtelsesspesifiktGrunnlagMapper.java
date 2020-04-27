@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,9 +24,6 @@ import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
-import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
-import no.nav.k9.sak.kontrakt.uttak.UttaksperiodeOmsorgspenger;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
@@ -44,6 +40,28 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Inject
     public OmsorgspengerYtelsesspesifiktGrunnlagMapper(ÅrskvantumTjeneste årskvantumTjeneste) {
         this.årskvantumTjeneste = årskvantumTjeneste;
+    }
+
+    private static InternArbeidsforholdRefDto mapArbeidsforholdId(String arbeidsforholdId) {
+        return arbeidsforholdId == null ? null : new InternArbeidsforholdRefDto(arbeidsforholdId);
+    }
+
+    private static Aktør mapTilKalkulusAktør(Arbeidsforhold arb) {
+        if (arb != null && arb.getAktørId() != null) {
+            return new AktørIdPersonident(arb.getAktørId());
+        } else if (arb != null && arb.getOrganisasjonsnummer() != null) {
+            return new Organisasjon(arb.getOrganisasjonsnummer());
+        } else {
+            return null;
+        }
+    }
+
+    private static UttakArbeidType mapType(String type) {
+        return new UttakArbeidType(type);
+    }
+
+    private static Periode tilKalkulusPeriode(LukketPeriode periode) {
+        return new Periode(periode.getFom(), periode.getTom());
     }
 
     @Override
@@ -74,28 +92,6 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         var internArbeidsforholdId = mapArbeidsforholdId(arb.getArbeidsforholdId());
         var utbetalingsgradARbeidsforhold = new UtbetalingsgradArbeidsforholdDto(aktør, internArbeidsforholdId, type);
         return utbetalingsgradARbeidsforhold;
-    }
-
-    private static InternArbeidsforholdRefDto mapArbeidsforholdId(String arbeidsforholdId) {
-        return arbeidsforholdId == null ? null : new InternArbeidsforholdRefDto(arbeidsforholdId);
-    }
-
-    private static Aktør mapTilKalkulusAktør(Arbeidsforhold arb) {
-        if (arb != null && arb.getAktørId() != null) {
-            return new AktørIdPersonident(arb.getAktørId());
-        } else if (arb != null && arb.getOrganisasjonsnummer() != null) {
-            return new Organisasjon(arb.getOrganisasjonsnummer());
-        } else {
-            return null;
-        }
-    }
-
-    private static UttakArbeidType mapType(String type) {
-        return new UttakArbeidType(type);
-    }
-
-    private static Periode tilKalkulusPeriode(LukketPeriode periode) {
-        return new Periode(periode.getFom(), periode.getTom());
     }
 
 }

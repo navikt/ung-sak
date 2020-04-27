@@ -18,6 +18,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
@@ -41,7 +42,6 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetalteP
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
-import no.nav.k9.sak.kontrakt.uttak.OmsorgspengerUtfall;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -185,7 +185,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     }
 
     private UttakDto mapUttakDto(DatoIntervallEntitet periode, Uttaksperiode uttaksPeriode) {
-        var utfallType = OmsorgspengerUtfall.INNVILGET.equals(uttaksPeriode.getUtfall()) ? UtfallType.INNVILGET : UtfallType.AVSLÅTT;
+        var utfallType = Utfall.INNVILGET.equals(uttaksPeriode.getUtfall()) ? UtfallType.INNVILGET : UtfallType.AVSLÅTT;
         return new UttakDto(avgrensPeriode(periode, uttaksPeriode.getPeriode()), utfallType, uttaksPeriode.getUtbetalingsgrad());
     }
 
