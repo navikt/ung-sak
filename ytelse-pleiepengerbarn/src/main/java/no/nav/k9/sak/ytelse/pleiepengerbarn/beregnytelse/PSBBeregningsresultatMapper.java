@@ -145,7 +145,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
     }
 
-    private LocalDateSegment<Void> kombinerMedUttak(@SuppressWarnings("unused") LocalDateInterval interval,
+    private LocalDateSegment<Void> kombinerMedUttak(LocalDateInterval interval,
                                                     LocalDateSegment<BeregningsresultatPeriodeDto> brpDto,
                                                     LocalDateSegment<Uttaksplanperiode> uttPeriode) {
         var ut = uttPeriode == null ? null : uttPeriode.getValue();

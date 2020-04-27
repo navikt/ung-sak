@@ -43,12 +43,12 @@ import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerTestUtil;
 import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerImpl;
 import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerInntektsmeldingImpl;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknadFørstegangsbehandlingImpl;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknadImpl;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknad;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class KompletthetsjekkerTest {
 
@@ -77,7 +77,7 @@ public class KompletthetsjekkerTest {
     @Mock
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
 
-    private KompletthetssjekkerSøknadImpl kompletthetssjekkerSøknadImpl;
+    private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
     private KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding;
     private KompletthetsjekkerFelles kompletthetsjekkerFelles;
     private KompletthetsjekkerImpl kompletthetsjekkerImpl;
@@ -90,10 +90,16 @@ public class KompletthetsjekkerTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(any(), anyBoolean())).thenReturn(new HashMap<>());
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean())).thenReturn(new HashMap<>());
 
-        kompletthetssjekkerSøknadImpl = new KompletthetssjekkerSøknadFørstegangsbehandlingImpl(dokumentArkivTjeneste, repositoryProvider, Period.parse("P4W"));
+        kompletthetssjekkerSøknad = new KompletthetssjekkerSøknad(søknadRepository, Period.parse("P4W"));
         kompletthetssjekkerInntektsmelding = new KompletthetssjekkerInntektsmeldingImpl(inntektsmeldingArkivTjeneste);
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
-        kompletthetsjekkerImpl = new KompletthetsjekkerImpl(kompletthetssjekkerSøknadImpl, kompletthetssjekkerInntektsmelding, inntektsmeldingTjeneste, kompletthetsjekkerFelles, søknadRepository);
+
+        kompletthetsjekkerImpl = new KompletthetsjekkerImpl(
+            new UnitTestLookupInstanceImpl<>(kompletthetssjekkerSøknad),
+            new UnitTestLookupInstanceImpl<>(kompletthetssjekkerInntektsmelding),
+            inntektsmeldingTjeneste,
+            kompletthetsjekkerFelles,
+            søknadRepository);
     }
 
     @Test
@@ -187,7 +193,8 @@ public class KompletthetsjekkerTest {
             new SøknadVedleggEntitet.Builder()
                 .medSkjemanummer(KODE_INNTEKTSMELDING)
                 .medErPåkrevdISøknadsdialog(true)
-                .build()).build();
+                .build())
+            .build();
         søknadRepository.lagreOgFlush(behandling, søknad);
     }
 

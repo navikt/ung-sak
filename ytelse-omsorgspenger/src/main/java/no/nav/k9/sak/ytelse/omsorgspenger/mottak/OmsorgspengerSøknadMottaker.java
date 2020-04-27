@@ -59,6 +59,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
     }
 
+    @SuppressWarnings("unused")
     private void persisterSøknad(Behandling behandling, OmsorgspengerSøknadInnsending søknad) {
         throw new UnsupportedOperationException("Ikke implementert ennå for omsorgspenger");
     }

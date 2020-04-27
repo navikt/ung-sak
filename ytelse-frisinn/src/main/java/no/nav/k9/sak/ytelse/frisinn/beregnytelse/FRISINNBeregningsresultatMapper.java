@@ -118,13 +118,12 @@ public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper
     }
 
     private void leggTilUttak(UttakAktivitet fastsattUttak, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
-        @SuppressWarnings("unchecked")
         UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, null);
         LocalDateTimeline<UttakResultatPeriode> uttakTimeline = uttakResultat.getUttakPeriodeTimeline();
         resultatTimeline.combine(uttakTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
     }
 
-    private LocalDateSegment<Void> kombinerMedUttak(@SuppressWarnings("unused") LocalDateInterval interval,
+    private LocalDateSegment<Void> kombinerMedUttak(LocalDateInterval interval,
                                                     LocalDateSegment<BeregningsresultatPeriodeDto> brpDto,
                                                     LocalDateSegment<UttakResultatPeriode> uttPeriode) {
         var ut = uttPeriode == null ? null : uttPeriode.getValue();

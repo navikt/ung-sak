@@ -1,11 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.kompletthetssjekk;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,8 +26,8 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
-import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerSøknad;
 import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
@@ -33,8 +36,8 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(OmsorgspengerKompletthetsjekker.class);
     public static final int ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING = 3;
 
-    private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
-    private KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding;
+    private Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad;
+    private Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private BehandlingRepository behandlingRepository;
     private KompletthetsjekkerFelles fellesUtil;
@@ -44,8 +47,8 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     }
 
     @Inject
-    public OmsorgspengerKompletthetsjekker(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
-                                           @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding,
+    public OmsorgspengerKompletthetsjekker(@Any Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad,
+                                           @Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
                                            InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil) {
@@ -58,7 +61,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        if (!kompletthetssjekkerSøknad.erSøknadMottatt(ref)) {
+        if (!getKomplethetsjekker(ref).erSøknadMottatt(ref)) {
             // Litt implisitt forutsetning her, men denne sjekken skal bare ha bli kalt dersom søknad eller IM er mottatt
             LOGGER.info("Behandling {} er ikke komplett - søknad er ikke mottatt", ref.getBehandlingId()); // NOSONAR //$NON-NLS-1$
             return KompletthetResultat.ikkeOppfylt(fellesUtil.finnVentefristTilManglendeSøknad(), Venteårsak.AVV_DOK);
@@ -68,7 +71,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
-        Optional<LocalDateTime> forTidligFrist = kompletthetssjekkerSøknad.erSøknadMottattForTidlig(ref);
+        Optional<LocalDateTime> forTidligFrist = getKomplethetsjekker(ref).erSøknadMottattForTidlig(ref);
         if (forTidligFrist.isPresent()) {
             return KompletthetResultat.ikkeOppfylt(forTidligFrist.get(), Venteårsak.FOR_TIDLIG_SOKNAD);
         }
@@ -80,9 +83,10 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
             return KompletthetResultat.oppfylt();
         }
-        // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling, hendelser)
+        // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling,
+        // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
-        List<ManglendeVedlegg> manglendeInntektsmeldinger = kompletthetssjekkerInntektsmelding.utledManglendeInntektsmeldinger(ref);
+        List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref);
         if (!manglendeInntektsmeldinger.isEmpty()) {
             loggManglendeInntektsmeldinger(ref.getBehandlingId(), manglendeInntektsmeldinger);
             Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref);
@@ -100,14 +104,13 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public boolean erForsendelsesgrunnlagKomplett(BehandlingReferanse ref) {
-        List<ManglendeVedlegg> manglendeVedlegg = kompletthetssjekkerSøknad.utledManglendeVedleggForSøknad(ref);
-        return manglendeVedlegg.isEmpty();
+        return true;
     }
 
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
-        List<ManglendeVedlegg> manglendeVedlegg = kompletthetssjekkerSøknad.utledManglendeVedleggForSøknad(ref);
-        manglendeVedlegg.addAll(kompletthetssjekkerInntektsmelding.utledManglendeInntektsmeldingerFraGrunnlag(ref));
+        List<ManglendeVedlegg> manglendeVedlegg = new ArrayList<>();
+        manglendeVedlegg.addAll(getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref));
         return manglendeVedlegg;
     }
 
@@ -127,5 +130,13 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .toLocalDate()
             .plusDays(ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING);
         return fellesUtil.finnVentefrist(muligFrist);
+    }
+
+    private KompletthetssjekkerSøknad getKomplethetsjekker(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.get(KompletthetssjekkerSøknad.class, kompletthetssjekkerSøknad, ref.getFagsakYtelseType(), ref.getBehandlingType());
+    }
+
+    private KompletthetssjekkerInntektsmelding getKompletthetsjekkerInntektsmelding(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.get(KompletthetssjekkerInntektsmelding.class, kompletthetssjekkerInntektsmelding, ref.getFagsakYtelseType(), ref.getBehandlingType());
     }
 }
