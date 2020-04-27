@@ -52,7 +52,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         VedtakVarsel oppdatertVarsel;
-        if (sjekkVilkårAvslått(behandlingId, vilkårene)) {
+        if (sjekkVilkårAvslått(ref, vilkårene)) {
             oppdatertVarsel = foreslåVedtakVarselAvslått(ref, behandling, vedtakVarsel);
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
@@ -73,7 +73,8 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         return vedtakVarselRepository.hentHvisEksisterer(ref.getId()).orElse(new VedtakVarsel()).getErVarselOmRevurderingSendt();
     }
 
-    private boolean sjekkVilkårAvslått(Long behandlingId, Vilkårene vilkårene) {
+    private boolean sjekkVilkårAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+        var behandlingId = ref.getBehandlingId();
         var maksPeriode = getMaksPeriode(behandlingId);
 
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
@@ -81,7 +82,11 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         return vilkårTidslinjer.values().stream()
             .anyMatch(timeline -> {
                 return !avslåttVilkårPeriode(timeline).isEmpty() && oppfylteVilkårPeriode(timeline).isEmpty();
-            });
+            }) && erVilkårAvslåttUtvidetSjekk(ref);
+    }
+
+    protected boolean erVilkårAvslåttUtvidetSjekk(BehandlingReferanse ref) {
+        return true;
     }
 
     protected abstract DatoIntervallEntitet getMaksPeriode(Long behandlingId);
