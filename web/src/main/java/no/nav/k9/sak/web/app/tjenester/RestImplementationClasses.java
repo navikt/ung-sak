@@ -23,6 +23,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingR
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.årskvantum.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
@@ -55,6 +56,7 @@ public class RestImplementationClasses {
         classes.add(FordelRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
+        classes.add(ÅrskvantumRestTjeneste.class);
         classes.add(PersonRestTjeneste.class);
         classes.add(SøknadRestTjeneste.class);
         classes.add(OpptjeningRestTjeneste.class);
