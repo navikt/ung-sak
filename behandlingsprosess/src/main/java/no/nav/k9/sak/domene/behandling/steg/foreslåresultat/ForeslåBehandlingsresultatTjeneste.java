@@ -52,7 +52,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         VedtakVarsel oppdatertVarsel;
-        if (sjekkVilkårAvslått(behandlingId, vilkårene)) {
+        if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
             oppdatertVarsel = foreslåVedtakVarselAvslått(ref, behandling, vedtakVarsel);
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
@@ -73,25 +73,36 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         return vedtakVarselRepository.hentHvisEksisterer(ref.getId()).orElse(new VedtakVarsel()).getErVarselOmRevurderingSendt();
     }
 
-    private boolean sjekkVilkårAvslått(Long behandlingId, Vilkårene vilkårene) {
+    private boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+        var behandlingId = ref.getBehandlingId();
+        boolean etEllerFlereVilkårAvslått = erAllePeriodeneTilVurderingAvslåttForEtVilkår(vilkårene, behandlingId);
+        if (etEllerFlereVilkårAvslått) {
+            return true;
+        }
+        return skalAvslåsBasertPåAndreForhold(ref);
+    }
+
+    private boolean erAllePeriodeneTilVurderingAvslåttForEtVilkår(Vilkårene vilkårene, Long behandlingId) {
         var maksPeriode = getMaksPeriode(behandlingId);
 
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
 
         return vilkårTidslinjer.values().stream()
-            .anyMatch(timeline -> {
-                return !avslåttVilkårPeriode(timeline).isEmpty() && oppfylteVilkårPeriode(timeline).isEmpty();
-            });
+            .anyMatch(timeline -> harAvslåtteVilkårsPerioder(timeline) && harIngenOppfylteVilkårsPerioder(timeline));
+    }
+
+    protected boolean skalAvslåsBasertPåAndreForhold(BehandlingReferanse ref) {
+        return false;
     }
 
     protected abstract DatoIntervallEntitet getMaksPeriode(Long behandlingId);
 
-    private LocalDateTimeline<VilkårPeriode> oppfylteVilkårPeriode(LocalDateTimeline<VilkårPeriode> timeline) {
-        return timeline.filterValue(vp -> vp.getAvslagsårsak() == null && vp.getGjeldendeUtfall() == Utfall.OPPFYLT);
+    private boolean harIngenOppfylteVilkårsPerioder(LocalDateTimeline<VilkårPeriode> timeline) {
+        return timeline.filterValue(vp -> vp.getAvslagsårsak() == null && vp.getGjeldendeUtfall() == Utfall.OPPFYLT).isEmpty();
     }
 
-    private LocalDateTimeline<VilkårPeriode> avslåttVilkårPeriode(LocalDateTimeline<VilkårPeriode> timeline) {
-        return timeline.filterValue(vp -> vp.getAvslagsårsak() != null && vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
+    private boolean harAvslåtteVilkårsPerioder(LocalDateTimeline<VilkårPeriode> timeline) {
+        return !timeline.filterValue(vp -> vp.getAvslagsårsak() != null && vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT).isEmpty();
     }
 
     private VedtakVarsel foreslåVedtakVarselAvslått(BehandlingReferanse ref, Behandling behandling, VedtakVarsel vedtakVarsel) {
