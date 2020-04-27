@@ -47,7 +47,7 @@ public class ÅrskvantumForeslåBehandlingsresultatTjeneste extends ForeslåBeha
     }
 
     @Override
-    protected boolean erVilkårAvslåttUtvidetSjekk(BehandlingReferanse ref) {
+    protected boolean skalAvslåsBasertPåAndreForhold(BehandlingReferanse ref) {
         var årskvantumForbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
         var sisteUttaksplan = årskvantumForbrukteDager.getSisteUttaksplan();
         return sisteUttaksplan == null || sisteUttaksplan.getAktiviteter()
