@@ -108,7 +108,7 @@ public class DokumentArkivTjeneste {
     }
 
     public List<ArkivJournalPost> hentAlleJournalposterForSak(Saksnummer saksnummer) {
-        DokumentoversiktFagsakQuery query = new DokumentoversiktFagsakQuery(saksnummer.getVerdi(), Fagsystem.K9SAK.name());
+        DokumentoversiktFagsakQuery query = new DokumentoversiktFagsakQuery(saksnummer.getVerdi(), Fagsystem.K9SAK.getOffisiellKode());
 
         DokumentoversiktFagsak oversikt = safTjeneste.dokumentoversiktFagsak(query);
 
