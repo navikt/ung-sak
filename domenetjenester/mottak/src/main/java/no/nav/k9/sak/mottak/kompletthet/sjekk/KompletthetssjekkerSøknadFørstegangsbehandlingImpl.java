@@ -38,8 +38,8 @@ public class KompletthetssjekkerSøknadFørstegangsbehandlingImpl extends Komple
 
     @Inject
     public KompletthetssjekkerSøknadFørstegangsbehandlingImpl(DokumentArkivTjeneste dokumentArkivTjeneste,
-                                                            BehandlingRepositoryProvider repositoryProvider,
-                                                            @KonfigVerdi(value = "fp.ventefrist.tidlig.soeknad", defaultVerdi = "P4W") Period ventefristForTidligSøknad) {
+                                                              BehandlingRepositoryProvider repositoryProvider,
+                                                              @KonfigVerdi(value = "fp.ventefrist.tidlig.soeknad", defaultVerdi = "P4W") Period ventefristForTidligSøknad) {
         super(ventefristForTidligSøknad,
             repositoryProvider.getSøknadRepository());
         this.søknadRepository = repositoryProvider.getSøknadRepository();
@@ -56,15 +56,18 @@ public class KompletthetssjekkerSøknadFørstegangsbehandlingImpl extends Komple
     @Override
     public List<ManglendeVedlegg> utledManglendeVedleggForSøknad(BehandlingReferanse ref) {
         final Optional<SøknadEntitet> søknad = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId());
-        Set<DokumentTypeId> dokumentTypeIds = dokumentArkivTjeneste.hentDokumentTypeIdForSak(ref.getSaksnummer(), LocalDate.MIN);
-        List<ManglendeVedlegg> manglendeVedlegg = identifiserManglendeVedlegg(søknad, dokumentTypeIds);
+        if (søknad.isPresent()) {
+            Set<DokumentTypeId> dokumentTypeIds = dokumentArkivTjeneste.hentDokumentTypeIdForSak(ref.getSaksnummer(), LocalDate.MIN);
+            List<ManglendeVedlegg> manglendeVedlegg = identifiserManglendeVedlegg(søknad, dokumentTypeIds);
 
-        if (!manglendeVedlegg.isEmpty()) {
-            LOGGER.info("Behandling {} er ikke komplett - mangler følgende vedlegg til søknad: {}", ref.getBehandlingId(),
-                lagDokumentTypeString(manglendeVedlegg)); // NOSONAR //$NON-NLS-1$
+            if (!manglendeVedlegg.isEmpty()) {
+                LOGGER.info("Behandling {} er ikke komplett - mangler følgende vedlegg til søknad: {}", ref.getBehandlingId(),
+                    lagDokumentTypeString(manglendeVedlegg)); // NOSONAR //$NON-NLS-1$
+            }
+            return manglendeVedlegg;
+        } else {
+            return List.of();
         }
-
-        return manglendeVedlegg;
     }
 
     private String lagDokumentTypeString(List<ManglendeVedlegg> manglendeVedlegg) {
