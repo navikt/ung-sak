@@ -157,7 +157,7 @@ public class SafTjenesteImpl implements SafTjeneste {
     }
 
 
-    private <T> byte[] utførForespørsel(HttpGet request) throws IOException {
+    private byte[] utførForespørsel(HttpGet request) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode == HttpStatus.SC_OK) {

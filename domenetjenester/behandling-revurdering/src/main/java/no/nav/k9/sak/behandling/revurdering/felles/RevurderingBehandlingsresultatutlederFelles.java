@@ -201,6 +201,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private static boolean erAvslagPåAvslag(Behandling resRevurdering, Behandling resOriginal) {
         return false;
     }

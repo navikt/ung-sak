@@ -62,7 +62,7 @@ public @interface BehandlingTypeRef {
         public BehandlingTypeRefLiteral(String navn) {
             this.navn = navn;
         }
-        
+
         public BehandlingTypeRefLiteral(BehandlingType ytelseType) {
             this.navn = (ytelseType == null ? "*" : ytelseType.getKode());
         }
@@ -75,10 +75,10 @@ public @interface BehandlingTypeRef {
 
     @SuppressWarnings("unchecked")
     public static final class Lookup {
-        
+
         private Lookup() {
         }
-        
+
         public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, String behandlingType) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType);
         }
@@ -93,32 +93,40 @@ public @interface BehandlingTypeRef {
                 behandlingType == null ? null : behandlingType.getKode());
         }
 
+        public static <I> I get(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+            var result = find(cls, instances,
+                ytelseType == null ? null : ytelseType.getKode(),
+                behandlingType == null ? null : behandlingType.getKode());
+
+            return result.orElseThrow(
+                () -> new UnsupportedOperationException("Har ikke " + cls.getSimpleName() + " for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType + ", blant:" + instances));
+        }
+
         public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, String behandlingType) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
-            
 
-            for(var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
-                
-                if(inst.isUnsatisfied()) {
+
+                if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    for(var behandlingLiteral : coalesce(behandlingType, "*")) {
+                    for (var behandlingLiteral : coalesce(behandlingType, "*")) {
                         var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingLiteral));
-                        if(binst.isResolvable()) {
+                        if (binst.isResolvable()) {
                             return Optional.of(getInstance(binst));
                         } else {
-                            if(binst.isAmbiguous()) {
-                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", instanser=" + binst);
+                            if (binst.isAmbiguous()) {
+                                throw new IllegalStateException(
+                                    "Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", instanser=" + binst);
                             }
                         }
                     }
                 }
-                
+
             }
             return Optional.empty();
         }
-        
 
         private static <I> I getInstance(Instance<I> inst) {
             var i = inst.get();
@@ -129,9 +137,9 @@ public @interface BehandlingTypeRef {
         }
 
         private static List<String> coalesce(String... vals) {
-            return Arrays.asList(vals).stream().filter(v -> v!=null).distinct().collect(Collectors.toList());
+            return Arrays.asList(vals).stream().filter(v -> v != null).distinct().collect(Collectors.toList());
         }
-        
+
         private static <I> Instance<I> select(Class<I> cls, Instance<I> instances, Annotation anno) {
             return cls != null
                 ? instances.select(cls, anno)
@@ -139,7 +147,7 @@ public @interface BehandlingTypeRef {
         }
 
     }
-    
+
     /**
      * container for repeatable annotations.
      * 

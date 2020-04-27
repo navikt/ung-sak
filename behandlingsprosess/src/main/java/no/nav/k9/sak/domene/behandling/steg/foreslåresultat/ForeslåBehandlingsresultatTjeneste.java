@@ -91,7 +91,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
             .anyMatch(timeline -> harAvslåtteVilkårsPerioder(timeline) && harIngenOppfylteVilkårsPerioder(timeline));
     }
 
-    protected boolean skalAvslåsBasertPåAndreForhold(BehandlingReferanse ref) {
+    protected boolean skalAvslåsBasertPåAndreForhold(@SuppressWarnings("unused") BehandlingReferanse ref) {
         return false;
     }
 

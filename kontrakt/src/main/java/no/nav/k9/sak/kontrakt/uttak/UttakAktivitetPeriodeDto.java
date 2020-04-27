@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,6 +29,21 @@ public class UttakAktivitetPeriodeDto {
     @Valid
     @NotNull
     private UttakArbeidType type;
+
+    @JsonCreator
+    public UttakAktivitetPeriodeDto(@JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode,
+                                    @JsonProperty(value = "type", required = true) @Valid @NotNull UttakArbeidType type) {
+        this.periode = Objects.requireNonNull(periode, "periode");
+        this.type = Objects.requireNonNull(type, "type");
+    }
+
+    public UttakArbeidType getType() {
+        return type;
+    }
+
+    public Periode getPeriode() {
+        return periode;
+    }
 
     @Override
     public boolean equals(Object obj) {

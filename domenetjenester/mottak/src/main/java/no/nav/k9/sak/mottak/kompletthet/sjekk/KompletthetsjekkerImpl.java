@@ -2,11 +2,14 @@ package no.nav.k9.sak.mottak.kompletthet.sjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -25,7 +28,6 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
-import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
@@ -37,8 +39,8 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     private static final Integer VENTEFRIST_ETTER_MOTATT_DATO_UKER = 1;
     private static final Integer VENTEFRIST_ETTER_ETTERLYSNING_UKER = 3;
 
-    private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
-    private KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding;
+    private Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad;
+    private Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private KompletthetsjekkerFelles fellesUtil;
     private SøknadRepository søknadRepository;
@@ -48,8 +50,8 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     }
 
     @Inject
-    public KompletthetsjekkerImpl(@FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
-                                  @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding,
+    public KompletthetsjekkerImpl(@Any Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad,
+                                  @Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
                                   InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                   KompletthetsjekkerFelles fellesUtil,
                                   SøknadRepository søknadRepository) {
@@ -62,7 +64,7 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        if (!kompletthetssjekkerSøknad.erSøknadMottatt(ref)) {
+        if (!getKomplethetsjekker(ref).erSøknadMottatt(ref)) {
             // Litt implisitt forutsetning her, men denne sjekken skal bare ha bli kalt dersom søknad eller IM er mottatt
             LOGGER.info("Behandling {} er ikke komplett - søknad er ikke mottatt", ref.getBehandlingId()); // NOSONAR //$NON-NLS-1$
             return KompletthetResultat.ikkeOppfylt(fellesUtil.finnVentefristTilManglendeSøknad(), Venteårsak.AVV_DOK);
@@ -70,9 +72,17 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
         return KompletthetResultat.oppfylt();
     }
 
+    private KompletthetssjekkerSøknad getKomplethetsjekker(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.get(KompletthetssjekkerSøknad.class, kompletthetssjekkerSøknad, ref.getFagsakYtelseType(), ref.getBehandlingType());
+    }
+
+    private KompletthetssjekkerInntektsmelding getKompletthetsjekkerInntektsmelding(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.get(KompletthetssjekkerInntektsmelding.class, kompletthetssjekkerInntektsmelding, ref.getFagsakYtelseType(), ref.getBehandlingType());
+    }
+
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
-        Optional<LocalDateTime> forTidligFrist = kompletthetssjekkerSøknad.erSøknadMottattForTidlig(ref);
+        Optional<LocalDateTime> forTidligFrist = getKomplethetsjekker(ref).erSøknadMottattForTidlig(ref);
         if (forTidligFrist.isPresent()) {
             return KompletthetResultat.ikkeOppfylt(forTidligFrist.get(), Venteårsak.FOR_TIDLIG_SOKNAD);
         }
@@ -85,9 +95,10 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
         if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
             return KompletthetResultat.oppfylt();
         }
-        // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling, hendelser)
+        // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling,
+        // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
-        List<ManglendeVedlegg> manglendeInntektsmeldinger = kompletthetssjekkerInntektsmelding.utledManglendeInntektsmeldinger(ref);
+        List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref);
         if (!manglendeInntektsmeldinger.isEmpty()) {
             loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
             Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref);
@@ -105,15 +116,15 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
 
     @Override
     public boolean erForsendelsesgrunnlagKomplett(BehandlingReferanse ref) {
-        List<ManglendeVedlegg> manglendeVedlegg = kompletthetssjekkerSøknad.utledManglendeVedleggForSøknad(ref);
-        manglendeVedlegg.addAll(kompletthetssjekkerInntektsmelding.utledManglendeInntektsmeldingerFraGrunnlag(ref));
+        List<ManglendeVedlegg> manglendeVedlegg = new ArrayList<>();
+        manglendeVedlegg.addAll(getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref));
         return manglendeVedlegg.isEmpty();
     }
 
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
-        List<ManglendeVedlegg> manglendeVedlegg = kompletthetssjekkerSøknad.utledManglendeVedleggForSøknad(ref);
-        manglendeVedlegg.addAll(kompletthetssjekkerInntektsmelding.utledManglendeInntektsmeldingerFraGrunnlag(ref));
+        List<ManglendeVedlegg> manglendeVedlegg = new ArrayList<>();
+        manglendeVedlegg.addAll(getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref));
         return manglendeVedlegg;
     }
 
@@ -134,7 +145,7 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
         }
         // Kalles fra KOARB (flere ganger) som setter autopunkt 7030 + fra KompletthetsKontroller (dokument på åpen behandling, hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
-        List<ManglendeVedlegg> manglendeInntektsmeldinger = kompletthetssjekkerInntektsmelding.utledManglendeInntektsmeldingerFraGrunnlag(ref);
+        List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref);
         if (!manglendeInntektsmeldinger.isEmpty()) {
             loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
             Optional<LocalDateTime> ventefristManglendeIM = vurderSkalInntektsmeldingEtterlyses(ref);
@@ -164,7 +175,8 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     private Optional<LocalDateTime> finnVentefristForEtterlysning(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
         LocalDate permisjonsstart = ref.getUtledetSkjæringstidspunkt();
-        final LocalDate muligFrist = LocalDate.now().isBefore(permisjonsstart.minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER)) ? LocalDate.now() : permisjonsstart.minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER);
+        final LocalDate muligFrist = LocalDate.now().isBefore(permisjonsstart.minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER)) ? LocalDate.now()
+            : permisjonsstart.minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER);
         final Optional<LocalDate> annenMuligFrist = søknadRepository.hentSøknadHvisEksisterer(behandlingId).map(s -> s.getMottattDato().plusWeeks(VENTEFRIST_ETTER_MOTATT_DATO_UKER));
         final LocalDate ønsketFrist = annenMuligFrist.filter(muligFrist::isBefore).orElse(muligFrist);
         return fellesUtil.finnVentefrist(ønsketFrist.plusWeeks(VENTEFRIST_ETTER_ETTERLYSNING_UKER));

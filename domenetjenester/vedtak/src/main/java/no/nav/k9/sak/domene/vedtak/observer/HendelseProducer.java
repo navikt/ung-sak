@@ -60,7 +60,6 @@ public class HendelseProducer {
         }
     }
 
-    @SuppressWarnings("resource")
     private Producer<String, String> createProducer(Properties properties) {
         log.info("Oppretter producer for topic='{}', keyClass='{}', valueClass='{}'", topic, StringSerializer.class.getName(), StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());

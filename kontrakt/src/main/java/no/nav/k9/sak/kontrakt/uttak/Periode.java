@@ -100,7 +100,7 @@ public class Periode implements Comparable<Periode>{
         return COMP.compare(this, o);
     }
     
-    private static final Comparator<Periode> COMP = Comparator
+    public static final Comparator<Periode> COMP = Comparator
             .comparing((Periode dto) -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
             .thenComparing(dto -> dto.getTom(), Comparator.nullsFirst(Comparator.naturalOrder()));
 }
