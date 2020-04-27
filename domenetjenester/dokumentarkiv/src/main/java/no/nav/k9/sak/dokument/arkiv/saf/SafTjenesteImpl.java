@@ -33,6 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.opensaml.xmlsec.signature.G;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import java.io.IOException;
@@ -40,7 +41,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-@ApplicationScoped
+@Dependent
 public class SafTjenesteImpl implements SafTjeneste {
 
     private URI graphqlEndpoint;
@@ -57,7 +58,8 @@ public class SafTjenesteImpl implements SafTjeneste {
     }
 
     @Inject
-    public SafTjenesteImpl(@KonfigVerdi("Saf.base.url") URI endpoint, OidcRestClient restKlient) {
+    public SafTjenesteImpl(@KonfigVerdi(value = "saf.base.url", defaultVerdi = "http://localhost:8060/rest/api/saf") URI endpoint,
+                           OidcRestClient restKlient) {
         this.graphqlEndpoint = URI.create(endpoint.toString() + "/graphql");
         this.hentDokumentEndpoint = URI.create(endpoint.toString() + "/rest/hentdokument");
         this.restKlient = restKlient;
