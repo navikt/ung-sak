@@ -150,7 +150,6 @@ public class TilkjentYtelseTjeneste {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         info.setSaksnummer(new Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()));
         info.setBehandlingId(behandling.getUuid());
-        info.setHenvisning(lagHenvisning(behandling));
         info.setYtelseType(MapperForYtelseType.mapYtelseType(behandling.getFagsakYtelseType()));
         info.setAnsvarligSaksbehandler(vedtak == null ? behandling.getAnsvarligSaksbehandler() : vedtak.getAnsvarligSaksbehandler());
         info.setAktørId(behandling.getAktørId().getId());
@@ -159,13 +158,5 @@ public class TilkjentYtelseTjeneste {
         return info;
     }
 
-    private String lagHenvisning(Behandling behandling) {
-        // FIXME K9 avklar hvilken verdi som skal brukes i 'henvisning'.
-        // den brukes til 3 formål:
-        // 1 kobling til kvitteringer
-        // 2 manuell avsjekk: verdien skal være synlig i GUI for K9, samt vil være synlig i GUI for Oppdragssystemet
-        // 3 koble tilbakekrevingsbehandlinger til kravgrunnlag. For dette formålet må p.t. verdien være helt unik
-        return behandling.getUuid().toString().substring(0, 30);
-    }
 
 }
