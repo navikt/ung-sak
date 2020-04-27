@@ -360,6 +360,12 @@
 				<artifactId>soknad-pleiepenger-barn</artifactId>
 				<version>${k9format.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-felles</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+
 
 			<!-- Prosjektets egne TEST AVHENGIGHETER -->
 			<!-- NB: Definer scope der det brukes, ikke her. -->

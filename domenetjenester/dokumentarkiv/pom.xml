@@ -35,6 +35,15 @@
 			<artifactId>inngaaendejournal-klient</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>soknad-felles</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+            <artifactId>felles-integrasjon-rest-klient</artifactId>
+        </dependency>
+
 
 		<!-- Test avhengigheter -->
 		<dependency>

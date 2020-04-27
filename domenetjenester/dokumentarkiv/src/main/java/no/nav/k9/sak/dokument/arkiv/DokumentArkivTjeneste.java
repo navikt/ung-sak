@@ -1,5 +1,7 @@
 package no.nav.k9.sak.dokument.arkiv;
 
+import static java.util.stream.Collectors.toList;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,74 +19,60 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
+import no.nav.k9.sak.dokument.arkiv.saf.graphql.DokumentoversiktFagsakQuery;
+import no.nav.k9.sak.dokument.arkiv.saf.graphql.HentDokumentQuery;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Datotype;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentoversiktFagsak;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentDokumentIkkeFunnet;
-import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentJournalpostIkkeFunnet;
-import no.nav.tjeneste.virksomhet.journal.v3.HentDokumentSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeUgyldigInput;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
-import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
-import no.nav.vedtak.felles.integrasjon.journal.v3.JournalConsumer;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjeneste.class);
-    private JournalConsumer journalConsumer;
+    // Variantformat ARKIV er den eneste varianten som benyttes for denne tjenesten
+    private static final VariantFormat VARIANT_FORMAT_ARKIV = VariantFormat.ARKIV;
 
-    private FagsakRepository fagsakRepository;
+    private SafTjeneste safTjeneste;
 
     private final Set<ArkivFilType> filTyperPdf = byggArkivFilTypeSet();
-    private final VariantFormat variantFormatArkiv = VariantFormat.ARKIV;
 
     DokumentArkivTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public DokumentArkivTjeneste(JournalConsumer journalConsumer, FagsakRepository fagsakRepository) {
-        this.journalConsumer = journalConsumer;
-        this.fagsakRepository = fagsakRepository;
+    public DokumentArkivTjeneste(SafTjeneste safTjeneste) {
+        this.safTjeneste = safTjeneste;
     }
 
     public byte[] hentDokumnet(JournalpostId journalpostId, String dokumentId) {
         LOG.info("HentDokument: input parametere journalpostId {} dokumentId {}", journalpostId, dokumentId);
         byte[] pdfFile = new byte[0];
-        HentDokumentRequest hentDokumentRequest = new HentDokumentRequest();
+        no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest hentDokumentRequest = new no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest();
         hentDokumentRequest.setJournalpostId(journalpostId.getVerdi());
         hentDokumentRequest.setDokumentId(dokumentId);
         Variantformater variantFormat = new Variantformater();
-        variantFormat.setValue(variantFormatArkiv.getOffisiellKode());
+        variantFormat.setValue(VARIANT_FORMAT_ARKIV.getOffisiellKode());
         hentDokumentRequest.setVariantformat(variantFormat);
 
-        try {
-            HentDokumentResponse hentDokumentResponse = journalConsumer.hentDokument(hentDokumentRequest);
-            if (hentDokumentResponse != null && hentDokumentResponse.getDokument() != null) {
-                pdfFile = hentDokumentResponse.getDokument();
-            }
-        } catch (HentDokumentDokumentIkkeFunnet e) {
-            throw DokumentArkivTjenesteFeil.FACTORY.hentDokumentIkkeFunnet(e).toException();
-        } catch (HentDokumentJournalpostIkkeFunnet e) {
-            throw DokumentArkivTjenesteFeil.FACTORY.hentJournalpostIkkeFunnet(e).toException();
-        } catch (HentDokumentSikkerhetsbegrensning e) {
-            throw DokumentArkivTjenesteFeil.FACTORY.journalUtilgjengeligSikkerhetsbegrensning("hent dokument", e).toException();
+        HentDokumentQuery query = new HentDokumentQuery(
+            journalpostId.getVerdi(),
+            dokumentId,
+            VariantFormat.ARKIV.getOffisiellKode());
+
+        byte[] pdfDokument = safTjeneste.hentDokument(query);
+        if (pdfDokument == null){
+            throw DokumentArkivTjenesteFeil.FACTORY.hentDokumentIkkeFunnet(query).toException();
         }
-        return pdfFile;
+        return pdfDokument;
     }
 
     public List<ArkivJournalPost> hentAlleDokumenterForVisning(Saksnummer saksnummer) {
@@ -112,7 +100,7 @@ public class DokumentArkivTjeneste {
 
     private boolean erDokumentArkivPdf(ArkivDokument arkivDokument) {
         for (ArkivDokumentHentbart format : arkivDokument.getTilgjengeligSom()) {
-            if (variantFormatArkiv.equals(format.getVariantFormat()) && filTyperPdf.contains(format.getArkivFilType())) {
+            if (VARIANT_FORMAT_ARKIV.equals(format.getVariantFormat()) && filTyperPdf.contains(format.getArkivFilType())) {
                 return true;
             }
         }
@@ -120,17 +108,14 @@ public class DokumentArkivTjeneste {
     }
 
     public List<ArkivJournalPost> hentAlleJournalposterForSak(Saksnummer saksnummer) {
-        List<ArkivJournalPost> journalPosts = new ArrayList<>();
-        doHentKjerneJournalpostListe(saksnummer)
-            .map(HentKjerneJournalpostListeResponse::getJournalpostListe).orElse(new ArrayList<>())
-            .stream()
-            .filter(journalpost -> !Journaltilstand.UTGAAR.equals(journalpost.getJournaltilstand()))
-            .forEach(journalpost -> {
-                ArkivJournalPost.Builder arkivJournalPost = opprettArkivJournalPost(saksnummer, journalpost);
-                journalPosts.add(arkivJournalPost.build());
-            });
+        DokumentoversiktFagsakQuery query = new DokumentoversiktFagsakQuery(saksnummer.getVerdi(), Fagsystem.K9SAK.name());
 
-        return journalPosts;
+        DokumentoversiktFagsak oversikt = safTjeneste.dokumentoversiktFagsak(query);
+
+        return Optional.ofNullable(oversikt.getJournalposter()).orElse(List.of())
+            .stream()
+            .map(journalpost -> opprettArkivJournalPost(saksnummer, journalpost).build())
+            .collect(toList());
     }
 
     public Optional<ArkivJournalPost> hentJournalpostForSak(Saksnummer saksnummer, JournalpostId journalpostId) {
@@ -163,82 +148,103 @@ public class DokumentArkivTjeneste {
         }
     }
 
-    private Optional<HentKjerneJournalpostListeResponse> doHentKjerneJournalpostListe(Saksnummer saksnummer) {
-        final Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        if (!fagsak.isPresent()) {
-            return Optional.empty();
-        }
-        HentKjerneJournalpostListeRequest hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
-
-        hentKjerneJournalpostListeRequest.getArkivSakListe().add(lageJournalSak(saksnummer, Fagsystem.GOSYS.getOffisiellKode()));
-
-        try {
-            HentKjerneJournalpostListeResponse hentKjerneJournalpostListeResponse = journalConsumer
-                .hentKjerneJournalpostListe(hentKjerneJournalpostListeRequest);
-            return Optional.of(hentKjerneJournalpostListeResponse);
-        } catch (HentKjerneJournalpostListeSikkerhetsbegrensning e) {
-            throw DokumentArkivTjenesteFeil.FACTORY.journalUtilgjengeligSikkerhetsbegrensning("hent journalpostliste", e).toException();
-        } catch (HentKjerneJournalpostListeUgyldigInput e) {
-            throw DokumentArkivTjenesteFeil.FACTORY.journalpostUgyldigInput(e).toException();
-        }
-    }
-
     private static Set<ArkivFilType> byggArkivFilTypeSet() {
         final ArkivFilType arkivFilTypePdf = ArkivFilType.PDF;
         final ArkivFilType arkivFilTypePdfa = ArkivFilType.PDFA;
         return new HashSet<>(Arrays.asList(arkivFilTypePdf, arkivFilTypePdfa));
     }
 
-    private ArkivSak lageJournalSak(Saksnummer saksnummer, String fagsystem) {
-        ArkivSak journalSak = new ArkivSak();
-        journalSak.setArkivSakSystem(fagsystem);
-        journalSak.setArkivSakId(saksnummer.getVerdi());
-        journalSak.setErFeilregistrert(false);
-        return journalSak;
-    }
-
-    private ArkivJournalPost.Builder opprettArkivJournalPost(Saksnummer saksnummer, Journalpost journalpost) {
-        LocalDateTime tidspunkt = journalpost.getForsendelseJournalfoert() != null ? DateUtil.convertToLocalDateTime(journalpost.getForsendelseJournalfoert())
-            : DateUtil.convertToLocalDateTime(journalpost.getForsendelseMottatt());
+    private ArkivJournalPost.Builder opprettArkivJournalPost(Saksnummer saksnummer, no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost journalpost) {
+        Optional<LocalDateTime> datoRegistrert = hentRelevantDato(journalpost, Datotype.DATO_REGISTRERT);
+        Optional<LocalDateTime> datoJournalFørt = hentRelevantDato(journalpost, Datotype.DATO_JOURNALFOERT);
+        LocalDateTime tidspunkt = datoJournalFørt.orElse(datoRegistrert.orElse(null));
 
         ArkivJournalPost.Builder builder = ArkivJournalPost.Builder.ny()
             .medSaksnummer(saksnummer)
             .medJournalpostId(new JournalpostId(journalpost.getJournalpostId()))
-            .medBeskrivelse(journalpost.getInnhold())
+            .medBeskrivelse(journalpost.getTittel())
             .medTidspunkt(tidspunkt)
-            .medKommunikasjonsretning(Kommunikasjonsretning.fromKommunikasjonsretningCode(journalpost.getJournalposttype().getValue()))
-            .medHoveddokument(opprettArkivDokument(journalpost.getHoveddokument()).build());
-        journalpost.getVedleggListe().forEach(vedlegg -> {
-            builder.leggTillVedlegg(opprettArkivDokument(vedlegg).build());
-        });
+            .medKommunikasjonsretning(Kommunikasjonsretning.fromKommunikasjonsretningCode(journalpost.getJournalposttype()));
+
+        List<DokumentInfo> dokumenter = journalpost.getDokumenter();
+        for (int i = 0; i < dokumenter.size(); i++) {
+            var dokumentInfo = dokumenter.get(i);
+            if (i == 0) {
+                // Første dokument er Hoveddokument
+                builder.medHoveddokument(opprettArkivDokument(dokumentInfo).build());
+            } else {
+                // Alle andre regnes som Andre dokument
+                builder.leggTilAnnetDokument(opprettArkivDokument(dokumentInfo).build());
+            }
+        }
         return builder;
     }
 
-    private ArkivDokument.Builder opprettArkivDokument(DetaljertDokumentinformasjon detaljertDokumentinformasjon) {
+    private ArkivDokument.Builder opprettArkivDokument(DokumentInfo dokumentInfo) {
         ArkivDokument.Builder builder = ArkivDokument.Builder.ny()
-            .medDokumentId(detaljertDokumentinformasjon.getDokumentId())
-            .medTittel(detaljertDokumentinformasjon.getTittel())
-            .medDokumentTypeId(detaljertDokumentinformasjon.getDokumentTypeId() != null
-                ? DokumentTypeId.finnForKodeverkEiersKode(detaljertDokumentinformasjon.getDokumentTypeId().getValue())
-                : DokumentTypeId.UDEFINERT)
-            .medDokumentKategori(detaljertDokumentinformasjon.getDokumentkategori() != null
-                ? DokumentKategori.finnForKodeverkEiersKode(detaljertDokumentinformasjon.getDokumentkategori().getValue())
-                : DokumentKategori.UDEFINERT);
-        detaljertDokumentinformasjon.getSkannetInnholdListe().forEach(vedlegg -> {
-            builder.leggTilInterntVedlegg(ArkivDokumentVedlegg.Builder.ny()
-                .medTittel(vedlegg.getVedleggInnhold())
-                .medDokumentTypeId(vedlegg.getDokumenttypeId() != null ? DokumentTypeId.finnForKodeverkEiersKode(vedlegg.getDokumenttypeId().getValue())
-                    : DokumentTypeId.UDEFINERT)
-                .build());
-        });
-        detaljertDokumentinformasjon.getDokumentInnholdListe().forEach(innhold -> {
+            .medDokumentId(dokumentInfo.getDokumentInfoId())
+            .medTittel(dokumentInfo.getTittel())
+            .medDokumentTypeId(mapTilDokumentTypeId(dokumentInfo.getBrevkode()))
+            .medDokumentKategori(mapTilDokumentKategori(dokumentInfo.getBrevkode()))
+            ;
+
+        dokumentInfo.getDokumentvarianter().stream()
+            .filter(innhold -> innhold.getSaksbehandlerHarTilgang())
+            .forEach(innhold -> {
             builder.leggTilTilgjengeligFormat(ArkivDokumentHentbart.Builder.ny()
                 .medArkivFilType(
-                    innhold.getArkivfiltype() != null ? ArkivFilType.finnForKodeverkEiersKode(innhold.getArkivfiltype().getValue()) : ArkivFilType.UDEFINERT)
-                .medVariantFormat(innhold.getVariantformat() != null ? VariantFormat.finnForKodeverkEiersKode(innhold.getVariantformat().getValue())
+                    innhold.getFiltype() != null ? ArkivFilType.finnForKodeverkEiersKode(innhold.getFiltype()) : ArkivFilType.UDEFINERT)
+                .medVariantFormat(innhold.getVariantFormat() != null ? VariantFormat.finnForKodeverkEiersKode(innhold.getVariantFormat().name())
                     : VariantFormat.UDEFINERT)
                 .build());
         });
         return builder;
+    }
+
+    // TODO (ESSV): Workaround mens vi venter på avklaring mapping Brevkode -> DokumentTypeId
+    private DokumentTypeId mapTilDokumentTypeId(String brevkodeVerdi) {
+        Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
+
+        DokumentTypeId dokumentTypeId = Arrays.stream(DokumentTypeId.values())
+            .filter(typeId -> typeId.name().equals(brevKode.name()))
+            .findFirst()
+            .orElse(DokumentTypeId.UDEFINERT);
+
+        if (dokumentTypeId.equals(DokumentTypeId.UDEFINERT)) {
+            LOG.info("Fant ingen matchende DokumentTypeId for brevkode '{}'", brevkodeVerdi);
+        }
+        return dokumentTypeId;
+    }
+
+    private Brevkode finnBrevKodeFraKodeverk(String brevkodeVerdi) {
+        Brevkode brevKode;
+        try {
+            brevKode = Brevkode.finnForKodeverkEiersKode(brevkodeVerdi);
+        } catch (Exception e) {
+            brevKode = Brevkode.UDEFINERT;
+        }
+        return brevKode;
+    }
+
+    // TODO (ESSV): Workaround mens vi venter på avklaring mapping Brevkode -> DokumentKategori
+    private DokumentKategori mapTilDokumentKategori(String brevkodeVerdi) {
+        Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
+
+        DokumentKategori dokumentKategori = Arrays.stream(DokumentKategori.values())
+            .filter(typeId -> typeId.name().equals(brevKode.name()))
+            .findFirst()
+            .orElse(DokumentKategori.UDEFINERT);
+
+        if (dokumentKategori.equals(DokumentKategori.UDEFINERT)) {
+            LOG.info("Fant ingen matchende DokumentTypeId for brevkode '{}'", brevkodeVerdi);
+        }
+        return dokumentKategori;
+    }
+
+    private Optional<LocalDateTime> hentRelevantDato(no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost journalpost, Datotype datotype) {
+        return Optional.ofNullable(journalpost.getRelevanteDatoer()).orElse(List.of()).stream()
+            .filter(it -> it.getDatotype().equals(datotype))
+            .map(it -> it.getDato())
+            .findFirst();
     }
 }

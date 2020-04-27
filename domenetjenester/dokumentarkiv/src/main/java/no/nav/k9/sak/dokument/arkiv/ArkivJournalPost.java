@@ -165,7 +165,7 @@ public class ArkivJournalPost {
             return this;
         }
 
-        public Builder leggTillVedlegg(ArkivDokument vedlegg){
+        public Builder leggTilAnnetDokument(ArkivDokument vedlegg){
             this.arkivJournalPost.getAndreDokument().add(vedlegg);
             return this;
         }
