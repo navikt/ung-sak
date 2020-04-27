@@ -3,11 +3,24 @@ package no.nav.k9.sak.dokument.arkiv.saf;
 
 import static no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteImpl.SafTjenesteFeil.FEILFACTORY;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Optional;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+
 import com.fasterxml.jackson.databind.ObjectReader;
 
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.DokumentoversiktFagsakQuery;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.GrapQlData;
-import no.nav.k9.sak.dokument.arkiv.saf.graphql.GraphQlError;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.GraphQlRequest;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.GraphQlResponse;
 import no.nav.k9.sak.dokument.arkiv.saf.graphql.HentDokumentQuery;
@@ -24,22 +37,6 @@ import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.opensaml.xmlsec.signature.G;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 
 @Dependent
 public class SafTjenesteImpl implements SafTjeneste {
@@ -87,7 +84,7 @@ public class SafTjenesteImpl implements SafTjeneste {
             return null;
         }
         if (graphQlResponse.getErrors() != null && graphQlResponse.getErrors().size() > 0) {
-            throw  FEILFACTORY.queryReturnerteFeil(graphQlResponse).toException();
+            throw FEILFACTORY.queryReturnerteFeil(graphQlResponse).toException();
         }
         return Optional.of(graphQlResponse)
             .map(GraphQlResponse::getData)
@@ -113,7 +110,7 @@ public class SafTjenesteImpl implements SafTjeneste {
             return null;
         }
         if (graphQlResponse.getErrors() != null && graphQlResponse.getErrors().size() > 0) {
-            throw  FEILFACTORY.queryReturnerteFeil(graphQlResponse).toException();
+            throw FEILFACTORY.queryReturnerteFeil(graphQlResponse).toException();
         }
         return Optional.of(graphQlResponse)
             .map(GraphQlResponse::getData)
