@@ -21,7 +21,6 @@ public enum InntektspostType implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", null),
     LØNN("LØNN", "Lønn", "LONN"),
     YTELSE("YTELSE", "Ytelse", "YTELSE"),
-    VANLIG("VANLIG", "Vanlig", "VANLIG"),
     SELVSTENDIG_NÆRINGSDRIVENDE("SELVSTENDIG_NÆRINGSDRIVENDE", "Selvstendig næringsdrivende", "-"),
     NÆRING_FISKE_FANGST_FAMBARNEHAGE("NÆRING_FISKE_FANGST_FAMBARNEHAGE", "Jordbruk/Skogbruk/Fiske/FamilieBarnehage", "personinntektFiskeFangstFamilebarnehage"),
             ;
