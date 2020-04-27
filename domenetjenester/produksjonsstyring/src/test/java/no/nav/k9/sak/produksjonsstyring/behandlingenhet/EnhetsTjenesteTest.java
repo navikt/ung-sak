@@ -16,7 +16,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -31,6 +31,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class EnhetsTjenesteTest {
 
 
+    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER;
     private static AktørId MOR_AKTØR_ID = AktørId.dummy();
     private static PersonIdent MOR_IDENT = new PersonIdent("12128965432");
     private static Personinfo MOR_PINFO;
@@ -77,7 +78,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, BehandlingTema.OMSORGSPENGER);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetNormal);
@@ -88,7 +89,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(true, false, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, BehandlingTema.OMSORGSPENGER);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetKode6);
@@ -99,7 +100,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, true, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, BehandlingTema.OMSORGSPENGER);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetKode6);
@@ -110,7 +111,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, BehandlingTema.OMSORGSPENGER);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetKode6);
@@ -121,20 +122,10 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, false);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgitte(enhetNormal.getEnhetId(), List.of(FAR_AKTØR_ID));
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgitte(YTELSE_TYPE, enhetNormal.getEnhetId(), List.of(FAR_AKTØR_ID));
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
-    }
-
-    @Test
-    public void presendens_enhet() {
-        // Oppsett
-        settOppTpsStrukturer(false, false, false, false);
-
-        OrganisasjonsEnhet enhet = enhetsTjeneste.enhetsPresedens(enhetNormal, enhetKode6, false);
-
-        assertThat(enhet).isEqualTo(enhetKode6);
     }
 
     @Test
@@ -142,7 +133,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(true, false, true, false);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgitte(enhetKode6.getEnhetId(), List.of(FAR_AKTØR_ID));
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgitte(YTELSE_TYPE, enhetKode6.getEnhetId(), List.of(FAR_AKTØR_ID));
 
         assertThat(enhet).isNotPresent();
     }
@@ -152,7 +143,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, true, false, true);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(enhetNormal.getEnhetId(), BehandlingTema.OMSORGSPENGER, MOR_AKTØR_ID, Optional.of(FAR_AKTØR_ID), Collections.emptyList());
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, Optional.of(FAR_AKTØR_ID), Collections.emptyList());
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
@@ -163,7 +154,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, false);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(enhetNormal.getEnhetId(), BehandlingTema.OMSORGSPENGER, MOR_AKTØR_ID, Optional.of(FAR_AKTØR_ID), Collections.emptyList());
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, Optional.of(FAR_AKTØR_ID), Collections.emptyList());
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));

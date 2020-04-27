@@ -26,9 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.kontrakter.fordel.FagsakInfomasjonDto;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
@@ -93,25 +91,6 @@ public class FordelRestTjeneste {
     }
 
     @POST
-    @Path("/fagsak/informasjon")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(JSON_UTF8)
-    @Operation(description = "Informasjon om en fagsak", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    public FagsakInfomasjonDto fagsak(@Parameter(description = "Saksnummeret det skal hentes saksinformasjon om") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
-        Optional<Fagsak> optFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummerDto.getVerdi(), false);
-        if (optFagsak.isEmpty() || optFagsak.get().getSkalTilInfotrygd()) {
-            return null;
-        }
-        var behandlingTemaFraKodeverksRepo = optFagsak.get().getBehandlingTema();
-        String behandlingstemaOffisiellKode = behandlingTemaFraKodeverksRepo.getOffisiellKode();
-        AktørId aktørId = optFagsak.get().getAktørId();
-
-        /* FIXME K9 bytt kontrakt her */
-        return new FagsakInfomasjonDto(aktørId.getId(), behandlingstemaOffisiellKode, false);
-    }
-
-    @POST
     @Path("/fagsak/opprett")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
@@ -153,12 +132,7 @@ public class FordelRestTjeneste {
     }
 
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
-        if (dto.getYtelseType() != null) {
-            return FagsakYtelseType.fraKode(dto.getYtelseType());
-        } else {
-            BehandlingTema behandlingTema = BehandlingTema.finnForKodeverkEiersKode(dto.getBehandlingstemaOffisiellKode());
-            return behandlingTema.getFagsakYtelseType();
-        }
+        return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
 
     @SuppressWarnings({ "unchecked" })

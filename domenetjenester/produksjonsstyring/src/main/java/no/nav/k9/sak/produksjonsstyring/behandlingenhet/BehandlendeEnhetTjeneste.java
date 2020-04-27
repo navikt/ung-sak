@@ -1,14 +1,13 @@
 package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -20,15 +19,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
 public class BehandlendeEnhetTjeneste {
 
-    private TpsTjeneste tpsTjeneste;
     private EnhetsTjeneste enhetsTjeneste;
     private BehandlingEnhetEventPubliserer eventPubliserer;
     private BehandlingRepository behandlingRepository;
@@ -39,46 +35,30 @@ public class BehandlendeEnhetTjeneste {
     }
 
     @Inject
-    public BehandlendeEnhetTjeneste(TpsTjeneste tpsTjeneste,
-                                    EnhetsTjeneste enhetsTjeneste,
+    public BehandlendeEnhetTjeneste(EnhetsTjeneste enhetsTjeneste,
                                     BehandlingEnhetEventPubliserer eventPubliserer,
                                     BehandlingRepositoryProvider provider) {
-        this.tpsTjeneste = tpsTjeneste;
         this.enhetsTjeneste = enhetsTjeneste;
         this.eventPubliserer = eventPubliserer;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.historikkRepository = provider.getHistorikkRepository();
     }
 
-    private BehandlingTema behandlingTemaFra(Behandling sisteBehandling) {
-        return sisteBehandling.getFagsak().getBehandlingTema();
-    }
-
     // Alle aktuelle enheter
-    public List<OrganisasjonsEnhet> hentEnhetListe() {
-        return enhetsTjeneste.hentEnhetListe();
+    public List<OrganisasjonsEnhet> hentEnhetListe(FagsakYtelseType ytelseType) {
+        return enhetsTjeneste.hentEnhetListe(ytelseType);
     }
 
     // Brukes ved opprettelse av oppgaver før behandling har startet
     public OrganisasjonsEnhet finnBehandlendeEnhetFraSøker(Fagsak fagsak) {
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(fagsak.getAktørId(), fagsak.getBehandlingTema());
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(fagsak.getAktørId(), fagsak.getYtelseType());
         return enhet;
     }
 
     // Brukes ved opprettelse av førstegangsbehandling
     public OrganisasjonsEnhet finnBehandlendeEnhetFraSøker(Behandling behandling) {
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(behandling.getAktørId(), behandlingTemaFra(behandling));
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(behandling.getAktørId(), behandling.getFagsakYtelseType());
         return enhet;
-    }
-
-    // Sjekk om andre angitte personer (Verge mm) har diskresjonskode som tilsier spesialenhet. Returnerer empty() hvis ingen endring.
-    public Optional<OrganisasjonsEnhet> endretBehandlendeEnhetFraAndrePersoner(Behandling behandling, PersonIdent relatert) {
-        AktørId aktørId = tpsTjeneste.hentAktørForFnr(relatert).orElse(null);
-        if (aktørId == null) {
-            return Optional.empty();
-        }
-        return enhetsTjeneste.oppdaterEnhetSjekkOppgitte(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId(),
-            Arrays.asList(aktørId));
     }
 
     // Brukes for å sjekke om det er behov for å endre til spesialenheter når saken tas av vent.
@@ -107,13 +87,13 @@ public class BehandlendeEnhetTjeneste {
         Optional<AktørId> kobletPerson = Optional.empty();
         List<AktørId> relatertePersoner = new ArrayList<>();
 
-        return enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId(), behandlingTemaFra(behandling),
+        return enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(behandling.getFagsakYtelseType(), behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId(),
             hovedPerson, kobletPerson, relatertePersoner);
     }
 
     // Sjekk om angitt journalførende enhet er gyldig for enkelte oppgaver
-    public boolean gyldigEnhetNfpNk(String enhetId) {
-        return enhetsTjeneste.finnOrganisasjonsEnhet(enhetId).isPresent();
+    public boolean gyldigEnhetNfpNk(FagsakYtelseType ytelseType, String enhetId) {
+        return enhetsTjeneste.finnOrganisasjonsEnhet(ytelseType, enhetId).isPresent();
     }
 
     // Brukes for å sjekke om behandling skal flyttes etter endringer i NORG2-oppsett
@@ -123,11 +103,6 @@ public class BehandlendeEnhetTjeneste {
             return Optional.empty();
         }
         return Optional.of(enhet);
-    }
-
-    // Returnerer enhetsnummer for NAV Klageinstans
-    public OrganisasjonsEnhet getKlageInstans() {
-        return enhetsTjeneste.getEnhetKlage();
     }
 
     // Oppdaterer behandlende enhet og sikre at dvh oppdateres (via event)

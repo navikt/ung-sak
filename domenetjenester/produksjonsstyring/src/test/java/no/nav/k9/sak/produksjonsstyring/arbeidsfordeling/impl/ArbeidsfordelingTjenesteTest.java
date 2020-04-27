@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.produksjonsstyring.arbeidsfordeling.ArbeidsfordelingTjeneste;
 import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.Enhetsstatus;
@@ -25,13 +25,13 @@ import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.klient.Arbeidsfordeling
 
 public class ArbeidsfordelingTjenesteTest {
 
+    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER;
     private static final String RESPONSE_ENHETS_ID = "1234";
     private static final String RESPONSE_ENHETS_ID2 = "35456";
     private static final String GEOGRAFISK_TILKNYTNING = "0219";
     private static final String DISKRESJONSKODE = "UFB";
     private static final String KODE6_DISKRESJON = "SPSF";
     private static final String KODE6_ENHET = "2103";
-    private static final BehandlingTema BEHANDLING_TEMA = BehandlingTema.PLEIEPENGER_SYKT_BARN;
 
     private ArbeidsfordelingConsumer consumer = mock(ArbeidsfordelingConsumer.class);
     private ArbeidsfordelingTjeneste tjeneste = new ArbeidsfordelingTjeneste(consumer);
@@ -42,8 +42,7 @@ public class ArbeidsfordelingTjenesteTest {
         FinnBehandlendeEnhetListeResponse tomResponse = new FinnBehandlendeEnhetListeResponse();
         when(consumer.finnBehandlendeEnhetListe(captor.capture())).thenReturn(tomResponse);
 
-        BehandlingTema behandlingTema = BEHANDLING_TEMA;
-        tjeneste.finnBehandlendeEnhet(GEOGRAFISK_TILKNYTNING, DISKRESJONSKODE, behandlingTema);
+        tjeneste.finnBehandlendeEnhet(GEOGRAFISK_TILKNYTNING, DISKRESJONSKODE, YTELSE_TYPE);
     }
 
     @Test
@@ -52,8 +51,7 @@ public class ArbeidsfordelingTjenesteTest {
         ArgumentCaptor<FinnBehandlendeEnhetListeRequest> captor = ArgumentCaptor.forClass(FinnBehandlendeEnhetListeRequest.class);
         when(consumer.finnBehandlendeEnhetListe(captor.capture())).thenReturn(opprettResponseMedToEnheter());
 
-        BehandlingTema behandlingTema = BEHANDLING_TEMA;
-        OrganisasjonsEnhet organisasjonsEnhet = tjeneste.finnBehandlendeEnhet(GEOGRAFISK_TILKNYTNING, DISKRESJONSKODE, behandlingTema);
+        OrganisasjonsEnhet organisasjonsEnhet = tjeneste.finnBehandlendeEnhet(GEOGRAFISK_TILKNYTNING, DISKRESJONSKODE, YTELSE_TYPE);
         //Verifiser svar
         assertThat(organisasjonsEnhet.getEnhetId()).isEqualTo(RESPONSE_ENHETS_ID);
     }
@@ -65,14 +63,12 @@ public class ArbeidsfordelingTjenesteTest {
         when(consumer.finnAlleBehandlendeEnheterListe(captor.capture())).thenReturn(opprettResponseForHentAlleEnheterListe());
 
         // Act
-        BehandlingTema behandlingTema = BEHANDLING_TEMA;
-        List<OrganisasjonsEnhet> orgEnheter = tjeneste.finnAlleBehandlendeEnhetListe(behandlingTema);
+        List<OrganisasjonsEnhet> orgEnheter = tjeneste.finnAlleBehandlendeEnhetListe(YTELSE_TYPE);
 
         // Assert
 
         List<String> forventetEnhetsIder = List.of(RESPONSE_ENHETS_ID, RESPONSE_ENHETS_ID2);
-        // returnerer 3 da den siste/klage er hardkodet inn.
-        assertThat(orgEnheter).hasSize(3);
+        assertThat(orgEnheter).hasSize(3); // inkluderer også klageenheten by default
         assertThat(orgEnheter.stream().map(OrganisasjonsEnhet::getEnhetId).collect(Collectors.toList()))
             .containsAll(forventetEnhetsIder);
     }
@@ -83,8 +79,7 @@ public class ArbeidsfordelingTjenesteTest {
         FinnAlleBehandlendeEnheterListeResponse tomResponse = new FinnAlleBehandlendeEnheterListeResponse();
         when(consumer.finnAlleBehandlendeEnheterListe(captor.capture())).thenReturn(tomResponse);
 
-        BehandlingTema behandlingTema = BEHANDLING_TEMA;
-        tjeneste.finnAlleBehandlendeEnhetListe(behandlingTema);
+        tjeneste.finnAlleBehandlendeEnhetListe(YTELSE_TYPE);
     }
 
     @Test
@@ -92,8 +87,7 @@ public class ArbeidsfordelingTjenesteTest {
         FinnAlleBehandlendeEnheterListeResponse kode6 = opprettResponseMedKode6Enhet();
         when(consumer.finnAlleBehandlendeEnheterListe(any())).thenReturn(kode6);
 
-        BehandlingTema behandlingTema = BEHANDLING_TEMA;
-        OrganisasjonsEnhet organisasjonsEnhet = tjeneste.hentEnhetForDiskresjonskode(KODE6_DISKRESJON, behandlingTema);
+        OrganisasjonsEnhet organisasjonsEnhet = tjeneste.hentEnhetForDiskresjonskode(KODE6_DISKRESJON, YTELSE_TYPE);
 
         //Verifiser svar
         assertThat(organisasjonsEnhet.getEnhetId()).isEqualTo(KODE6_ENHET);

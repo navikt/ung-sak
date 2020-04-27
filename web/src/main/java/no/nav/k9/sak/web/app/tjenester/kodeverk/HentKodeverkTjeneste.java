@@ -158,10 +158,10 @@ public class HentKodeverkTjeneste {
 
     }
 
-    public List<OrganisasjonsEnhet> hentBehandlendeEnheter() {
+    public List<OrganisasjonsEnhet> hentBehandlendeEnheter(FagsakYtelseType ytelseType) {
         final String statusAktiv = Enhetsstatus.AKTIV.name();
 
-        List<OrganisasjonsEnhet> orgEnhetsListe = enhetsTjeneste.hentEnhetListe();
+        List<OrganisasjonsEnhet> orgEnhetsListe = enhetsTjeneste.hentEnhetListe(ytelseType);
 
         return orgEnhetsListe.stream()
             .filter(organisasjonsEnhet -> statusAktiv.equals(organisasjonsEnhet.getStatus()))
