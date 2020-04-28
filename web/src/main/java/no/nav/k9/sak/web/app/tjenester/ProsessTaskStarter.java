@@ -5,8 +5,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import no.nav.k9.sak.web.server.batch.BatchTaskSchedueler;
 import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
+import no.nav.vedtak.felles.prosesstask.impl.cron.BatchTaskScheduler;
 
 /**
  * Initialiserer bakgrunns tasks.
@@ -17,7 +17,7 @@ public class ProsessTaskStarter implements ServletContextListener {
     @Inject
     private TaskManager taskManager;  // NOSONAR
     @Inject
-    private BatchTaskSchedueler batchTaskSchedueler;
+    private BatchTaskScheduler batchTaskSchedueler;
 
     public ProsessTaskStarter() { // NOSONAR
     }
