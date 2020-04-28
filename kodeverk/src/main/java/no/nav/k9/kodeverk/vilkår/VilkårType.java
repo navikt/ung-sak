@@ -165,13 +165,13 @@ public enum VilkårType implements Kodeverdi {
         return INDEKS_AVSLAGSÅRSAK_VILKÅR.get(avslagsårsak);
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonProperty(value="kode")
     @Override
     public String getKode() {
         return kode;
@@ -180,6 +180,11 @@ public enum VilkårType implements Kodeverdi {
     @Override
     public String getOffisiellKode() {
         return getKode();
+    }
+    
+    /** for JAX-RS. */
+    public static VilkårType fromString(String kode) {
+        return fraKode(kode);
     }
 
     static {

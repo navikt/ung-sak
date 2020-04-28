@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
