@@ -119,9 +119,11 @@ spec:
       value: privat-k9-dokumenthendelse
     - name: KAFKA_DOKUMENTBESTILLING_CLIENT_ID
       value: KP-privat-k9-dokumenthendelse
+    - name: KAFKA_FATTEVEDTAK_TOPIC
+      value: privat-familie-vedtakFattet-v1-q1
     - name: SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.preprod.local
-
+    
     # Baseurl
     - name: BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
@@ -177,8 +179,8 @@ spec:
       value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_INFOTRYGDFEED_CLIENT_ID
       value: k9-sak
-    - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: privat-familie-vedtakFattet-v1-q1
+    - name: ARBEIDSFORDELING_RS_URL
+      value: http://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
 
 
     # Web services

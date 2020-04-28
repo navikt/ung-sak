@@ -50,7 +50,7 @@ public class Risikoklassifisering {
             Periode periode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), false);
             RisikovurderingRequest risikovurderingRequest = RisikovurderingRequest.builder()
                 .medSoekerAktoerId(new AktoerId(behandling.getAktørId()))
-                .medBehandlingstema(hentBehandlingTema(behandling))
+                .medYtelseType(behandling.getFagsakYtelseType())
                 .medSkjæringstidspunkt(skjæringstidspunkt)
                 .medOpplysningsperiode(leggTilOpplysningsperiode(periode))
                 .medKonsumentId(behandling.getUuid()).build();
@@ -58,11 +58,6 @@ public class Risikoklassifisering {
         } catch (Exception ex) {
             log.warn("Publisering av Risikovurderingstask feilet", ex);
         }
-    }
-
-    private String hentBehandlingTema(Behandling behandling) {
-        var behandlingTema = behandling.getFagsak().getBehandlingTema();
-        return behandlingTema.getOffisiellKode();
     }
 
     private void opprettProsesstask(Behandling behandling, RisikovurderingRequest risikovurderingRequest) throws IOException {

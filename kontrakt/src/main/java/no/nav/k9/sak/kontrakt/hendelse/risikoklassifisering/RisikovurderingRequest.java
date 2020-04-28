@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -36,8 +38,8 @@ public class RisikovurderingRequest {
             return this;
         }
 
-        public Builder medBehandlingstema(String behandlingstema) {
-            mal.behandlingstema = behandlingstema;
+        public Builder medYtelseType(FagsakYtelseType ytelseType) {
+            mal.ytelseType = ytelseType.getKode();
             return this;
         }
 
@@ -66,7 +68,7 @@ public class RisikovurderingRequest {
             Objects.requireNonNull(mal.konsumentId, "konsumentid");
             Objects.requireNonNull(mal.skjæringstidspunkt, "skjæringstidspunkt");
             Objects.requireNonNull(mal.opplysningsperiode, "opplysningsperiode");
-            Objects.requireNonNull(mal.behandlingstema, "behandlingstema");
+            Objects.requireNonNull(mal.ytelseType, "ytelseType");
         }
 
     }
@@ -75,10 +77,10 @@ public class RisikovurderingRequest {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private AnnenPart annenPart;
 
-    @JsonProperty(value = "behandlingstema", required = true)
+    @JsonProperty(value = "ytelseType")
     @Valid
     @NotNull
-    private String behandlingstema;
+    private String ytelseType;
 
     @JsonProperty(value = "konsumentId", required = true)
     @Valid
@@ -111,8 +113,8 @@ public class RisikovurderingRequest {
         return annenPart;
     }
 
-    public String getBehandlingstema() {
-        return behandlingstema;
+    public String getYtelseType() {
+        return ytelseType;
     }
 
     public UUID getKonsumentId() {
@@ -136,7 +138,7 @@ public class RisikovurderingRequest {
     }
 
     public void setBehandlingstema(String behandlingstema) {
-        this.behandlingstema = behandlingstema;
+        this.ytelseType = behandlingstema;
     }
 
     public void setKonsumentId(UUID konsumentId) {

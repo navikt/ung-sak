@@ -22,7 +22,6 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonskravDatoerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest.GrunnlagVersjon;
@@ -257,20 +256,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         }
     }
 
-    @Override
-    public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningDto oppgittOpptjening) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
-        var saksnummer = behandling.getFagsak().getSaksnummer();
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, oppgittOpptjening);
-
-        try {
-            abakusTjeneste.lagreOppgittOpptjening(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-        }
-    }
-    
     @Override
     public void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder informasjonBuilder) {
         Objects.requireNonNull(informasjonBuilder, "informasjonBuilder"); // NOSONAR

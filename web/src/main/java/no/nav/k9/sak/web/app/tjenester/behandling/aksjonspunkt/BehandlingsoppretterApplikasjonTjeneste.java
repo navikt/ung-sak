@@ -4,8 +4,6 @@ import static no.nav.vedtak.feil.LogLevel.ERROR;
 import static no.nav.vedtak.feil.LogLevel.INFO;
 
 import java.util.Objects;
-import java.util.Optional;
-
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -51,7 +49,7 @@ public class BehandlingsoppretterApplikasjonTjeneste {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
 
-        Optional<OrganisasjonsEnhet> enhet = behandlendeEnhetTjeneste.sjekkEnhetVedNyAvledetBehandling(fagsak);
+        OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         return revurderingTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, enhet);
     }
 

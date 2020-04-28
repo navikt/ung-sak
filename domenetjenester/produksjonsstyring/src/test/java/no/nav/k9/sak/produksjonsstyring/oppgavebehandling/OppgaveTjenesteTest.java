@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
 import javax.persistence.EntityManager;
 
 import org.junit.Before;
@@ -43,7 +44,6 @@ import no.nav.vedtak.felles.integrasjon.behandleoppgave.opprett.OpprettOppgaveRe
 import no.nav.vedtak.felles.integrasjon.oppgave.FinnOppgaveListeRequestMal;
 import no.nav.vedtak.felles.integrasjon.oppgave.OppgaveConsumer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class OppgaveTjenesteTest {
 
@@ -54,7 +54,6 @@ public class OppgaveTjenesteTest {
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final EntityManager entityManager = repoRule.getEntityManager();
-    private Repository repository = repoRule.getRepository();
 
     private OppgaveTjeneste tjeneste;
     private BehandleoppgaveConsumer oppgavebehandlingConsumer;

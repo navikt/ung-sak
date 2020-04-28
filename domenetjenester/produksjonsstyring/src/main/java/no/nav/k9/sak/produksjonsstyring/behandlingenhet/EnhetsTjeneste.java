@@ -1,144 +1,176 @@
 package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.produksjonsstyring.arbeidsfordeling.ArbeidsfordelingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
+import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
+import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
 
 @ApplicationScoped
 public class EnhetsTjeneste {
 
-    private TpsTjeneste tpsTjeneste;
-    private ArbeidsfordelingTjeneste arbeidsfordelingTjeneste;
+    static class EnhetsTjenesteData {
+        OrganisasjonsEnhet enhetKode6;
+        OrganisasjonsEnhet enhetKlage;
+        List<OrganisasjonsEnhet> alleBehandlendeEnheter;
+        LocalDate sisteInnhenting = LocalDate.MIN;
+        
+        Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(String enhetId) {
+            return alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
+        }
+    }
+    
+    private static final String DISKRESJON_K6 = Diskresjonskode.KODE6.getOffisiellKode(); // Kodeverk Diskresjonskoder
+    private static final String NK_ENHET_ID = "4292";
+    private static final OrganisasjonsEnhet KLAGE_ENHET =  new OrganisasjonsEnhet(NK_ENHET_ID, "NAV Klageinstans Midt-Norge");
 
-    private LocalDate sisteInnhenting = LocalDate.MIN;
-    // Produksjonsstyring skjer på nivå TEMA - behandlingTema ikke hensyntatt in NORG2
-    private OrganisasjonsEnhet enhetKode6;
-    private OrganisasjonsEnhet enhetKlage;
-    private List<OrganisasjonsEnhet> alleBehandlendeEnheter;
+    private static final Map<FagsakYtelseType, String> TEMAER = Map.of(
+        FagsakYtelseType.OMSORGSPENGER, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
+        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
+        FagsakYtelseType.OPPLÆRINGSPENGER, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
+        FagsakYtelseType.FRISINN, "FRI" // Ny korona ytelse
+    );
+
+    private TpsTjeneste tpsTjeneste;
+    private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
+
+    private Map<FagsakYtelseType, EnhetsTjenesteData> cache = Map.of(
+        FagsakYtelseType.OMSORGSPENGER, new EnhetsTjenesteData(),
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN, new EnhetsTjenesteData(),
+        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, new EnhetsTjenesteData(),
+        FagsakYtelseType.OPPLÆRINGSPENGER, new EnhetsTjenesteData(),
+        FagsakYtelseType.FRISINN, new EnhetsTjenesteData());
 
     public EnhetsTjeneste() {
         // For CDI proxy
     }
 
     @Inject
-    public EnhetsTjeneste(TpsTjeneste tpsTjeneste, ArbeidsfordelingTjeneste arbeidsfordelingTjeneste) {
+    public EnhetsTjeneste(TpsTjeneste tpsTjeneste, ArbeidsfordelingRestKlient arbeidsfordelingTjeneste) {
         this.tpsTjeneste = tpsTjeneste;
         this.arbeidsfordelingTjeneste = arbeidsfordelingTjeneste;
     }
 
-
-    List<OrganisasjonsEnhet> hentEnhetListe() {
-        oppdaterEnhetCache();
-        return alleBehandlendeEnheter;
+    List<OrganisasjonsEnhet> hentEnhetListe(FagsakYtelseType ytelseType) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType);
+        return cacheEntry.alleBehandlendeEnheter;
     }
 
-    OrganisasjonsEnhet hentEnhetSjekkRegistrerteRelasjoner(AktørId aktørId, BehandlingTema behandlingTema) {
-        oppdaterEnhetCache();
+    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkOppgittePersoner(FagsakYtelseType ytelseType, String enhetId, AktørId hovedAktør, Collection<AktørId> alleAktører) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType);
+        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || cacheEntry.enhetKlage.getEnhetId().equals(enhetId)) {
+            return Optional.empty();
+        }
+
+        if (harNoenDiskresjonskode6(alleAktører)) {
+            return Optional.of(cacheEntry.enhetKode6);
+        }
+        if (finnOrganisasjonsEnhet(ytelseType, enhetId).isEmpty()) {
+            return Optional.of(hentEnhetSjekkKunAktør(hovedAktør, ytelseType));
+        }
+        return Optional.empty();
+    }
+
+    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkRegistrerteRelasjoner(FagsakYtelseType ytelseType, 
+                                                                         String enhetId, 
+                                                                         AktørId hovedAktør, 
+                                                                         Collection<AktørId> alleAktører) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType);
+        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || NK_ENHET_ID.equals(enhetId)) {
+            return Optional.empty();
+        }
+        if (harNoenDiskresjonskode6(alleAktører)) {
+            return Optional.of(cacheEntry.enhetKode6);
+        }
+        if (cacheEntry.finnOrganisasjonsEnhet(enhetId).isEmpty()) {
+            return Optional.of(hentEnhetSjekkKunAktør(hovedAktør, ytelseType));
+        }
+        return Optional.empty();
+    }
+    
+    OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
-
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr);
-        String aktivDiskresjonskode = geografiskTilknytning.getDiskresjonskode();
-        if (!Diskresjonskode.KODE6.getKode().equals(aktivDiskresjonskode)) {
-            boolean relasjonMedK6 = tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(fnr).stream()
-                .anyMatch(geo -> Diskresjonskode.KODE6.getKode().equals(geo.getDiskresjonskode()));
-            if (relasjonMedK6) {
-                aktivDiskresjonskode = Diskresjonskode.KODE6.getKode();
-            }
-        }
-
-        return arbeidsfordelingTjeneste.finnBehandlendeEnhet(geografiskTilknytning.getTilknytning(), aktivDiskresjonskode, behandlingTema);
+        return hentEnheterFor(geografiskTilknytning.getTilknytning(), geografiskTilknytning.getDiskresjonskode(), ytelseType).get(0);
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkOppgitte(String enhetId, List<AktørId> relaterteAktører) {
-        oppdaterEnhetCache();
-        if (enhetKode6.getEnhetId().equals(enhetId) || enhetKlage.getEnhetId().equals(enhetId)) {
-            return Optional.empty();
-        }
-
-        return sjekkSpesifiserteRelaterte(relaterteAktører);
-    }
-
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkRegistrerteRelasjoner(String enhetId, BehandlingTema behandlingTema, AktørId aktørId, Optional<AktørId> kobletAktørId, List<AktørId> relaterteAktører) {
-        oppdaterEnhetCache();
-        if (enhetKode6.getEnhetId().equals(enhetId) || enhetKlage.getEnhetId().equals(enhetId)) {
-            return Optional.empty();
-        }
-
-        OrganisasjonsEnhet enhet = hentEnhetSjekkRegistrerteRelasjoner(aktørId, behandlingTema);
-        if (enhetKode6.getEnhetId().equals(enhet.getEnhetId())) {
-            return Optional.of(enhetKode6);
-        }
-        if (kobletAktørId.isPresent()) {
-            OrganisasjonsEnhet enhetKoblet = hentEnhetSjekkRegistrerteRelasjoner(kobletAktørId.get(), behandlingTema);
-            if (enhetKode6.getEnhetId().equals(enhetKoblet.getEnhetId())) {
-                return Optional.of(enhetKode6);
-            }
-        }
-        if (sjekkSpesifiserteRelaterte(relaterteAktører).isPresent()) {
-            return Optional.of(enhetKode6);
-        }
-        if (!gyldigEnhetId(enhetId)) {
-            return Optional.of(enhet);
-        }
-
-        return Optional.empty();
-    }
-
-    private Optional<OrganisasjonsEnhet> sjekkSpesifiserteRelaterte(List<AktørId> relaterteAktører) {
-        for (AktørId relatert : relaterteAktører) {
-            PersonIdent personIdent = tpsTjeneste.hentFnrForAktør(relatert);
-            GeografiskTilknytning geo = tpsTjeneste.hentGeografiskTilknytning(personIdent);
-            if (Diskresjonskode.KODE6.getKode().equals(geo.getDiskresjonskode())) {
-                return Optional.of(enhetKode6);
-            }
-        }
-        return Optional.empty();
-    }
-
-    private void oppdaterEnhetCache() {
-        if (sisteInnhenting.isBefore(LocalDate.now())) {
-            enhetKode6 = arbeidsfordelingTjeneste.hentEnhetForDiskresjonskode(Diskresjonskode.KODE6.getKode(), BehandlingTema.UDEFINERT);
-            enhetKlage = arbeidsfordelingTjeneste.getKlageInstansEnhet();
-            alleBehandlendeEnheter = arbeidsfordelingTjeneste.finnAlleBehandlendeEnhetListe(BehandlingTema.UDEFINERT);
-            sisteInnhenting = LocalDate.now();
-        }
-    }
-
-    private boolean gyldigEnhetId(String enhetId) {
-        return finnOrganisasjonsEnhet(enhetId).isPresent();
-    }
-
-    Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(String enhetId) {
-        oppdaterEnhetCache();
-        return alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
-    }
-
-    OrganisasjonsEnhet enhetsPresedens(OrganisasjonsEnhet enhetSak1, OrganisasjonsEnhet enhetSak2, boolean arverKlage) {
-        oppdaterEnhetCache();
-        if (arverKlage && enhetKlage.getEnhetId().equals(enhetSak1.getEnhetId())) {
-            return enhetSak1;
-        }
-        if (enhetKode6.getEnhetId().equals(enhetSak1.getEnhetId()) || enhetKode6.getEnhetId().equals(enhetSak2.getEnhetId())) {
-            return enhetKode6;
+    OrganisasjonsEnhet enhetsPresedens(FagsakYtelseType ytelseType, OrganisasjonsEnhet enhetSak1, OrganisasjonsEnhet enhetSak2) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType);
+        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetSak1.getEnhetId()) || cacheEntry.enhetKode6.getEnhetId().equals(enhetSak2.getEnhetId())) {
+            return cacheEntry.enhetKode6;
         }
         return enhetSak1;
     }
-
-    OrganisasjonsEnhet getEnhetKlage() {
-        oppdaterEnhetCache();
-        return enhetKlage;
+    
+    private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører) {
+        return aktører.stream()
+            .map(tpsTjeneste::hentFnrForAktør)
+            .map(tpsTjeneste::hentGeografiskTilknytning)
+            .map(GeografiskTilknytning::getDiskresjonskode)
+            .filter(Objects::nonNull)
+            .anyMatch(DISKRESJON_K6::equalsIgnoreCase);
+    }
+    
+    private EnhetsTjenesteData oppdaterEnhetCache(FagsakYtelseType ytelseType) {
+        var cacheEntry = cache.get(ytelseType);
+        if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
+            synchronized (cacheEntry) {
+                if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
+                    cacheEntry.enhetKode6 = hentEnheterFor(null, Diskresjonskode.KODE6.getKode(), ytelseType).get(0);
+                    cacheEntry.enhetKlage = KLAGE_ENHET;
+                    cacheEntry.alleBehandlendeEnheter = hentEnheterFor(null, null, ytelseType);
+                    cacheEntry.sisteInnhenting = LocalDate.now();
+                }
+            }
+        }
+        return cacheEntry;
     }
 
+    OrganisasjonsEnhet getEnhetKlage() {
+        return KLAGE_ENHET;
+    }
+    
+    Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String enhetId) {
+        var cacheEntry = oppdaterEnhetCache(ytelseType);
+        return cacheEntry.alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
+    }
+
+    private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
+        List<ArbeidsfordelingResponse> restenhet;
+        var request = ArbeidsfordelingRequest.ny()
+            .medTema(TEMAER.get(ytelseType))
+            .medTemagruppe("FMLI") // dekker OMS, PSB, FRISINN (fra Temagruppe offisielt kodeverk)
+            .medOppgavetype("BEH_SAK_VL") // fra Oppgavetype offisielt kodeverk)
+            .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
+            .medDiskresjonskode(diskresjon)
+            .medGeografiskOmraade(geografi)
+            .build();
+        if (geografi == null && diskresjon == null) {
+            restenhet = arbeidsfordelingTjeneste.hentAlleAktiveEnheter(request);
+        } else {
+            restenhet = arbeidsfordelingTjeneste.finnEnhet(request);
+        }
+        return restenhet.stream()
+            .map(r -> new OrganisasjonsEnhet(r.getEnhetNr(), r.getEnhetNavn()))
+            .collect(Collectors.toList());
+    }
 }

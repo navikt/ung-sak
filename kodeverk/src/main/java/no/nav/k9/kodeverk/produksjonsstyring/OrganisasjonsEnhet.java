@@ -1,5 +1,7 @@
 package no.nav.k9.kodeverk.produksjonsstyring;
 
+import java.util.Objects;
+
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -55,4 +57,25 @@ public class OrganisasjonsEnhet {
     public String getStatus() {
         return status;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+        var other = (OrganisasjonsEnhet) obj;
+        return Objects.equals(enhetId, other.enhetId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enhetId);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<enhetId=" + enhetId + ", navn=" + enhetNavn + ", status=" + status + ">";
+    }
+
 }

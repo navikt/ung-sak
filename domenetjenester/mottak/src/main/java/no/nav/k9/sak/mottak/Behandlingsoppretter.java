@@ -88,8 +88,7 @@ public class Behandlingsoppretter {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
             }
             beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-            OrganisasjonsEnhet enhet = tidligereBehandling.map(b -> utledEnhetFraTidligereBehandling(b).orElse(b.getBehandlendeOrganisasjonsEnhet()))
-                .orElse(finnBehandlendeEnhet(beh));
+            OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
             beh.setBehandlendeEnhet(enhet);
         }); // NOSONAR
     }
@@ -104,13 +103,13 @@ public class Behandlingsoppretter {
 
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType revurderingsÅrsak) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(fagsak, revurderingsÅrsak, behandlendeEnhetTjeneste.sjekkEnhetVedNyAvledetBehandling(fagsak));
+        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(fagsak, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak));
         return revurdering;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType revurderingsÅrsak) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettManuellRevurdering(fagsak, revurderingsÅrsak, behandlendeEnhetTjeneste.sjekkEnhetVedNyAvledetBehandling(fagsak));
+        Behandling revurdering = revurderingTjeneste.opprettManuellRevurdering(fagsak, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak));
         return revurdering;
     }
 
@@ -143,16 +142,6 @@ public class Behandlingsoppretter {
 
     public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(Behandling forrigeBehandling, Behandling nyBehandling) {
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
-    }
-
-    private OrganisasjonsEnhet finnBehandlendeEnhet(Behandling behandling) {
-        return behandlendeEnhetTjeneste.finnBehandlendeEnhetFraSøker(behandling);
-    }
-
-    private Optional<OrganisasjonsEnhet> utledEnhetFraTidligereBehandling(Behandling tidligereBehandling) {
-        // Utleder basert på regler rundt sakskompleks og diskresjonskoder. Vil bruke forrige enhet med mindre noen tilsier Kode6 eller enhet
-        // opphørt
-        return behandlendeEnhetTjeneste.sjekkEnhetVedNyAvledetBehandling(tidligereBehandling);
     }
 
     public boolean harBehandlingsresultatOpphørt(Behandling behandling) {

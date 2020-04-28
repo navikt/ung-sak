@@ -1,7 +1,6 @@
 package no.nav.k9.sak.behandling.revurdering;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -40,16 +39,18 @@ public class RevurderingTjenesteFelles {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
-    public Behandling opprettRevurderingsbehandling(BehandlingÅrsakType revurderingÅrsakType, Behandling opprinneligBehandling, boolean manueltOpprettet,
-                                                    Optional<OrganisasjonsEnhet> enhet) {
+    public Behandling opprettRevurderingsbehandling(BehandlingÅrsakType revurderingÅrsakType,
+                                                    Behandling opprinneligBehandling,
+                                                    boolean manueltOpprettet,
+                                                    OrganisasjonsEnhet enhet) {
         BehandlingType behandlingType = BehandlingType.REVURDERING;
         BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(revurderingÅrsakType)
             .medOriginalBehandling(opprinneligBehandling)
             .medManueltOpprettet(manueltOpprettet);
         Behandling revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
+            .medBehandlendeEnhet(enhet)
             .medBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()))
             .medBehandlingÅrsak(revurderingÅrsak).build();
-        enhet.ifPresent(revurdering::setBehandlendeEnhet);
         revurderingHistorikk.opprettHistorikkinnslagOmRevurdering(revurdering, revurderingÅrsakType, manueltOpprettet);
         return revurdering;
     }
@@ -61,7 +62,7 @@ public class RevurderingTjenesteFelles {
     public void kopierVilkårsresultat(Behandling origBehandling, Behandling revurdering, BehandlingskontrollKontekst kontekst) {
         vilkårResultatRepository.kopier(origBehandling.getId(), revurdering.getId());
         behandlingRepository.lagre(revurdering, kontekst.getSkriveLås());
-        
+
         // Kan være at førstegangsbehandling ble avslått før den har kommet til opptjening.
         if (opptjeningRepository.finnOpptjening(origBehandling.getId()).isPresent()) {
             opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(origBehandling, revurdering);

@@ -44,6 +44,9 @@ public class RestApiInputValideringAnnoteringTest extends RestApiTester {
     @Test
     public void alle_felter_i_objekter_som_brukes_som_inputDTO_skal_enten_ha_valideringsannotering_eller_være_av_godkjent_type() throws Exception {
         for (int i = 0; i < restMethod.getParameterCount(); i++) {
+            if(restMethod.getParameters()[i].getType().isEnum()) {
+                continue;
+            }
             assertThat(restMethod.getParameterTypes()[i].isAssignableFrom(String.class)).as(
                 "REST-metoder skal ikke har parameter som er String eller mer generelt. Bruk DTO-er og valider. " + printKlasseOgMetodeNavn.apply(restMethod))
                 .isFalse();

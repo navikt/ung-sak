@@ -1,24 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.kodeverk;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Operation;
-import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.util.LRUCache;
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +10,32 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Operation;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
+import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.vedtak.util.LRUCache;
 
 @Path("/kodeverk")
 @ApplicationScoped
@@ -71,10 +78,10 @@ public class KodeverkRestTjeneste {
     @GET
     @Path("/behandlende-enheter")
     @Operation(description = "Henter liste over behandlende enheter", tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false) 
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<OrganisasjonsEnhet> hentBehandlendeEnheter() {
-        return hentKodeverkTjeneste.hentBehandlendeEnheter();
+    public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMP") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
+        return hentKodeverkTjeneste.hentBehandlendeEnheter(ytelseType);
     }
 
     private String getKodeverkRawJson() throws JsonProcessingException {
