@@ -330,7 +330,7 @@ public class BehandlingDtoTjeneste {
         var ytelseType = behandling.getFagsakYtelseType();
         switch (ytelseType) {
             case FRISINN:
-                // har ikke noe å tilføye
+                dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_OPPGITT, "uttak-oppgitt", uuidQueryParams));
                 break;
             case OMSORGSPENGER:
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));

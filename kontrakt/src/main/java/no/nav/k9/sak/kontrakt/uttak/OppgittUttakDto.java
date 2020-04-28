@@ -9,14 +9,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
@@ -38,6 +34,7 @@ public class OppgittUttakDto {
         // for proxy
     }
 
+    @JsonCreator
     public OppgittUttakDto(@JsonProperty(value = "behandlingUuid", required = true) UUID behandlingUuid,
                            @JsonProperty(value = "aktiviteter") List<@NotNull UttakAktivitetPeriodeDto> aktiviteter) {
         this.aktiviteter = aktiviteter == null ? Collections.emptyList() : List.copyOf(aktiviteter);
