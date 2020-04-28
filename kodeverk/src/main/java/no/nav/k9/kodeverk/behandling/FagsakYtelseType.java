@@ -130,6 +130,10 @@ public enum FagsakYtelseType implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
+    
+    public static FagsakYtelseType fromString(String kode) {
+        return fraKode(kode);
+    }
 
     private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OPPTJENING_RELATERTYTELSE_CONFIG = Map.of(
         FORELDREPENGER,
