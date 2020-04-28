@@ -49,7 +49,7 @@ public class VedtattYtelseTjeneste {
         final Aktør aktør = new Aktør();
         aktør.setVerdi(behandling.getAktørId().getId());
         final YtelseV1 ytelse = new YtelseV1();
-        ytelse.setFagsystem(Fagsystem.FPSAK);
+        ytelse.setFagsystem(Fagsystem.K9SAK);
         ytelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         ytelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
         ytelse.setVedtakReferanse(behandling.getUuid().toString());
