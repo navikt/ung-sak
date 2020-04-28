@@ -65,7 +65,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         if (skalDetLagesAksjonspunkt(årskvantumResultat.getUttaksplan())) {
             try {
-                log.info("Setter behandling på vent etter følgende respons fra årskvantum" +
+                log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
                     "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat));
             } catch (IOException e) {
                 log.info("Feilet i serialisering av årskvantum respons: " + årskvantumResultat);

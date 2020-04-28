@@ -114,7 +114,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             barna);
 
         try {
-            log.info("Sender request til årskvantum" +
+            log.debug("Sender request til årskvantum" +
                 "\nrequest='{}'", JsonObjectMapper.getJson(årskvantumRequest));
         } catch (IOException e) {
             log.info("Feilet i serialisering av årskvantum request: " + årskvantumRequest);
