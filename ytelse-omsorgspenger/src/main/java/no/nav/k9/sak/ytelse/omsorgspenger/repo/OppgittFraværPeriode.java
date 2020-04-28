@@ -39,8 +39,8 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
-            @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
     private DatoIntervallEntitet periode;
 
@@ -60,7 +60,9 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     @Embedded
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    /** tid oppgittFravær per dag. Hvis ikke oppgitt antas hele dagen å telle med. */
+    /**
+     * tid oppgittFravær per dag. Hvis ikke oppgitt antas hele dagen å telle med.
+     */
     @ChangeTracked
     @Column(name = "fravaer_per_dag", nullable = true)
     private Duration fraværPerDag;
@@ -136,6 +138,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             return false;
         OppgittFraværPeriode that = (OppgittFraværPeriode) o;
         return Objects.equals(periode, that.periode)
+            && Objects.equals(fraværPerDag, that.fraværPerDag)
             && Objects.equals(aktivitetType, that.aktivitetType)
             && Objects.equals(arbeidsgiver, that.arbeidsgiver)
             && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
@@ -143,7 +146,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+        return Objects.hash(periode, fraværPerDag, aktivitetType, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override

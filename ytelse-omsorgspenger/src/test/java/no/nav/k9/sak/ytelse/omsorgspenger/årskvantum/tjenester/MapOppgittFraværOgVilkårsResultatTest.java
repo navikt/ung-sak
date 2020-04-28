@@ -54,4 +54,25 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder.stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
         assertThat(perioder.stream().filter(it -> !it.getErAvslått())).hasSize(1);
     }
+
+    @Test
+    public void skal_ta_hensyn_til_overlapp_i_søkte_perioder() {
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        vilkårResultatBuilder
+            .leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
+                .leggTil(new VilkårPeriodeBuilder().medUtfall(Utfall.IKKE_OPPFYLT).medPeriode(LocalDate.now().minusDays(10), LocalDate.now())))
+            .leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET)
+                .leggTil(new VilkårPeriodeBuilder().medUtfall(Utfall.IKKE_OPPFYLT).medPeriode(LocalDate.now().minusDays(15), LocalDate.now())));
+
+        var vilkårene = vilkårResultatBuilder.build();
+
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(8)),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(8)));
+
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfallHvisAvslåttVilkår(oppgittFravær, vilkårene);
+
+        assertThat(perioder).hasSize(2);
+        assertThat(perioder.stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
+        assertThat(perioder.stream().filter(it -> !it.getErAvslått())).hasSize(1);
+    }
 }

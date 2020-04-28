@@ -26,13 +26,16 @@ class WrappedOppgittFraværPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WrappedOppgittFraværPeriode that = (WrappedOppgittFraværPeriode) o;
-        return avslått == that.avslått &&
-            Objects.equals(periode, that.periode);
+        return avslått == that.avslått
+            && Objects.equals(periode.getFraværPerDag(), that.periode.getFraværPerDag())
+            && Objects.equals(periode.getAktivitetType(), that.periode.getAktivitetType())
+            && Objects.equals(periode.getArbeidsgiver(), that.periode.getArbeidsgiver())
+            && Objects.equals(periode.getArbeidsforholdRef(), that.periode.getArbeidsforholdRef());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, avslått);
+        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), periode.getArbeidsgiver(), periode.getArbeidsforholdRef(), avslått);
     }
 
     @Override
