@@ -90,22 +90,22 @@ public enum BehandlingType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonProperty(value="kode")
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
+    public static BehandlingType fromString(String kode) {
+        return fraKode(kode);
     }
-
+    
     @Override
     public String getOffisiellKode() {
         return offisiellKode;

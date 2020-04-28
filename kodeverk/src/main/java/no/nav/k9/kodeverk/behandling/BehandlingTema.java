@@ -48,6 +48,7 @@ public enum BehandlingTema implements Kodeverdi {
 
     private String kode;
 
+    @JsonIgnore
     private FagsakYtelseType fagsakYtelseType;
 
     private BehandlingTema(String kode) {
@@ -86,18 +87,22 @@ public enum BehandlingTema implements Kodeverdi {
         return YTELSE_TYPE_TIL_TEMA.getOrDefault(ytelseType, BehandlingTema.UDEFINERT);
     }
 
+    public static BehandlingTema fromString(String kode) {
+        return fraKode(kode);
+    }
+    
     @Override
     public String getNavn() {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonProperty(value="kode")
     @Override
     public String getKode() {
         return kode;
