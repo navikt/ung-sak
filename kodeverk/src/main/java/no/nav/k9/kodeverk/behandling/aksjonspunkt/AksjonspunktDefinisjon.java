@@ -455,7 +455,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonProperty(value="kode")
     @Override
     public String getKode() {
         return kode;
@@ -469,7 +469,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return vurderingspunktType;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
