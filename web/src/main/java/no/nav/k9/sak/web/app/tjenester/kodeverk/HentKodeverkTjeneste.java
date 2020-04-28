@@ -1,7 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.kodeverk;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -62,7 +60,6 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.tjeneste.virksomhet.arbeidsfordeling.v1.informasjon.Enhetsstatus;
 
 @ApplicationScoped
 public class HentKodeverkTjeneste {
@@ -122,7 +119,7 @@ public class HentKodeverkTjeneste {
         Map<String, Collection<?>> mapFiltered = new LinkedHashMap<>();
 
         map.entrySet().forEach(e -> {
-            mapFiltered.put(e.getKey(), e.getValue().stream().filter(f -> !(f instanceof Kodeverdi) || !"-".equals(((Kodeverdi)f).getKode())).collect(Collectors.toSet()));
+            mapFiltered.put(e.getKey(), e.getValue().stream().filter(f -> !(f instanceof Kodeverdi) || !"-".equals(((Kodeverdi) f).getKode())).collect(Collectors.toSet()));
         });
 
         KODEVERDIER_SOM_BRUKES_PÅ_KLIENT = Collections.unmodifiableMap(mapFiltered);
@@ -159,13 +156,6 @@ public class HentKodeverkTjeneste {
     }
 
     public List<OrganisasjonsEnhet> hentBehandlendeEnheter(FagsakYtelseType ytelseType) {
-        final String statusAktiv = Enhetsstatus.AKTIV.name();
-
-        List<OrganisasjonsEnhet> orgEnhetsListe = enhetsTjeneste.hentEnhetListe(ytelseType);
-
-        return orgEnhetsListe.stream()
-            .filter(organisasjonsEnhet -> statusAktiv.equals(organisasjonsEnhet.getStatus()))
-            .collect(toList());
+        return enhetsTjeneste.hentEnhetListe(ytelseType);
     }
-
 }

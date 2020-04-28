@@ -179,6 +179,8 @@ spec:
       value: k9-sak
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1-q1
+    - name: ARBEIDSFORDELING_RS_URL
+      value: http://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
 
 
     # Web services

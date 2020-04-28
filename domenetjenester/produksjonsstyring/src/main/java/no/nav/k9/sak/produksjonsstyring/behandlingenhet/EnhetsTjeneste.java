@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -157,7 +158,9 @@ public class EnhetsTjeneste {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
             .medTema(TEMAER.get(ytelseType))
-            .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // knytter til søknader
+            .medTemagruppe("FMLI") // dekker OMS, PSB, FRISINN (fra Temagruppe offisielt kodeverk)
+            .medOppgavetype("BEH_SAK_VL") // fra Oppgavetype offisielt kodeverk)
+            .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)
             .medGeografiskOmraade(geografi)
             .build();
