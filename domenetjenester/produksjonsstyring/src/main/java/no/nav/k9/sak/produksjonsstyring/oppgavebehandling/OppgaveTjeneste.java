@@ -53,8 +53,6 @@ public class OppgaveTjeneste {
     //FIXME(k9) hva skal fristen være?
     private static final int DEFAULT_OPPGAVEFRIST_OMSORGSPENGER_DAGER = 21;
 
-    private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL!";
-
     private static final String OMSORGSPENGERSAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Omsorgspengersak må flyttes til Infotrygd";
 
     private static final String NØS_ANSVARLIG_ENHETID = "4151";

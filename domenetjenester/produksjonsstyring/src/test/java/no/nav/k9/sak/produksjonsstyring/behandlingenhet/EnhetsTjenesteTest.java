@@ -1,9 +1,6 @@
 package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,65 +8,69 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.produksjonsstyring.arbeidsfordeling.ArbeidsfordelingTjeneste;
+import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
+import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
+import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
 
 public class EnhetsTjenesteTest {
 
-
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER;
+    
     private static AktørId MOR_AKTØR_ID = AktørId.dummy();
-    private static PersonIdent MOR_IDENT = new PersonIdent("12128965432");
+    private static PersonIdent MOR_IDENT = new PersonIdent(new FiktiveFnr().nesteKvinneFnr());
     private static Personinfo MOR_PINFO;
 
     private static AktørId FAR_AKTØR_ID = AktørId.dummy();
-    private static PersonIdent FAR_IDENT = new PersonIdent("11119164523");
+    private static PersonIdent FAR_IDENT = new PersonIdent(new FiktiveFnr().nesteMannFnr());
     private static Personinfo FAR_PINFO;
 
     private static AktørId BARN_AKTØR_ID = AktørId.dummy();
-    private static AktørId ELDRE_BARN_AKTØR_ID = AktørId.dummy();
-    private static PersonIdent BARN_IDENT = new PersonIdent("03031855655");
-    private static PersonIdent ELDRE_BARN_IDENT = new PersonIdent("06060633333");
+    private static PersonIdent BARN_IDENT = new PersonIdent(new FiktiveFnr().nesteBarnFnr());
     private static Personinfo BARN_PINFO;
-    private static Personinfo ELDRE_BARN_PINFO;
-    private static LocalDate ELDRE_BARN_FØDT = LocalDate.of(2006,6,6);
     private static LocalDate BARN_FØDT = LocalDate.of(2018,3,3);
 
-    private static Familierelasjon relasjontilEldreBarn = new Familierelasjon(ELDRE_BARN_IDENT, RelasjonsRolleType.BARN, ELDRE_BARN_FØDT, "Vei", true);
+    private static final Set<AktørId> FAMILIE = Set.of(MOR_AKTØR_ID, FAR_AKTØR_ID, BARN_AKTØR_ID);
+
     private static Familierelasjon relasjontilBarn = new Familierelasjon(BARN_IDENT, RelasjonsRolleType.BARN, BARN_FØDT, "Vei", true);
     private static Familierelasjon relasjonEkteFar = new Familierelasjon(FAR_IDENT, RelasjonsRolleType.EKTE, LocalDate.of(1991,11,11), "Vei", true);
 
-    private static OrganisasjonsEnhet enhetNormal = new OrganisasjonsEnhet("4802", "NAV Bærum", "AKTIV");
-    private static OrganisasjonsEnhet enhetKode6 = new OrganisasjonsEnhet("2103", "NAV Viken", "AKTIV");
+    private static OrganisasjonsEnhet enhetNormal = new OrganisasjonsEnhet("4802", "NAV Bærum");
+    private static OrganisasjonsEnhet enhetKode6 = new OrganisasjonsEnhet("2103", "NAV Viken");
+    private static ArbeidsfordelingResponse respNormal = new ArbeidsfordelingResponse("4802", "NAV Bærum", "Aktiv", "FPY");
+    private static ArbeidsfordelingResponse respKode6 = new ArbeidsfordelingResponse("2103", "NAV Viken", "Aktiv", "KO");
 
     private static GeografiskTilknytning tilknytningNormal = new GeografiskTilknytning("0219", null);
     private static GeografiskTilknytning tilknytningKode6 = new GeografiskTilknytning("0219", "SPSF");
     private static GeografiskTilknytning relatertKode6 = new GeografiskTilknytning(null, "SPSF");
 
     private TpsTjeneste tpsTjeneste;
-    private ArbeidsfordelingTjeneste arbeidsfordelingTjeneste;
+    private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
     private EnhetsTjeneste enhetsTjeneste;
 
 
     @Before
     public void oppsett() {
         tpsTjeneste = mock(TpsTjeneste.class);
-        arbeidsfordelingTjeneste = mock(ArbeidsfordelingTjeneste.class);
-        when(arbeidsfordelingTjeneste.getKlageInstansEnhet()).thenReturn(new OrganisasjonsEnhet("4292", "NAV Klageinstans Midt-Norge"));
+        arbeidsfordelingTjeneste = mock(ArbeidsfordelingRestKlient.class);
         enhetsTjeneste = new EnhetsTjeneste(tpsTjeneste, arbeidsfordelingTjeneste);
     }
 
@@ -78,7 +79,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetNormal);
@@ -89,7 +90,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(true, false, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
 
         assertThat(enhet).isNotNull();
         assertThat(enhet).isEqualTo(enhetKode6);
@@ -100,10 +101,11 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, true, false, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet1 = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhet.getEnhetId(), MOR_AKTØR_ID, FAMILIE).orElse(enhet);
 
         assertThat(enhet).isNotNull();
-        assertThat(enhet).isEqualTo(enhetKode6);
+        assertThat(enhet1).isEqualTo(enhetKode6);
     }
 
     @Test
@@ -111,10 +113,11 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, true);
 
-        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkRegistrerteRelasjoner(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet = enhetsTjeneste.hentEnhetSjekkKunAktør(MOR_AKTØR_ID, YTELSE_TYPE);
+        OrganisasjonsEnhet enhet1 = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhet.getEnhetId(), MOR_AKTØR_ID, FAMILIE).orElse(enhet);
 
         assertThat(enhet).isNotNull();
-        assertThat(enhet).isEqualTo(enhetKode6);
+        assertThat(enhet1).isEqualTo(enhetKode6);
     }
 
     @Test
@@ -122,10 +125,20 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, false);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgitte(YTELSE_TYPE, enhetNormal.getEnhetId(), List.of(FAR_AKTØR_ID));
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
+    }
+
+    @Test
+    public void presendens_enhet() {
+        // Oppsett
+        settOppTpsStrukturer(false, false, false, false);
+
+        OrganisasjonsEnhet enhet = enhetsTjeneste.enhetsPresedens(YTELSE_TYPE, enhetNormal, enhetKode6);
+
+        assertThat(enhet).isEqualTo(enhetKode6);
     }
 
     @Test
@@ -133,7 +146,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(true, false, true, false);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgitte(YTELSE_TYPE, enhetKode6.getEnhetId(), List.of(FAR_AKTØR_ID));
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetKode6.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isNotPresent();
     }
@@ -143,7 +156,7 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, true, false, true);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, Optional.of(FAR_AKTØR_ID), Collections.emptyList());
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
@@ -154,48 +167,45 @@ public class EnhetsTjenesteTest {
         // Oppsett
         settOppTpsStrukturer(false, false, true, false);
 
-        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkRegistrerteRelasjoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, Optional.of(FAR_AKTØR_ID), Collections.emptyList());
+        Optional<OrganisasjonsEnhet> enhet = enhetsTjeneste.oppdaterEnhetSjekkOppgittePersoner(YTELSE_TYPE, enhetNormal.getEnhetId(), MOR_AKTØR_ID, FAMILIE);
 
         assertThat(enhet).isPresent();
         assertThat(enhet).hasValueSatisfying(enhetObj -> assertThat(enhetObj).isEqualTo(enhetKode6));
     }
 
     private void settOppTpsStrukturer(boolean morKode6, boolean barnKode6, boolean annenPartKode6, boolean foreldreRelatertTps) {
-        HashSet<Familierelasjon> relasjoner = new HashSet<>(List.of(relasjontilEldreBarn, relasjontilBarn));
+        HashSet<Familierelasjon> relasjoner = new HashSet<>(List.of(relasjontilBarn));
         if (foreldreRelatertTps) {
             relasjoner.add(relasjonEkteFar);
         }
         MOR_PINFO = new Personinfo.Builder().medAktørId(MOR_AKTØR_ID).medPersonIdent(MOR_IDENT).medNavn("Kari Dunk")
-            .medKjønn(NavBrukerKjønn.KVINNE).medFødselsdato(LocalDate.of(1989,12,12)).medAdresse("Vei")
+            .medFødselsdato(LocalDate.of(1989,12,12)).medAdresse("Vei")
             .medFamilierelasjon(relasjoner).build();
         FAR_PINFO = new Personinfo.Builder().medAktørId(FAR_AKTØR_ID).medPersonIdent(FAR_IDENT).medNavn("Ola Dunk")
-            .medKjønn(NavBrukerKjønn.MANN).medFødselsdato(LocalDate.of(1991,11,11)).medAdresse("Vei").build();
-        ELDRE_BARN_PINFO = new Personinfo.Builder().medAktørId(ELDRE_BARN_AKTØR_ID).medPersonIdent(ELDRE_BARN_IDENT).medFødselsdato(ELDRE_BARN_FØDT)
-            .medKjønn(NavBrukerKjønn.MANN).medNavn("Dunk junior d.e.").medAdresse("Vei").build();
+            .medFødselsdato(LocalDate.of(1991,11,11)).medAdresse("Vei").build();
         BARN_PINFO = new Personinfo.Builder().medAktørId(BARN_AKTØR_ID).medPersonIdent(BARN_IDENT).medFødselsdato(BARN_FØDT)
-            .medKjønn(NavBrukerKjønn.KVINNE).medNavn("Dunk junior d.y.").medAdresse("Vei").build();
+            .medNavn("Dunk junior d.y.").medAdresse("Vei").build();
 
         when(tpsTjeneste.hentFnrForAktør(MOR_AKTØR_ID)).thenReturn(MOR_IDENT);
         when(tpsTjeneste.hentFnrForAktør(FAR_AKTØR_ID)).thenReturn(FAR_IDENT);
         when(tpsTjeneste.hentFnrForAktør(BARN_AKTØR_ID)).thenReturn(BARN_IDENT);
-        when(tpsTjeneste.hentFnrForAktør(ELDRE_BARN_AKTØR_ID)).thenReturn(ELDRE_BARN_IDENT);
 
         when(tpsTjeneste.hentBrukerForAktør(MOR_AKTØR_ID)).thenReturn(Optional.of(MOR_PINFO));
         when(tpsTjeneste.hentBrukerForAktør(FAR_AKTØR_ID)).thenReturn(Optional.of(FAR_PINFO));
         when(tpsTjeneste.hentBrukerForAktør(BARN_AKTØR_ID)).thenReturn(Optional.of(BARN_PINFO));
-        when(tpsTjeneste.hentBrukerForAktør(ELDRE_BARN_AKTØR_ID)).thenReturn(Optional.of(ELDRE_BARN_PINFO));
 
         when(tpsTjeneste.hentGeografiskTilknytning(MOR_IDENT)).thenReturn(morKode6 ? tilknytningKode6 : tilknytningNormal);
         when(tpsTjeneste.hentGeografiskTilknytning(FAR_IDENT)).thenReturn(annenPartKode6 ? tilknytningKode6 : tilknytningNormal);
-        when(tpsTjeneste.hentGeografiskTilknytning(ELDRE_BARN_IDENT)).thenReturn(barnKode6 ? tilknytningKode6 : tilknytningNormal);
-        when(tpsTjeneste.hentGeografiskTilknytning(BARN_IDENT)).thenReturn(morKode6 ? tilknytningKode6 : tilknytningNormal);
+        when(tpsTjeneste.hentGeografiskTilknytning(BARN_IDENT)).thenReturn(barnKode6 ? tilknytningKode6 : tilknytningNormal);
 
-        when(arbeidsfordelingTjeneste.finnBehandlendeEnhet(any(),isNull(), any())).thenReturn(enhetNormal);
-        when(arbeidsfordelingTjeneste.finnBehandlendeEnhet(any(), matches("SPSF"), any())).thenReturn(enhetKode6);
-        when(arbeidsfordelingTjeneste.hentEnhetForDiskresjonskode(matches("SPSF"), any())).thenReturn(enhetKode6);
+        Mockito.doAnswer((Answer<List<ArbeidsfordelingResponse>>) invocation -> {
+            ArbeidsfordelingRequest data = (ArbeidsfordelingRequest) invocation.getArguments()[0];
+            return Objects.equals("SPSF", data.getDiskresjonskode()) ? List.of(respKode6) : List.of(respNormal);
+        }).when(arbeidsfordelingTjeneste).finnEnhet(Mockito.any());
 
         when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(MOR_IDENT))
             .thenReturn(barnKode6 || (annenPartKode6 && foreldreRelatertTps) ? Collections.singletonList(relatertKode6): Collections.emptyList());
         when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(FAR_IDENT)).thenReturn(annenPartKode6 ? Collections.singletonList(relatertKode6): Collections.emptyList());
     }
+    
 }

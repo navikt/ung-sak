@@ -93,7 +93,7 @@ public class DokumentmottakerFelles {
     }
 
     private String finnEnhetFraFagsak(Fagsak sak) {
-        OrganisasjonsEnhet organisasjonsEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFraSøker(sak);
+        OrganisasjonsEnhet organisasjonsEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(sak);
         return organisasjonsEnhet.getEnhetId();
     }
 

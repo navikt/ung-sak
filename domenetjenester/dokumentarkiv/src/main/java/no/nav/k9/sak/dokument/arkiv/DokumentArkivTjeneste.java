@@ -55,7 +55,6 @@ public class DokumentArkivTjeneste {
 
     public byte[] hentDokumnet(JournalpostId journalpostId, String dokumentId) {
         LOG.info("HentDokument: input parametere journalpostId {} dokumentId {}", journalpostId, dokumentId);
-        byte[] pdfFile = new byte[0];
         no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest hentDokumentRequest = new no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest();
         hentDokumentRequest.setJournalpostId(journalpostId.getVerdi());
         hentDokumentRequest.setDokumentId(dokumentId);

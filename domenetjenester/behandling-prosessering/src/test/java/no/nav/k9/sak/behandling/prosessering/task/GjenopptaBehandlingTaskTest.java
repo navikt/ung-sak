@@ -54,7 +54,7 @@ public class GjenopptaBehandlingTaskTest {
         Behandling behandling = scenario.lagMocked();
         behandling.setBehandlendeEnhet(organisasjonsEnhet);
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
-        when(mockEnhetsTjeneste.sjekkEnhetVedGjenopptak(any())).thenReturn(Optional.empty());
+        when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.empty());
 
         ProsessTaskData prosessTaskData = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
         prosessTaskData.setBehandling(0L, behandlingId, AktørId.dummy().getId());
@@ -80,7 +80,7 @@ public class GjenopptaBehandlingTaskTest {
         when(mockBehandlingRepository.lagre(any(Behandling.class), any())).thenReturn(0L);
         when(mockBehandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenReturn(kontekst);
         when(kontekst.getSkriveLås()).thenReturn(lås);
-        when(mockEnhetsTjeneste.sjekkEnhetVedGjenopptak(any())).thenReturn(Optional.of(enhet));
+        when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.of(enhet));
 
         ProsessTaskData prosessTaskData = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
         prosessTaskData.setBehandling(0L, behandlingId, "0");

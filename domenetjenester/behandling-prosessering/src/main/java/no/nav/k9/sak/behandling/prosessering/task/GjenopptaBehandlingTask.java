@@ -59,7 +59,7 @@ public class GjenopptaBehandlingTask implements ProsessTaskHandler {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
         }
 
-        behandlendeEnhetTjeneste.sjekkEnhetVedGjenopptak(behandling).ifPresent(organisasjonsEnhet -> {
+        behandlendeEnhetTjeneste.sjekkEnhetEtterEndring(behandling).ifPresent(organisasjonsEnhet -> {
             behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, organisasjonsEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, "");
         });
 

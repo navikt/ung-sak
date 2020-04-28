@@ -1,8 +1,6 @@
 package no.nav.k9.sak.behandling.revurdering.satsregulering;
 
-import java.util.Optional;
-
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,15 +17,13 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
+import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
-/**
- * @Dependent scope for å hente konfig ved hver kjøring.
- */
 @Deprecated(since = "Kalkulus skal eie satsregulering")
-@Dependent
+@ApplicationScoped
 @ProsessTask(AutomatiskGrunnbelopReguleringTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
@@ -36,6 +32,7 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakRepository fagsakRepository;
+    private BehandlendeEnhetTjeneste enhetTjeneste;
 
     AutomatiskGrunnbelopReguleringTask() {
         // for CDI proxy
@@ -43,11 +40,13 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
 
     @Inject
     public AutomatiskGrunnbelopReguleringTask(BehandlingRepositoryProvider repositoryProvider,
-                                              ProsessTaskRepository prosessTaskRepository) {
+                                              ProsessTaskRepository prosessTaskRepository,
+                                              BehandlendeEnhetTjeneste enhetTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.prosessTaskRepository = prosessTaskRepository;
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
+        this.enhetTjeneste = enhetTjeneste;
     }
 
     @Override
@@ -61,8 +60,9 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
         }
 
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        var enhet = enhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(fagsak, BehandlingÅrsakType.RE_SATS_REGULERING, Optional.empty());
+        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(fagsak, BehandlingÅrsakType.RE_SATS_REGULERING, enhet);
 
         log.info("GrunnbeløpRegulering har opprettet revurdering på fagsak med fagsakId = {}", fagsakId);
 

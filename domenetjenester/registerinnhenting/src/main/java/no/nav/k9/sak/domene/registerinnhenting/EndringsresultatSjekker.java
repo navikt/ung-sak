@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -35,7 +34,6 @@ public class EndringsresultatSjekker {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     private OpptjeningRepository opptjeningRepository;
-    private KalkulusTjeneste kalkulusTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     EndringsresultatSjekker() {
@@ -46,13 +44,11 @@ public class EndringsresultatSjekker {
     public EndringsresultatSjekker(PersonopplysningTjeneste personopplysningTjeneste,
                                    MedlemTjeneste medlemTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                   KalkulusTjeneste kalkulusTjeneste,
                                    BehandlingRepositoryProvider provider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.medlemTjeneste = medlemTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.opptjeningRepository = provider.getOpptjeningRepository();
-        this.kalkulusTjeneste = kalkulusTjeneste;
+        this.opptjeningRepository = provider    .getOpptjeningRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
     }
 
