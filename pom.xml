@@ -43,7 +43,7 @@
 
 		<metrics.version>4.1.6</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-		<k9format.version>4.0.0-20200424173059-361eb35</k9format.version>
+		<k9format.version>4.0.0-20200427091803-aafdb06</k9format.version>
 	</properties>
 
     <repositories>
