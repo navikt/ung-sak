@@ -7,43 +7,47 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
-import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
-import no.nav.k9.sak.dokument.arkiv.journal.JournalMetadata;
-import no.nav.k9.sak.dokument.arkiv.journal.JournalTjeneste;
+import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
+import no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Dokumentvariant;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.VariantFormat;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class HistorikkinnslagTjenesteTest {
 
     private static final JournalpostId JOURNALPOST_ID = new JournalpostId("5");
+    private static final JournalpostQuery journalpostQuery = new JournalpostQuery(JOURNALPOST_ID.getVerdi());
     private static final String HOVEDDOKUMENT_DOKUMENT_ID = "1";
     private static final String VEDLEGG_DOKUMENT_ID = "2";
 
     private HistorikkRepository historikkRepository;
-    private JournalTjeneste journalTjeneste;
+    private SafTjeneste journalTjeneste;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
     @Before
     public void before() {
         historikkRepository = mock(HistorikkRepository.class);
-        journalTjeneste = mock(JournalTjeneste.class);
+        journalTjeneste = mock(SafTjeneste.class);
         historikkinnslagTjeneste = new HistorikkinnslagTjeneste(historikkRepository, journalTjeneste);
     }
 
@@ -54,11 +58,11 @@ public class HistorikkinnslagTjenesteTest {
         Behandling behandling = scenario.lagMocked();
         // Arrange
 
-        JournalMetadata journalMetadataHoveddokumentXml = byggJournalMetadata(JOURNALPOST_ID, HOVEDDOKUMENT_DOKUMENT_ID, ArkivFilType.XML, true, VariantFormat.FULLVERSJON);
-        JournalMetadata journalMetadataHoveddokumentPdf = byggJournalMetadata(JOURNALPOST_ID, HOVEDDOKUMENT_DOKUMENT_ID, ArkivFilType.PDF, true, VariantFormat.ARKIV);
-        JournalMetadata journalMetadataVedlegg = byggJournalMetadata(JOURNALPOST_ID, VEDLEGG_DOKUMENT_ID, ArkivFilType.XML, false, VariantFormat.FULLVERSJON);
+        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, VariantFormat.ORIGINAL, VariantFormat.ARKIV);
+        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, VariantFormat.ORIGINAL);
+        var respons = new Journalpost(JOURNALPOST_ID.getVerdi(), "", "", "", "", "", "", null, null, null, List.of(hoveddokument, vedlegg), List.of());
 
-        when(journalTjeneste.hentMetadata(JOURNALPOST_ID)).thenReturn(List.of(journalMetadataHoveddokumentXml, journalMetadataHoveddokumentPdf, journalMetadataVedlegg));
+        when(journalTjeneste.hentJournalpostInfo(any())).thenReturn(respons);
 
         // Act
         historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID, HistorikkinnslagType.BEH_STARTET);
@@ -98,18 +102,10 @@ public class HistorikkinnslagTjenesteTest {
         verify(historikkRepository, times(0)).lagre(any(Historikkinnslag.class));
     }
 
-    private JournalMetadata byggJournalMetadata(JournalpostId journalpostId, String dokumentId, ArkivFilType arkivFiltype, boolean hoveddokument, VariantFormat variantFormat) {
-        JournalMetadata.Builder builderHoveddok = JournalMetadata.builder();
-        builderHoveddok.medJournalpostId(journalpostId);
-        builderHoveddok.medDokumentId(dokumentId);
-        builderHoveddok.medVariantFormat(variantFormat);
-        builderHoveddok.medDokumentType(DokumentTypeId.LEGEERKLÆRING);
-        builderHoveddok.medDokumentKategori(DokumentKategori.BRV);
-        builderHoveddok.medArkivFilType(arkivFiltype);
-        builderHoveddok.medErHoveddokument(hoveddokument);
-        builderHoveddok.medForsendelseMottatt(LocalDate.now());
-        builderHoveddok.medBrukerIdentListe(Collections.singletonList("01234567890"));
-        JournalMetadata journalMetadataHoveddokument = builderHoveddok.build();
-        return journalMetadataHoveddokument;
+    private DokumentInfo byggJournalMetadata(String dokumentId, VariantFormat... variantFormater) {
+        var varianter = Arrays.stream(variantFormater)
+            .map(variantFormat -> new Dokumentvariant(variantFormat, "asdf", VariantFormat.ORIGINAL.equals(variantFormat) ? ArkivFilType.XML.getKode() : ArkivFilType.PDF.getKode(), true))
+            .collect(Collectors.toList());
+        return new DokumentInfo(dokumentId, "asdf", DokumentTypeId.LEGEERKLÆRING.getOffisiellKode(), varianter);
     }
 }

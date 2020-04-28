@@ -41,10 +41,11 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
 
     @Rule
     public RepositoryRule repositoryRule = new UnittestRepositoryRule();
-
+    Behandling behandling;
+    Aksjonspunkt aksjonspunkt;
+    Skjæringstidspunkt skjæringstidspunkt;
     @Mock
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslagTjeneste = Mockito.mock(ArbeidsgiverHistorikkinnslag.class);
-
     private SafTjeneste mockSafTjeneste = mock(SafTjeneste.class);
     private IAYRepositoryProvider provider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
     private HistorikkRepository historikkRepository = new HistorikkRepository(repositoryRule.getEntityManager());
@@ -55,9 +56,6 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     private ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste;
     private Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("1");
     private InternArbeidsforholdRef ref = InternArbeidsforholdRef.nyRef();
-    Behandling behandling;
-    Aksjonspunkt aksjonspunkt;
-    Skjæringstidspunkt skjæringstidspunkt;
 
     @Before
     public void setup() {

@@ -39,10 +39,8 @@ public class DokumentArkivTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjeneste.class);
     // Variantformat ARKIV er den eneste varianten som benyttes for denne tjenesten
     private static final VariantFormat VARIANT_FORMAT_ARKIV = VariantFormat.ARKIV;
-
-    private SafTjeneste safTjeneste;
-
     private final Set<ArkivFilType> filTyperPdf = byggArkivFilTypeSet();
+    private SafTjeneste safTjeneste;
 
     DokumentArkivTjeneste() {
         // for CDI proxy
@@ -51,6 +49,12 @@ public class DokumentArkivTjeneste {
     @Inject
     public DokumentArkivTjeneste(SafTjeneste safTjeneste) {
         this.safTjeneste = safTjeneste;
+    }
+
+    private static Set<ArkivFilType> byggArkivFilTypeSet() {
+        final ArkivFilType arkivFilTypePdf = ArkivFilType.PDF;
+        final ArkivFilType arkivFilTypePdfa = ArkivFilType.PDFA;
+        return new HashSet<>(Arrays.asList(arkivFilTypePdf, arkivFilTypePdfa));
     }
 
     public byte[] hentDokumnet(JournalpostId journalpostId, String dokumentId) {
@@ -68,7 +72,7 @@ public class DokumentArkivTjeneste {
             VariantFormat.ARKIV.getOffisiellKode());
 
         byte[] pdfDokument = safTjeneste.hentDokument(query);
-        if (pdfDokument == null){
+        if (pdfDokument == null) {
             throw DokumentArkivTjenesteFeil.FACTORY.hentDokumentIkkeFunnet(query).toException();
         }
         return pdfDokument;
@@ -147,12 +151,6 @@ public class DokumentArkivTjeneste {
         }
     }
 
-    private static Set<ArkivFilType> byggArkivFilTypeSet() {
-        final ArkivFilType arkivFilTypePdf = ArkivFilType.PDF;
-        final ArkivFilType arkivFilTypePdfa = ArkivFilType.PDFA;
-        return new HashSet<>(Arrays.asList(arkivFilTypePdf, arkivFilTypePdfa));
-    }
-
     private ArkivJournalPost.Builder opprettArkivJournalPost(Saksnummer saksnummer, no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost journalpost) {
         Optional<LocalDateTime> datoRegistrert = hentRelevantDato(journalpost, Datotype.DATO_REGISTRERT);
         Optional<LocalDateTime> datoJournalFørt = hentRelevantDato(journalpost, Datotype.DATO_JOURNALFOERT);
@@ -184,19 +182,18 @@ public class DokumentArkivTjeneste {
             .medDokumentId(dokumentInfo.getDokumentInfoId())
             .medTittel(dokumentInfo.getTittel())
             .medDokumentTypeId(mapTilDokumentTypeId(dokumentInfo.getBrevkode()))
-            .medDokumentKategori(mapTilDokumentKategori(dokumentInfo.getBrevkode()))
-            ;
+            .medDokumentKategori(mapTilDokumentKategori(dokumentInfo.getBrevkode()));
 
         dokumentInfo.getDokumentvarianter().stream()
             .filter(innhold -> innhold.getSaksbehandlerHarTilgang())
             .forEach(innhold -> {
-            builder.leggTilTilgjengeligFormat(ArkivDokumentHentbart.Builder.ny()
-                .medArkivFilType(
-                    innhold.getFiltype() != null ? ArkivFilType.finnForKodeverkEiersKode(innhold.getFiltype()) : ArkivFilType.UDEFINERT)
-                .medVariantFormat(innhold.getVariantFormat() != null ? VariantFormat.finnForKodeverkEiersKode(innhold.getVariantFormat().name())
-                    : VariantFormat.UDEFINERT)
-                .build());
-        });
+                builder.leggTilTilgjengeligFormat(ArkivDokumentHentbart.Builder.ny()
+                    .medArkivFilType(
+                        innhold.getFiltype() != null ? ArkivFilType.finnForKodeverkEiersKode(innhold.getFiltype()) : ArkivFilType.UDEFINERT)
+                    .medVariantFormat(innhold.getVariantFormat() != null ? VariantFormat.finnForKodeverkEiersKode(innhold.getVariantFormat().name())
+                        : VariantFormat.UDEFINERT)
+                    .build());
+            });
         return builder;
     }
 
