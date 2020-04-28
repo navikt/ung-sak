@@ -30,7 +30,7 @@ import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 
 public class SafTjenesteTest {
 
-    private SafTjenesteImpl safTjeneste;
+    private SafTjeneste safTjeneste;
 
     private OidcRestClient restClient;
     private CloseableHttpResponse response;
@@ -44,7 +44,7 @@ public class SafTjenesteTest {
         // Service setup
         restClient = mock(OidcRestClient.class);
         URI endpoint = URI.create("dummyendpoint/graphql");
-        safTjeneste = new SafTjenesteImpl(endpoint, restClient);
+        safTjeneste = new SafTjeneste(endpoint, restClient);
 
         // Mock http behavior
         // Client Setup
