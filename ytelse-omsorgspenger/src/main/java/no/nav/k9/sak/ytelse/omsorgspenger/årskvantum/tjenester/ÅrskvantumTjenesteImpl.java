@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
@@ -124,7 +125,13 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     @NotNull
     private ArrayList<FraværPeriode> mapUttaksPerioder(OppgittFravær grunnlag, Vilkårene vilkårene, InntektsmeldingAggregat inntektsmeldingAggregat) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
-        for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfallHvisAvslåttVilkår(grunnlag, vilkårene)) {
+        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfallHvisAvslåttVilkår(grunnlag, vilkårene)
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
             var periode = new LukketPeriode(fraværPeriode.getFom(), fraværPeriode.getTom());
 

@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,23 +20,35 @@ public class MapOppgittFraværOgVilkårsResultat {
     public MapOppgittFraværOgVilkårsResultat() {
     }
 
-    Set<WrappedOppgittFraværPeriode> utledPerioderMedUtfallHvisAvslåttVilkår(OppgittFravær grunnlag, Vilkårene vilkårene) {
+    Map<Aktivitet, Set<WrappedOppgittFraværPeriode>> utledPerioderMedUtfallHvisAvslåttVilkår(OppgittFravær grunnlag, Vilkårene vilkårene) {
 
-        LocalDateTimeline<WrappedOppgittFraværPeriode> fraværsTidslinje = opprettFraværsTidslinje(grunnlag);
+        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje = opprettFraværsTidslinje(grunnlag);
         LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje = opprettVilkårTidslinje(vilkårene);
 
-        fraværsTidslinje = fraværsTidslinje.combine(avslåtteVilkårTidslinje, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        return kombinerTidslinjene(fraværsTidslinje, avslåtteVilkårTidslinje);
+    }
 
-        return fraværsTidslinje.toSegments()
-            .stream()
-            .filter(it -> it.getValue() != null)
-            .filter(it -> it.getValue().getPeriode() != null)
-            .map(this::opprettHoldKonsistens)
-            .collect(Collectors.toSet());
+    private Map<Aktivitet, Set<WrappedOppgittFraværPeriode>> kombinerTidslinjene(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje,
+                                                                                 LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje) {
+        Map<Aktivitet, Set<WrappedOppgittFraværPeriode>> result = new HashMap<>();
+
+        for (Map.Entry<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> entry : fraværsTidslinje.entrySet()) {
+            var timeline = entry.getValue().combine(avslåtteVilkårTidslinje, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
+
+            result.put(entry.getKey(), timeline.toSegments()
+                .stream()
+                .filter(it -> it.getValue() != null)
+                .filter(it -> it.getValue().getPeriode() != null)
+                .map(this::opprettHoldKonsistens)
+                .collect(Collectors.toSet()));
+        }
+
+        return result;
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettVilkårTidslinje(Vilkårene vilkårene) {
-        var avslåtteVilkårsPerioder = vilkårene.getVilkårene().stream()
+        var avslåtteVilkårsPerioder = vilkårene.getVilkårene()
+            .stream()
             .map(Vilkår::getPerioder)
             .flatMap(Collection::stream)
             .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()))
@@ -47,16 +61,23 @@ public class MapOppgittFraværOgVilkårsResultat {
         return avslåtteVilkårTidslinje;
     }
 
-    private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettFraværsTidslinje(OppgittFravær grunnlag) {
-        LocalDateTimeline<WrappedOppgittFraværPeriode> fraværsTidslinje = new LocalDateTimeline<WrappedOppgittFraværPeriode>(List.of());
-        var perioder = grunnlag.getPerioder().stream()
+    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettFraværsTidslinje(OppgittFravær grunnlag) {
+        var perioderPerAktivitet = grunnlag.getPerioder()
+            .stream()
             .map(it -> new WrappedOppgittFraværPeriode(it, false))
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFom(), it.getPeriode().getTom(), it))
-            .collect(Collectors.toList());
-        for (LocalDateSegment<WrappedOppgittFraværPeriode> segment : perioder) {
-            fraværsTidslinje = fraværsTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            .collect(Collectors.groupingBy(WrappedOppgittFraværPeriode::getAktivitet, Collectors.toList()));
+
+        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result = new HashMap<>();
+
+        for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> aktivitetsPerioder : perioderPerAktivitet.entrySet()) {
+            LocalDateTimeline<WrappedOppgittFraværPeriode> fraværsTidslinje = new LocalDateTimeline<WrappedOppgittFraværPeriode>(List.of());
+            for (WrappedOppgittFraværPeriode periode : aktivitetsPerioder.getValue()) {
+                LocalDateSegment<WrappedOppgittFraværPeriode> segment = new LocalDateSegment<>(periode.getPeriode().getFom(), periode.getPeriode().getTom(), periode);
+                fraværsTidslinje = fraværsTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+            result.put(aktivitetsPerioder.getKey(), fraværsTidslinje.compress());
         }
-        return fraværsTidslinje;
+        return result;
     }
 
     private WrappedOppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {
