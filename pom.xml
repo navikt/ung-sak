@@ -122,7 +122,7 @@
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>2.0_20200426220144_9065d52</version>
+                <version>2.0_20200427154150_d9cbde9</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
