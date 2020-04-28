@@ -83,21 +83,6 @@ jobs:
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
 
-      - name: Trigger verdikjede test
-        if: success()
-        shell: bash
-        run: |
-          curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" \
-          -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Content-Type: application/json" \
-          https://api.github.com/repos/navikt/k9-verdikjede/dispatches \
-          --data '{"event_type": "saksbehandling-verdikjede",
-                   "client_payload": {
-                      "trigger": "${{ github.repository }}",
-                      "version": "${{ env.TAG }}",
-                      "image": "${{ env.IMAGE }}"
-                  }}'
-
       - name: Lukk gamle issues
         uses: actions/github-script@0.8.0
         with:
@@ -135,18 +120,21 @@ jobs:
             <tr><td>prod-fss</td><td>default</td></tr>
             </table>
 
-      - name: Trigg deploy til dev-fss
-        if: success()
-        uses: actions/github-script@0.3.0
-        with:
-          github-token: ${{secrets.GITHUB_ACCESS_TOKEN}}
-          script: |
-            const issue = { owner: context.issue.owner,
-                            repo: context.issue.repo,
-                            issue_number: ${{ steps.createdeployissue.outputs.number }} }
-            github.issues.createComment({...issue,
-                                    title: 'Deploy av ${{ env.TAG }}',
-                                    body: '/promote ${{ env.CLUSTER }} ${{ env.NAMESPACE }}'})
+      - name: Trigger verdikjede test
+          if: success()
+          shell: bash
+          run: |
+            curl -XPOST -u "x-access-token:${{secrets.GITHUB_ACCESS_TOKEN}}" \
+            -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/navikt/k9-verdikjede/dispatches \
+            --data '{"event_type": "saksbehandling-verdikjede",
+                     "client_payload": {
+                        "trigger": "${{ github.repository }}",
+                        "version": "${{ env.TAG }}",
+                        "image": "${{ env.IMAGE }}",
+                        "issue_number": "${{ steps.createdeployissue.outputs.number }}"
+                    }}'
 
       - name: Publiser Release Note
         id: create_release
