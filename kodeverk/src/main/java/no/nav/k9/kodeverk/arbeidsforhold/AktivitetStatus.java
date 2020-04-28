@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -58,6 +57,7 @@ public enum AktivitetStatus implements Kodeverdi {
 
     private String kode;
 
+    @JsonIgnore
     private Inntektskategori inntektskategori;
 
     AktivitetStatus(String kode, String navn, Inntektskategori inntektskategori) {
@@ -77,13 +77,9 @@ public enum AktivitetStatus implements Kodeverdi {
         }
         return ad;
     }
-
+    
     public static Map<String, AktivitetStatus> kodeMap() {
         return Collections.unmodifiableMap(KODER);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
     }
 
     private static final Set<AktivitetStatus> AT_STATUSER = new HashSet<>(Arrays.asList(ARBEIDSTAKER,
@@ -112,13 +108,13 @@ public enum AktivitetStatus implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonProperty(value="kode")
     @Override
     public String getKode() {
         return kode;
