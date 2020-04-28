@@ -41,7 +41,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     @Inject
     private AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjeneste;
-    private Periode periode = new Periode(LocalDate.now().minusMonths(3), LocalDate.now());;
+    private Periode periode = new Periode(LocalDate.now().minusMonths(3), LocalDate.now());
 
     @Test
     public void skal_opprette_aksjonspunkt_for_overstyring() {

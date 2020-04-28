@@ -39,6 +39,7 @@ public class SafTjenesteTest {
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
+    @SuppressWarnings("resource")
     @Before
     public void setUp() throws IOException {
         // Service setup
@@ -63,6 +64,7 @@ public class SafTjenesteTest {
     }
 
 
+    @SuppressWarnings("resource")
     @Test
     public void skal_returnere_dokumentoversikt_fagsak() throws IOException {
         //query-eksempel: dokumentoversiktFagsak(fagsak: {fagsakId: "2019186111", fagsaksystem: "AO01"}, foerste: 5)
@@ -74,6 +76,7 @@ public class SafTjenesteTest {
         assertThat(dokumentoversiktFagsak.getJournalposter()).isNotEmpty();
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void skal_returnere_journalpost() throws IOException {
         // query-eksempel: journalpost(journalpostId: "439560100")
@@ -85,6 +88,7 @@ public class SafTjenesteTest {
         assertThat(journalpost.getJournalpostId()).isNotEmpty();
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void skal_returnere_dokument() throws IOException {
         // GET-eksempel: hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}
