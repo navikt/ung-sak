@@ -6,8 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,8 +22,6 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
@@ -155,13 +151,12 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                     arbeidsforholdId);
             }
 
-            Map<Vilkår,Utfall> emptyVurderteVilkår = new HashMap<>();
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
                 kreverRefusjon,
-                new VurderteVilkår(emptyVurderteVilkår));
+                new VurderteVilkår(wrappedOppgittFraværPeriode.getVurderteVilkår()));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
