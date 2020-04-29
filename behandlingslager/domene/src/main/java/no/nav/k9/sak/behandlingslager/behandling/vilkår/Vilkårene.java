@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.joining;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import javax.persistence.Version;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -45,7 +47,7 @@ public class Vilkårene extends BaseEntitet {
     private long versjon;
 
     // CascadeType.ALL + orphanRemoval=true må til for at Vilkår skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE }, mappedBy = "vilkårene")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, mappedBy = "vilkårene")
     private Set<Vilkår> vilkårne = new LinkedHashSet<>();
 
     Vilkårene() {
@@ -164,14 +166,25 @@ public class Vilkårene extends BaseEntitet {
         if (vilkår.isEmpty()) {
             return LocalDateTimeline.EMPTY_TIMELINE;
         } else {
-            return new LocalDateTimeline<VilkårPeriode>(vilkår.get().getPerioder().stream()
-                .map(v -> new LocalDateSegment<VilkårPeriode>(v.getFom(), v.getTom(), v)).collect(Collectors.toList()));
+            return new LocalDateTimeline<>(vilkår.get().getPerioder().stream()
+                .map(v -> new LocalDateSegment<>(v.getFom(), v.getTom(), v)).collect(Collectors.toList()));
         }
     }
 
     public Map<VilkårType, LocalDateTimeline<VilkårPeriode>> getVilkårTidslinjer(DatoIntervallEntitet maksPeriode) {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> map = new EnumMap<>(VilkårType.class);
-        vilkårne.stream().forEach(v -> map.put(v.getVilkårType(), getVilkårTimeline(v.getVilkårType(), maksPeriode.getFomDato(), maksPeriode.getTomDato())));
+        vilkårne.forEach(v -> map.put(v.getVilkårType(), getVilkårTimeline(v.getVilkårType(), maksPeriode.getFomDato(), maksPeriode.getTomDato())));
         return map;
+    }
+
+    public Map<VilkårType, Set<Avslagsårsak>> getVilkårMedAvslagsårsaker() {
+        Map<VilkårType, Set<Avslagsårsak>> result = new HashMap<>();
+        for (Vilkår vilkår : vilkårne) {
+            var avslagsårsaker = vilkår.getPerioder().stream().map(VilkårPeriode::getAvslagsårsak).filter(it -> !Avslagsårsak.UDEFINERT.equals(it)).collect(Collectors.toSet());
+            if (!avslagsårsaker.isEmpty()) {
+                result.put(vilkår.getVilkårType(), avslagsårsaker);
+            }
+        }
+        return result;
     }
 }
