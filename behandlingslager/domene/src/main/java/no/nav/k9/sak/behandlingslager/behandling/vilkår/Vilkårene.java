@@ -180,7 +180,11 @@ public class Vilkårene extends BaseEntitet {
     public Map<VilkårType, Set<Avslagsårsak>> getVilkårMedAvslagsårsaker() {
         Map<VilkårType, Set<Avslagsårsak>> result = new HashMap<>();
         for (Vilkår vilkår : vilkårne) {
-            var avslagsårsaker = vilkår.getPerioder().stream().map(VilkårPeriode::getAvslagsårsak).filter(it -> !Avslagsårsak.UDEFINERT.equals(it)).collect(Collectors.toSet());
+            var avslagsårsaker = vilkår.getPerioder().stream()
+                .map(VilkårPeriode::getAvslagsårsak)
+                .filter(Objects::nonNull)
+                .filter(it -> !Avslagsårsak.UDEFINERT.equals(it))
+                .collect(Collectors.toSet());
             if (!avslagsårsaker.isEmpty()) {
                 result.put(vilkår.getVilkårType(), avslagsårsaker);
             }
