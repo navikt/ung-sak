@@ -23,7 +23,7 @@ public class OpptjeningResultatBuilderTest {
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(29), LocalDate.now().minusDays(1));
         var opptjening = new Opptjening(LocalDate.now().minusDays(29), LocalDate.now().minusDays(1));
         opptjening.setOpptjentPeriode(Period.ofDays(28));
-        opptjening.setOpptjeningAktivitet(Set.of(new OpptjeningAktivitet(LocalDate.now().minusDays(29), LocalDate.now().minusDays(1), OpptjeningAktivitetType.ARBEID, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
+        opptjening.setOpptjeningAktivitet(Set.of(new OpptjeningAktivitet(periode.getFomDato(), periode.getTomDato(), OpptjeningAktivitetType.ARBEID, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
 
         var vilkårBuilder = new VilkårBuilder().medType(VilkårType.OPPTJENINGSVILKÅRET);
         var periodeBuilder = vilkårBuilder.hentBuilderFor(LocalDate.now(), LocalDate.now().plusDays(3))

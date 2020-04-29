@@ -54,19 +54,19 @@ class OpptjeningResultatBuilder {
             throw new IllegalArgumentException("[Utviklerfeil] krever Opptjeningsvilkår");
         }
 
-        var vilkårsPerioder = vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet());
+        var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
 
         var opptjeningUtenKnytningTilVilkårsPerioder = kladd.getOpptjeningPerioder()
             .stream()
-            .map(Opptjening::getOpptjeningPeriode)
-            .filter(it -> vilkårsPerioder.stream()
-                .noneMatch(it::grenserTil))
+            .map(Opptjening::getSkjæringstidspunkt)
+            .filter(it -> vilkårsSkjæringspunkter.stream()
+                .noneMatch(it::equals))
             .collect(Collectors.toList());
 
         if (!opptjeningUtenKnytningTilVilkårsPerioder.isEmpty()) {
-            log.warn("OpptjeningResultat inneholder opptjening for perioder='{}' som ikke stemmer med vilkårsperioder={}",
+            log.warn("OpptjeningResultat inneholder opptjening for perioder='{}' som ikke stemmer med vilkårsperioder med skjæringstidspunkter={}",
                 opptjeningUtenKnytningTilVilkårsPerioder,
-                vilkårsPerioder);
+                vilkårsSkjæringspunkter);
             throw new IllegalStateException("Opptjeningsresultat inneholder opptjening for perioder som ikke er knyttet til vilkårsperioder");
         }
 
