@@ -82,9 +82,17 @@ public class AktørRestTjeneste {
                 List<FagsakDto> fagsakDtoer = new ArrayList<>();
                 List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
                 for (var f : fagsaker) {
-                    fagsakDtoer.add(new FagsakDto(f.getSaksnummer(), f.getYtelseType(), f.getStatus(), personDto,
-                        null, f.getSkalTilInfotrygd(),
-                        f.getOpprettetTidspunkt(), f.getEndretTidspunkt()));
+                    fagsakDtoer.add(new FagsakDto(
+                        f.getSaksnummer(),
+                        f.getYtelseType(),
+                        f.getStatus(),
+                        personDto,
+                        null,
+                        f.getSkalTilInfotrygd(),
+                        f.getOpprettetTidspunkt(),
+                        f.getEndretTidspunkt(),
+                        f.getAktørId()
+                    ));
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);
                 return Response.ok(aktoerInfoDto).build();

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -52,6 +53,10 @@ public class FagsakDto {
     @NotNull
     private FagsakStatus status;
 
+    @JsonProperty(value = "aktørId")
+    @NotNull
+    private AktørId aktørId;
+
     public FagsakDto() {
         // Injiseres i test
     }
@@ -63,7 +68,8 @@ public class FagsakDto {
                      Boolean kanRevurderingOpprettes,
                      Boolean skalBehandlesAvInfotrygd,
                      LocalDateTime opprettetTidspunkt,
-                     LocalDateTime endretTidspunkt) {
+                     LocalDateTime endretTidspunkt,
+                     AktørId aktørId) {
         this.saksnummer = saksnummer;
         this.sakstype = ytelseType;
         this.status = status;
@@ -72,6 +78,7 @@ public class FagsakDto {
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
         this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
+        this.aktørId = aktørId;
     }
 
     @Override
@@ -92,6 +99,8 @@ public class FagsakDto {
         if (!person.equals(fagsakDto.person))
             return false;
         if (opprettet != null ? !opprettet.equals(fagsakDto.opprettet) : fagsakDto.opprettet != null)
+            return false;
+        if (!aktørId.equals(fagsakDto.aktørId))
             return false;
         return endret != null ? endret.equals(fagsakDto.endret) : fagsakDto.endret == null;
     }
@@ -126,6 +135,10 @@ public class FagsakDto {
 
     public FagsakStatus getStatus() {
         return status;
+    }
+
+    public AktørId getAktørId() {
+        return aktørId;
     }
 
     @Override
@@ -169,6 +182,10 @@ public class FagsakDto {
 
     public void setStatus(FagsakStatus status) {
         this.status = status;
+    }
+
+    public void setAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
     }
 
     @Override

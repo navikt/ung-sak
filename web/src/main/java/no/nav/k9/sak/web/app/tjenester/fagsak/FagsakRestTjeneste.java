@@ -130,9 +130,17 @@ public class FagsakRestTjeneste {
             Fagsak fagsak = info.getFagsak();
             Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
                 .kanRevurderingOpprettes(fagsak);
-            dtoer.add(new FagsakDto(fagsak.getSaksnummer(), fagsak.getYtelseType(), fagsak.getStatus(), personDto,
-                kanRevurderingOpprettes, fagsak.getSkalTilInfotrygd(),
-                fagsak.getOpprettetTidspunkt(), fagsak.getEndretTidspunkt()));
+            dtoer.add(new FagsakDto(
+                fagsak.getSaksnummer(),
+                fagsak.getYtelseType(),
+                fagsak.getStatus(),
+                personDto,
+                kanRevurderingOpprettes,
+                fagsak.getSkalTilInfotrygd(),
+                fagsak.getOpprettetTidspunkt(),
+                fagsak.getEndretTidspunkt(),
+                fagsak.getAktørId()
+            ));
         }
         return dtoer;
     }
