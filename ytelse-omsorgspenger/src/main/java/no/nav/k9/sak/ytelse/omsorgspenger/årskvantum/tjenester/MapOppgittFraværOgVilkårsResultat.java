@@ -11,6 +11,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
@@ -52,7 +53,7 @@ public class MapOppgittFraværOgVilkårsResultat {
             .map(Vilkår::getPerioder)
             .flatMap(Collection::stream)
             .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()))
-            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedOppgittFraværPeriode(null, true)))
+            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedOppgittFraværPeriode(null, mapToVurderteVilkår(it.getVilkårType(),it.getGjeldendeUtfall()))))
             .collect(Collectors.toList());
         LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje = new LocalDateTimeline<>(List.of());
         for (LocalDateSegment<WrappedOppgittFraværPeriode> segment : avslåtteVilkårsPerioder) {
@@ -61,10 +62,22 @@ public class MapOppgittFraværOgVilkårsResultat {
         return avslåtteVilkårTidslinje;
     }
 
+    private Map<no.nav.k9.aarskvantum.kontrakter.Vilkår, no.nav.k9.aarskvantum.kontrakter.Utfall> mapToVurderteVilkår(VilkårType vilkårType, Utfall utfall) {
+        Map<no.nav.k9.aarskvantum.kontrakter.Vilkår, no.nav.k9.aarskvantum.kontrakter.Utfall> vurderteVilkår = new HashMap<>();
+
+        //TODO finn kode for medlemskap og opptjening
+        if (Utfall.OPPFYLT.equals(utfall)) {
+            vurderteVilkår.put(no.nav.k9.aarskvantum.kontrakter.Vilkår.OPPTJENINGSVILKÅR, no.nav.k9.aarskvantum.kontrakter.Utfall.INNVILGET);
+        } else {
+            vurderteVilkår.put(no.nav.k9.aarskvantum.kontrakter.Vilkår.OPPTJENINGSVILKÅR, no.nav.k9.aarskvantum.kontrakter.Utfall.AVSLÅTT);
+        }
+        return vurderteVilkår;
+    }
+
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettFraværsTidslinje(OppgittFravær grunnlag) {
         var perioderPerAktivitet = grunnlag.getPerioder()
             .stream()
-            .map(it -> new WrappedOppgittFraværPeriode(it, false))
+            .map(it -> new WrappedOppgittFraværPeriode(it, new HashMap<>()))
             .collect(Collectors.groupingBy(WrappedOppgittFraværPeriode::getAktivitet, Collectors.toList()));
 
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result = new HashMap<>();
@@ -84,7 +97,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         var segmentValue = segment.getValue();
         var oppgittPeriode = segmentValue.getPeriode();
         return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(segment.getFom(), segment.getTom(), oppgittPeriode.getAktivitetType(),
-            oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()), segmentValue.getErAvslått());
+            oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()), segmentValue.getVurderteVilkår());
     }
 
     private LocalDateSegment<WrappedOppgittFraværPeriode> mergePeriode(LocalDateInterval di,
@@ -97,14 +110,16 @@ public class MapOppgittFraværOgVilkårsResultat {
         }
         var første = førsteVersjon.getValue();
         var siste = sisteVersjon.getValue();
-        if (første.getErAvslått() && !siste.getErAvslått()) {
-            return lagSegment(di, første.getErAvslått(), utledOppgittPeriode(første.getPeriode(), siste.getPeriode()));
-        } else if (!første.getErAvslått() && siste.getErAvslått()) {
-            return lagSegment(di, siste.getErAvslått(), utledOppgittPeriode(siste.getPeriode(), første.getPeriode()));
+        if (første.erAvslått() && !siste.erAvslått()) {
+            return lagSegment(di, utledOppgittPeriode(første.getPeriode(), siste.getPeriode()), første.getVurderteVilkår());
+        } else if (!første.erAvslått() && siste.erAvslått()) {
+            return lagSegment(di, utledOppgittPeriode(siste.getPeriode(), første.getPeriode()), siste.getVurderteVilkår());
         } else {
             return sisteVersjon;
         }
     }
+
+
 
     private OppgittFraværPeriode utledOppgittPeriode(OppgittFraværPeriode a, OppgittFraværPeriode b) {
         if (a == null) {
@@ -113,10 +128,10 @@ public class MapOppgittFraværOgVilkårsResultat {
         return a;
     }
 
-    private LocalDateSegment<WrappedOppgittFraværPeriode> lagSegment(LocalDateInterval di, boolean erAvslått, OppgittFraværPeriode oppgittPeriode) {
+    private LocalDateSegment<WrappedOppgittFraværPeriode> lagSegment(LocalDateInterval di, OppgittFraværPeriode oppgittPeriode, Map<no.nav.k9.aarskvantum.kontrakter.Vilkår, no.nav.k9.aarskvantum.kontrakter.Utfall> vurderteVilkår) {
         var oppdaterOppgittFravær = new OppgittFraværPeriode(di.getFomDato(), di.getTomDato(), oppgittPeriode.getAktivitetType(),
             oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag());
-        var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, erAvslått);
+        var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, vurderteVilkår);
         return new LocalDateSegment<>(di, wrapper);
     }
 
@@ -124,7 +139,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         var oppgittPeriode = segmentValue.getPeriode();
         var oppdaterOppgittFravær = oppgittPeriode != null ? new OppgittFraværPeriode(di.getFomDato(), di.getTomDato(), oppgittPeriode.getAktivitetType(),
             oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()) : null;
-        var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, segmentValue.getErAvslått());
+        var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, segmentValue.getVurderteVilkår());
         return new LocalDateSegment<>(di, wrapper);
     }
 }

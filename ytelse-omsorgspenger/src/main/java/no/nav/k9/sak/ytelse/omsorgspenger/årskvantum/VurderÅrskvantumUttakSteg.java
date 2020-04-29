@@ -10,9 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.Årsak;
+import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -95,10 +96,12 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
     public boolean skalDetLagesAksjonspunkt(Uttaksplan uttaksplanOmsorgspenger) {
         for (Aktivitet uttaksPlanOmsorgspengerAktivitet : uttaksplanOmsorgspenger.getAktiviteter()) {
             for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
-                if (Årsak.AVSLÅTT_IKKE_FLERE_DAGER.equals(uttaksperiodeOmsorgspenger.getårsak())
-                    || Årsak.AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK.equals(uttaksperiodeOmsorgspenger.getårsak())
-                    || Årsak.AVSLÅTT_KREVER_LEGEERKLÆRING.equals(uttaksperiodeOmsorgspenger.getårsak())) {
-                    return true;
+                for(Vilkår vilkår : uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().keySet()) {
+                    if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.LEGEERKLÆRING.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår))  &&
+                        (uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT) ||
+                        uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.UAVKLART))) {
+                        return true;
+                    }
                 }
             }
         }

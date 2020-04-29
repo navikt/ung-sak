@@ -1,29 +1,32 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
-import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.Årsak;
-import no.nav.k9.aarskvantum.kontrakter.Årskvantum;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.kontrakt.uttak.*;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
-
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.Vilkår;
+import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
+import no.nav.k9.aarskvantum.kontrakter.Årskvantum;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 
 public class MapFraÅrskvantumResultatTest {
 
@@ -75,10 +78,12 @@ public class MapFraÅrskvantumResultatTest {
     }
 
     private Uttaksperiode innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad) {
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, Årsak.AVSLÅTT_70ÅR, utbetalingsgrad);
+        Map<Vilkår,Utfall> emptyVurderteVilkår = new HashMap<>();
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), utbetalingsgrad);
     }
 
     private Uttaksperiode avslått(LocalDate fom, LocalDate tom) {
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, Årsak.AVSLÅTT_70ÅR, BigDecimal.ZERO);
+        Map<Vilkår,Utfall> emptyVurderteVilkår = new HashMap<>();
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), BigDecimal.ZERO);
     }
 }

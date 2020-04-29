@@ -1,30 +1,38 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class WrappedOppgittFraværPeriode {
     private OppgittFraværPeriode periode;
     private Aktivitet aktivitet;
-    private boolean avslått;
+    private Map<Vilkår, Utfall> vurderteVilkår = new HashMap<>();
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, boolean avslått) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, Map<Vilkår, Utfall> vurderteVilkår) {
         this.periode = periode;
         if (periode != null && periode.getAktivitetType() != null) {
             this.aktivitet = new Aktivitet(periode.getAktivitetType(), periode.getArbeidsgiver(), periode.getArbeidsforholdRef());
         } else {
             this.aktivitet = null;
         }
-        this.avslått = avslått;
+        this.vurderteVilkår = vurderteVilkår;
     }
 
     public OppgittFraværPeriode getPeriode() {
         return periode;
     }
 
-    public boolean getErAvslått() {
-        return avslått;
+    public Map<Vilkår, Utfall> getVurderteVilkår() {
+        return vurderteVilkår;
+    }
+
+    public void setVurderteVilkår(Map<Vilkår, Utfall> vurderteVilkår) {
+        this.vurderteVilkår = vurderteVilkår;
     }
 
     public Aktivitet getAktivitet() {
@@ -36,7 +44,7 @@ class WrappedOppgittFraværPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WrappedOppgittFraværPeriode that = (WrappedOppgittFraværPeriode) o;
-        return avslått == that.avslått
+        return vurderteVilkår == that.vurderteVilkår
             && Objects.equals(aktivitet, that.aktivitet)
             && periodeEquals(that);
     }
@@ -49,16 +57,26 @@ class WrappedOppgittFraværPeriode {
             return this.periode == null && that.periode == null;
     }
 
+    public boolean erAvslått() {
+        for(no.nav.k9.aarskvantum.kontrakter.Vilkår vilkår : vurderteVilkår.keySet()) {
+            if (vurderteVilkår.getOrDefault(vilkår, no.nav.k9.aarskvantum.kontrakter.Utfall.INNVILGET).equals(no.nav.k9.aarskvantum.kontrakter.Utfall.AVSLÅTT)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslått);
+        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, vurderteVilkår);
     }
 
     @Override
     public String toString() {
         return "WrappedOppgittFraværPeriode{" +
             "periode=" + periode +
-            ", avslått=" + avslått +
+            ", avslått=" + vurderteVilkår +
             '}';
     }
 

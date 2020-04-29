@@ -36,8 +36,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, Set<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> !it.getErAvslått())).hasSize(1);
+            assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::erAvslått)).hasSize(1);
+            assertThat(entries.getValue().stream().filter(it -> !it.erAvslått())).hasSize(1);
         }
     }
 
@@ -60,8 +60,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, Set<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> !it.getErAvslått())).hasSize(1);
+            assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::erAvslått)).hasSize(1);
+            assertThat(entries.getValue().stream().filter(it -> !it.erAvslått())).hasSize(1);
         }
     }
 
@@ -85,11 +85,11 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var fraværPerioder = perioder.get(new Aktivitet(UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef()));
         var fraværPerioder1 = perioder.get(new Aktivitet(UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef()));
         assertThat(fraværPerioder).hasSize(2);
-        assertThat(fraværPerioder.stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
-        assertThat(fraværPerioder.stream().filter(it -> !it.getErAvslått())).hasSize(1);
+        assertThat(fraværPerioder.stream().filter(WrappedOppgittFraværPeriode::erAvslått)).hasSize(1);
+        assertThat(fraværPerioder.stream().filter(it -> !it.erAvslått())).hasSize(1);
         assertThat(fraværPerioder1).hasSize(1);
-        assertThat(fraværPerioder1.stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(0);
-        assertThat(fraværPerioder1.stream().filter(it -> !it.getErAvslått())).hasSize(1);
+        assertThat(fraværPerioder1.stream().filter(WrappedOppgittFraværPeriode::erAvslått)).hasSize(0);
+        assertThat(fraværPerioder1.stream().filter(it -> !it.erAvslått())).hasSize(1);
     }
 
     @Test
@@ -111,8 +111,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, Set<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> !it.getErAvslått())).hasSize(1);
+            assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::erAvslått)).hasSize(1);
+            assertThat(entries.getValue().stream().filter(it -> !it.erAvslått())).hasSize(1);
         }
     }
 }
