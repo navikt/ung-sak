@@ -190,8 +190,6 @@ spec:
       value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
     - name: SAF_BASE_URL
       value: http://saf.q1
-    - name: DOKUMENTPRODUKSJON_V2_URL
-      value: https://dokprod-q1.nais.preprod.local/dokprod/ws/dokumentproduksjon/v2
     - name: BEHANDLESAK_V2_URL
       value: https://wasapp-q1.adeo.no/nav-gsak-ws/BehandleSakV2
     - name: SAK_V1_URL
@@ -203,13 +201,15 @@ spec:
     - name: ORGANISASJON_V4_URL
       value: https://modapp-q1.adeo.no/ereg/ws/OrganisasjonService/v4
     - name: MEDLEM_V2_URL
-      value: https://app-q1.adeo.no/medl2/ws/Medlemskap/v2
-    - name: ARBEIDSFORDELING_V1_URL
-      value: https://app-q1.adeo.no/norg2/ws/Arbeidsfordeling/v1
+      value: https://app-q1.adeo.no/medl2/ws/Medlemskap/v2    
     - name: KODEVERK_V2_URL
       value: https://kodeverk.nais.preprod.local/ws/kodeverk/v2
-
-
+      
+    # Legacy - fjerne disse
+    - name: ARBEIDSFORDELING_V1_URL
+      value: https://app-q1.adeo.no/norg2/ws/Arbeidsfordeling/v1
+    - name: JOURNAL_V3_URL
+      value: https://dokarkiv-q1.nais.preprod.local/services/journal/v3
 
     # Sikkerhet:
     - name: OIDC_STS_ISSUER_URL
@@ -218,4 +218,9 @@ spec:
       value: https://security-token-service.nais.preprod.local/rest/v1/sts/jwks
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
+
+    - name: SENSU_HOST
+      value: "sensu.nais"
+    - name: SENSU_PORT
+      value: "3030"
 

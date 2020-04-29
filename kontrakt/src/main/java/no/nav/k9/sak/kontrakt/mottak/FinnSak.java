@@ -34,7 +34,7 @@ public class FinnSak {
     @Valid
     private AktørId pleietrengendeAktørId;
 
-    @JsonProperty(value = "periodeStart", required = true)
+    @JsonProperty(value = "periode", required = true)
     @Valid
     @NotNull
     private Periode periode;
