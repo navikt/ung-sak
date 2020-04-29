@@ -39,7 +39,6 @@ import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Sakstype;
 import no.nav.k9.sak.dokument.arkiv.saf.rest.model.VariantFormat;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
 
 public class DokumentArkivTjenesteImplTest {
 
@@ -205,14 +204,10 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skal_kalle_web_service_og_oversette_fra_() {
         // Arrange
-
         final byte[] bytesExpected = {1, 2, 7};
-        HentDokumentResponse response = new HentDokumentResponse();
-        response.setDokument(bytesExpected);
         when(safTjeneste.hentDokument(any(HentDokumentQuery.class))).thenReturn(bytesExpected);
 
         // Act
-
         byte[] bytesActual = dokumentApplikasjonTjeneste.hentDokumnet(new JournalpostId("123"), "456");
 
         // Assert

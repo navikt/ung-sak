@@ -32,7 +32,6 @@ import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
 import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentoversiktFagsak;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {
@@ -59,12 +58,6 @@ public class DokumentArkivTjeneste {
 
     public byte[] hentDokumnet(JournalpostId journalpostId, String dokumentId) {
         LOG.info("HentDokument: input parametere journalpostId {} dokumentId {}", journalpostId, dokumentId);
-        no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest hentDokumentRequest = new no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest();
-        hentDokumentRequest.setJournalpostId(journalpostId.getVerdi());
-        hentDokumentRequest.setDokumentId(dokumentId);
-        Variantformater variantFormat = new Variantformater();
-        variantFormat.setValue(VARIANT_FORMAT_ARKIV.getOffisiellKode());
-        hentDokumentRequest.setVariantformat(variantFormat);
 
         HentDokumentQuery query = new HentDokumentQuery(
             journalpostId.getVerdi(),
