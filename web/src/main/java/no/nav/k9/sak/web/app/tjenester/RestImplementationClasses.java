@@ -30,7 +30,6 @@ import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.konfig.KonfigRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.FeatureToggleRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
@@ -50,7 +49,6 @@ public class RestImplementationClasses {
         classes.add(DokumentRestTjeneste.class);
         classes.add(HistorikkRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
-        classes.add(KonfigRestTjeneste.class);
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(OmsorgenForRestTjeneste.class);
         classes.add(FordelRestTjeneste.class);
