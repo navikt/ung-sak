@@ -76,15 +76,24 @@ public class AktørRestTjeneste {
                     pi.erKvinne(),
                     pi.getPersonstatus(),
                     pi.getDiskresjonskode(),
-                    pi.getDødsdato());
+                    pi.getDødsdato(),
+                    pi.getAktørId()
+                );
                 aktoerInfoDto.setPerson(personDto);
                 aktoerInfoDto.setAktørId(pi.getAktørId());
                 List<FagsakDto> fagsakDtoer = new ArrayList<>();
                 List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
                 for (var f : fagsaker) {
-                    fagsakDtoer.add(new FagsakDto(f.getSaksnummer(), f.getYtelseType(), f.getStatus(), personDto,
-                        null, f.getSkalTilInfotrygd(),
-                        f.getOpprettetTidspunkt(), f.getEndretTidspunkt()));
+                    fagsakDtoer.add(new FagsakDto(
+                        f.getSaksnummer(),
+                        f.getYtelseType(),
+                        f.getStatus(),
+                        personDto,
+                        null,
+                        f.getSkalTilInfotrygd(),
+                        f.getOpprettetTidspunkt(),
+                        f.getEndretTidspunkt()
+                    ));
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);
                 return Response.ok(aktoerInfoDto).build();

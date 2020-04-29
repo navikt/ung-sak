@@ -122,17 +122,32 @@ public class FagsakRestTjeneste {
         }
         Personinfo brukerInfo = view.getBrukerInfo();
 
-        PersonDto personDto = new PersonDto(brukerInfo.getNavn(), brukerInfo.getAlder(), String.valueOf(brukerInfo.getPersonIdent().getIdent()),
-            brukerInfo.erKvinne(), brukerInfo.getPersonstatus(), brukerInfo.getDiskresjonskode(), brukerInfo.getDødsdato());
+        PersonDto personDto = new PersonDto(
+            brukerInfo.getNavn(),
+            brukerInfo.getAlder(),
+            String.valueOf(brukerInfo.getPersonIdent().getIdent()),
+            brukerInfo.erKvinne(),
+            brukerInfo.getPersonstatus(),
+            brukerInfo.getDiskresjonskode(),
+            brukerInfo.getDødsdato(),
+            brukerInfo.getAktørId()
+        );
 
         List<FagsakDto> dtoer = new ArrayList<>();
         for (var info : view.getFagsakInfoer()) {
             Fagsak fagsak = info.getFagsak();
             Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
                 .kanRevurderingOpprettes(fagsak);
-            dtoer.add(new FagsakDto(fagsak.getSaksnummer(), fagsak.getYtelseType(), fagsak.getStatus(), personDto,
-                kanRevurderingOpprettes, fagsak.getSkalTilInfotrygd(),
-                fagsak.getOpprettetTidspunkt(), fagsak.getEndretTidspunkt()));
+            dtoer.add(new FagsakDto(
+                fagsak.getSaksnummer(),
+                fagsak.getYtelseType(),
+                fagsak.getStatus(),
+                personDto,
+                kanRevurderingOpprettes,
+                fagsak.getSkalTilInfotrygd(),
+                fagsak.getOpprettetTidspunkt(),
+                fagsak.getEndretTidspunkt()
+            ));
         }
         return dtoer;
     }
