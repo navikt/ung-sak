@@ -122,8 +122,16 @@ public class FagsakRestTjeneste {
         }
         Personinfo brukerInfo = view.getBrukerInfo();
 
-        PersonDto personDto = new PersonDto(brukerInfo.getNavn(), brukerInfo.getAlder(), String.valueOf(brukerInfo.getPersonIdent().getIdent()),
-            brukerInfo.erKvinne(), brukerInfo.getPersonstatus(), brukerInfo.getDiskresjonskode(), brukerInfo.getDødsdato());
+        PersonDto personDto = new PersonDto(
+            brukerInfo.getNavn(),
+            brukerInfo.getAlder(),
+            String.valueOf(brukerInfo.getPersonIdent().getIdent()),
+            brukerInfo.erKvinne(),
+            brukerInfo.getPersonstatus(),
+            brukerInfo.getDiskresjonskode(),
+            brukerInfo.getDødsdato(),
+            brukerInfo.getAktørId()
+        );
 
         List<FagsakDto> dtoer = new ArrayList<>();
         for (var info : view.getFagsakInfoer()) {
@@ -138,8 +146,7 @@ public class FagsakRestTjeneste {
                 kanRevurderingOpprettes,
                 fagsak.getSkalTilInfotrygd(),
                 fagsak.getOpprettetTidspunkt(),
-                fagsak.getEndretTidspunkt(),
-                fagsak.getAktørId()
+                fagsak.getEndretTidspunkt()
             ));
         }
         return dtoer;

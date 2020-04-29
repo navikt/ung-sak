@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.typer.AktørId;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -37,12 +38,21 @@ public class PersonDto {
     @JsonProperty("personstatusType")
     private PersonstatusType personstatusType;
 
+    @JsonProperty("aktørId")
+    private AktørId aktørId;
+
     public PersonDto() {
         //
     }
 
-    public PersonDto(String navn, Integer alder, String personnummer, boolean erKvinne, PersonstatusType personstatusType, String diskresjonskode,
-                     LocalDate dodsdato) {
+    public PersonDto(String navn,
+                     Integer alder,
+                     String personnummer,
+                     boolean erKvinne,
+                     PersonstatusType personstatusType,
+                     String diskresjonskode,
+                     LocalDate dodsdato,
+                     AktørId aktørId) {
         this.navn = navn;
         this.alder = alder;
         this.personnummer = personnummer;
@@ -50,6 +60,7 @@ public class PersonDto {
         this.personstatusType = personstatusType;
         this.diskresjonskode = diskresjonskode;
         this.dodsdato = dodsdato;
+        this.aktørId = aktørId;
     }
 
     @Override
@@ -66,6 +77,8 @@ public class PersonDto {
         if (!alder.equals(personDto.alder))
             return false;
         if (!personnummer.equals(personDto.personnummer))
+            return false;
+        if (!aktørId.equals(personDto.aktørId))
             return false;
         return erKvinne.equals(personDto.erKvinne);
     }
@@ -103,6 +116,10 @@ public class PersonDto {
         return personstatusType;
     }
 
+    public AktørId getAktørId() {
+        return aktørId;
+    }
+
     @Override
     public int hashCode() {
         int result = navn.hashCode();
@@ -138,6 +155,10 @@ public class PersonDto {
 
     public void setPersonstatusType(PersonstatusType personstatusType) {
         this.personstatusType = personstatusType;
+    }
+
+    public void setAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
     }
 
     @Override

@@ -76,7 +76,9 @@ public class AktørRestTjeneste {
                     pi.erKvinne(),
                     pi.getPersonstatus(),
                     pi.getDiskresjonskode(),
-                    pi.getDødsdato());
+                    pi.getDødsdato(),
+                    pi.getAktørId()
+                );
                 aktoerInfoDto.setPerson(personDto);
                 aktoerInfoDto.setAktørId(pi.getAktørId());
                 List<FagsakDto> fagsakDtoer = new ArrayList<>();
@@ -90,8 +92,7 @@ public class AktørRestTjeneste {
                         null,
                         f.getSkalTilInfotrygd(),
                         f.getOpprettetTidspunkt(),
-                        f.getEndretTidspunkt(),
-                        f.getAktørId()
+                        f.getEndretTidspunkt()
                     ));
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);
