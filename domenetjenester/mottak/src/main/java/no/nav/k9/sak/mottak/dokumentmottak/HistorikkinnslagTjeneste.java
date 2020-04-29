@@ -3,8 +3,8 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -32,12 +32,12 @@ import no.nav.k9.sak.typer.JournalpostId;
 @Dependent
 public class HistorikkinnslagTjeneste {
 
+    public static final String INNTEKTSMELDING_BREVKODE = "4936";
     private static final String VEDLEGG = "Vedlegg";
     private static final String PAPIRSØKNAD = "Papirsøknad";
     private static final String SØKNAD = "Søknad";
     private static final String INNTEKTSMELDING = "Inntektsmelding";
     private static final String ETTERSENDELSE = "Ettersendelse";
-    public static final String INNTEKTSMELDING_BREVKODE = "4936";
     private HistorikkRepository historikkRepository;
     private SafTjeneste safTjeneste;
 
@@ -93,9 +93,9 @@ public class HistorikkinnslagTjeneste {
 
             var elektroniskSøknad = Optional.ofNullable(hoveddokumentJournalMetadata)
                 .stream()
-                .filter(it -> it.getDokumentvarianter().stream()
-                    .anyMatch(ta -> Set.of(VariantFormat.ORIGINAL, VariantFormat.FULLVERSJON).contains(ta.getVariantFormat())
-                        && ArkivFilType.XML.equals(ArkivFilType.fraKode(ta.getFiltype())))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
+                .filter(it -> it.getDokumentvarianter()
+                    .stream()
+                    .anyMatch(ta -> Objects.equals(VariantFormat.ORIGINAL, ta.getVariantFormat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
                 .findFirst();
 
             leggTilSøknadDokumentLenke(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
