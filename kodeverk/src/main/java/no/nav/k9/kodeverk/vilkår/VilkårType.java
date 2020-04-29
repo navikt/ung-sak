@@ -30,8 +30,7 @@ public enum VilkårType implements Kodeverdi {
 
     MEDLEMSKAPSVILKÅRET(VilkårTypeKoder.FP_VK_2,
             "Medlemskapsvilkåret",
-            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
-                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "2"),
+            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2", FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2"),
             Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
             Avslagsårsak.SØKER_ER_UTVANDRET,
             Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
@@ -79,16 +78,17 @@ public enum VilkårType implements Kodeverdi {
             Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     OPPTJENINGSPERIODEVILKÅR(VilkårTypeKoder.FP_VK_21,
             "Opptjeningsperiode",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2"),
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2", FagsakYtelseType.OMP, "§ 9-2 jamfør 8-2"),
             Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
     OPPTJENINGSVILKÅRET(VilkårTypeKoder.FP_VK_23,
             "Opptjeningsvilkåret",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2"),
-            Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2", FagsakYtelseType.OMP, "§ 9-2 jamfør 8-2"),
+            Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING,
+            Avslagsårsak.FYLLER_IKKE_ORDINÆRE_OPPTJENINGSREGLER),
     BEREGNINGSGRUNNLAGVILKÅR(VilkårTypeKoder.FP_VK_41,
             "Beregning",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7"),
-            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG),
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7", FagsakYtelseType.OMP, "§ 8"),
+            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG, Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47),
 
     /**
      * Brukes i stedet for null der det er optional.
@@ -181,7 +181,7 @@ public enum VilkårType implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     /** for JAX-RS. */
     public static VilkårType fromString(String kode) {
         return fraKode(kode);
