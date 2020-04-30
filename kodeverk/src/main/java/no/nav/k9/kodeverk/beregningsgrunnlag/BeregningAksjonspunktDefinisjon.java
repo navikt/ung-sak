@@ -40,6 +40,9 @@ enum BeregningAksjonspunktDefinisjon implements Kodeverdi {
     AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT(
         BeregningAksjonspunktKodeDefinition.AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT_KODE,
         "Vent på siste meldekort for AAP eller DP-mottaker"),
+    AUTO_VENT_FRISINN(
+        BeregningAksjonspunktKodeDefinition.AUTO_VENT_FRISINN_KODE,
+        "Vent på mangel i løsning: 36 måneder med ytelse"),
     FORDEL_BEREGNINGSGRUNNLAG(
         BeregningAksjonspunktKodeDefinition.FORDEL_BEREGNINGSGRUNNLAG_KODE,
         "Fordel beregningsgrunnlag"),
