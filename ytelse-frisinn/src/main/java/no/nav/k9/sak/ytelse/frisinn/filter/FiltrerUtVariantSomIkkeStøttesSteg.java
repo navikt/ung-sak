@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.filter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -63,8 +64,11 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         var frilans = oppgittOpptjening.getFrilans();
         var næring = oppgittOpptjening.getEgenNæring();
 
-        var søkerKompensasjonForFrilans = søkerKompensasjonForFrilans(uttakGrunnlag, frilans);
-        var søkerKompensasjonForNæring = søkerKompensasjonForNæring(uttakGrunnlag, næring);
+        var harFrilansInntekter = harFrilansInntekter(frilans);
+        var søkerKompensasjonForFrilans = harSøktKompensasjonForFrilans(uttakGrunnlag);
+        boolean ikkeNyOppstartetFrilans = frilans.map(this::erFrilansOgIkkeNyOppstartet).orElse(true);
+        var harNæringsInntekt = harNæringsinntekt(næring);
+        var søkerKompensasjonForNæring = harSøktKompensasjonForNæring(uttakGrunnlag);
 
         /*
          Frisinnsøknad.inntekter har  frilanser og selvstendig.
@@ -76,9 +80,9 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         frilanser.erNyEtablert er som antagelig vil slippes opp først
          */
 
-        if (søkerKompensasjonForFrilans && !søkerKompensasjonForNæring) {
+        if (søkerKompensasjonForFrilans && ikkeNyOppstartetFrilans && harFrilansInntekter && !søkerKompensasjonForNæring && !harNæringsInntekt) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if (!søkerKompensasjonForFrilans && søkerKompensasjonForNæring) {
+        } else if (!søkerKompensasjonForFrilans && !harFrilansInntekter && søkerKompensasjonForNæring && harNæringsInntekt) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -86,8 +90,8 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         return BehandleStegResultat.utførtMedAksjonspunktResultater(resultater);
     }
 
-    private boolean søkerKompensasjonForNæring(Optional<UttakGrunnlag> uttakGrunnlag, List<OppgittEgenNæring> næring) {
-        return !næring.isEmpty() && harSøktKompensasjonForNæring(uttakGrunnlag);
+    private boolean harNæringsinntekt(List<OppgittEgenNæring> næring) {
+        return næring.stream().anyMatch(it -> BigDecimal.ZERO.compareTo(it.getBruttoInntekt()) != 0);
     }
 
     private boolean harSøktKompensasjonForNæring(Optional<UttakGrunnlag> uttakGrunnlag) {
@@ -98,8 +102,8 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .anyMatch(it -> UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE.equals(it.getAktivitetType()));
     }
 
-    private boolean søkerKompensasjonForFrilans(Optional<UttakGrunnlag> uttakGrunnlag, Optional<OppgittFrilans> frilans) {
-        return frilans.isPresent() && erFrilansOgIkkeNyOppstartet(frilans.get()) && harSøktKompensasjonForFrilans(uttakGrunnlag) && harInntekterSomFrilans(frilans.get());
+    private boolean harFrilansInntekter(Optional<OppgittFrilans> frilans) {
+        return frilans.isPresent() && harInntekterSomFrilans(frilans.get());
     }
 
     private boolean harInntekterSomFrilans(OppgittFrilans frilans) {
@@ -115,6 +119,6 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
     }
 
     private boolean erFrilansOgIkkeNyOppstartet(OppgittFrilans frilans) {
-        return frilans.getErNyoppstartet();
+        return !frilans.getErNyoppstartet();
     }
 }
