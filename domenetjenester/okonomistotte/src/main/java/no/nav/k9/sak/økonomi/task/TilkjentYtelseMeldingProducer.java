@@ -54,7 +54,7 @@ public class TilkjentYtelseMeldingProducer {
     }
 
     @Inject
-    TilkjentYtelseMeldingProducer(@KonfigVerdi("fp.tilkjentytelse.v1.topic.url") String topic,
+    TilkjentYtelseMeldingProducer(@KonfigVerdi("kafka.tilkjentytelse.v1.topic.url") String topic,
                                   @KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                   @KonfigVerdi("application.name") String clientId,
                                   @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
