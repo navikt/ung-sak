@@ -57,3 +57,4 @@ jobs:
             github.issues.createComment({...issue,
                                     body: 'promote til ${{ github.event.client_payload.slash_command.args }} utført'})
             github.issues.addLabels({...issue, labels: ['deployment','${{ env.CLUSTER }}-${{ env.NAMESPACE }}']})
+
