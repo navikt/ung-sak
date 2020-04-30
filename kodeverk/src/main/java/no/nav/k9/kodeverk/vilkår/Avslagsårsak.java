@@ -30,8 +30,13 @@ public enum Avslagsårsak implements Kodeverdi {
     SØKER_ER_IKKE_BOSATT("1025", "Søker er ikke bosatt", Map.of(FagsakYtelseType.FP, "14-2", FagsakYtelseType.OMP, "9-2 og 9-3, jamfør kapittel 2")),
     IKKE_TILSTREKKELIG_OPPTJENING("1035", "Ikke tilstrekkelig opptjening", Map.of(FagsakYtelseType.FP, "9-2", FagsakYtelseType.OMP, "9-2, jamfør 8-2")),
     FYLLER_IKKE_ORDINÆRE_OPPTJENINGSREGLER("1036", "Ikke tilstrekkelig opptjening", Map.of(FagsakYtelseType.OMP, "8-47 1. ledd")),
-    FOR_LAVT_BEREGNINGSGRUNNLAG("1041", "For lavt brutto beregningsgrunnlag", Map.of(FagsakYtelseType.OMP, "9-3 2. ledd", FagsakYtelseType.PSB, "9-3 2. ledd")),
+    FOR_LAVT_BEREGNINGSGRUNNLAG("1041", "For lavt brutto beregningsgrunnlag", Map.of(
+        FagsakYtelseType.OMP, "9-3 2. ledd",
+        FagsakYtelseType.PSB, "9-3 2. ledd",
+        FagsakYtelseType.FRISINN, "koronaloven § 2 1. ledd")),
     FOR_LAVT_BEREGNINGSGRUNNLAG_8_47("1042", "For lavt brutto beregningsgrunnlag", Map.of(FagsakYtelseType.OMP, "8-47 5. ledd", FagsakYtelseType.PSB, "8-47 5. ledd")),
+    SØKT_FRILANS_UTEN_FRILANS_INNTEKT("8000", "Søkt frilans uten frilansinntekt", Map.of(FagsakYtelseType.FRISINN, "koronaloven § 1 1. ledd")),
+    AVKORTET_GRUNNET_ANNEN_INNTEKT("8001", "Avkortet grunnet annen inntekt", Map.of(FagsakYtelseType.FRISINN, "koronaloven § 2 2. ledd")),
 
     IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE("1067", "Ikke dokumentert sykdom, skade eller lyte.", Map.of(FagsakYtelseType.PSB, "9-10 1. ledd")),
     DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", Map.of(FagsakYtelseType.PSB, "9-16")),

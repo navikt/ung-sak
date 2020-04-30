@@ -60,6 +60,10 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_7004("7004", "Søker er far og har søkt på vegne av seg selv"),
     VM_7006("7006", "Venter på opptjeningsopplysninger"),
 
+    VM_8000("8000", "søkt frilans uten frilansinntekt"),
+    VM_8001("8001", "avkortet grunnet annen inntekt"),
+
+
     UDEFINERT("-", "Ikke definert"),
 
     ;

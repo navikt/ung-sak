@@ -87,8 +87,13 @@ public enum VilkårType implements Kodeverdi {
             Avslagsårsak.FYLLER_IKKE_ORDINÆRE_OPPTJENINGSREGLER),
     BEREGNINGSGRUNNLAGVILKÅR(VilkårTypeKoder.FP_VK_41,
             "Beregning",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7", FagsakYtelseType.OMP, "§ 8"),
-            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG, Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47),
+            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7",
+                FagsakYtelseType.OMP, "§ 8",
+                FagsakYtelseType.FRISINN, "koronaloven § 1-3"),
+            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
+        Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47,
+        Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT
+        ),
 
     /**
      * Brukes i stedet for null der det er optional.

@@ -49,8 +49,10 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.Beregn
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -286,9 +288,21 @@ public class KalkulusTjeneste implements BeregningTjeneste {
             dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist())).collect(Collectors.toList());
         KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
         if (tilstandResponse.getVilkarOppfylt() != null) {
+            if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
+                kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse));
+            }
             return kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
         }
         return kalkulusResultat;
+    }
+
+    private Avslagsårsak mapTilAvslagsårsak(TilstandResponse tilstandResponse) {
+        if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.SØKT_FL_INGEN_FL_INNTEKT.getKode())) {
+            return Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT;
+        } else if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG.getKode())) {
+            return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG;
+        }
+        return Avslagsårsak.UDEFINERT;
     }
 
     private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(Long behandlingId, BehandlingReferanse referanse) {
