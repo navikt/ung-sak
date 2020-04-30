@@ -30,6 +30,7 @@ class TaskStatusEventObserver {
 
     void observerProsessTasks(@Observes ProsessTaskEvent event) {
 
+        // logger bare ferdig her, siden det er tungvindt å telle hver gang på tvers av partisjoner
         if (DONE.contains(event.getNyStatus())) {
             var sensuEvent = SensuEvent.createSensuEvent(
                 "antall_ferdig_prosesstask",
@@ -37,24 +38,7 @@ class TaskStatusEventObserver {
                 Map.of("antall", 1));
 
             sensuKlient.logMetrics(sensuEvent);
-        } else if (event.getGammelStatus() != null
-            && ProsessTaskStatus.FEILET.equals(event.getGammelStatus())
-            && ProsessTaskStatus.FEILET.equals(event.getNyStatus())) {
-            return;
-        } else if (event.getGammelStatus() != null && ProsessTaskStatus.FEILET.equals(event.getGammelStatus())) {
-            var sensuEvent = SensuEvent.createSensuEvent(
-                "antall_feilende_prosesstask",
-                Map.of("prosesstask_type", event.getTaskType()),
-                Map.of("antall", -1));
-
-            sensuKlient.logMetrics(sensuEvent);
-        } else if (ProsessTaskStatus.FEILET.equals(event.getNyStatus())) {
-            var sensuEvent = SensuEvent.createSensuEvent(
-                "antall_feilende_prosesstask",
-                Map.of("prosesstask_type", event.getTaskType()),
-                Map.of("antall", 1));
-
-            sensuKlient.logMetrics(sensuEvent);
         }
+        // else - andre status telles som totaler ved jevnlig søk i db nå
     }
 }

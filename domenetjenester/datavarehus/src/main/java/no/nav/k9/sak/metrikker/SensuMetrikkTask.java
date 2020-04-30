@@ -31,9 +31,13 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData data) {
 
+        statistikkRepository.prosessTaskStatistikk().forEach(e -> sensuKlient.logMetrics(e));
+
+        statistikkRepository.behandlingStatistikk().forEach(e -> sensuKlient.logMetrics(e));
+
         statistikkRepository.aksjonspunktStatistikk().forEach(e -> sensuKlient.logMetrics(e));
-        
+
         statistikkRepository.aksjonspunktVenteårsakStatistikk().forEach(e -> sensuKlient.logMetrics(e));
-        
+
     }
 }

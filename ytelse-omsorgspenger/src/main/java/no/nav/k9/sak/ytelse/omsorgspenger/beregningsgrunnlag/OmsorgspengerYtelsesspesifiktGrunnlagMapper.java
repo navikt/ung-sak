@@ -30,7 +30,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 @ApplicationScoped
 public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<OmsorgspengerGrunnlag> {
 
-
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
     protected OmsorgspengerYtelsesspesifiktGrunnlagMapper() {
@@ -67,12 +66,15 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
         var årskvantum = årskvantumTjeneste.hentÅrskvantumUttak(ref);
-        if (årskvantum.getUttaksplan().getAktiviteter() == null || årskvantum.getUttaksplan().getAktiviteter().isEmpty()) {
+        var aktiviteter = årskvantum.getUttaksplan().getAktiviteter();
+        if (aktiviteter == null || aktiviteter.isEmpty()) {
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
 
-        var arbeidsforholdPerioder = årskvantum.getUttaksplan().getAktiviteter();
-        var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.stream().map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder())).collect(Collectors.toList());
+        var arbeidsforholdPerioder = aktiviteter;
+        var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.stream()
+            .filter(e -> !e.getUttaksperioder().isEmpty() && e.getUttaksperioder().stream().anyMatch(p -> p.getUtfall() == Utfall.INNVILGET))
+            .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder())).collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
 
@@ -83,6 +85,10 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             .sorted() // stabil rekkefølge output
             .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad()))
             .collect(Collectors.toList());
+
+        if (perioder.isEmpty() || utbetalingsgrad.isEmpty()) {
+            throw new IllegalArgumentException("Utvikler-feil: Skal ikke komme til kalkulus uten innvilgede perioder for " + arbeidsforhold + ", angitte uttaksperioder: " + perioder);
+        }
         return new UtbetalingsgradPrAktivitetDto(arbeidsforhold, utbetalingsgrad);
     }
 
