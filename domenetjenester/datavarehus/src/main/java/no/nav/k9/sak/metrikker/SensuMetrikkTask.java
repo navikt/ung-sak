@@ -3,14 +3,13 @@ package no.nav.k9.sak.metrikker;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(FortsettBehandlingTaskProperties.TASKTYPE)
+@ProsessTask(SensuMetrikkTask.TASKTYPE)
 public class SensuMetrikkTask implements ProsessTaskHandler {
     static final String TASKTYPE = "sensu.metrikk.task";
 

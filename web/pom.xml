@@ -60,6 +60,11 @@
 			<artifactId>risikoklassifisering</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>datavarehus</artifactId>
+		</dependency>
+		
+		<dependency>
 			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			<artifactId>fordel-v1</artifactId>
 		</dependency>
