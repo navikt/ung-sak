@@ -51,6 +51,7 @@ public class KalkulusRestTjeneste {
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandResponse.class);
     private final ObjectReader oppdaterReader = kalkulusMapper.readerFor(OppdateringRespons.class);
     private final ObjectReader dtoReader = kalkulusMapper.readerFor(BeregningsgrunnlagDto.class);
+    private final ObjectReader booleanReader = kalkulusMapper.readerFor(Boolean.class);
     private final ObjectReader grunnlagReader = kalkulusMapper.readerFor(BeregningsgrunnlagGrunnlagDto.class);
     private final ObjectReader fastSattReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto.class);
 
@@ -211,7 +212,7 @@ public class KalkulusRestTjeneste {
 
     private Boolean getErEndringIBeregningResponse(URI endpoint, String json) {
         try {
-            return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, dtoReader));
+            return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, booleanReader));
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
