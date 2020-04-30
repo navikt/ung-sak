@@ -14,7 +14,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -29,9 +28,9 @@ import no.nav.vedtak.konfig.Tid;
 @ApplicationScoped
 class BeregningsgrunnlagVilkårTjeneste {
 
-    protected BehandlingRepository behandlingRepository;
+    private BehandlingRepository behandlingRepository;
     private VedtakVarselRepository behandlingsresultatRepository;
-    protected VilkårResultatRepository vilkårResultatRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     protected BeregningsgrunnlagVilkårTjeneste() {
         // CDI Proxy
