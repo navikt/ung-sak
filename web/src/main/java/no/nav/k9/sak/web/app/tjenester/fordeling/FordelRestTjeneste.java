@@ -34,7 +34,7 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
-import no.nav.k9.sak.dokument.arkiv.journal.JournalTjeneste;
+import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
@@ -71,7 +71,7 @@ public class FordelRestTjeneste {
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
-    private JournalTjeneste journalTjeneste;
+    private SafAdapter safAdapter;
     private FagsakTjeneste fagsakTjeneste;
 
     private Instance<SøknadMottakTjeneste<?>> søknadMottakere;
@@ -81,11 +81,11 @@ public class FordelRestTjeneste {
 
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
-                              JournalTjeneste journalTjeneste,
+                              SafAdapter safAdapter,
                               FagsakTjeneste fagsakTjeneste,
                               @Any Instance<SøknadMottakTjeneste<?>> søknadMottakere) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
-        this.journalTjeneste = journalTjeneste;
+        this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
         this.søknadMottakere = søknadMottakere;
     }
@@ -210,7 +210,7 @@ public class FordelRestTjeneste {
     }
 
     private String utledAltinnReferanseFraInntektsmelding(JournalpostId journalpostId) {
-        ArkivJournalPost journalPost = journalTjeneste.hentInngåendeJournalpostHoveddokument(journalpostId);
+        ArkivJournalPost journalPost = safAdapter.hentInngåendeJournalpostHoveddokument(journalpostId);
         return journalPost != null ? journalPost.getKanalreferanse() : null;
     }
 

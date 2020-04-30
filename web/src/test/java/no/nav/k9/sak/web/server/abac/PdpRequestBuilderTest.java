@@ -1,28 +1,8 @@
 package no.nav.k9.sak.web.server.abac;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.FagsakStatus;
-import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
-import no.nav.k9.sak.behandlingslager.pip.PipRepository;
-import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeUgyldigInput;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand;
-import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost;
-import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
-import no.nav.vedtak.exception.ManglerTilgangException;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
-import no.nav.vedtak.felles.integrasjon.journal.v3.JournalConsumer;
-import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.PdpRequest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -30,9 +10,23 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
+import no.nav.k9.sak.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.exception.ManglerTilgangException;
+import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
+import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
+import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.vedtak.sikkerhet.abac.PdpRequest;
 
 public class PdpRequestBuilderTest {
 
@@ -54,12 +48,11 @@ public class PdpRequestBuilderTest {
 
     private PipRepository pipRepository = Mockito.mock(PipRepository.class);
     private AktørConsumerMedCache aktørConsumer = Mockito.mock(AktørConsumerMedCache.class);
-    private JournalConsumer journalConsumer = Mockito.mock(JournalConsumer.class);
 
     private AppPdpRequestBuilderImpl requestBuilder = new AppPdpRequestBuilderImpl(pipRepository, aktørConsumer);
 
     @Test
-    public void skal_hente_saksstatus_og_behandlingsstatus_når_behandlingId_er_input() throws Exception {
+    public void skal_hente_saksstatus_og_behandlingsstatus_når_behandlingId_er_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
             .leggTil(AppAbacAttributtType.BEHANDLING_ID, BEHANDLING_ID));
 
@@ -79,16 +72,13 @@ public class PdpRequestBuilderTest {
     }
 
     @Test
-    public void skal_angi_aktørId_gitt_journalpost_id_som_input()
-            throws HentKjerneJournalpostListeSikkerhetsbegrensning, HentKjerneJournalpostListeUgyldigInput {
+    public void skal_angi_aktørId_gitt_journalpost_id_som_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
             .leggTil(AppAbacAttributtType.JOURNALPOST_ID, JOURNALPOST_ID.getVerdi()));
-        final HentKjerneJournalpostListeResponse mockJournalResponse = initJournalMockResponse(false);
 
         when(pipRepository.fagsakIdForJournalpostId(any())).thenReturn(Collections.singleton(FAGSAK_ID));
         when(pipRepository.fagsakIdForSaksnummer(any())).thenReturn(Collections.singleton(FAGSAK_ID));
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
-        when(journalConsumer.hentKjerneJournalpostListe(any())).thenReturn(mockJournalResponse); // NOSONAR
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
@@ -174,18 +164,6 @@ public class PdpRequestBuilderTest {
         attributtSamling.setActionType(BeskyttetRessursActionAttributt.READ);
         attributtSamling.setResource(FAGSAK_ABAC_REFERANSE);
         return attributtSamling;
-    }
-
-    private HentKjerneJournalpostListeResponse initJournalMockResponse(boolean utgått) {
-        HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
-        Journalpost dummy = new Journalpost();
-        dummy.setJournalpostId(JOURNALPOST_ID.getVerdi());
-        dummy.setJournaltilstand(utgått ? Journaltilstand.UTGAAR : Journaltilstand.ENDELIG);
-        Journalposttyper retning = new Journalposttyper();
-        retning.setValue("I");
-        dummy.setJournalposttype(retning);
-        response.getJournalpostListe().add(dummy);
-        return response;
     }
 
 }

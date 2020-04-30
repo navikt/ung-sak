@@ -55,7 +55,7 @@ public class SafTjeneste {
     }
 
     @Inject
-    public SafTjeneste(@KonfigVerdi(value = "saf.base.url", defaultVerdi = "http://localhost:8060/rest/api/saf") URI endpoint,
+    public SafTjeneste(@KonfigVerdi(value = "saf.base.url", defaultVerdi = "https://localhost:8063/rest/api/saf") URI endpoint,
                        OidcRestClient restKlient) {
         this.graphqlEndpoint = URI.create(endpoint.toString() + "/graphql");
         this.hentDokumentEndpoint = URI.create(endpoint.toString() + "/rest/hentdokument");
