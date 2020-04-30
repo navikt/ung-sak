@@ -31,10 +31,6 @@ public class InnhentDokumentTjeneste {
     private Instance<Dokumentmottaker> mottakere;
 
     private FagsakRepository fagsakRepository;
-    
-    InnhentDokumentTjeneste() {
-        // CDI proxy
-    }
 
     @Inject
     public InnhentDokumentTjeneste(BehandlingRepositoryProvider repositoryProvider,
@@ -45,7 +41,7 @@ public class InnhentDokumentTjeneste {
 
     public void utfør(MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(mottattDokument.getFagsakId());
-        DokumentGruppe dokumentGruppe = DokumentGruppe.INNTEKTSMELDING;
+        DokumentGruppe dokumentGruppe = DokumentGruppe.INNTEKTSMELDING;  // eneste supporterte foreløpig.
         Dokumentmottaker dokumentmottaker = finnMottaker(dokumentGruppe, fagsak.getYtelseType());
         dokumentmottaker.mottaDokument(mottattDokument, fagsak, behandlingÅrsakType);
     }
@@ -55,19 +51,7 @@ public class InnhentDokumentTjeneste {
         String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
         Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(dokumentgruppeKode));
 
-        if (selected.isAmbiguous()) {
-            selected = selected.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(fagsakYtelseTypeKode));
-        }
-
-        if (selected.isAmbiguous()) {
-            throw new IllegalArgumentException("Mer enn en implementasjon funnet for DokumentGruppe=" + dokumentgruppeKode + ", FagsakYtelseType=" + fagsakYtelseTypeKode);
-        } else if (selected.isUnsatisfied()) {
-            throw new IllegalArgumentException("Ingen implementasjoner funnet for DokumentGruppe=" + dokumentgruppeKode + ", FagsakYtelseType=" + fagsakYtelseTypeKode);
-        }
-        Dokumentmottaker minInstans = selected.get();
-        if (minInstans.getClass().isAnnotationPresent(Dependent.class)) {
-            throw new IllegalStateException("Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + minInstans.getClass());
-        }
-        return minInstans;
+        return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmotaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + dokumentgruppeKode));
     }
 }

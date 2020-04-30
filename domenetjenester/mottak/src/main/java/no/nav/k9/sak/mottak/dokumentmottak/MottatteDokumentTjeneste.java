@@ -2,14 +2,12 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -67,18 +65,6 @@ public class MottatteDokumentTjeneste {
     public Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
         MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument);
         return mottattDokument.getId();
-    }
-
-    public List<MottattDokument> hentMottatteDokument(Long behandlingId) {
-        return mottatteDokumentRepository.hentMottatteDokument(behandlingId);
-    }
-
-    public List<MottattDokument> hentMottatteDokumentFagsak(Long fagsakId) {
-        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId);
-    }
-
-    public boolean harMottattDokumentKat(Long behandlingId, DokumentKategori dokumentKategori) {
-        return hentMottatteDokument(behandlingId).stream().anyMatch(dok -> dokumentKategori.equals(dok.getDokumentKategori()));
     }
 
     public void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {

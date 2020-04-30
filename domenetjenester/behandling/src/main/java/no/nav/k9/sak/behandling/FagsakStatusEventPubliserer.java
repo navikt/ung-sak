@@ -48,7 +48,7 @@ public class FagsakStatusEventPubliserer {
             }
         }
 
-        FagsakStatusEvent event = new FagsakStatusEvent(fagsak.getId(), fagsak.getAktørId(), gammelStatusIn, nyStatusIn);
+        FagsakStatusEvent event = new FagsakStatusEvent(fagsak.getId(), fagsak.getAktørId(), fagsak.getYtelseType(), gammelStatusIn, nyStatusIn);
         fagsakStatusEvent.fire(event);
     }
 

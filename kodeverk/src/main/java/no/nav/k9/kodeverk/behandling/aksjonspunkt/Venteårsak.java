@@ -35,7 +35,6 @@ public enum Venteårsak implements Kodeverdi {
     SCANN("SCANN", "Venter på scanning"),
     ULIKE_STARTDATOER_SVP("ULIKE_STARTDATOER_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
     UTV_FRIST("UTV_FRIST", "Utvidet frist"),
-    VENT_DØDFØDSEL_80P_DEKNINGSGRAD("VENT_DØDFØDSEL_80P_DEKNINGSGRAD", "Mangel i løsning for oppgitt 80% dekningsgrad med dødfødsel"),
     VENT_FEIL_ENDRINGSSØKNAD("VENT_FEIL_ENDRINGSSØKNAD", "Behandlingen er satt på vent på grunn av potensielt feil i endringssøknad"),
     VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG("VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "Mangel i løsning for oppgitt gradering der utbetaling ikke finnes"),
     VENT_INFOTRYGD("VENT_INFOTRYGD", "Venter på en ytelse i Infotrygd"),
