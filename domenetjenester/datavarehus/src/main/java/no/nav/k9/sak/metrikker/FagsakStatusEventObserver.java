@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.sak.behandling.FagsakStatusEvent;
@@ -19,6 +20,7 @@ class FagsakStatusEventObserver {
         // for proxy
     }
 
+    @Inject
     FagsakStatusEventObserver(SensuKlient sensuKlient) {
         this.sensuKlient = sensuKlient;
     }
