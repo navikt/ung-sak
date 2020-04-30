@@ -208,4 +208,37 @@ public class VilkårBuilderTest {
         assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(oppdatertFørsteSkjæringstidspunkt, andreSkjæringstidspunkt);
         assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
     }
+
+    @Test
+    public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering() {
+        var vilkårBuilder = new VilkårBuilder()
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
+
+        var førsteSkjæringstidspunkt = LocalDate.now();
+        var sluttFørstePeriode = LocalDate.now().plusMonths(3);
+        var førstePeriode = vilkårBuilder.hentBuilderFor(førsteSkjæringstidspunkt, sluttFørstePeriode)
+            .medUtfall(Utfall.OPPFYLT);
+        var andreSkjæringstidspunkt = LocalDate.now().plusMonths(3).plusDays(7);
+        var andrePeriode = vilkårBuilder.hentBuilderFor(andreSkjæringstidspunkt, LocalDate.now().plusMonths(5))
+            .medUtfall(Utfall.OPPFYLT);
+
+        vilkårBuilder.leggTil(førstePeriode)
+            .leggTil(andrePeriode);
+
+        var vilkår = vilkårBuilder.build();
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+
+        var oppdateringBuilder = new VilkårBuilder(vilkår);
+        var nyPeriode = LocalDate.now().plusMonths(5).plusDays(1);
+        oppdateringBuilder.leggTil(oppdateringBuilder.hentBuilderFor(nyPeriode, nyPeriode.plusDays(3))
+            .medUtfall(Utfall.IKKE_VURDERT));
+
+        var oppdatertVilkår = oppdateringBuilder.build();
+        assertThat(oppdatertVilkår).isNotNull();
+        assertThat(oppdatertVilkår.getPerioder()).hasSize(2);
+    }
 }

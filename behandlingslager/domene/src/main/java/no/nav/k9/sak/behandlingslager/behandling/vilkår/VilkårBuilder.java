@@ -10,7 +10,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -28,7 +30,10 @@ public class VilkårBuilder {
 
     VilkårBuilder(Vilkår vilkåret) {
         this.vilkåret = new Vilkår(vilkåret);
-        this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder().stream().map(a -> new LocalDateSegment<>(a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), new WrappedVilkårPeriode(a))).collect(Collectors.toList()));
+        this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder()
+            .stream()
+            .map(a -> new LocalDateSegment<>(a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), new WrappedVilkårPeriode(a)))
+            .collect(Collectors.toList()));
     }
 
     boolean erMellomliggendePeriode(LocalDate firstDate, LocalDate secondDate) {
@@ -161,14 +166,63 @@ public class VilkårBuilder {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
         bygget = true;
-        final var collect = vilkårTidslinje.compress()
+        var vilkårsPerioderRaw = vilkårTidslinje
+            .compress()
             .toSegments()
             .stream()
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)
             .map(WrappedVilkårPeriode::getVilkårPeriode)
             .collect(Collectors.toList());
-        vilkåret.setPerioder(collect);
+        var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw);
+        vilkåret.setPerioder(vilkårsPerioder);
         return vilkåret;
+    }
+
+    private List<VilkårPeriode> sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(List<VilkårPeriode> vilkårsPerioderRaw) {
+        var periodeTilVurdering = vilkårsPerioderRaw.stream().anyMatch(it -> Utfall.IKKE_VURDERT.equals(it.getGjeldendeUtfall()));
+        var perioderSomGrenserTil = harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(vilkårsPerioderRaw);
+
+        if (perioderSomGrenserTil && periodeTilVurdering) {
+            VilkårPeriode periode = null;
+            var vilkårPerioder = new ArrayList<VilkårPeriode>();
+
+            for (VilkårPeriode vilkårPeriode : vilkårsPerioderRaw) {
+                if (vilkårPeriode.getErOverstyrt()) {
+                    continue;
+                }
+                if (periode == null) {
+                    periode = vilkårPeriode;
+                } else if (periode.getPeriode().grenserTil(vilkårPeriode.getPeriode()) && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)) {
+                    periode = new VilkårPeriodeBuilder(periode)
+                        .medPeriode(periode.getFom(), vilkårPeriode.getTom())
+                        .medUtfall(Utfall.IKKE_VURDERT)
+                        .build();
+                } else {
+                    vilkårPerioder.add(periode);
+                    periode = vilkårPeriode;
+                }
+            }
+            if (periode != null) {
+                vilkårPerioder.add(periode);
+            }
+            return vilkårPerioder;
+        }
+        return vilkårsPerioderRaw;
+    }
+
+    private boolean harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(List<VilkårPeriode> vilkårsPerioderRaw) {
+        return vilkårsPerioderRaw.stream()
+            .filter(it -> !it.getErOverstyrt())
+            .filter(it -> Utfall.IKKE_VURDERT.equals(it.getGjeldendeUtfall()))
+            .anyMatch(it -> vilkårsPerioderRaw.stream()
+                .filter(p -> !p.getErOverstyrt())
+                .map(VilkårPeriode::getPeriode)
+                .filter(at -> !at.equals(it.getPeriode()))
+                .anyMatch(p -> p.grenserTil(it.getPeriode())));
+    }
+
+    private boolean enAvPeriodeneErTilVurdering(VilkårPeriode periode, VilkårPeriode vilkårPeriode) {
+        return Utfall.IKKE_VURDERT.equals(periode.getUtfall()) || Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall());
     }
 }
