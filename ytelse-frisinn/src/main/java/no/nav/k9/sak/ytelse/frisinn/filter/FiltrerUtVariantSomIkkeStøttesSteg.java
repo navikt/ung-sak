@@ -22,6 +22,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -61,9 +62,12 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .orElseThrow();
         var uttakGrunnlag = uttakRepository.hentGrunnlag(behandlingId);
 
+        return filtrerBehandlinger(uttakGrunnlag, oppgittOpptjening);
+    }
+
+    BehandleStegResultat filtrerBehandlinger(Optional<UttakGrunnlag> uttakGrunnlag, OppgittOpptjening oppgittOpptjening) {
         var frilans = oppgittOpptjening.getFrilans();
         var næring = oppgittOpptjening.getEgenNæring();
-
         var harFrilansInntekter = harFrilansInntekter(frilans);
         var søkerKompensasjonForFrilans = harSøktKompensasjonForFrilans(uttakGrunnlag);
         boolean ikkeNyOppstartetFrilans = frilans.map(this::erFrilansOgIkkeNyOppstartet).orElse(true);
