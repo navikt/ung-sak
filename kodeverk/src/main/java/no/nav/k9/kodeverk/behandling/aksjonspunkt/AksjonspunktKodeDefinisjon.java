@@ -101,6 +101,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // FRISINN
     public static final String AUTO_VENT_FRISINN_INGEN_PERIODER_UTEN_YTELSE = "8000";
+    public static final String AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET = "8003";
 
 
     // Andre koder
