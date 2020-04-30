@@ -15,6 +15,8 @@ import org.jboss.weld.exceptions.UnsupportedOperationException;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -96,16 +98,18 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
             .startBeregning(ref, ytelseGrunnlag);
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         if (vilkårOppfylt != null && !vilkårOppfylt) {
-            return avslåVilkår(kontekst, ref);
+            return avslåVilkår(kontekst, ref, kalkulusResultat.getAvslagsårsak());
         } else {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
         }
     }
 
-    private BehandleStegResultat avslåVilkår(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+    private BehandleStegResultat avslåVilkår(BehandlingskontrollKontekst kontekst,
+                                             BehandlingReferanse ref,
+                                             Avslagsårsak avslagsårsak) {
         var vilkårsPeriode = behandletPeriodeTjeneste.utledPeriode(ref);
         var orginalVilkårsPeriode = behandletPeriodeTjeneste.utledOrginalVilkårsPeriode(ref);
-        beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, false, vilkårsPeriode, orginalVilkårsPeriode);
+        beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårsPeriode, orginalVilkårsPeriode, avslagsårsak);
         return BehandleStegResultat.fremoverført(FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
     }
 

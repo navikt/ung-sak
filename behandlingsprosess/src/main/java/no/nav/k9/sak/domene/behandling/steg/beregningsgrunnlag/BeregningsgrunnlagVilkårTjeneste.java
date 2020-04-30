@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -28,9 +29,9 @@ import no.nav.vedtak.konfig.Tid;
 @ApplicationScoped
 class BeregningsgrunnlagVilkårTjeneste {
 
-    private BehandlingRepository behandlingRepository;
+    protected BehandlingRepository behandlingRepository;
     private VedtakVarselRepository behandlingsresultatRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
+    protected VilkårResultatRepository vilkårResultatRepository;
 
     protected BeregningsgrunnlagVilkårTjeneste() {
         // CDI Proxy
@@ -45,7 +46,26 @@ class BeregningsgrunnlagVilkårTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst, boolean vilkårOppfylt, DatoIntervallEntitet vilkårsPeriode, DatoIntervallEntitet orginalVilkårsPeriode) {
+    void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
+                             DatoIntervallEntitet vilkårsPeriode,
+                             DatoIntervallEntitet orginalVilkårsPeriode,
+                                    Avslagsårsak avslagsårsak) {
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        VilkårResultatBuilder vilkårResultatBuilder = opprettAvslåttVilkårsResultat(
+            vilkårene,
+            vilkårsPeriode,
+            orginalVilkårsPeriode,
+            avslagsårsak);
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+    }
+
+    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
+                             boolean vilkårOppfylt,
+                             DatoIntervallEntitet vilkårsPeriode,
+                             DatoIntervallEntitet orginalVilkårsPeriode) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode, orginalVilkårsPeriode);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -73,6 +93,31 @@ class BeregningsgrunnlagVilkårTjeneste {
         behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+    }
+
+
+    private VilkårResultatBuilder opprettAvslåttVilkårsResultat(Vilkårene vilkårene,
+                                                                DatoIntervallEntitet vilkårsPeriode,
+                                                                DatoIntervallEntitet orginalVilkårsPeriode,
+                                                                Avslagsårsak avslagsårsak) {
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        if (!vilkårsPeriode.equals(orginalVilkårsPeriode)) {
+            vilkårBuilder.tilbakestill(orginalVilkårsPeriode);
+        }
+        finnVilkårUtfallMerknad(avslagsårsak);
+        vilkårBuilder
+            .leggTil(vilkårBuilder
+                .hentBuilderFor(vilkårsPeriode)
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medMerknad(finnVilkårUtfallMerknad(avslagsårsak))
+                .medAvslagsårsak(avslagsårsak));
+        builder.leggTil(vilkårBuilder);
+        return builder;
+    }
+
+    private VilkårUtfallMerknad finnVilkårUtfallMerknad(Avslagsårsak avslagsårsak) {
+        return VilkårUtfallMerknad.fraKode(avslagsårsak.getKode());
     }
 
 
