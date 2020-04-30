@@ -1,5 +1,6 @@
 package no.nav.k9.sak.metrikker;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ class StatistikkRepository {
             Map.of(
                 "aksjonspunkt", t.get(0, String.class),
                 "ytelse_type", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(2, Long.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toList());
 
     }
 
@@ -59,7 +60,7 @@ class StatistikkRepository {
                 "aksjonspunkt", t.get(0, String.class),
                 "ytelse_type", t.get(1, String.class),
                 "vent_aarsak", t.get(2, String.class)),
-            Map.of("totalt_antall", t.get(3, Long.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -82,7 +83,7 @@ class StatistikkRepository {
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
                 "behandling_status", t.get(2, String.class)),
-            Map.of("totalt_antall", t.get(3, Long.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -97,6 +98,6 @@ class StatistikkRepository {
             Map.of(
                 "prosess_task_type", t.get(0, String.class),
                 "status", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(2, Long.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toList());
     }
 }
