@@ -1,0 +1,1 @@
+Insert into PROSESS_TASK_TYPE (KODE,NAVN,FEIL_MAKS_FORSOEK,FEIL_SEK_MELLOM_FORSOEK,FEILHANDTERING_ALGORITME,BESKRIVELSE,CRON_EXPRESSION) values ('sensu.metrikk.task','Publiserer diverse statistikk via sensu klient',20,60,'DEFAULT','Publiserer diverse statistikk via sensu klient', '0 */5 * * * *');
