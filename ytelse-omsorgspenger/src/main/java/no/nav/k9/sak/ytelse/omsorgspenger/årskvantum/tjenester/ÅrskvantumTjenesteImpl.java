@@ -155,7 +155,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                 fraværPeriode.getFraværPerDag(),
                 true,
                 kreverRefusjon,
-                wrappedOppgittFraværPeriode.getErAvslått() ? Utfall.AVSLÅTT : Utfall.UAVKLART);
+                wrappedOppgittFraværPeriode.getErAvslått() ? Utfall.AVSLÅTT : Utfall.INNVILGET);
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
