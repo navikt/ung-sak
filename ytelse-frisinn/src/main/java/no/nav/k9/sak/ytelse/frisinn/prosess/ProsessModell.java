@@ -26,6 +26,7 @@ public class ProsessModell {
         modellBuilder.medSteg(
             BehandlingStegType.START_STEG,
             BehandlingStegType.VURDER_KOMPLETTHET,
+            BehandlingStegType.VARIANT_FILTER,
             BehandlingStegType.INIT_VILKÅR,
             BehandlingStegType.INNHENT_REGISTEROPP,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
@@ -53,6 +54,7 @@ public class ProsessModell {
             BehandlingStegType.START_STEG,
             BehandlingStegType.VARSEL_REVURDERING,
             BehandlingStegType.VURDER_KOMPLETTHET,
+            BehandlingStegType.VARIANT_FILTER,
             BehandlingStegType.INIT_VILKÅR,
             BehandlingStegType.INNHENT_REGISTEROPP,
             BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
