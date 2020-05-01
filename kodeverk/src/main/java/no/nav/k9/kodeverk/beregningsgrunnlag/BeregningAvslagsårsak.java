@@ -20,7 +20,7 @@ public enum BeregningAvslagsårsak implements Kodeverdi {
 
     SØKT_FL_INGEN_FL_INNTEKT("SØKT_FL_INGEN_FL_INNTEKT", "Søkt frilans uten frilansinntekt"),
     FOR_LAVT_BG("FOR_LAVT_BG", "For lavt beregningsgrunnlag"),
-
+    AVKORTET_GRUNNET_ANNEN_INNTEKT("AVKORTET_GRUNNET_ANNEN_INNTEKT", "Avkortet grunnet annen inntekt"),
     UNDEFINED,;
 
     static final String KODEVERK = "BEREGNING_AVSLAG_ÅRSAK";

@@ -301,6 +301,8 @@ public class KalkulusTjeneste implements BeregningTjeneste {
             return Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT;
         } else if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG.getKode())) {
             return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG;
+        } else if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT.getKode())) {
+            return Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT;
         }
         return Avslagsårsak.UDEFINERT;
     }
