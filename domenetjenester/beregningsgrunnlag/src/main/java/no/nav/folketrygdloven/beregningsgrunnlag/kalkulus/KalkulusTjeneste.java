@@ -289,7 +289,7 @@ public class KalkulusTjeneste implements BeregningTjeneste {
         KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
         if (tilstandResponse.getVilkarOppfylt() != null) {
             if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
-                kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse));
+                return kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse));
             }
             return kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
         }
