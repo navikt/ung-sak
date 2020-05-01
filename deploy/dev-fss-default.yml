@@ -91,44 +91,23 @@ spec:
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
-    - name: KAFKA_AKSJONSPUNKTHENDELSE_CLIENT_ID
-      value: KP-privat-k9-aksjonspunkthendelse
-    - name: KAFKA_AKSJONSPUNKTHENDELSE_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.preprod.local
-    - name: KAFKA_AKSJONSPUNKTHENDELSE_GROUP_ID
-      value: KC-privat-k9-aksjonspunkthendelse-q1
     - name: KAFKA_HISTORIKKINNSLAG_TOPIC
       value: privat-k9-historikkinnslag-q1
     - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
       value: privat-k9-risk-utfor-q1
-    - name: KAFKA_RISIKOKLASSIFISERING_CLIENT_ID
-      value: KP-privat-k9-risk-utfor-q1
-    - name: KAFKA_RISIKOKLASSIFISERING_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.preprod.local
-    - name: KAFKA_RISIKOKLASSIFISERING_GROUP_ID
-      value: KC-privat-k9-risk-utfor-q1
     - name: KAFKA_KONTROLL_RESULTAT_TOPIC
       value: privat-k9-kontroll-resultat-q1
-    - name: KAFKA_KONTROLL_RESULTAT_CLIENT_ID
-      value: KP-privat-k9-kontroll-resultat-q1
-    - name: KAFKA_KONTROLL_RESULTAT_SCHEMA_REGISTRY_URL
-      value: https://kafka-test-schema-registry.nais.preprod.local
-    - name: KAFKA_KONTROLL_RESULTAT_GROUP_ID
-      value: KC-privat-k9-kontroll-resultat-q1
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
-    - name: KAFKA_DOKUMENTBESTILLING_CLIENT_ID
-      value: KP-privat-k9-dokumenthendelse
-    - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: privat-familie-vedtakFattet-v1-q1
+    - name: KAFKA_TILKJENTYTELSE_V1_TOPIC
+      value: privat-k9-tilkjentytelse-v1-q1
+      
+    # Baseurl
     - name: SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.preprod.local
-
-    # Baseurl
     - name: BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-    - name: FP_TILKJENTYTELSE_V1_TOPIC_URL
-      value: privat-k9-tilkjentytelse-v1-q1
+
 
     # Loadbalancerconfig
     - name: LOADBALANCER_FQDN
@@ -177,8 +156,6 @@ spec:
       value: http://k9-aarskvantum
     - name: KAFKA_INFOTRYGDFEED_TOPIC
       value: privat-k9-infotrygdFeedHendelse
-    - name: KAFKA_INFOTRYGDFEED_CLIENT_ID
-      value: k9-sak
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
 

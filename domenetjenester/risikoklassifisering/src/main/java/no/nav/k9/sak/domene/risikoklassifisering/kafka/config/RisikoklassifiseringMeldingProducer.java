@@ -16,9 +16,8 @@ class RisikoklassifiseringMeldingProducer extends GenerellMeldingProducer implem
     public RisikoklassifiseringMeldingProducer(@KonfigVerdi("kafka.risikoklassifisering.topic") String topic,
                                                @KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                                @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                               @KonfigVerdi("kafka.risikoklassifisering.client.id") String clientId,
                                                @KonfigVerdi("systembruker.username") String username,
                                                @KonfigVerdi("systembruker.password") String password) {
-        super(topic, bootstrapServers, schemaRegistryUrl, clientId, username, password);
+        super(topic, bootstrapServers, schemaRegistryUrl, "KP-" + topic, username, password);
     }
 }
