@@ -134,7 +134,7 @@ public class Endringskontroller {
     private void avsluttOppgaverIGsak(Behandling behandling, BehandlingStatus før) {
         boolean behandlingIFatteVedtak = BehandlingStatus.FATTER_VEDTAK.equals(før);
         if (behandlingIFatteVedtak) {
-            oppgaveTjeneste.avslutt(behandling.getId(), OppgaveÅrsak.GODKJENNE_VEDTAK);
+            oppgaveTjeneste.avslutt(behandling.getId(), OppgaveÅrsak.GODKJENN_VEDTAK_VL);
         }
     }
 

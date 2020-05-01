@@ -1,6 +1,5 @@
 package no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak.VURDER_DOKUMENT;
 import static no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderDokumentTask.TASKTYPE;
 
 import java.util.Optional;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
@@ -44,14 +44,14 @@ public class OpprettOppgaveVurderDokumentTask extends FagsakProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandlendeEnhet = prosessTaskData.getPropertyValue(KEY_BEHANDLENDE_ENHET);
         DokumentTypeId dokumentGruppe = Optional.ofNullable(prosessTaskData.getPropertyValue(KEY_DOKUMENT_TYPE))
-            .map(dtid -> DokumentTypeId.fraKode(dtid)).orElse(DokumentTypeId.UDEFINERT);
+            .map(DokumentTypeId::fraKode).orElse(DokumentTypeId.UDEFINERT);
         String beskrivelse = dokumentGruppe.getNavn();
         if (beskrivelse == null) {
             beskrivelse = dokumentGruppe.getKode();
         }
 
         String oppgaveId = oppgaveTjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(prosessTaskData.getFagsakId(),
-            VURDER_DOKUMENT, behandlendeEnhet, "VL: " + beskrivelse, false);
+            OppgaveÅrsak.VURDER_DOKUMENT_VL, behandlendeEnhet, "VL: " + beskrivelse, false);
         log.info("Oppgave opprettet i GSAK for å vurdere dokument på enhet {}. Oppgavenummer: {}", behandlendeEnhet, oppgaveId);
     }
 }

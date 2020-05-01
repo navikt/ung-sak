@@ -46,7 +46,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     @Override
     public void opprettIverksettingstasker(Behandling behandling, Optional<String> initiellTaskNavn) {
         Optional<ProsessTaskData> avsluttOppgave = oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling,
-            behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK, false);
+            behandling.erRevurdering() ? OppgaveÅrsak.REVURDER_VL : OppgaveÅrsak.BEHANDLE_SAK_VL, false);
         Optional<ProsessTaskData> initiellTask = Optional.empty();
         if (initiellTaskNavn.isPresent()) {
             initiellTask = Optional.of(new ProsessTaskData(initiellTaskNavn.get()));

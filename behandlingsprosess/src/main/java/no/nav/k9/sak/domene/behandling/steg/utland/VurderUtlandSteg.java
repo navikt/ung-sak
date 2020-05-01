@@ -69,7 +69,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
     }
 
     private void opprettOppgaveForInnhentingAvDokumentasjon(Behandling behandling) {
-        OppgaveÅrsak oppgaveÅrsak = OppgaveÅrsak.BEHANDLE_SAK;
+        OppgaveÅrsak oppgaveÅrsak = OppgaveÅrsak.BEHANDLE_SAK_VL;
         AksjonspunktDefinisjon aksjonspunktDef = AUTOMATISK_MARKERING_AV_UTENLANDSSAK;
         oppgaveTjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), oppgaveÅrsak,
             behandling.getBehandlendeEnhet(), aksjonspunktDef.getNavn(), false);

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak.VURDER_KONS_FOR_YTELSE;
 import static no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderKonsekvensTask.TASKTYPE;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -9,6 +8,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
@@ -54,7 +54,7 @@ public class OpprettOppgaveVurderKonsekvensTask extends FagsakProsessTask {
         String beskrivelse = prosessTaskData.getPropertyValue(KEY_BESKRIVELSE);
         String prioritet = prosessTaskData.getPropertyValue(KEY_PRIORITET);
         boolean høyPrioritet = PRIORITET_HØY.equals(prioritet);
-        String oppgaveId = oppgaveTjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(prosessTaskData.getFagsakId(), VURDER_KONS_FOR_YTELSE, behandlendeEnhet, beskrivelse, høyPrioritet);
+        String oppgaveId = oppgaveTjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(prosessTaskData.getFagsakId(), OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, behandlendeEnhet, beskrivelse, høyPrioritet);
         log.info("Oppgave opprettet i GSAK for å vurdere konsekvens for ytelse på enhet {}. Oppgavenummer: {}. Prioritet: {}", behandlendeEnhet, oppgaveId, prioritet); // NOSONAR
     }
 }

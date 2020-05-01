@@ -18,15 +18,16 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum OppgaveÅrsak implements Kodeverdi {
 
-    BEHANDLE_SAK("BEH_SAK_VL", "Behandle sak i VL"),
-    BEHANDLE_SAK_INFOTRYGD("BEH_SAK_FOR", "Behandle sak i Infotrygd"),
-    BEHANDLE_SAK_INFOTRYGD_OMS("BEH_SAK_OMS", "Behandle sak(OMS) i Infotrygd"),
-    SETT_ARENA_UTBET_VENT("SETTVENT_STO", "Sett Arena utbetaling på vent"),
-    GODKJENNE_VEDTAK("GOD_VED_VL", "Godkjenne vedtak i VL"),
-    REVURDER("RV_VL", "Revurdere i VL"),
-    VURDER_DOKUMENT("VUR_VL", "Vurder dokument i VL"),
-    VURDER_KONS_FOR_YTELSE("VUR_KONS_YTE_FOR", "Vurder konsekvens for ytelse foreldrepenger"),
-    VURDER_KONS_OMS_YTELSE("VUR_KONS_YTE_OMS", "Vurder konsekvens for OMS-ytelser"),
+    BEHANDLE_SAK_VL("BEH_SAK_VL", "Behandle sak i VL"),
+    REVURDER_VL("RV_VL", "Revurdere i VL"),
+    GODKJENN_VEDTAK_VL("GOD_VED_VL", "Godkjenne vedtak i VL"),
+    REG_SOKNAD_VL("REG_SOK_VL", "Registrere søknad i VL"),
+    VURDER_KONSEKVENS_YTELSE("VUR_KONS_YTE", "Vurder konsekvens for ytelse"),
+    VURDER_DOKUMENT_VL("VUR_VL", "Vurder dokument i VL"),
+    FEILUTBETALING("FEILUTBET", "Feilutbetalingsvedtak"),
+    INNHENT_DOK("INNH_DOK", "Innhent dokumentasjon"),
+    SETTVENT("SETTVENT", "Sett utbetaling på vent"),
+    BEHANDLE_SAK_IT("BEH_SAK", "Behandle sak"),
     UDEFINERT("-", "Ikke definert"),
     ;
 
@@ -34,9 +35,16 @@ public enum OppgaveÅrsak implements Kodeverdi {
 
     private static final Map<String, OppgaveÅrsak> KODER = new LinkedHashMap<>();
 
+    static {
+        for (var v : values()) {
+            if (KODER.putIfAbsent(v.kode, v) != null) {
+                throw new IllegalArgumentException("Duplikat : " + v.kode);
+            }
+        }
+    }
+
     @JsonIgnore
     private String navn;
-
     private String kode;
 
     private OppgaveÅrsak(String kode, String navn) {
@@ -60,13 +68,13 @@ public enum OppgaveÅrsak implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
+    public static void main(String[] args) {
+        System.out.println(KODER.keySet());
+    }
+
     @Override
     public String getNavn() {
         return navn;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -84,14 +92,6 @@ public enum OppgaveÅrsak implements Kodeverdi {
     @Override
     public String getOffisiellKode() {
         return getKode();
-    }
-
-    static {
-        for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
-            }
-        }
     }
 
 }

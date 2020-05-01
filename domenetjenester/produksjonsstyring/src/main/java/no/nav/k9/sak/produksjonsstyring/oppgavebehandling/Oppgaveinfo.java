@@ -4,10 +4,10 @@ import java.util.Objects;
 
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
-public class Oppgaveinfo{
+public class Oppgaveinfo {
 
-    public static final Oppgaveinfo VURDER_KONST_YTELSE_OMSORGSPENGER = new Oppgaveinfo("VUR_KONS_YTE_OMS", null);
-    public static final Oppgaveinfo VURDER_DOKUMENT = new Oppgaveinfo(OppgaveÅrsak.VURDER_DOKUMENT.getKode(), null);
+    public static final Oppgaveinfo VURDER_KONST_YTELSE = new Oppgaveinfo(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode(), null);
+    public static final Oppgaveinfo VURDER_DOKUMENT = new Oppgaveinfo(OppgaveÅrsak.VURDER_DOKUMENT_VL.getKode(), null);
 
     private String oppgaveType;
     private String status;
@@ -27,8 +27,8 @@ public class Oppgaveinfo{
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof  Oppgaveinfo){
-            return oppgaveType.equals(((Oppgaveinfo)obj).getOppgaveType());
+        if (obj instanceof Oppgaveinfo) {
+            return oppgaveType.equals(((Oppgaveinfo) obj).getOppgaveType());
         }
         return false;
     }
