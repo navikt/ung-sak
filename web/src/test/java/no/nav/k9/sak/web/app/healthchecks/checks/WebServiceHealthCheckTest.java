@@ -49,8 +49,6 @@ public class WebServiceHealthCheckTest {
         assertThat(res.getException()).isNotNull();
     }
 
-    //-----------
-
     private static class MyWebServiceHealthCheck extends WebServiceHealthCheck {
 
         private boolean shouldThrowWebServiceException = false;

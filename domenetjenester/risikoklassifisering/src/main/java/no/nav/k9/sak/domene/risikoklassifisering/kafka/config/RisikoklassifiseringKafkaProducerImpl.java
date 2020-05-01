@@ -9,7 +9,7 @@ class RisikoklassifiseringKafkaProducerImpl implements RisikoklassifiseringKafka
     private MeldingProducer meldingProducer;
 
     RisikoklassifiseringKafkaProducerImpl(){
-
+        // for proxy
     }
 
     @Inject

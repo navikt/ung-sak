@@ -36,14 +36,13 @@ public class AksjonspunktKafkaProducer {
     public AksjonspunktKafkaProducer(@KonfigVerdi("kafka.aksjonspunkthendelse.topic") String topic,
                                        @KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                        @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                       @KonfigVerdi("kafka.aksjonspunkthendelse.client.id") String clientId,
                                        @KonfigVerdi("systembruker.username") String username,
                                        @KonfigVerdi("systembruker.password") String password) {
         Properties properties = new Properties();
 
         properties.setProperty("bootstrap.servers", bootstrapServers);
         properties.setProperty("schema.registry.url", schemaRegistryUrl);
-        properties.setProperty("client.id", clientId);
+        properties.setProperty("client.id", "KP-" + topic);
 
         setSecurity(username, properties);
         setUsernameAndPassword(username, password, properties);

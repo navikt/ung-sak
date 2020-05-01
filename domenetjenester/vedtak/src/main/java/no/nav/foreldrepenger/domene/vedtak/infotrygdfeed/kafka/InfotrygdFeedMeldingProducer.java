@@ -15,9 +15,8 @@ public class InfotrygdFeedMeldingProducer extends GenerellMeldingProducer {
     public InfotrygdFeedMeldingProducer(@KonfigVerdi("kafka.infotrygdfeed.topic") String topic,
                                         @KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                         @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
-                                        @KonfigVerdi("kafka.infotrygdfeed.client.id") String clientId,
                                         @KonfigVerdi("systembruker.username") String username,
                                         @KonfigVerdi("systembruker.password") String password) {
-        super(topic, bootstrapServers, schemaRegistryUrl, clientId, username, password);
+        super(topic, bootstrapServers, schemaRegistryUrl, "KP-" + topic, username, password);
     }
 }
