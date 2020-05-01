@@ -56,7 +56,8 @@ import no.nav.k9.sak.domene.medlem.api.FinnMedlemRequest;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.DefaultRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleiepengerRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -85,7 +86,9 @@ public class RegisterdataInnhenter {
             INNTEKT_BEREGNINGSGRUNNLAG,
             INNTEKT_SAMMENLIGNINGSGRUNNLAG));
 
-    private Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> relasjonsFiltrering = Map.of(FagsakYtelseType.PSB, new PleiepengerRelasjonsFilter());
+    private final Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> relasjonsFiltrering = Map.of(
+        FagsakYtelseType.PSB, new PleiepengerRelasjonsFilter(),
+        FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter());
 
     private PersoninfoAdapter personinfoAdapter;
     private MedlemTjeneste medlemTjeneste;
@@ -167,13 +170,18 @@ public class RegisterdataInnhenter {
 
         mapTilPersonopplysning(søkerPersonInfo, informasjonBuilder, true, false, behandling);
 
-        // legg til pleietrengende
-        leggTilPleietrengende(informasjonBuilder, behandling);
-
-        // Ektefelle
-        leggTilEktefelle(søkerPersonInfo, informasjonBuilder, behandling);
+        if (erIkkeFRISINN(behandling)) {
+            // legg til pleietrengende
+            leggTilPleietrengende(informasjonBuilder, behandling);
+            // Ektefelle
+            leggTilEktefelle(søkerPersonInfo, informasjonBuilder, behandling);
+        }
 
         return informasjonBuilder;
+    }
+
+    private boolean erIkkeFRISINN(Behandling behandling) {
+        return !FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType());
     }
 
     private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
@@ -350,7 +358,7 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        var relasjonsFilter = relasjonsFiltrering.getOrDefault(behandling.getFagsakYtelseType(), new DefaultRelasjonsFilter());
+        var relasjonsFilter = relasjonsFiltrering.getOrDefault(behandling.getFagsakYtelseType(), new IngenRelasjonFilter());
 
         return relaterteBarn.stream()
             .filter(it -> relasjonsFilter.relasjonsFiltrering(behandling, it))
@@ -429,7 +437,7 @@ public class RegisterdataInnhenter {
         var informasjonsElementer = utledBasertPå(behandlingType, fagsakYtelseType);
         var periode = new Periode(opplysningsperiode.getFom(), opplysningsperiode.getTom());
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
-        
+
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
 
