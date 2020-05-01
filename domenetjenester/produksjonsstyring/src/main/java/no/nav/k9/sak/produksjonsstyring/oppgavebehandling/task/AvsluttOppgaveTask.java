@@ -33,6 +33,6 @@ public class AvsluttOppgaveTask extends BehandlingProsessTask {
         String oppgaveId = prosessTaskData.getOppgaveId()
             .orElseThrow(() -> new IllegalStateException("Mangler oppgaveId"));
 
-        oppgaveTjeneste.avslutt(prosessTaskData.getBehandlingId(), oppgaveId);
+        oppgaveTjeneste.avslutt(Long.valueOf(prosessTaskData.getBehandlingId()), oppgaveId);
     }
 }

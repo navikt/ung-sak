@@ -25,7 +25,7 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
-		        
+
         <!-- Integrasjon klient avhengigheter -->
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
@@ -33,11 +33,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>behandleoppgave-klient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>oppgave-klient</artifactId>
+            <artifactId>oppgave-rest-klient</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>

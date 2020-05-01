@@ -57,7 +57,7 @@ public class OpprettOppgaveVurderKonsekvensTaskTest {
         verify(oppgaveTjeneste).opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(fagsakIdCaptor.capture(), årsakCaptor.capture(), any(),
                 beskrivelseCaptor.capture(), Mockito.eq(false));
         assertThat(fagsakIdCaptor.getValue()).isEqualTo(FAGSAK_ID);
-        assertThat(årsakCaptor.getValue()).isEqualTo(OppgaveÅrsak.VURDER_KONS_FOR_YTELSE);
+        assertThat(årsakCaptor.getValue()).isEqualTo(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE);
         assertThat(beskrivelseCaptor.getValue()).isEqualTo(OpprettOppgaveVurderKonsekvensTask.STANDARD_BESKRIVELSE);
     }
 }

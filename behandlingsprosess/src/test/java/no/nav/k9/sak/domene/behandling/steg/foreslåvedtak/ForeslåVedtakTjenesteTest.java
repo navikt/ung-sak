@@ -88,7 +88,7 @@ public class ForeslåVedtakTjenesteTest {
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
-        when(oppgaveTjeneste.hentOppgaveListe(any(AktørId.class), any())).thenReturn(oppgaveinfoerSomReturneres);
+        when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
 
         SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste = new SjekkMotEksisterendeOppgaverTjeneste(historikkRepository, oppgaveTjeneste);
         tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotEksisterendeOppgaverTjeneste);
@@ -170,7 +170,7 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void lagerRiktigAksjonspunkterNårDetErOppgaveriGsak() {
         // Arrange
-        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER);
+        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE);
         oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_DOKUMENT);
 
         // Act
@@ -190,7 +190,7 @@ public class ForeslåVedtakTjenesteTest {
         var aksjonspunkt = leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
         Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
 
-        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE_OMSORGSPENGER);
+        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE);
         oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_DOKUMENT);
 
         // Act

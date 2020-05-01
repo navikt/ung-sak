@@ -51,10 +51,10 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-    
+
     @Inject
     private BehandlingRepository behandlingRepository;
-    
+
     @Inject
     private BehandlingskontrollServiceProvider behandlingskontrollServiceProvider;
 
@@ -132,7 +132,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
     public void skal_sette_behandling_med_oppgave_pa_vent_og_opprette_task_avslutt_oppgave() {
         // Arrange
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        OppgaveBehandlingKobling oppgave = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK, "1",
+        OppgaveBehandlingKobling oppgave = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "1",
             behandling.getFagsak().getSaksnummer(), behandling);
         oppgaveBehandlingKoblingRepository.lagre(oppgave);
 
