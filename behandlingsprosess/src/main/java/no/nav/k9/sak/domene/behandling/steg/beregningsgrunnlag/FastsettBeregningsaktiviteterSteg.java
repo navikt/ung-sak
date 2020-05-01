@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import static no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -98,7 +99,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
             .startBeregning(ref, ytelseGrunnlag);
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         if (vilkårOppfylt != null && !vilkårOppfylt) {
-            return avslåVilkår(kontekst, ref, kalkulusResultat.getAvslagsårsak());
+            return avslåVilkår(kontekst, ref, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat));
         } else {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
         }

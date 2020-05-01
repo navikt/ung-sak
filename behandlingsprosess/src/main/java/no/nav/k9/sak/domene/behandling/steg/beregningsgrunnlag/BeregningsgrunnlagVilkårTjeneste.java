@@ -104,7 +104,6 @@ class BeregningsgrunnlagVilkårTjeneste {
         if (!vilkårsPeriode.equals(orginalVilkårsPeriode)) {
             vilkårBuilder.tilbakestill(orginalVilkårsPeriode);
         }
-        finnVilkårUtfallMerknad(avslagsårsak);
         vilkårBuilder
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)

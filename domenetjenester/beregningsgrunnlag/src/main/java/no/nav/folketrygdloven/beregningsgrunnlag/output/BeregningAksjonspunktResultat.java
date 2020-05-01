@@ -15,7 +15,6 @@ public class BeregningAksjonspunktResultat {
     private BeregningVenteårsak venteårsak;
     private LocalDateTime ventefrist;
 
-
     private BeregningAksjonspunktResultat(BeregningAksjonspunktDefinisjon aksjonspunktDefinisjon) {
         this.beregningAksjonspunktDefinisjon = aksjonspunktDefinisjon;
     }
@@ -61,8 +60,11 @@ public class BeregningAksjonspunktResultat {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + beregningAksjonspunktDefinisjon.getKode() + ":" + beregningAksjonspunktDefinisjon.getNavn()
-            + ", venteårsak=" + getVenteårsak() + ", ventefrist=" + getVentefrist() + ">";
+        return getClass().getSimpleName() + "<" +
+            beregningAksjonspunktDefinisjon.getKode() + ":" + beregningAksjonspunktDefinisjon.getNavn() +
+            ", venteårsak=" + getVenteårsak() +
+            ", ventefrist=" + getVentefrist() +
+            ">";
     }
 
     @Override
