@@ -110,7 +110,6 @@ spec:
     - name: BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
-
     # Loadbalancerconfig
     - name: LOADBALANCER_FQDN
       value: app-q1.adeo.no
