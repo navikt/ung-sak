@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -33,8 +35,11 @@ import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårRe
 public class VurderOpptjeningsvilkårSteg extends VurderOpptjeningsvilkårStegFelles {
 
     @Inject
-    public VurderOpptjeningsvilkårSteg(BehandlingRepositoryProvider repositoryProvider, OpptjeningRepository opptjeningRepository, InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste) {
-        super(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR);
+    public VurderOpptjeningsvilkårSteg(BehandlingRepositoryProvider repositoryProvider,
+                                       OpptjeningRepository opptjeningRepository,
+                                       InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
+                                       @Any Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer) {
+        super(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, automatiskAvslagHåndterer);
     }
 
 

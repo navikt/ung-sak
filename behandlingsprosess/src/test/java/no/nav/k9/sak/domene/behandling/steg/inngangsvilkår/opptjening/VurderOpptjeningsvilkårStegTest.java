@@ -32,6 +32,7 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 @RunWith(CdiRunner.class)
@@ -71,7 +72,7 @@ public class VurderOpptjeningsvilkårStegTest {
             .utførSteg(kontekst);
 
         // vurder vilkåret
-        new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste)
+        new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, new UnitTestLookupInstanceImpl<>(new DefaultHåndtereAutomatiskAvslag()))
             .utførSteg(kontekst);
     }
 
@@ -79,7 +80,7 @@ public class VurderOpptjeningsvilkårStegTest {
     public void skal_gi_steg_utført_ved_ikke_alle_avslått() {
         var fagsak = new Fagsak(FagsakYtelseType.PSB, AktørId.dummy(), new Saksnummer("1234"));
         var behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        var steg = new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste);
+        var steg = new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, new UnitTestLookupInstanceImpl<>(new DefaultHåndtereAutomatiskAvslag()));
         var vilkåret = new VilkårBuilder()
             .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .build();
@@ -95,7 +96,7 @@ public class VurderOpptjeningsvilkårStegTest {
         var fagsak = new Fagsak(FagsakYtelseType.PSB, AktørId.dummy(), new Saksnummer("1234"));
         var behandling = Behandling.forFørstegangssøknad(fagsak).build();
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
-        var steg = new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste);
+        var steg = new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, new UnitTestLookupInstanceImpl<>(new DefaultHåndtereAutomatiskAvslag()));
         var vilkåret = new VilkårBuilder()
             .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder()

@@ -5,12 +5,13 @@ import static java.util.Collections.singletonList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.enterprise.inject.Instance;
+
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -27,6 +28,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     protected static final VilkårType OPPTJENINGSVILKÅRET = VilkårType.OPPTJENINGSVILKÅRET;
     private static List<VilkårType> STØTTEDE_VILKÅR = singletonList(OPPTJENINGSVILKÅRET);
     protected BehandlingRepositoryProvider repositoryProvider;
+    private Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer;
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
 
@@ -37,11 +39,13 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     public VurderOpptjeningsvilkårStegFelles(BehandlingRepositoryProvider repositoryProvider,
                                              OpptjeningRepository opptjeningRepository,
                                              InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
-                                             BehandlingStegType behandlingStegType) {
+                                             BehandlingStegType behandlingStegType,
+                                             Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer) {
         super(repositoryProvider, inngangsvilkårFellesTjeneste, behandlingStegType);
         this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.repositoryProvider = repositoryProvider;
+        this.automatiskAvslagHåndterer = automatiskAvslagHåndterer;
     }
 
     @Override
@@ -60,10 +64,10 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     }
 
     private void håndtereAutomatiskAvslag(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        if (FagsakYtelseType.PSB.equals(behandling.getFagsakYtelseType())
-            && regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
+        if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
             // Legger til aksjonspunspunkt for å håndtere eventuelle 8-47 innvilgelser
-            regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+            var håndterer = FagsakYtelseTypeRef.Lookup.find(automatiskAvslagHåndterer, behandling.getFagsakYtelseType()).orElseThrow();
+            håndterer.håndter(behandling, regelResultat, periode);
         }
     }
 
