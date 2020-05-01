@@ -103,7 +103,7 @@ spec:
       value: privat-k9-tilkjentytelse-v1-q1
     - name: KAFKA_INFOTRYGDFEED_TOPIC
       value: privat-k9-infotrygdFeedHendelse
-      
+
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais.preprod.local
@@ -144,11 +144,11 @@ spec:
       value: http://fptilbake.q1/fptilbake/api/behandlinger/tilbakekreving/aapen
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
-      
+
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum
-	
+
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
       value: http://pleiepenger-barn-uttak/pleiepenger-barn-uttak
@@ -156,7 +156,7 @@ spec:
     # Graphql services
     - name: SAF_BASE_URL
       value: http://saf.q1
-      
+
     # Web services
     - name: AKTOER_V2_URL
       value: https://app-q1.adeo.no/aktoerregister/ws/Aktoer/v2
