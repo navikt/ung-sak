@@ -190,4 +190,4 @@ spec:
 
     # Feature-flag
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
-      value: "false"
+      value: "true"
