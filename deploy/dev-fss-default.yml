@@ -163,10 +163,6 @@ spec:
       value: https://app-q1.adeo.no/aktoerregister/ws/Aktoer/v2
     - name: PERSON_V3_URL
       value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
-    - name: BEHANDLESAK_V2_URL
-      value: https://wasapp-q1.adeo.no/nav-gsak-ws/BehandleSakV2
-    - name: SAK_V1_URL
-      value: https://wasapp-q1.adeo.no/nav-gsak-ws/SakV1
     - name: ORGANISASJON_V4_URL
       value: https://modapp-q1.adeo.no/ereg/ws/OrganisasjonService/v4
     - name: MEDLEM_V2_URL
