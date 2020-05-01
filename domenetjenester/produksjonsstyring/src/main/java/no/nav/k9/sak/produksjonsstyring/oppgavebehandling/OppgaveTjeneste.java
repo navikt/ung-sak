@@ -29,7 +29,6 @@ import no.nav.vedtak.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
 import no.nav.vedtak.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.vedtak.felles.integrasjon.oppgave.v1.Prioritet;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
@@ -38,7 +37,6 @@ public class OppgaveTjeneste {
     public static final Set<FagsakYtelseType> OMS_YTELSER = Set.of(FagsakYtelseType.OMP, FagsakYtelseType.PSB, FagsakYtelseType.OPPLÆRINGSPENGER, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjeneste.class);
     private static final int DEFAULT_OPPGAVEFRIST_DAGER = 1;
-    private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL!";
 
     private static final String SAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Sak må flyttes til Infotrygd";
 
@@ -67,46 +65,6 @@ public class OppgaveTjeneste {
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
         this.restKlient = restKlient;
         this.prosessTaskRepository = prosessTaskRepository;
-    }
-
-    /*
-     * Oppgave som lagres i OBK: BEH_SAK_VL, RV_VL, GOD_VED_VL, REG_SOK_VL
-     */
-    public String opprettBasertPåBehandlingId(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return opprettOppgave(behandling, oppgaveÅrsak, DEFAULT_OPPGAVEBESKRIVELSE, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER);
-    }
-
-    public String opprettBehandleOppgaveForBehandling(Long behandlingId) {
-        return opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(behandlingId, DEFAULT_OPPGAVEBESKRIVELSE, false, DEFAULT_OPPGAVEFRIST_DAGER);
-    }
-
-    public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(Long behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER_VL : OppgaveÅrsak.BEHANDLE_SAK_VL;
-        return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, høyPrioritet ? Prioritet.HOY : Prioritet.NORM, fristDager);
-    }
-
-    private String opprettOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String beskrivelse, Prioritet prioritet, int fristDager) {
-        List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandling.getId());
-        if (OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger).isPresent()) {
-            // skal ikke opprette oppgave med samme årsak når behandlingen allerede har en åpen oppgave med den årsaken knyttet til seg
-            return null;
-        }
-        Fagsak fagsak = behandling.getFagsak();
-        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, prioritet, fristDager, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
-            .medOppgavetype(oppgaveÅrsak.getKode());
-        var oppgave = restKlient.opprettetOppgave(orequest);
-        logger.info("GOSYS opprettet LOS oppgave {}", oppgave);
-        return behandleRespons(behandling, oppgaveÅrsak, oppgave.getId().toString(), fagsak.getSaksnummer());
-    }
-
-    private String behandleRespons(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String oppgaveId,
-                                   Saksnummer saksnummer) {
-        OppgaveBehandlingKobling oppgaveBehandlingKobling = new OppgaveBehandlingKobling(oppgaveÅrsak, oppgaveId, saksnummer, behandling);
-        oppgaveBehandlingKoblingRepository.lagre(oppgaveBehandlingKobling);
-        return oppgaveId;
     }
 
     public void avslutt(Long behandlingId, OppgaveÅrsak oppgaveÅrsak) {
@@ -150,17 +108,6 @@ public class OppgaveTjeneste {
     private void ferdigstillOppgaveBehandlingKobling(OppgaveBehandlingKobling aktivOppgave) {
         aktivOppgave.ferdigstillOppgave(SubjectHandler.getSubjectHandler().getUid());
         oppgaveBehandlingKoblingRepository.lagre(aktivOppgave);
-    }
-
-    public void avsluttOppgaveOgStartTask(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String taskType) {
-        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
-        taskGruppe.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        opprettTaskAvsluttOppgave(behandling, oppgaveÅrsak, false).ifPresent(taskGruppe::addNesteSekvensiell);
-        taskGruppe.addNesteSekvensiell(opprettProsessTask(behandling, taskType));
-
-        taskGruppe.setCallIdFraEksisterende();
-
-        prosessTaskRepository.lagre(taskGruppe);
     }
 
     private String mapYtelseTypeTilTema(FagsakYtelseType ytelseType) {
@@ -252,20 +199,6 @@ public class OppgaveTjeneste {
         return oppgave.getId().toString();
     }
 
-    public String opprettMedPrioritetOgBeskrivelseBasertPåAktørId(String gjeldendeAktørId, Long fagsakId, OppgaveÅrsak oppgaveÅrsak, String enhetsId, String beskrivelse, boolean høyPrioritet) {
-
-        AktørId aktørId = new AktørId(gjeldendeAktørId);
-
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-
-        var orequest = createRestRequestBuilder(null, aktørId, enhetsId, beskrivelse, høyPrioritet ? Prioritet.HOY : Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
-            .medOppgavetype(oppgaveÅrsak.getKode());
-        var oppgave = restKlient.opprettetOppgave(orequest);
-        logger.info("GOSYS opprettet VURDER IT oppgave {}", oppgave);
-        return oppgave.getId().toString();
-    }
-
     /**
      * Observer endringer i BehandlingStatus og håndter oppgaver deretter.
      */
@@ -280,7 +213,6 @@ public class OppgaveTjeneste {
      */
     public String opprettOppgaveSakSkalTilInfotrygd(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
         var fagsak = behandling.getFagsak();
 
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), SAK_MÅ_FLYTTES_TIL_INFOTRYGD,
