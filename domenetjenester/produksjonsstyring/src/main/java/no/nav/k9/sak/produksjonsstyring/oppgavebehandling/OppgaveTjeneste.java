@@ -116,7 +116,7 @@ public class OppgaveTjeneste {
         } else if (FagsakYtelseType.FRISINN.equals(ytelseType)) {
             return "FRI";
         }
-        throw new RuntimeException("Ukjent ytelsestype " + ytelseType);
+        throw new UnsupportedOperationException("Støtter ikke ytelsestype " + ytelseType);
     }
 
     public Optional<ProsessTaskData> opprettTaskAvsluttOppgave(Behandling behandling) {
@@ -181,10 +181,10 @@ public class OppgaveTjeneste {
     public boolean harÅpneOppgaverAvType(AktørId aktørId, OppgaveÅrsak oppgavetype, FagsakYtelseType ytelseType) {
         try {
             var oppgaver = restKlient.finnÅpneOppgaver(aktørId.getId(), mapYtelseTypeTilTema(ytelseType), List.of(oppgavetype.getKode()));
-            logger.info("GOSYS fant {} oppgaver av type {}", oppgaver.size(), oppgavetype.getKode());
+            logger.info("GOSYS fant {} oppgaver av type {}, for ytelse {}", oppgaver.size(), oppgavetype, ytelseType);
             return !oppgaver.isEmpty();
         } catch (Exception e) {
-            throw OppgaveFeilmeldinger.FACTORY.feilVedHentingAvOppgaver(oppgavetype.getKode()).toException();
+            throw OppgaveFeilmeldinger.FACTORY.feilVedHentingAvOppgaver(ytelseType, oppgavetype, aktørId, e).toException();
         }
     }
 
