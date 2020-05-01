@@ -61,8 +61,6 @@ public class ExtHealthCheckTest {
         assertThat(result.getMessage()).isNotNull();
     }
 
-    //-------
-
     private class MyExtHealthCheck extends ExtHealthCheck {
 
         @Override
