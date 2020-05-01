@@ -2,7 +2,6 @@ package no.nav.folketrygdloven.beregningsgrunnlag.output;
 
 import java.util.List;
 
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 
 public class KalkulusResultat {
@@ -37,4 +36,13 @@ public class KalkulusResultat {
     public Avslagsårsak getAvslagsårsak() {
         return avslagsårsak;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<vilkårOppfylt=" + vilkårOppfylt +
+            ", avslagsårsak=" + avslagsårsak +
+            ", beregningAksjonspunktResultat=" + beregningAksjonspunktResultat +
+            ">";
+    }
+
 }
