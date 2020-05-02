@@ -118,7 +118,7 @@ class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
-        String sql = "select t.kode as task_type, p.status, count(p.status) as antall " +
+        String sql = "select t.kode as task_type, p.status, coalesce(count(p.status), 0) as antall " +
             " from prosess_task_type t" +
             " left outer join prosess_task p on p.task_type=t.kode And  p.status in ('FEILET', 'SUSPENDERT', 'VENTER_SVAR')" +
             " group by 1, 2";
