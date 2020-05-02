@@ -111,7 +111,8 @@ public class BehandlingKandidaterRepository {
                 " FROM Aksjonspunkt ap " +
                 " INNER JOIN ap.behandling b " +
                 " WHERE ap.status IN :aapneAksjonspunktKoder " +
-                "   AND ap.aksjonspunktDefinisjon IN :autopunktKoder " +
+                "   AND b.fagsak.ytelseType != 'OBSOLETE'" +
+                "   AND ap.aksjonspunktDefinisjon IN (:autopunktKoder) " +
                 "   AND ap.fristTid < :naa ",
             Behandling.class);
         query.setHint(QueryHints.HINT_READONLY, "true");
@@ -144,6 +145,7 @@ public class BehandlingKandidaterRepository {
         TypedQuery<Behandling> query = entityManager.createQuery(
             "FROM Behandling behandling " +
                 "WHERE behandling.status NOT IN (:avsluttetOgIverksetterStatus) " +
+                "   AND b.fagsak.ytelseType != 'OBSOLETE'" +
                 "  AND behandling.behandlendeEnhet = :enhet ", //$NON-NLS-1$
             Behandling.class);
 
