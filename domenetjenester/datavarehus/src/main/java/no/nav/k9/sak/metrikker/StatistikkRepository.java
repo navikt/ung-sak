@@ -119,9 +119,10 @@ class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
-        String sql = "select t.kode as task_type, p.status, coalesce(count(p.status), 0) as antall " +
-            " from prosess_task_type t" +
-            " left outer join prosess_task p on p.task_type=t.kode And  p.status in ('FEILET', 'SUSPENDERT', 'VENTER_SVAR')" +
+        String sql = "select t.kode as task_type, s.status, coalesce(count(p.status), 0) as antall " + 
+            " from prosess_task_type t" + 
+            " cross join(values ('FEILET'),('VENTER_SVAR')) as s(status)" + 
+            " left outer join prosess_task p on p.task_type=t.kode And  p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR')" + 
             " group by 1, 2";
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
