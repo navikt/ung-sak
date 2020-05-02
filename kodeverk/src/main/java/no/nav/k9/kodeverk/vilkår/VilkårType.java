@@ -92,8 +92,9 @@ public enum VilkårType implements Kodeverdi {
                 FagsakYtelseType.FRISINN, "koronaloven § 1-3"),
             Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
         Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47,
-        Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT
-        ),
+        Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT,
+        Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT
+    ),
 
     /**
      * Brukes i stedet for null der det er optional.
