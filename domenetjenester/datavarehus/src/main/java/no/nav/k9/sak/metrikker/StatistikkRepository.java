@@ -1,8 +1,11 @@
 package no.nav.k9.sak.metrikker;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,7 +39,7 @@ class StatistikkRepository {
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_per_ytelse_type",
-            Map.of(
+            toMap(
                 "aksjonspunkt", t.get(0, String.class),
                 "ytelse_type", t.get(1, String.class)),
             Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
@@ -45,18 +48,18 @@ class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> aksjonspunktVenteårsakStatistikk() {
-        
-        String sql = "select a.aksjonspunkt_def as aksjonspunkt, f.ytelse_type, a.vent_aarsak, a.aksjonspunkt_status," +
-                " case when (  a.aksjonspunkt_status != 'OPPR' OR f.ytelse_type='OBSOLETE' or vent_aarsak='-' or vent_aarsak is null ) then 0 else count(*) end as antall" +
-                " from aksjonspunkt a " +
-                " inner join behandling b on b.id =a.behandling_id" +
-                " inner join fagsak f on f.id=b.fagsak_id" +
-                " group by 1, 2, 3, 4";
-        
+
+        String sql = "select a.aksjonspunkt_def as aksjonspunkt, f.ytelse_type, case when vent_aarsak='-' then null else vent_aarsak end as vent_aarsak, a.aksjonspunkt_status," +
+            " case when (  a.aksjonspunkt_status != 'OPPR' OR f.ytelse_type='OBSOLETE' or vent_aarsak='-' or vent_aarsak is null ) then 0 else count(*) end as antall" +
+            " from aksjonspunkt a " +
+            " inner join behandling b on b.id =a.behandling_id" +
+            " inner join fagsak f on f.id=b.fagsak_id" +
+            " group by 1, 2, 3, 4";
+
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_ytelse_type_vent_aarsak",
-            Map.of(
+            toMap(
                 "aksjonspunkt", t.get(0, String.class),
                 "ytelse_type", t.get(1, String.class),
                 "vent_aarsak", t.get(2, String.class)),
@@ -73,7 +76,7 @@ class StatistikkRepository {
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("behandling_status",
-            Map.of(
+            toMap(
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
                 "behandling_status", t.get(2, String.class)),
@@ -90,7 +93,7 @@ class StatistikkRepository {
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("behandling_status_opprettet_dag",
-            Map.of(
+            toMap(
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
                 "behandling_status", t.get(2, String.class),
@@ -108,7 +111,7 @@ class StatistikkRepository {
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("behandling_status_avsluttet_dag",
-            Map.of(
+            toMap(
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
                 "behandling_status", t.get(2, String.class),
@@ -126,9 +129,21 @@ class StatistikkRepository {
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("prosess_task",
-            Map.of(
+            toMap(
                 "prosess_task_type", t.get(0, String.class),
                 "status", t.get(1, String.class)),
             Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toList());
+    }
+
+    /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
+    private static Map<String, String> toMap(String... args) {
+        if (args.length % 2 != 0) {
+            throw new IllegalArgumentException("Må ha partall antal argumenter, fikk: " + Arrays.asList(args));
+        }
+        var map = new HashMap<String, String>();
+        for (int i = 0; i < args.length; i += 2) {
+            map.put(Objects.requireNonNull(args[i], "key kan ikke være null"), args[i + 1]);
+        }
+        return map;
     }
 }
