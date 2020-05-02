@@ -49,7 +49,7 @@ class StatistikkRepository {
     @SuppressWarnings("unchecked")
     List<SensuEvent> aksjonspunktVenteårsakStatistikk() {
 
-        String sql = "select a.aksjonspunkt_def as aksjonspunkt, f.ytelse_type, case when vent_aarsak='-' then null else vent_aarsak end as vent_aarsak, a.aksjonspunkt_status," +
+        String sql = "select a.aksjonspunkt_def as aksjonspunkt, f.ytelse_type, a.aksjonspunkt_status, a.vent_aarsak, " +
             " case when (  a.aksjonspunkt_status != 'OPPR' OR f.ytelse_type='OBSOLETE' or vent_aarsak='-' or vent_aarsak is null ) then 0 else count(*) end as antall" +
             " from aksjonspunkt a " +
             " inner join behandling b on b.id =a.behandling_id" +
