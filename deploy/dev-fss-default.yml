@@ -130,7 +130,7 @@ spec:
 
     # Restservice Generelle
     - name: INFOTRYGD_HENDELSER_API_URL
-      value: https://infotrygd-hendelser-api-q1.nais.preprod.local/infotrygd/hendelser
+      value: http://infotrygd-hendelser.default/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.q1/fpabakus
     - name: FTKALKULUS_URL
