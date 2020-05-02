@@ -140,7 +140,11 @@ class StatistikkRepository {
         }
         var map = new HashMap<String, String>();
         for (int i = 0; i < args.length; i += 2) {
-            map.put(Objects.requireNonNull(args[i], "key kan ikke være null"), args[i + 1]);
+            // influxdb Point takler ikke null key eller value. skipper null verdier
+            String v = args[i + 1];
+            if (v != null) {
+                map.put(args[i], v);
+            }
         }
         return map;
     }
