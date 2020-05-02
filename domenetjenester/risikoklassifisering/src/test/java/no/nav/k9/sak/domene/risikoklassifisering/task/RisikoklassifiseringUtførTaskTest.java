@@ -1,9 +1,10 @@
 package no.nav.k9.sak.domene.risikoklassifisering.task;
 
 
-import no.nav.k9.sak.domene.risikoklassifisering.RisikoklassifiseringUtførTask;
-import no.nav.k9.sak.domene.risikoklassifisering.kafka.config.RisikoklassifiseringKafkaProducer;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import static org.mockito.Mockito.verify;
+
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,9 +12,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.UUID;
-
-import static org.mockito.Mockito.verify;
+import no.nav.k9.sak.domene.risikoklassifisering.RisikoklassifiseringUtførTask;
+import no.nav.k9.sak.domene.risikoklassifisering.kafka.config.RisikoklassifiseringKafkaProducer;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RisikoklassifiseringUtførTaskTest {
@@ -41,7 +42,7 @@ public class RisikoklassifiseringUtførTaskTest {
     @Test
     public void skal_produsere_melding_til_kafka(){
         ProsessTaskData prosessTaskData = new ProsessTaskData(TASKTYPE);
-        prosessTaskData.setProperty(RISIKOKLASSIFISERING_JSON, "json");
+        prosessTaskData.setPayload("json");
 
         String konsumentId = UUID.randomUUID().toString();
         prosessTaskData.setProperty(KONSUMENT_ID, konsumentId);

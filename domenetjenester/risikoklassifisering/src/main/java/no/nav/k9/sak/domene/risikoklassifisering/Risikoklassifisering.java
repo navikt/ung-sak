@@ -67,7 +67,7 @@ public class Risikoklassifisering {
             taskData.setCallIdFraEksisterende();
             RequestWrapper requestWrapper = new RequestWrapper(MDCOperations.getCallId(), risikovurderingRequest);
             taskData.setProperty(RisikoklassifiseringUtførTask.KONSUMENT_ID, risikovurderingRequest.getKonsumentId().toString());
-            taskData.setProperty(RisikoklassifiseringUtførTask.RISIKOKLASSIFISERING_JSON, getJson(requestWrapper));
+            taskData.setPayload(getJson(requestWrapper));
             prosessTaskRepository.lagre(taskData);
         } else {
             log.info("behandling = {} Har Blitt Risikoklassifisert", behandling.getId());
