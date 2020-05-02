@@ -185,3 +185,10 @@ spec:
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
       value: "true"
 
+    # Audit logging
+    - name: AUDITLOGGER_ENABLED=true
+      value: "true"
+    - name: AUDITLOGGER_VENDOR
+      value: "k9"
+    - name: AUDITLOGGER_PRODUCT
+      value: "k9-sak"

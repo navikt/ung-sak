@@ -91,20 +91,18 @@ spec:
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
+    - name: KAFKA_DOKUMENTBESTILLING_TOPIC
+      value: privat-k9-dokumenthendelse
+    - name: KAFKA_INFOTRYGDFEED_TOPIC
+      value: privat-k9-infotrygdFeedHendelse
+    - name: KAFKA_FATTEVEDTAK_TOPIC
+      value: privat-familie-vedtakFattet-v1
     - name: KAFKA_HISTORIKKINNSLAG_TOPIC
       value: privat-k9-historikkinnslag-p
     - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
       value: privat-k9-risk-utfor-p
     - name: KAFKA_KONTROLL_RESULTAT_TOPIC
       value: privat-k9-kontroll-resultat-p
-    - name: KAFKA_DOKUMENTBESTILLING_TOPIC
-      value: privat-k9-dokumenthendelse
-    - name: KAFKA_TILKJENTYTELSE_V1_TOPIC
-      value: privat-k9-tilkjentytelse-v1
-    - name: KAFKA_INFOTRYGDFEED_TOPIC
-      value: privat-k9-infotrygdFeedHendelse
-    - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: privat-familie-vedtakFattet-v1
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -178,6 +176,7 @@ spec:
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
 
+    # metrics
     - name: SENSU_HOST
       value: "sensu.nais"
     - name: SENSU_PORT
@@ -187,3 +186,10 @@ spec:
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
       value: "true"
 
+    # Audit logging
+    - name: AUDITLOGGER_ENABLED=true
+      value: "true"
+    - name: AUDITLOGGER_VENDOR
+      value: "k9"
+    - name: AUDITLOGGER_PRODUCT
+      value: "k9-sak"
