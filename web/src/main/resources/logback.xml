@@ -30,7 +30,7 @@
         </encoder>
     </appender>
 
-    <appender name="SPORING_LOG" class="com.papertrailapp.logback.Syslog4jAppender">
+    <appender name="auditLogger" class="com.papertrailapp.logback.Syslog4jAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>%m%n%xEx</pattern>
         </layout>
@@ -69,9 +69,10 @@
     <!-- denne logger passord på INFO nivå!-->
     <logger name="no.nav.modig.core.test.PropertySetter" level="${log.level.no.nav.modig.core.test.PropertySetter:-WARN}" />
 
-
-    <logger name="sporing" level="INFO" additivity="false">
-        <appender-ref ref="SPORING_LOG" />
+    <logger name="auditLogger" level="INFO" additivity="false">
+        <appender-ref ref="auditLogger" />
+    </logger>
+    <logger level="OFF" name="sporing" additivity="false">
     </logger>
 
     <root level="${log.level.root:-INFO}">
