@@ -20,10 +20,10 @@ public enum DokumentMalType implements Kodeverdi {
     FORLENGET_TIDLIG_SOK("FORLTS", "Forlenget saksbehandlingstid - Tidlig søknad"),
     FORLENGET_OPPTJENING("FOROPT", "Forlenget saksbehandlingstid - Venter Opptjening"),
     REVURDERING_DOK("REVURD", "Varsel om revurdering"),
-    INNVILGELSE_DOK("INNVFP", "Innvilgelsesbrev"),
+    INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev"),
     OPPHØR_DOK("OPPHOR", "Opphør brev"),
     INNTEKTSMELDING_FOR_TIDLIG_DOK("INNTID", "Ikke mottatt søknad"),
-    AVSLAG__DOK("AVSLFP", "Avslagsbrev"),
+    AVSLAG__DOK("AVSLAG", "Avslagsbrev"),
     FRITEKST_DOK("FRITKS", "Fritekstbrev"),
     ETTERLYS_INNTEKTSMELDING_DOK("INNLYS", "Etterlys inntektsmelding"),
 
