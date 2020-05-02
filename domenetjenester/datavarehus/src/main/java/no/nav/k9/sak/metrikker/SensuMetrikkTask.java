@@ -1,7 +1,12 @@
 package no.nav.k9.sak.metrikker;
 
+import java.time.Duration;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
@@ -11,7 +16,10 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 @ApplicationScoped
 @ProsessTask(SensuMetrikkTask.TASKTYPE)
 public class SensuMetrikkTask implements ProsessTaskHandler {
+
     static final String TASKTYPE = "sensu.metrikk.task";
+
+    private static final Logger log = LoggerFactory.getLogger(SensuMetrikkTask.class);
 
     private SensuKlient sensuKlient;
 
@@ -29,14 +37,27 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData data) {
+        long startTime = System.nanoTime();
 
-        statistikkRepository.prosessTaskStatistikk().forEach(e -> sensuKlient.logMetrics(e));
+        try {
+            sensuKlient.logMetrics(statistikkRepository.prosessTaskStatistikk());
 
-        statistikkRepository.behandlingStatistikk().forEach(e -> sensuKlient.logMetrics(e));
+            sensuKlient.logMetrics(statistikkRepository.behandlingStatistikkUnderBehandling());
 
-        statistikkRepository.aksjonspunktStatistikk().forEach(e -> sensuKlient.logMetrics(e));
+            sensuKlient.logMetrics(statistikkRepository.behandlingStatistikkStartetIDag());
 
-        statistikkRepository.aksjonspunktVenteårsakStatistikk().forEach(e -> sensuKlient.logMetrics(e));
+            sensuKlient.logMetrics(statistikkRepository.behandlingStatistikkAvsluttetIDag());
+
+            sensuKlient.logMetrics(statistikkRepository.aksjonspunktStatistikk());
+
+            sensuKlient.logMetrics(statistikkRepository.aksjonspunktVenteårsakStatistikk());
+        } finally {
+            var varighet = Duration.ofNanos(System.nanoTime() - startTime);
+            if (Duration.ofSeconds(20).minus(varighet).isNegative()) {
+                // bruker for lang tid på logging av metrikker.
+                log.warn("Publisering av sensu metrikker tok : " + varighet);
+            }
+        }
 
     }
 }
