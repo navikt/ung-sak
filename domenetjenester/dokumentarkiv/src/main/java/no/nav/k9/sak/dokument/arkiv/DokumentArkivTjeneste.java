@@ -199,9 +199,6 @@ public class DokumentArkivTjeneste {
             .findFirst()
             .orElse(DokumentTypeId.UDEFINERT);
 
-        if (dokumentTypeId.equals(DokumentTypeId.UDEFINERT)) {
-            LOG.info("Fant ingen matchende DokumentTypeId for brevkode '{}'", brevkodeVerdi);
-        }
         return dokumentTypeId;
     }
 
@@ -224,9 +221,6 @@ public class DokumentArkivTjeneste {
             .findFirst()
             .orElse(DokumentKategori.UDEFINERT);
 
-        if (dokumentKategori.equals(DokumentKategori.UDEFINERT)) {
-            LOG.info("Fant ingen matchende DokumentTypeId for brevkode '{}'", brevkodeVerdi);
-        }
         return dokumentKategori;
     }
 
