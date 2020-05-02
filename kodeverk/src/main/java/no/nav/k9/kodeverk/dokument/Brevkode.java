@@ -42,6 +42,10 @@ public enum Brevkode implements Kodeverdi {
     SEDOK("SEDOK", "SED"), // Brevkode ikke avklart
     TSKJ("TSKJ", "TS"), // Brevkode ikke avklart
     VBRV("VBRV", "VB"), // Brevkode ikke avklart
+    INNTEKTKOMP_FRILANS("INNTEKTKOMP_FRILANS", "NAV 00-03.02"),
+    SØKNAD_DAGP_PERM("SOKNAD_DAGP_PERM", "NAV 04-01.04"),
+    FRISINN_AVSLFP("FRISINN_AVSLFP", "FRISINN_AVSLFP"),
+    FRISINN_INNVFP("FRISINN_INNVFP", "FRISINN_INNVFP"),
 
     // Default
     UDEFINERT("-", null),

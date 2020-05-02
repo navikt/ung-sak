@@ -35,6 +35,10 @@ public enum DokumentKategori implements Kodeverdi {
     SEDOK("SEDOK", "Strukturert elektronisk dokument - EU/EØS", "SED"),
     TSKJ("TSKJ", "Tolkbart skjema", "TS"),
     VBRV("VBRV", "Vedtaksbrev", "VB"),
+    INNTEKTKOMP_FRILANS("INNTEKTKOMP_FRILANS", "Frilansere og Selvstendig næringdrivendes Inntektskompensasjon", "NAV 00-03.02"),
+    SØKNAD_DAGP_PERM("SOKNAD_DAGP_PERM", "Søknad om dagpenger ved permittering", "NAV 04-01.04"),
+    FRISINN_AVSLFP("FRISINN_AVSLFP", "Frisinn avslutning FP", "FRISINN_AVSLFP"),
+    FRISINN_INNVFP("FRISINN_INNVFP", "Frisinn innvilgelse FP", "FRISINN_INNVFP"),
     ;
 
     public static final String KODEVERK = "DOKUMENT_KATEGORI";
