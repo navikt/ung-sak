@@ -1,6 +1,7 @@
 package no.nav.k9.sak.metrikker;
 
 import java.time.Duration;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -40,17 +42,17 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            sensuKlient.logMetrics(statistikkRepository.prosessTaskStatistikk());
+            logMetrics(statistikkRepository.prosessTaskStatistikk());
 
-            sensuKlient.logMetrics(statistikkRepository.behandlingStatistikkUnderBehandling());
+            logMetrics(statistikkRepository.behandlingStatistikkUnderBehandling());
 
-            sensuKlient.logMetrics(statistikkRepository.behandlingStatistikkStartetIDag());
+            logMetrics(statistikkRepository.behandlingStatistikkStartetIDag());
 
-            sensuKlient.logMetrics(statistikkRepository.behandlingStatistikkAvsluttetIDag());
+            logMetrics(statistikkRepository.behandlingStatistikkAvsluttetIDag());
 
-            sensuKlient.logMetrics(statistikkRepository.aksjonspunktStatistikk());
+            logMetrics(statistikkRepository.aksjonspunktStatistikk());
 
-            sensuKlient.logMetrics(statistikkRepository.aksjonspunktVenteårsakStatistikk());
+            logMetrics(statistikkRepository.aksjonspunktVenteårsakStatistikk());
         } finally {
             var varighet = Duration.ofNanos(System.nanoTime() - startTime);
             if (Duration.ofSeconds(20).minus(varighet).isNegative()) {
@@ -58,6 +60,11 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
                 log.warn("Publisering av sensu metrikker tok : " + varighet);
             }
         }
+
+    }
+
+    private void logMetrics(List<SensuEvent> events) {
+        events.forEach(sensuKlient::logMetrics);
 
     }
 }
