@@ -59,7 +59,7 @@ public enum Brevkode implements Kodeverdi {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
-            if (KODER.putIfAbsent(v.offisiellKode, v) != null) {
+            if (KODER.putIfAbsent(v.offisiellKode, v) != null && !Objects.equals(v.offisiellKode, v.kode)) {
                 throw new IllegalArgumentException("Duplikat : " + v.offisiellKode);
             }
         }
