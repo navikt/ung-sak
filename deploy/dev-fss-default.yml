@@ -99,8 +99,6 @@ spec:
       value: privat-k9-kontroll-resultat-q1
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
-    - name: KAFKA_TILKJENTYTELSE_V1_TOPIC
-      value: privat-k9-tilkjentytelse-v1-q1
     - name: KAFKA_INFOTRYGDFEED_TOPIC
       value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_FATTEVEDTAK_TOPIC
