@@ -5,9 +5,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -43,7 +45,11 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
         StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag);
         if (startBeregningRequest.getKalkulatorInput().getOpptjeningAktiviteter().getPerioder().isEmpty()) {
-            return new KalkulusResultat(Collections.emptyList()).medVilkårResulatat(false);
+            FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
+            if (frisinnGrunnlag.getSøkerYtelseForFrilans()) {
+                return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT);
+            }
+            return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
         }
         TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
