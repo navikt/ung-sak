@@ -158,7 +158,7 @@ spec:
 
     # Graphql services
     - name: SAF_BASE_URL
-      value: http://saf.q1
+      value: http://saf
 
     # Web services
     - name: AKTOER_V2_URL
