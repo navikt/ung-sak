@@ -96,9 +96,8 @@ class StatistikkRepository {
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
-                "behandling_status", t.get(2, String.class),
-                "opprettet_dato", t.get(3, String.class)),
-            Map.of("totalt_antall", t.get(4, BigInteger.class)))).collect(Collectors.toList());
+                "opprettet_dato", t.get(2, String.class)),
+            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -114,9 +113,8 @@ class StatistikkRepository {
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
-                "behandling_status", t.get(2, String.class),
-                "avsluttet_dato", t.get(3, String.class)),
-            Map.of("totalt_antall", t.get(4, BigInteger.class)))).collect(Collectors.toList());
+                "avsluttet_dato", t.get(2, String.class)),
+            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
