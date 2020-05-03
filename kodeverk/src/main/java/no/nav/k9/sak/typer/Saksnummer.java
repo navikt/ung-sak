@@ -68,7 +68,7 @@ public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + saksnummer + ">";
+        return saksnummer;
     }
 
     @Override
