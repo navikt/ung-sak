@@ -32,7 +32,7 @@ class PubliserEventTaskImpl implements PubliserEventTask {
         String key = prosessTaskData.getPropertyValue(PROPERTY_KEY);
         var eventJson = prosessTaskData.getPayloadAsString();
         kafkaProducer.sendJsonMedNøkkel(key, eventJson);
-        log.info("Publisert aksjonspunktevent for behandling med id='{}' & value='{}'", key, eventJson);
+        log.info("Publisert aksjonspunktevent for behandling med id='{}'", key);
     }
 
     @Override
