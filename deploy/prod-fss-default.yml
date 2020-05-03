@@ -37,16 +37,16 @@ spec:
       cpu: "200m"
       memory: "1024Mi"
   ingresses:
-    - "https://k9-sak.nais.preprod.local/"
+    - "https://k9-sak.nais.adeo.no/"
   vault:
     enabled: true
     paths:
       - mountPath: /var/run/secrets/nais.io/serviceuser
-        kvPath: /serviceuser/data/dev/srvk9sak
+        kvPath: /serviceuser/data/prod/srvk9sak
       - mountPath: /var/run/secrets/nais.io/ldap
-        kvPath: /serviceuser/data/dev/srvssolinux
+        kvPath: /serviceuser/data/prod/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
-        kvPath: /kv/preprod/fss/k9-sak/default
+        kvPath: /kv/prod/fss/k9-sak/default
   sidecar: true
   env:
     - name: TZ
@@ -57,7 +57,7 @@ spec:
     - name: DEFAULTDS_USERNAME
       value: k9-sak
     - name: DEFAULTDS_URL
-      value: jdbc:postgresql://b27dbvl014.preprod.local:5432/k9-sak
+      value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-sak
 
     # Appdynamics
     - name: APPDYNAMICS_CONTROLLER_HOST_NAME
@@ -67,82 +67,82 @@ spec:
     - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
       value: "true"
     - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
-      value: NON-PROD
+      value: PROD
 
     - name: OPENIDCONNECT_ISSOHOST
-      value: https://isso-q.adeo.no:443/isso/oauth2
+      value: https://isso.adeo.no:443/isso/oauth2
     - name: OPENIDCONNECT_ISSOISSUER
-      value: https://isso-q.adeo.no:443/isso/oauth2
+      value: https://isso.adeo.no:443/isso/oauth2
     - name: OPENIDCONNECT_ISSOJWKS
-      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
+      value: https://isso.adeo.no:443/isso/oauth2/connect/jwk_uri
     - name: OPENIDCONNECT_USERNAME
-      value: k9-sak-q1
+      value: k9-sak-p
 
     # Gjentatt grunnet felles-sikkerhet
     - name: OIDC_OPENAM_HOSTURL
-      value: https://isso-q.adeo.no:443/isso/oauth2
+      value: https://isso.adeo.no:443/isso/oauth2
     - name: OIDC_OPENAM_ISSUERURL
-      value: https://isso-q.adeo.no:443/isso/oauth2
+      value: https://isso.adeo.no:443/isso/oauth2
     - name: OIDC_OPENAM_JWKSURL
-      value: https://isso-q.adeo.no:443/isso/oauth2/connect/jwk_uri
+      value: https://isso.adeo.no:443/isso/oauth2/connect/jwk_uri
     - name: OIDC_OPENAM_AGENTNAME
-      value: k9-sak-q1
+      value: k9-sak-p
 
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
       value: privat-k9-aksjonspunkthendelse
-    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
-      value: privat-k9-historikkinnslag-q1
-    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
-      value: privat-k9-risk-utfor-q1
-    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
-      value: privat-k9-kontroll-resultat-q1
     - name: KAFKA_DOKUMENTBESTILLING_TOPIC
       value: privat-k9-dokumenthendelse
     - name: KAFKA_INFOTRYGDFEED_TOPIC
       value: privat-k9-infotrygdFeedHendelse
     - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: privat-familie-vedtakFattet-v1-q1
+      value: privat-familie-vedtakFattet-v1
+    - name: KAFKA_HISTORIKKINNSLAG_TOPIC
+      value: privat-k9-historikkinnslag-p
+    - name: KAFKA_RISIKOKLASSIFISERING_TOPIC
+      value: privat-k9-risk-utfor-p
+    - name: KAFKA_KONTROLL_RESULTAT_TOPIC
+      value: privat-k9-kontroll-resultat-p
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.preprod.local
+      value: https://kafka-schema-registry.nais.adeo.no
     - name: BOOTSTRAP_SERVERS
-      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+      value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
 
     # Loadbalancerconfig
     - name: LOADBALANCER_FQDN
-      value: app-q1.adeo.no
+      value: app.adeo.no
 
     # LDAP
     - name: LDAP_URL
-      value: ldaps://ldapgw.preprod.local
+      value: ldaps://ldapgw.adeo.no
     - name: LDAP_BASEDN
-      value: "dc=preprod,dc=local"
+      value: "dc=adeo,dc=no"
     - name: LDAP_DOMAIN
-      value: "PREPROD.LOCAL"
+      value: "ADEO.NO"
     - name: LDAP_USER_BASEDN
-      value: "ou=NAV,ou=BusinessUnits,dc=preprod,dc=local"
+      value: "ou=NAV,ou=BusinessUnits,dc=adeo,dc=no"
     - name: LDAP_SERVICEUSER_BASEDN
-      value: "ou=ServiceAccounts,dc=preprod,dc=local"
+      value: "ou=ServiceAccounts,dc=adeo,dc=no"
 
     # Restservice Generelle
     - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
+      value: http://infotrygd-hendelser.default/infotrygd/hendelser
     - name: FPABAKUS_URL
-      value: http://fpabakus.q1/fpabakus
+      value: http://fpabakus.default/fpabakus
     - name: FTKALKULUS_URL
-      value: http://ftkalkulus.q1/ftkalkulus
+      value: http://ftkalkulus.default/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
-      value: https://app-q1.adeo.no/k9/oppdrag/api
+      value: https://app.adeo.no/k9/oppdrag/api
     - name: URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING
-      value: http://fptilbake.q1/fptilbake/api/behandlinger/tilbakekreving/aapen
+      value: http://fptilbake.default/fptilbake/api/behandlinger/tilbakekreving/aapen
     - name: ARBEIDSFORDELING_RS_URL
-      value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
+      value: https://app.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: http://oppgave.default/api/v1/oppgaver
 
@@ -156,26 +156,27 @@ spec:
 
     # Graphql services
     - name: SAF_BASE_URL
-      value: http://saf.q1
+      value: http://saf
 
     # Web services
     - name: AKTOER_V2_URL
-      value: https://app-q1.adeo.no/aktoerregister/ws/Aktoer/v2
+      value: https://app.adeo.no/aktoerregister/ws/Aktoer/v2
     - name: PERSON_V3_URL
-      value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
+      value: https://wasapp.adeo.no/tpsws/ws/Person/v3
     - name: ORGANISASJON_V4_URL
-      value: https://modapp-q1.adeo.no/ereg/ws/OrganisasjonService/v4
+      value: https://modapp.adeo.no/ereg/ws/OrganisasjonService/v4
     - name: MEDLEM_V2_URL
-      value: https://app-q1.adeo.no/medl2/ws/Medlemskap/v2
+      value: https://app.adeo.no/medl2/ws/Medlemskap/v2
 
     # Sikkerhet:
     - name: OIDC_STS_ISSUER_URL
-      value: https://security-token-service.nais.preprod.local
+      value: https://security-token-service.nais.adeo.no
     - name: OIDC_STS_JWKS_URL
-      value: https://security-token-service.nais.preprod.local/rest/v1/sts/jwks
+      value: https://security-token-service.nais.adeo.no/rest/v1/sts/jwks
     - name: SECURITYTOKENSERVICE_URL
-      value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
+      value: https://sts.adeo.no/SecurityTokenServiceProvider/
 
+    # metrics
     - name: SENSU_HOST
       value: "sensu.nais"
     - name: SENSU_PORT
