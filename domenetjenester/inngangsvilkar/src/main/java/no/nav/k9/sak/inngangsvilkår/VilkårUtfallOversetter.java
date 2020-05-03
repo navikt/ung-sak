@@ -41,9 +41,8 @@ public class VilkårUtfallOversetter {
         } catch (IllegalArgumentException e) {
             throw FEILFACTORY.kanIkkeSerialisereRegelinput(vilkårType.getKode(), e).toException();
         }
-        // kan hende det ikke burde ligge som info, men er veldig greit i de tilfellene FP ruller tilbake databasen for da har vi fortsatt regel
-        // input!!
-        logger.debug("json grunnlag for " + vilkårType.getKode() + ": " + jsonGrunnlag); // NOSONAR
+
+        logger.debug("json grunnlag for {}: {}", vilkårType.getKode(), jsonGrunnlag);
 
         Utfall utfall = getVilkårUtfallType(summary);
 
