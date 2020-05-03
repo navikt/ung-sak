@@ -132,7 +132,7 @@ public class UttakInputTjeneste {
         Long behandlingId = ref.getBehandlingId();
         var res = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId).orElse(null);
         if (res.getPerioder() == null || res.getPerioder().isEmpty()) {
-            throw new IllegalStateException("Mangler søkndadsperioder for behandling: " + ref);
+            throw new IllegalStateException("Mangler søkndadsperioder for behandling: " + behandlingId);
         }
         return res;
     }

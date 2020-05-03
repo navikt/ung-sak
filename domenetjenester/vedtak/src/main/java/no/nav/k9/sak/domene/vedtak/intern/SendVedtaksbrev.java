@@ -61,12 +61,12 @@ public class SendVedtaksbrev {
         Long behandlingId = ref.getBehandlingId();
         Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId);
         if (behandlingVedtakOpt.isEmpty()) {
-            log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", ref); //$NON-NLS-1$
+            log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", behandlingId); //$NON-NLS-1$
             return;
         }
 
         if (erKunRefusjonTilArbeidsgiver(ref)) {
-            log.info("Sender ikke vedtaksbrev for omsorgspenger - refusjon til arbeidsgiver. Gjelder behandlingId {}", ref); //$NON-NLS-1$
+            log.info("Sender ikke vedtaksbrev for omsorgspenger - refusjon til arbeidsgiver. Gjelder behandlingId {}", behandlingId); //$NON-NLS-1$
             return;
         }
 
@@ -75,16 +75,16 @@ public class SendVedtaksbrev {
             var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
             boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
             if (!fritekstVedtaksbrev) {
-                log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", ref);
+                log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", behandlingId);
                 return;
             }
         }
 
         var behandlingVedtak = behandlingVedtakOpt.get();
         if (behandlingVedtak.isBeslutningsvedtak()) {
-            log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", ref); //$NON-NLS-1$
+            log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", behandlingId); //$NON-NLS-1$
         } else {
-            log.info("Sender vedtaksbrev({}) for {} i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref.getFagsakYtelseType(), ref); // $NON-NLS-1
+            log.info("Sender vedtaksbrev({}) for {} i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref.getFagsakYtelseType(), behandlingId); // $NON-NLS-1
         }
         dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(ref, behandlingVedtak);
     }
