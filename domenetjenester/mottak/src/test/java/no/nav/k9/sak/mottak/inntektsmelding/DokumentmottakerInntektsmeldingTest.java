@@ -99,7 +99,8 @@ public class DokumentmottakerInntektsmeldingTest {
             kompletthetskontroller,
             uttakTjeneste,
             prosessTaskRepository,
-            repositoryProvider));
+            repositoryProvider,
+            null));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
@@ -152,7 +153,7 @@ public class DokumentmottakerInntektsmeldingTest {
         dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
 
         // Assert - sjekk flyt
-        verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(revurderingBehandling, mottattDokument, BehandlingÅrsakType.UDEFINERT);
+        verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(revurderingBehandling, mottattDokument);
         verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), DokumentTypeId.INNTEKTSMELDING);
     }

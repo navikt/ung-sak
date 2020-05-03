@@ -88,7 +88,8 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
             kompletthetskontroller,
             uttakTjeneste,
             prosessTaskRepository,
-            repositoryProvider));
+            repositoryProvider,
+            null));
 
         var enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
@@ -109,8 +110,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
-            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling);
         verify(dokumentmottaker).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
     }
 
@@ -130,8 +130,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
-            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling);
         verify(dokumentmottaker).opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), behandling, mottattDokument);
     }
 
@@ -152,8 +151,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         // Assert
-        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling,
-            BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(dokumentmottaker).håndterAvslåttEllerOpphørtBehandling(mottattDokument, behandling.getFagsak(), behandling);
         verify(behandlingsoppretter, times(0)).opprettFørstegangsbehandling(any(), any(), any());
     }
 
