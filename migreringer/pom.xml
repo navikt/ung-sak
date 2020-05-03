@@ -39,6 +39,7 @@
                     <mainClass>no.nav.k9.sak.db.util.Databaseskjemainitialisering</mainClass>
                     <classpathScope>test</classpathScope>
                     <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                    <skip>${skipTests}</skip>
                 </configuration>
             </plugin>
             <plugin>
