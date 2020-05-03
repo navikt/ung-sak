@@ -24,7 +24,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårUtfallOversetter {
 
-    private Logger logger = LoggerFactory.getLogger(VilkårUtfallOversetter.class);
+    private static final Logger logger = LoggerFactory.getLogger(VilkårUtfallOversetter.class);
 
     public VilkårUtfallOversetter() {
     }
@@ -43,7 +43,7 @@ public class VilkårUtfallOversetter {
         }
         // kan hende det ikke burde ligge som info, men er veldig greit i de tilfellene FP ruller tilbake databasen for da har vi fortsatt regel
         // input!!
-        logger.info("json grunnlag for " + vilkårType.getKode() + ": " + jsonGrunnlag); // NOSONAR
+        logger.debug("json grunnlag for " + vilkårType.getKode() + ": " + jsonGrunnlag); // NOSONAR
 
         Utfall utfall = getVilkårUtfallType(summary);
 
