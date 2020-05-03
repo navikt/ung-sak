@@ -57,14 +57,13 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
             var varighet = Duration.ofNanos(System.nanoTime() - startTime);
             if (Duration.ofSeconds(20).minus(varighet).isNegative()) {
                 // bruker for lang tid på logging av metrikker.
-                log.warn("Publisering av sensu metrikker tok : " + varighet);
+                log.warn("Generering av sensu metrikker tok : " + varighet);
             }
         }
 
     }
 
     private void logMetrics(List<SensuEvent> events) {
-        events.forEach(sensuKlient::logMetrics);
-
+        sensuKlient.logMetrics(events);
     }
 }
