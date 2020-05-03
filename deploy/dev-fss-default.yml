@@ -186,7 +186,7 @@ spec:
       value: "true"
 
     # Audit logging
-    - name: AUDITLOGGER_ENABLED=true
+    - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
       value: "k9"
