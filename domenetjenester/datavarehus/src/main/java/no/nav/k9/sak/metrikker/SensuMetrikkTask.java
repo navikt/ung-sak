@@ -1,6 +1,7 @@
 package no.nav.k9.sak.metrikker;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -42,17 +43,15 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            logMetrics(statistikkRepository.prosessTaskStatistikk());
-
-            logMetrics(statistikkRepository.behandlingStatistikkUnderBehandling());
-
-            logMetrics(statistikkRepository.behandlingStatistikkStartetIDag());
-
-            logMetrics(statistikkRepository.behandlingStatistikkAvsluttetIDag());
-
-            logMetrics(statistikkRepository.aksjonspunktStatistikk());
-
-            logMetrics(statistikkRepository.aksjonspunktVenteårsakStatistikk());
+            List<SensuEvent> metrikker = new ArrayList<>();
+            metrikker.addAll(statistikkRepository.prosessTaskStatistikk());
+            metrikker.addAll(statistikkRepository.behandlingStatistikkUnderBehandling());
+            metrikker.addAll(statistikkRepository.behandlingStatistikkStartetIDag());
+            metrikker.addAll(statistikkRepository.behandlingStatistikkAvsluttetIDag());
+            metrikker.addAll(statistikkRepository.aksjonspunktStatistikk());
+            metrikker.addAll(statistikkRepository.aksjonspunktVenteårsakStatistikk());
+            metrikker.addAll(statistikkRepository.fagsakStatistikk());
+            logMetrics(metrikker);
         } finally {
             var varighet = Duration.ofNanos(System.nanoTime() - startTime);
             if (Duration.ofSeconds(20).minus(varighet).isNegative()) {
