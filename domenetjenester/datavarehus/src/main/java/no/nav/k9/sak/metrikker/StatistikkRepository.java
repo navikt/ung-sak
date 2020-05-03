@@ -120,11 +120,11 @@ class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
-        String sql = "select t.kode as task_type, s.status, coalesce(count(p.status), 0) as antall " + 
+        String sql = "select t.kode as task_type, s.status, p.status as dummy, case when p.status is null then 0 else count(p.status) end as antall " + 
             " from prosess_task_type t" + 
-            " cross join(values ('FEILET'),('VENTER_SVAR')) as s(status)" + 
-            " left outer join prosess_task p on p.task_type=t.kode And  p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR')" + 
-            " group by 1, 2";
+            " cross join(values ('FEILET'),('VENTER_SVAR'),('KLAR')) as s(status)" + 
+            " left outer join prosess_task p on p.task_type=t.kode And  p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" + 
+            " group by 1, 2, 3";
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream();
@@ -132,7 +132,7 @@ class StatistikkRepository {
             toMap(
                 "prosess_task_type", t.get(0, String.class),
                 "status", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
     
     @SuppressWarnings("unchecked")
