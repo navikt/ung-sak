@@ -12,16 +12,16 @@ import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 
 @ApplicationScoped
-class FagsakStatusEventObserver {
+class FagsakStatusEventStatistikkObserver {
 
     private SensuKlient sensuKlient;
 
-    FagsakStatusEventObserver() {
+    FagsakStatusEventStatistikkObserver() {
         // for proxy
     }
 
     @Inject
-    FagsakStatusEventObserver(SensuKlient sensuKlient) {
+    FagsakStatusEventStatistikkObserver(SensuKlient sensuKlient) {
         this.sensuKlient = sensuKlient;
     }
 

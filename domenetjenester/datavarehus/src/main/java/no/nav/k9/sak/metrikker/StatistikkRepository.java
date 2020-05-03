@@ -2,11 +2,9 @@ package no.nav.k9.sak.metrikker;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -151,7 +149,7 @@ class StatistikkRepository {
                 "status", t.get(1, String.class)),
             Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
-
+    
     /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
     private static Map<String, String> toMap(String... args) {
         if (args.length % 2 != 0) {

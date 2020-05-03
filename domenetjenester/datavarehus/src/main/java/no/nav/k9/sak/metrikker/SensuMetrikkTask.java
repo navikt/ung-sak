@@ -51,6 +51,7 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
             metrikker.addAll(statistikkRepository.aksjonspunktStatistikk());
             metrikker.addAll(statistikkRepository.aksjonspunktVenteårsakStatistikk());
             metrikker.addAll(statistikkRepository.fagsakStatistikk());
+            
             logMetrics(metrikker);
         } finally {
             var varighet = Duration.ofNanos(System.nanoTime() - startTime);
