@@ -93,8 +93,6 @@ public class KalkulusRestTjeneste {
 
         try {
             String json = kalkulusJsonWriter.writeValueAsString(request);
-            // TODO(K9-SAK) logger for debugging, fjern før prodsetting
-            log.info("Input til kalkulus: " + json);
             return getTilstandResponse(endpoint, json);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();

@@ -34,7 +34,7 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
         String key = pd.getPropertyValue(KAFKA_KEY_PROPERTY);
         String value = pd.getPayloadAsString();
 
-        logger.info("Publiserer hendelse til Infotrygd Feed. Key: '{}', Value: '{}'", key, value);
+        logger.info("Publiserer hendelse til Infotrygd Feed. Key: '{}'", key);
 
         meldingProducer.send(key, value);
     }

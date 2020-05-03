@@ -46,7 +46,7 @@ public class EndringIArbeidsforholdId {
 
             if (!vurderIM.isEmpty()) {
                 LeggTilResultat.leggTil(result, ENDRING_I_ARBEIDSFORHOLDS_ID, arbeidsgiver, vurderIM);
-                logger.info("Endring i arbeidsforholdsId: arbeidsgiver={}, fra arbeidsforholdRef={} til arbeidsforholdRef={}", arbeidsgiver, eksisterendeRefSet, nyRefSet);
+                logger.info("Endring i arbeidsforholdsId fra arbeidsforholdRef={} til arbeidsforholdRef={}", eksisterendeRefSet, nyRefSet);
             }
         }
     }

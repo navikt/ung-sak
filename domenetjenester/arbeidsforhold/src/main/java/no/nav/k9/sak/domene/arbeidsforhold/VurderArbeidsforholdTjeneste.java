@@ -263,7 +263,7 @@ public class VurderArbeidsforholdTjeneste {
                     final Arbeidsgiver arbeidsgiver = inntektsmelding.getArbeidsgiver();
                     final Set<InternArbeidsforholdRef> arbeidsforholdRefs = trekkUtRef(inntektsmelding);
                     LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
-                    logger.info("Inntektsmelding uten kjent arbeidsforhold: arbeidsgiver={}, arbeidsforholdRef={}", arbeidsgiver, arbeidsforholdRefs);
+                    logger.info("Inntektsmelding uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
                 }
             }
         }
@@ -381,7 +381,7 @@ public class VurderArbeidsforholdTjeneste {
                     .map(Inntektsmelding::getArbeidsforholdRef)
                     .collect(Collectors.toSet());
             }
-            logger.info("Inntekter uten kjent arbeidsforhold: arbeidsgiver={}, arbeidsforholdRef={}", inntekt.getArbeidsgiver(), arbeidsforholdRefs);
+            logger.info("Inntekter uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
         }
 
     }
