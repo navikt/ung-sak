@@ -41,7 +41,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        logger.info("Foreslår behandlingsresultat for behandling {}", ref);
+        logger.info("Foreslår behandlingsresultat for behandling {}", (ref != null) ? ref.getBehandlingUuid() : "MANGLER REF");
         
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(foreslåBehandlingsresultatTjeneste, ref.getFagsakYtelseType()).orElseThrow();
         tjeneste.foreslåVedtakVarsel(ref, kontekst);
