@@ -52,6 +52,6 @@ public class OpprettOppgaveVurderDokumentTask extends FagsakProsessTask {
 
         String oppgaveId = oppgaveTjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(prosessTaskData.getFagsakId(),
             OppgaveÅrsak.VURDER_DOKUMENT_VL, behandlendeEnhet, "VL: " + beskrivelse, false);
-        log.info("Oppgave opprettet i GSAK for å vurdere dokument på enhet {}. Oppgavenummer: {}", behandlendeEnhet, oppgaveId);
+        log.info("Oppgave opprettet i GSAK for å vurdere dokument på enhet. Oppgavenummer: {}", oppgaveId);
     }
 }

@@ -69,7 +69,7 @@ public class VilkårResultatRepository {
             entityManager.flush();
         } else {
             // Forkaster resultat da ingen diff på vilkårene
-            log.info("[behandlingId={}] Forkaster lagring av {} da dette er identisk med eksisterende resultat.", behandlingId, resultat);
+            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
     }
 

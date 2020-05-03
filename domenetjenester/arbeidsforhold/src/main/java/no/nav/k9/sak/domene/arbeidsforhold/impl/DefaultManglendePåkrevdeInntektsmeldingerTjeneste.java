@@ -48,7 +48,7 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Mangl
         if (erIkkeEndringssøknad) {
             for (Map.Entry<Arbeidsgiver, Set<InternArbeidsforholdRef>> entry : manglendeInntektsmeldinger.entrySet()) {
                 LeggTilResultat.leggTil(result, AksjonspunktÅrsak.MANGLENDE_INNTEKTSMELDING, entry.getKey(), entry.getValue());
-                LOGGER.info("Mangler inntektsmelding: arbeidsgiver={}, arbeidsforholdRef={}", entry.getKey(), entry.getValue());
+                LOGGER.info("Mangler inntektsmelding: arbeidsforholdRef={}", entry.getValue());
             }
         }
         return result;

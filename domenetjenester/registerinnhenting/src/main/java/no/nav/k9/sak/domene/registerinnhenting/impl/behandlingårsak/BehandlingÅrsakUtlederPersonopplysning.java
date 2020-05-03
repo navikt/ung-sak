@@ -47,7 +47,7 @@ class BehandlingÅrsakUtlederPersonopplysning implements BehandlingÅrsakUtleder
         boolean barnetsDødsdatoEndret = poDiff.erBarnDødsdatoEndret();
 
         if (forelderErDødEndret || barnetsDødsdatoEndret) {
-            log.info("Setter behandlingårsak til opplysning om død, har endring forelderErDødEndret {} barnetsDødsdatoEndret {}, grunnlagid1: {}, grunnlagid2: {}", forelderErDødEndret, barnetsDødsdatoEndret, grunnlag1, grunnlag2); //$NON-NLS-1
+            log.info("Setter behandlingårsak til opplysning om død, grunnlagid1: {}, grunnlagid2: {}", grunnlag1, grunnlag2); //$NON-NLS-1
             return java.util.Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD)));
         }
         log.info("Setter behandlingårsak til registeropplysning, grunnlagid1: {}, grunnlagid2: {}", grunnlag1, grunnlag2); //$NON-NLS-1
