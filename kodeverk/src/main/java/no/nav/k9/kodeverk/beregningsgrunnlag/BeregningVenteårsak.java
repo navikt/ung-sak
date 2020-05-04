@@ -56,7 +56,7 @@ public enum BeregningVenteårsak implements Kodeverdi {
     VENT_BEREGNING_TILBAKE_I_TID("VENT_BEREGNING_TILBAKE_I_TID", "Endring i tilkjent ytelse bakover i tid. Dette håndteres ikke i løsningen enda."),
     AAP_DP_SISTE_10_MND_SVP("AAP_DP_SISTE_10_MND_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
     FL_SN_IKKE_STOTTET_FOR_SVP("FL_SN_IKKE_STOTTET_FOR_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
-
+    INGEN_PERIODE_UTEN_YTELSE("INGEN_PERIODE_UTEN_YTELSE", "Behandlingen er satt på vent på grunn av mangel i kalkulus: Ingen periode uten ytelse er ikke støttet i kalkulus ennå")
     ;
 
     public static final String KODEVERK = "VENT_AARSAK";
@@ -106,7 +106,7 @@ public enum BeregningVenteårsak implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
