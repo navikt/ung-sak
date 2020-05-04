@@ -286,7 +286,7 @@ public class TilKalkulusMapper {
             new OpptjeningAktivitetType(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
             new Periode(opptjeningPeriode.getPeriode().getFom(), opptjeningPeriode.getPeriode().getTom()),
             mapTilDto(opptjeningPeriode),
-            opptjeningPeriode.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse()) : null))
+            opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse()) : null))
             .collect(Collectors.toList()));
     }
 
