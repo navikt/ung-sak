@@ -1,6 +1,7 @@
 package no.nav.k9.sak.metrikker;
 
 import java.util.Map;
+import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -26,21 +27,20 @@ class FagsakStatusEventStatistikkObserver {
     }
 
     void observer(@Observes FagsakStatusEvent event) {
-        if (FagsakStatus.OPPRETTET.equals(event.getNyStatus())) {
-            var sensuEvent = SensuEvent.createSensuEvent(
-                "antall_fagsak_opprettet",
-                Map.of("ytelse_type", event.getYtelseType().getKode()),
-                Map.of("antall", 1));
-
-            sensuKlient.logMetrics(sensuEvent);
-        } else if (FagsakStatus.UNDER_BEHANDLING.equals(event.getNyStatus())) {
+        if(Objects.equals(event.getForrigeStatus(), event.getNyStatus())) {
+            return;
+        }
+        
+        if (event.getNyStatus() != null) {
             var sensuEvent = SensuEvent.createSensuEvent(
                 "antall_fagsak_under_behandling",
                 Map.of("ytelse_type", event.getYtelseType().getKode()),
                 Map.of("antall", 1));
 
             sensuKlient.logMetrics(sensuEvent);
-        } else if (FagsakStatus.UNDER_BEHANDLING.equals(event.getForrigeStatus())) {
+        }
+
+        if (event.getForrigeStatus() != null) {
             var sensuEvent = SensuEvent.createSensuEvent(
                 "antall_fagsak_under_behandling",
                 Map.of("ytelse_type", event.getYtelseType().getKode()),
@@ -48,5 +48,6 @@ class FagsakStatusEventStatistikkObserver {
 
             sensuKlient.logMetrics(sensuEvent);
         }
+
     }
 }
