@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 
 public abstract class IverksetteVedtakStegYtelseFelles extends IverksetteVedtakStegFelles {
 
@@ -22,8 +23,9 @@ public abstract class IverksetteVedtakStegYtelseFelles extends IverksetteVedtakS
     }
 
     public IverksetteVedtakStegYtelseFelles(BehandlingRepositoryProvider repositoryProvider,
-                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse) {
-        super(repositoryProvider);
+                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse, 
+                                            SensuKlient sensuKlient) {
+        super(repositoryProvider, sensuKlient);
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.tidligereBehandlingUnderIverksettelse = tidligereBehandlingUnderIverksettelse;
     }
