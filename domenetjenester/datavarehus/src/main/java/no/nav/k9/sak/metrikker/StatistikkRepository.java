@@ -133,23 +133,6 @@ class StatistikkRepository {
             Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
     
-    @SuppressWarnings("unchecked")
-    List<SensuEvent> fagsakStatistikk() {
-        String sql = " select yt.ytelse_type, st.status, f.ytelse_type as dummy, case when f.ytelse_type is null then 0 else count(f.ytelse_type is not null) end from " + 
-            " (values ('OPPR'), ('UBEH'), ('LOP'), ('AVSLU')) as st(status)" + 
-            " cross join (values ('OMP'), ('FRISINN'), ('PSB')) as yt(ytelse_type)" + 
-            " left outer join fagsak f on f.ytelse_type=yt.ytelse_type and f.fagsak_status=st.status" + 
-            " group by 1,2,3";
-
-        Query query = entityManager.createNativeQuery(sql, Tuple.class);
-        Stream<Tuple> stream = query.getResultStream();
-        return stream.map(t -> SensuEvent.createSensuEvent("totalt_antall_fagsak",
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "status", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
-    }
-    
     /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
     private static Map<String, String> toMap(String... args) {
         if (args.length % 2 != 0) {

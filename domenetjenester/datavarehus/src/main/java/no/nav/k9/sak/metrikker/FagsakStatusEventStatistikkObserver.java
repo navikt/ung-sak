@@ -1,5 +1,7 @@
 package no.nav.k9.sak.metrikker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -7,7 +9,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.sak.behandling.FagsakStatusEvent;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
@@ -27,27 +28,30 @@ class FagsakStatusEventStatistikkObserver {
     }
 
     void observer(@Observes FagsakStatusEvent event) {
-        if(Objects.equals(event.getForrigeStatus(), event.getNyStatus())) {
+        if (Objects.equals(event.getForrigeStatus(), event.getNyStatus())) {
             return;
         }
-        
+
+        List<SensuEvent> events = new ArrayList<>();
         if (event.getNyStatus() != null) {
             var sensuEvent = SensuEvent.createSensuEvent(
-                "antall_fagsak_under_behandling",
-                Map.of("ytelse_type", event.getYtelseType().getKode()),
+                "antall_fagsak",
+                Map.of("ytelse_type", event.getYtelseType().getKode(),
+                    "fagsak_status", event.getNyStatus().getKode()),
                 Map.of("antall", 1));
-
-            sensuKlient.logMetrics(sensuEvent);
+            events.add(sensuEvent);
         }
 
         if (event.getForrigeStatus() != null) {
             var sensuEvent = SensuEvent.createSensuEvent(
-                "antall_fagsak_under_behandling",
-                Map.of("ytelse_type", event.getYtelseType().getKode()),
+                "antall_fagsak",
+                Map.of("ytelse_type", event.getYtelseType().getKode(),
+                    "fagsak_status", event.getForrigeStatus().getKode()),
                 Map.of("antall", -1));
-
-            sensuKlient.logMetrics(sensuEvent);
+            events.add(sensuEvent);
         }
+
+        sensuKlient.logMetrics(events);
 
     }
 }
