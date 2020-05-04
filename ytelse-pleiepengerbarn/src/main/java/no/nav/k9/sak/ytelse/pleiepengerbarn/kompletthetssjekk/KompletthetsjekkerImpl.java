@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthet.sjekk;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,11 +27,13 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerInntektsmelding;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("PSB")
 public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(KompletthetsjekkerImpl.class);
 

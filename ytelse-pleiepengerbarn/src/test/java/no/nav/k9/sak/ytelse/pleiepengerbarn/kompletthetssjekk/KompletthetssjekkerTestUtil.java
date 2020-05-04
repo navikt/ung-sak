@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthet;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

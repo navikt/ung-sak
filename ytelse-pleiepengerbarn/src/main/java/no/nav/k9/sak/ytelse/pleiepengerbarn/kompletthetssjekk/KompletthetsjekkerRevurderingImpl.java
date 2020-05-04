@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthet.sjekk;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +17,7 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-004")
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("PSB")
 public class KompletthetsjekkerRevurderingImpl implements Kompletthetsjekker {
 
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
