@@ -38,6 +38,7 @@ import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
+import no.nav.k9.sak.mottak.kompletthetssjekk.DefaultKompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
@@ -89,7 +90,7 @@ public class KompletthetsjekkerTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean())).thenReturn(new HashMap<>());
 
         kompletthetssjekkerSøknad = new KompletthetssjekkerSøknad(søknadRepository, Period.parse("P4W"));
-        kompletthetssjekkerInntektsmelding = new PsbKompletthetssjekkerInntektsmelding(inntektsmeldingArkivTjeneste);
+        kompletthetssjekkerInntektsmelding = new DefaultKompletthetssjekkerInntektsmelding(inntektsmeldingArkivTjeneste);
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
 
         kompletthetsjekkerImpl = new KompletthetsjekkerImpl(
