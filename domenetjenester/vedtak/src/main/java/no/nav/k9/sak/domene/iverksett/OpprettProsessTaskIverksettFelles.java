@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.iverksett;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
@@ -63,9 +64,11 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         // FIXME: Antar at denne er dekket av opprettTaskSendTilØkonomi() ?
         // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
-        //taskData.addNesteSekvensiell(new ProsessTaskData(SendTilkjentYtelseTask.TASKTYPE));
+        // taskData.addNesteSekvensiell(new ProsessTaskData(SendTilkjentYtelseTask.TASKTYPE));
 
-        taskData.addNesteSekvensiell(new ProsessTaskData(VurderOppgaveArenaTask.TASKTYPE));
+        if (skalVurdereOppgaveTilArena(behandling)) {
+            taskData.addNesteSekvensiell(new ProsessTaskData(VurderOppgaveArenaTask.TASKTYPE));
+        }
         taskData.addNesteSekvensiell(new ProsessTaskData(AvsluttBehandlingTask.TASKTYPE));
 
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
@@ -78,6 +81,11 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
         prosessTaskRepository.lagre(opprettTaskVurderOppgaveTilbakekreving(behandling));
 
         infotrygdFeedService.publiserHendelse(behandling);
+    }
+
+    private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
+        // varsle Arena for andre ytelser enn FRISINN
+        return !(FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType()));
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {
