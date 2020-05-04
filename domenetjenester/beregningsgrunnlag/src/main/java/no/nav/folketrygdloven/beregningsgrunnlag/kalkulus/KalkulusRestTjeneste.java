@@ -263,7 +263,7 @@ public class KalkulusRestTjeneste {
                 }
             }
         } catch (RuntimeException re) {
-            log.warn("Feil ved henting av data. uri=" + endpoint + (json == null ? null : ". jsonInput=" + json), re);
+            log.warn("Feil ved henting av data. uri=" + endpoint, re);
             throw re;
         }
     }

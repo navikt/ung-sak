@@ -167,7 +167,7 @@ public class UttakRestKlient {
                 }
             }
         } catch (RuntimeException re) {
-            log.warn("Feil ved henting av data. uri=" + request.getURI() + (jsonInput == null ? null : ". jsonInput=" + jsonInput), re);
+            log.warn("Feil ved henting av data. uri=" + request.getURI(), re);
             throw re;
         }
     }
