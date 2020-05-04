@@ -1,4 +1,4 @@
-delete from prosess_task where task_type='sensu.metrikk.task' and status ='KLAR';
+delete from prosess_task where task_type='sensu.metrikk.task' and status IN ('KLAR', 'FEILET');
 
 -- setter inn en ny
  insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key)
