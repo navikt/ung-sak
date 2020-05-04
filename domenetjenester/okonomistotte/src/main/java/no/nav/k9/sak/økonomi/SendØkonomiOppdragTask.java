@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.uttak.rest.JsonMapper;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
+import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.util.env.Environment;
@@ -37,16 +38,21 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
 
     private K9OppdragRestKlient restKlient;
     private TilkjentYtelseTjeneste tilkjentYtelseTjeneste;
+    private SensuKlient sensuKlient;
 
     SendØkonomiOppdragTask() {
         // for CDI proxy
     }
 
     @Inject
-    public SendØkonomiOppdragTask(BehandlingRepositoryProvider repositoryProvider, K9OppdragRestKlient restKlient, TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
+    public SendØkonomiOppdragTask(BehandlingRepositoryProvider repositoryProvider, 
+                                  K9OppdragRestKlient restKlient, 
+                                  TilkjentYtelseTjeneste tilkjentYtelseTjeneste,
+                                  SensuKlient sensuKlient) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.restKlient = restKlient;
         this.tilkjentYtelseTjeneste = tilkjentYtelseTjeneste;
+        this.sensuKlient = sensuKlient;
     }
 
     @Override
