@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
+package no.nav.k9.sak.mottak.kompletthetssjekk;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,21 +12,20 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerInntektsmelding;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
-@FagsakYtelseTypeRef("PSB")
-public class PsbKompletthetssjekkerInntektsmelding implements KompletthetssjekkerInntektsmelding {
+@FagsakYtelseTypeRef
+public class DefaultKompletthetssjekkerInntektsmelding implements KompletthetssjekkerInntektsmelding {
 
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste;
 
-    PsbKompletthetssjekkerInntektsmelding() {
+    DefaultKompletthetssjekkerInntektsmelding() {
         // CDI
     }
 
     @Inject
-    public PsbKompletthetssjekkerInntektsmelding(InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste) {
+    public DefaultKompletthetssjekkerInntektsmelding(InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste) {
         this.inntektsmeldingArkivTjeneste = inntektsmeldingArkivTjeneste;
     }
 
