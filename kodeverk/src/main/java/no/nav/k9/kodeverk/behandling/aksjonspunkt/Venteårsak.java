@@ -60,6 +60,7 @@ public enum Venteårsak implements Kodeverdi {
 
     INGEN_PERIODE_UTEN_YTELSE("INGEN_PERIODE_UTEN_YTELSE", "Mangel i løsning for brukere som har 36 måneder med ytelse før stp."),
     MANGLENDE_FUNKSJONALITET("MANGLENDE_FUNKSJONALITET", "Mangler funksjonalitet for å behandle saken."),
+    KORTVARIG_ARBEID("KORTVARIG_ARBEID", "Søker har kortvarig arbeid siste 6 måneder før skjæringstidspunktet."),
 
 ;
     public static final String KODEVERK = "VENT_AARSAK";

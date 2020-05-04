@@ -100,7 +100,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
 
     // FRISINN
-    public static final String AUTO_VENT_FRISINN_INGEN_PERIODER_UTEN_YTELSE = "8000";
+    public static final String AUTO_VENT_FRISINN_BEREGNING = "8000";
     public static final String AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET = "8003";
 
 
