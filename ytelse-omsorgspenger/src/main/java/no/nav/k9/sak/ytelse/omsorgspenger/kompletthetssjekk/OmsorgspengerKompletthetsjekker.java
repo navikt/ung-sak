@@ -25,9 +25,9 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
-import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerFelles;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknad;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerInntektsmelding;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")

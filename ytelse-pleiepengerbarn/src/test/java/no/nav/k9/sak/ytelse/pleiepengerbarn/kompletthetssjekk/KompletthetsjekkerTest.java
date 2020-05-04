@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthet.psb;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,16 +38,14 @@ import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerInntektsmelding;
-import no.nav.k9.sak.mottak.kompletthet.KompletthetssjekkerTestUtil;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerFelles;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetsjekkerImpl;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerInntektsmeldingImpl;
-import no.nav.k9.sak.mottak.kompletthet.sjekk.KompletthetssjekkerSøknad;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerInntektsmelding;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetsjekkerImpl;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class KompletthetsjekkerTest {
@@ -91,7 +89,7 @@ public class KompletthetsjekkerTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean())).thenReturn(new HashMap<>());
 
         kompletthetssjekkerSøknad = new KompletthetssjekkerSøknad(søknadRepository, Period.parse("P4W"));
-        kompletthetssjekkerInntektsmelding = new KompletthetssjekkerInntektsmeldingImpl(inntektsmeldingArkivTjeneste);
+        kompletthetssjekkerInntektsmelding = new PsbKompletthetssjekkerInntektsmelding(inntektsmeldingArkivTjeneste);
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
 
         kompletthetsjekkerImpl = new KompletthetsjekkerImpl(
