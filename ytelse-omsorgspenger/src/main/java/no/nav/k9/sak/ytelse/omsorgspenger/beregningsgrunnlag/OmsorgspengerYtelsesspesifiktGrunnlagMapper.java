@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
+import static java.util.Comparator.comparing;
+
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +32,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
 public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<OmsorgspengerGrunnlag> {
+
+    private static final Comparator<Uttaksperiode> COMP_PERIODE = comparing(uttaksperiode -> uttaksperiode.getPeriode().getFom());
 
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
@@ -82,7 +87,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         var arbeidsforhold = mapTilKalkulusArbeidsforhold(uttakArbeidsforhold);
         var utbetalingsgrad = perioder.stream()
             .filter(p -> p.getUtfall() == Utfall.INNVILGET)
-            .sorted() // stabil rekkefølge output
+            .sorted(COMP_PERIODE) // stabil rekkefølge output
             .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad()))
             .collect(Collectors.toList());
 
