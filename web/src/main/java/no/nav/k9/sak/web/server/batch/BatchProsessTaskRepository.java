@@ -44,8 +44,7 @@ public class BatchProsessTaskRepository {
     int rekjørAlleFeiledeTasks() {
         Query query = entityManager.createNativeQuery("UPDATE PROSESS_TASK " +
             "SET status = :status, " +
-            "feilede_forsoek = feilede_forsoek-1, " +
-            "neste_kjoering_etter = current_timestamp " +
+            "feilede_forsoek = feilede_forsoek-1 " +
             "WHERE STATUS = :feilet");
         query.setParameter("status", ProsessTaskStatus.KLAR.getDbKode())
             .setParameter("feilet", ProsessTaskStatus.FEILET.getDbKode());
