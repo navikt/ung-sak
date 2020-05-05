@@ -50,16 +50,17 @@ public class OmsorgspengerOpphørtidspunktTjeneste implements YtelseOpphørtidsp
 
     @Override
     public Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref) {
-        var årskvantumResultat = hentÅrskvantumResultat(ref);
-        return årskvantumResultat == null ? Optional.empty() : Optional.ofNullable(getMaksPeriode(årskvantumResultat)).map(Periode::getTom);
+        if (erOpphør(ref)) {
+            var årskvantumResultat = hentÅrskvantumResultat(ref);
+            return årskvantumResultat == null ? Optional.empty() : Optional.ofNullable(getMaksPeriode(årskvantumResultat)).map(Periode::getTom);
+        }
+        return Optional.empty();
     }
 
     private ÅrskvantumForbrukteDager hentÅrskvantumResultat(BehandlingReferanse ref) {
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
         return årskvantumResultat;
     }
-
-
 
 
     public Periode getMaksPeriode(ÅrskvantumForbrukteDager årskvantumResultat) {
