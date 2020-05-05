@@ -1,5 +1,13 @@
 package no.nav.k9.sak.dokument.arkiv.saf.rest.model;
 
 public enum Datotype {
-    DATO_DOKUMENT, DATO_JOURNALFOERT, DATO_REGISTRERT
+
+    DATO_OPPRETTET,
+    DATO_SENDT_PRINT,
+    DATO_EKSPEDERT,
+    DATO_JOURNALFOERT,
+    DATO_REGISTRERT,
+    DATO_AVS_RETUR,
+    DATO_DOKUMENT
+
 }
