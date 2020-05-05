@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.filter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -34,6 +36,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
 
+    public static final DatoIntervallEntitet NÆRINGS_PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 12, 31));
     private Boolean filterAktivert;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private UttakRepository uttakRepository;
@@ -72,6 +75,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         var søkerKompensasjonForFrilans = harSøktKompensasjonForFrilans(uttakGrunnlag);
         boolean ikkeNyOppstartetFrilans = frilans.map(this::erFrilansOgIkkeNyOppstartet).orElse(true);
         var harNæringsInntekt = harNæringsinntekt(næring);
+        var harNæringsinntektIHele2019 = harNæringsinntektIHele2019(næring);
         var søkerKompensasjonForNæring = harSøktKompensasjonForNæring(uttakGrunnlag);
 
         /*
@@ -86,7 +90,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
 
         if (søkerKompensasjonForFrilans && ikkeNyOppstartetFrilans && harFrilansInntekter && !søkerKompensasjonForNæring && !harNæringsInntekt) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if (!søkerKompensasjonForFrilans && !harFrilansInntekter && søkerKompensasjonForNæring && harNæringsInntekt) {
+        } else if (!søkerKompensasjonForFrilans && !harFrilansInntekter && søkerKompensasjonForNæring && harNæringsInntekt && harNæringsinntektIHele2019) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -95,7 +99,14 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
     }
 
     private boolean harNæringsinntekt(List<OppgittEgenNæring> næring) {
-        return næring.stream().anyMatch(it -> BigDecimal.ZERO.compareTo(it.getBruttoInntekt()) != 0);
+        return næring.stream()
+            .anyMatch(it -> BigDecimal.ZERO.compareTo(it.getBruttoInntekt()) != 0);
+    }
+
+    private boolean harNæringsinntektIHele2019(List<OppgittEgenNæring> næring) {
+        return næring.stream()
+            .filter(it -> NÆRINGS_PERIODE.equals(it.getPeriode()))
+            .anyMatch(it -> BigDecimal.ZERO.compareTo(it.getBruttoInntekt()) != 0);
     }
 
     private boolean harSøktKompensasjonForNæring(Optional<UttakGrunnlag> uttakGrunnlag) {
