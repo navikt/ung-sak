@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -87,11 +88,11 @@ public class TilKalkulusMapper {
 
         var inntektsmeldinger = grunnlag.getInntektsmeldinger();
         var yrkesaktiviteterForBeregning = arbeid.map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(Collections.emptyList());
-        var alleInntektBeregningsgrunnlag = inntektFilter.getAlleInntektBeregningsgrunnlag();
+        var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
         inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning));
-        inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleInntektBeregningsgrunnlag));
+        inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
         inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(inntektsmeldinger));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
@@ -99,6 +100,13 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
 
         return inntektArbeidYtelseGrunnlagDto;
+    }
+
+    private static List<Inntekt> finnRelevanteInntekter(InntektFilter inntektFilter){
+        return new ArrayList<>(){{
+            addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
+            addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
+        }};
     }
 
     private static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjonOpt) {
