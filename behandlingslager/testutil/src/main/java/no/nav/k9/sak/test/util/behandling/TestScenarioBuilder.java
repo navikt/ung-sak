@@ -71,5 +71,4 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
         return new TestScenarioBuilder(fagsakYtelseType);
     }
 
-
 }
