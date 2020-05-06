@@ -14,23 +14,25 @@ import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 
 @Dependent
-public class IverksetteVedtakStatistikk {
+class IverksetteVedtakStatistikk {
     private SensuKlient sensuKlient;
     private VilkårResultatRepository vilkårResultatRepository;
 
     @Inject
-    public IverksetteVedtakStatistikk(SensuKlient sensuKlient, VilkårResultatRepository vilkårResultatRepository) {
+    IverksetteVedtakStatistikk(SensuKlient sensuKlient, VilkårResultatRepository vilkårResultatRepository) {
         this.sensuKlient = sensuKlient;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    public void logMetrikker(Behandling behandling) {
+    void logMetrikker(Behandling behandling) {
         var fagsak = behandling.getFagsak();
         Long behandlingId = behandling.getId();
         var resultatType = behandling.getBehandlingResultatType();
 
         var events = new ArrayList<SensuEvent>();
 
+        boolean harSaksbehandler = behandling.getAnsvarligSaksbehandler() != null && !"VL".equals(behandling.getAnsvarligSaksbehandler());
+        
         events.add(SensuEvent.createSensuEvent(
             "steg.iverksetteVedtak",
             Map.of(
@@ -39,8 +41,8 @@ public class IverksetteVedtakStatistikk {
                 "behandling_resultat", resultatType.getKode()),
             Map.of(
                 "antall", 1,
-                "antall_manuell", (behandling.getAnsvarligSaksbehandler() != null ? 1 : 0),
-                "antall_automatisk", (behandling.getAnsvarligSaksbehandler() != null ? 0 : 1),
+                "antall_manuell", (harSaksbehandler ? 1 : 0),
+                "antall_automatisk", (harSaksbehandler ? 0 : 1),
                 "antall_totrinn", (behandling.isToTrinnsBehandling() ? 1 : 0))));
 
         if (resultatType.isBehandlingsresultatAvslått()) {
