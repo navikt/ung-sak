@@ -183,7 +183,7 @@ spec:
 
     # Feature-flag
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
-      value: "true"
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
