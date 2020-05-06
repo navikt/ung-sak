@@ -43,7 +43,7 @@ public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
 
             // kjøres utenfor savepoint. Ellers står vi nakne, med kun utførte steg
             stegVisitor.markerOvergangTilNyttSteg(steg.getBehandlingStegType(), forrigeTilstand);
-
+            
             StegProsesseringResultat resultat = prosesserStegISavepoint(behandling, stegVisitor);
             return resultat;
         } finally {

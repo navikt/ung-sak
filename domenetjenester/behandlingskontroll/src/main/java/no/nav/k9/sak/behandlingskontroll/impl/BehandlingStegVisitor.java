@@ -136,7 +136,8 @@ class BehandlingStegVisitor {
     private void avsluttSteg(BehandlingStegType stegType, BehandlingStegStatus førsteStegStatus, StegProsesseringResultat stegResultat,
                              List<Aksjonspunkt> funnetAksjonspunkter) {
 
-        log.info("Avslutter steg={}, transisjon={} og funnet aksjonspunkter={}, har totalt aksjonspunkter={}", stegType, stegResultat, funnetAksjonspunkter.stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).collect(Collectors.toList()), behandling.getAksjonspunkter());
+        log.info("Avslutter steg={}, transisjon={} og funnet aksjonspunkter={}, har totalt aksjonspunkter={}", stegType, stegResultat,
+            funnetAksjonspunkter.stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).collect(Collectors.toList()), behandling.getAksjonspunkter());
 
         Optional<BehandlingStegTilstand> stegTilstandFør = behandling.getSisteBehandlingStegTilstand();
 
@@ -182,6 +183,7 @@ class BehandlingStegVisitor {
         // Flytt aktivt steg til gjeldende steg hvis de ikke er like
         BehandlingStegStatus sluttStatusForAndreSteg = behandlingStegKonfigurasjon.getUtført();
         settBehandlingStegSomGjeldende(stegType, sluttStatusForAndreSteg);
+        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
 
         fyrEventBehandlingStegOvergang(forrigeTilstand, BehandlingModellImpl.tilBehandlingsStegSnapshot(behandling.getBehandlingStegTilstand()));
     }
@@ -320,7 +322,6 @@ class BehandlingStegVisitor {
         }
         return tilbakeførtStegStatus;
     }
-
 
     private void oppdaterBehandlingStegType(BehandlingStegType nesteStegType, BehandlingStegStatus nesteStegStatus, BehandlingStegStatus sluttStegStatusVedOvergang) {
         Objects.requireNonNull(behandlingRepository, "behandlingRepository");
