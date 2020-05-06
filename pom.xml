@@ -38,7 +38,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<felles.version>1.6-20200503085330-c5620b7</felles.version>
+		<felles.version>1.6-20200506091752-eeb7f11</felles.version>
 
 		<metrics.version>4.1.7</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
@@ -73,7 +73,7 @@
 			<dependency>
 				<groupId>no.nav.vedtak.prosesstask</groupId>
 				<artifactId>prosesstask-root</artifactId>
-				<version>2.3-20200503073854-0577a9b</version>
+				<version>2.3-20200506081503-ce85a68</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -447,7 +447,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.8.0</version>
+				<version>3.16.0</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>

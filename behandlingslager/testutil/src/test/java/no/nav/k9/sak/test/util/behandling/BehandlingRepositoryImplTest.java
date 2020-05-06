@@ -479,7 +479,7 @@ public class BehandlingRepositoryImplTest {
         LocalDateTime avsluttetDatoResultat = resultatBehandling.get().getAvsluttetDato();
 
         assertThat(avsluttetDatoResultat).isEqualTo(avsluttetDato.withNano(0)); // Oracle is not returning milliseconds.
-        assertThat(avsluttetDatoResultat).isNotEqualTo(avsluttetDato.toLocalDate());
+
     }
 
     private Behandling opprettBehandlingForAutomatiskGjenopptagelse() {

@@ -11,7 +11,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 
 @BehandlingStegRef(kode = "IVEDSTEG")
 @BehandlingTypeRef("BT-004") // Revurdering
@@ -31,8 +30,8 @@ public class IverksetteVedtakStegRevurdering extends IverksetteVedtakStegTilgren
                                            @FagsakYtelseTypeRef OpprettProsessTaskIverksett opprettProsessTaskIverksett,
                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
                                            IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse, 
-                                           SensuKlient sensuKlient) {
-        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse, sensuKlient);
+                                           IverksetteVedtakStatistikk metrikker) {
+        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse, metrikker);
         this.opprettProsessTaskIverksett = opprettProsessTaskIverksett;
     }
 
