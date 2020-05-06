@@ -1,6 +1,7 @@
 package no.nav.k9.sak.metrikker;
 
 import java.math.BigInteger;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -16,6 +17,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TemporalType;
 import javax.persistence.Tuple;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -33,16 +35,16 @@ public class StatistikkRepository {
     @SuppressWarnings("unchecked")
     List<SensuEvent> avslagStatistikk(LocalDate fagsakOpprettetDato) {
 
-        String sql = "select f.ytelse_type, f.fagsak_status, b.behandling_type, b.behandling_resultat_type, b.uuid, vv.vilkar_type, coalesce(vrp.avslag_kode, '-'), f.opprettet_tid from fagsak f " +
-            "inner join behandling b on b.fagsak_id=f.id" +
-            "inner join rs_vilkars_resultat rs on rs.behandling_id=b.id and rs.aktiv=true" +
-            "inner join VR_VILKAR_RESULTAT vr on vr.id=rs.vilkarene_id" +
-            "inner join vr_vilkar vv on vv.vilkar_resultat_id=vr.id" +
-            "inner join vr_vilkar_periode vrp on vrp.vilkar_id=vv.id" +
-            "where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid))";
+        String sql = "select f.ytelse_type, f.fagsak_status, b.behandling_type, b.behandling_resultat_type, cast(b.uuid as varchar(50)), vv.vilkar_type, coalesce(vrp.avslag_kode, '-'), f.opprettet_tid from fagsak f " +
+            " inner join behandling b on b.fagsak_id=f.id" +
+            " inner join rs_vilkars_resultat rs on rs.behandling_id=b.id and rs.aktiv=true" +
+            " inner join VR_VILKAR_RESULTAT vr on vr.id=rs.vilkarene_id" +
+            " inner join vr_vilkar vv on vv.vilkar_resultat_id=vr.id" +
+            " inner join vr_vilkar_periode vrp on vrp.vilkar_id=vv.id" +
+            " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid))";
 
-        Query query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("dato", fagsakOpprettetDato);
+        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
+            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("totalt_vilkar_resultat",
             toMap(
@@ -71,8 +73,8 @@ public class StatistikkRepository {
             " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid)) " +
             " group by 1, 2, 3";
 
-        Query query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("dato", fagsakOpprettetDato);
+        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
+                .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_per_ytelse_type",
             toMap(
@@ -93,8 +95,8 @@ public class StatistikkRepository {
             " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid)) " +
             " group by 1, 2, 3, 4";
 
-        Query query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("dato", fagsakOpprettetDato);
+        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
+                .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_ytelse_type_vent_aarsak",
             toMap(
@@ -112,8 +114,8 @@ public class StatistikkRepository {
             " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid)) " +
             " group by 1, 2, 3";
 
-        Query query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("dato", fagsakOpprettetDato);
+        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
+            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("behandling_status",
             toMap(
@@ -125,7 +127,7 @@ public class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
-        String sql = "select t.kode as task_type, s.status, coalesce(f.ytelse_type, '-'), p.status as dummy, case when p.status is null then 0 else count(p.status) end as antall " +
+        String sql = "select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'OBSOLETE'), p.status as dummy, case when p.status is null then 0 else count(p.status) end as antall " +
             " from prosess_task_type t" +
             " cross join(values ('FEILET'),('VENTER_SVAR'),('KLAR')) as s(status)" +
             " left outer join prosess_task p on p.task_type=t.kode And  p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +

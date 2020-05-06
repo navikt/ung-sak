@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.persistence.EntityManager;
+
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -37,9 +39,9 @@ import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling.Builder;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling.Builder;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapBehandlingsgrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
@@ -441,6 +443,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return fagsak;
     }
 
+    public Behandling lagre(EntityManager entityManager) {
+        return lagre(new BehandlingRepositoryProvider(entityManager));
+    }
+    
     public Behandling lagre(BehandlingRepositoryProvider repositoryProvider) {
 
         build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
