@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -15,8 +14,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 
 public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg {
 
@@ -25,14 +22,14 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
-    private SensuKlient sensuKlient;
+    private IverksetteVedtakStatistikk metrikker;
 
     protected IverksetteVedtakStegFelles() {
         // for CDI proxy
     }
 
-    public IverksetteVedtakStegFelles(BehandlingRepositoryProvider repositoryProvider, SensuKlient sensuKlient) {
-        this.sensuKlient = sensuKlient;
+    public IverksetteVedtakStegFelles(BehandlingRepositoryProvider repositoryProvider, IverksetteVedtakStatistikk metrikker) {
+        this.metrikker = metrikker;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     }
@@ -61,24 +58,13 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
         førIverksetting(behandling, vedtak);
         log.info("Behandling {}: Iverksetter vedtak", behandlingId);
         iverksetter(behandling);
-        
-        logMetrikkIverksettVedtak(behandling);
-        
+
+        metrikker.logMetrikker(behandling);
+
         return BehandleStegResultat.settPåVent();
     }
 
-    private void logMetrikkIverksettVedtak(Behandling behandling) {
-        var fagsak = behandling.getFagsak();
-        var sensuEvent = SensuEvent.createSensuEvent(
-            "steg.iverksetteVedtak",
-            Map.of(
-                "ytelse_type", fagsak.getYtelseType().getKode(),
-                "behandling_type", behandling.getType().getKode(),
-                "behandling_resultat", behandling.getBehandlingResultatType().getKode()),
-            Map.of("antall", 1));
 
-        sensuKlient.logMetrics(sensuEvent);
-    }
 
     @Override
     public final BehandleStegResultat gjenopptaSteg(BehandlingskontrollKontekst kontekst) {

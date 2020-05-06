@@ -40,7 +40,6 @@ import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class IverksetteVedtakStegYtelseTest {
@@ -69,7 +68,7 @@ public class IverksetteVedtakStegYtelseTest {
     private IdentifiserOverlappendeInfotrygdYtelseTjeneste iverksettingSkalIkkeStoppesAvOverlappendeYtelse;
 
     @Mock
-    private SensuKlient sensuKlient;
+    private IverksetteVedtakStatistikk metrikker;
     
     private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
 
@@ -79,7 +78,7 @@ public class IverksetteVedtakStegYtelseTest {
             opprettProsessTaskIverksett, 
             vurderBehandlingerUnderIverksettelse,
             iverksettingSkalIkkeStoppesAvOverlappendeYtelse, 
-            sensuKlient);
+            metrikker);
         behandling = opprettBehandling();
     }
 

@@ -5,7 +5,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 
 public abstract class IverksetteVedtakStegTilgrensendeFelles extends IverksetteVedtakStegYtelseFelles {
 
@@ -18,8 +17,8 @@ public abstract class IverksetteVedtakStegTilgrensendeFelles extends IverksetteV
     public IverksetteVedtakStegTilgrensendeFelles(BehandlingRepositoryProvider repositoryProvider,
                                                   VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
                                                   IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse, 
-                                                  SensuKlient sensuKlient) {
-        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, sensuKlient);
+                                                  IverksetteVedtakStatistikk metrikker) {
+        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, metrikker);
         this.identifiserOverlappendeInfotrygdYtelse = identifiserOverlappendeInfotrygdYtelse;
     }
 

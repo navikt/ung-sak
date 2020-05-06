@@ -1,7 +1,6 @@
 package no.nav.k9.sak.metrikker;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -43,13 +42,7 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            List<SensuEvent> metrikker = new ArrayList<>();
-            metrikker.addAll(statistikkRepository.prosessTaskStatistikk());
-            metrikker.addAll(statistikkRepository.behandlingStatistikkUnderBehandling());
-            metrikker.addAll(statistikkRepository.behandlingStatistikkStartetIDag());
-            metrikker.addAll(statistikkRepository.behandlingStatistikkAvsluttetIDag());
-            metrikker.addAll(statistikkRepository.aksjonspunktStatistikk());
-            metrikker.addAll(statistikkRepository.aksjonspunktVenteårsakStatistikk());
+            var metrikker = statistikkRepository.hentAlle(null);
             
             logMetrics(metrikker);
         } finally {

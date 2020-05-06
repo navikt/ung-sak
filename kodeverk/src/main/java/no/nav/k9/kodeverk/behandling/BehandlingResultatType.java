@@ -143,7 +143,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(this);
     }
-
+    
     public boolean isBehandlingsresultatHenlagt() {
         return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
