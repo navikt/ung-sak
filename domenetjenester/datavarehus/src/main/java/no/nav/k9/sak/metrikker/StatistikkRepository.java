@@ -53,7 +53,7 @@ public class StatistikkRepository {
                 "behandling_uuid", t.get(4, String.class),
                 "vilkar_type", t.get(5, String.class),
                 "avslag_kode", t.get(6, String.class)),
-            Map.of("antall", "1"), tidsstempel(fagsakOpprettetDato, t.get(7, LocalDateTime.class)))).collect(Collectors.toList());
+            Map.of("antall", BigInteger.ONE), tidsstempel(fagsakOpprettetDato, t.get(7, LocalDateTime.class)))).collect(Collectors.toList());
 
     }
 
@@ -141,7 +141,7 @@ public class StatistikkRepository {
                 "prosess_task_type", t.get(0, String.class),
                 "status", t.get(1, String.class),
                 "ytelse_type", t.get(2, String.class)),
-            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(4, BigInteger.class)))).collect(Collectors.toList());
     }
 
     /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
