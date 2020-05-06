@@ -2,9 +2,8 @@ package no.nav.k9.sak.metrikker;
 
 import java.math.BigInteger;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,7 +34,8 @@ public class StatistikkRepository {
     @SuppressWarnings("unchecked")
     List<SensuEvent> avslagStatistikk(LocalDate fagsakOpprettetDato) {
 
-        String sql = "select f.ytelse_type, f.fagsak_status, b.behandling_type, b.behandling_resultat_type, cast(b.uuid as varchar(50)), vv.vilkar_type, coalesce(vrp.avslag_kode, '-'), f.opprettet_tid from fagsak f " +
+        String sql = "select f.ytelse_type, f.fagsak_status, b.behandling_type, b.behandling_resultat_type, cast(b.uuid as varchar(50)), vv.vilkar_type, coalesce(vrp.avslag_kode, '-'), f.opprettet_tid from fagsak f "
+            +
             " inner join behandling b on b.fagsak_id=f.id" +
             " inner join rs_vilkars_resultat rs on rs.behandling_id=b.id and rs.aktiv=true" +
             " inner join VR_VILKAR_RESULTAT vr on vr.id=rs.vilkarene_id" +
@@ -55,12 +55,12 @@ public class StatistikkRepository {
                 "behandling_uuid", t.get(4, String.class),
                 "vilkar_type", t.get(5, String.class),
                 "avslag_kode", t.get(6, String.class)),
-            Map.of("antall", BigInteger.ONE), tidsstempel(fagsakOpprettetDato, t.get(7, LocalDateTime.class)))).collect(Collectors.toList());
+            Map.of("antall", BigInteger.ONE), tidsstempel(fagsakOpprettetDato, t.get(7, Timestamp.class)))).collect(Collectors.toList());
 
     }
 
-    private long tidsstempel(LocalDate fagsakOpprettetDato, LocalDateTime opprettetTid) {
-        return fagsakOpprettetDato == null ? System.currentTimeMillis() : opprettetTid.toInstant(ZoneOffset.of("Z")).toEpochMilli();
+    private long tidsstempel(LocalDate fagsakOpprettetDato, Timestamp opprettetTid) {
+        return fagsakOpprettetDato == null || opprettetTid == null ? System.currentTimeMillis() : opprettetTid.getTime();
     }
 
     @SuppressWarnings("unchecked")
@@ -74,7 +74,7 @@ public class StatistikkRepository {
             " group by 1, 2, 3";
 
         Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
-                .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
+            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_per_ytelse_type",
             toMap(
@@ -96,7 +96,7 @@ public class StatistikkRepository {
             " group by 1, 2, 3, 4";
 
         Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
-                .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
+            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_ytelse_type_vent_aarsak",
             toMap(
