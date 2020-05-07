@@ -9,11 +9,8 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Converter;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -56,7 +53,7 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
     @JoinColumn(name = "aktivitet_id", nullable = false, updatable = false, unique = true)
     private UttakAktivitet uttak;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = UttakArbeidTypeKodeConverter.class)
     @ChangeTracked
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
@@ -113,7 +110,7 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
         this.periode = Objects.requireNonNull(periode, "periode");
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
     }
-    
+
     public UttakAktivitetPeriode(UttakArbeidType aktivitetType, LocalDate fom, LocalDate tom) {
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
@@ -123,7 +120,7 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
     public String getIndexKey() {
         return IndexKeyComposer.createKey(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
     }
-    
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
