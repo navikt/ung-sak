@@ -66,6 +66,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
         var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand)
+            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
         var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);

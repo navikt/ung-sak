@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -19,6 +20,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class VilkårBuilder {
 
     private final Vilkår vilkåret;
+    private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;
@@ -44,6 +46,12 @@ public class VilkårBuilder {
             avstand = ChronoUnit.DAYS.between(secondDate, firstDate);
         }
         return avstand > 0 && avstand < mellomliggendePeriodeAvstand;
+    }
+
+    VilkårBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
+        Objects.requireNonNull(vurderer);
+        this.kantIKantVurderer = vurderer;
+        return this;
     }
 
     public VilkårBuilder medType(VilkårType type) {
@@ -190,7 +198,7 @@ public class VilkårBuilder {
             for (VilkårPeriode vilkårPeriode : vilkårsPerioderRaw) {
                 if (periode == null) {
                     periode = vilkårPeriode;
-                } else if (periode.getPeriode().grenserTil(vilkårPeriode.getPeriode()) && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)) {
+                } else if (kantIKantVurderer.erKantIKant(vilkårPeriode.getPeriode(), periode.getPeriode()) && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)) {
                     periode = new VilkårPeriodeBuilder(periode)
                         .medPeriode(periode.getFom(), vilkårPeriode.getTom())
                         .medUtfall(Utfall.IKKE_VURDERT)
@@ -215,10 +223,9 @@ public class VilkårBuilder {
             .filter(it -> !it.getErOverstyrt())
             .filter(it -> Utfall.IKKE_VURDERT.equals(it.getGjeldendeUtfall()))
             .anyMatch(it -> vilkårsPerioderRaw.stream()
-                .filter(p -> !p.getErOverstyrt())
                 .map(VilkårPeriode::getPeriode)
                 .filter(at -> !at.equals(it.getPeriode()))
-                .anyMatch(p -> p.grenserTil(it.getPeriode())));
+                .anyMatch(p -> kantIKantVurderer.erKantIKant(it.getPeriode(), p)));
     }
 
     private boolean enAvPeriodeneErTilVurdering(VilkårPeriode periode, VilkårPeriode vilkårPeriode) {

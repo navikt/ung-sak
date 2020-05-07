@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -13,6 +14,7 @@ public class VilkårResultatBuilder {
 
     private Vilkårene kladd = new Vilkårene();
     private int mellomliggendePeriodeAvstand = 0;
+    private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
     private boolean built;
 
     public VilkårResultatBuilder() {
@@ -45,6 +47,11 @@ public class VilkårResultatBuilder {
         return this;
     }
 
+    public VilkårResultatBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
+        Objects.requireNonNull(vurderer);
+        this.kantIKantVurderer = vurderer;
+        return this;
+    }
 
     public VilkårResultatBuilder leggTil(VilkårBuilder vilkårBuilder) {
         kladd.leggTilVilkår(vilkårBuilder.build());
@@ -69,7 +76,8 @@ public class VilkårResultatBuilder {
         vilkår.stream()
             .map(type -> hentBuilderFor(type)
                 .medType(type)
-                .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand))
+                .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
+                .medKantIKantVurderer(kantIKantVurderer))
             .peek(v -> intervaller.forEach(p -> v.leggTil(v.hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT))))
             .forEach(builder -> kladd.leggTilVilkår(builder.build()));
         return this;
