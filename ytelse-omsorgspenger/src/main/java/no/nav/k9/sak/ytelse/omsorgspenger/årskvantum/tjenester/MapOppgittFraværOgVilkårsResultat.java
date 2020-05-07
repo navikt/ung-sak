@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -20,7 +19,7 @@ public class MapOppgittFraværOgVilkårsResultat {
     public MapOppgittFraværOgVilkårsResultat() {
     }
 
-    Map<Aktivitet, Set<WrappedOppgittFraværPeriode>> utledPerioderMedUtfallHvisAvslåttVilkår(OppgittFravær grunnlag, Vilkårene vilkårene) {
+    Map<Aktivitet, List<WrappedOppgittFraværPeriode>> utledPerioderMedUtfallHvisAvslåttVilkår(OppgittFravær grunnlag, Vilkårene vilkårene) {
 
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje = opprettFraværsTidslinje(grunnlag);
         LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje = opprettVilkårTidslinje(vilkårene);
@@ -28,9 +27,9 @@ public class MapOppgittFraværOgVilkårsResultat {
         return kombinerTidslinjene(fraværsTidslinje, avslåtteVilkårTidslinje);
     }
 
-    private Map<Aktivitet, Set<WrappedOppgittFraværPeriode>> kombinerTidslinjene(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje,
+    private Map<Aktivitet, List<WrappedOppgittFraværPeriode>> kombinerTidslinjene(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje,
                                                                                  LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje) {
-        Map<Aktivitet, Set<WrappedOppgittFraværPeriode>> result = new HashMap<>();
+        Map<Aktivitet, List<WrappedOppgittFraværPeriode>> result = new HashMap<>();
 
         for (Map.Entry<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> entry : fraværsTidslinje.entrySet()) {
             var timeline = entry.getValue().combine(avslåtteVilkårTidslinje, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
@@ -40,7 +39,7 @@ public class MapOppgittFraværOgVilkårsResultat {
                 .filter(it -> it.getValue() != null)
                 .filter(it -> it.getValue().getPeriode() != null)
                 .map(this::opprettHoldKonsistens)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toList()));
         }
 
         return result;

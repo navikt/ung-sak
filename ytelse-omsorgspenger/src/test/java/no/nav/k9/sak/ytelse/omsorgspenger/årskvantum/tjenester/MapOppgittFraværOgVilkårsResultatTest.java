@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfallHvisAvslåttVilkår(oppgittFravær, vilkårene);
 
         assertThat(perioder).hasSize(1);
-        for (Map.Entry<Aktivitet, Set<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
+        for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
             assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
             assertThat(entries.getValue().stream().filter(it -> !it.getErAvslått())).hasSize(1);
@@ -58,7 +58,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfallHvisAvslåttVilkår(oppgittFravær, vilkårene);
 
         assertThat(perioder).hasSize(1);
-        for (Map.Entry<Aktivitet, Set<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
+        for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
             assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
             assertThat(entries.getValue().stream().filter(it -> !it.getErAvslått())).hasSize(1);
@@ -109,7 +109,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfallHvisAvslåttVilkår(oppgittFravær, vilkårene);
 
         assertThat(perioder).hasSize(1);
-        for (Map.Entry<Aktivitet, Set<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
+        for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
             assertThat(entries.getValue().stream().filter(WrappedOppgittFraværPeriode::getErAvslått)).hasSize(1);
             assertThat(entries.getValue().stream().filter(it -> !it.getErAvslått())).hasSize(1);
