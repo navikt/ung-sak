@@ -25,6 +25,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
+    PRECONDITION_BEREGNING("PRECONDITION_BERGRUNN", "Vurderer om det er mulig å beregne", UTREDES),
     FASTSETT_BEREGNINGSGRUNNLAG("FAST_BERGRUNN", "Fastsett beregningsgrunnlag", UTREDES),
     FASTSETT_OPPTJENINGSPERIODE("VURDER_OPPTJ_PERIODE", "Vurder Opptjening Periode", UTREDES),
     FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING("FASTSETT_STP_BER", "Fastsett skjæringstidspunkt beregning", UTREDES),

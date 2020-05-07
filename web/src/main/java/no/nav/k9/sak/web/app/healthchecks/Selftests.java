@@ -42,8 +42,7 @@ public class Selftests {
     private LocalDateTime sistOppdatertTid = LocalDateTime.now().minusDays(1);
 
     @Inject
-    public Selftests(
-                     HealthCheckRegistry registry,
+    public Selftests(HealthCheckRegistry registry,
                      @Any Instance<ExtHealthCheck> healthChecks,
                      @KonfigVerdi(value = "application.name") String applicationName) {
 
