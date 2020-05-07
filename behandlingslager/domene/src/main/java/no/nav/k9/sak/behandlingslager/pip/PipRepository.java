@@ -126,10 +126,10 @@ public class PipRepository {
             "WHERE fag.SAKSNUMMER = (:saksnummer) AND grp.aktiv = TRUE " +
             " UNION ALL " + // NOSONAR
             "SELECT fag.bruker_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.id in (:fagsakIder) AND fag.bruker_aktoer_id IS NOT NULL " +
+            "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.bruker_aktoer_id IS NOT NULL " +
             " UNION ALL " + // NOSONAR
             "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
-            "WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL ";
+            "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.pleietrengende_aktoer_id IS NOT NULL ";
 
         Query query = entityManager.createNativeQuery(sql); // NOSONAR
         query.setParameter(SAKSNUMMER, saksnummer.getVerdi());
