@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -103,9 +104,10 @@ class BehandlingStegVisitor {
         if (!gjenoppta && BehandlingStegStatus.VENTER.equals(førStegStatus)) {
             return StegProsesseringResultat.medMuligTransisjon(førStegStatus, BehandleStegResultat.settPåVent().getTransisjon());
         }
+        BehandlingStatus førStatus = behandling.getStatus();
         BehandlingStegStatus førsteStegStatus = utledStegStatusFørUtføring(stegModell);
         oppdaterBehandlingStegStatus(behandling, stegType, førStegStatus, førsteStegStatus);
-
+        var stegTilstand = behandling.getSisteBehandlingStegTilstand();
         // Utfør steg hvis tillatt av stegets før-status. Utled stegets nye status.
         StegProsesseringResultat stegResultat;
         List<Aksjonspunkt> funnetAksjonspunkter = new ArrayList<>();
@@ -128,25 +130,29 @@ class BehandlingStegVisitor {
             stegResultat = StegProsesseringResultat.utenOverhopp(førsteStegStatus);
         }
 
-        avsluttSteg(stegType, førsteStegStatus, stegResultat, funnetAksjonspunkter);
+        avsluttSteg(stegType, førStatus, førsteStegStatus, stegTilstand, stegResultat, funnetAksjonspunkter);
 
         return stegResultat;
     }
 
-    private void avsluttSteg(BehandlingStegType stegType, BehandlingStegStatus førsteStegStatus, StegProsesseringResultat stegResultat,
+    private void avsluttSteg(BehandlingStegType stegType, BehandlingStatus førStatus, BehandlingStegStatus førsteStegStatus, Optional<BehandlingStegTilstand> stegTilstandFør, StegProsesseringResultat stegResultat,
                              List<Aksjonspunkt> funnetAksjonspunkter) {
 
         log.info("Avslutter steg={}, transisjon={} og funnet aksjonspunkter={}, har totalt aksjonspunkter={}", stegType, stegResultat,
             funnetAksjonspunkter.stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).collect(Collectors.toList()), behandling.getAksjonspunkter());
 
-        Optional<BehandlingStegTilstand> stegTilstandFør = behandling.getSisteBehandlingStegTilstand();
-
         // Sett riktig status for steget etter at det er utført. Lagre eventuelle endringer fra steg på behandling
         guardAlleÅpneAksjonspunkterHarDefinertVurderingspunkt();
         oppdaterBehandlingStegStatus(behandling, stegType, førsteStegStatus, stegResultat.getNyStegStatus());
 
+        // Publiser statusevent
+        BehandlingStatus etterStatus = behandling.getStatus();
+        eventPubliserer.fireEvent(kontekst, førStatus, etterStatus);
+
         // Publiser transisjonsevent
         StegTransisjon transisjon = behandlingModell.finnTransisjon(stegResultat.getTransisjon());
+        
+        // FIXME K9:Suspekt støtter bare fremoverhopp her? returnerer null tilSteg om ikke finner (eks. hvis tilbakeføring)
         BehandlingStegType tilSteg = finnFremoverhoppSteg(stegType, transisjon);
         eventPubliserer.fireEvent(opprettEvent(stegResultat, transisjon, stegTilstandFør.orElse(null), tilSteg));
 
@@ -336,7 +342,11 @@ class BehandlingStegVisitor {
     }
 
     protected void settBehandlingStegSomGjeldende(BehandlingStegType nesteStegType, BehandlingStegStatus sluttStegStatusVedOvergang) {
+        BehandlingStatus førStatus = behandling.getStatus();
         oppdaterBehandlingStegType(nesteStegType, null, sluttStegStatusVedOvergang);
+        if (!Objects.equals(førStatus, behandling.getStatus())) {
+            eventPubliserer.fireEvent(kontekst, førStatus, behandling.getStatus());
+        }
     }
 
     private boolean erSammeStegSomFør(BehandlingStegType stegType, BehandlingStegType nåværendeBehandlingSteg) {
