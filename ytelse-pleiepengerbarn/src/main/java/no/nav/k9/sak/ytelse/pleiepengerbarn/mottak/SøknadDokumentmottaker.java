@@ -73,7 +73,7 @@ class SøknadDokumentmottaker {
 
     private Behandling tilknyttBehandling(Saksnummer saksnummer) {
         // FIXME K9 Legg til logikk for valg av fagsak
-        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
 
         // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType
         return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());

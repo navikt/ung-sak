@@ -41,7 +41,7 @@ public class InnhentDokumentTjeneste {
 
     public void utfør(MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(mottattDokument.getFagsakId());
-        DokumentGruppe dokumentGruppe = DokumentGruppe.INNTEKTSMELDING;  // eneste supporterte foreløpig.
+        DokumentGruppe dokumentGruppe = DokumentGruppe.INNTEKTSMELDING; // eneste supporterte foreløpig.
         Dokumentmottaker dokumentmottaker = finnMottaker(dokumentGruppe, fagsak.getYtelseType());
         dokumentmottaker.mottaDokument(mottattDokument, fagsak, behandlingÅrsakType);
     }

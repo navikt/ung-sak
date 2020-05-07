@@ -178,7 +178,6 @@ class BehandlingStegVisitor {
     }
 
     void markerOvergangTilNyttSteg(BehandlingStegType stegType, BehandlingStegTilstandSnapshot forrigeTilstand) {
-        log.info("Markerer nytt steg som aktivt: {}", stegType);
 
         // Flytt aktivt steg til gjeldende steg hvis de ikke er like
         BehandlingStegStatus sluttStatusForAndreSteg = behandlingStegKonfigurasjon.getUtført();
