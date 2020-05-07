@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.uttak;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -18,7 +19,11 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
-public class UttakAktivitetPeriodeDto {
+public class UttakAktivitetPeriodeDto implements Comparable<UttakAktivitetPeriodeDto> {
+
+    private static final Comparator<UttakAktivitetPeriodeDto> COMP = Comparator
+        .comparing(UttakAktivitetPeriodeDto::getPeriode, Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(UttakAktivitetPeriodeDto::getType, Comparator.nullsLast(Comparator.naturalOrder()));
 
     @JsonProperty(value = "periode", required = true)
     @Valid
@@ -65,6 +70,13 @@ public class UttakAktivitetPeriodeDto {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<periode=" + periode + ", type=" + type + ">";
+    }
+
+    @Override
+    public int compareTo(UttakAktivitetPeriodeDto o) {
+        if (this == o)
+            return 0;
+        return COMP.compare(this, o);
     }
 
 }
