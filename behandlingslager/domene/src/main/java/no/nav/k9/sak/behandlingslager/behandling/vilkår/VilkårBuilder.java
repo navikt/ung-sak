@@ -188,15 +188,14 @@ public class VilkårBuilder {
             var vilkårPerioder = new ArrayList<VilkårPeriode>();
 
             for (VilkårPeriode vilkårPeriode : vilkårsPerioderRaw) {
-                if (vilkårPeriode.getErOverstyrt()) {
-                    continue;
-                }
                 if (periode == null) {
                     periode = vilkårPeriode;
                 } else if (periode.getPeriode().grenserTil(vilkårPeriode.getPeriode()) && enAvPeriodeneErTilVurdering(periode, vilkårPeriode)) {
                     periode = new VilkårPeriodeBuilder(periode)
                         .medPeriode(periode.getFom(), vilkårPeriode.getTom())
                         .medUtfall(Utfall.IKKE_VURDERT)
+                        .medUtfallOverstyrt(Utfall.UDEFINERT)
+                        .medUtfallManuell(Utfall.UDEFINERT)
                         .build();
                 } else {
                     vilkårPerioder.add(periode);
