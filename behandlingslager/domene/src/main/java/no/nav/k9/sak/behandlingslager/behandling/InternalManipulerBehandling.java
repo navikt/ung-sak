@@ -2,8 +2,11 @@ package no.nav.k9.sak.behandlingslager.behandling;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -12,8 +15,10 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
  * Kun for invortes bruk (Behandlingskontroll). Evt. tester. Skal ikke aksesseres direkte av andre under normal
  * operasjon.
  */
-@ApplicationScoped
+@Dependent
 public class InternalManipulerBehandling {
+    
+    private static final Logger log = LoggerFactory.getLogger(InternalManipulerBehandling.class);
 
     @Inject
     public InternalManipulerBehandling() {
@@ -52,6 +57,8 @@ public class InternalManipulerBehandling {
             BehandlingStegTilstand tilstand = new BehandlingStegTilstand(behandling, stegType);
             tilstand.setBehandlingStegStatus(nesteStegStatus);
             behandling.oppdaterBehandlingStegOgStatus(tilstand);
+
+            log.info("Markerer nytt steg som aktivt: {}", stegType);
         } else {
             eksisterendeTilstand.ifPresent(it -> it.setBehandlingStegStatus(nesteStegStatus));
         }
