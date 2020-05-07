@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingskontroll.impl;
 
+
 import no.nav.k9.sak.behandlingskontroll.BehandlingModellVisitor;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
@@ -43,8 +44,9 @@ public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
 
             // kjøres utenfor savepoint. Ellers står vi nakne, med kun utførte steg
             stegVisitor.markerOvergangTilNyttSteg(steg.getBehandlingStegType(), forrigeTilstand);
-            
+
             StegProsesseringResultat resultat = prosesserStegISavepoint(behandling, stegVisitor);
+
             return resultat;
         } finally {
             /*
