@@ -70,7 +70,7 @@ public class SøknadDokumentmottaker {
     }
 
     private Behandling tilknyttBehandling(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknad søknad) {
-        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
         var periode = søknad.getSøknadsperiode();
         var eksisterendeBehandlinger = soknadOversetter.finnesSøknadForSammePeriode(fagsak.getId(), periode.getFraOgMed(), periode.getTilOgMed());
 
