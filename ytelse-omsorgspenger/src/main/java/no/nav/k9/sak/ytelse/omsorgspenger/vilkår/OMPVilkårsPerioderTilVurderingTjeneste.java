@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -83,4 +84,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkårsPeriodisering.getOrDefault(vilkår, søktePerioder).utledPeriode(behandlingId);
     }
 
+    @Override
+    public KantIKantVurderer getKantIKantVurderer() {
+        return new PåTversAvHelgErKantIKantVurderer();
+    }
 }
