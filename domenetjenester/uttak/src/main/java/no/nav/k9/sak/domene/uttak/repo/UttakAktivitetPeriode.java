@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -52,6 +53,7 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
     @JoinColumn(name = "aktivitet_id", nullable = false, updatable = false, unique = true)
     private UttakAktivitet uttak;
 
+    @Convert(converter = UttakArbeidTypeKodeConverter.class)
     @ChangeTracked
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
@@ -108,7 +110,7 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
         this.periode = Objects.requireNonNull(periode, "periode");
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
     }
-    
+
     public UttakAktivitetPeriode(UttakArbeidType aktivitetType, LocalDate fom, LocalDate tom) {
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
@@ -116,9 +118,9 @@ public class UttakAktivitetPeriode extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKeyComposer.createKey(periode);
+        return IndexKeyComposer.createKey(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
     }
-    
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }

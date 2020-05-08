@@ -1,9 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.uttak;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
@@ -65,15 +64,16 @@ public class MapUttak {
     }
 
     private List<UttakAktivitetPeriodeDto> mapUttakPerioder(UttakAktivitet akt) {
-        if(akt==null || akt.getPerioder()==null || akt.getPerioder().isEmpty()) {
+        if (akt == null || akt.getPerioder() == null || akt.getPerioder().isEmpty()) {
             return Collections.emptyList();
         }
-        
-        SortedMap<Periode, UttakAktivitetPeriodeDto> list = new TreeMap<>();
-        for(var ut : akt.getPerioder()) {
+
+        List<UttakAktivitetPeriodeDto> result = new ArrayList<>();
+        for (var ut : akt.getPerioder()) {
             var periode = new Periode(ut.getPeriode().getFomDato(), ut.getPeriode().getTomDato());
-            list.put(periode, new UttakAktivitetPeriodeDto(periode, ut.getAktivitetType()));
+            result.add(new UttakAktivitetPeriodeDto(periode, ut.getAktivitetType()));
         }
-        return List.copyOf(list.values());
+        Collections.sort(result);
+        return List.copyOf(result);
     }
 }
