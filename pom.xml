@@ -24,7 +24,6 @@
 
 		<!-- Web klient og server -->
 		<module>web</module>
-
 	</modules>
 
 	<properties>
