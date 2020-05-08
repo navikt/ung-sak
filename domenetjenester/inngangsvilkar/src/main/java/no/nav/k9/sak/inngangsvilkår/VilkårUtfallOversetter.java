@@ -16,6 +16,7 @@ import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -50,10 +51,18 @@ public class VilkårUtfallOversetter {
 
         List<AksjonspunktDefinisjon> apDefinisjoner = getAksjonspunktDefinisjoner(summary);
         VilkårUtfallMerknad vilkårUtfallMerknad = getVilkårUtfallMerknad(summary);
+        Avslagsårsak avslagsårsak = getAvslagsÅrsak(utfall, vilkårUtfallMerknad);
 
-        return new VilkårData(periode, vilkårType, utfall, merknadParametere, apDefinisjoner, vilkårUtfallMerknad, null,
+        return new VilkårData(periode, vilkårType, utfall, merknadParametere, apDefinisjoner, vilkårUtfallMerknad, avslagsårsak,
             regelEvalueringJson, jsonGrunnlag, false);
 
+    }
+
+    private Avslagsårsak getAvslagsÅrsak(Utfall utfall, VilkårUtfallMerknad vilkårUtfallMerknad) {
+        if (Utfall.IKKE_OPPFYLT.equals(utfall)) {
+            return Avslagsårsak.fraKode(vilkårUtfallMerknad.getKode());
+        }
+        return null;
     }
 
     private VilkårUtfallMerknad getVilkårUtfallMerknad(EvaluationSummary summary) {
