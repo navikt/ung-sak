@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -47,7 +48,10 @@ public class InfotrygdFeedService {
     }
 
     public void publiserHendelse(Behandling behandling) {
-        if(FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
+        if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
+            return;
+        }
+        if (BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType())) {
             return;
         }
 
