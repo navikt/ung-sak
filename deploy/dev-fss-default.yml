@@ -53,6 +53,8 @@ spec:
       value: "Europe/Oslo"
     - name: APP_NAME
       value: "K9SAK"
+    - name: FASIT_ENVIRONMENT_NAME
+      value: q1
 
     - name: DEFAULTDS_USERNAME
       value: k9-sak
