@@ -56,6 +56,11 @@ public class VilkårPeriodeDto {
     @Valid
     private Periode periode;
 
+    @JsonProperty("begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    private String begrunnelse;
+
     public VilkårPeriodeDto() {
     }
 
@@ -105,5 +110,13 @@ public class VilkårPeriodeDto {
 
     public void setPeriode(Periode periode) {
         this.periode = periode;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
     }
 }

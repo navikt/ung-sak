@@ -56,6 +56,7 @@ class VilkårDtoMapper {
         dto.setAvslagKode(it.getAvslagsårsak() != null ? it.getAvslagsårsak().getKode() : null);
         dto.setVilkarStatus(it.getGjeldendeUtfall());
         dto.setMerknadParametere(it.getMerknadParametere());
+        dto.setBegrunnelse(it.getBegrunnelse());
 
         if (medVilkårkjøring) {
             dto.setInput(it.getRegelInput());
