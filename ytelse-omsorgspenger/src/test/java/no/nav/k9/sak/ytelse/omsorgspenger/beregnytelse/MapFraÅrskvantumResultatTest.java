@@ -35,7 +35,7 @@ public class MapFraÅrskvantumResultatTest {
     @Test
     public void map_fra_årskvantum_resultat() throws Exception {
 
-        var år = new ÅrskvantumResultat(new Årskvantum("2020","1234567890",20,BigDecimal.TEN),lagUttaksplan());
+        var år = new ÅrskvantumResultat(new Årskvantum("2020","1234567890",10, 10, BigDecimal.TEN),lagUttaksplan());
 
 
         List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
