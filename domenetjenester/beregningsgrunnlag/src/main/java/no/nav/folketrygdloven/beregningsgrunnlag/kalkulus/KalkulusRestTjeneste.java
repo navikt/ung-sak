@@ -122,7 +122,7 @@ public class KalkulusRestTjeneste {
     public void deaktiverBeregningsgrunnlag(HentBeregningsgrunnlagRequest request) {
         var endpoint = deaktiverBeregningsgrunnlag;
         try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+            deaktiver(endpoint, kalkulusJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
@@ -184,9 +184,9 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    private void utfør(URI endpoint, String json) {
+    private void deaktiver(URI endpoint, String json) {
         try {
-            utførOgHent(endpoint, json, new ObjectReaderResponseHandler<TilstandResponse>(endpoint, tilstandReader));
+            utfør(endpoint, json);
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
@@ -232,6 +232,30 @@ public class KalkulusRestTjeneste {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
+
+    private void utfør(URI endpoint, String json) throws IOException {
+        var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
+        httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
+            if (!isOk(responseCode)) {
+                if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
+                    log.warn("Kall til deaktiver gjorde ingen endring på beregningsgrunnlag");
+                } else if (responseCode != HttpStatus.SC_NO_CONTENT && responseCode != HttpStatus.SC_ACCEPTED) {
+                    String responseBody = EntityUtils.toString(httpResponse.getEntity());
+                    String feilmelding = "Kunne ikke utføre kall til kalkulus,"
+                        + " endpoint=" + httpPost.getURI()
+                        + ", HTTP status=" + httpResponse.getStatusLine()
+                        + ". HTTP Errormessage=" + responseBody;
+                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
+                }
+            }
+        } catch (RuntimeException re) {
+            log.warn("Feil ved henting av data. uri=" + endpoint, re);
+            throw re;
+        }
+    }
+
 
     private <T> T utførOgHent(URI endpoint, String json, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
