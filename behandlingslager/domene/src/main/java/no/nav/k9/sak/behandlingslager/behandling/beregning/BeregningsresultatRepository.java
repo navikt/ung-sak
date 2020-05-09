@@ -50,7 +50,7 @@ public class BeregningsresultatRepository {
 
     public Optional<BehandlingBeregningsresultatEntitet> hentBeregningsresultatAggregat(Long behandlingId) {
         TypedQuery<BehandlingBeregningsresultatEntitet> query = entityManager.createQuery(
-            "from BeregningsresultatFPAggregatEntitet aggregat " +
+            "from BeregningsresultatAggregatEntitet aggregat " +
                 "where aggregat.behandlingId=:behandlingId and aggregat.aktiv = TRUE", BehandlingBeregningsresultatEntitet.class); //$NON-NLS-1$
         query.setParameter("behandlingId", behandlingId); //$NON-NLS-1$
         return hentUniktResultat(query);
