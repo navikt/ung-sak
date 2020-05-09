@@ -193,3 +193,6 @@ spec:
       value: "k9"
     - name: AUDITLOGGER_PRODUCT
       value: "k9-sak"
+      
+    - name: PIP_USERS
+      value: "srvPDP"
