@@ -52,13 +52,12 @@
     <logger name="no.nav.vedtak.felles.integrasjon.unleash" level="${log.level.no.nav.vedtak.felles.integrasjon.unleash:-WARN}" />
 
     <!-- skru paa for aa logge all sql statements med parametere -->
-    <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}" />
     <logger name="org.hibernate.SQL" level="${log.level.org.hibernate.SQL:-WARN}" />
     <logger name="com.zaxxer.hikari" level="${log.level.com.zaxxer.hikari:-WARN}" />
     <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
     <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}" />
-    <logger name="no.nav.vault.jdbc.hikaricp" level="${no.nav.vault.jdbc.hikaricp:-WARN}" />
+    <logger name="no.nav.vault.jdbc" level="${no.nav.vault.jdbc:-INFO}" />
     <logger name="org.flywaydb" level="${log.level.org.flywaydb:-INFO}" />
     <logger name="org.apache" level="${log.level.org.apache:-ERROR}" />
         <!-- ESSV: genererer en del støy for webservice -->

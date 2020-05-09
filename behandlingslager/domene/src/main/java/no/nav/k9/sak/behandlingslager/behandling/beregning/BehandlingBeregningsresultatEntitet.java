@@ -15,7 +15,7 @@ import javax.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 
-@Entity(name = "BeregningsresultatFPAggregatEntitet")
+@Entity(name = "BeregningsresultatAggregatEntitet")
 @Table(name = "BR_RESULTAT_BEHANDLING")
 public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
 
