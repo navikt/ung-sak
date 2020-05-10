@@ -32,6 +32,9 @@ public class InntektArbeidYtelseGrunnlag {
     private OppgittOpptjening oppgittOpptjening;
 
     @ChangeTracked
+    private OppgittOpptjening overstyrtOppgittOpptjening;
+
+    @ChangeTracked
     private InntektsmeldingAggregat inntektsmeldinger;
 
     @ChangeTracked
@@ -40,7 +43,7 @@ public class InntektArbeidYtelseGrunnlag {
     private boolean aktiv = true;
 
     @DiffIgnore
-    private LocalDateTime opprettetTidspunkt;       
+    private LocalDateTime opprettetTidspunkt;
 
     InntektArbeidYtelseGrunnlag() {
     }
@@ -49,11 +52,12 @@ public class InntektArbeidYtelseGrunnlag {
         this(UUID.randomUUID(), LocalDateTime.now());
 
         // NB! skal ikke lage ny versjon av oppgitt opptjening eller andre underlag! Lenker bare inn på ferskt grunnlag
-        grunnlag.getOppgittOpptjening().ifPresent(opp -> this.setOppgittOpptjening(opp));
-        grunnlag.getRegisterVersjon().ifPresent(ver -> this.setRegister(ver));
-        grunnlag.getSaksbehandletVersjon().ifPresent(ver -> this.setSaksbehandlet(ver));
-        grunnlag.getInntektsmeldinger().ifPresent(inn -> this.setInntektsmeldinger(inn));
-        grunnlag.getArbeidsforholdInformasjon().ifPresent(info -> this.setInformasjon(info));
+        grunnlag.getOppgittOpptjening().ifPresent(this::setOppgittOpptjening);
+        grunnlag.getOverstyrtOppgittOpptjening().ifPresent(this::setOverstyrtOppgittOpptjening);
+        grunnlag.getRegisterVersjon().ifPresent(this::setRegister);
+        grunnlag.getSaksbehandletVersjon().ifPresent(this::setSaksbehandlet);
+        grunnlag.getInntektsmeldinger().ifPresent(this::setInntektsmeldinger);
+        grunnlag.getArbeidsforholdInformasjon().ifPresent(this::setInformasjon);
     }
 
     public InntektArbeidYtelseGrunnlag(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt) {
@@ -172,6 +176,17 @@ public class InntektArbeidYtelseGrunnlag {
         this.oppgittOpptjening = oppgittOpptjening;
     }
 
+    void setOverstyrtOppgittOpptjening(OppgittOpptjening overstyrtOppgittOpptjening) {
+        this.overstyrtOppgittOpptjening = overstyrtOppgittOpptjening;
+    }
+
+    /**
+     * Returnerer overstyrt oppgitt opptjening hvis det finnes. (Inneholder overstyrt opplysninger søker opplyser om i søknaden)
+     */
+    public Optional<OppgittOpptjening> getOverstyrtOppgittOpptjening() {
+        return Optional.ofNullable(overstyrtOppgittOpptjening);
+    }
+
     public List<InntektsmeldingSomIkkeKommer> getInntektsmeldingerSomIkkeKommer() {
         if (arbeidsforholdInformasjon == null) {
             return Collections.emptyList();
@@ -257,4 +272,5 @@ public class InntektArbeidYtelseGrunnlag {
     public LocalDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
     }
+
 }

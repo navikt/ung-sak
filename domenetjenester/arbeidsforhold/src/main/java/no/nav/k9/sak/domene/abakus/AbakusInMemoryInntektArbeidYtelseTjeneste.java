@@ -37,6 +37,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
@@ -237,6 +238,19 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
+    public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjening) {
+        if (oppgittOpptjening == null) {
+            return;
+        }
+        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
+
+        var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
+        iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
+
+        lagreOgFlush(behandlingId, iayGrunnlag.build());
+    }
+
+    @Override
     public SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer) {
         List<InntektArbeidYtelseGrunnlag> alleGrunnlag = grunnlag;
         var resultat = new SakInntektsmeldinger(saksnummer);
@@ -251,6 +265,11 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
             }
         }
         return resultat;
+    }
+
+    @Override
+    public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
+        return finnGrunnlag(behandlingId).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
     }
 
     @Override

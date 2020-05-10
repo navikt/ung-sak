@@ -29,6 +29,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Gradering;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.GraderingPeriodeDto;
@@ -39,8 +40,14 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.RelaterteYtelserDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.UtsettelsePeriodeDto;
+import no.nav.k9.sak.kontrakt.opptjening.OppgittEgenNæringDto;
+import no.nav.k9.sak.kontrakt.opptjening.OppgittFrilansDto;
+import no.nav.k9.sak.kontrakt.opptjening.OppgittFrilansoppdragDto;
+import no.nav.k9.sak.kontrakt.opptjening.OppgittOpptjeningDto;
+import no.nav.k9.sak.kontrakt.opptjening.PeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.vedtak.konfig.Tid;
 
@@ -193,7 +200,7 @@ public class InntektArbeidYtelseDtoMapper {
         }
 
         dto.setGetRefusjonBeløpPerMnd(inntektsmelding.getRefusjonBeløpPerMnd());
-        
+
         return dto;
     }
 
@@ -223,5 +230,33 @@ public class InntektArbeidYtelseDtoMapper {
             permisjon.getTilOgMed() == null || TIDENES_ENDE.equals(permisjon.getTilOgMed()) ? null : permisjon.getTilOgMed(),
             permisjon.getProsentsats().getVerdi(),
             permisjon.getPermisjonsbeskrivelseType());
+    }
+
+    public static OppgittOpptjeningDto mapOppgittOpptjening(Optional<OppgittOpptjening> oppgittOpptjeningOpt) {
+        if (oppgittOpptjeningOpt.isEmpty()) {
+            return null;
+        }
+        OppgittOpptjening oppgittOpptjening = oppgittOpptjeningOpt.get();
+
+        OppgittOpptjeningDto oppgittOpptjeningDto = new OppgittOpptjeningDto();
+        if (oppgittOpptjening.getFrilans().isPresent()) {
+            OppgittFrilansDto oppgittFrilansDto = new OppgittFrilansDto();
+            oppgittFrilansDto.setOppgittFrilansoppdrag(oppgittOpptjening.getFrilans().get().getFrilansoppdrag().stream().map(frilansoppdrag -> {
+                OppgittFrilansoppdragDto oppgittFrilansoppdragDto = new OppgittFrilansoppdragDto();
+                oppgittFrilansoppdragDto.setBruttoInntekt(new Beløp(frilansoppdrag.getInntekt()));
+                oppgittFrilansoppdragDto.setPeriode(new PeriodeDto(frilansoppdrag.getPeriode().getFomDato(), frilansoppdrag.getPeriode().getTomDato()));
+                return oppgittFrilansoppdragDto;
+            }).collect(Collectors.toList()));
+            oppgittOpptjeningDto.setOppgittFrilans(oppgittFrilansDto);
+        }
+        List<OppgittEgenNæringDto> egenNæringList = oppgittOpptjening.getEgenNæring().stream().map(egen -> {
+            OppgittEgenNæringDto oppgittEgenNæringDto = new OppgittEgenNæringDto();
+            oppgittEgenNæringDto.setBruttoInntekt(new Beløp(egen.getBruttoInntekt()));
+            oppgittEgenNæringDto.setPeriode(new PeriodeDto(egen.getPeriode().getFomDato(), egen.getPeriode().getTomDato()));
+            return oppgittEgenNæringDto;
+        }).collect(Collectors.toList());
+
+        oppgittOpptjeningDto.setOppgittEgenNæring(egenNæringList);
+        return oppgittOpptjeningDto;
     }
 }

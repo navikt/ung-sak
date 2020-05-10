@@ -50,6 +50,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
@@ -257,6 +258,24 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     @Override
+    public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
+        if (oppgittOpptjeningBuilder == null) {
+            return;
+        }
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
+        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, oppgittOpptjening);
+
+        try {
+            abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
     public void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder informasjonBuilder) {
         Objects.requireNonNull(informasjonBuilder, "informasjonBuilder"); // NOSONAR
 
@@ -267,6 +286,16 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         iayGrunnlagBuilder.medInformasjon(informasjonBuilder.build());
 
         konverterOgLagre(behandlingId, iayGrunnlagBuilder.build());
+    }
+
+    @Override
+    public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var request = initRequest(behandling);
+        //skriver over denne, ønsker kun denne delen av grunnlaget for å minske payload
+        request.medDataset(Dataset.OVERSTYRT_OPPGITT_OPPTJENING);
+        AktørId aktørId = behandling.getAktørId();
+        return Optional.ofNullable(hentOgMapGrunnlag(request, aktørId)).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
     }
 
     @Override

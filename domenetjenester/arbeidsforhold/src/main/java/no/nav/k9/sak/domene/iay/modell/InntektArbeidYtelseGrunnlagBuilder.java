@@ -86,6 +86,13 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         return this;
     }
 
+    public InntektArbeidYtelseGrunnlagBuilder medOverstyrtOppgittOpptjening(OppgittOpptjeningBuilder builder) {
+        if (builder != null) {
+            kladd.setOverstyrtOppgittOpptjening(builder.build());
+        }
+        return this;
+    }
+
     public InntektArbeidYtelseGrunnlag build() {
         var k = kladd;
         if (kladd.getArbeidsforholdInformasjon().isPresent()) {
