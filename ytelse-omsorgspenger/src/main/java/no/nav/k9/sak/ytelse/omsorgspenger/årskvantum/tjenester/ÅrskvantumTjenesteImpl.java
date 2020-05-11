@@ -87,7 +87,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
         var barna = personMedRelasjoner.getFamilierelasjoner()
             .stream()
-            .filter(it -> it.getRelasjonsrolle().equals(RelasjonsRolleType.BARN) && it.getHarSammeBosted())
+            .filter(it -> it.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
             .map(this::innhentPersonopplysningForBarn)
             .map(this::mapBarn)
             .collect(Collectors.toList());
