@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.junit.Test;
 
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.Hjemmel;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
@@ -31,11 +33,12 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 public class MapFraÅrskvantumResultatTest {
 
     private static final BigDecimal _100 = BigDecimal.valueOf(100L);
+    private final List<Hjemmel> hjemler = Arrays.asList(Hjemmel.FTRL_9_3__1, Hjemmel.COVID19_4_1__2);
 
     @Test
     public void map_fra_årskvantum_resultat() throws Exception {
 
-        var år = new ÅrskvantumResultat(new Årskvantum("2020","1234567890",10, 10, BigDecimal.TEN),lagUttaksplan());
+        var år = new ÅrskvantumResultat(new Årskvantum("2020", "1234567890", 10, 10, BigDecimal.TEN), lagUttaksplan());
 
 
         List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
@@ -47,7 +50,7 @@ public class MapFraÅrskvantumResultatTest {
 
 
     private Uttaksplan lagUttaksplan() {
-        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(),lagAktiviteter(),false);
+        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false);
 
         return uttaksplanOmsorgspenger;
     }
@@ -78,14 +81,14 @@ public class MapFraÅrskvantumResultatTest {
     }
 
     private Uttaksperiode innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad) {
-        Map<Vilkår,Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), utbetalingsgrad);
+        Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad);
 
     }
 
     private Uttaksperiode avslått(LocalDate fom, LocalDate tom) {
-        Map<Vilkår,Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), BigDecimal.ZERO);
+        Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO);
 
     }
 }
