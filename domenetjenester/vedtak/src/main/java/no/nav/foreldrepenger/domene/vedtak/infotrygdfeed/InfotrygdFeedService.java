@@ -129,6 +129,8 @@ public class InfotrygdFeedService {
         pd.setProperty(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY, saksnummer);
 
         pd.setPayload(infotrygdFeedMessage.toJson());
+        
+        pd.setCallIdFraEksisterende();
         return pd;
     }
 

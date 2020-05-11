@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingKandidater
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.TaskStatus;
+import no.nav.vedtak.log.mdc.MDCOperations;
 
 @ApplicationScoped
 public class AutomatiskGjenopptagelseTjeneste {
@@ -44,7 +45,7 @@ public class AutomatiskGjenopptagelseTjeneste {
         prosessTaskData.setSekvens("1");
         prosessTaskData.setPrioritet(100);
 
-        prosessTaskData.setCallIdFraEksisterende();
+        prosessTaskData.setCallId(MDCOperations.generateCallId()); // ny callId per task. 
 
         prosessTaskRepository.lagre(prosessTaskData);
     }
