@@ -59,6 +59,7 @@ public class VedtakFattetEventObserver {
     private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtattYtelseHendelseTask.TASKTYPE);
         taskData.setProperty(PubliserVedtattYtelseHendelseTask.KEY, behandlingId.toString());
+        taskData.setCallIdFraEksisterende();
         taskRepository.lagre(taskData);
     }
 

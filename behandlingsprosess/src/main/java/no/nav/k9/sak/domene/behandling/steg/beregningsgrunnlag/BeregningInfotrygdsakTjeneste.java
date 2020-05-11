@@ -86,6 +86,7 @@ public class BeregningInfotrygdsakTjeneste {
     private void dispatchTilInfotrygd(BehandlingReferanse ref) {
         ProsessTaskData data = new ProsessTaskData(OpprettOppgaveSendTilInfotrygdTask.TASKTYPE);
         data.setBehandling(ref.getSaksnummer().getVerdi(), String.valueOf(ref.getBehandlingId()), ref.getAktørId().getId());
+        data.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(data);
     }
 

@@ -133,7 +133,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
 
         opprettHistorikkinnslagForBehandlingStartetPåNytt(behandling);
-
+        gruppe.setCallIdFraEksisterende();
         return prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandlingId), gruppe);
     }
 
