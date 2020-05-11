@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -104,7 +105,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     private InntektArbeidYtelseGrunnlag hentGrunnlagHvisEksisterer(Behandling behandling) {
-        var request = initRequest(behandling);
+        var request = initRequest(behandling, Arrays.asList(Dataset.values()));
         AktørId aktørId = behandling.getAktørId();
         return hentOgMapGrunnlag(request, aktørId);
     }
@@ -291,9 +292,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     @Override
     public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var request = initRequest(behandling);
-        //skriver over denne, ønsker kun denne delen av grunnlaget for å minske payload
-        request.medDataset(Dataset.OVERSTYRT_OPPGITT_OPPTJENING);
+        var request = initRequest(behandling, Collections.singletonList(Dataset.OVERSTYRT_OPPGITT_OPPTJENING));
         AktørId aktørId = behandling.getAktørId();
         return Optional.ofNullable(hentOgMapGrunnlag(request, aktørId)).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
     }
@@ -411,13 +410,13 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return new AbakusInntektArbeidYtelseGrunnlag(inntektArbeidYtelseGrunnlag, dto.getKoblingReferanse());
     }
 
-    private InntektArbeidYtelseGrunnlagRequest initRequest(Behandling behandling) {
+    private InntektArbeidYtelseGrunnlagRequest initRequest(Behandling behandling, List<Dataset> data) {
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(behandling.getAktørId().getId()));
         request.medSisteKjenteGrunnlagReferanse(requestCache.getSisteAktiveGrunnlagReferanse(behandling.getUuid()));
         request.medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         request.medYtelseType(YtelseType.fraKode(behandling.getFagsakYtelseType().getKode()));
         request.forKobling(behandling.getUuid());
-        request.medDataset(Arrays.asList(Dataset.values()));
+        request.medDataset(data);
         return request;
     }
 
