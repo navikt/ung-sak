@@ -35,7 +35,8 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                               InntektArbeidYtelseGrunnlag grunnlag,
                                                                               OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                               Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                                                              Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
+                                                                              Yrkesaktivitet overstyrtAktivitet,
+                                                                              DatoIntervallEntitet opptjeningPeriode) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, registerAktivitet.getArbeidType());
         return new ArrayList<>(mapAktivitetsavtaler(behandlingReferanse, registerAktivitet, grunnlag,
             vurderForSaksbehandling, type, overstyrtAktivitet, opptjeningPeriode));
@@ -56,7 +57,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                                   Yrkesaktivitet overstyrtAktivitet,
                                                                                   DatoIntervallEntitet opptjeningPeriode) {
         List<OpptjeningsperiodeForSaksbehandling> perioderForAktivitetsavtaler = new ArrayList<>();
-        LocalDate skjæringstidspunkt = behandlingReferanse.getUtledetSkjæringstidspunkt();
+        LocalDate skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         for (AktivitetsAvtale avtale : gjeldendeAvtaler(grunnlag, skjæringstidspunkt, registerAktivitet, overstyrtAktivitet)) {
             var builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medOpptjeningAktivitetType(type)
