@@ -28,6 +28,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
@@ -41,6 +43,9 @@ public class RevurderingTjenesteImplTest {
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
+
+    @Inject
+    private UttakRepository uttakRepository;
 
     @Inject
     private BeregningRevurderingTestUtil revurderingTestUtil;
@@ -71,12 +76,15 @@ public class RevurderingTjenesteImplTest {
         scenario.medBehandlingstidFrist(LocalDate.now().minusDays(5));
         Behandling behandlingSomSkalRevurderes = scenario.lagre(repositoryProvider);
         repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandlingSomSkalRevurderes, LocalDate.now().minusYears(1), LocalDate.now(), false);
+        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingSomSkalRevurderes.getId(),
+            new UttakGrunnlag(behandlingSomSkalRevurderes.getId(), null, null, null, null));
+
         revurderingTestUtil.avsluttBehandling(behandlingSomSkalRevurderes);
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
         var revurderingTjeneste = new RevurderingTjeneste(repositoryProvider, behandlingskontrollTjeneste,
-            iayTjeneste, revurderingTjenesteFelles);
+            uttakRepository, iayTjeneste, revurderingTjenesteFelles);
 
         // Act
         Behandling revurdering = revurderingTjeneste
