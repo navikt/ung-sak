@@ -41,7 +41,7 @@ public class VurderMedlemskapTjeneste {
         var medlemskapRepository = provider.getMedlemskapRepository();
         this.avklarOmErBosatt = new AvklarOmErBosatt(medlemskapRepository, medlemskapPerioderTjeneste, personopplysningTjeneste);
         this.avklarGyldigPeriode = new AvklarGyldigPeriode(medlemskapRepository, medlemskapPerioderTjeneste);
-        this.avklarOmSøkerOppholderSegINorge = new AvklarOmSøkerOppholderSegINorge(provider, personopplysningTjeneste, iayTjeneste);
+        this.avklarOmSøkerOppholderSegINorge = new AvklarOmSøkerOppholderSegINorge(personopplysningTjeneste, iayTjeneste);
         this.avklaringFaktaMedlemskap = new AvklaringFaktaMedlemskap(provider, medlemskapPerioderTjeneste, personopplysningTjeneste, iayTjeneste);
     }
 

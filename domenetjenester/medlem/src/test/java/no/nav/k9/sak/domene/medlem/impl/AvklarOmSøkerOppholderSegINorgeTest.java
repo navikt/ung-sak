@@ -52,12 +52,12 @@ public class AvklarOmSøkerOppholderSegINorgeTest {
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    
+
     private AvklarOmSøkerOppholderSegINorge tjeneste;
 
     @Before
     public void setUp() {
-        this.tjeneste = new AvklarOmSøkerOppholderSegINorge(provider, personopplysningTjeneste, iayTjeneste);
+        this.tjeneste = new AvklarOmSøkerOppholderSegINorge(personopplysningTjeneste, iayTjeneste);
     }
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
@@ -195,7 +195,7 @@ public class AvklarOmSøkerOppholderSegINorgeTest {
         scenario.medSøknad().medMottattDato(LocalDate.now());
         leggTilSøker(scenario, AdresseType.POSTADRESSE_UTLAND, Landkoder.ESP);
         Behandling behandling = lagre(scenario);
-        
+
         leggTilInntekt(behandling, behandling.getAktørId(), fom, tom);
 
         // Act
@@ -232,7 +232,7 @@ public class AvklarOmSøkerOppholderSegINorgeTest {
         leggTilSøker(scenario, AdresseType.POSTADRESSE_UTLAND, Landkoder.ESP);
 
         Behandling behandling = lagre(scenario);
-        
+
         leggTilInntekt(behandling, behandling.getAktørId(), fom, tom);
 
         // Act
