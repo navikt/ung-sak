@@ -108,7 +108,7 @@ public class OpptjeningsperioderTjeneste {
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(opptjening.getTom());
+        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
 
         Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         for (Yrkesaktivitet yrkesaktivitet : filter.getYrkesaktiviteter()) {
@@ -376,8 +376,9 @@ public class OpptjeningsperioderTjeneste {
         AktørId aktørId = behandlingReferanse.getAktørId();
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
 
-        var filterRegisterFør = filter.før(opptjeningsperiode.getTomDato());
-        var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(opptjeningsperiode.getTomDato()).filterPensjonsgivende();
+        var skjæringstidspunkt = opptjeningsperiode.getTomDato().plusDays(1);
+        var filterRegisterFør = filter.før(skjæringstidspunkt);
+        var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunkt).filterPensjonsgivende();
 
         if (!inntektFilter.getFiltrertInntektsposter().isEmpty() && !filterRegisterFør.getFrilansOppdrag().isEmpty()) {
 
