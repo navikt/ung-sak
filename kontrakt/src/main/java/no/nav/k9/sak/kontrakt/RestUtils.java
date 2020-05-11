@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-class RestUtils {
+public class RestUtils {
 
     private static final ObjectMapper OM;
     static {
@@ -26,13 +26,13 @@ class RestUtils {
     public static String convertObjectToQueryString(Object object) {
         return OM.convertValue(object, UriFormat.class).toString();
     }
-    
+
     public static String convertObjectToQueryStringFraMap(Map<String, String> queryParams) {
         var fmt = new UriFormat();
         queryParams.entrySet().forEach(e -> fmt.addToUri(e.getKey(), String.valueOf(e.getValue())));
         return fmt.toString();
     }
-    
+
     public static ObjectMapper getObjectMapper() {
         return OM.copy();
     }

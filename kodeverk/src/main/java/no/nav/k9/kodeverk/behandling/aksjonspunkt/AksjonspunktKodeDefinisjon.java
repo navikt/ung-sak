@@ -102,6 +102,7 @@ public class AksjonspunktKodeDefinisjon {
     // FRISINN
     public static final String AUTO_VENT_FRISINN_BEREGNING = "8000";
     public static final String AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET = "8003";
+    public static final String OVERSTYRING_FRISINN_OPPGITT_OPPTJENING_KODE = "8004";
 
 
     // Andre koder

@@ -12,6 +12,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.typer.AktørId;
@@ -96,6 +97,11 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
     /**
+     * Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
+     */
+    void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
+
+    /**
      * Lagre nytt grunnlag for ArbeidsforholdInformasjon.  Builder bør ikke gjenbrukes etter kall her.
      * @param behandlingId - Behandling Id
      * @param aktørId - Aktør Id
@@ -119,6 +125,8 @@ public interface InntektArbeidYtelseTjeneste {
      * @param saksnummer - Saksnummer
      */
     SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer);
+
+    Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId);
 
     /**
      * Lagre en eller flere inntektsmeldinger på en behandling for en sak.

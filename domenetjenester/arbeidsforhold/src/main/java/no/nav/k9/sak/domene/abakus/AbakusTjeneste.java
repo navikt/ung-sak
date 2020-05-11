@@ -69,6 +69,7 @@ public class AbakusTjeneste {
     private URI endpointGrunnlag;
     private URI endpointMottaInntektsmeldinger;
     private URI endpointMottaOppgittOpptjening;
+    private URI endpointOverstyrtOppgittOpptjening;
     private URI endpointKopierGrunnlag;
     private URI endpointGrunnlagSnapshot;
     private URI endpointInntektsmeldinger;
@@ -90,6 +91,7 @@ public class AbakusTjeneste {
         this.endpointGrunnlag = toUri("/api/iay/grunnlag/v1/");
         this.endpointMottaInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/motta");
         this.endpointMottaOppgittOpptjening = toUri("/api/iay/oppgitt/v1/motta");
+        this.endpointOverstyrtOppgittOpptjening = toUri("/api/iay/oppgitt/v1/overstyr");
         this.endpointGrunnlagSnapshot = toUri("/api/iay/grunnlag/v1/snapshot");
         this.endpointKopierGrunnlag = toUri("/api/iay/grunnlag/v1/kopier");
         this.innhentRegisterdata = toUri("/api/registerdata/v1/innhent/async");
@@ -304,6 +306,32 @@ public class AbakusTjeneste {
 
     public String getCallbackUrl() {
         return callbackUrl.toString();
+    }
+
+    public void lagreOverstyrtOppgittOpptjening(OppgittOpptjeningMottattRequest request) throws IOException {
+        var json = iayJsonWriter.writeValueAsString(request);
+        lagreOverstyrtOppgittOpptjening(request.getKoblingReferanse(), json);
+    }
+
+    public void lagreOverstyrtOppgittOpptjening(UUID behandlingRef, String json) throws IOException {
+        HttpPost httpPost = new HttpPost(endpointOverstyrtOppgittOpptjening);
+        httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+
+        log.info("Lagre overstyrt oppgitt opptjening (behandlingUUID={}) i Abakus", behandlingRef);
+        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
+            if (responseCode != HttpStatus.SC_OK) {
+                String responseBody = EntityUtils.toString(httpResponse.getEntity());
+                String feilmelding = "Kunne ikke lagre overstyrt oppgitt opptjening for behandling: " + behandlingRef + " til abakus: " + httpPost.getURI()
+                        + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+
+                if (responseCode == HttpStatus.SC_BAD_REQUEST) {
+                    throw AbakusTjenesteFeil.FEIL.feilKallTilAbakus(feilmelding).toException();
+                } else {
+                    throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
+                }
+            }
+        }
     }
 
     public interface AbakusTjenesteFeil extends DeklarerteFeil {
