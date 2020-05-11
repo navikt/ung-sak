@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opptjening;
+package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.util.Collections;
 import java.util.List;

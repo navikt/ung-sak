@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opptjening;
+package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.time.LocalDate;
 import java.util.Objects;

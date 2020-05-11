@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opptjening;
+package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,9 +14,9 @@ import no.nav.k9.sak.typer.Beløp;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class OppgittFrilansoppdragDto {
+public class OppgittEgenNæringDto {
 
-    public OppgittFrilansoppdragDto() {
+    public OppgittEgenNæringDto() {
         //jackson
     }
 

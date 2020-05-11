@@ -10,6 +10,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.k9.sak.kontrakt.RestUtils;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansoppdragDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class OppgittOpptjeningTest {
