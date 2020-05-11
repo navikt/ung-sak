@@ -26,15 +26,12 @@ import no.nav.k9.sak.typer.AktørId;
 
 public class AvklarOmSøkerOppholderSegINorge {
 
-    private SøknadRepository søknadRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
-    public AvklarOmSøkerOppholderSegINorge(BehandlingRepositoryProvider repositoryProvider,
-                                           PersonopplysningTjeneste personopplysningTjeneste,
+    public AvklarOmSøkerOppholderSegINorge(PersonopplysningTjeneste personopplysningTjeneste,
                                            InntektArbeidYtelseTjeneste iayTjeneste) {
         this.iayTjeneste = iayTjeneste;
-        this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
@@ -88,9 +85,7 @@ public class AvklarOmSøkerOppholderSegINorge {
     }
 
     private Utfall harSøkerHattInntektINorgeDeSiste3Mnd(Long behandlingId, AktørId aktørId, LocalDate vurderingstidspunkt) {
-        final SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
-        LocalDate mottattDato = søknad.getMottattDato();
-        LocalDate treMndTilbake = mottattDato.minusMonths(3L);
+        LocalDate treMndTilbake = vurderingstidspunkt.minusMonths(3L);
 
         // OBS: ulike regler for vilkår og autopunkt. For EØS-par skal man vente hvis søker ikke har inntekt siste 3mnd.
         Optional<InntektArbeidYtelseGrunnlag> grunnlag = iayTjeneste.finnGrunnlag(behandlingId);
