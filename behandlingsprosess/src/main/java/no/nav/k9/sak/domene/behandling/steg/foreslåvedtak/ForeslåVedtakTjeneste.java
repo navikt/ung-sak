@@ -49,8 +49,8 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>
-            (sjekkMotEksisterendeOppgaverTjeneste.sjekkMotEksisterendeGsakOppgaver(behandling.getAktørId(), behandling));
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
+        aksjonspunktDefinisjoner = sjekkMotEksisterendeOppgaverTjeneste.sjekkMotEksisterendeGsakOppgaver(behandling.getAktørId(), behandling);
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
