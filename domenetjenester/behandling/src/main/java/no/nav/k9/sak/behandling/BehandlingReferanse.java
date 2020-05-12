@@ -264,8 +264,8 @@ public class BehandlingReferanse {
     @Override
     public String toString() {
         return getClass().getSimpleName() + String.format(
-            "<saksnummer=%s, behandlingId=%s, fagsakType=%s, behandlingType=%s, aktørId=%s, status=%s, skjæringstidspunkt=%s, originalBehandlingId=%s>",
-            saksnummer, behandlingId, fagsakYtelseType, behandlingType, aktørId, behandlingStatus, skjæringstidspunkt, originalBehandlingId);
+            "<saksnummer=%s, behandlingId=%s, fagsakType=%s, behandlingType=%s, status=%s, skjæringstidspunkt=%s, originalBehandlingId=%s>",
+            saksnummer, behandlingId, fagsakYtelseType, behandlingType, behandlingStatus, skjæringstidspunkt, originalBehandlingId);
     }
 
     /**

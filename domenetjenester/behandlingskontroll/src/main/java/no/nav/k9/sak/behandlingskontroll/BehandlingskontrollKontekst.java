@@ -60,6 +60,6 @@ public class BehandlingskontrollKontekst {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<fagsakId=" + fagsakId + ", aktørId=" + aktørId + ", behandlingId=" + getBehandlingId() + ">"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        return getClass().getSimpleName() + "<fagsakId=" + fagsakId + ", behandlingId=" + getBehandlingId() + ">"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 }

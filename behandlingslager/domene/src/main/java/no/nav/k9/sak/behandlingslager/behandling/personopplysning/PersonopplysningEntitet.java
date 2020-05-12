@@ -69,7 +69,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
 
     @ChangeTracked
     @Convert(converter = RegionKodeverdiConverter.class)
-    @Column(name="region", nullable = false)
+    @Column(name = "region", nullable = false)
     private Region region = Region.UDEFINERT;
 
     @ManyToOne(optional = false)
@@ -187,15 +187,14 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
 
     @Override
     public String toString() {
-        return "PersonopplysningEntitet{" + "id=" + id +
-            ", aktørId=" + aktørId +
+        return getClass().getSimpleName()+"<" + "id=" + id +
             ", brukerKjønn=" + brukerKjønn +
             ", sivilstand=" + sivilstand +
             ", navn='" + navn + '\'' +
             ", fødselsdato=" + fødselsdato +
             ", dødsdato=" + dødsdato +
             ", region=" + region +
-            '}';
+            '>';
     }
 
     public int compareTo(PersonopplysningEntitet other) {

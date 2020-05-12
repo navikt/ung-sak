@@ -130,7 +130,10 @@ public class Personinfo {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<aktørId=" + aktørId + ">"; //$NON-NLS-1$ //$NON-NLS-2$
+        // tar ikke med aktørId/fnr/personident i toString, så det ikke lekker i logger etc.
+        return getClass().getSimpleName() + "<fødselsdato=" + fødselsdato +
+            ", statsborgerskap=" + statsborgerskap +
+            ", landkode=" + landkode + ">"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     public static class Builder {

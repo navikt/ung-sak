@@ -198,10 +198,14 @@ public class Fagsak extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" //$NON-NLS-1$
-            + (id == null ? "" : "id=" + id + ",") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            + " bruker=" + brukerAktørId //$NON-NLS-1$
-            + ">"; //$NON-NLS-1$
+        // tar ikke med brukerAktørId, pleietrengendeAktørId så ikke lekker sensitive opplysninger i logger
+        return getClass().getSimpleName() + "<"
+            + (id == null ? "" : "fagsakId=" + id + ",")
+            + ", saksnummer=" + saksnummer
+            + ", ytelseType" + ytelseType
+            + ", periode=" + periode
+            + ", skalTilInfotrygd=" + skalTilInfotrygd
+            + ">";
     }
 
     @Override

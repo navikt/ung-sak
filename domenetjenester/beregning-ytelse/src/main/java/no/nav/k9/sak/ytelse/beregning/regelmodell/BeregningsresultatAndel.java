@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.ReferanseType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 
 public class BeregningsresultatAndel {
@@ -75,9 +76,15 @@ public class BeregningsresultatAndel {
 
     @Override
     public String toString() {
+        String arbeidsgiverId = arbeidsforhold != null
+            ? (arbeidsforhold.getReferanseType() == ReferanseType.AKTØR_ID
+                ? "(personlig arbeidsgiver)" // tar ikke med personidentifiserende/sensitive opplysninger
+                : arbeidsforhold.getIdentifikator())
+            : null;
+
         return "BeregningsresultatAndel{" +
             "aktivitetStatus='" + aktivitetStatus.name() + '\'' +
-            ", arbeidsgiverId=" + (arbeidsforhold != null ? arbeidsforhold.getIdentifikator() : null) +
+            ", arbeidsgiverId=" + arbeidsgiverId +
             ", arbeidsforholdId=" + (arbeidsforhold != null ? arbeidsforhold.getArbeidsforholdId() : null) +
             ", erBrukerMottaker=" + erBrukerMottaker() +
             '}';

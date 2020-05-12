@@ -33,7 +33,7 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
     private Long id;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", updatable = false, nullable=false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", updatable = false, nullable = false)))
     private AktørId aktørId;
 
     @Embedded
@@ -41,7 +41,7 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
 
     @ChangeTracked
     @Convert(converter = PersonstatusKodeverdiConverter.class)
-    @Column(name="personstatus", nullable = false)
+    @Column(name = "personstatus", nullable = false)
     private PersonstatusType personstatus = PersonstatusType.UDEFINERT;
 
     @ManyToOne(optional = false)
@@ -56,7 +56,6 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
         this.periode = personstatus.getPeriode();
         this.personstatus = personstatus.getPersonstatus();
     }
-
 
     @Override
     public String getIndexKey() {
@@ -76,7 +75,6 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
         this.personstatus = personstatus;
     }
 
-
     @Override
     public AktørId getAktørId() {
         return aktørId;
@@ -86,7 +84,6 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
         this.aktørId = aktørId;
     }
 
-
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
@@ -95,11 +92,9 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
         this.periode = gyldighetsperiode;
     }
 
-
     public PersonstatusType getPersonstatus() {
         return personstatus;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -111,24 +106,21 @@ public class PersonstatusEntitet extends BaseEntitet implements HarAktørId, Ind
         }
         PersonstatusEntitet entitet = (PersonstatusEntitet) o;
         return Objects.equals(aktørId, entitet.aktørId) &&
-                Objects.equals(periode, entitet.periode) &&
-                Objects.equals(personstatus, entitet.personstatus);
+            Objects.equals(periode, entitet.periode) &&
+            Objects.equals(personstatus, entitet.personstatus);
     }
-
 
     @Override
     public int hashCode() {
         return Objects.hash(aktørId, periode, personstatus);
     }
 
-
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PersonstatusEntitet{");
-        sb.append("aktørId=").append(aktørId);
+        var sb = new StringBuilder(getClass().getSimpleName()+"<");
         sb.append(", periode=").append(periode);
         sb.append(", personstatus=").append(personstatus);
-        sb.append('}');
+        sb.append('>');
         return sb.toString();
     }
 

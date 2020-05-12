@@ -209,15 +209,14 @@ public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, In
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PersonAdresseEntitet{");
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName() + "<");
         sb.append("id=").append(id);
-        sb.append(", aktørId=").append(aktørId);
         sb.append(", periode=").append(periode);
         sb.append(", adresseType=").append(adresseType);
         sb.append(", postnummer='").append(postnummer).append('\'');
         sb.append(", poststed='").append(poststed).append('\'');
         sb.append(", land='").append(land).append('\'');
-        sb.append('}');
+        sb.append('>');
         return sb.toString();
     }
 

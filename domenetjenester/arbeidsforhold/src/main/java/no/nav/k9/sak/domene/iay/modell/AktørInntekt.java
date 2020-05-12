@@ -122,7 +122,6 @@ public class AktørInntekt implements IndexKey {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" +
-            "aktørId=" + aktørId +
             ", inntekt=" + inntekt +
             '>';
     }
