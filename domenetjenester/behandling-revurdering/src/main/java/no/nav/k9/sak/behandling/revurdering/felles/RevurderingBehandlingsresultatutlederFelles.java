@@ -50,10 +50,10 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
     }
 
     public RevurderingBehandlingsresultatutlederFelles(BehandlingRepositoryProvider repositoryProvider,
-                                                           VedtakVarselRepository vedtakVarselRepository,
-                                                           BeregningTjeneste kalkulusTjeneste,
-                                                           MedlemTjeneste medlemTjeneste,
-                                                           HarEtablertYtelse harEtablertYtelse) {
+                                                       VedtakVarselRepository vedtakVarselRepository,
+                                                       BeregningTjeneste kalkulusTjeneste,
+                                                       MedlemTjeneste medlemTjeneste,
+                                                       HarEtablertYtelse harEtablertYtelse) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -62,6 +62,20 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.harEtablertYtelse = harEtablertYtelse;
+    }
+
+    private static boolean vurderAvslagPåAslag(Optional<Behandling> resRevurdering, Optional<Behandling> resOriginal, BehandlingType originalBehandlingType) {
+        if (resOriginal.isPresent() && resRevurdering.isPresent()) {
+            if (BehandlingType.FØRSTEGANGSSØKNAD.equals(originalBehandlingType)) {
+                return erAvslagPåAvslag(resRevurdering.get(), resOriginal.get());
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean erAvslagPåAvslag(Behandling resRevurdering, Behandling resOriginal) {
+        return false;
     }
 
     public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, boolean erVarselOmRevurderingSendt) {
@@ -74,9 +88,9 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
     }
 
     private VedtakVarsel bestemVedtakVarselRevurderingCore(BehandlingReferanse revurderingRef,
-                                                                            Behandling revurdering,
-                                                                            Behandling originalBehandling,
-                                                                            boolean erVarselOmRevurderingSendt) {
+                                                           Behandling revurdering,
+                                                           Behandling originalBehandling,
+                                                           boolean erVarselOmRevurderingSendt) {
         if (!revurdering.getType().equals(BehandlingType.REVURDERING)) {
             throw new IllegalStateException("Utviklerfeil: Skal ikke kunne havne her uten en revurderingssak");
         }
@@ -102,11 +116,13 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             return vedtakVarsel;
         }
 
-        Tuple<Utfall, Avslagsårsak> utfall = medlemTjeneste.utledVilkårUtfall(revurdering);
-        if (!utfall.getElement1().equals(Utfall.OPPFYLT)) {
-            revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
-            return vedtakVarsel;
+        if (vilkårene.getVilkår(VilkårType.MEDLEMSKAPSVILKÅRET).isPresent()) {
+            Tuple<Utfall, Avslagsårsak> utfall = medlemTjeneste.utledVilkårUtfall(revurdering);
+            if (!utfall.getElement1().equals(Utfall.OPPFYLT)) {
+                revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
+                vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
+                return vedtakVarsel;
+            }
         }
 
         boolean erEndringIBeregning = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId());
@@ -190,19 +206,5 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             .flatMap(Collection::stream)
             .anyMatch(periode -> Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN.equals(periode.getAvslagsårsak())
                 && Utfall.IKKE_OPPFYLT.equals(periode.getGjeldendeUtfall()));
-    }
-
-    private static boolean vurderAvslagPåAslag(Optional<Behandling> resRevurdering, Optional<Behandling> resOriginal, BehandlingType originalBehandlingType) {
-        if (resOriginal.isPresent() && resRevurdering.isPresent()) {
-            if (BehandlingType.FØRSTEGANGSSØKNAD.equals(originalBehandlingType)) {
-                return erAvslagPåAvslag(resRevurdering.get(), resOriginal.get());
-            }
-        }
-        return false;
-    }
-
-    @SuppressWarnings("unused")
-    private static boolean erAvslagPåAvslag(Behandling resRevurdering, Behandling resOriginal) {
-        return false;
     }
 }
