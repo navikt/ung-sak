@@ -32,6 +32,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.GraderingPeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
@@ -74,6 +75,8 @@ public class InntektArbeidYtelseDtoMapper {
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.ytelseTjeneste = ytelseTjeneste;
     }
+
+
 
     public InntektArbeidYtelseDto mapFra(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger,
                                          UtledArbeidsforholdParametere param) {
@@ -258,5 +261,32 @@ public class InntektArbeidYtelseDtoMapper {
 
         oppgittOpptjeningDto.setOppgittEgenNæring(egenNæringList);
         return oppgittOpptjeningDto;
+    }
+
+    public static OppgittOpptjeningDto mapTilPeriode(OppgittOpptjeningDto oppgittOpptjeningDto, PeriodeDto periodeFraSøknad) {
+        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeFraSøknad.getFom(), periodeFraSøknad.getTom());
+        OppgittOpptjeningDto dto = new OppgittOpptjeningDto();
+
+        dto.setOppgittEgenNæring(oppgittOpptjeningDto.getOppgittEgenNæring().stream().filter(oppgittEgenNæringDto -> periode.overlapper(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getFom())).collect(Collectors.toList()));
+        if (oppgittOpptjeningDto.getOppgittFrilans() != null) {
+            OppgittFrilansDto oppgittFrilansDto = new OppgittFrilansDto();
+            oppgittFrilansDto.setOppgittFrilansoppdrag(oppgittOpptjeningDto.getOppgittFrilans().getOppgittFrilansoppdrag().stream().filter(oppgittFrilansoppdragDto -> periode.overlapper(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getFom())).collect(Collectors.toList()));
+            dto.setOppgittFrilans(oppgittFrilansDto);
+
+        }
+        return dto;
+    }
+
+    public static OppgittOpptjeningDto mapUtenomPeriode(OppgittOpptjeningDto oppgittOpptjeningDto, PeriodeDto periodeFraSøknad) {
+        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeFraSøknad.getFom(), periodeFraSøknad.getTom());
+        OppgittOpptjeningDto dto = new OppgittOpptjeningDto();
+
+        dto.setOppgittEgenNæring(oppgittOpptjeningDto.getOppgittEgenNæring().stream().filter(oppgittEgenNæringDto -> !periode.overlapper(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getFom())).collect(Collectors.toList()));
+        if (oppgittOpptjeningDto.getOppgittFrilans() != null) {
+            OppgittFrilansDto oppgittFrilansDto = new OppgittFrilansDto();
+            oppgittFrilansDto.setOppgittFrilansoppdrag(oppgittOpptjeningDto.getOppgittFrilans().getOppgittFrilansoppdrag().stream().filter(oppgittFrilansoppdragDto -> !periode.overlapper(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getFom())).collect(Collectors.toList()));
+            dto.setOppgittFrilans(oppgittFrilansDto);
+        }
+        return dto;
     }
 }

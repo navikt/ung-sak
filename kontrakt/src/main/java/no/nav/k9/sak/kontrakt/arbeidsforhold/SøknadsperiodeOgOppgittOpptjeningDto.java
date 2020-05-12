@@ -19,22 +19,61 @@ public class SøknadsperiodeOgOppgittOpptjeningDto {
         //jackson
     }
 
-    @JsonProperty(value = "oppgittOpptjening", required = true)
+    @JsonProperty(value = "førSøkerPerioden", required = true)
     @Valid
     @NotNull
-    private OppgittOpptjeningDto oppgittOpptjening;
+    private OppgittOpptjeningDto førSøkerPerioden;
+
+    @JsonProperty(value = "iSøkerPerioden", required = true)
+    @Valid
+    @NotNull
+    private OppgittOpptjeningDto iSøkerPerioden;
 
     @JsonProperty(value = "periodeFraSøknad", required = true)
     @Valid
     @NotNull
     private PeriodeDto periodeFraSøknad;
 
-    public OppgittOpptjeningDto getOppgittOpptjening() {
-        return oppgittOpptjening;
+    @JsonProperty(value = "søkerYtelseForFrilans", required = true)
+    @Valid
+    @NotNull
+    private Boolean søkerYtelseForFrilans;
+
+    @JsonProperty(value = "søkerYtelseForNæring", required = true)
+    @Valid
+    @NotNull
+    private Boolean søkerYtelseForNæring;
+
+    public OppgittOpptjeningDto getFørSøkerPerioden() {
+        return førSøkerPerioden;
     }
 
-    public void setOppgittOpptjening(OppgittOpptjeningDto oppgittOpptjening) {
-        this.oppgittOpptjening = oppgittOpptjening;
+    public void setFørSøkerPerioden(OppgittOpptjeningDto førSøkerPerioden) {
+        this.førSøkerPerioden = førSøkerPerioden;
+    }
+
+    public OppgittOpptjeningDto getISøkerPerioden() {
+        return iSøkerPerioden;
+    }
+
+    public void setISøkerPerioden(OppgittOpptjeningDto iSøkerPerioden) {
+        this.iSøkerPerioden = iSøkerPerioden;
+    }
+
+    public Boolean getSøkerYtelseForFrilans() {
+        return søkerYtelseForFrilans;
+    }
+
+    public void setSøkerYtelseForFrilans(Boolean søkerYtelseForFrilans) {
+        this.søkerYtelseForFrilans = søkerYtelseForFrilans;
+    }
+
+    public Boolean getSøkerYtelseForNæring() {
+        return søkerYtelseForNæring;
+    }
+
+    public void setSøkerYtelseForNæring(Boolean søkerYtelseForNæring) {
+        this.søkerYtelseForNæring = søkerYtelseForNæring;
     }
 
     public PeriodeDto getPeriodeFraSøknad() {

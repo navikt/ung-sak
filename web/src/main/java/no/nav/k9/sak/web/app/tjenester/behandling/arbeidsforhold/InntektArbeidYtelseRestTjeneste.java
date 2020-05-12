@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -106,8 +107,8 @@ public class InntektArbeidYtelseRestTjeneste {
 
     @GET
     @Path(OPPGITT_OPPTJEING_PATH)
-    @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser", summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."), tags = "inntekt-arbeid-ytelse", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
+    @Operation(description = "Hent informasjon om oppgitt opptjening og søknadsperiode", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -130,10 +131,22 @@ public class InntektArbeidYtelseRestTjeneste {
         }
 
         if (oppgittOpptjeningDto != null) {
-            SøknadsperiodeOgOppgittOpptjeningDto dto = new SøknadsperiodeOgOppgittOpptjeningDto();
-            dto.setOppgittOpptjening(oppgittOpptjeningDto);
             Søknadsperioder søknadsperioder = uttakRepository.hentOppgittSøknadsperioder(behandling.getId());
-            dto.setPeriodeFraSøknad(new PeriodeDto(søknadsperioder.getMaksPeriode().getFomDato(), søknadsperioder.getMaksPeriode().getTomDato()));
+            PeriodeDto periodeFraSøknad = new PeriodeDto(søknadsperioder.getMaksPeriode().getFomDato(), søknadsperioder.getMaksPeriode().getTomDato());
+            SøknadsperiodeOgOppgittOpptjeningDto dto = new SøknadsperiodeOgOppgittOpptjeningDto();
+            dto.setISøkerPerioden(InntektArbeidYtelseDtoMapper.mapTilPeriode(oppgittOpptjeningDto, periodeFraSøknad));
+            dto.setFørSøkerPerioden(InntektArbeidYtelseDtoMapper.mapUtenomPeriode(oppgittOpptjeningDto, periodeFraSøknad));
+            dto.setPeriodeFraSøknad(periodeFraSøknad);
+
+            var fastsattUttak = uttakRepository.hentFastsattUttak(behandling.getId());
+            boolean søkerYtelseForFrilans = fastsattUttak.getPerioder().stream()
+                    .anyMatch(p -> p.getPeriode().overlapper(søknadsperioder.getMaksPeriode()) && p.getAktivitetType() == UttakArbeidType.FRILANSER);
+
+            boolean søkerYtelseForNæring = fastsattUttak.getPerioder().stream()
+                    .anyMatch(p -> p.getPeriode().overlapper(søknadsperioder.getMaksPeriode()) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
+
+            dto.setSøkerYtelseForNæring(søkerYtelseForNæring);
+            dto.setSøkerYtelseForFrilans(søkerYtelseForFrilans);
             return dto;
         }
         return new SøknadsperiodeOgOppgittOpptjeningDto();
