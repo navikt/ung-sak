@@ -30,7 +30,6 @@ import no.nav.k9.sak.typer.AktørId;
 
 public class AvklaringFaktaMedlemskap {
 
-    private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private MedlemskapPerioderTjeneste medlemskapPerioderTjeneste;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -42,7 +41,6 @@ public class AvklaringFaktaMedlemskap {
                                     InntektArbeidYtelseTjeneste iayTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapPerioderTjeneste = medlemskapPerioderTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
@@ -153,9 +151,8 @@ public class AvklaringFaktaMedlemskap {
      */
     private Utfall harInntektSiste3mnd(Behandling behandling, LocalDate vurderingsdato) {
         AktørId aktørId = behandling.getAktørId();
-        LocalDate mottattDato = søknadRepository.hentSøknad(behandling).getMottattDato();
-        LocalDate mottattDatoMinus3Mnd = mottattDato.minusMonths(3);
-        DatoIntervallEntitet siste3Mnd = DatoIntervallEntitet.fraOgMedTilOgMed(mottattDatoMinus3Mnd, mottattDato);
+        LocalDate vurderingsdatoMinus3Mnd = vurderingsdato.minusMonths(3);
+        DatoIntervallEntitet siste3Mnd = DatoIntervallEntitet.fraOgMedTilOgMed(vurderingsdatoMinus3Mnd, vurderingsdato);
         Optional<InntektArbeidYtelseGrunnlag> grunnlag = iayTjeneste.finnGrunnlag(behandling.getId());
 
         boolean inntektSiste3M = false;
