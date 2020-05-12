@@ -118,11 +118,18 @@ public class OpptjeningAktiviteter {
 
         @Override
         public String toString() {
+            String personligArbeidsgiverMaskertRef = arbeidsgiverAktørId == null
+                ? ""
+                // kun siste 3 bokstaver fra aktørId
+                : ", arbeidsgiverAktørId=..." + arbeidsgiverAktørId.substring(arbeidsgiverAktørId.length() - Math.min(3, arbeidsgiverAktørId.length()), arbeidsgiverAktørId.length());
+
+            String virksomhetArbeidsgiver = arbeidsgiverOrgNummer == null ? "" : ", arbeidsgiverOrgNummer=" + arbeidsgiverOrgNummer;
+            
             return getClass().getSimpleName()
                 + "<type=" + type
                 + ", periode=" + periode
-                + (arbeidsgiverOrgNummer == null ? "" : ", arbeidsgiverOrgNummer=" + arbeidsgiverOrgNummer)
-                + (arbeidsgiverAktørId == null ? "" : ", arbeidsgiverAktørId=" + arbeidsgiverAktørId)
+                + virksomhetArbeidsgiver
+                + personligArbeidsgiverMaskertRef
                 + (arbeidsforholdId == null ? "" : ", arbeidsforholdId=" + arbeidsforholdId)
                 + ">";
         }

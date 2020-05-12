@@ -66,13 +66,12 @@ public class PipBehandlingsData {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<"  //$NON-NLS-1$
-            + "behandligStatus=" + behandligStatus + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + "fagsakId=" + fagsakId + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + "fagsakStatus=" + fagsakStatus + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + "ansvarligSaksbehandler=" + ansvarligSaksbehandler + "," //$NON-NLS-1$ //$NON-NLS-2$
+        // tar ikke med ansvarligSaksbehandlinger så ikke lekker sensitive personopplysninger i logg (inkl. stedslokaliserende, enhet)
+        return getClass().getSimpleName() + "<"
+            + "behandligStatus=" + behandligStatus + ", "
+            + "fagsakId=" + fagsakId + ", "
+            + "fagsakStatus=" + fagsakStatus + ", "
             + ">"; //$NON-NLS-1$
     }
-
 
 }

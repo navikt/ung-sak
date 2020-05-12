@@ -37,20 +37,19 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     private Long id;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "fra_aktoer_id", updatable = false, nullable=false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "fra_aktoer_id", updatable = false, nullable = false)))
     @ChangeTracked
     private AktørId fraAktørId;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "til_aktoer_id", updatable = false, nullable=false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "til_aktoer_id", updatable = false, nullable = false)))
     @ChangeTracked
     private AktørId tilAktørId;
 
     @Convert(converter = RelasjonsRolleTypeKodeverdiConverter.class)
-    @Column(name="relasjonsrolle", nullable = false)
+    @Column(name = "relasjonsrolle", nullable = false)
     @ChangeTracked
     private RelasjonsRolleType relasjonsrolle;
-
 
     @Column(name = "har_samme_bosted")
     @ChangeTracked
@@ -69,7 +68,6 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
         this.relasjonsrolle = relasjon.getRelasjonsrolle();
         this.harSammeBosted = relasjon.getHarSammeBosted();
     }
-
 
     @Override
     public String getIndexKey() {
@@ -97,38 +95,31 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
         this.personopplysningInformasjon = personopplysningInformasjon;
     }
 
-
     @Override
     public AktørId getAktørId() {
         return fraAktørId;
     }
 
-
     public AktørId getTilAktørId() {
         return tilAktørId;
     }
-
 
     public RelasjonsRolleType getRelasjonsrolle() {
         return relasjonsrolle;
     }
 
-
     public Boolean getHarSammeBosted() {
         return harSammeBosted;
     }
 
-
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PersonRelasjonEntitet{");
+        // tar ikke med til/fra Aktør da det fort lekker sensitive opplysninger i logger
+        var sb = new StringBuilder("PersonRelasjonEntitet<");
         sb.append("relasjonsrolle=").append(relasjonsrolle);
-        sb.append(", fra=").append(fraAktørId);
-        sb.append(", til=").append(tilAktørId);
-        sb.append('}');
+        sb.append('>');
         return sb.toString();
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -140,11 +131,10 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
         }
         PersonRelasjonEntitet entitet = (PersonRelasjonEntitet) o;
         return Objects.equals(fraAktørId, entitet.fraAktørId) &&
-                Objects.equals(tilAktørId, entitet.tilAktørId) &&
-                Objects.equals(harSammeBosted, entitet.harSammeBosted) &&
-                Objects.equals(relasjonsrolle, entitet.relasjonsrolle);
+            Objects.equals(tilAktørId, entitet.tilAktørId) &&
+            Objects.equals(harSammeBosted, entitet.harSammeBosted) &&
+            Objects.equals(relasjonsrolle, entitet.relasjonsrolle);
     }
-
 
     @Override
     public int hashCode() {

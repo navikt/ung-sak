@@ -131,7 +131,6 @@ public class AktørArbeid implements IndexKey {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" +
-            "aktørId=" + aktørId +
             ", yrkesaktiviteter=" + yrkesaktiviter +
             '>';
     }
