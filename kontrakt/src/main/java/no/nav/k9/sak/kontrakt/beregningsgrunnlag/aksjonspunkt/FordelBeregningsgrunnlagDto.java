@@ -1,8 +1,10 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -20,6 +22,11 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.FORDEL_BEREGNINGSGRUNNLAG_KODE)
 public class FordelBeregningsgrunnlagDto extends BekreftetAksjonspunktDto {
+
+    @JsonProperty(value = "skjæringstidspunkt")
+    @Valid
+    @NotNull
+    private LocalDate skjæringstidspunkt;
 
     @JsonProperty(value = "endretBeregningsgrunnlagPerioder")
     @Valid
@@ -41,5 +48,13 @@ public class FordelBeregningsgrunnlagDto extends BekreftetAksjonspunktDto {
 
     public void setEndretBeregningsgrunnlagPerioder(List<FastsettBeregningsgrunnlagPeriodeDto> endretBeregningsgrunnlagPerioder) {
         this.endretBeregningsgrunnlagPerioder = endretBeregningsgrunnlagPerioder;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 }

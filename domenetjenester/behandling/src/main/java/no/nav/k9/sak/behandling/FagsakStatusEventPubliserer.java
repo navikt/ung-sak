@@ -41,10 +41,10 @@ public class FagsakStatusEventPubliserer {
             String nyStatus = nyStatusIn == null ? null : nyStatusIn.getKode();
 
             if (behandling != null) {
-                log.info("Fagsak status oppdatert: {} -> {}; fagsakId [{}] behandlingId [{}]", gammelStatus, nyStatus, fagsakId, //$NON-NLS-1$
+                log.info("Fagsak[{}-{}] status oppdatert: {} -> {}; fagsakId [{}] behandlingId [{}]", fagsak.getSaksnummer(), fagsak.getYtelseType(), gammelStatus, nyStatus, fagsakId, //$NON-NLS-1$
                     behandling.getId());
             } else {
-                log.info("Fagsak status oppdatert: {} -> {}; fagsakId [{}]", gammelStatus, nyStatus, fagsakId); //$NON-NLS-1$
+                log.info("Fagsak[{}-{}] status oppdatert: {} -> {}; fagsakId [{}]", fagsak.getSaksnummer(), fagsak.getYtelseType(), gammelStatus, nyStatus, fagsakId); //$NON-NLS-1$
             }
         }
 

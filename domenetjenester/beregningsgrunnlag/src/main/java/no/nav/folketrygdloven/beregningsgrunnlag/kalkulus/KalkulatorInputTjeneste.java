@@ -38,11 +38,10 @@ public class KalkulatorInputTjeneste {
         // for CDI proxy
     }
 
-    public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
+    public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate stp) {
         var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
 
-        LocalDate stp = referanse.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
         var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, referanse.getAktørId(), stp);
 
         var opptjeningAktiviteter = hentOpptjeningAktiviteter(referanse, inntektArbeidYtelseGrunnlag);

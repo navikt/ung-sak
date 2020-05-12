@@ -10,12 +10,23 @@ public class BeregningsgrunnlagAktivitetStatus {
     private Beregningsgrunnlag beregningsgrunnlag;
     private AktivitetStatus aktivitetStatus;
     private Hjemmel hjemmel;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(BeregningsgrunnlagAktivitetStatus beregningsgrunnlagAktivitetStatusMal) {
+        return new Builder(beregningsgrunnlagAktivitetStatusMal);
+    }
+
     public Beregningsgrunnlag getBeregningsgrunnlag() {
         return beregningsgrunnlag;
     }
+
     public AktivitetStatus getAktivitetStatus() {
         return aktivitetStatus;
     }
+
     public Hjemmel getHjemmel() {
         return hjemmel;
     }
@@ -29,7 +40,7 @@ public class BeregningsgrunnlagAktivitetStatus {
         }
         BeregningsgrunnlagAktivitetStatus other = (BeregningsgrunnlagAktivitetStatus) obj;
         return Objects.equals(this.getAktivitetStatus(), other.getAktivitetStatus())
-                && Objects.equals(this.getBeregningsgrunnlag(), other.getBeregningsgrunnlag());
+            && Objects.equals(this.getBeregningsgrunnlag(), other.getBeregningsgrunnlag());
     }
 
     @Override
@@ -40,18 +51,18 @@ public class BeregningsgrunnlagAktivitetStatus {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" //$NON-NLS-1$
-                + "beregningsgrunnlag=" + beregningsgrunnlag + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "aktivitetStatus=" + aktivitetStatus + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "hjemmel=" + hjemmel + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + ">"; //$NON-NLS-1$
-    }
-
-    public static Builder builder() {
-        return new Builder();
+            + "beregningsgrunnlag=" + beregningsgrunnlag + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "aktivitetStatus=" + aktivitetStatus + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "hjemmel=" + hjemmel + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + ">"; //$NON-NLS-1$
     }
 
     public static class Builder {
         private BeregningsgrunnlagAktivitetStatus beregningsgrunnlagAktivitetStatusMal;
+
+        public Builder(BeregningsgrunnlagAktivitetStatus beregningsgrunnlagAktivitetStatusMal) {
+            this.beregningsgrunnlagAktivitetStatusMal = beregningsgrunnlagAktivitetStatusMal;
+        }
 
         public Builder() {
             beregningsgrunnlagAktivitetStatusMal = new BeregningsgrunnlagAktivitetStatus();

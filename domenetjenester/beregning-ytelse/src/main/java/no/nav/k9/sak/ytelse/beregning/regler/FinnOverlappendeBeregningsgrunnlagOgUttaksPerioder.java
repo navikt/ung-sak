@@ -13,6 +13,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
@@ -42,21 +43,26 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         super(ID, BESKRIVELSE);
     }
 
+    private static long årsbeløpTilDagsats(BigDecimal årsbeløp) {
+        final BigDecimal toHundreSeksti = BigDecimal.valueOf(260);
+        return årsbeløp.divide(toHundreSeksti, 0, RoundingMode.HALF_UP).longValue();
+    }
+
     @Override
     public Evaluation evaluate(BeregningsresultatRegelmodellMellomregning mellomregning) {
         // Regelsporing
         Map<String, Object> resultater = new LinkedHashMap<>();
 
         BeregningsresultatRegelmodell regelmodell = mellomregning.getInput();
-        Beregningsgrunnlag grunnlag = regelmodell.getBeregningsgrunnlag();
+        List<Beregningsgrunnlag> grunnlagene = regelmodell.getBeregningsgrunnlag();
         UttakResultat uttakResultat = regelmodell.getUttakResultat();
 
-        List<BeregningsresultatPeriode> periodeListe = mapPerioder(grunnlag, uttakResultat, resultater);
+        List<BeregningsresultatPeriode> periodeListe = mapPerioder(grunnlagene, uttakResultat, resultater);
         periodeListe.forEach(p -> mellomregning.getOutput().addBeregningsresultatPeriode(p));
         return beregnet(resultater);
     }
 
-    private List<BeregningsresultatPeriode> mapPerioder(Beregningsgrunnlag grunnlag, UttakResultat uttakResultat, Map<String, Object> resultater) {
+    private List<BeregningsresultatPeriode> mapPerioder(List<Beregningsgrunnlag> grunnlag, UttakResultat uttakResultat, Map<String, Object> resultater) {
         LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline = mapGrunnlagTimeline(grunnlag);
         LocalDateTimeline<UttakResultatPeriode> uttakTimeline = uttakResultat.getUttakPeriodeTimeline();
         LocalDateTimeline<BeregningsresultatPeriode> resultatTimeline = intersectTimelines(grunnlagTimeline, uttakTimeline, resultater)
@@ -66,7 +72,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<UttakResultatPeriode> uttakTimeline,
                                                                             Map<String, Object> resultater) {
-        final int[] i = { 0 }; // Periode-teller til regelsporing
+        final int[] i = {0}; // Periode-teller til regelsporing
         return grunnlagTimeline.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
             BeregningsresultatPeriode resultatPeriode = BeregningsresultatPeriode.builder()
                 .medPeriode(dateInterval).build();
@@ -200,15 +206,14 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             .findFirst();
     }
 
-    private LocalDateTimeline<BeregningsgrunnlagPeriode> mapGrunnlagTimeline(Beregningsgrunnlag grunnlag) {
-        List<LocalDateSegment<BeregningsgrunnlagPeriode>> grunnlagPerioder = grunnlag.getBeregningsgrunnlagPerioder().stream()
-            .map(p -> new LocalDateSegment<>(p.getBeregningsgrunnlagPeriode().getFom(), p.getBeregningsgrunnlagPeriode().getTom(), p))
-            .collect(Collectors.toList());
-        return new LocalDateTimeline<>(grunnlagPerioder);
-    }
-
-    private static long årsbeløpTilDagsats(BigDecimal årsbeløp) {
-        final BigDecimal toHundreSeksti = BigDecimal.valueOf(260);
-        return årsbeløp.divide(toHundreSeksti, 0, RoundingMode.HALF_UP).longValue();
+    private LocalDateTimeline<BeregningsgrunnlagPeriode> mapGrunnlagTimeline(List<Beregningsgrunnlag> grunnlag) {
+        var grunnlagTimeline = new LocalDateTimeline<BeregningsgrunnlagPeriode>(List.of());
+        for (Beregningsgrunnlag beregningsgrunnlag : grunnlag) {
+            List<LocalDateSegment<BeregningsgrunnlagPeriode>> grunnlagPerioder = beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+                .map(p -> new LocalDateSegment<>(p.getBeregningsgrunnlagPeriode().getFom(), p.getBeregningsgrunnlagPeriode().getTom(), p))
+                .collect(Collectors.toList());
+            grunnlagTimeline = grunnlagTimeline.combine(new LocalDateTimeline<>(grunnlagPerioder), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        return grunnlagTimeline;
     }
 }

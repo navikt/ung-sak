@@ -6,6 +6,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -25,7 +26,7 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
     private static final AksjonspunktDefinisjon FASTSETTBRUTTOSNKODE = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
 
     VurderVarigEndringEllerNyoppstartetSNOppdaterer() {
         // CDI
@@ -33,7 +34,7 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
 
     @Inject
     public VurderVarigEndringEllerNyoppstartetSNOppdaterer(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                                           KalkulusTjeneste kalkulusTjeneste) {
+                                                           BeregningTjeneste kalkulusTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
@@ -48,7 +49,7 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
         if (dto.getErVarigEndretNaering()) {
             if (dto.getBruttoBeregningsgrunnlag() != null) {
                 HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-                kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+                kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
             } else {
                 behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(FASTSETTBRUTTOSNKODE));
             }

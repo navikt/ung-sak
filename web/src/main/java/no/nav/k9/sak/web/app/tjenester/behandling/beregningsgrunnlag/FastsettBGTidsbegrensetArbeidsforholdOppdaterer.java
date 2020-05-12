@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -21,14 +22,14 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegr
 @DtoTilServiceAdapter(dto = FastsettBGTidsbegrensetArbeidsforholdDto.class, adapter = AksjonspunktOppdaterer.class)
 public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<FastsettBGTidsbegrensetArbeidsforholdDto> {
 
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
 
     FastsettBGTidsbegrensetArbeidsforholdOppdaterer() {
         // CDI
     }
 
     @Inject
-    public FastsettBGTidsbegrensetArbeidsforholdOppdaterer(KalkulusTjeneste kalkulusTjeneste) {
+    public FastsettBGTidsbegrensetArbeidsforholdOppdaterer(BeregningTjeneste kalkulusTjeneste) {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
@@ -36,7 +37,7 @@ public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements Aksjonsp
     public OppdateringResultat oppdater(FastsettBGTidsbegrensetArbeidsforholdDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
         // TODO FIKS HISTORIKK
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         håndterEventueltOverflødigAksjonspunkt(behandling)

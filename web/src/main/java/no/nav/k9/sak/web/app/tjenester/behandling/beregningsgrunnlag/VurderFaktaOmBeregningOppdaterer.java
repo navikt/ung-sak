@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -17,7 +18,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.historikk.FaktaOmBeregningHist
 @DtoTilServiceAdapter(dto = VurderFaktaOmBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<VurderFaktaOmBeregningDto> {
 
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
     private FaktaOmBeregningHistorikkTjeneste faktaOmBeregningHistorikkTjeneste;
 
     VurderFaktaOmBeregningOppdaterer() {
@@ -25,7 +26,7 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
     }
 
     @Inject
-    public VurderFaktaOmBeregningOppdaterer(KalkulusTjeneste kalkulusTjeneste, FaktaOmBeregningHistorikkTjeneste faktaOmBeregningHistorikkTjeneste) {
+    public VurderFaktaOmBeregningOppdaterer(BeregningTjeneste kalkulusTjeneste, FaktaOmBeregningHistorikkTjeneste faktaOmBeregningHistorikkTjeneste) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.faktaOmBeregningHistorikkTjeneste = faktaOmBeregningHistorikkTjeneste;
     }
@@ -33,7 +34,7 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
     @Override
     public OppdateringResultat oppdater(VurderFaktaOmBeregningDto dto, AksjonspunktOppdaterParameter param) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
         faktaOmBeregningHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), resultat, dto.getBegrunnelse());
         return OppdateringResultat.utenOveropp();
     }

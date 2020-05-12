@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.vedtak.util.Tuple;
@@ -136,7 +137,18 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             return vedtakVarsel;
         }
 
-        boolean erEndringIBeregning = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId());
+        var beregningsvilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        boolean erEndringIBeregning = false;
+        if (beregningsvilkår.isPresent()) {
+            var skjæringstidspunkter = beregningsvilkår.get().getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toList());
+            for (LocalDate skjæringstidspunkt : skjæringstidspunkter) {
+                var erEndring = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId(), skjæringstidspunkt);
+                if (erEndring) {
+                    erEndringIBeregning = erEndring;
+                    break;
+                }
+            }
+        }
 
         Betingelser betingelser = Betingelser.fastsett(erEndringIBeregning, erVarselOmRevurderingSendt,
             harInnvilgetIkkeOpphørtVedtak(revurdering.getFagsak()));

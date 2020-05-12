@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -22,6 +23,7 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 
@@ -35,9 +37,9 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
  */
 @RequestScoped
 @Alternative
-public class KalkulusInMermoryTjeneste implements BeregningTjeneste {
+public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
 
-    private final Map<Long, Deque<UUID>> indeksBehandlingTilGrunnlag = new LinkedHashMap<>();
+    private final Map<UUID, Deque<UUID>> indeksBehandlingTilGrunnlag = new LinkedHashMap<>();
     private final List<BeregningsgrunnlagGrunnlag> grunnlag = new ArrayList<>();
 
     /**
@@ -47,30 +49,30 @@ public class KalkulusInMermoryTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
+    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType) {
+    public KalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, UUID behandlingUuid, BehandlingStegType stegType) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse) {
+    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, UUID behandlingUuid) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentFastsatt(Long behandlingId) {
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(behandlingId, k -> new LinkedList<>());
+    public Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType) {
+        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse, k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
             return Optional.empty();
         }
 
-        Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(behandlingId, grId))
-                .filter(BeregningsgrunnlagGrunnlag::getAktiv)
-                .findFirst();
+        Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(0L, grId))
+            .filter(BeregningsgrunnlagGrunnlag::getAktiv)
+            .findFirst();
 
         if (first.isPresent()) {
 
@@ -81,73 +83,73 @@ public class KalkulusInMermoryTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public Beregningsgrunnlag hentEksaktFastsatt(Long behandlingId) {
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(behandlingId, k -> new LinkedList<>());
+    public Beregningsgrunnlag hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
+        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse, k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
-            throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + behandlingId);
+            throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse);
         }
 
-        Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(behandlingId, grId))
-                .filter(BeregningsgrunnlagGrunnlag::getAktiv)
-                .findFirst();
+        Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(0L, grId))
+            .filter(BeregningsgrunnlagGrunnlag::getAktiv)
+            .findFirst();
 
         if (first.isPresent()) {
             BeregningsgrunnlagGrunnlag beregningsgrunnlagGrunnlag = first.get();
-            return beregningsgrunnlagGrunnlag.getBeregningsgrunnlag().orElseThrow(() -> new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + behandlingId));
+            return beregningsgrunnlagGrunnlag.getBeregningsgrunnlag().orElseThrow(() -> new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse));
         }
-        throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + behandlingId);
+        throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse);
     }
 
     @Override
-    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(Long behandlingId) {
+    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse) {
         return null;
     }
 
     @Override
-    public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(Long behandlingId) {
+    public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, UUID uuid) {
         return Optional.empty();
     }
 
     @Override
-    public void lagreBeregningsgrunnlag(Long behandlingId, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand tilstand) {
-        BeregningsgrunnlagGrunnlagBuilder oppdatere = BeregningsgrunnlagGrunnlagBuilder.oppdatere(getAktivtInntektArbeidGrunnlag(behandlingId));
+    public void lagreBeregningsgrunnlag(BehandlingReferanse referanse, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand tilstand) {
+        BeregningsgrunnlagGrunnlagBuilder oppdatere = BeregningsgrunnlagGrunnlagBuilder.oppdatere(getAktivtInntektArbeidGrunnlag(referanse.getBehandlingId()));
         oppdatere.medBeregningsgrunnlag(beregningsgrunnlag);
         BeregningsgrunnlagGrunnlag beregningsgrunnlagGrunnlag = oppdatere.build(tilstand);
 
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(behandlingId, k -> new LinkedList<>());
+        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(referanse.getBehandlingUuid(), k -> new LinkedList<>());
 
         behGrunnlag.push(beregningsgrunnlagGrunnlag.getEksternReferanse());
         grunnlag.add(beregningsgrunnlagGrunnlag);
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID uuid, Long behandlingId) {
+    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID bgReferanse, FagsakYtelseType fagsakYtelseType, UUID uuid) {
         return Optional.empty();
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(Long behandlingId) {
+    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
     }
 
     @Override
-    public Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2) {
+    public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2) {
         return false;
     }
 
 
     private Optional<BeregningsgrunnlagGrunnlag> getAktivtInntektArbeidGrunnlag(Long behandlingId) {
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(behandlingId, k -> new LinkedList<>());
+        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(UUID.randomUUID(), k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
             return Optional.empty();
         }
         return behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(behandlingId, grId))
-                .filter(BeregningsgrunnlagGrunnlag::getAktiv)
-                .findFirst();
+            .filter(BeregningsgrunnlagGrunnlag::getAktiv)
+            .findFirst();
     }
 
     public BeregningsgrunnlagGrunnlag hentGrunnlagForGrunnlagId(@SuppressWarnings("unused") Long behandlingId, UUID inntektArbeidYtelseGrunnlagId) {
         return grunnlag.stream().filter(g -> Objects.equals(g.getEksternReferanse(), inntektArbeidYtelseGrunnlagId))
-                .findFirst().orElseThrow();
+            .findFirst().orElseThrow();
     }
 }
 

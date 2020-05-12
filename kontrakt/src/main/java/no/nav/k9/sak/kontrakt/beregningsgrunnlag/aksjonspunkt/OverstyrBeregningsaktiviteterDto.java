@@ -48,13 +48,13 @@ public class OverstyrBeregningsaktiviteterDto extends OverstyringAksjonspunktDto
         return beregningsaktivitetLagreDtoList;
     }
 
+    public void setBeregningsaktivitetLagreDtoList(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList) {
+        this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
+    }
+
     @JsonIgnore
     @Override
     public boolean getErVilkarOk() {
         return true;
-    }
-
-    public void setBeregningsaktivitetLagreDtoList(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList) {
-        this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
     }
 }

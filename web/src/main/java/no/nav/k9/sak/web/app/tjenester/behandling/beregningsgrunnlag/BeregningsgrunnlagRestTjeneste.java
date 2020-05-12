@@ -3,6 +3,8 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -18,9 +20,11 @@ import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -40,9 +44,10 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class BeregningsgrunnlagRestTjeneste {
 
     static public final String PATH = "/behandling/beregningsgrunnlag";
+    static public final String PATH_ALLE = "/behandling/beregningsgrunnlag/alle";
     private BehandlingRepository behandlingRepository;
     private OpptjeningRepository opptjeningRepository;
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
 
     public BeregningsgrunnlagRestTjeneste() {
         // for resteasy
@@ -51,7 +56,7 @@ public class BeregningsgrunnlagRestTjeneste {
     @Inject
     public BeregningsgrunnlagRestTjeneste(BehandlingRepository behandlingRepository,
                                           OpptjeningRepository opptjeningRepository,
-                                          KalkulusTjeneste kalkulusTjeneste) {
+                                          BeregningTjeneste kalkulusTjeneste) {
         this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -73,7 +78,7 @@ public class BeregningsgrunnlagRestTjeneste {
         if (opptjening.isEmpty()) {
             return null;
         }
-        return kalkulusTjeneste.hentBeregningsgrunnlagDto(id);
+        return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
     }
 
     @GET
@@ -85,13 +90,31 @@ public class BeregningsgrunnlagRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
             // behandlinger for ytelse FRISINN har ikke opptjening
-            return kalkulusTjeneste.hentBeregningsgrunnlagDto(behandling.getId());
+            return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
         }
         final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
         if (opptjening.isEmpty()) {
             return null;
         }
-        return kalkulusTjeneste.hentBeregningsgrunnlagDto(behandling.getId());
+        return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
+    }
+
+    @GET
+    @Operation(description = "Henter alle beregningsgrunnlag for angitt behandling", summary = ("Returnerer beregningsgrunnlag for behandling."), tags = "beregningsgrunnlag")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path(PATH_ALLE)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<BeregningsgrunnlagDto> hentBeregningsgrunnlagene(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
+            // behandlinger for ytelse FRISINN har ikke opptjening
+            return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling));
+        }
+        final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
+        if (opptjening.isEmpty()) {
+            return null;
+        }
+        return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling));
     }
 
 }

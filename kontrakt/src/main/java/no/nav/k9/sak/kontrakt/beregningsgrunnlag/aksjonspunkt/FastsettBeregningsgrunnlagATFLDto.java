@@ -1,11 +1,13 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -23,6 +25,11 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE)
 public class FastsettBeregningsgrunnlagATFLDto extends BekreftetAksjonspunktDto {
+
+    @JsonProperty(value = "skjæringstidspunkt")
+    @Valid
+    @NotNull
+    private LocalDate skjæringstidspunkt;
 
     @JsonProperty(value = "inntektFrilanser")
     @Min(0)
@@ -53,15 +60,23 @@ public class FastsettBeregningsgrunnlagATFLDto extends BekreftetAksjonspunktDto 
         return inntektFrilanser;
     }
 
-    public List<InntektPrAndelDto> getInntektPrAndelList() {
-        return inntektPrAndelList;
-    }
-
     public void setInntektFrilanser(Integer inntektFrilanser) {
         this.inntektFrilanser = inntektFrilanser;
     }
 
+    public List<InntektPrAndelDto> getInntektPrAndelList() {
+        return inntektPrAndelList;
+    }
+
     public void setInntektPrAndelList(List<InntektPrAndelDto> inntektPrAndelList) {
         this.inntektPrAndelList = inntektPrAndelList;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 }
