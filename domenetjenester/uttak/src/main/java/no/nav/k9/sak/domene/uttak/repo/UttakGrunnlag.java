@@ -70,12 +70,17 @@ public class UttakGrunnlag extends BaseEntitet {
     public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, Søknadsperioder søknadsperioder) {
         this(behandlingId, oppgittUttak, null, søknadsperioder, null, null);
     }
-    
+
     /** Opprett med oppgitt og fastsatt uttak (kan være samme) */
     public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder) {
         this(behandlingId, oppgittUttak, fastsattUttak, søknadsperioder, null, null);
     }
-    
+
+    /** Kopier for revurdering */
+    UttakGrunnlag(Long behandlingId, UttakGrunnlag gr) {
+        this(behandlingId, gr.oppgittUttak, gr.fastsattUttak, gr.søknadsperioder, gr.oppgittFerie, gr.oppgittTilsynsordning);
+    }
+
     public UttakGrunnlag(Long behandlingId, UttakAktivitet oppgittUttak, UttakAktivitet fastsattUttak, Søknadsperioder søknadsperioder, Ferie ferie, OppgittTilsynsordning tilsynsordning) {
         this.behandlingId = behandlingId;
         this.oppgittUttak = oppgittUttak;
@@ -116,7 +121,7 @@ public class UttakGrunnlag extends BaseEntitet {
     void setOppgittFerie(Ferie ferie) {
         this.oppgittFerie = ferie;
     }
-    
+
     void setOppgittTilsynsordning(OppgittTilsynsordning tilsynsordning) {
         this.oppgittTilsynsordning = tilsynsordning;
     }

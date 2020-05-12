@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -27,6 +28,7 @@ public class RevurderingTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private PersonopplysningRepository personopplysningRepository;
     private MedlemskapRepository medlemskapRepository;
+    private UttakRepository uttakRepository;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -36,9 +38,10 @@ public class RevurderingTjeneste {
 
     @Inject
     public RevurderingTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                   BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                   InntektArbeidYtelseTjeneste iayTjeneste,
-                                   RevurderingTjenesteFelles revurderingTjenesteFelles) {
+                               BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                               UttakRepository uttakRepository, InntektArbeidYtelseTjeneste iayTjeneste,
+                               RevurderingTjenesteFelles revurderingTjenesteFelles) {
+        this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -84,6 +87,7 @@ public class RevurderingTjeneste {
         Long nyBehandlingId = ny.getId();
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
