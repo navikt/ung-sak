@@ -1,6 +1,6 @@
 package no.nav.k9.sak.dokument.bestill.vedtak;
 
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -33,7 +33,7 @@ public class VedtaksbrevUtleder {
         return Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
     }
 
-    public static DokumentMalType velgDokumentMalForVedtak(BehandlingReferanse ref, 
+    public static DokumentMalType velgDokumentMalForVedtak(BehandlingReferanse ref,
                                                            VedtakVarsel behandlingsresultat,
                                                            BehandlingVedtak behandlingVedtak) {
         DokumentMalType dokumentMal = null;

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,7 +14,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -95,7 +95,7 @@ public class DokumentKafkaBestillerTest {
     }
 
     private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String arsakskode, String fritekst) {
-        return new BestillBrevDto(behandling.getId(), dokumentMalType, fritekst, arsakskode);
+        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, arsakskode);
     }
 
 }
