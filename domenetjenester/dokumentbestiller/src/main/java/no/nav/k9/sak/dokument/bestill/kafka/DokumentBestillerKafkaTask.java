@@ -7,7 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
-import no.nav.k9.formidling.kontrakt.hendelse.kodeverk.FagsakYtelseType;
+import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -36,7 +36,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
     }
 
     private static FagsakYtelseType mapYtelse(no.nav.k9.kodeverk.behandling.FagsakYtelseType fpsakYtelseKode) {
-        return new FagsakYtelseType(fpsakYtelseKode.getKode());
+        return FagsakYtelseType.fraKode(fpsakYtelseKode.getKode());
     }
 
     @Override
