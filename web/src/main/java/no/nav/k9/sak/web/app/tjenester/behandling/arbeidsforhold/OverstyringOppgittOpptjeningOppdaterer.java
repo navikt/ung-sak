@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
@@ -54,8 +55,8 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
         var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny();
         var søknadsperiodeOgOppgittOpptjening = dto.getSøknadsperiodeOgOppgittOpptjeningDto();
-        leggerTilEgenæring(oppgittOpptjeningBuilder, søknadsperiodeOgOppgittOpptjening);
-        leggerTilFrilans(oppgittOpptjeningBuilder, søknadsperiodeOgOppgittOpptjening);
+        leggerTilEgenæring(søknadsperiodeOgOppgittOpptjening).ifPresent(oppgittOpptjeningBuilder::leggTilEgneNæringer);
+        leggerTilFrilans(søknadsperiodeOgOppgittOpptjening).ifPresent(oppgittOpptjeningBuilder::leggTilFrilansOpplysninger);
 
         inntektArbeidYtelseTjeneste.lagreOverstyrtOppgittOpptjening(kontekst.getBehandlingId(), oppgittOpptjeningBuilder);
 
@@ -80,7 +81,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         return perioderSomSkalMed;
     }
 
-    private void leggerTilFrilans(OppgittOpptjeningBuilder oppgittOpptjeningBuilder, SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
+    private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
         var frilansI = søknadsperiodeOgOppgittOpptjening.getISøkerPerioden().getOppgittFrilans();
         var frilansFør = søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittFrilans();
 
@@ -97,22 +98,23 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
             var frilansBuilder = OppgittFrilansBuilder.ny();
             frilansBuilder.leggTilOppgittOppdrag(oppgittFrilansoppdrag);
-            oppgittOpptjeningBuilder.leggTilFrilansOpplysninger(frilansBuilder.build());
+            return Optional.of(frilansBuilder.build());
         }
+        return Optional.empty();
     }
 
-    private void leggerTilEgenæring(OppgittOpptjeningBuilder oppgittOpptjeningBuilder, SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
+    private Optional<List<EgenNæringBuilder>> leggerTilEgenæring(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
         var egenNæring = new ArrayList<>(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring());
         egenNæring.addAll(søknadsperiodeOgOppgittOpptjening.getISøkerPerioden().getOppgittEgenNæring());
 
         if (!egenNæring.isEmpty()) {
-            var egenNæringBuilders = egenNæring.stream().map(oppgittEgenNæringDto -> {
+            return Optional.of(egenNæring.stream().map(oppgittEgenNæringDto -> {
                 var egenNæringBuilder = EgenNæringBuilder.ny();
                 egenNæringBuilder.medBruttoInntekt(oppgittEgenNæringDto.getBruttoInntekt().getVerdi());
                 egenNæringBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getTom()));
                 return egenNæringBuilder;
-            }).collect(Collectors.toList());
-            oppgittOpptjeningBuilder.leggTilEgneNæringer(egenNæringBuilders);
+            }).collect(Collectors.toList()));
         }
+        return Optional.empty();
     }
 }

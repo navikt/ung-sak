@@ -15,34 +15,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SøknadsperiodeOgOppgittOpptjeningDto {
 
 
-    public SøknadsperiodeOgOppgittOpptjeningDto() {
-        //jackson
-    }
-
     @JsonProperty(value = "førSøkerPerioden", required = true)
     @Valid
     @NotNull
     private OppgittOpptjeningDto førSøkerPerioden;
-
     @JsonProperty(value = "iSøkerPerioden", required = true)
     @Valid
     @NotNull
     private OppgittOpptjeningDto iSøkerPerioden;
-
     @JsonProperty(value = "periodeFraSøknad", required = true)
     @Valid
     @NotNull
     private PeriodeDto periodeFraSøknad;
-
     @JsonProperty(value = "søkerYtelseForFrilans", required = true)
     @Valid
     @NotNull
     private Boolean søkerYtelseForFrilans;
-
     @JsonProperty(value = "søkerYtelseForNæring", required = true)
     @Valid
     @NotNull
     private Boolean søkerYtelseForNæring;
+
+    public SøknadsperiodeOgOppgittOpptjeningDto() {
+        //jackson
+    }
 
     public OppgittOpptjeningDto getFørSøkerPerioden() {
         return førSøkerPerioden;
