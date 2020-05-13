@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -80,6 +81,11 @@ public class SendVedtaksbrev {
             }
         }
 
+        if (erBehandlingEtterKlage(behandling)) {
+            log.info("Sender ikke vedtaksbrev for vedtak fra omgjøring fra klageinstansen på behandling {}, gjelder medhold fra klageinstans", behandlingId); //$NON-NLS-1$
+            return;
+        }
+
         var behandlingVedtak = behandlingVedtakOpt.get();
         if (behandlingVedtak.isBeslutningsvedtak()) {
             log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", behandlingId); //$NON-NLS-1$
@@ -91,5 +97,9 @@ public class SendVedtaksbrev {
 
     private boolean erKunRefusjonTilArbeidsgiver(BehandlingReferanse ref) {
         return ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER;
+    }
+
+    private boolean erBehandlingEtterKlage(Behandling behandling) {
+        return BehandlingÅrsakType.årsakerEtterKlageBehandling().stream().anyMatch(behandling::harBehandlingÅrsak);
     }
 }
