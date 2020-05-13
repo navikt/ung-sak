@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -29,6 +30,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.BekreftOverstyrOppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftOverstyrOppgittOpptjeningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -71,14 +73,22 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
         var perioderSomSkalMed = new ArrayList<UttakAktivitetPeriode>();
         if (dto.getSøknadsperiodeOgOppgittOpptjeningDto().getSøkerYtelseForFrilans()) {
-            List<UttakAktivitetPeriode> frilans = uttakAktivitet.getPerioder().stream().filter(p -> p.getAktivitetType() == UttakArbeidType.FRILANSER).collect(Collectors.toList());
+            List<UttakAktivitetPeriode> frilans = uttakAktivitet.getPerioder().stream().filter(p -> p.getAktivitetType() == UttakArbeidType.FRILANSER).map(this::mapUttakAktivitetPeriode).collect(Collectors.toList());
             perioderSomSkalMed.addAll(frilans);
         }
         if (dto.getSøknadsperiodeOgOppgittOpptjeningDto().getSøkerYtelseForNæring()) {
-            List<UttakAktivitetPeriode> egenNæring = uttakAktivitet.getPerioder().stream().filter(p -> p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE).collect(Collectors.toList());
+            List<UttakAktivitetPeriode> egenNæring = uttakAktivitet.getPerioder().stream().filter(p -> p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE).map(this::mapUttakAktivitetPeriode).collect(Collectors.toList());
             perioderSomSkalMed.addAll(egenNæring);
         }
         return perioderSomSkalMed;
+    }
+
+    private UttakAktivitetPeriode mapUttakAktivitetPeriode(UttakAktivitetPeriode p) {
+        return new UttakAktivitetPeriode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(),
+                p.getAktivitetType(), p.getArbeidsgiver(),
+                p.getArbeidsforholdRef() != null ? p.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef(), // legger på null objekt her for sammenligne enklere senre
+                p.getJobberNormaltPerUke(),
+                p.getSkalJobbeProsent());
     }
 
     private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
@@ -97,6 +107,8 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
             }).collect(Collectors.toList());
 
             var frilansBuilder = OppgittFrilansBuilder.ny();
+            //TODO(OJR) utled
+            frilansBuilder.medErNyoppstartet(true);
             frilansBuilder.leggTilOppgittOppdrag(oppgittFrilansoppdrag);
             return Optional.of(frilansBuilder.build());
         }
@@ -111,6 +123,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
             return Optional.of(egenNæring.stream().map(oppgittEgenNæringDto -> {
                 var egenNæringBuilder = EgenNæringBuilder.ny();
                 egenNæringBuilder.medBruttoInntekt(oppgittEgenNæringDto.getBruttoInntekt().getVerdi());
+                egenNæringBuilder.medVirksomhetType(VirksomhetType.ANNEN);
                 egenNæringBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getTom()));
                 return egenNæringBuilder;
             }).collect(Collectors.toList()));
