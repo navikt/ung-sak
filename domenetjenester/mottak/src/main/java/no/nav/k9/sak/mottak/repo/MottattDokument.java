@@ -1,10 +1,12 @@
 package no.nav.k9.sak.mottak.repo;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -16,15 +18,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PersistenceException;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.engine.jdbc.ClobProxy;
 
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.kodeverk.DokumentKategoriKodeverdiConverter;
+import no.nav.k9.sak.behandlingslager.kodeverk.BrevkodeKodeverdiConverter;
 import no.nav.k9.sak.typer.JournalpostId;
 
 /**
@@ -51,16 +55,6 @@ public class MottattDokument extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    @Column(name = "forsendelse_id")
-    private UUID forsendelseId;
-
-    @Column(name = "journal_enhet")
-    private String journalEnhet;
-
-    @Convert(converter = DokumentKategoriKodeverdiConverter.class)
-    @Column(name = "dokument_kategori", nullable = false, updatable = false)
-    private DokumentKategori dokumentKategori = DokumentKategori.UDEFINERT;
-
     @Column(name = "behandling_id", updatable = false)
     private Long behandlingId;
 
@@ -73,15 +67,20 @@ public class MottattDokument extends BaseEntitet {
     @Column(name = "kanalreferanse", updatable = false)
     private String kanalreferanse;
 
-    @Column(name = "type", updatable = false)
-    private String dokumentTypeId;
+    /**
+     * Av historiske årsaker kalles dette kodeverkt for Brevkode her. Vi lagrer kun intern brevkode kode, så vi ikke er avhengig av brev i
+     * fremtiden.
+     */
+    @Convert(converter = BrevkodeKodeverdiConverter.class)
+    @Column(name = "type", updatable = false, nullable = false)
+    private Brevkode type;
 
     @Lob
     @Column(name = "payload", updatable = false)
-    private String payload;
+    private Clob payload;
 
-    @Column(name = "payload_type", updatable = false)
-    private String payloadType;
+    @Transient
+    private String payloadString;
 
     @Column(name = "fagsak_id", nullable = false)
     private Long fagsakId;
@@ -96,14 +95,6 @@ public class MottattDokument extends BaseEntitet {
 
     public JournalpostId getJournalpostId() {
         return journalpostId;
-    }
-
-    public DokumentKategori getDokumentKategori() {
-        return dokumentKategori;
-    }
-
-    public Optional<String> getJournalEnhet() {
-        return Optional.ofNullable(journalEnhet);
     }
 
     public Long getBehandlingId() {
@@ -122,21 +113,40 @@ public class MottattDokument extends BaseEntitet {
         return kanalreferanse;
     }
 
-    public String getPayload() {
-        return payload;
+    public boolean harPayload() {
+        String lob = getPayload();
+        return lob != null && !lob.isEmpty();
     }
 
-    /** @return "XML", "JSON", null. */
-    public String getPayloadType() {
-        return this.payloadType;
+    public String getPayload() {
+        if (payloadString != null && !payloadString.isEmpty()) {
+            return payloadString; // quick return, deserialisert tidligere
+        }
+        if (payload == null || (payloadString != null && payloadString.isEmpty())) {
+            return null;  // quick return, har ikke eller er tom
+        }
+
+        payloadString = ""; // dummy value for å signalisere at er allerede deserialisert
+        try {
+            BufferedReader in = new BufferedReader(this.payload.getCharacterStream());
+            String line;
+            StringBuilder sb = new StringBuilder(2048);
+            while ((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            payloadString = sb.toString();
+        } catch (SQLException | IOException e) {
+            throw new PersistenceException("Kunne ikke lese payload: ", e);
+        }
+        return this.payloadString;
+    }
+
+    public void setPayload(String payload) {
+        this.payload = payload == null || payload.isEmpty() ? null : ClobProxy.generateProxy(payload);
     }
 
     void setJournalpostId(JournalpostId journalpostId) {
         this.journalpostId = journalpostId;
-    }
-
-    void setDokumentKategori(DokumentKategori dokumentKategori) {
-        this.dokumentKategori = dokumentKategori;
     }
 
     void setBehandlingId(Long behandlingId) {
@@ -151,32 +161,12 @@ public class MottattDokument extends BaseEntitet {
         this.mottattTidspunkt = mottattTidspunkt;
     }
 
-    void setPayload(String payload) {
-        this.payload = payload;
-        if (payload != null && !payload.isEmpty()) {
-            switch (payload.charAt(0)) {
-                case '<':
-                    this.payloadType = "XML";
-                    break;
-                case '{':
-                    this.payloadType = "JSON";
-                    break;
-                default:
-                    this.payloadType = null;
-            }
-        }
-    }
-
-    void setDokumentType(String dokumentIdType) {
-        this.dokumentTypeId = dokumentIdType;
-    }
-
     public void setKanalreferanse(String kanalreferanse) {
         this.kanalreferanse = kanalreferanse;
     }
 
-    public String getDokumentTypeId() {
-        return dokumentTypeId;
+    public Brevkode getType() {
+        return type;
     }
 
     public Long getFagsakId() {
@@ -185,18 +175,6 @@ public class MottattDokument extends BaseEntitet {
 
     void setFagsakId(Long fagsakId) {
         this.fagsakId = fagsakId;
-    }
-
-    public UUID getForsendelseId() {
-        return forsendelseId;
-    }
-
-    public void setForsendelseId(UUID forsendelseId) {
-        this.forsendelseId = forsendelseId;
-    }
-
-    public void setJournalEnhet(String enhet) {
-        this.journalEnhet = enhet;
     }
 
     public static class Builder {
@@ -210,18 +188,8 @@ public class MottattDokument extends BaseEntitet {
             return new Builder();
         }
 
-        public Builder medDokumentKategori(DokumentKategori dokumentKategori) {
-            mottatteDokumentMal.dokumentKategori = dokumentKategori;
-            return this;
-        }
-
         public Builder medJournalPostId(JournalpostId journalPostId) {
             mottatteDokumentMal.journalpostId = journalPostId;
-            return this;
-        }
-
-        public Builder medJournalFørendeEnhet(String journalEnhet) {
-            mottatteDokumentMal.journalEnhet = journalEnhet;
             return this;
         }
 
@@ -255,18 +223,13 @@ public class MottattDokument extends BaseEntitet {
             return this;
         }
 
-        public Builder medForsendelseId(UUID forsendelseId) {
-            mottatteDokumentMal.forsendelseId = forsendelseId;
-            return this;
-        }
-
         public Builder medId(Long mottattDokumentId) {
             mottatteDokumentMal.id = mottattDokumentId;
             return this;
         }
 
-        public Builder medDokumentTypeId(String dokumentTypeId) {
-            mottatteDokumentMal.dokumentTypeId = dokumentTypeId;
+        public Builder medType(Brevkode type) {
+            mottatteDokumentMal.type = type;
             return this;
         }
 
@@ -275,9 +238,6 @@ public class MottattDokument extends BaseEntitet {
             return mottatteDokumentMal;
         }
 
-        public Builder medDokumentTypeId(DokumentTypeId dokumentTypeId) {
-            return medDokumentTypeId(dokumentTypeId.getOffisiellKode());
-        }
     }
 
     @Override
@@ -288,22 +248,18 @@ public class MottattDokument extends BaseEntitet {
             return false;
         }
         MottattDokument other = (MottattDokument) obj;
-        return Objects.equals(this.dokumentKategori, other.dokumentKategori)
-            && Objects.equals(this.dokumentTypeId, other.dokumentTypeId)
-            && Objects.equals(this.journalpostId, other.journalpostId)
-            && Objects.equals(this.payload, other.payload);
+        return Objects.equals(this.type, other.type)
+            && Objects.equals(this.journalpostId, other.journalpostId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dokumentKategori, dokumentTypeId, journalpostId, payload);
+        return Objects.hash(type, journalpostId);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<journalpostId=" + journalpostId
-            + ", mottattDato" + mottattDato + "[" + mottattTidspunkt + "]"
-            + ", dokumentKategori=" + dokumentKategori
-            + (payload != null ? ", payload=\\n" + payload + "\\n>" : ">");
+            + ", mottattDato" + mottattDato + "[" + mottattTidspunkt + "]";
     }
 }

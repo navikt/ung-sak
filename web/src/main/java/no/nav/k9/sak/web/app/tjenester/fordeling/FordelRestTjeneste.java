@@ -5,7 +5,6 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,8 +27,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -178,29 +175,18 @@ public class FordelRestTjeneste {
             throw new IllegalStateException("Finner ingen fagsak for saksnummer " + saksnummer);
         }
 
-        DokumentKategori dokumentKategori = mottattJournalpost.getDokumentKategoriOffisiellKode() != null
-            ? DokumentKategori.finnForKodeverkEiersKode(mottattJournalpost.getDokumentKategoriOffisiellKode())
-            : DokumentKategori.UDEFINERT; // NOSONAR
-
-        Optional<String> payloadXml = mottattJournalpost.getPayloadXml();
-        String dokumentTypeId = mottattJournalpost.getDokumentTypeIdOffisiellKode().orElse(null);
+        Optional<String> payload = mottattJournalpost.getPayload();
         InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
             .medFagsakId(fagsak.get().getId())
-            .medElektroniskSøknad(payloadXml.isPresent())
-            .medDokumentTypeId(dokumentTypeId)
-            .medJournalpostId(mottattJournalpost.getJournalpostId())
-            .medDokumentKategori(dokumentKategori)
-            .medJournalførendeEnhet(mottattJournalpost.getJournalForendeEnhet());
+            .medElektroniskSøknad(payload.isPresent())
+            .medType(mottattJournalpost.getType())
+            .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        if (DokumentTypeId.INNTEKTSMELDING.getOffisiellKode().equals(dokumentTypeId)) {
-            String referanseFraJournalpost = utledAltinnReferanseFraInntektsmelding(journalpostId);
-            builder.medKanalreferanse(referanseFraJournalpost);
-        }
+        String referanseFraJournalpost = utledAltinnReferanseFraInntektsmelding(journalpostId);
+        builder.medKanalreferanse(referanseFraJournalpost);
 
-        mottattJournalpost.getForsendelseId().ifPresent(builder::medForsendelseId);
-
-        if (payloadXml.isPresent()) {
-            builder.medPayload(payloadXml.get()); // NOSONAR
+        if (payload.isPresent()) {
+            builder.medPayload(payload.get()); // NOSONAR
         }
 
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(LocalDate.now())); // NOSONAR
@@ -226,31 +212,17 @@ public class FordelRestTjeneste {
             super();
         }
 
-        public AbacJournalpostMottakDto(Saksnummer saksnummer, JournalpostId journalpostId,
-                                        String behandlingstemaOffisiellKode,
-                                        String dokumentTypeIdOffisiellKode,
-                                        LocalDateTime forsendelseMottattTidspunkt, String payloadXml) {
-            super(saksnummer, journalpostId, behandlingstemaOffisiellKode, dokumentTypeIdOffisiellKode, forsendelseMottattTidspunkt, payloadXml);
-        }
-
-        static Optional<String> getPayloadValiderLengde(String base64EncodedPayload, Integer deklarertLengde) {
+        static Optional<String> getPayloadValiderLengde(String base64EncodedPayload) {
             if (base64EncodedPayload == null) {
                 return Optional.empty();
             }
-            if (deklarertLengde == null) {
-                throw JournalpostMottakFeil.FACTORY.manglerPayloadLength().toException();
-            }
             byte[] bytes = Base64.getUrlDecoder().decode(base64EncodedPayload);
-            String streng = new String(bytes, StandardCharsets.UTF_8);
-            if (streng.length() != deklarertLengde) {
-                throw JournalpostMottakFeil.FACTORY.feilPayloadLength(deklarertLengde, streng.length()).toException();
-            }
-            return Optional.of(streng);
+            return Optional.of(new String(bytes, StandardCharsets.UTF_8));
         }
 
         @JsonIgnore
-        public Optional<String> getPayloadXml() {
-            return getPayloadValiderLengde(base64EncodedPayloadXml, payloadLength);
+        public Optional<String> getPayload() {
+            return getPayloadValiderLengde(base64EncodedPayload);
         }
 
         @Override

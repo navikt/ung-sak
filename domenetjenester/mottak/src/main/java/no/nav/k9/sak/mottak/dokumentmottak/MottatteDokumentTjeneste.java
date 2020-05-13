@@ -57,7 +57,7 @@ public class MottatteDokumentTjeneste {
 
     public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument) {
         oppdaterMottattDokumentMedBehandling(dokument, behandling.getId());
-        if (dokument.getPayload() != null) {
+        if (dokument.harPayload()) {
             dokumentPersistererTjeneste.leggInntektsmeldingTilBehandling(behandling, dokument);
         }
     }
@@ -67,7 +67,7 @@ public class MottatteDokumentTjeneste {
         return mottattDokument.getId();
     }
 
-    public void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {
+    private void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {
         mottatteDokumentRepository.oppdaterMedBehandling(mottattDokument, behandlingId);
     }
 

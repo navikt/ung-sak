@@ -78,7 +78,7 @@ public class AvsluttBehandling {
 
         behandlingskontrollTjeneste.prosesserBehandlingGjenopptaHvisStegVenter(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
 
-        log.info("Har avsluttet behandling: {}", ((ref != null) ? ref.getBehandlingUuid() : "MANGLER ref")); //$NON-NLS-1$
+        log.info("Har avsluttet behandling: {}", ref.getBehandlingUuid());
 
         // TODO: Kunne vi flyttet dette ut i en Event observer (ref BehandlingStatusEvent)
         Optional<Behandling> ventendeBehandlingOpt = vurderBehandlingerUnderIverksettelse.finnBehandlingSomVenterIverksetting(behandling);

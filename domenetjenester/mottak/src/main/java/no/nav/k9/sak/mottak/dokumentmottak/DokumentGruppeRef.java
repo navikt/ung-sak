@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
+
 /**
  * Marker type som implementerer interface {@link Dokumentmottaker}.
  */
@@ -22,20 +24,21 @@ public @interface DokumentGruppeRef {
 
     /**
      * Settes til navn på dokumentgruppe slik det defineres i KODELISTE-tabellen.
+     * Av historiske årsaker brukes brevkode kodeverket her.
      */
-    String value();
+    Brevkode value();
 
     /** AnnotationLiteral som kan brukes ved CDI søk. */
     class DokumentGruppeRefLiteral extends AnnotationLiteral<DokumentGruppeRef> implements DokumentGruppeRef {
 
-        private String navn;
+        private Brevkode navn;
 
-        DokumentGruppeRefLiteral(String navn) {
+        DokumentGruppeRefLiteral(Brevkode navn) {
             this.navn = navn;
         }
 
         @Override
-        public String value() {
+        public Brevkode value() {
             return navn;
         }
     }

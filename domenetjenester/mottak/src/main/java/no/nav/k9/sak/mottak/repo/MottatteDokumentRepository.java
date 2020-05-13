@@ -47,19 +47,6 @@ public class MottatteDokumentRepository {
      * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
      * ikke å anbefale å bruke.
      */
-    public List<MottattDokument> hentMottatteDokument(long behandlingId) {
-        String strQueryTemplate = "select m from MottattDokument m where m.behandlingId = :param";
-        return entityManager.createQuery(
-            strQueryTemplate, MottattDokument.class)
-            .setParameter(PARAM_KEY, behandlingId)
-            .getResultList();
-    }
-    
-    /**
-     * Returnerer liste av MottattDokument.
-     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
-     * ikke å anbefale å bruke.
-     */
     public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId) {
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param";
         return entityManager.createQuery(

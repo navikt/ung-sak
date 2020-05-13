@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -21,7 +22,7 @@ public class InngåendeSaksdokument {
     private DokumentKategori dokumentKategori;
     private String kanalreferanse;
     private String journalEnhet;
-    private String dokumentTypeId;
+    public Brevkode type;
 
     private InngåendeSaksdokument() {
         // Skjult.
@@ -51,6 +52,10 @@ public class InngåendeSaksdokument {
         return payload;
     }
 
+    public Brevkode getType() {
+        return type;
+    }
+
     public BehandlingÅrsakType getBehandlingÅrsakType() {
         return behandlingÅrsakType;
     }
@@ -61,11 +66,6 @@ public class InngåendeSaksdokument {
 
     public DokumentKategori getDokumentKategori() {
         return dokumentKategori;
-    }
-
-    public String getDokumentTypeId() {
-        return dokumentTypeId;
-
     }
 
     public String getKanalreferanse() {
@@ -103,16 +103,6 @@ public class InngåendeSaksdokument {
             return this;
         }
 
-        public InngåendeSaksdokument.Builder medDokumentKategori(DokumentKategori dokumentKategori) {
-            this.kladd.dokumentKategori = dokumentKategori;
-            return this;
-        }
-
-        public InngåendeSaksdokument.Builder medBehandlingÅrsak(BehandlingÅrsakType behandlingÅrsakType) {
-            this.kladd.behandlingÅrsakType = behandlingÅrsakType;
-            return this;
-        }
-
         public InngåendeSaksdokument.Builder medForsendelseMottatt(LocalDate forsendelseMottatt) {
             this.kladd.forsendelseMottatt = forsendelseMottatt;
             return this;
@@ -143,13 +133,14 @@ public class InngåendeSaksdokument {
             return this;
         }
 
-        public InngåendeSaksdokument.Builder medDokumentTypeId(String dokumentTypeId) {
-            this.kladd.dokumentTypeId = dokumentTypeId;
+        public Builder medType(Brevkode type) {
+            this.kladd.type = type;
             return this;
         }
 
         public InngåendeSaksdokument build() {
             return kladd;
         }
+
     }
 }
