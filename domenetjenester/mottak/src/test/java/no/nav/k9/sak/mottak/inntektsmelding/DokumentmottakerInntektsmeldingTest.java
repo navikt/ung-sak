@@ -219,7 +219,7 @@ public class DokumentmottakerInntektsmeldingTest {
 
         // Assert
         verify(behandlingsoppretter).opprettRevurdering(behandling.getFagsak(), BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(mottatteDokumentTjeneste).persisterDokumentinnhold(revurdering, mottattDokument);
+        verify(mottatteDokumentTjeneste).persisterInntektsmelding(revurdering, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 

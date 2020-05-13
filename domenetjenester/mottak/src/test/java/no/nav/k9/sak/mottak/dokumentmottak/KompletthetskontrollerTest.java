@@ -172,7 +172,7 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterDokumentinnhold(behandling, mottattDokument);
+        verify(mottatteDokumentTjeneste).persisterInntektsmelding(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.FOR_TIDLIG_SOKNAD);
     }
@@ -190,7 +190,7 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterDokumentinnhold(behandling, mottattDokument);
+        verify(mottatteDokumentTjeneste).persisterInntektsmelding(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.AVV_DOK);
     }

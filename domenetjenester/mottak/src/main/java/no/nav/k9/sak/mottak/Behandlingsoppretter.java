@@ -154,7 +154,7 @@ public class Behandlingsoppretter {
         Behandling behandling;
         behandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
         historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmelding(behandling, mottattDokument);
         return behandling;
     }
 

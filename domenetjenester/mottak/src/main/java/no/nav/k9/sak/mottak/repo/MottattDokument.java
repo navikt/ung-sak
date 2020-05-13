@@ -184,10 +184,6 @@ public class MottattDokument extends BaseEntitet {
             mottatteDokumentMal = new MottattDokument();
         }
 
-        public static Builder ny() {
-            return new Builder();
-        }
-
         public Builder medJournalPostId(JournalpostId journalPostId) {
             mottatteDokumentMal.journalpostId = journalPostId;
             return this;

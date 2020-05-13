@@ -62,14 +62,22 @@ public class JournalpostMottakDto {
     @NotNull
     private Brevkode type = Brevkode.INNTEKTSMELDING; // FIXME K9: kan defaulte så lenge det er kun inntektsmeldinger som mottas i k9-sak
 
+    @JsonProperty(value = "kanalReferanse")
+    @Pattern(regexp = "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$")
+    @Size(max = 100)
+    private String kanalReferanse;
+
     public JournalpostMottakDto(Saksnummer saksnummer,
                                 JournalpostId journalpostId,
                                 FagsakYtelseType ytelseType,
+                                String kanalReferanse, 
                                 Brevkode type,
                                 LocalDateTime forsendelseMottattTidspunkt,
-                                String payloadRawString) {
+                                String payloadRawString
+                                ) {
         this.saksnummer = saksnummer;
         this.journalpostId = journalpostId;
+        this.kanalReferanse = kanalReferanse;
         this.type = type;
         this.forsendelseMottatt = forsendelseMottattTidspunkt.toLocalDate();
         this.forsendelseMottattTidspunkt = forsendelseMottattTidspunkt;
@@ -109,6 +117,10 @@ public class JournalpostMottakDto {
 
     public FagsakYtelseType getYtelseType() {
         return ytelseType;
+    }
+    
+    public String getKanalReferanse() {
+        return kanalReferanse;
     }
 
 }

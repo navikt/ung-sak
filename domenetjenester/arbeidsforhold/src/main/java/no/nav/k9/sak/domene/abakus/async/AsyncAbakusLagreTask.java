@@ -40,7 +40,7 @@ public class AsyncAbakusLagreTask extends BehandlingProsessTask {
         }
         
         void validerForventetType(Object obj) {
-            if(forventetType.isInstance(obj)) {
+            if(!forventetType.isInstance(obj)) {
                 throw new IllegalArgumentException("Angitt objekt er ikke av type " + forventetType.getName() + ": " + obj);
             }
         }
@@ -88,7 +88,8 @@ public class AsyncAbakusLagreTask extends BehandlingProsessTask {
     static void initPayload(ProsessTaskData data, Action action, Object payload) {
         try {
             action.validerForventetType(payload);
-            data.setPayload(MAPPER.writeValueAsString(payload));
+            String payloadString = MAPPER.writeValueAsString(payload);
+            data.setPayload(payloadString);
             data.setProperty(KEY, action.name());
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("kunne ikke serialisere payload:" + payload, e);

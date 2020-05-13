@@ -59,7 +59,7 @@ public class Kompletthetskontroller {
         EndringsresultatSnapshot grunnlagSnapshot = behandlingProsesseringTjeneste.taSnapshotAvBehandlingsgrunnlag(behandling);
 
         // Persister dokument (dvs. knytt dokument til behandlingen)
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmelding(behandling, mottattDokument);
 
         // Vurder kompletthet etter at dokument knyttet til behandling
         var kompletthetResultat = vurderBehandlingKomplett(behandling);
@@ -93,7 +93,7 @@ public class Kompletthetskontroller {
 
     void persisterKøetDokumentOgVurderKompletthet(Behandling behandling, MottattDokument mottattDokument) {
         // Persister dokument (dvs. knytt dokument til behandlingen)
-        mottatteDokumentTjeneste.persisterDokumentinnhold(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmelding(behandling, mottattDokument);
         vurderKompletthetForKøetBehandling(behandling);
     }
 

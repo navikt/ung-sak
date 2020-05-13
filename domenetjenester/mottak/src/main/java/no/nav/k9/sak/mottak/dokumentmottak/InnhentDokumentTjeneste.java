@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentGruppe;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -31,17 +30,15 @@ public class InnhentDokumentTjeneste {
 
     public void utfør(MottattDokument mottattDokument, BehandlingÅrsakType behandlingÅrsakType) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(mottattDokument.getFagsakId());
-        DokumentGruppe dokumentGruppe = DokumentGruppe.INNTEKTSMELDING; // eneste supporterte foreløpig.
-        Dokumentmottaker dokumentmottaker = finnMottaker(dokumentGruppe, fagsak.getYtelseType());
+        Dokumentmottaker dokumentmottaker = finnMottaker(mottattDokument.getType(), fagsak.getYtelseType());
         dokumentmottaker.mottaDokument(mottattDokument, fagsak, behandlingÅrsakType);
     }
 
-    private Dokumentmottaker finnMottaker(DokumentGruppe dokumentGruppe, FagsakYtelseType fagsakYtelseType) {
-        Brevkode kode = Brevkode.fraKode(dokumentGruppe.getKode());
+    private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
         String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
-        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(kode));
+        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode));
 
         return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + kode));
+            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
     }
 }

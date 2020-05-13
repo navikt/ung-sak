@@ -5,6 +5,8 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.function.Function;
@@ -22,6 +24,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,10 +45,13 @@ import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.k9.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -72,6 +79,8 @@ public class FordelRestTjeneste {
     private FagsakTjeneste fagsakTjeneste;
 
     private Instance<SøknadMottakTjeneste<?>> søknadMottakere;
+    private MottatteDokumentRepository mottatteDokumentRepository;
+    private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -80,10 +89,12 @@ public class FordelRestTjeneste {
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               SafAdapter safAdapter,
                               FagsakTjeneste fagsakTjeneste,
+                              MottatteDokumentRepository mottatteDokumentRepository,
                               @Any Instance<SøknadMottakTjeneste<?>> søknadMottakere) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadMottakere = søknadMottakere;
     }
 
@@ -143,9 +154,37 @@ public class FordelRestTjeneste {
         var saksnummer = innsending.getSaksnummer();
         var ytelseType = innsending.getYtelseType();
         var journalpostId = innsending.getJournalpostId();
+
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finner ikke fagsak for saksnummer=" + saksnummer));
+        var mottattDokument = lagreMottattDokument(innsending, journalpostId, fagsak);
+
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
-        søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
+        var behandling = søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
+
+        mottatteDokumentRepository.oppdaterMedBehandling(mottattDokument, behandling.getId());
+
         return new InnsendingMottatt(saksnummer);
+    }
+
+    private MottattDokument lagreMottattDokument(Innsending innsending, JournalpostId journalpostId, Fagsak fagsak) {
+        String payload = writePayload(innsending);
+        var builder = new MottattDokument.Builder()
+            .medFagsakId(fagsak.getId())
+            .medJournalPostId(journalpostId)
+            .medType(innsending.getType())
+            .medMottattDato(innsending.getForsendelseMottattDato())
+            .medPayload(payload)
+            .medKanalreferanse(mapTilKanalreferanse(innsending.getKanalReferanse(), journalpostId));
+
+        if (innsending.getForsendelseMottattTidspunkt() == null) {
+            builder.medMottattTidspunkt(LocalDateTime.now());
+        } else {
+            builder.medMottattTidspunkt(innsending.getForsendelseMottattTidspunkt().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime());
+        }
+
+        MottattDokument mottattDokument = builder.build();
+        mottatteDokumentRepository.lagre(mottattDokument);
+        return mottattDokument;
     }
 
     @POST
@@ -182,8 +221,7 @@ public class FordelRestTjeneste {
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        String referanseFraJournalpost = utledAltinnReferanseFraInntektsmelding(journalpostId);
-        builder.medKanalreferanse(referanseFraJournalpost);
+        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
 
         if (payload.isPresent()) {
             builder.medPayload(payload.get()); // NOSONAR
@@ -195,6 +233,31 @@ public class FordelRestTjeneste {
         return builder.build();
     }
 
+    /**
+     * @deprecated skal bare returnere kanalReferanse når k9-fordel alltid setter kanalReferanse. Da slipper vi oppslag mot Saf her
+     */
+    @Deprecated(forRemoval = true)
+    private String mapTilKanalreferanse(String kanalReferanse, JournalpostId journalpostId) {
+        if (kanalReferanse != null) {
+            return kanalReferanse;
+        } else {
+            return utledAltinnReferanseFraInntektsmelding(journalpostId);
+        }
+    }
+
+    private String writePayload(Innsending innsending) {
+        // burde kunne ha streamet direkte fra input, får bli en senere optimalisering...
+        try {
+            return objectWriter.writeValueAsString(innsending);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Kan ikke serialisere innsendt dokument: " + innsending, e);
+        }
+    }
+
+    /**
+     * @deprecated fjern denne når vi mottar fra fordel
+     */
+    @Deprecated(forRemoval = true)
     private String utledAltinnReferanseFraInntektsmelding(JournalpostId journalpostId) {
         ArkivJournalPost journalPost = safAdapter.hentInngåendeJournalpostHoveddokument(journalpostId);
         return journalPost != null ? journalPost.getKanalreferanse() : null;

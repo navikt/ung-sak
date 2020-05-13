@@ -36,41 +36,43 @@ public class MottatteDokumentRepositoryImplTest {
     private Behandling beh1, beh2;
     private MottattDokument dokument1, dokument2;
 
+    private long journalpostId = 123L;
+
     @Before
-    public void setup(){
+    public void setup() {
         fagsakRepository.opprettNy(fagsak);
-        
+
         beh1 = opprettBuilderForBehandling().build();
         lagreBehandling(beh1);
 
         beh2 = opprettBuilderForBehandling().build();
         lagreBehandling(beh2);
 
-        //Opprett og lagre MottateDokument
+        // Opprett og lagre MottateDokument
         dokument1 = lagMottatteDokument(beh1.getFagsakId(), Brevkode.INNTEKTSMELDING);
         mottatteDokumentRepository.lagre(dokument1);
 
-        //Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
+        // Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
         dokument2 = lagMottatteDokument(beh2.getFagsakId(), Brevkode.INNTEKTSMELDING);
         mottatteDokumentRepository.lagre(dokument2);
     }
 
     @Test
     public void skal_hente_alle_MottatteDokument_på_fagsakId() {
-        //Act
+        // Act
         List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsak.getId());
 
-        //Assert
+        // Assert
         assertThat(mottatteDokumenter).hasSize(2);
     }
 
     @Test
     public void skal_hente_MottattDokument_på_id() {
-        //Act
+        // Act
         Optional<MottattDokument> mottattDokument1 = mottatteDokumentRepository.hentMottattDokument(dokument1.getId());
         Optional<MottattDokument> mottattDokument2 = mottatteDokumentRepository.hentMottattDokument(dokument2.getId());
 
-        //Assert
+        // Assert
         assertThat(dokument1).isEqualTo(mottattDokument1.get());
         assertThat(dokument2).isEqualTo(mottattDokument2.get());
     }
@@ -80,9 +82,9 @@ public class MottatteDokumentRepositoryImplTest {
         behandlingRepository.lagre(behandling, lås);
     }
 
-    public static MottattDokument lagMottatteDokument(long fagsakId, Brevkode type) {
+    public MottattDokument lagMottatteDokument(long fagsakId, Brevkode type) {
         return new MottattDokument.Builder()
-            .medJournalPostId(new JournalpostId("123"))
+            .medJournalPostId(new JournalpostId(journalpostId++))
             .medType(type)
             .medMottattDato(LocalDate.now())
             .medFagsakId(fagsakId)
