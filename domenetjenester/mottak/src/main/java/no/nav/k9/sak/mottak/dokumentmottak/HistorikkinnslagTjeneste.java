@@ -32,7 +32,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 @Dependent
 public class HistorikkinnslagTjeneste {
 
-    public static final String INNTEKTSMELDING_BREVKODE = "4936";
+    public static final String INNTEKTSMELDING_BREVKODE = Brevkode.INNTEKTSMELDING.getOffisiellKode();
     private static final String VEDLEGG = "Vedlegg";
     private static final String PAPIRSØKNAD = "Papirsøknad";
     private static final String SØKNAD = "Søknad";
