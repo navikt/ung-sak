@@ -43,7 +43,10 @@ public class OppgittOpptjeningTest {
         oppgittOpptjeningDto.setOppgittFrilans(oppgittFrilansDto);
 
         SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto = new SøknadsperiodeOgOppgittOpptjeningDto();
-        søknadsperiodeOgOppgittOpptjeningDto.setOppgittOpptjening(oppgittOpptjeningDto);
+        søknadsperiodeOgOppgittOpptjeningDto.setFørSøkerPerioden(oppgittOpptjeningDto);
+        søknadsperiodeOgOppgittOpptjeningDto.setISøkerPerioden(oppgittOpptjeningDto);
+        søknadsperiodeOgOppgittOpptjeningDto.setSøkerYtelseForFrilans(true);
+        søknadsperiodeOgOppgittOpptjeningDto.setSøkerYtelseForNæring(true);
         søknadsperiodeOgOppgittOpptjeningDto.setPeriodeFraSøknad(periodeDto);
 
         String JSON = OM.writeValueAsString(søknadsperiodeOgOppgittOpptjeningDto);

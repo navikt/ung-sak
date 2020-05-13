@@ -24,21 +24,21 @@ public class BekreftOverstyrOppgittOpptjeningDto extends BekreftetAksjonspunktDt
         //jackson
     }
 
-    public BekreftOverstyrOppgittOpptjeningDto(String begrunnelse, @JsonProperty(value = "oppgittOpptjening", required = true) @NotNull @Valid OppgittOpptjeningDto oppgittOpptjening) {
+    public BekreftOverstyrOppgittOpptjeningDto(String begrunnelse, @JsonProperty(value = "søknadsperiodeOgOppgittOpptjeningDto", required = true) @NotNull @Valid SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto) {
         super(begrunnelse);
-        this.oppgittOpptjening = oppgittOpptjening;
+        this.søknadsperiodeOgOppgittOpptjeningDto = søknadsperiodeOgOppgittOpptjeningDto;
     }
 
-    @JsonProperty(value = "oppgittOpptjening", required = true)
+    @JsonProperty(value = "søknadsperiodeOgOppgittOpptjeningDto", required = true)
     @NotNull
     @Valid
-    private OppgittOpptjeningDto oppgittOpptjening;
+    private SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto;
 
-    public OppgittOpptjeningDto getOppgittOpptjening() {
-        return oppgittOpptjening;
+    public SøknadsperiodeOgOppgittOpptjeningDto getSøknadsperiodeOgOppgittOpptjeningDto() {
+        return søknadsperiodeOgOppgittOpptjeningDto;
     }
 
-    public void setOppgittOpptjening(OppgittOpptjeningDto oppgittOpptjening) {
-        this.oppgittOpptjening = oppgittOpptjening;
+    public void setSøknadsperiodeOgOppgittOpptjeningDto(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto) {
+        this.søknadsperiodeOgOppgittOpptjeningDto = søknadsperiodeOgOppgittOpptjeningDto;
     }
 }
