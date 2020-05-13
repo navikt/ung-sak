@@ -61,7 +61,7 @@ public enum Venteårsak implements Kodeverdi {
     INGEN_PERIODE_UTEN_YTELSE("INGEN_PERIODE_UTEN_YTELSE", "Mangel i løsning for brukere som har 36 måneder med ytelse før stp."),
     MANGLENDE_FUNKSJONALITET("MANGLENDE_FUNKSJONALITET", "Mangler funksjonalitet for å behandle saken."),
     KORTVARIG_ARBEID("KORTVARIG_ARBEID", "Søker har kortvarig arbeid siste 6 måneder før skjæringstidspunktet."),
-
+    FRISINN_ATFL_SAMME_ORG("FRISINN_ATFL_SAMME_ORG", "Søker er arbeidstaker og frilanser i samme organisasjon og kan ikke behandles. Satt på vent."),
 ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();

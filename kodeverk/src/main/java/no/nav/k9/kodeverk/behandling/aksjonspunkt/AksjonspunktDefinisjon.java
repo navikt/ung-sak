@@ -255,6 +255,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
         BehandlingStegType.VARIANT_FILTER, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(FRISINN)),
 
+    AUTO_VENT_FRISINN_ATFL_SAMME_ORG(AksjonspunktKodeDefinisjon.AUTO_VENT_FRISINN_ATFL_SAMME_ORG_KODE, AksjonspunktType.AUTOPUNKT, "Arbeidstaker og frilanser i samme organisasjon, kan ikke beregnes.",
+        BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(FRISINN)),
+
     OVERSTYRING_FRISINN_OPPGITT_OPPTJENING(AksjonspunktKodeDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING_KODE, AksjonspunktType.MANUELL, "Saksbehandler overstyrer oppgitt opptjening"
     , BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, Set.of(FRISINN)),
 
