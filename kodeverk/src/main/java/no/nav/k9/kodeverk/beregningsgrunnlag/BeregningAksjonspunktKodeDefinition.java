@@ -10,6 +10,7 @@ class BeregningAksjonspunktKodeDefinition {
     static final String AUTO_VENT_AAP_DP_ENESTE_AKTIVITET_SVP_KODE = "7031";
     static final String AUTO_VENT_FLERE_ARBEIDSFORHOLD_SAMME_ORG_SVP_KODE = "7034";
     static final String AUTO_VENT_FRISINN_KODE = "8000";
+    static final String AUTO_VENT_FRISINN_ATFL_SAMME_ORG_KODE = "8005";
 
     static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
 

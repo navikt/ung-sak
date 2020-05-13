@@ -58,6 +58,7 @@ public enum BeregningVenteårsak implements Kodeverdi {
     FL_SN_IKKE_STOTTET_FOR_SVP("FL_SN_IKKE_STOTTET_FOR_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette."),
     INGEN_PERIODE_UTEN_YTELSE("INGEN_PERIODE_UTEN_YTELSE", "Behandlingen er satt på vent på grunn av mangel i kalkulus: Ingen periode uten ytelse er ikke støttet i kalkulus ennå"),
     KORTVARIG_ARBEID("KORTVARIG_ARBEID", "Søker har kortvarig arbeid siste 6 måneder før skjæringstidspunktet."),
+    FRISINN_ATFL_SAMME_ORG("FRISINN_ATFL_SAMME_ORG", "Søker er arbeidstaker og frilanser i samme organisasjon og kan ikke behandles. Satt på vent."),
     ;
 
     public static final String KODEVERK = "VENT_AARSAK";

@@ -43,6 +43,9 @@ enum BeregningAksjonspunktDefinisjon implements Kodeverdi {
     AUTO_VENT_FRISINN(
         BeregningAksjonspunktKodeDefinition.AUTO_VENT_FRISINN_KODE,
         "Vent på mangel i løsning: 36 måneder med ytelse"),
+    AUTO_VENT_FRISINN_ATFL_SAMME_ORG(
+        BeregningAksjonspunktKodeDefinition.AUTO_VENT_FRISINN_ATFL_SAMME_ORG_KODE,
+        "Arbeidstaker og frilanser i samme organisasjon, kan ikke beregnes"),
     FORDEL_BEREGNINGSGRUNNLAG(
         BeregningAksjonspunktKodeDefinition.FORDEL_BEREGNINGSGRUNNLAG_KODE,
         "Fordel beregningsgrunnlag"),
