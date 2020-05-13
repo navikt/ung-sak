@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -15,10 +18,12 @@ import org.junit.runner.RunWith;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandling.revurdering.BeregningRevurderingTestUtil;
+import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -59,6 +64,10 @@ public class RevurderingTjenesteImplTest {
     @FagsakYtelseTypeRef
     private RevurderingEndring revurderingEndring;
 
+    @Inject @Any
+    private Instance<GrunnlagKopierer> grunnlagKopierer;
+
+
     @Before
     public void setup() {
         opprettRevurderingsKandidat();
@@ -67,7 +76,7 @@ public class RevurderingTjenesteImplTest {
     @Test
     public void skal_opprette_revurdering() {
         // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad();
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER);
         scenario.medBehandlingVedtak()
             .medVedtakstidspunkt(LocalDateTime.now())
             .medVedtakResultatType(VedtakResultatType.INNVILGET);
@@ -84,7 +93,7 @@ public class RevurderingTjenesteImplTest {
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
         var revurderingTjeneste = new RevurderingTjeneste(repositoryProvider, behandlingskontrollTjeneste,
-            uttakRepository, iayTjeneste, revurderingTjenesteFelles);
+            revurderingTjenesteFelles, grunnlagKopierer);
 
         // Act
         Behandling revurdering = revurderingTjeneste

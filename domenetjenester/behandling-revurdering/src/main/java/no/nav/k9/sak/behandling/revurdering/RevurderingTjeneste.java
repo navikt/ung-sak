@@ -3,6 +3,8 @@ package no.nav.k9.sak.behandling.revurdering;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -26,11 +28,8 @@ public class RevurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private PersonopplysningRepository personopplysningRepository;
-    private MedlemskapRepository medlemskapRepository;
-    private UttakRepository uttakRepository;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
+    private Instance<GrunnlagKopierer> grunnlagKopierere;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -39,15 +38,12 @@ public class RevurderingTjeneste {
     @Inject
     public RevurderingTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                               UttakRepository uttakRepository, InntektArbeidYtelseTjeneste iayTjeneste,
-                               RevurderingTjenesteFelles revurderingTjenesteFelles) {
-        this.uttakRepository = uttakRepository;
-        this.iayTjeneste = iayTjeneste;
+                               RevurderingTjenesteFelles revurderingTjenesteFelles,
+                               @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
-        this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
+        this.grunnlagKopierere = grunnlagKopierere;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
@@ -77,20 +73,22 @@ public class RevurderingTjeneste {
         revurderingTjenesteFelles.kopierVilkårsresultat(origBehandling, revurdering, kontekst);
 
         // Kopier grunnlagsdata
-        this.kopierAlleGrunnlagFraTidligereBehandling(origBehandling, revurdering);
+         var grunnlagKopierer = FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, fagsak.getYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Kopiering av grunnlag for revurdering ikke støttet for " + fagsak.getYtelseType().getKode()));
+        grunnlagKopierer.kopierAlleGrunnlagFraTidligereBehandling(origBehandling, revurdering);
+
+        // Aksjonspunkt for skjema dersom manuelt opprettet
+        if (manueltOpprettet) {
+            grunnlagKopierer.opprettAksjonspunktForSaksbehandlerOverstyring(revurdering);
+        }
 
         return revurdering;
     }
 
     public void kopierAlleGrunnlagFraTidligereBehandling(Behandling original, Behandling ny) {
-        Long originalBehandlingId = original.getId();
-        Long nyBehandlingId = ny.getId();
-        personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-
-        // gjør til slutt, innebærer kall til abakus
-        iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        var grunnlagKopierer = FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, original.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Kopiering av grunnlag for revurdering ikke støttet for " + original.getFagsakYtelseType().getKode()));
+        grunnlagKopierer.kopierAlleGrunnlagFraTidligereBehandling(original, ny);
     }
 
     public Boolean kanRevurderingOpprettes(Fagsak fagsak) {
