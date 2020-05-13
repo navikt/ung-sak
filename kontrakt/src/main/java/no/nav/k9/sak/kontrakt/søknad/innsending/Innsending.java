@@ -48,13 +48,11 @@ public class Innsending {
 
     @JsonProperty(value = "mottattDato")
     @Valid
-    @NotNull
     private LocalDate forsendelseMottattDato;
 
     @JsonProperty(value = "mottattTidspunkt")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     @Valid
-    @NotNull
     private ZonedDateTime forsendelseMottattTidspunkt;
 
     @JsonProperty(value = "kanalReferanse")

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.function.Function;
@@ -172,15 +173,11 @@ public class FordelRestTjeneste {
             .medFagsakId(fagsak.getId())
             .medJournalPostId(journalpostId)
             .medType(innsending.getType())
-            .medMottattDato(innsending.getForsendelseMottattDato())
             .medPayload(payload)
             .medKanalreferanse(mapTilKanalreferanse(innsending.getKanalReferanse(), journalpostId));
 
-        if (innsending.getForsendelseMottattTidspunkt() == null) {
-            builder.medMottattTidspunkt(LocalDateTime.now());
-        } else {
-            builder.medMottattTidspunkt(innsending.getForsendelseMottattTidspunkt().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime());
-        }
+        builder.medMottattTidspunkt(Optional.ofNullable(innsending.getForsendelseMottattTidspunkt()).orElse(ZonedDateTime.now()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime());
+        builder.medMottattDato(Optional.ofNullable(innsending.getForsendelseMottattDato()).orElse(LocalDate.now()));
 
         MottattDokument mottattDokument = builder.build();
         mottatteDokumentRepository.lagre(mottattDokument);
@@ -228,7 +225,7 @@ public class FordelRestTjeneste {
         }
 
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(LocalDate.now())); // NOSONAR
-        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottattTidspunkt()); // NOSONAR
+        builder.medForsendelseMottatt(Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt()).orElse(LocalDateTime.now())); // NOSONAR
 
         return builder.build();
     }
