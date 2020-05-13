@@ -16,6 +16,8 @@ import org.mockito.junit.MockitoRule;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -135,6 +137,24 @@ public class SendVedtaksbrevTest {
         behandling = scenario.lagre(repositoryProvider);
 
         sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
+
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
+    }
+
+    @Test
+    public void senderIkkeBrevEtterKlagebehandling() {
+        behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.FRISINN).lagre(repositoryProvider);
+
+        // Skal ikke sende brev etter revurdering som opprettes etter klagebehandling
+        var etterKlagebehandling = BehandlingÅrsakType.ETTER_KLAGE;
+
+        var revurderingsscenario = TestScenarioBuilder.builderMedSøknad()
+            .medOriginalBehandling(behandling, etterKlagebehandling)
+            .medBehandlingType(BehandlingType.REVURDERING);
+        revurderingsscenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        var revurdering = revurderingsscenario.lagre(repositoryProvider);
+
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(revurdering));
 
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
     }
