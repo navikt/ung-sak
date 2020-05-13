@@ -24,11 +24,6 @@ public class BekreftOverstyrOppgittOpptjeningDto extends BekreftetAksjonspunktDt
         //jackson
     }
 
-    public BekreftOverstyrOppgittOpptjeningDto(String begrunnelse, @JsonProperty(value = "søknadsperiodeOgOppgittOpptjeningDto", required = true) @NotNull @Valid SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto) {
-        super(begrunnelse);
-        this.søknadsperiodeOgOppgittOpptjeningDto = søknadsperiodeOgOppgittOpptjeningDto;
-    }
-
     @JsonProperty(value = "søknadsperiodeOgOppgittOpptjeningDto", required = true)
     @NotNull
     @Valid
