@@ -162,7 +162,8 @@ public class FordelRestTjeneste {
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
         var behandling = søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
 
-        mottatteDokumentRepository.oppdaterMedBehandling(mottattDokument, behandling.getId());
+        mottattDokument.setBehandlingId(behandling.getId());
+        mottatteDokumentRepository.lagre(mottattDokument);
 
         return new InnsendingMottatt(saksnummer);
     }
@@ -173,6 +174,7 @@ public class FordelRestTjeneste {
             .medFagsakId(fagsak.getId())
             .medJournalPostId(journalpostId)
             .medType(innsending.getType())
+            .medArbeidsgiver(null) // sender ikke inn fra arbeidsgiver på dette endepunktet ennå
             .medPayload(payload)
             .medKanalreferanse(mapTilKanalreferanse(innsending.getKanalReferanse(), journalpostId));
 

@@ -21,6 +21,7 @@ import javax.persistence.Lob;
 import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -55,7 +56,7 @@ public class MottattDokument extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    @Column(name = "behandling_id", updatable = false)
+    @Column(name = "behandling_id")
     private Long behandlingId;
 
     @Column(name = "mottatt_dato", updatable = false)
@@ -66,6 +67,10 @@ public class MottattDokument extends BaseEntitet {
 
     @Column(name = "kanalreferanse", updatable = false)
     private String kanalreferanse;
+
+    /** Arbeidsgiver referanse - orgnummer eller privat arbeidsgiver fnr. */
+    @Column(name = "arbeidsgiver")
+    private String arbeidsgiver;
 
     /**
      * Av historiske årsaker kalles dette kodeverkt for Brevkode her. Vi lagrer kun intern brevkode kode, så vi ikke er avhengig av brev i
@@ -84,6 +89,10 @@ public class MottattDokument extends BaseEntitet {
 
     @Column(name = "fagsak_id", nullable = false)
     private Long fagsakId;
+
+    @Version
+    @Column(name = "versjon", nullable = false)
+    private long versjon;
 
     MottattDokument() {
         // Hibernate
@@ -123,7 +132,7 @@ public class MottattDokument extends BaseEntitet {
             return payloadString; // quick return, deserialisert tidligere
         }
         if (payload == null || (payloadString != null && payloadString.isEmpty())) {
-            return null;  // quick return, har ikke eller er tom
+            return null; // quick return, har ikke eller er tom
         }
 
         payloadString = ""; // dummy value for å signalisere at er allerede deserialisert
@@ -142,6 +151,9 @@ public class MottattDokument extends BaseEntitet {
     }
 
     public void setPayload(String payload) {
+        if (this.payload != null) {
+            throw new IllegalStateException("Kan ikke overskrive payload for journalpostId: " + journalpostId + ", fagsakId=" + fagsakId);
+        }
         this.payload = payload == null || payload.isEmpty() ? null : ClobProxy.generateProxy(payload);
     }
 
@@ -149,8 +161,18 @@ public class MottattDokument extends BaseEntitet {
         this.journalpostId = journalpostId;
     }
 
-    void setBehandlingId(Long behandlingId) {
+    public void setBehandlingId(Long behandlingId) {
+        if (this.behandlingId != null && !Objects.equals(this.behandlingId, behandlingId)) {
+            throw new IllegalStateException("Kan ikke overskrive behandlingId: " + this.behandlingId + ", ny: " + behandlingId);
+        }
         this.behandlingId = behandlingId;
+    }
+
+    public void setArbeidsgiver(String arbeidsgiver) {
+        if (this.arbeidsgiver != null && !Objects.equals(this.arbeidsgiver, arbeidsgiver)) {
+            throw new IllegalStateException("Kan ikke overskrive arbeidsgiver: " + this.arbeidsgiver + ", ny: " + arbeidsgiver);
+        }
+        this.arbeidsgiver = arbeidsgiver;
     }
 
     void setMottattDato(LocalDate mottattDato) {
@@ -206,6 +228,11 @@ public class MottattDokument extends BaseEntitet {
 
         public Builder medKanalreferanse(String kanalreferanse) {
             mottatteDokumentMal.kanalreferanse = kanalreferanse;
+            return this;
+        }
+
+        public Builder medArbeidsgiver(String arbeidsgiver) {
+            mottatteDokumentMal.arbeidsgiver = arbeidsgiver;
             return this;
         }
 

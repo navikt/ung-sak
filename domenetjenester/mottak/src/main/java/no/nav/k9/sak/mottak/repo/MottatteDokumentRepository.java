@@ -55,11 +55,4 @@ public class MottatteDokumentRepository {
             .getResultList();
     }
 
-    public void oppdaterMedBehandling(MottattDokument mottattDokument, long behandlingId) {
-        entityManager.createQuery(
-            "update MottattDokument set behandlingId = :param WHERE id = :dokumentId")
-            .setParameter("dokumentId", mottattDokument.getId())
-            .setParameter(PARAM_KEY, behandlingId)
-            .executeUpdate();
-    }
 }

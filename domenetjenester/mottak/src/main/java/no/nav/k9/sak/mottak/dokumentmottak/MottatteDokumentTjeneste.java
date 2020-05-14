@@ -16,7 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingPersistererTjeneste;
+import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
@@ -26,7 +26,7 @@ public class MottatteDokumentTjeneste {
 
     private Period fristForInnsendingAvDokumentasjon;
 
-    private InntektsmeldingPersistererTjeneste dokumentPersistererTjeneste;
+    private InntektsmeldingParser inntektsmeldingParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -42,13 +42,13 @@ public class MottatteDokumentTjeneste {
      */
     @Inject
     public MottatteDokumentTjeneste(@KonfigVerdi(value = "sak.frist.innsending.dok", defaultVerdi = "P6W") Period fristForInnsendingAvDokumentasjon,
-                                    InntektsmeldingPersistererTjeneste dokumentPersistererTjeneste,
+                                    InntektsmeldingParser inntektsmeldingParser,
                                     MottatteDokumentRepository mottatteDokumentRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     UttakRepository uttakRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.fristForInnsendingAvDokumentasjon = fristForInnsendingAvDokumentasjon;
-        this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
+        this.inntektsmeldingParser = inntektsmeldingParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.uttakRepository = uttakRepository;
@@ -56,19 +56,20 @@ public class MottatteDokumentTjeneste {
     }
 
     public void persisterInntektsmelding(Behandling behandling, MottattDokument dokument) {
-        oppdaterMottattDokumentMedBehandling(dokument, behandling.getId());
         if (dokument.harPayload()) {
-            dokumentPersistererTjeneste.leggInntektsmeldingTilBehandling(behandling, dokument);
+            var inntektsmeldingBuildere = inntektsmeldingParser.parseInntektsmeldinger(behandling, dokument);
+            // sender bare ett dokument her:
+            var arbeidsgiver = inntektsmeldingBuildere.get(0).getArbeidsgiver();
+            dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());
+            dokument.setBehandlingId(behandling.getId());
+            mottatteDokumentRepository.lagre(dokument);// oppdaterer 
+            
         }
     }
 
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
         MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument);
         return mottattDokument.getId();
-    }
-
-    private void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {
-        mottatteDokumentRepository.oppdaterMedBehandling(mottattDokument, behandlingId);
     }
 
     Optional<MottattDokument> hentMottattDokument(Long mottattDokumentId) {
