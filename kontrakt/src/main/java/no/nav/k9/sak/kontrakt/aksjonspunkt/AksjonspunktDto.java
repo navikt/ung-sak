@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
@@ -71,6 +72,9 @@ public class AksjonspunktDto {
     @Valid
     @Size(max = 100)
     private Set<VurderÅrsak> vurderPaNyttArsaker;
+
+    @JsonProperty(value = "venteårsak")
+    private Venteårsak venteårsak;
 
     public AksjonspunktDto() {
     }
@@ -171,6 +175,14 @@ public class AksjonspunktDto {
         this.vurderPaNyttArsaker = vurderPaNyttArsaker;
     }
 
+    public void setVenteårsak(Venteårsak venteårsak) {
+        this.venteårsak = venteårsak;
+    }
+
+    public Venteårsak getVenteårsak() {
+        return venteårsak;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
@@ -193,16 +205,17 @@ public class AksjonspunktDto {
         return getClass().getSimpleName() + "<"
             + "def=" + definisjon
             + ", type=" + aksjonspunktType
-            + ", erAktivt=" + erAktivt
-            + ", fristTid=" + fristTid
-            + ", status=" + status
-            + ", kanLoses=" + kanLoses
-            + ", toTrinnsBehandling=" + toTrinnsBehandling
-            + ", toTrinnsBehandlingGodkjent=" + toTrinnsBehandlingGodkjent
             + ", vilkarType=" + vilkarType
-            + ", begrunnelse=" + begrunnelse
-            + ", besluttersBegrunnelse=" + besluttersBegrunnelse
-            + ", vurderPaNyttArsaker=" + vurderPaNyttArsaker
+            + ", status=" + status
+            + (erAktivt == null ? "" : ", erAktivt=" + erAktivt)
+            + (fristTid == null ? "" : ", fristTid=" + fristTid)
+            + (kanLoses == null ? "" : ", kanLoses=" + kanLoses)
+            + (toTrinnsBehandling == null ? "" : ", toTrinnsBehandling=" + toTrinnsBehandling)
+            + (toTrinnsBehandlingGodkjent == null ? "" : ", toTrinnsBehandlingGodkjent=" + toTrinnsBehandlingGodkjent)
+            + (begrunnelse == null ? "" : ", begrunnelse=" + begrunnelse)
+            + (besluttersBegrunnelse == null ? "" : ", besluttersBegrunnelse=" + besluttersBegrunnelse)
+            + (vurderPaNyttArsaker == null ? "" : ", vurderPaNyttArsaker=" + vurderPaNyttArsaker)
+            + (venteårsak == null ? "" : ", venteårsak=" + venteårsak)
             + ">";
     }
 }

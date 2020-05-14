@@ -67,7 +67,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    private AksjonspunktRepository aksjonspunktRepository = new AksjonspunktRepository();
+    private AksjonspunktRepository aksjonspunktRepository;
 
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
 
@@ -87,12 +87,14 @@ public class AksjonspunktApplikasjonTjeneste {
     @Inject
     public AksjonspunktApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                           AksjonspunktRepository aksjonspunktRepository,
                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                            HistorikkTjenesteAdapter historikkTjenesteAdapter,
                                            HenleggBehandlingTjeneste henleggBehandlingTjeneste,
                                            EndringsresultatSjekker endringsresultatSjekker) {
 
+        this.aksjonspunktRepository = aksjonspunktRepository;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
