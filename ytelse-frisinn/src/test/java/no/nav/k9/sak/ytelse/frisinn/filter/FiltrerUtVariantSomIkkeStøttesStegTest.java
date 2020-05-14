@@ -182,4 +182,24 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
         assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
     }
+
+    @Test
+    public void skal_legges_på_vent_hvis_kun_SN_kun_inntenkt_i_2020() {
+        var opptjeningBuilder = OppgittOpptjeningBuilder.ny();
+        var perioden = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(2), LocalDate.now());
+        var oppgittOpptjening = opptjeningBuilder
+            .leggTilEgneNæringer(List.of(OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020,1,2), LocalDate.of(2020,12,31)))
+                .medBruttoInntekt(BigDecimal.TEN)))
+            .build();
+
+        var oppgittUttak = new UttakAktivitet(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, perioden));
+        var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
+            oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
+
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
+
+        assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
+        assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
+    }
 }

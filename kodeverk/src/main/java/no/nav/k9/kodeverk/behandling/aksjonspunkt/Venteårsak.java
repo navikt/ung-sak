@@ -62,7 +62,24 @@ public enum Venteårsak implements Kodeverdi {
     MANGLENDE_FUNKSJONALITET("MANGLENDE_FUNKSJONALITET", "Mangler funksjonalitet for å behandle saken."),
     KORTVARIG_ARBEID("KORTVARIG_ARBEID", "Søker har kortvarig arbeid siste 6 måneder før skjæringstidspunktet."),
     FRISINN_ATFL_SAMME_ORG("FRISINN_ATFL_SAMME_ORG", "Søker er arbeidstaker og frilanser i samme organisasjon og kan ikke behandles. Satt på vent."),
-;
+
+    FRISINN_VARIANT_SN_MED_FL_INNTEKT("FRISINN_VARIANT_SN_MED_FL_INNTEKT", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_FL_MED_SN_INNTEKT("FRISINN_VARIANT_FL_MED_SN_INNTEKT", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_NY_FL("FRISINN_VARIANT_NY_FL", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_NY_SN_2019("FRISINN_VARIANT_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_NY_SN_2020("FRISINN_VARIANT_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_KOMBINERT("FRISINN_VARIANT_KOMBINERT", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_KOMBINERT_NY_FL("FRISINN_VARIANT_KOMBINERT_NY_FL", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019("FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020("FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_KOMBINERT_NY_SN_2019("FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_KOMBINERT_NY_SN_2020("FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019("FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020("FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
+    ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();
 
@@ -104,13 +121,13 @@ public enum Venteårsak implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
+    public static void main(String[] args) {
+        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
+    }
+
     @Override
     public String getNavn() {
         return navn;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(a -> "\"" + a + "\"").collect(Collectors.toList()));
     }
 
     @JsonProperty
