@@ -10,6 +10,7 @@ import no.nav.k9.sak.web.app.tjenester.aktør.AktørRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktSammendragRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
@@ -40,6 +41,9 @@ public class RestImplementationClasses {
 
     public Collection<Class<?>> getImplementationClasses() {
         Set<Class<?>> classes = new HashSet<>();
+        
+        classes.add(AksjonspunktSammendragRestTjeneste.class);
+        
         classes.add(FagsakRestTjeneste.class);
         classes.add(NavAnsattRestTjeneste.class);
         classes.add(FeatureToggleRestTjeneste.class);
