@@ -116,7 +116,7 @@ jobs:
             Kommenter med <b>/promote cluster namespace</b>, hvor <b>cluster</b> er et gyldig clusternavn og <b>namespace</b> et eksisterende namespace i det clusteret.
             <table>
             <tr><th>Cluster</th><th>Namespace</th></tr>
-            <tr><td>dev-fss</td><td>default,t4,q1</td></tr>
+            <tr><td>dev-fss</td><td>default</td></tr>
             <tr><td>prod-fss</td><td>default</td></tr>
             </table>
 
