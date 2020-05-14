@@ -2,6 +2,7 @@ package no.nav.k9.sak.økonomi.tilkjentytelse;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,16 +17,21 @@ class MapperForYtelseType {
         Map<FagsakYtelseType, YtelseType> map = Arrays.stream(YtelseType.values())
             .collect(Collectors.toMap(yt -> FagsakYtelseType.fraKode(yt.getKode()), Function.identity()));
 
+        Set<FagsakYtelseType> ignored = Set.of(FagsakYtelseType.UDEFINERT, FagsakYtelseType.OBSOLETE);
         for (FagsakYtelseType egenKode : FagsakYtelseType.values()) {
-            if (egenKode != FagsakYtelseType.UDEFINERT && !map.containsKey(egenKode)) {
-                throw new IllegalStateException("Kan ikke opprette mapping fra " + FagsakYtelseType.class.getName() + "." + egenKode.name() + " til " + YtelseType.class.getName() + " siden det ikke finnes tilsvarende i " + YtelseType.class.getName());
+            if (ignored.contains(egenKode)) {
+                continue;
+            }
+            if (!map.containsKey(egenKode)) {
+                throw new IllegalStateException("Kan ikke opprette mapping fra " + FagsakYtelseType.class.getName() + "." + egenKode.name() + " til " + YtelseType.class.getName()
+                    + " siden det ikke finnes tilsvarende i " + YtelseType.class.getName());
             }
         }
         return map;
     }
 
     private MapperForYtelseType() {
-        //for å unngå instansiering, slik at SonarQube blir glad
+        // for å unngå instansiering, slik at SonarQube blir glad
     }
 
     static YtelseType mapYtelseType(FagsakYtelseType fagsakYtelseType) {
