@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -99,7 +100,7 @@ public abstract class DokumentmottakerTestsupport {
 
     protected MottattDokument dummyInntektsmeldingDokument(Behandling behandling) {
         DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
-        return DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "<"+dokumentTypeId+">", now(), "123");
+        return DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "<"+dokumentTypeId+">", now(), "123", Brevkode.INNTEKTSMELDING);
     }
 
 

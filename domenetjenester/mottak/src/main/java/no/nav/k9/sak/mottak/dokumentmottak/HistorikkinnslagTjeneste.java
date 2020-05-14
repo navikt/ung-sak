@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -32,7 +32,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 @Dependent
 public class HistorikkinnslagTjeneste {
 
-    public static final String INNTEKTSMELDING_BREVKODE = "4936";
+    public static final String INNTEKTSMELDING_BREVKODE = Brevkode.INNTEKTSMELDING.getOffisiellKode();
     private static final String VEDLEGG = "Vedlegg";
     private static final String PAPIRSØKNAD = "Papirsøknad";
     private static final String SØKNAD = "Søknad";
@@ -147,9 +147,9 @@ public class HistorikkinnslagTjeneste {
         historikkRepository.lagre(historikkinnslag);
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, DokumentTypeId dokumentTypeId) {
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
         Historikkinnslag historikkinnslag = new Historikkinnslag();
-        if (dokumentTypeId != null && dokumentTypeId.equals(DokumentTypeId.INNTEKTSMELDING)) {
+        if (dokumentTypeId != null && dokumentTypeId.equals(Brevkode.INNTEKTSMELDING)) {
             historikkinnslag.setAktør(HistorikkAktør.ARBEIDSGIVER);
         } else {
             historikkinnslag.setAktør(HistorikkAktør.SØKER);

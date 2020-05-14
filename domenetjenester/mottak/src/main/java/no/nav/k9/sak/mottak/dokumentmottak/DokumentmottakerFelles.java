@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
@@ -76,16 +76,11 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, historikkinnslagType, frist, venteårsak);
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, DokumentTypeId dokumentTypeId) {
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
         historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, journalpostId, dokumentTypeId);
     }
 
-    public String hentBehandlendeEnhetTilVurderDokumentOppgave(MottattDokument dokument, Fagsak sak, Behandling behandling) {
-        // Prod: Klageinstans + Viken sender dokumenter til scanning med forside som inneholder enhet. Journalføring og Vurder dokument skal til
-        // enheten.
-        if (dokument.getJournalEnhet().isPresent() && behandlendeEnhetTjeneste.gyldigEnhetNfpNk(sak.getYtelseType(), dokument.getJournalEnhet().get())) {
-            return dokument.getJournalEnhet().get();
-        }
+    public String hentBehandlendeEnhetTilVurderDokumentOppgave(Fagsak sak, Behandling behandling) {
         if (behandling == null) {
             return finnEnhetFraFagsak(sak);
         }
@@ -103,7 +98,7 @@ public class DokumentmottakerFelles {
 
     public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettRevurdering(fagsak, behandlingÅrsakType);
-        mottatteDokumentTjeneste.persisterDokumentinnhold(revurdering, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmelding(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
         return revurdering;
     }
@@ -114,7 +109,7 @@ public class DokumentmottakerFelles {
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
         
-        opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), DokumentTypeId.INNTEKTSMELDING);
+        opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
     
     public boolean skalOppretteNyFørstegangsbehandling(Fagsak fagsak) {

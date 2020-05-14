@@ -54,7 +54,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
         if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
             behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY));
-        } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.getPayload() != null) {
+        } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.harPayload()) {
              dokumentPersistererTjeneste.xmlTilWrapper(mottattDokument);
         }
         innhentDokumentTjeneste.utfør(mottattDokument, behandlingÅrsakType);

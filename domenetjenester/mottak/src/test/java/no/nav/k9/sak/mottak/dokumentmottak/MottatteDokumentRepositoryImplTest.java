@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -36,52 +36,43 @@ public class MottatteDokumentRepositoryImplTest {
     private Behandling beh1, beh2;
     private MottattDokument dokument1, dokument2;
 
+    private long journalpostId = 123L;
+
     @Before
-    public void setup(){
+    public void setup() {
         fagsakRepository.opprettNy(fagsak);
-        
+
         beh1 = opprettBuilderForBehandling().build();
         lagreBehandling(beh1);
 
         beh2 = opprettBuilderForBehandling().build();
         lagreBehandling(beh2);
 
-        //Opprett og lagre MottateDokument
-        dokument1 = lagMottatteDokument(beh1.getId(), beh1.getFagsakId(), DokumentTypeId.INNTEKTSMELDING);
+        // Opprett og lagre MottateDokument
+        dokument1 = lagMottatteDokument(beh1.getFagsakId(), Brevkode.INNTEKTSMELDING);
         mottatteDokumentRepository.lagre(dokument1);
 
-        //Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
-        dokument2 = lagMottatteDokument(beh2.getId(), beh2.getFagsakId(), DokumentTypeId.INNTEKTSMELDING);
+        // Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
+        dokument2 = lagMottatteDokument(beh2.getFagsakId(), Brevkode.INNTEKTSMELDING);
         mottatteDokumentRepository.lagre(dokument2);
     }
 
     @Test
-    public void skal_hente_alle_MottatteDokument_på_behandlingId() {
-        //Act
-        List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokument(beh1.getId());
-
-        //Assert
-        assertThat(mottatteDokumenter).hasSize(1);
-        assertThat(mottatteDokumenter.get(0).getBehandlingId()).isEqualTo(beh1.getId());
-    }
-
-    @Test
     public void skal_hente_alle_MottatteDokument_på_fagsakId() {
-        //Act
+        // Act
         List<MottattDokument> mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsak.getId());
 
-        //Assert
+        // Assert
         assertThat(mottatteDokumenter).hasSize(2);
-        assertThat(mottatteDokumenter.stream().allMatch(md -> md.getBehandlingId().equals(beh1.getId()) || md.getBehandlingId().equals(beh2.getId()))).isTrue();
     }
 
     @Test
     public void skal_hente_MottattDokument_på_id() {
-        //Act
+        // Act
         Optional<MottattDokument> mottattDokument1 = mottatteDokumentRepository.hentMottattDokument(dokument1.getId());
         Optional<MottattDokument> mottattDokument2 = mottatteDokumentRepository.hentMottattDokument(dokument2.getId());
 
-        //Assert
+        // Assert
         assertThat(dokument1).isEqualTo(mottattDokument1.get());
         assertThat(dokument2).isEqualTo(mottattDokument2.get());
     }
@@ -91,11 +82,10 @@ public class MottatteDokumentRepositoryImplTest {
         behandlingRepository.lagre(behandling, lås);
     }
 
-    public static MottattDokument lagMottatteDokument(long behandlingId, long fagsakId, DokumentTypeId dokumentTypeId) {
+    public MottattDokument lagMottatteDokument(long fagsakId, Brevkode type) {
         return new MottattDokument.Builder()
-            .medBehandlingId(behandlingId)
-            .medJournalPostId(new JournalpostId("123"))
-            .medDokumentTypeId(dokumentTypeId)
+            .medJournalPostId(new JournalpostId(journalpostId++))
+            .medType(type)
             .medMottattDato(LocalDate.now())
             .medFagsakId(fagsakId)
             .build();

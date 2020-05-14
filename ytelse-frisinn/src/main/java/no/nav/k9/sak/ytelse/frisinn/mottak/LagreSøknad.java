@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
@@ -25,7 +26,6 @@ class LagreSøknad {
     @SuppressWarnings("unused")
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
-    private LagreOppgittOpptjening lagreOppgittOpptjening;
 
     LagreSøknad() {
         // for CDI proxy
@@ -35,13 +35,11 @@ class LagreSøknad {
     LagreSøknad(FagsakRepository fagsakRepository,
                 UttakRepository uttakRepository,
                 SøknadRepository søknadRepository,
-                TpsTjeneste tpsTjeneste,
-                LagreOppgittOpptjening lagreOppgittOpptjening) {
+                TpsTjeneste tpsTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.søknadRepository = søknadRepository;
         this.uttakRepository = uttakRepository;
         this.tpsTjeneste = tpsTjeneste;
-        this.lagreOppgittOpptjening = lagreOppgittOpptjening;
     }
 
     void persister(FrisinnSøknad søknad, Behandling behandling) {
@@ -50,19 +48,18 @@ class LagreSøknad {
         var søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(søknad.getSøknadsperiode().getFraOgMed(), søknad.getSøknadsperiode().getTilOgMed());
 
         final boolean elektroniskSøknad = false;
+        LocalDate mottattDato = søknad.getMottattDato().withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(søknadsperiode)
             .medElektroniskRegistrert(elektroniskSøknad)
-            .medMottattDato(søknad.getMottattDato().toLocalDate())
+            .medMottattDato(mottattDato)
             .medErEndringssøknad(false) // støtter ikke endringssønader p.t.
-            .medSøknadsdato(søknad.getMottattDato().toLocalDate())
+            .medSøknadsdato(mottattDato)
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
         lagrePerioder(søknad, behandlingId, fagsakId);
-
-        lagreOppgittOpptjening.lagreOpptjening(behandling, søknad.getInntekter(), søknad.getMottattDato());
 
     }
 

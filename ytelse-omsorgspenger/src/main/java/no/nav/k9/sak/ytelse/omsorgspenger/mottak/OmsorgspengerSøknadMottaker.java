@@ -46,7 +46,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Override
-    public void mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId,  OmsorgspengerSøknadInnsending søknadInnsending) {
+    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId,  OmsorgspengerSøknadInnsending søknadInnsending) {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknadInnsending);
         // FIXME K9 Legg til logikk for valg av fagsak og behandling type
@@ -57,6 +57,8 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         persisterSøknad(behandling, søknadInnsending);
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        
+        return behandling;
     }
 
     @SuppressWarnings("unused")

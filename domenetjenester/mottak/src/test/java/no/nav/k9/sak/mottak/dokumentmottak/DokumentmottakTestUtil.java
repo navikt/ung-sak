@@ -3,6 +3,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.time.LocalDate;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -16,9 +17,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 public class DokumentmottakTestUtil {
 
-    public static MottattDokument byggMottattDokument(Long fagsakId, String xml, LocalDate mottattDato, String journalpostId) {
+    public static MottattDokument byggMottattDokument(Long fagsakId, String xml, LocalDate mottattDato, String journalpostId, Brevkode brevkode) {
         MottattDokument.Builder builder = new MottattDokument.Builder();
         builder.medMottattDato(mottattDato);
+        builder.medType(brevkode);
         builder.medPayload(xml);
         builder.medFagsakId(fagsakId);
         if (journalpostId != null) {

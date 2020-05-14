@@ -32,7 +32,7 @@ public class SøknadDokumentmottaker {
     private LagreSøknad soknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
-
+    private LagreOppgittOpptjening lagreOppgittOpptjening;
     SøknadDokumentmottaker() {
         // for CDI proxy
     }
@@ -42,11 +42,13 @@ public class SøknadDokumentmottaker {
                                   SaksnummerRepository saksnummerRepository,
                                   Behandlingsoppretter behandlingsoppretter,
                                   LagreSøknad søknadOversetter,
+                                  LagreOppgittOpptjening lagreOppgittOpptjening,
                                   FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
         this.soknadOversetter = søknadOversetter;
+        this.lagreOppgittOpptjening = lagreOppgittOpptjening;
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
@@ -86,6 +88,9 @@ public class SøknadDokumentmottaker {
                 leggTilÅpenBehandlingOgTilbakefør(søknad, behandling);
             }
         }
+
+        lagreOppgittOpptjening.lagreOpptjening(behandling, søknad.getInntekter(), søknad.getMottattDato());
+        
         return behandling;
     }
 

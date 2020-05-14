@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -29,8 +30,8 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
     }
 
     @Override
-    public void mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, PleiepengerBarnSøknadInnsending søknadInnsending) {
-        dokumentMottaker.mottaSøknad(saksnummer, journalpostId, søknadInnsending.getSøknad());
+    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, PleiepengerBarnSøknadInnsending søknadInnsending) {
+        return dokumentMottaker.mottaSøknad(saksnummer, journalpostId, søknadInnsending.getSøknad());
     }
 
     @Override

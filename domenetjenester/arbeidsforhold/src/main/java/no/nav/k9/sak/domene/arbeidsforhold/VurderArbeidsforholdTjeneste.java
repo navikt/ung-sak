@@ -147,7 +147,7 @@ public class VurderArbeidsforholdTjeneste {
 
     private ManglendePåkrevdeInntektsmeldingerTjeneste finnPåkrevdeInntektsmeldingerTjeneste(BehandlingReferanse ref) {
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(påkrevdeInntektsmeldingerTjenester, ref.getFagsakYtelseType());
-        return tjeneste.orElseThrow(() -> new IllegalStateException("Finner ikke implementasjon for PåkrevdeInntektsmeldingerTjeneste for behandling " + ((ref != null) ? ref.getBehandlingUuid() : "Mangler ref")));
+        return tjeneste.orElseThrow(() -> new IllegalStateException("Finner ikke implementasjon for PåkrevdeInntektsmeldingerTjeneste for behandling " + ref.getBehandlingUuid()));
     }
 
     /**

@@ -260,7 +260,6 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         MottattDokument mottattDokument = builder
             .medFagsakId(behandling.getFagsakId())
             .medMottattDato(LocalDate.now())
-            .medBehandlingId(behandling.getId())
             .medJournalPostId(new JournalpostId("123123123"))
             .medPayload(xml)
             .build();

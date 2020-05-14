@@ -61,6 +61,6 @@ public class VurderKompletthetRevurderingStegImpl implements VurderKompletthetSt
 
     private Kompletthetsjekker getKompletthetsjekker(BehandlingReferanse ref) {
         return BehandlingTypeRef.Lookup.find(Kompletthetsjekker.class, kompletthetsjekkerInstances, ref.getFagsakYtelseType(), ref.getBehandlingType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + Kompletthetsjekker.class.getSimpleName() + " for " + ((ref != null) ? ref.getBehandlingUuid() : "MANGLER ref")));
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + Kompletthetsjekker.class.getSimpleName() + " for " + ref.getBehandlingUuid()));
     }
 }

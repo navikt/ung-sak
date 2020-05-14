@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.kompletthetssjekk;
+package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.List;
 import java.util.stream.Collectors;

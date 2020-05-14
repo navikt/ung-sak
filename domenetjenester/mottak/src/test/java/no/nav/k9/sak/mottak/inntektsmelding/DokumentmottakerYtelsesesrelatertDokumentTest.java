@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -103,7 +104,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         avsluttBehandling(behandling, VedtakResultatType.AVSLAG);
         behandling = behandlingRepository.hentBehandling(behandling.getId());
 
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123");
+        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
         when(behandlingsoppretter.erAvslåttBehandling(behandling)).thenReturn(true);
 
         // Act
@@ -123,7 +124,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         avsluttBehandling(behandling, VedtakResultatType.OPPHØR);
         behandling = behandlingRepository.hentBehandling(behandling.getId());
 
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123");
+        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
         when(behandlingsoppretter.harBehandlingsresultatOpphørt(behandling)).thenReturn(true);
 
         // Act
@@ -144,7 +145,7 @@ public class DokumentmottakerYtelsesesrelatertDokumentTest {
         avsluttBehandling(behandling, VedtakResultatType.OPPHØR);
         behandling = behandlingRepository.hentBehandling(behandling.getId());
 
-        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123");
+        var mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
         doReturn(true).when(behandlingsoppretter).harBehandlingsresultatOpphørt(behandling);
 
         // Act

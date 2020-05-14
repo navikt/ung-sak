@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -87,7 +88,7 @@ public class KompletthetskontrollerTest {
             behandlingProsesseringTjeneste,
             skjæringstidspunktTjeneste);
 
-        mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null);
+        mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, Brevkode.INNTEKTSMELDING);
 
     }
 
@@ -171,7 +172,7 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterDokumentinnhold(behandling, mottattDokument);
+        verify(mottatteDokumentTjeneste).persisterInntektsmelding(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.FOR_TIDLIG_SOKNAD);
     }
@@ -189,7 +190,7 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterDokumentinnhold(behandling, mottattDokument);
+        verify(mottatteDokumentTjeneste).persisterInntektsmelding(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.AVV_DOK);
     }

@@ -30,7 +30,7 @@ public class InntektsmeldingPersistererTjeneste {
     }
 
     @SuppressWarnings("unchecked")
-    public void leggInntektsmeldingerTilBehandling(Behandling behandling, List<MottattDokument> mottatteDokumenter) {
+    private void leggInntektsmeldingerTilBehandling(Behandling behandling, List<MottattDokument> mottatteDokumenter) {
         // wrap/dekod alle først
         var mottatt = new IdentityHashMap();
         var oversettere = new IdentityHashMap();

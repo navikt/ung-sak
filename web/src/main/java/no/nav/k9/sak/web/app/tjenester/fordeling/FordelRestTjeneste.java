@@ -6,6 +6,8 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.function.Function;
@@ -23,13 +25,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -44,10 +46,13 @@ import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.k9.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -75,6 +80,8 @@ public class FordelRestTjeneste {
     private FagsakTjeneste fagsakTjeneste;
 
     private Instance<SøknadMottakTjeneste<?>> søknadMottakere;
+    private MottatteDokumentRepository mottatteDokumentRepository;
+    private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -83,10 +90,12 @@ public class FordelRestTjeneste {
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               SafAdapter safAdapter,
                               FagsakTjeneste fagsakTjeneste,
+                              MottatteDokumentRepository mottatteDokumentRepository,
                               @Any Instance<SøknadMottakTjeneste<?>> søknadMottakere) { // NOSONAR
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadMottakere = søknadMottakere;
     }
 
@@ -146,9 +155,33 @@ public class FordelRestTjeneste {
         var saksnummer = innsending.getSaksnummer();
         var ytelseType = innsending.getYtelseType();
         var journalpostId = innsending.getJournalpostId();
+
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finner ikke fagsak for saksnummer=" + saksnummer));
+        var mottattDokument = lagreMottattDokument(innsending, journalpostId, fagsak);
+
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
-        søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
+        var behandling = søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
+
+        mottatteDokumentRepository.oppdaterMedBehandling(mottattDokument, behandling.getId());
+
         return new InnsendingMottatt(saksnummer);
+    }
+
+    private MottattDokument lagreMottattDokument(Innsending innsending, JournalpostId journalpostId, Fagsak fagsak) {
+        String payload = writePayload(innsending);
+        var builder = new MottattDokument.Builder()
+            .medFagsakId(fagsak.getId())
+            .medJournalPostId(journalpostId)
+            .medType(innsending.getType())
+            .medPayload(payload)
+            .medKanalreferanse(mapTilKanalreferanse(innsending.getKanalReferanse(), journalpostId));
+
+        builder.medMottattTidspunkt(Optional.ofNullable(innsending.getForsendelseMottattTidspunkt()).orElse(ZonedDateTime.now()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime());
+        builder.medMottattDato(Optional.ofNullable(innsending.getForsendelseMottattDato()).orElse(LocalDate.now()));
+
+        MottattDokument mottattDokument = builder.build();
+        mottatteDokumentRepository.lagre(mottattDokument);
+        return mottattDokument;
     }
 
     @POST
@@ -178,37 +211,50 @@ public class FordelRestTjeneste {
             throw new IllegalStateException("Finner ingen fagsak for saksnummer " + saksnummer);
         }
 
-        DokumentKategori dokumentKategori = mottattJournalpost.getDokumentKategoriOffisiellKode() != null
-            ? DokumentKategori.finnForKodeverkEiersKode(mottattJournalpost.getDokumentKategoriOffisiellKode())
-            : DokumentKategori.UDEFINERT; // NOSONAR
-
-        Optional<String> payloadXml = mottattJournalpost.getPayloadXml();
-        String dokumentTypeId = mottattJournalpost.getDokumentTypeIdOffisiellKode().orElse(null);
+        Optional<String> payload = mottattJournalpost.getPayload();
         InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
             .medFagsakId(fagsak.get().getId())
-            .medElektroniskSøknad(payloadXml.isPresent())
-            .medDokumentTypeId(dokumentTypeId)
-            .medJournalpostId(mottattJournalpost.getJournalpostId())
-            .medDokumentKategori(dokumentKategori)
-            .medJournalførendeEnhet(mottattJournalpost.getJournalForendeEnhet());
+            .medElektroniskSøknad(payload.isPresent())
+            .medType(mottattJournalpost.getType())
+            .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        if (DokumentTypeId.INNTEKTSMELDING.getOffisiellKode().equals(dokumentTypeId)) {
-            String referanseFraJournalpost = utledAltinnReferanseFraInntektsmelding(journalpostId);
-            builder.medKanalreferanse(referanseFraJournalpost);
-        }
+        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
 
-        mottattJournalpost.getForsendelseId().ifPresent(builder::medForsendelseId);
-
-        if (payloadXml.isPresent()) {
-            builder.medPayload(payloadXml.get()); // NOSONAR
+        if (payload.isPresent()) {
+            builder.medPayload(payload.get()); // NOSONAR
         }
 
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(LocalDate.now())); // NOSONAR
-        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottattTidspunkt()); // NOSONAR
+        builder.medForsendelseMottatt(Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt()).orElse(LocalDateTime.now())); // NOSONAR
 
         return builder.build();
     }
 
+    /**
+     * @deprecated skal bare returnere kanalReferanse når k9-fordel alltid setter kanalReferanse. Da slipper vi oppslag mot Saf her
+     */
+    @Deprecated(forRemoval = true)
+    private String mapTilKanalreferanse(String kanalReferanse, JournalpostId journalpostId) {
+        if (kanalReferanse != null) {
+            return kanalReferanse;
+        } else {
+            return utledAltinnReferanseFraInntektsmelding(journalpostId);
+        }
+    }
+
+    private String writePayload(Innsending innsending) {
+        // burde kunne ha streamet direkte fra input, får bli en senere optimalisering...
+        try {
+            return objectWriter.writeValueAsString(innsending);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Kan ikke serialisere innsendt dokument: " + innsending, e);
+        }
+    }
+
+    /**
+     * @deprecated fjern denne når vi mottar fra fordel
+     */
+    @Deprecated(forRemoval = true)
     private String utledAltinnReferanseFraInntektsmelding(JournalpostId journalpostId) {
         ArkivJournalPost journalPost = safAdapter.hentInngåendeJournalpostHoveddokument(journalpostId);
         return journalPost != null ? journalPost.getKanalreferanse() : null;
@@ -226,31 +272,17 @@ public class FordelRestTjeneste {
             super();
         }
 
-        public AbacJournalpostMottakDto(Saksnummer saksnummer, JournalpostId journalpostId,
-                                        String behandlingstemaOffisiellKode,
-                                        String dokumentTypeIdOffisiellKode,
-                                        LocalDateTime forsendelseMottattTidspunkt, String payloadXml) {
-            super(saksnummer, journalpostId, behandlingstemaOffisiellKode, dokumentTypeIdOffisiellKode, forsendelseMottattTidspunkt, payloadXml);
-        }
-
-        static Optional<String> getPayloadValiderLengde(String base64EncodedPayload, Integer deklarertLengde) {
+        static Optional<String> getPayloadValiderLengde(String base64EncodedPayload) {
             if (base64EncodedPayload == null) {
                 return Optional.empty();
             }
-            if (deklarertLengde == null) {
-                throw JournalpostMottakFeil.FACTORY.manglerPayloadLength().toException();
-            }
             byte[] bytes = Base64.getUrlDecoder().decode(base64EncodedPayload);
-            String streng = new String(bytes, StandardCharsets.UTF_8);
-            if (streng.length() != deklarertLengde) {
-                throw JournalpostMottakFeil.FACTORY.feilPayloadLength(deklarertLengde, streng.length()).toException();
-            }
-            return Optional.of(streng);
+            return Optional.of(new String(bytes, StandardCharsets.UTF_8));
         }
 
         @JsonIgnore
-        public Optional<String> getPayloadXml() {
-            return getPayloadValiderLengde(base64EncodedPayloadXml, payloadLength);
+        public Optional<String> getPayload() {
+            return getPayloadValiderLengde(base64EncodedPayload);
         }
 
         @Override

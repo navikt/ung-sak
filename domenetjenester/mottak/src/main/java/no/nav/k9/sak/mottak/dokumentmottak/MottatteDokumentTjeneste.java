@@ -55,27 +55,27 @@ public class MottatteDokumentTjeneste {
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
-    public void persisterDokumentinnhold(Behandling behandling, MottattDokument dokument) {
+    public void persisterInntektsmelding(Behandling behandling, MottattDokument dokument) {
         oppdaterMottattDokumentMedBehandling(dokument, behandling.getId());
-        if (dokument.getPayload() != null) {
+        if (dokument.harPayload()) {
             dokumentPersistererTjeneste.leggInntektsmeldingTilBehandling(behandling, dokument);
         }
     }
 
-    public Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
+    Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
         MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument);
         return mottattDokument.getId();
     }
 
-    public void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {
+    private void oppdaterMottattDokumentMedBehandling(MottattDokument mottattDokument, Long behandlingId) {
         mottatteDokumentRepository.oppdaterMedBehandling(mottattDokument, behandlingId);
     }
 
-    public Optional<MottattDokument> hentMottattDokument(Long mottattDokumentId) {
+    Optional<MottattDokument> hentMottattDokument(Long mottattDokumentId) {
         return mottatteDokumentRepository.hentMottattDokument(mottattDokumentId);
     }
 
-    public boolean erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(Fagsak sak) {
+    boolean erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(Fagsak sak) {
         Objects.requireNonNull(sak, "Fagsak");
         Optional<Behandling> behandling = behandlingRepositoryProvider.getBehandlingRepository().finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
         return behandling.map(this::erAvsluttetPgaManglendeDokumentasjon).orElse(Boolean.FALSE);
@@ -84,7 +84,7 @@ public class MottatteDokumentTjeneste {
     /**
      * Beregnes fra vedtaksdato
      */
-    public boolean harFristForInnsendingAvDokGåttUt(Fagsak sak) {
+    boolean harFristForInnsendingAvDokGåttUt(Fagsak sak) {
         Objects.requireNonNull(sak, "Fagsak");
         Optional<Behandling> behandlingOptional = behandlingRepositoryProvider.getBehandlingRepository().finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
         return behandlingOptional.flatMap(b -> behandlingRepositoryProvider.getBehandlingVedtakRepository().hentBehandlingVedtakForBehandlingId(b.getId()))
