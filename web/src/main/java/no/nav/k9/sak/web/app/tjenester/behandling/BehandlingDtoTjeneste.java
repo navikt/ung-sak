@@ -260,18 +260,17 @@ public class BehandlingDtoTjeneste {
         return dto;
     }
 
-    public BehandlingDto lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(Behandling originalBehandling) {
+    public BehandlingDto lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(Behandling revurdering) {
         var dto = new BehandlingDto();
 
-        Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository
-            .finnSisteAvsluttedeIkkeHenlagteBehandling(originalBehandling.getFagsakId());
+        Optional<Behandling> originalBehandling = revurdering.getOriginalBehandling();
 
-        var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(originalBehandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId));
-        var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(originalBehandling.getId()).orElse(null);
-        setStandardfelter(originalBehandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+        var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(revurdering, originalBehandling.map(Behandling::getId));
+        var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(revurdering.getId()).orElse(null);
+        setStandardfelter(revurdering, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
 
-        var behandlingsresultatDto = lagBehandlingsresultat(originalBehandling);
-        initBehandlingResourceLinks(originalBehandling, behandlingsresultatDto, dto);
+        var behandlingsresultatDto = lagBehandlingsresultat(revurdering);
+        initBehandlingResourceLinks(revurdering, behandlingsresultatDto, dto);
 
         return dto;
     }
