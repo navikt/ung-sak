@@ -57,6 +57,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     /** Folketrygdloven K15 ytelser. */
     ENSLIG_FORSØRGER("EF", "Enslig forsørger"),
 
+    OBSOLETE("OBSOLETE", "Kun brukt for å markere noen som utgått - ikke en gyldig type i seg selv"),
     UDEFINERT("-", "Ikke definert"),;
 
     public static final String KODEVERK = "FAGSAK_YTELSE"; //$NON-NLS-1$
