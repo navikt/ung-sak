@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -9,6 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -17,9 +21,12 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
+import no.nav.k9.sak.ytelse.beregning.FinnEndringsdatoBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 @FagsakYtelseTypeRef("FRISINN")
@@ -33,6 +40,8 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private UttakRepository uttakRepository;
+    private Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste;
+
 
     protected FrisinnBeregneYtelseSteg() {
         // for proxy
@@ -42,12 +51,14 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     public FrisinnBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                     BeregningTjeneste kalkulusTjeneste,
                                     FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
-                                    UttakRepository uttakRepository) {
+                                    UttakRepository uttakRepository,
+                                    @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.uttakRepository = uttakRepository;
+        this.finnEndringsdatoBeregningsresultatTjeneste = finnEndringsdatoBeregningsresultatTjeneste;
     }
 
     @Override
@@ -67,6 +78,14 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
         // Beregner ikke feriepenger for frisinn
+
+        // Sett endringsdato
+        if (behandling.erRevurdering()) {
+            var endringsdatoBeregningsresultatTjeneste = FagsakYtelseTypeRef.Lookup.find(finnEndringsdatoBeregningsresultatTjeneste, behandling.getFagsakYtelseType())
+                .orElseThrow();
+            Optional<LocalDate> endringsDato = endringsdatoBeregningsresultatTjeneste.finnEndringsdato(behandling, beregningsresultat);
+            endringsDato.ifPresent(endringsdato -> BeregningsresultatEntitet.builder(beregningsresultat).medEndringsdato(endringsdato));
+        }
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
