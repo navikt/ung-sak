@@ -77,7 +77,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         boolean ikkeNyOppstartetFrilans = frilans.map(this::erFrilansOgIkkeNyOppstartet).orElse(true);
         var harNæringsInntekt = harNæringsinntekt(næring);
         var harNæringsinntektIHele2019 = harNæringsinntektIHele2019(næring);
-        var næringStartdato = næringStartdato(næring);
+        var næringStartdato = harNæringsinntektIHele2019 ? NÆRINGS_PERIODE.getFomDato() : næringStartdato(næring);
         var søkerKompensasjonForNæring = harSøktKompensasjonForNæring(uttakGrunnlag);
 
         /*
@@ -103,11 +103,11 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
     }
 
     private Venteårsak utledVenteÅrsak(boolean harFrilansInntekter,
-                               boolean søkerKompensasjonForFrilans,
-                               boolean harNæringsInntekt,
-                               boolean søkerKompensasjonForNæring,
-                               boolean nyOppstartetFrilans,
-                               LocalDate startDatoNæring) {
+                                       boolean søkerKompensasjonForFrilans,
+                                       boolean harNæringsInntekt,
+                                       boolean søkerKompensasjonForNæring,
+                                       boolean nyOppstartetFrilans,
+                                       LocalDate startDatoNæring) {
         String kode = "FRISINN_VARIANT";
 
         if (søkerKompensasjonForFrilans && søkerKompensasjonForNæring) {
