@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -76,6 +77,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         boolean ikkeNyOppstartetFrilans = frilans.map(this::erFrilansOgIkkeNyOppstartet).orElse(true);
         var harNæringsInntekt = harNæringsinntekt(næring);
         var harNæringsinntektIHele2019 = harNæringsinntektIHele2019(næring);
+        var næringStartdato = næringStartdato(næring);
         var søkerKompensasjonForNæring = harSøktKompensasjonForNæring(uttakGrunnlag);
 
         /*
@@ -94,8 +96,48 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        var resultater = List.of(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET, Venteårsak.MANGLENDE_FUNKSJONALITET, LocalDateTime.now().plusDays(3)));
+        var venteårsak = utledVenteÅrsak(harFrilansInntekter, søkerKompensasjonForFrilans, harNæringsInntekt, søkerKompensasjonForNæring, !ikkeNyOppstartetFrilans, næringStartdato);
+
+        var resultater = List.of(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET, venteårsak, LocalDateTime.now().plusDays(3)));
         return BehandleStegResultat.utførtMedAksjonspunktResultater(resultater);
+    }
+
+    private Venteårsak utledVenteÅrsak(boolean harFrilansInntekter,
+                               boolean søkerKompensasjonForFrilans,
+                               boolean harNæringsInntekt,
+                               boolean søkerKompensasjonForNæring,
+                               boolean nyOppstartetFrilans,
+                               LocalDate startDatoNæring) {
+        String kode = "FRISINN_VARIANT";
+
+        if (søkerKompensasjonForFrilans && søkerKompensasjonForNæring) {
+            kode += "_KOMBINERT";
+        } else {
+            if (søkerKompensasjonForFrilans && harNæringsInntekt) {
+                kode += "_FL_MED_SN_INNTEKT";
+            }
+            if (søkerKompensasjonForNæring && harFrilansInntekter) {
+                kode += "_SN_MED_FL_INNTEKT";
+            }
+        }
+
+        if (nyOppstartetFrilans) {
+            kode += "_NY_FL";
+        }
+
+        if (startDatoNæring != null && !startDatoNæring.equals(NÆRINGS_PERIODE.getFomDato())) {
+            kode += "_NY_SN_" + startDatoNæring.getYear(); // Forventer 2019 & 2020 her
+        }
+
+        return Venteårsak.fraKode(kode);
+    }
+
+    private LocalDate næringStartdato(List<OppgittEgenNæring> næring) {
+        return næring.stream()
+            .filter(it -> BigDecimal.ZERO.compareTo(it.getBruttoInntekt()) != 0)
+            .filter(it -> Objects.nonNull(it.getPeriode()))
+            .map(OppgittEgenNæring::getFraOgMed)
+            .min(LocalDate::compareTo).orElse(null);
     }
 
     private boolean harNæringsinntekt(List<OppgittEgenNæring> næring) {
