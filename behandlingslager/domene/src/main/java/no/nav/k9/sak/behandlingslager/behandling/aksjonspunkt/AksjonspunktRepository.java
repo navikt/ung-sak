@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -33,7 +34,7 @@ public class AksjonspunktRepository {
     public AksjonspunktRepository(EntityManager em) {
         this.em = em;
     }
-    
+
     public void lagre(Aksjonspunkt aks) {
         em.persist(aks);
         em.flush();
@@ -43,7 +44,7 @@ public class AksjonspunktRepository {
         aks.forEach(em::persist);
         em.flush();
     }
-    
+
     public void setToTrinnsBehandlingKreves(Aksjonspunkt aksjonspunkt) {
         AksjonspunktDefinisjon apDef = aksjonspunkt.getAksjonspunktDefinisjon();
         if (apDef.getSkjermlenkeType() == null || SkjermlenkeType.UDEFINERT.equals(apDef.getSkjermlenkeType())) {
@@ -111,6 +112,9 @@ public class AksjonspunktRepository {
         for (var tuple : list) {
             var beh = (Behandling) tuple[0];
             var aks = (Aksjonspunkt) tuple[1];
+            if (skipBehandling(beh)) {
+                continue;
+            }
             if (!map.containsKey(beh)) {
                 map.put(beh, new ArrayList<>());
             }
@@ -118,6 +122,10 @@ public class AksjonspunktRepository {
         }
 
         return map;
+    }
+
+    private boolean skipBehandling(Behandling beh) {
+        return beh.getFagsakYtelseType() == FagsakYtelseType.OBSOLETE;
     }
 
 }
