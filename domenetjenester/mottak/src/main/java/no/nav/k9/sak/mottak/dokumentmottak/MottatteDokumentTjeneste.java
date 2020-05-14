@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
@@ -27,6 +28,7 @@ public class MottatteDokumentTjeneste {
     private Period fristForInnsendingAvDokumentasjon;
 
     private InntektsmeldingParser inntektsmeldingParser;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -43,12 +45,14 @@ public class MottatteDokumentTjeneste {
     @Inject
     public MottatteDokumentTjeneste(@KonfigVerdi(value = "sak.frist.innsending.dok", defaultVerdi = "P6W") Period fristForInnsendingAvDokumentasjon,
                                     InntektsmeldingParser inntektsmeldingParser,
+                                    InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                     MottatteDokumentRepository mottatteDokumentRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     UttakRepository uttakRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.fristForInnsendingAvDokumentasjon = fristForInnsendingAvDokumentasjon;
         this.inntektsmeldingParser = inntektsmeldingParser;
+        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.uttakRepository = uttakRepository;
@@ -57,13 +61,16 @@ public class MottatteDokumentTjeneste {
 
     public void persisterInntektsmelding(Behandling behandling, MottattDokument dokument) {
         if (dokument.harPayload()) {
-            var inntektsmeldingBuildere = inntektsmeldingParser.parseInntektsmeldinger(behandling, dokument);
-            // sender bare ett dokument her:
-            var arbeidsgiver = inntektsmeldingBuildere.get(0).getArbeidsgiver();
+            var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(behandling, dokument);
+            // sendte bare ett dokument her, så forventer kun et svar:
+            var arbeidsgiver = inntektsmeldinger.get(0).getArbeidsgiver(); // NOSONAR
             dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());
             dokument.setBehandlingId(behandling.getId());
-            mottatteDokumentRepository.lagre(dokument);// oppdaterer 
-            
+            mottatteDokumentRepository.lagre(dokument);// oppdaterer
+
+            // gjør etter alle andre lagringer i db da dette medfører remote kall til abakus (bør egentlig flyttes til egen task)
+            inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
+
         }
     }
 
