@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.foreldrepenger.kontrakter.fordel.JournalpostKnyttningDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -304,16 +303,4 @@ public class FordelRestTjeneste {
         }
     }
 
-    public static class AbacJournalpostKnyttningDto extends JournalpostKnyttningDto implements AbacDto {
-        public AbacJournalpostKnyttningDto() {
-            super();
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett()
-                .leggTil(AppAbacAttributtType.JOURNALPOST_ID, new JournalpostId(getJournalpostId()))
-                .leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer(getSaksnummer()));
-        }
-    }
 }
