@@ -24,7 +24,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
     private final FiltrerUtVariantSomIkkeStøttesSteg steg = new FiltrerUtVariantSomIkkeStøttesSteg();
 
     @Test
-    public void skal_legge_på_vent_hvis_SN_og_FL() {
+    public void skal_ikke_legge_på_vent_hvis_SN_og_FL() {
         var opptjeningBuilder = OppgittOpptjeningBuilder.ny();
         var perioden = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(2), LocalDate.now());
         var oppgittOpptjening = opptjeningBuilder
@@ -44,8 +44,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
 
         var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
-        assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
-        assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
+        assertThat(stegResultat.getAksjonspunktResultater()).isEmpty();
     }
 
     @Test
