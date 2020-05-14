@@ -90,9 +90,9 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         frilanser.erNyEtablert er som antagelig vil slippes opp først
          */
 
-        if (søkerKompensasjonForFrilans && ikkeNyOppstartetFrilans && harFrilansInntekter && !søkerKompensasjonForNæring && !harNæringsInntekt) {
+        if (søkerKompensasjonForFrilans && ikkeNyOppstartetFrilans && harFrilansInntekter && (søkerKompensasjonForNæring || !harNæringsInntekt)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if (!søkerKompensasjonForFrilans && !harFrilansInntekter && søkerKompensasjonForNæring && harNæringsInntekt && harNæringsinntektIHele2019) {
+        } else if ((søkerKompensasjonForFrilans || !harFrilansInntekter) && søkerKompensasjonForNæring && harNæringsInntekt && harNæringsinntektIHele2019) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
