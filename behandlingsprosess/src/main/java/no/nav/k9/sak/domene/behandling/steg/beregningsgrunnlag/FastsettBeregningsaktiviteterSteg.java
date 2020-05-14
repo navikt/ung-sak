@@ -24,10 +24,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @FagsakYtelseTypeRef
@@ -36,14 +34,11 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @ApplicationScoped
 public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg {
 
-    //FIXME(k9) hvor langt tilbake skal k9 se etter arbeid med FL og SN
-    public static final int ANTALL_ARBEIDSDAGER = 100;
     private Instance<KalkulusTjeneste> kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester;
-    private BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste;
     private BehandletPeriodeTjeneste behandletPeriodeTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
@@ -57,7 +52,6 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
                                              @Any Instance<UtledBeregningSkjæringstidspunktForBehandlingTjeneste> utledStpTjenester,
-                                             BeregningInfotrygdsakTjeneste beregningInfotrygdsakTjeneste,
                                              BehandletPeriodeTjeneste behandletPeriodeTjeneste,
                                              BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
 
@@ -66,7 +60,6 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.utledStpTjenester = utledStpTjenester;
-        this.beregningInfotrygdsakTjeneste = beregningInfotrygdsakTjeneste;
         this.behandletPeriodeTjeneste = behandletPeriodeTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
@@ -78,16 +71,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
-        LocalDate stp = utledSkjæringstidspunkt(ref);
-
-        //FIXME(k9)(NB! midlertidig løsning!! k9 skal etterhvert behandle OMSORGSPENGER for FL og SN
-        DatoIntervallEntitet inntektsperioden = DatoIntervallEntitet.tilOgMedMinusArbeidsdager(stp, ANTALL_ARBEIDSDAGER);
-        boolean sendtTilInfotrygd = beregningInfotrygdsakTjeneste.vurderOgOppdaterSakSomBehandlesAvInfotrygd(ref, kontekst, inntektsperioden);
-        if (sendtTilInfotrygd) {
-            return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-        } else {
-            return utførBeregning(kontekst, ref);
-        }
+        return utførBeregning(kontekst, ref);
     }
 
     private BehandleStegResultat utførBeregning(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
