@@ -22,7 +22,6 @@ public class StatistikkRepositoryTest {
     public void skal_kunne_hente_statistikk() throws Exception {
 
         assertThat(statistikkRepository.hentAlle()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task"));
-        assertThat(statistikkRepository.hentAlle()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task"));
     }
     
     @Test
@@ -34,13 +33,8 @@ public class StatistikkRepositoryTest {
         var behandling = scenario.lagre(repoRule.getEntityManager());
         
         assertThat(statistikkRepository.aksjonspunktStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v2"));
-        assertThat(statistikkRepository.aksjonspunktVenteårsakStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("aksjonspunkt_ytelse_type_vent_aarsak_v2"));
+        assertThat(statistikkRepository.aksjonspunktVenteårsakStatistikk()).isEmpty(); // får ikke data her pga venteårsak ikke satt
         
-        assertThat(statistikkRepository.aksjonspunktStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v2"));
-        assertThat(statistikkRepository.aksjonspunktVenteårsakStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("aksjonspunkt_ytelse_type_vent_aarsak_v2"));
-        
-        assertThat(statistikkRepository.aksjonspunktStatistikk()).isEmpty();
-        assertThat(statistikkRepository.aksjonspunktVenteårsakStatistikk()).isEmpty();
     }
 
 }

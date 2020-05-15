@@ -81,7 +81,7 @@ public class StatistikkRepository {
     @SuppressWarnings("unchecked")
     List<SensuEvent> aksjonspunktVenteårsakStatistikk() {
 
-        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status, a.vent_aarsak, v.vent_aarsak, " +
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status, a.vent_aarsak as vent_aarsak_ap, v.vent_aarsak, " +
             "             case when a.vent_aarsak=v.vent_aarsak then count(*) else 0 end as antall" +
             "             from aksjonspunkt a" +
             "             cross join (select distinct vent_aarsak from aksjonspunkt where vent_aarsak!='-') v " +
@@ -124,8 +124,8 @@ public class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
-        String sql = " select ytelse_type, task_type, status, sum(antall) as antall from ("
-            + " select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'OBSOLETE') as ytelse_type, p.status as dummy, case when p.status is null then 0 else count(*) end as antall " +
+        String sql = " select ytelse_type, task_type, status, cast(sum(antall) as bigint) antall from ("
+            + " select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'NONE') as ytelse_type, p.status as dummy, case when p.status is null then 0 else count(*) end  antall " +
             " from prosess_task_type t" +
             " cross join(values ('FEILET'),('VENTER_SVAR'),('KLAR')) as s(status)" +
             " left outer join prosess_task p on p.task_type=t.kode AND p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +
@@ -137,13 +137,13 @@ public class StatistikkRepository {
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
         Stream<Tuple> stream = query.getResultStream()
-            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));  // forkaster dummy ytelse_type fra db
         return stream.map(t -> SensuEvent.createSensuEvent("prosess_task",
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "prosess_task_type", t.get(1, String.class),
                 "status", t.get(2, String.class)),
-            Map.of("totalt_antall", t.get(4, BigInteger.class)))).collect(Collectors.toList());
+            Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
     }
 
     /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
