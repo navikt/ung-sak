@@ -105,11 +105,6 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
 
         var originalOrg = finnBehandlingsresultatPåOriginalBehandling(originalBehandling);
         VedtakVarsel vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-        if (erYtelsenOpphørt(originalOrg, revurdering)) {
-            revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
-            return vedtakVarsel;
-        }
         if (vurderAvslagPåAslag(Optional.of(revurdering), Optional.of(originalOrg), originalBehandling.getType())) {
             /* 2b */
             revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
@@ -133,6 +128,12 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
                 vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
                 return vedtakVarsel;
             }
+        }
+
+        if (erYtelsenOpphørt(originalOrg, revurdering)) {
+            revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
+            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
+            return vedtakVarsel;
         }
 
         boolean erEndringIBeregning = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId());
