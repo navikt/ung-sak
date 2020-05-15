@@ -1,25 +1,27 @@
 package no.nav.k9.sak.domene.iverksett;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
-import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
-import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
-import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
+import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
+import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
+import no.nav.k9.sak.domene.vedtak.årskvantum.ÅrskvantumDeaktiveringTask;
+import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
+import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
+import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 public abstract class OpprettProsessTaskIverksettFelles implements OpprettProsessTaskIverksett {
 
@@ -60,6 +62,11 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
         parallelle.add(opprettTaskSendTilØkonomi());
         avsluttOppgave.ifPresent(parallelle::add);
 
+        if (skalDeaktivereUttak (behandling)) {
+            //Denne setter uttak i årskvantum til inaktivt hvis utfall er avslag
+            parallelle.add(new ProsessTaskData(ÅrskvantumDeaktiveringTask.TASKTYPE));
+        }
+
         taskData.addNesteParallell(parallelle);
 
         // FIXME: Antar at denne er dekket av opprettTaskSendTilØkonomi() ?
@@ -86,6 +93,11 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
         // varsle Arena for andre ytelser enn FRISINN
         return !(FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType()));
+    }
+
+    private boolean skalDeaktivereUttak(Behandling behandling) {
+        return (FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType())
+            && BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType()));
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {
