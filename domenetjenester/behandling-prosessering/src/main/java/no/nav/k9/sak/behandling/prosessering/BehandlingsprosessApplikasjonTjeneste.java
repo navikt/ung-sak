@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
 import no.nav.k9.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
@@ -29,6 +30,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
     private HistorikkRepository historikkRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     BehandlingsprosessApplikasjonTjeneste() {
         // for CDI proxy
@@ -41,16 +43,17 @@ public class BehandlingsprosessApplikasjonTjeneste {
 
     @Inject
     public BehandlingsprosessApplikasjonTjeneste(
-                                                     BehandlingRepository behandlingRepository,
-                                                     ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
-                                                     BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                                     HistorikkRepository historikkRepository) {
+        BehandlingRepository behandlingRepository,
+        ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
+        BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
+        HistorikkRepository historikkRepository, BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
 
         Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.behandlingRepository = behandlingRepository;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.historikkRepository = historikkRepository;
+        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
 
     /**
@@ -111,6 +114,22 @@ public class BehandlingsprosessApplikasjonTjeneste {
         return behandlingRepository.hentBehandling(behandlingUuid);
     }
 
+
+    /**
+     * Åpner behandlingen for endringer ved å reaktivere inaktive aksjonspunkter fra steget etter Innhent registeroppl.
+     * Gjøres asynkront.
+     *
+     * @return ProsessTask gruppe
+     */
+    public String asynkTilbakestillOgÅpneBehandlingForEndringer(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var startSteg = behandlingskontrollTjeneste.nesteSteg(behandling, BehandlingStegType.INNHENT_REGISTEROPP)
+            .orElseThrow(() -> new IllegalStateException("Behandling kan ikke åpnes for endringer fra et veldefinert steg"));
+
+        return asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId, startSteg);
+    }
+
+
     /**
      * Åpner behandlingen for endringer ved å reaktivere inaktive aksjonspunkter før startpunktet
      * og hopper til første startpunkt. Gjøres asynkront.
@@ -126,7 +145,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
         åpneBehandlingForEndringerTask.setProperty(ÅpneBehandlingForEndringerTask.START_STEG, startSteg.getKode());
         åpneBehandlingForEndringerTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         gruppe.addNesteSekvensiell(åpneBehandlingForEndringerTask);
-        
+
         ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));

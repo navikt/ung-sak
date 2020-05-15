@@ -392,7 +392,7 @@ public class BehandlingRestTjeneste {
         if (behandling.harBehandlingÅrsak(BehandlingÅrsakType.BERØRT_BEHANDLING)) {
             throw BehandlingRestTjenesteFeil.FACTORY.erBerørtBehandling(behandlingId).toException();
         }
-        behandlingsprosessTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId, StartpunktType.KONTROLLER_ARBEIDSFORHOLD.getBehandlingSteg());
+        behandlingsprosessTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId);
         behandling = behandlingsprosessTjeneste.hentBehandling(behandlingId);
         return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.empty());
     }
