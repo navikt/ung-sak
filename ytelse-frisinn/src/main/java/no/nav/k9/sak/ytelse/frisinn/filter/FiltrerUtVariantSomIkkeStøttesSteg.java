@@ -74,7 +74,6 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         var næring = oppgittOpptjening.getEgenNæring();
         var harFrilansInntekter = harFrilansInntekter(frilans);
         var søkerKompensasjonForFrilans = harSøktKompensasjonForFrilans(uttakGrunnlag);
-        boolean ikkeNyOppstartetFrilans = frilans.map(this::erFrilansOgIkkeNyOppstartet).orElse(true);
         var harNæringsInntekt = harNæringsinntekt(næring);
         var harNæringsinntektIHele2019 = harNæringsinntektIHele2019(næring);
         var næringStartdato = harNæringsinntektIHele2019 ? NÆRINGS_PERIODE.getFomDato() : næringStartdato(næring);
@@ -90,13 +89,13 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
         frilanser.erNyEtablert er som antagelig vil slippes opp først
          */
 
-        if (søkerKompensasjonForFrilans && ikkeNyOppstartetFrilans && harFrilansInntekter && (søkerKompensasjonForNæring || !harNæringsInntekt)) {
+        if (søkerKompensasjonForFrilans && harFrilansInntekter && (søkerKompensasjonForNæring || !harNæringsInntekt)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         } else if ((søkerKompensasjonForFrilans || !harFrilansInntekter) && søkerKompensasjonForNæring && harNæringsInntekt && harNæringsinntektIHele2019) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        var venteårsak = utledVenteÅrsak(harFrilansInntekter, søkerKompensasjonForFrilans, harNæringsInntekt, søkerKompensasjonForNæring, !ikkeNyOppstartetFrilans, næringStartdato);
+        var venteårsak = utledVenteÅrsak(harFrilansInntekter, søkerKompensasjonForFrilans, harNæringsInntekt, søkerKompensasjonForNæring, næringStartdato);
 
         var resultater = List.of(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET, venteårsak, LocalDateTime.now().plusDays(3)));
         return BehandleStegResultat.utførtMedAksjonspunktResultater(resultater);
@@ -106,7 +105,6 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
                                        boolean søkerKompensasjonForFrilans,
                                        boolean harNæringsInntekt,
                                        boolean søkerKompensasjonForNæring,
-                                       boolean nyOppstartetFrilans,
                                        LocalDate startDatoNæring) {
         String kode = "FRISINN_VARIANT";
 
@@ -120,11 +118,6 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
                 kode += "_SN_MED_FL_INNTEKT";
             }
         }
-
-        if (nyOppstartetFrilans) {
-            kode += "_NY_FL";
-        }
-
         if (startDatoNæring != null && !startDatoNæring.equals(NÆRINGS_PERIODE.getFomDato())) {
             kode += "_NY_SN_" + startDatoNæring.getYear(); // Forventer 2019 & 2020 her
         }
