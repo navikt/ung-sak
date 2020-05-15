@@ -64,6 +64,11 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         this.harEtablertYtelse = harEtablertYtelse;
     }
 
+    private static boolean erYtelsenOpphørt(Behandling origBehandling, Behandling revurdering) {
+        return (origBehandling.getBehandlingResultatType().equals(BehandlingResultatType.INNVILGET) &&
+            revurdering.getBehandlingResultatType().equals(BehandlingResultatType.AVSLÅTT));
+    }
+
     private static boolean vurderAvslagPåAslag(Optional<Behandling> resRevurdering, Optional<Behandling> resOriginal, BehandlingType originalBehandlingType) {
         if (resOriginal.isPresent() && resRevurdering.isPresent()) {
             if (BehandlingType.FØRSTEGANGSSØKNAD.equals(originalBehandlingType)) {
@@ -87,6 +92,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         return bestemVedtakVarselRevurderingCore(revurderingRef, revurdering, originalBehandling, erVarselOmRevurderingSendt);
     }
 
+    // TODO ESSV: Teknisk gjeld. Denne logikken må skille Vedtaksbrev (utledning) fra BehandlingResultatType (sideeffekt)
     private VedtakVarsel bestemVedtakVarselRevurderingCore(BehandlingReferanse revurderingRef,
                                                            Behandling revurdering,
                                                            Behandling originalBehandling,
@@ -99,7 +105,11 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
 
         var originalOrg = finnBehandlingsresultatPåOriginalBehandling(originalBehandling);
         VedtakVarsel vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-
+        if (erYtelsenOpphørt(originalOrg, revurdering)) {
+            revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
+            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
+            return vedtakVarsel;
+        }
         if (vurderAvslagPåAslag(Optional.of(revurdering), Optional.of(originalOrg), originalBehandling.getType())) {
             /* 2b */
             revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
