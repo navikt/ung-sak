@@ -16,4 +16,6 @@ public interface ÅrskvantumTjeneste {
 
     Periode hentPeriodeForFagsak(Saksnummer ref);
 
+    void deaktiverUttakForBehandling(UUID behandlingUuid);
+
 }

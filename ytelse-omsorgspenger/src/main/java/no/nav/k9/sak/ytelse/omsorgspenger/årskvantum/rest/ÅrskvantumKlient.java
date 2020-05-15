@@ -11,7 +11,7 @@ public interface ÅrskvantumKlient {
 
     ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumGrunnlag årskvantumRequest);
 
-    void avbrytÅrskvantumForBehandling(UUID behandlingUUID);
+    void deaktiverUttakForBehandling(UUID behandlingUUID);
 
     ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID);
 
