@@ -125,10 +125,10 @@ public class StatistikkRepository {
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
         String sql = " select ytelse_type, task_type, status, sum(antall) as antall from ("
-            + " select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'OBSOLETE'), p.status as dummy, case when p.status is null then 0 else count(*) end as antall " +
+            + " select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'OBSOLETE') as ytelse_type, p.status as dummy, case when p.status is null then 0 else count(*) end as antall " +
             " from prosess_task_type t" +
             " cross join(values ('FEILET'),('VENTER_SVAR'),('KLAR')) as s(status)" +
-            " left outer join prosess_task p on p.task_type=t.kode And  p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +
+            " left outer join prosess_task p on p.task_type=t.kode AND p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +
             " left outer join fagsak_prosess_task fpt on fpt.prosess_task_id=p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
             " group by 1, 2, 3, 4 ) t" +
