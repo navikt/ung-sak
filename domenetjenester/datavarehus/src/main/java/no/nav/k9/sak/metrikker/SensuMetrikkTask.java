@@ -42,7 +42,7 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            var metrikker = statistikkRepository.hentAlle(null);
+            var metrikker = statistikkRepository.hentAlle();
             
             logMetrics(metrikker);
         } finally {

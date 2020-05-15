@@ -61,7 +61,7 @@ public class SensuMetrikkRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, ressurs = DRIFT)
     public SensuRequest hentStatistikk(@Parameter(description = "Angitt dato for fagsak opprettet") @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Valid LocalDate fagsakOpprettetDato) {
-        List<SensuEvent> events = statistikkRepository.hentAlle(fagsakOpprettetDato);
+        List<SensuEvent> events = statistikkRepository.hentAlle();
         return SensuEvent.createBatchSensuRequest(events);
     }
 
