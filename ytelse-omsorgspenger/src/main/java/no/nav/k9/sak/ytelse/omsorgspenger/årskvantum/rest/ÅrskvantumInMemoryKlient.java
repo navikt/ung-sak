@@ -22,8 +22,7 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void avbrytÅrskvantumForBehandling(UUID behandlingUUID) {
-
+    public void deaktiverUttakForBehandling(UUID behandlingUUID) {
     }
 
     @Override

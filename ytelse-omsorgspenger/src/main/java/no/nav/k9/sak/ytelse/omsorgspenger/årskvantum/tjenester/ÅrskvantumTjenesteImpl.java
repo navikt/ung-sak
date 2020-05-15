@@ -81,6 +81,11 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
+    public void deaktiverUttakForBehandling(UUID behandlingUuid) {
+        årskvantumKlient.deaktiverUttakForBehandling(behandlingUuid);
+    }
+
+    @Override
     public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
 
         var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId()).orElseThrow();

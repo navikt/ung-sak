@@ -68,12 +68,12 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void avbrytÅrskvantumForBehandling(UUID behandlingUUID) {
+    public void deaktiverUttakForBehandling(UUID behandlingUUID) {
         try {
-            var endpoint = URI.create(endpointUttaksplan.toString() + "/avbrytkvantumforbehandling");
-            restKlient.post(endpoint, behandlingUUID.toString());
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/inaktiv?behandlingUUID=" + behandlingUUID.toString());
+            restKlient.patch(endpoint, Object.class);
         } catch (Exception e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForBehandling(e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilDeaktiverUttak(e).toException();
         }
     }
 
@@ -128,7 +128,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         @TekniskFeil(feilkode = "K9SAK-AK-1000090", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente Resterende Kvantum: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilhentResterendeKvantum(Throwable t);
 
-        @TekniskFeil(feilkode = "K9SAK-AK-1000091", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke beregne uttaksplan for årskvantum: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-AK-1000091", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke deaktivere Uttak: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilDeaktiverUttak(Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000092", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke beregne uttaksplan for årskvantum: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilÅrskvantum(Throwable t);
 
     }
