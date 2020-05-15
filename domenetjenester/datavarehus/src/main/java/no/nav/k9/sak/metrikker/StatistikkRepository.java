@@ -1,25 +1,24 @@
 package no.nav.k9.sak.metrikker;
 
 import java.math.BigInteger;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
 import javax.persistence.Tuple;
 
+import org.hibernate.query.NativeQuery;
+
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
 
 @Dependent
@@ -32,92 +31,90 @@ public class StatistikkRepository {
     }
 
     @SuppressWarnings("unchecked")
-    List<SensuEvent> avslagStatistikk(LocalDate fagsakOpprettetDato) {
+    List<SensuEvent> avslagStatistikk() {
 
-        String sql = "select f.ytelse_type, f.fagsak_status, b.behandling_type, b.behandling_resultat_type, cast(b.uuid as varchar(50)), vv.vilkar_type, coalesce(vrp.avslag_kode, '-'), f.opprettet_tid from fagsak f "
-            +
+        String sql = "select f.ytelse_type, f.fagsak_status, b.behandling_type, b.behandling_resultat_type, vv.vilkar_type, coalesce(vrp.avslag_kode, '-') avslag_kode" +
+            " , count(*) antall from fagsak f " +
             " inner join behandling b on b.fagsak_id=f.id" +
             " inner join rs_vilkars_resultat rs on rs.behandling_id=b.id and rs.aktiv=true" +
             " inner join VR_VILKAR_RESULTAT vr on vr.id=rs.vilkarene_id" +
             " inner join vr_vilkar vv on vv.vilkar_resultat_id=vr.id" +
             " inner join vr_vilkar_periode vrp on vrp.vilkar_id=vv.id" +
-            " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid))";
+            " group by 1, 2, 3, 4, 5, 6";
 
-        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
-            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
-        Stream<Tuple> stream = query.getResultStream();
-        return stream.map(t -> SensuEvent.createSensuEvent("totalt_vilkar_resultat",
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+        return stream.map(t -> SensuEvent.createSensuEvent("totalt_vilkar_resultat_v2",
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "fagsak_status", t.get(1, String.class),
                 "behandling_type", t.get(2, String.class),
                 "behandling_resultat_type", t.get(3, String.class),
-                "behandling_uuid", t.get(4, String.class),
-                "vilkar_type", t.get(5, String.class),
-                "avslag_kode", t.get(6, String.class)),
-            Map.of("antall", BigInteger.ONE), tidsstempel(fagsakOpprettetDato, t.get(7, Timestamp.class)))).collect(Collectors.toList());
+                "vilkar_type", t.get(4, String.class),
+                "avslag_kode", t.get(5, String.class)),
+            Map.of("totalt_antall", t.get(6, BigInteger.class)))).collect(Collectors.toList());
 
-    }
-
-    private long tidsstempel(LocalDate fagsakOpprettetDato, Timestamp opprettetTid) {
-        return fagsakOpprettetDato == null || opprettetTid == null ? System.currentTimeMillis() : opprettetTid.getTime();
     }
 
     @SuppressWarnings("unchecked")
-    List<SensuEvent> aksjonspunktStatistikk(LocalDate fagsakOpprettetDato) {
-        String sql = "select a.aksjonspunkt_def as aksjonspunkt, f.ytelse_type, a.aksjonspunkt_status," +
-            " case when (  a.aksjonspunkt_status != 'OPPR' OR f.ytelse_type='OBSOLETE' ) then 0 else count(*) end as antall" +
+    List<SensuEvent> aksjonspunktStatistikk() {
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status," +
+            " count(*) as antall" +
             " from aksjonspunkt a " +
             " inner join behandling b on b.id =a.behandling_id" +
             " inner join fagsak f on f.id=b.fagsak_id" +
-            " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid)) " +
             " group by 1, 2, 3";
 
-        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
-            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
-        Stream<Tuple> stream = query.getResultStream();
-        return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_per_ytelse_type",
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+        return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_per_ytelse_type_v2",
             toMap(
-                "aksjonspunkt", t.get(0, String.class),
-                "ytelse_type", t.get(1, String.class)),
+                "ytelse_type", t.get(0, String.class),
+                "aksjonspunkt", t.get(1, String.class),
+                "aksjonspunkt_status", t.get(2, String.class)),
             Map.of("totalt_antall", t.get(3, BigInteger.class)))).collect(Collectors.toList());
 
     }
 
     @SuppressWarnings("unchecked")
-    List<SensuEvent> aksjonspunktVenteårsakStatistikk(LocalDate fagsakOpprettetDato) {
+    List<SensuEvent> aksjonspunktVenteårsakStatistikk() {
 
-        String sql = "select a.aksjonspunkt_def as aksjonspunkt, f.ytelse_type, a.aksjonspunkt_status, a.vent_aarsak, " +
-            " case when (  a.aksjonspunkt_status != 'OPPR' OR f.ytelse_type='OBSOLETE' or vent_aarsak='-' or vent_aarsak is null ) then 0 else count(*) end as antall" +
-            " from aksjonspunkt a " +
-            " inner join behandling b on b.id =a.behandling_id" +
-            " inner join fagsak f on f.id=b.fagsak_id" +
-            " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid)) " +
-            " group by 1, 2, 3, 4";
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status, a.vent_aarsak, v.vent_aarsak, " +
+            "             case when a.vent_aarsak=v.vent_aarsak then count(*) else 0 end as antall" +
+            "             from aksjonspunkt a" +
+            "             cross join (select distinct vent_aarsak from aksjonspunkt where vent_aarsak!='-') v " +
+            "                         inner join behandling b on b.id =a.behandling_id " +
+            "             inner join fagsak f on f.id=b.fagsak_id" +
+            "                         " +
+            "             group by 1, 2, 3, 4, 5" +
+            "                         order by 1, 2, 3, 4, 5";
 
-        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
-            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
-        Stream<Tuple> stream = query.getResultStream();
-        return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_ytelse_type_vent_aarsak",
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+        return stream.map(t -> SensuEvent.createSensuEvent("aksjonspunkt_ytelse_type_vent_aarsak_v2",
             toMap(
-                "aksjonspunkt", t.get(0, String.class),
-                "ytelse_type", t.get(1, String.class),
-                "vent_aarsak", t.get(3, String.class)),
-            Map.of("totalt_antall", t.get(4, BigInteger.class)))).collect(Collectors.toList());
+                "ytelse_type", t.get(0, String.class),
+                "aksjonspunkt", t.get(1, String.class),
+                "aksjonspunkt_status", t.get(2, String.class),
+                "vent_aarsak", t.get(4, String.class)),
+            Map.of("totalt_antall", t.get(5, BigInteger.class)))).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
-    List<SensuEvent> behandlingStatistikkUnderBehandling(LocalDate fagsakOpprettetDato) {
-        String sql = "select f.ytelse_type, behandling_type, behandling_status," +
-            " case when ( behandling_status='AVSLU' OR f.ytelse_type='OBSOLETE' ) then 0 else count(*) end as antall from behandling b" +
+    List<SensuEvent> behandlingStatistikkUnderBehandling() {
+        String sql = "select f.ytelse_type, behandling_type, behandling_status" +
+            " , count(*) antall" +
+            " from behandling b" +
             " inner join fagsak f on f.id=b.fagsak_id" +
-            " where date_trunc('DAY', f.opprettet_tid) = coalesce(:dato, date_trunc('DAY', f.opprettet_tid)) " +
             " group by 1, 2, 3";
 
-        Query query = ((org.hibernate.query.Query<Tuple>) entityManager.createNativeQuery(sql, Tuple.class))
-            .setParameter("dato", fagsakOpprettetDato == null ? null : Date.valueOf(fagsakOpprettetDato), TemporalType.DATE);
-        Stream<Tuple> stream = query.getResultStream();
-        return stream.map(t -> SensuEvent.createSensuEvent("behandling_status",
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+        return stream.map(t -> SensuEvent.createSensuEvent("behandling_status_v2",
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "behandling_type", BehandlingType.fraKode(t.get(1, String.class)).getNavn(),
@@ -127,29 +124,32 @@ public class StatistikkRepository {
 
     @SuppressWarnings("unchecked")
     List<SensuEvent> prosessTaskStatistikk() {
-        String sql = "select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'OBSOLETE'), p.status as dummy, case when p.status is null then 0 else count(p.status) end as antall " +
+        String sql = " select ytelse_type, task_type, status, sum(antall) as antall from ("
+            + " select t.kode as task_type, s.status, coalesce(f.ytelse_type, 'OBSOLETE'), p.status as dummy, case when p.status is null then 0 else count(*) end as antall " +
             " from prosess_task_type t" +
             " cross join(values ('FEILET'),('VENTER_SVAR'),('KLAR')) as s(status)" +
             " left outer join prosess_task p on p.task_type=t.kode And  p.status=s.status and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +
             " left outer join fagsak_prosess_task fpt on fpt.prosess_task_id=p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
-            " group by 1, 2, 3, 4" +
-            " order by dummy nulls last";
+            " group by 1, 2, 3, 4 ) t" +
+            " group by 1, 2, 3" +
+            " order by 1, 2, 3";
 
-        Query query = entityManager.createNativeQuery(sql, Tuple.class);
-        Stream<Tuple> stream = query.getResultStream();
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
         return stream.map(t -> SensuEvent.createSensuEvent("prosess_task",
             toMap(
-                "prosess_task_type", t.get(0, String.class),
-                "status", t.get(1, String.class),
-                "ytelse_type", t.get(2, String.class)),
+                "ytelse_type", t.get(0, String.class),
+                "prosess_task_type", t.get(1, String.class),
+                "status", t.get(2, String.class)),
             Map.of("totalt_antall", t.get(4, BigInteger.class)))).collect(Collectors.toList());
     }
 
     /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
     private static Map<String, String> toMap(String... args) {
         if (args.length % 2 != 0) {
-            throw new IllegalArgumentException("Må ha partall antal argumenter, fikk: " + Arrays.asList(args));
+            throw new IllegalArgumentException("Må ha partall antall argumenter, fikk: " + Arrays.asList(args));
         }
         var map = new HashMap<String, String>();
         for (int i = 0; i < args.length; i += 2) {
@@ -163,15 +163,14 @@ public class StatistikkRepository {
     }
 
     /**
-     * @param fagsakOpprettetDato - optional dato, begrens søket til kun fagsaker opprettet denne datoen
      */
-    public List<SensuEvent> hentAlle(LocalDate fagsakOpprettetDato) {
+    public List<SensuEvent> hentAlle() {
         List<SensuEvent> metrikker = new ArrayList<>();
         metrikker.addAll(prosessTaskStatistikk());
-        metrikker.addAll(behandlingStatistikkUnderBehandling(fagsakOpprettetDato));
-        metrikker.addAll(aksjonspunktStatistikk(fagsakOpprettetDato));
-        metrikker.addAll(aksjonspunktVenteårsakStatistikk(fagsakOpprettetDato));
-        metrikker.addAll(avslagStatistikk(fagsakOpprettetDato));
+        metrikker.addAll(behandlingStatistikkUnderBehandling());
+        metrikker.addAll(aksjonspunktStatistikk());
+        metrikker.addAll(aksjonspunktVenteårsakStatistikk());
+        metrikker.addAll(avslagStatistikk());
         return metrikker;
     }
 }
