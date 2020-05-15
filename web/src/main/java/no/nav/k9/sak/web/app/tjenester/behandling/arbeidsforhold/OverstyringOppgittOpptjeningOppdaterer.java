@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.BekreftOverstyrOppgittOpptjeningDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
@@ -117,8 +118,9 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
     }
 
     private Optional<List<EgenNæringBuilder>> leggerTilEgenæring(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
-        var egenNæring = new ArrayList<>(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring());
-        egenNæring.addAll(søknadsperiodeOgOppgittOpptjening.getISøkerPerioden().getOppgittEgenNæring());
+        List<OppgittEgenNæringDto> egenNæring = new ArrayList<>();
+        Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
+        Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getISøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
 
         if (!egenNæring.isEmpty()) {
             return Optional.of(egenNæring.stream().map(oppgittEgenNæringDto -> {
