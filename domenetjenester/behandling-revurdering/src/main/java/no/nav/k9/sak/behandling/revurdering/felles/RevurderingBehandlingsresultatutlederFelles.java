@@ -132,7 +132,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
 
         if (erYtelsenOpphørt(originalOrg, revurdering)) {
             revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
+            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
             return vedtakVarsel;
         }
 
