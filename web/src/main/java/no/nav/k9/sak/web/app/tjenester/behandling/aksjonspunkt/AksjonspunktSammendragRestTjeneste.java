@@ -28,6 +28,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
@@ -102,8 +104,8 @@ public class AksjonspunktSammendragRestTjeneste {
 
         // headere, pass på rekkefølge her!
         sb.append("ytelseType,saksnummer,fagsakStatus,behandlingUuid,behandlingType,behandlingStatus,"
-            + "aksjonspunktDef,aksjonspunktType,vilkårType,aksjonspunktStatus,venteårsak,"
-            + "kanLøses,totrinnsbehandling,totrinnsbehandlingGodkjent");
+            + "aksjonspunktDef,aksjonspunktType,vilkårType,aksjonspunktStatus,venteårsak,fristTid,"
+            + "kanLøses,totrinnsbehandling,totrinnsbehandlingGodkjent\n");
 
         for (var d : dtos) {
             // ingen av feltene trenger escaping så langt - kun id og kodeverdier
@@ -117,14 +119,15 @@ public class AksjonspunktSammendragRestTjeneste {
             for (var a : d.getAksjonspunkter()) {
                 var ad = a.getDefinisjon().getKode();
                 var at = a.getAksjonspunktType().getKode();
-                var vt = a.getVilkarType() == null ? "" : a.getVilkarType();
+                var vt = a.getVilkarType() == null || a.getVilkarType() == VilkårType.UDEFINERT ? "" : a.getVilkarType(); // NOSONAR
                 var as = a.getStatus() == null ? "" : a.getStatus().getKode();
-                var vå = a.getVenteårsak() == null ? "" : a.getVenteårsak().getKode();
+                var vå = a.getVenteårsak() == null || a.getVenteårsak() == Venteårsak.UDEFINERT ? "" : a.getVenteårsak().getKode(); // NOSONAR
+                var ft = a.getFristTid();
                 var kl = a.getKanLoses() == null ? "" : a.getKanLoses();
                 var tt = a.getToTrinnsBehandling() == null ? "" : a.getToTrinnsBehandling();
                 var ttg = a.getToTrinnsBehandlingGodkjent() == null ? "" : a.getToTrinnsBehandlingGodkjent();
-
-                Object[] args = new Object[] { yt, sn, fs, uuid, bt, bs, ad, at, vt, as, vå, kl, tt, ttg };
+                
+                Object[] args = new Object[] { yt, sn, fs, uuid, bt, bs, ad, at, vt, as, vå, ft, kl, tt, ttg };
                 String fmt = "%s,".repeat(args.length);
                 var s = String.format(fmt.substring(0, fmt.length() - 1), args);
                 sb.append(s).append('\n');
