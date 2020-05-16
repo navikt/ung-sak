@@ -96,7 +96,7 @@ public interface BehandlingskontrollTjeneste {
      */
     BehandlingskontrollKontekst initBehandlingskontroll(String behandlingd);
 
-    
+
     /**
      * Initier ny Behandlingskontroll, oppretter kontekst som brukes til sikre at parallle behandlinger og kjøringer går
      * i tur og orden. Dette skjer gjennom å opprette en {@link BehandlingLås} som legges ved ved lagring.
@@ -114,6 +114,8 @@ public interface BehandlingskontrollTjeneste {
      *            - må være med
      */
     BehandlingskontrollKontekst initBehandlingskontroll(UUID behandlingUuid);
+
+    Optional<BehandlingStegType> nesteSteg(Behandling behandling, BehandlingStegType behandlingStegType);
 
     boolean inneholderSteg(Behandling behandling, BehandlingStegType registrerSøknad);
 
