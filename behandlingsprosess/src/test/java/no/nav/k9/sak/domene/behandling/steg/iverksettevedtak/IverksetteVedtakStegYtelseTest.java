@@ -66,9 +66,6 @@ public class IverksetteVedtakStegYtelseTest {
 
     @Mock
     private IdentifiserOverlappendeInfotrygdYtelseTjeneste iverksettingSkalIkkeStoppesAvOverlappendeYtelse;
-
-    @Mock
-    private IverksetteVedtakStatistikk metrikker;
     
     private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
 
@@ -77,8 +74,7 @@ public class IverksetteVedtakStegYtelseTest {
         iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider, 
             opprettProsessTaskIverksett, 
             vurderBehandlingerUnderIverksettelse,
-            iverksettingSkalIkkeStoppesAvOverlappendeYtelse, 
-            metrikker);
+            iverksettingSkalIkkeStoppesAvOverlappendeYtelse);
         behandling = opprettBehandling();
     }
 

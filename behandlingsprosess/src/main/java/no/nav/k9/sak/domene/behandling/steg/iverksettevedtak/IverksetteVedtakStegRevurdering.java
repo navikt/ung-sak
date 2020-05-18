@@ -29,9 +29,8 @@ public class IverksetteVedtakStegRevurdering extends IverksetteVedtakStegTilgren
     public IverksetteVedtakStegRevurdering(BehandlingRepositoryProvider repositoryProvider,
                                            @FagsakYtelseTypeRef OpprettProsessTaskIverksett opprettProsessTaskIverksett,
                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
-                                           IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse, 
-                                           IverksetteVedtakStatistikk metrikker) {
-        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse, metrikker);
+                                           IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse) {
+        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse);
         this.opprettProsessTaskIverksett = opprettProsessTaskIverksett;
     }
 
