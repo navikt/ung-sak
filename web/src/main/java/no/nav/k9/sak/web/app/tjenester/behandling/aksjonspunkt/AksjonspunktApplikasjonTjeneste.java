@@ -161,7 +161,7 @@ public class AksjonspunktApplikasjonTjeneste {
         Optional<OppdateringResultat> funnetHenleggelse = overhoppResultat.finnHenleggelse();
         if (funnetHenleggelse.isPresent()) {
             OppdateringResultat henleggelse = funnetHenleggelse.get();
-            henleggBehandlingTjeneste.henleggBehandling(String.valueOf(kontekst.getBehandlingId()),
+            henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(kontekst.getBehandlingId()),
                 henleggelse.getHenleggelseResultat(), henleggelse.getHenleggingsbegrunnelse());
             return;
         }

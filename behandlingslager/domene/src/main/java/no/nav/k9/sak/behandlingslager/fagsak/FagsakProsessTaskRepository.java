@@ -33,6 +33,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe.Entry;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskEntitet;
+import no.nav.vedtak.konfig.Tid;
 
 /** Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks. */
 @ApplicationScoped
@@ -40,10 +41,10 @@ public class FagsakProsessTaskRepository {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);
 
-    private EntityManager entityManager;
+    private EntityManager em;
     private ProsessTaskRepository prosessTaskRepository;
-    
-    private final Set<ProsessTaskStatus> ferdigStatuser= Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
+
+    private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
 
     FagsakProsessTaskRepository() {
         // for proxy
@@ -51,14 +52,14 @@ public class FagsakProsessTaskRepository {
 
     @Inject
     public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository) {
-        this.entityManager = entityManager;
+        this.em = entityManager;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
-    
     public void lagre(FagsakProsessTask fagsakProsessTask) {
         ProsessTaskData ptData = prosessTaskRepository.finn(fagsakProsessTask.getProsessTaskId());
-        log.debug("Linker fagsak[{}] -> prosesstask[{}], tasktype=[{}] gruppeSekvensNr=[{}]", fagsakProsessTask.getFagsakId(), fagsakProsessTask.getProsessTaskId(), ptData.getTaskType(), fagsakProsessTask.getGruppeSekvensNr());
+        log.debug("Linker fagsak[{}] -> prosesstask[{}], tasktype=[{}] gruppeSekvensNr=[{}]", fagsakProsessTask.getFagsakId(), fagsakProsessTask.getProsessTaskId(), ptData.getTaskType(),
+            fagsakProsessTask.getGruppeSekvensNr());
         EntityManager em = getEntityManager();
         em.persist(fagsakProsessTask);
         em.flush();
@@ -94,7 +95,7 @@ public class FagsakProsessTaskRepository {
         // native sql for å håndtere join og subselect,
         // samt cast til hibernate spesifikk håndtering av parametere som kan være NULL
         @SuppressWarnings("unchecked")
-        NativeQuery<ProsessTaskEntitet> query = (NativeQuery<ProsessTaskEntitet>) entityManager
+        NativeQuery<ProsessTaskEntitet> query = (NativeQuery<ProsessTaskEntitet>) em
             .createNativeQuery(
                 "SELECT pt.* FROM PROSESS_TASK pt"
                     + " INNER JOIN FAGSAK_PROSESS_TASK fpt ON fpt.prosess_task_id = pt.id"
@@ -109,7 +110,7 @@ public class FagsakProsessTaskRepository {
 
         query.setParameter("statuses", statusNames)
             .setParameter("gruppe", gruppeId, StringType.INSTANCE)
-            .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_etter er sekunder
+            .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_eTtter er sekunder
             .setParameter("nesteKjoeringTilOgMed", nesteKjoeringTilOgMed)
             .setParameter("fagsakId", fagsakId) // NOSONAR
             .setParameter("behandlingId", behandlingId, StringType.INSTANCE) // NOSONAR
@@ -119,7 +120,6 @@ public class FagsakProsessTaskRepository {
         return tilProsessTask(resultList);
     }
 
-    
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, String behandlingId, ProsessTaskGruppe gruppe) {
         // oppretter nye tasks hvis gamle har feilet og matcher angitt gruppe, eller tidligere er FERDIG. Ignorerer hvis tidligere gruppe fortsatt
         // er KLAR
@@ -142,7 +142,7 @@ public class FagsakProsessTaskRepository {
             Set<String> eksisterendeTaskTyper = eksisterendeTasks.stream().map(t -> t.getTaskType()).collect(Collectors.toSet());
 
             if (!feilet.isPresent()) {
-                if(eksisterendeTaskTyper.containsAll(nyeTaskTyper)){
+                if (eksisterendeTaskTyper.containsAll(nyeTaskTyper)) {
                     return eksisterendeTasks.get(0).getGruppe();
                 } else {
                     return prosessTaskRepository.lagre(gruppe);
@@ -154,7 +154,6 @@ public class FagsakProsessTaskRepository {
 
     }
 
-    
     public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, String behandlingId, String gruppe) {
         Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR
 
@@ -183,7 +182,6 @@ public class FagsakProsessTaskRepository {
         return tasks;
     }
 
-    
     public Optional<FagsakProsessTask> sjekkTillattKjøreFagsakProsessTask(ProsessTaskData ptData) {
         Long fagsakId = ptData.getFagsakId();
         Long prosessTaskId = ptData.getId();
@@ -198,8 +196,8 @@ public class FagsakProsessTaskRepository {
             // Dersom den ikke er NULL er den kun tillatt dersom den matcher laveste gruppe_sekvensnr for Fagsak i
             // FAGSAK_PROSESS_TASK tabell.
             TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("from FagsakProsessTask fpt " +
-                    "where fpt.fagsakId=:fagsakId and gruppeSekvensNr is not null " +
-                    "order by gruppeSekvensNr ",
+                "where fpt.fagsakId=:fagsakId and gruppeSekvensNr is not null " +
+                "order by gruppeSekvensNr ",
                 FagsakProsessTask.class);
             query.setParameter("fagsakId", fagsakId); // NOSONAR
 
@@ -237,15 +235,38 @@ public class FagsakProsessTaskRepository {
                 fjern(fagsakId, ptEvent.getId(), fagsakProsessTaskOpt.get().getGruppeSekvensNr());
             }
         }
-        
+
     }
 
     protected EntityManager getEntityManager() {
-        return entityManager;
+        return em;
     }
 
     private List<ProsessTaskData> tilProsessTask(List<ProsessTaskEntitet> resultList) {
         return resultList.stream().map(ProsessTaskEntitet::tilProsessTask).collect(Collectors.toList());
+    }
+
+    /** Sletter prosesstasks som er koblet til fagsak+behandling og er ikke kjørt. */
+    public void ryddProsessTasks(Long fagsakId, Long behandlingId) {
+
+        Set<ProsessTaskStatus> uferdigStatuser = EnumSet.complementOf(EnumSet.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT));
+
+        var skalSlettes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, uferdigStatuser, Tid.TIDENES_BEGYNNELSE.atStartOfDay(), Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
+        if (!skalSlettes.isEmpty()) {
+            em.flush(); // flush alt annet
+            em.createNativeQuery("delete from fagsak_prosess_task fpt where fpt.fagsak_id=:fagsakId and fpt.behandling_id=:behandlingId")
+                .setParameter("fagsakId", fagsakId)
+                .setParameter("behandlingId", behandlingId)
+                .executeUpdate();
+            em.flush();
+            for (var s : skalSlettes) {
+                em.createNativeQuery("delete from prosess_task p where p.id = :pid")
+                    .setParameter("pid", s.getId())
+                    .executeUpdate();
+                em.flush();
+            }
+        }
+
     }
 
 }

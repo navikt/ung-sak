@@ -262,7 +262,7 @@ public class BehandlingRestTjeneste {
         Long behandlingId = dto.getBehandlingId();
         behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, dto.getBehandlingVersjon());
         BehandlingResultatType årsakKode = tilHenleggBehandlingResultatType(dto.getÅrsakKode());
-        henleggBehandlingTjeneste.henleggBehandling(String.valueOf(behandlingId), årsakKode, dto.getBegrunnelse());
+        henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(String.valueOf(behandlingId), årsakKode, dto.getBegrunnelse());
     }
 
     @POST
