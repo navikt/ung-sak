@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
@@ -34,6 +35,7 @@ public class HenleggBehandlingTjeneste {
     private SøknadRepository søknadRepository;
     private FagsakRepository fagsakRepository;
     private HistorikkRepository historikkRepository;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -43,7 +45,9 @@ public class HenleggBehandlingTjeneste {
     public HenleggBehandlingTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                      DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                                     FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      ProsessTaskRepository prosessTaskRepository) {
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
@@ -53,13 +57,15 @@ public class HenleggBehandlingTjeneste {
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
     }
 
-    public void henleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, false);
+    public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, false, HistorikkAktør.SAKSBEHANDLER);
     }
 
-    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, boolean avbrytVentendeAutopunkt) {
+    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, boolean avbrytVentendeAutopunkt, HistorikkAktør historikkAktør) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
+        
         if (avbrytVentendeAutopunkt && behandling.isBehandlingPåVent()) {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
         } else {
@@ -73,11 +79,12 @@ public class HenleggBehandlingTjeneste {
             fagsakRepository.fagsakSkalBehandlesAvInfotrygd(behandling.getFagsakId());
             opprettOppgaveTilInfotrygd(behandling);
         }
-        lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+        lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
     }
 
-    public void henleggBehandlingAvbrytAutopunkter(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, true);
+    /** Henlegger helt - for forvaltning først og fremst. */
+    public void henleggBehandlingOgAksjonspunkter(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, true, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     private void opprettOppgaveTilInfotrygd(Behandling behandling) {
