@@ -16,18 +16,9 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 public class VurderProsessTaskStatusForPollingApi {
     private static final Logger log = LoggerFactory.getLogger(VurderProsessTaskStatusForPollingApi.class);
-
+    private static final Set<ProsessTaskStatus> FERDIG_STATUSER = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
     private ProsessTaskFeilmelder feilmelder;
     private Long entityId;
-    private static final Set<ProsessTaskStatus> FERDIG_STATUSER = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
-
-    public interface ProsessTaskFeilmelder {
-        Feil feilIProsessTaskGruppe(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime sistKjørt);
-
-        Feil utsattKjøringAvProsessTask(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime nesteKjøringEtter);
-
-        Feil venterPåSvar(String callId, Long entityId, String gruppe, String taskType, Long id, ProsessTaskStatus status, LocalDateTime sistKjørt);
-    }
 
     public VurderProsessTaskStatusForPollingApi(ProsessTaskFeilmelder feilmelder, Long entityId) {
         this.feilmelder = feilmelder;
@@ -81,15 +72,25 @@ public class VurderProsessTaskStatusForPollingApi {
     }
 
     private Optional<AsyncPollingStatus> ventPåSvar(String gruppe, ProsessTaskData task, String callId) {
-        Feil feil = feilmelder.venterPåSvar(callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getSistKjørt());
-        feil.log(log);
+        if (task.getSistKjørt() != null && LocalDateTime.now().isBefore(task.getSistKjørt().plusMinutes(2))) {
+            AsyncPollingStatus status = new AsyncPollingStatus(
+                AsyncPollingStatus.Status.PENDING,
+                task.getNesteKjøringEtter(),
+                "Venter på svar for prosesstask [" + task.getTaskType() + "][id: " + task.getId() + "]",
+                null, 500L);
 
-        AsyncPollingStatus status = new AsyncPollingStatus(
-            AsyncPollingStatus.Status.DELAYED,
-            task.getNesteKjøringEtter(),
-            feil.getFeilmelding());
+            return Optional.of(status);// fortsett å polle på gruppe, er ikke ferdig.
+        } else {
+            Feil feil = feilmelder.venterPåSvar(callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getSistKjørt());
+            feil.log(log);
 
-        return Optional.of(status);// er ikke ferdig, men ok å videresende til visning av behandling med feilmelding der.
+            AsyncPollingStatus status = new AsyncPollingStatus(
+                AsyncPollingStatus.Status.DELAYED,
+                task.getNesteKjøringEtter(),
+                feil.getFeilmelding());
+
+            return Optional.of(status);// er ikke ferdig, men ok å videresende til visning av behandling med feilmelding der.
+        }
     }
 
     private Optional<AsyncPollingStatus> ventPåKlar(String gruppe, LocalDateTime maksTidFørNesteKjøring, ProsessTaskData task, String callId) {
@@ -104,7 +105,7 @@ public class VurderProsessTaskStatusForPollingApi {
             return Optional.of(status);// fortsett å polle på gruppe, er ikke ferdig.
         } else {
             Feil feil = feilmelder.utsattKjøringAvProsessTask(
-               callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getNesteKjøringEtter());
+                callId, entityId, gruppe, task.getTaskType(), task.getId(), task.getStatus(), task.getNesteKjøringEtter());
             feil.log(log);
 
             AsyncPollingStatus status = new AsyncPollingStatus(
@@ -114,6 +115,14 @@ public class VurderProsessTaskStatusForPollingApi {
 
             return Optional.of(status);// er ikke ferdig, men ok å videresende til visning av behandling med feilmelding der.
         }
+    }
+
+    public interface ProsessTaskFeilmelder {
+        Feil feilIProsessTaskGruppe(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime sistKjørt);
+
+        Feil utsattKjøringAvProsessTask(String callId, Long entityId, String gruppe, String taskType, Long taskId, ProsessTaskStatus taskStatus, LocalDateTime nesteKjøringEtter);
+
+        Feil venterPåSvar(String callId, Long entityId, String gruppe, String taskType, Long id, ProsessTaskStatus status, LocalDateTime sistKjørt);
     }
 
 }
