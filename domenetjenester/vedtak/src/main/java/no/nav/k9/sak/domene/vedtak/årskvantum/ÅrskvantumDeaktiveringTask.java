@@ -1,12 +1,16 @@
 package no.nav.k9.sak.domene.vedtak.årskvantum;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.PubliserInfotrygdFeedElementTask;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
@@ -20,7 +24,7 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ÅrskvantumDeaktiveringTask.class);
 
-    ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste;
+    private Instance<ÅrskvantumDeaktiveringTjeneste> årskvantumDeaktiveringTjeneste;
     BehandlingRepositoryProvider repositoryProvider;
 
     public ÅrskvantumDeaktiveringTask() {
@@ -28,7 +32,7 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public ÅrskvantumDeaktiveringTask(ÅrskvantumDeaktiveringTjeneste årskvantumDeaktiveringTjeneste,
+    public ÅrskvantumDeaktiveringTask(@Any Instance<ÅrskvantumDeaktiveringTjeneste> årskvantumDeaktiveringTjeneste,
                                       BehandlingRepositoryProvider repositoryProvider) {
         this.årskvantumDeaktiveringTjeneste = årskvantumDeaktiveringTjeneste;
         this.repositoryProvider = repositoryProvider;
@@ -41,7 +45,14 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
 
         logger.info("Setter uttak til inaktivt. behandlingUUID: '{}'", behandling.getUuid());
 
-        årskvantumDeaktiveringTjeneste.deaktiverUttakForBehandling(behandling.getUuid());
+        this.hentDeaktiveringstjeneste(behandling).deaktiverUttakForBehandling(behandling.getUuid());
+    }
+
+    private ÅrskvantumDeaktiveringTjeneste hentDeaktiveringstjeneste(Behandling behandling) {
+        FagsakYtelseType ytelseType = behandling.getFagsak().getYtelseType();
+
+        return FagsakYtelseTypeRef.Lookup.find(årskvantumDeaktiveringTjeneste, ytelseType)
+            .orElseThrow(() -> new IllegalArgumentException("kan ikke deaktivere uttak(årskvantum) for ytelse: " + ytelseType));
     }
 
 }
