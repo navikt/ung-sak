@@ -111,6 +111,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         if (skalHenteInnRegisterData(behandling)) {
             leggTilInnhentRegisterdataTasks(behandling, gruppe);
             var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+            diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
             try {
                 diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId())));
             } catch (IOException e) {
@@ -166,6 +167,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         if (skalHenteInnRegisterData(behandling)) {
             leggTilInnhentRegisterdataTasks(behandling, gruppe);
             var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+            diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
             try {
                 diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId())));
             } catch (IOException e) {
