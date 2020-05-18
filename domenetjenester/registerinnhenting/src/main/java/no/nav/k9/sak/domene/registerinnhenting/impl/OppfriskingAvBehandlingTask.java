@@ -14,7 +14,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
@@ -22,29 +21,26 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
  * Utfører innhenting av registerdata.
  */
 @ApplicationScoped
-@ProsessTask(RegisterdataOppdatererTask.TASKTYPE)
+@ProsessTask(OppfriskingAvBehandlingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class RegisterdataOppdatererTask extends BehandlingProsessTask {
+public class OppfriskingAvBehandlingTask extends BehandlingProsessTask {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterdataOppdatererTask.class);
+    private static final Logger log = LoggerFactory.getLogger(OppfriskingAvBehandlingTask.class);
 
     public static final String TASKTYPE = "behandlingskontroll.registerdataOppdaterBehandling";
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private RegisterdataEndringshåndterer registerdataOppdaterer;
     private BehandlingRepository behandlingRepository;
 
-    RegisterdataOppdatererTask() {
+    OppfriskingAvBehandlingTask() {
         // for CDI proxy
     }
 
     @Inject
-    public RegisterdataOppdatererTask(BehandlingRepositoryProvider behandlingRepositoryProvider,
-                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                      RegisterdataEndringshåndterer registerdataOppdaterer) {
+    public OppfriskingAvBehandlingTask(BehandlingRepositoryProvider behandlingRepositoryProvider,
+                                       BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         super(behandlingRepositoryProvider.getBehandlingLåsRepository());
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.registerdataOppdaterer = registerdataOppdaterer;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
     }
 
@@ -66,11 +62,6 @@ public class RegisterdataOppdatererTask extends BehandlingProsessTask {
             return;
         }
 
-        if (behandling.isBehandlingPåVent()) {
-            behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
-        }
-        registerdataOppdaterer.oppdaterRegisteropplysningerOgReposisjonerBehandlingVedEndringer(behandling);
-        // I tilfelle tilbakehopp reåpner aksjonspunkt
         if (behandling.isBehandlingPåVent()) {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
         }

@@ -1,15 +1,16 @@
 package no.nav.k9.sak.behandling.hendelse;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import no.nav.k9.kodeverk.Fagsystem;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+
+import no.nav.k9.kodeverk.Fagsystem;
 
 public class BehandlingProsessEventDto {
     /**
@@ -145,7 +146,7 @@ public class BehandlingProsessEventDto {
         this.fagsystem = builder.fagsystem;
         this.behandlingstidFrist = builder.behandlingstidFrist;
         this.eventHendelse = builder.eventHendelse;
-        this.behandlinStatus = builder.behandlinStatus;
+        this.behandlinStatus = builder.behandlingStatus;
         this.behandlingStatus = builder.behandlingStatus;
         this.behandlingSteg = builder.behandlingSteg;
         this.behandlendeEnhet = builder.behandlendeEnhet;
@@ -164,7 +165,6 @@ public class BehandlingProsessEventDto {
         private Long behandlingId;
         private LocalDateTime eventTid;
         private EventHendelse eventHendelse;
-        private String behandlinStatus;
         private String behandlingStatus;
         private String behandlingSteg;
         private String behandlendeEnhet;
@@ -213,11 +213,6 @@ public class BehandlingProsessEventDto {
 
         public T medEventHendelse(EventHendelse eventHendelse) {
             this.eventHendelse = eventHendelse;
-            return self();
-        }
-
-        public T medBehandlinStatus(String behandlinStatus) {
-            this.behandlinStatus = behandlinStatus;
             return self();
         }
 
