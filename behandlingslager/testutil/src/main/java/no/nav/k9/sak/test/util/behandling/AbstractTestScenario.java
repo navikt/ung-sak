@@ -277,11 +277,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             }
 
             @Override
-            public SøknadEntitet hentSøknad(Long behandlingId) {
-                return søknad;
-            }
-
-            @Override
             public void lagreOgFlush(Behandling behandling, SøknadEntitet søknad1) {
                 this.søknad = søknad1;
             }
