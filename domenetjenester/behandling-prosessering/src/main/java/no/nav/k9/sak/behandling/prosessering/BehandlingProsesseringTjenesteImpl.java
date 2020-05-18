@@ -20,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
-import no.nav.k9.sak.domene.registerinnhenting.impl.RegisterdataOppdatererTask;
+import no.nav.k9.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.DiffOgReposisjonerTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.InnhentIAYIAbakusTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.InnhentMedlemskapOpplysningerTask;
@@ -105,7 +105,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling) {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
-        ProsessTaskData registerdataOppdatererTask = new ProsessTaskData(RegisterdataOppdatererTask.TASKTYPE);
+        ProsessTaskData registerdataOppdatererTask = new ProsessTaskData(OppfriskingAvBehandlingTask.TASKTYPE);
         registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(registerdataOppdatererTask);
         if (skalHenteInnRegisterData(behandling)) {
