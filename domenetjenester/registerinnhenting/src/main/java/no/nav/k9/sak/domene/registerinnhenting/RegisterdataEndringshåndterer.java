@@ -123,13 +123,6 @@ public class RegisterdataEndringshåndterer {
     }
 
     private EndringsresultatDiff oppdaterRegisteropplysninger(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
-
-        registerdataInnhenter.innhentPersonopplysninger(behandling);
-        registerdataInnhenter.innhentMedlemskapsOpplysning(behandling);
-        registerdataInnhenter.innhentIAYIAbakus(behandling);
-
-        // oppdater alltid tidspunktet grunnlagene ble oppdater eller forsøkt oppdatert!
-        behandlingRepository.oppdaterSistOppdatertTidspunkt(behandling, LocalDateTime.now());
         // Finn alle endringer som registerinnhenting har gjort på behandlingsgrunnlaget
         EndringsresultatDiff endringsresultat = endringsresultatSjekker.finnSporedeEndringerPåBehandlingsgrunnlag(behandling.getId(), grunnlagSnapshot);
         return endringsresultat;
