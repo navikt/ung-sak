@@ -69,10 +69,5 @@ public class RegisterdataOppdatererTask extends BehandlingProsessTask {
         if (behandling.isBehandlingPåVent()) {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
         }
-        registerdataOppdaterer.oppdaterRegisteropplysningerOgReposisjonerBehandlingVedEndringer(behandling);
-        // I tilfelle tilbakehopp reåpner aksjonspunkt
-        if (behandling.isBehandlingPåVent()) {
-            behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
-        }
     }
 }

@@ -5,25 +5,26 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingKandidaterRepository;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.TaskStatus;
-import no.nav.vedtak.log.mdc.MDCOperations;
 
 @ApplicationScoped
 public class AutomatiskGjenopptagelseTjeneste {
 
-
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingKandidaterRepository behandlingKandidaterRepository;
+    private BehandlingProsesseringTjeneste prosesseringTjeneste;
 
     @Inject
     public AutomatiskGjenopptagelseTjeneste(BehandlingKandidaterRepository behandlingKandidaterRepository,
+                                            BehandlingProsesseringTjeneste prosesseringTjeneste,
                                             ProsessTaskRepository prosessTaskRepository) {
         this.behandlingKandidaterRepository = behandlingKandidaterRepository;
+        this.prosesseringTjeneste = prosesseringTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
@@ -40,14 +41,7 @@ public class AutomatiskGjenopptagelseTjeneste {
     }
 
     private void opprettProsessTask(Behandling behandling) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
-        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        prosessTaskData.setSekvens("1");
-        prosessTaskData.setPrioritet(100);
-
-        prosessTaskData.setCallId(MDCOperations.generateCallId()); // ny callId per task. 
-
-        prosessTaskRepository.lagre(prosessTaskData);
+        prosesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling);
     }
 
     public List<TaskStatus> hentStatusForGjenopptaBehandlingGruppe(String gruppe) {

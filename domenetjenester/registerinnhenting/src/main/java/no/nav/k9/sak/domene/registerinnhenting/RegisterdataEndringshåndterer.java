@@ -115,20 +115,14 @@ public class RegisterdataEndringshåndterer {
         }
     }
 
-    public void oppdaterRegisteropplysningerOgReposisjonerBehandlingVedEndringer(Behandling behandling) {
-        if (!endringskontroller.erRegisterinnhentingPassert(behandling)) {
-            return;
-        }
-        boolean skalOppdatereRegisterdata = skalInnhenteRegisteropplysningerPåNytt(behandling);
-
+    public void utledDiffOgReposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
         // Utled diff hvis registerdata skal oppdateres
-        EndringsresultatDiff endringsresultat = skalOppdatereRegisterdata ? oppdaterRegisteropplysninger(behandling) : opprettDiffUtenEndring();
+        EndringsresultatDiff endringsresultat = oppdaterRegisteropplysninger(behandling, grunnlagSnapshot);
 
         doReposisjonerBehandlingVedEndringer(behandling, endringsresultat, true);
     }
 
-    private EndringsresultatDiff oppdaterRegisteropplysninger(Behandling behandling) {
-        EndringsresultatSnapshot grunnlagSnapshot = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
+    private EndringsresultatDiff oppdaterRegisteropplysninger(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
 
         registerdataInnhenter.innhentPersonopplysninger(behandling);
         registerdataInnhenter.innhentMedlemskapsOpplysning(behandling);
@@ -139,10 +133,6 @@ public class RegisterdataEndringshåndterer {
         // Finn alle endringer som registerinnhenting har gjort på behandlingsgrunnlaget
         EndringsresultatDiff endringsresultat = endringsresultatSjekker.finnSporedeEndringerPåBehandlingsgrunnlag(behandling.getId(), grunnlagSnapshot);
         return endringsresultat;
-    }
-
-    private EndringsresultatDiff opprettDiffUtenEndring() {
-        return EndringsresultatDiff.opprettForSporingsendringer();
     }
 
     private void lagBehandlingÅrsakerOgHistorikk(Behandling behandling, EndringsresultatDiff endringsresultat) {
