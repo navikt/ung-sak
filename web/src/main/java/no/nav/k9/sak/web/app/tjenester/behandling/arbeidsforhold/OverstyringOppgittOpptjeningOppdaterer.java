@@ -32,6 +32,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.BekreftOverstyrOppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
 
@@ -74,14 +75,39 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
     private ArrayList<UttakAktivitetPeriode> utledePerioder(BekreftOverstyrOppgittOpptjeningDto dto) {
         PeriodeDto periodeFraSøknad = dto.getSøknadsperiodeOgOppgittOpptjeningDto().getPeriodeFraSøknad();
 
+        var tidligsteDato = finnFraOgMedDato(dto.getSøknadsperiodeOgOppgittOpptjeningDto());
+
         var perioderSomSkalMed = new ArrayList<UttakAktivitetPeriode>();
         if (dto.getSøknadsperiodeOgOppgittOpptjeningDto().getSøkerYtelseForFrilans()) {
-            perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, periodeFraSøknad.getFom(), periodeFraSøknad.getTom()));
+            perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, tidligsteDato, periodeFraSøknad.getTom()));
         }
         if (dto.getSøknadsperiodeOgOppgittOpptjeningDto().getSøkerYtelseForNæring()) {
-            perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, periodeFraSøknad.getFom(), periodeFraSøknad.getTom()));
+            perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, tidligsteDato, periodeFraSøknad.getTom()));
         }
         return perioderSomSkalMed;
+    }
+
+    LocalDate finnFraOgMedDato(SøknadsperiodeOgOppgittOpptjeningDto dto) {
+        LocalDate tidligsteDato = dto.getPeriodeFraSøknad().getFom();
+        if (dto.getSøkerYtelseForNæring()) {
+            OppgittOpptjeningDto iSøkerPerioden = dto.getISøkerPerioden();
+            LocalDate datoForSn = iSøkerPerioden.getOppgittEgenNæring().stream().map(egenNæringDto -> egenNæringDto.getPeriode().getFom()).min(LocalDate::compareTo).orElse(tidligsteDato);
+            if (datoForSn.isAfter(tidligsteDato)) {
+                tidligsteDato = datoForSn;
+            }
+        }
+        if (dto.getSøkerYtelseForFrilans()) {
+            OppgittOpptjeningDto iSøkerPerioden = dto.getISøkerPerioden();
+            OppgittFrilansDto oppgittFrilans = iSøkerPerioden.getOppgittFrilans();
+            if (oppgittFrilans != null) {
+                LocalDate datoForFl = oppgittFrilans.getOppgittFrilansoppdrag().stream().map(frilans -> frilans.getPeriode().getFom()).min(LocalDate::compareTo).orElse(tidligsteDato);
+                LocalDate orginalFom = dto.getPeriodeFraSøknad().getFom();
+                if (datoForFl.isAfter(orginalFom) && datoForFl.isBefore(tidligsteDato)) {
+                    tidligsteDato = datoForFl;
+                }
+            }
+        }
+        return tidligsteDato;
     }
 
     private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening) {
