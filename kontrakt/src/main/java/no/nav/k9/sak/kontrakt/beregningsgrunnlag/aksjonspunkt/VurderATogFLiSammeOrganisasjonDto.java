@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class VurderATogFLiSammeOrganisasjonDto {
 
-    @JsonProperty(value = "vurdreATogFLiSammeOrganisasjonAndelListe", required = true)
+    @JsonProperty(value = "vurderATogFLiSammeOrganisasjonAndelListe", required = true)
     @Valid
     @NotNull
     @Size(max = 100)
