@@ -22,14 +22,12 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
-    private IverksetteVedtakStatistikk metrikker;
 
     protected IverksetteVedtakStegFelles() {
         // for CDI proxy
     }
 
-    public IverksetteVedtakStegFelles(BehandlingRepositoryProvider repositoryProvider, IverksetteVedtakStatistikk metrikker) {
-        this.metrikker = metrikker;
+    public IverksetteVedtakStegFelles(BehandlingRepositoryProvider repositoryProvider) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
     }
@@ -58,8 +56,6 @@ public abstract class IverksetteVedtakStegFelles implements IverksetteVedtakSteg
         førIverksetting(behandling, vedtak);
         log.info("Behandling {}: Iverksetter vedtak", behandlingId);
         iverksetter(behandling);
-
-        metrikker.logMetrikker(behandling);
 
         return BehandleStegResultat.settPåVent();
     }

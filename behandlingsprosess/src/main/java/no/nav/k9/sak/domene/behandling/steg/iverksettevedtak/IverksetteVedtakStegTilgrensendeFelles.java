@@ -16,9 +16,8 @@ public abstract class IverksetteVedtakStegTilgrensendeFelles extends IverksetteV
 
     public IverksetteVedtakStegTilgrensendeFelles(BehandlingRepositoryProvider repositoryProvider,
                                                   VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
-                                                  IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse, 
-                                                  IverksetteVedtakStatistikk metrikker) {
-        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, metrikker);
+                                                  IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse) {
+        super(repositoryProvider, tidligereBehandlingUnderIverksettelse);
         this.identifiserOverlappendeInfotrygdYtelse = identifiserOverlappendeInfotrygdYtelse;
     }
 

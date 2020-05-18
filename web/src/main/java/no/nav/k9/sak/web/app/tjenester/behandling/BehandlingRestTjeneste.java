@@ -15,7 +15,6 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;

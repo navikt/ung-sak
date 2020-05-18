@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.uttak.rest.JsonMapper;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.util.env.Environment;
@@ -38,21 +37,18 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
 
     private K9OppdragRestKlient restKlient;
     private TilkjentYtelseTjeneste tilkjentYtelseTjeneste;
-    private SensuKlient sensuKlient;
 
     SendØkonomiOppdragTask() {
         // for CDI proxy
     }
 
     @Inject
-    public SendØkonomiOppdragTask(BehandlingRepositoryProvider repositoryProvider, 
-                                  K9OppdragRestKlient restKlient, 
-                                  TilkjentYtelseTjeneste tilkjentYtelseTjeneste,
-                                  SensuKlient sensuKlient) {
+    public SendØkonomiOppdragTask(BehandlingRepositoryProvider repositoryProvider,
+                                  K9OppdragRestKlient restKlient,
+                                  TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.restKlient = restKlient;
         this.tilkjentYtelseTjeneste = tilkjentYtelseTjeneste;
-        this.sensuKlient = sensuKlient;
     }
 
     @Override
@@ -63,7 +59,7 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
 
         logger.info("Sender {} perioder med tilkjent ytelse for behandlingId={}", input.getTilkjentYtelse().getPerioder().size(), input.getBehandlingId());
 
-        //FIXME K9 Midlertidig kode for å feilsøke integrasjonen mot k9-oppdrag
+        // FIXME K9 Midlertidig kode for å feilsøke integrasjonen mot k9-oppdrag
         if (!Environment.current().isProd() && logger.isInfoEnabled()) {
             try {
                 TilkjentYtelseOppdrag maskert = maskerer.masker(input);
@@ -79,7 +75,7 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
     private OffsetDateTime hentOpprinneligIverksettelseTidspunkt(ProsessTaskData prosessTaskData) {
         String tidspunkt = prosessTaskData.getPropertyValue("opprinneligIverksettingTidspunkt");
         if (tidspunkt == null) {
-            throw new IllegalArgumentException("Mangler verdi for opprinneligIverksettingTidspunkt");
+            throw new IllegalArgumentException("Mangler verdi for opprinneligIverksettingTidspunkt: " + prosessTaskData);
         }
         return OffsetDateTime.parse(tidspunkt, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
