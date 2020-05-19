@@ -3,6 +3,9 @@ package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -15,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
@@ -27,6 +31,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 @ApplicationScoped
 public class HenleggBehandlingTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(HenleggBehandlingTjeneste.class);
+    
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
@@ -67,13 +73,15 @@ public class HenleggBehandlingTjeneste {
             // har søknad og saksbehandler forsøker å ta av vent
         }
         
+        fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
+        
         doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
     }
 
     private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
+        
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
@@ -89,9 +97,20 @@ public class HenleggBehandlingTjeneste {
     public void henleggBehandlingOgAksjonspunkter(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
+        
+        if(behandling.isBehandlingHenlagt()) {
+            // er allerede henlagt - en saksbehandler kom oss i forkjøpet
+            Fagsak fagsak = behandling.getFagsak();
+            log.warn("Behandling [fagsakId={}, saksnummer={}, behandlingId={}, ytelseType={}] er allerede henlagt", fagsak.getId(), fagsak.getSaksnummer(), behandling.getId(), fagsak.getYtelseType());
+            return;
+        }
+        
         if(behandling.isBehandlingPåVent()) {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
         }
+        
         doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
