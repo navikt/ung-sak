@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -105,10 +104,14 @@ class MapOppgittOpptjening {
             var frilansoppdrag = frilans.getFrilansoppdrag().stream().map(MapTilDto::mapFrilansoppdrag).sorted(COMP_FRILANSOPPDRAG)
                 .collect(Collectors.toList());
             var frilansDto = new OppgittFrilansDto(frilansoppdrag);
-            Optional.ofNullable(frilans.getErNyoppstartet()).ifPresent(frilansDto::medErNyoppstartet);
-            Optional.ofNullable(frilans.getHarInntektFraFosterhjem()).ifPresent(frilansDto::medHarInntektFraFosterhjem);
-            Optional.ofNullable(frilans.getHarNærRelasjon()).ifPresent(frilansDto::medHarNærRelasjon);
+            frilansDto.medErNyoppstartet(booleanOrFalse(frilans.getErNyoppstartet()));
+            frilansDto.medHarInntektFraFosterhjem(booleanOrFalse(frilans.getHarInntektFraFosterhjem()));
+            frilansDto.medHarNærRelasjon(booleanOrFalse(frilans.getHarNærRelasjon()));
             return frilansDto;
+        }
+
+        private static boolean booleanOrFalse(Boolean bool) {
+            return bool != null && bool;
         }
 
         private static OppgittArbeidsforholdDto mapArbeidsforhold(OppgittArbeidsforhold arbeidsforhold) {
@@ -155,10 +158,10 @@ class MapOppgittOpptjening {
                 .medVirksomhet(org)
                 .medVirksomhetType(virksomhetType);
 
-            Optional.ofNullable(egenNæring.getNyIArbeidslivet()).ifPresent(dto::medNyIArbeidslivet);
-            Optional.ofNullable(egenNæring.getNyoppstartet()).ifPresent(dto::medNyoppstartet);
-            Optional.ofNullable(egenNæring.getNærRelasjon()).ifPresent(dto::medNærRelasjon);
-            Optional.ofNullable(egenNæring.getVarigEndring()).ifPresent(dto::medVarigEndring);
+            dto.medNyIArbeidslivet(booleanOrFalse(egenNæring.getNyIArbeidslivet()));
+            dto.medNyoppstartet(booleanOrFalse(egenNæring.getNyoppstartet()));
+            dto.medNærRelasjon(booleanOrFalse(egenNæring.getNærRelasjon()));
+            dto.medVarigEndring(booleanOrFalse(egenNæring.getVarigEndring()));
 
             var virksomhet = egenNæring.getVirksomhet();
             if (virksomhet != null) {
