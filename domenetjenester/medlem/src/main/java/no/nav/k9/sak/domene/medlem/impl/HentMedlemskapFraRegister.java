@@ -113,7 +113,7 @@ public class HentMedlemskapFraRegister {
     private MedlemskapType mapTilLovvalg(LovvalgMedTerm term) {
         MedlemskapType medlemskapType = MedlemskapType.UDEFINERT;
         if (term != null) {
-            String strTerm = term.getTerm();
+            String strTerm = term.getValue();
             if (MedlemskapsperiodeKoder.Lovvalg.ENDL.name().equals(strTerm)) {
                 medlemskapType = MedlemskapType.ENDELIG;
             }
@@ -130,7 +130,7 @@ public class HentMedlemskapFraRegister {
     private MedlemskapKildeType mapTilKilde(KildeMedTerm term) {
         MedlemskapKildeType kildeType = MedlemskapKildeType.UDEFINERT;
         if (term != null) {
-            String strTerm = term.getTerm();
+            String strTerm = term.getValue();
             if (strTerm != null) {
                 kildeType = MedlemskapKildeType.fraKode(strTerm);
                 if (kildeType == null) {
