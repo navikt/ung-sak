@@ -46,6 +46,10 @@ public class FastsattUttakDto {
         return behandlingUuid;
     }
 
+    public List<UttakAktivitetPeriodeDto> getAktiviteter() {
+        return aktiviteter;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
