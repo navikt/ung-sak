@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -93,11 +92,6 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
         // varsle Arena for andre ytelser enn FRISINN
         return !(FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType()));
-    }
-
-    private boolean skalDeaktivereUttak(Behandling behandling) {
-        return (FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType())
-            && BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType()));
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {
