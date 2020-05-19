@@ -63,7 +63,6 @@ class LagreOppgittOpptjening {
 
             OppgittFrilansBuilder frilansBuilder = OppgittFrilansBuilder.ny();
             OppgittFrilans oppgittFrilans = frilansBuilder
-                    .medErNyoppstartet(fri.getErNyetablert())
                     .leggTilOppgittOppdrag(oppdrag)
                     .build();
             opptjeningBuilder.leggTilFrilansOpplysninger(oppgittFrilans);

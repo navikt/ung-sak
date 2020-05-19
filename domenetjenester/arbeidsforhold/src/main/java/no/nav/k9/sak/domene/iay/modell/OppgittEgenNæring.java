@@ -30,13 +30,13 @@ public class OppgittEgenNæring implements IndexKey {
 
     private BigDecimal bruttoInntekt;
 
-    private boolean nyoppstartet;
+    private Boolean nyoppstartet;
 
-    private boolean varigEndring;
+    private Boolean varigEndring;
 
-    private boolean nærRelasjon;
+    private Boolean nærRelasjon;
 
-    private boolean nyIArbeidslivet;
+    private Boolean nyIArbeidslivet;
 
     private OppgittUtenlandskVirksomhet utenlandskVirksomhet = new OppgittUtenlandskVirksomhet();
 
@@ -139,35 +139,35 @@ public class OppgittEgenNæring implements IndexKey {
         this.begrunnelse = begrunnelse;
     }
 
-    public boolean getNyoppstartet() {
+    public Boolean getNyoppstartet() {
         return nyoppstartet;
     }
 
-    void setNyoppstartet(boolean nyoppstartet) {
+    void setNyoppstartet(Boolean nyoppstartet) {
         this.nyoppstartet = nyoppstartet;
     }
 
-    void setNyIArbeidslivet(boolean nyIArbeidslivet) {
+    void setNyIArbeidslivet(Boolean nyIArbeidslivet) {
         this.nyIArbeidslivet = nyIArbeidslivet;
     }
 
-    public boolean getNyIArbeidslivet() {
+    public Boolean getNyIArbeidslivet() {
         return nyIArbeidslivet;
     }
 
-    public boolean getVarigEndring() {
+    public Boolean getVarigEndring() {
         return varigEndring;
     }
 
-    void setVarigEndring(boolean varigEndring) {
+    void setVarigEndring(Boolean varigEndring) {
         this.varigEndring = varigEndring;
     }
 
-    public boolean getNærRelasjon() {
+    public Boolean getNærRelasjon() {
         return nærRelasjon;
     }
 
-    void setNærRelasjon(boolean nærRelasjon) {
+    void setNærRelasjon(Boolean nærRelasjon) {
         this.nærRelasjon = nærRelasjon;
     }
 
@@ -204,7 +204,9 @@ public class OppgittEgenNæring implements IndexKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, virksomhetOrgnr, virksomhetType, nyoppstartet, regnskapsførerNavn, regnskapsførerTlf, endringDato, begrunnelse,
+        return Objects.hash(periode, virksomhetOrgnr, virksomhetType,
+            nyoppstartet,
+            regnskapsførerNavn, regnskapsførerTlf, endringDato, begrunnelse,
             bruttoInntekt, utenlandskVirksomhet);
     }
 
