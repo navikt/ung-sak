@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -128,10 +130,15 @@ public class ForeslåVedtakRevurderingStegImplTest {
             .medSkjæringstidspunkt(LocalDate.now())
             .medGrunnbeløp(BigDecimal.valueOf(91425))
             .build();
-        BeregningsgrunnlagPeriode.builder()
+        BeregningsgrunnlagPeriode periode = BeregningsgrunnlagPeriode.builder()
             .medBeregningsgrunnlagPeriode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1))
             .medBruttoPrÅr(BigDecimal.valueOf(bruttoPerÅr))
             .build(beregningsgrunnlag);
+        BeregningsgrunnlagPrStatusOgAndel.builder().medAktivitetStatus(AktivitetStatus.FRILANSER)
+            .medBeregnetPrÅr(BigDecimal.valueOf(bruttoPerÅr))
+            .medRedusertBrukersAndelPrÅr(BigDecimal.valueOf(bruttoPerÅr))
+            .build(periode);
+        BeregningsgrunnlagPeriode.builder(periode).build(beregningsgrunnlag);
         return beregningsgrunnlag;
     }
 

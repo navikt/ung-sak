@@ -91,12 +91,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         Beregningsgrunnlag revurderingsBeregning = kalkulusTjeneste.hentFastsatt(revurdering.getId())
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Skal ha Beregningsgrunnlag på positivt vedtak"));
 
-        BigDecimal orginalBeregningSumBruttoPrÅr = orginalBeregning.getBeregningsgrunnlagPerioder().stream()
-            .map(BeregningsgrunnlagPeriode::getBruttoPrÅr).reduce(new BigDecimal(0), BigDecimal::add);
-        BigDecimal revurderingsBeregningSumBruttoPrÅr = revurderingsBeregning.getBeregningsgrunnlagPerioder().stream()
-            .map(BeregningsgrunnlagPeriode::getBruttoPrÅr).reduce(new BigDecimal(0), BigDecimal::add);
-
-        return revurderingsBeregningSumBruttoPrÅr.compareTo(orginalBeregningSumBruttoPrÅr) < 0;
+        return VurderUgunst.erUgunst(orginalBeregning, revurderingsBeregning);
     }
 
 }
