@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
-import no.nav.k9.sak.domene.vedtak.årskvantum.ÅrskvantumDeaktiveringTask;
+import no.nav.k9.sak.domene.vedtak.årskvantum.ÅrskvantumIverksettingService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
@@ -28,6 +28,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     protected ProsessTaskRepository prosessTaskRepository;
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
+    protected ÅrskvantumIverksettingService årskvantumIverksettingService;
 
     protected OpprettProsessTaskIverksettFelles() {
         // for CDI proxy
@@ -35,10 +36,12 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
     public OpprettProsessTaskIverksettFelles(ProsessTaskRepository prosessTaskRepository,
                                              OppgaveTjeneste oppgaveTjeneste,
-                                             InfotrygdFeedService infotrygdFeedService) {
+                                             InfotrygdFeedService infotrygdFeedService,
+                                             ÅrskvantumIverksettingService årskvantumIverksettingService) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
+        this.årskvantumIverksettingService = årskvantumIverksettingService;
     }
 
     @Override
@@ -62,11 +65,6 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
         parallelle.add(opprettTaskSendTilØkonomi());
         avsluttOppgave.ifPresent(parallelle::add);
 
-        if (skalDeaktivereUttak (behandling)) {
-            //Denne setter uttak i årskvantum til inaktivt hvis utfall er avslag
-            parallelle.add(new ProsessTaskData(ÅrskvantumDeaktiveringTask.TASKTYPE));
-        }
-
         taskData.addNesteParallell(parallelle);
 
         // FIXME: Antar at denne er dekket av opprettTaskSendTilØkonomi() ?
@@ -88,6 +86,8 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
         prosessTaskRepository.lagre(opprettTaskVurderOppgaveTilbakekreving(behandling));
 
         infotrygdFeedService.publiserHendelse(behandling);
+
+        årskvantumIverksettingService.meldIfraOmIverksettingTilÅrskvantum(behandling);
     }
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
