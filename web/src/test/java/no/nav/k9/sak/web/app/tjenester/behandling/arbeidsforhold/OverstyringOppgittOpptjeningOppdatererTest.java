@@ -33,7 +33,7 @@ public class OverstyringOppgittOpptjeningOppdatererTest {
 
         SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto = lagDto(true, true, snPeriode, flPeriode, søkerPeriode);
 
-        LocalDate dato = oppdaterer.finnFraOgMedDato(søknadsperiodeOgOppgittOpptjeningDto);
+        LocalDate dato = oppdaterer.finnFraOgMedDatoFL(søknadsperiodeOgOppgittOpptjeningDto);
 
         Assertions.assertThat(dato).isEqualTo(startFL);
     }
@@ -52,7 +52,7 @@ public class OverstyringOppgittOpptjeningOppdatererTest {
 
         SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto = lagDto(true, true, snPeriode, flPeriode, søkerPeriode);
 
-        LocalDate dato = oppdaterer.finnFraOgMedDato(søknadsperiodeOgOppgittOpptjeningDto);
+        LocalDate dato = oppdaterer.finnFraOgMedDatoSN(søknadsperiodeOgOppgittOpptjeningDto);
 
         Assertions.assertThat(dato).isEqualTo(startSN);
     }
