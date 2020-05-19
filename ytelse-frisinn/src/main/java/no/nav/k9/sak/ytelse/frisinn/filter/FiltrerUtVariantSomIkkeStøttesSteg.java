@@ -168,7 +168,4 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .anyMatch(it -> UttakArbeidType.FRILANSER.equals(it.getAktivitetType()));
     }
 
-    private boolean erFrilansOgIkkeNyOppstartet(OppgittFrilans frilans) {
-        return !frilans.getErNyoppstartet();
-    }
 }

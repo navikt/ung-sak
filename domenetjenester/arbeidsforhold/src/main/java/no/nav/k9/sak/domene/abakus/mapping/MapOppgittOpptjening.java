@@ -103,11 +103,15 @@ class MapOppgittOpptjening {
 
             var frilansoppdrag = frilans.getFrilansoppdrag().stream().map(MapTilDto::mapFrilansoppdrag).sorted(COMP_FRILANSOPPDRAG)
                 .collect(Collectors.toList());
-            var frilansDto = new OppgittFrilansDto(frilansoppdrag)
-                .medErNyoppstartet(frilans.getErNyoppstartet())
-                .medHarInntektFraFosterhjem(frilans.getHarInntektFraFosterhjem())
-                .medHarNærRelasjon(frilans.getHarNærRelasjon());
+            var frilansDto = new OppgittFrilansDto(frilansoppdrag);
+            frilansDto.medErNyoppstartet(booleanOrFalse(frilans.getErNyoppstartet()));
+            frilansDto.medHarInntektFraFosterhjem(booleanOrFalse(frilans.getHarInntektFraFosterhjem()));
+            frilansDto.medHarNærRelasjon(booleanOrFalse(frilans.getHarNærRelasjon()));
             return frilansDto;
+        }
+
+        private static boolean booleanOrFalse(Boolean bool) {
+            return bool != null && bool;
         }
 
         private static OppgittArbeidsforholdDto mapArbeidsforhold(OppgittArbeidsforhold arbeidsforhold) {
@@ -149,14 +153,15 @@ class MapOppgittOpptjening {
                 .medBegrunnelse(egenNæring.getBegrunnelse())
                 .medBruttoInntekt(minMax(egenNæring.getBruttoInntekt(), BigDecimal.ZERO, null))
                 .medEndringDato(egenNæring.getEndringDato())
-                .medNyIArbeidslivet(egenNæring.getNyIArbeidslivet())
-                .medNyoppstartet(egenNæring.getNyoppstartet())
-                .medNærRelasjon(egenNæring.getNærRelasjon())
                 .medRegnskapsførerNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(egenNæring.getRegnskapsførerNavn()))
                 .medRegnskapsførerTlf(fjernUnicodeControlOgAlternativeWhitespaceCharacters(egenNæring.getRegnskapsførerTlf()))
-                .medVarigEndring(egenNæring.getVarigEndring())
                 .medVirksomhet(org)
                 .medVirksomhetType(virksomhetType);
+
+            dto.medNyIArbeidslivet(booleanOrFalse(egenNæring.getNyIArbeidslivet()));
+            dto.medNyoppstartet(booleanOrFalse(egenNæring.getNyoppstartet()));
+            dto.medNærRelasjon(booleanOrFalse(egenNæring.getNærRelasjon()));
+            dto.medVarigEndring(booleanOrFalse(egenNæring.getVarigEndring()));
 
             var virksomhet = egenNæring.getVirksomhet();
             if (virksomhet != null) {
@@ -175,7 +180,7 @@ class MapOppgittOpptjening {
         }
 
         private static BigDecimal minMax(BigDecimal val, BigDecimal min, BigDecimal max) {
-            if(val==null) {
+            if (val == null) {
                 return null;
             }
             if (min != null && val.compareTo(min) < 0) {
@@ -251,11 +256,11 @@ class MapOppgittOpptjening {
             frilansBuilder.medHarInntektFraFosterhjem(dto.isHarInntektFraFosterhjem());
 
             var frilansoppdrag = mapEach(dto.getFrilansoppdrag(),
-                    f -> OppgittFrilansOppdragBuilder.ny()
-                            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(f.getPeriode().getFom(), f.getPeriode().getTom()))
-                            .medInntekt(f.getInntekt())
-                            .medOppdragsgiver(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()))
-                            .build());
+                f -> OppgittFrilansOppdragBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(f.getPeriode().getFom(), f.getPeriode().getTom()))
+                    .medInntekt(f.getInntekt())
+                    .medOppdragsgiver(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()))
+                    .build());
 
             frilansBuilder.leggTilOppgittOppdrag(frilansoppdrag);
             return frilansBuilder.build();
