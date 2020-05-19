@@ -3,38 +3,21 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 public class OppgittFrilans {
 
-    private boolean harInntektFraFosterhjem;
+    private Boolean harInntektFraFosterhjem;
 
-    private boolean erNyoppstartet;
+    private Boolean erNyoppstartet;
 
-    private boolean harNærRelasjon;
+    private Boolean harNærRelasjon;
 
     @ChangeTracked
     private List<OppgittFrilansoppdrag> frilansoppdrag;
 
     public OppgittFrilans() {
-    }
-
-    OppgittFrilans(boolean harInntektFraFosterhjem, boolean erNyoppstartet, boolean harNærRelasjon) {
-        this.harInntektFraFosterhjem = harInntektFraFosterhjem;
-        this.erNyoppstartet = erNyoppstartet;
-        this.harNærRelasjon = harNærRelasjon;
-    }
-
-    /** deep copy ctor. */
-    OppgittFrilans(OppgittFrilans kopierFra) {
-        this.harInntektFraFosterhjem = kopierFra.harInntektFraFosterhjem;
-        this.erNyoppstartet = kopierFra.erNyoppstartet;
-        this.harNærRelasjon = kopierFra.harNærRelasjon;
-        this.frilansoppdrag = kopierFra.frilansoppdrag == null
-            ? Collections.emptyList()
-            : kopierFra.frilansoppdrag.stream().map(OppgittFrilansoppdrag::new).collect(Collectors.toList());
     }
 
     @Override
@@ -44,10 +27,10 @@ public class OppgittFrilans {
         if (o == null || !(o instanceof OppgittFrilans))
             return false;
         OppgittFrilans that = (OppgittFrilans) o;
-        return harInntektFraFosterhjem == that.harInntektFraFosterhjem &&
-            erNyoppstartet == that.erNyoppstartet &&
-            harNærRelasjon == that.harNærRelasjon &&
-            Objects.equals(frilansoppdrag, that.frilansoppdrag);
+        return Objects.equals(harInntektFraFosterhjem, that.harInntektFraFosterhjem)
+            && Objects.equals(erNyoppstartet, that.erNyoppstartet)
+            && Objects.equals(harNærRelasjon, that.harNærRelasjon)
+            && Objects.equals(frilansoppdrag, that.frilansoppdrag);
     }
 
     @Override
@@ -65,27 +48,27 @@ public class OppgittFrilans {
             '>';
     }
 
-    public boolean getHarInntektFraFosterhjem() {
+    public Boolean getHarInntektFraFosterhjem() {
         return harInntektFraFosterhjem;
     }
 
-    void setHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
+    void setHarInntektFraFosterhjem(Boolean harInntektFraFosterhjem) {
         this.harInntektFraFosterhjem = harInntektFraFosterhjem;
     }
 
-    void setErNyoppstartet(boolean erNyoppstartet) {
+    void setErNyoppstartet(Boolean erNyoppstartet) {
         this.erNyoppstartet = erNyoppstartet;
     }
 
-    void setHarNærRelasjon(boolean harNærRelasjon) {
+    void setHarNærRelasjon(Boolean harNærRelasjon) {
         this.harNærRelasjon = harNærRelasjon;
     }
 
-    public boolean getErNyoppstartet() {
+    public Boolean getErNyoppstartet() {
         return erNyoppstartet;
     }
 
-    public boolean getHarNærRelasjon() {
+    public Boolean getHarNærRelasjon() {
         return harNærRelasjon;
     }
 

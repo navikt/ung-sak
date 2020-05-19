@@ -111,17 +111,17 @@ public class OppgittOpptjeningBuilder {
             return this;
         }
 
-        public EgenNæringBuilder medNyoppstartet(boolean nyoppstartet) {
+        public EgenNæringBuilder medNyoppstartet(Boolean nyoppstartet) {
             this.entitet.setNyoppstartet(nyoppstartet);
             return this;
         }
 
-        public EgenNæringBuilder medVarigEndring(boolean varigEndring) {
+        public EgenNæringBuilder medVarigEndring(Boolean varigEndring) {
             this.entitet.setVarigEndring(varigEndring);
             return this;
         }
 
-        public EgenNæringBuilder medNærRelasjon(boolean nærRelasjon) {
+        public EgenNæringBuilder medNærRelasjon(Boolean nærRelasjon) {
             this.entitet.setNærRelasjon(nærRelasjon);
             return this;
         }
@@ -140,7 +140,7 @@ public class OppgittOpptjeningBuilder {
             return entitet;
         }
 
-        public EgenNæringBuilder medNyIArbeidslivet(boolean nyIArbeidslivet) {
+        public EgenNæringBuilder medNyIArbeidslivet(Boolean nyIArbeidslivet) {
             this.entitet.setNyIArbeidslivet(nyIArbeidslivet);
             return this;
 
@@ -169,17 +169,17 @@ public class OppgittOpptjeningBuilder {
             return this;
         }
 
-        public OppgittFrilansBuilder medHarInntektFraFosterhjem(boolean harInntektFraFosterhjem) {
+        public OppgittFrilansBuilder medHarInntektFraFosterhjem(Boolean harInntektFraFosterhjem) {
             this.kladd.setHarInntektFraFosterhjem(harInntektFraFosterhjem);
             return this;
         }
 
-        public OppgittFrilansBuilder medErNyoppstartet(boolean erNyoppstartet) {
+        public OppgittFrilansBuilder medErNyoppstartet(Boolean erNyoppstartet) {
             this.kladd.setErNyoppstartet(erNyoppstartet);
             return this;
         }
 
-        public OppgittFrilansBuilder medHarNærRelasjon(boolean harNærRelasjon) {
+        public OppgittFrilansBuilder medHarNærRelasjon(Boolean harNærRelasjon) {
             this.kladd.setHarNærRelasjon(harNærRelasjon);
             return this;
         }
