@@ -40,9 +40,7 @@ create table gr_beregningsgrunnlag
     ENDRET_AV      VARCHAR(20),
     ENDRET_TID     TIMESTAMP(3),
     constraint FK_GR_BEREGNINGSGRUNNLAG_01
-        foreign key (BEHANDLING_ID) references behandling,
-    constraint FK_GR_BEREGNINGSGRUNNLAG_02
-        foreign key (bg_grunnlag_id) references BG_PERIODER
+        foreign key (BEHANDLING_ID) references behandling
 );
 
 create index IDX_GR_BEREGNINGSGRUNNLAG_01
