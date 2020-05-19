@@ -8,14 +8,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
-import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 
 /**
  * Task som utfører noe på en fagsak, før prosessen kjøres videre.
  * Sikrer at fagsaklås task på riktig plass..
  */
 public abstract class FagsakProsessTask implements ProsessTaskHandler {
-    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
 
     private FagsakLåsRepository fagsakLåsRepository;
     private BehandlingLåsRepository behandlingLåsRepository;
@@ -40,11 +38,7 @@ public abstract class FagsakProsessTask implements ProsessTaskHandler {
 
         fagsakLåsRepository.taLås(fagsakId);
 
-        try {
             prosesser(prosessTaskData);
-        } finally {
-            LOG_CONTEXT.clear();
-        }
     }
 
     protected abstract void prosesser(ProsessTaskData prosessTaskData);

@@ -17,7 +17,11 @@ import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.KildeMedTerm;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.LovvalgMedTerm;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.PeriodetypeMedTerm;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.Statuskode;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.TrygdedekningMedTerm;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
 import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
@@ -69,10 +73,10 @@ public class HentMedlemskapFraRegister {
             .medFom(DateUtil.convertToLocalDate(medlemsperiode.getFraOgMed()))
             .medTom(DateUtil.convertToLocalDate(medlemsperiode.getTilOgMed()))
             .medDatoBesluttet(DateUtil.convertToLocalDate(medlemsperiode.getDatoBesluttet()))
-            .medErMedlem(bestemErMedlem(medlemsperiode.getType().getValue()))
-            .medKilde(mapTilKilde(medlemsperiode.getKilde().getValue()))
-            .medDekning(mapTilDekning(medlemsperiode.getTrygdedekning().getValue()))
-            .medLovvalg(mapTilLovvalg(medlemsperiode.getLovvalg().getValue()))
+            .medErMedlem(bestemErMedlem(medlemsperiode.getType()))
+            .medKilde(mapTilKilde(medlemsperiode.getKilde()))
+            .medDekning(mapTilDekning(medlemsperiode.getTrygdedekning()))
+            .medLovvalg(mapTilLovvalg(medlemsperiode.getLovvalg()))
             .medLovvalgsland(finnLovvalgsland(medlemsperiode))
             .medStudieland(finnStudieland(medlemsperiode))
             .medMedlId(medlemsperiode.getId())
@@ -94,10 +98,11 @@ public class HentMedlemskapFraRegister {
         return null;
     }
 
-    private MedlemskapDekningType mapTilDekning(String trygdeDekning) {
+    private MedlemskapDekningType mapTilDekning(TrygdedekningMedTerm term) {
         MedlemskapDekningType dekningType = MedlemskapDekningType.UDEFINERT;
-        if (trygdeDekning != null) {
-            dekningType = MedlemskapsperiodeKoder.getDekningMap().get(trygdeDekning);
+        if (term != null) {
+            String strTerm = term.getValue();
+            dekningType = MedlemskapsperiodeKoder.getDekningMap().get(strTerm);
             if (dekningType == null) {
                 dekningType = MedlemskapDekningType.UDEFINERT;
             }
@@ -105,49 +110,54 @@ public class HentMedlemskapFraRegister {
         return dekningType;
     }
 
-    private MedlemskapType mapTilLovvalg(String lovvalg) {
+    private MedlemskapType mapTilLovvalg(LovvalgMedTerm term) {
         MedlemskapType medlemskapType = MedlemskapType.UDEFINERT;
-        if (lovvalg != null) {
-            if (MedlemskapsperiodeKoder.Lovvalg.ENDL.name().compareTo(lovvalg) == 0) {
+        if (term != null) {
+            String strTerm = term.getValue();
+            if (MedlemskapsperiodeKoder.Lovvalg.ENDL.name().equals(strTerm)) {
                 medlemskapType = MedlemskapType.ENDELIG;
             }
-            if (MedlemskapsperiodeKoder.Lovvalg.UAVK.name().compareTo(lovvalg) == 0) {
+            if (MedlemskapsperiodeKoder.Lovvalg.UAVK.name().equals(strTerm)) {
                 medlemskapType = MedlemskapType.UNDER_AVKLARING;
             }
-            if (MedlemskapsperiodeKoder.Lovvalg.FORL.name().compareTo(lovvalg) == 0) {
+            if (MedlemskapsperiodeKoder.Lovvalg.FORL.name().equals(strTerm)) {
                 medlemskapType = MedlemskapType.FORELOPIG;
             }
         }
         return medlemskapType;
     }
 
-    private MedlemskapKildeType mapTilKilde(String kilde) {
+    private MedlemskapKildeType mapTilKilde(KildeMedTerm term) {
         MedlemskapKildeType kildeType = MedlemskapKildeType.UDEFINERT;
-        if (kilde != null) {
-            kildeType = MedlemskapKildeType.fraKode(kilde);
-            if (kildeType == null) {
-                kildeType = MedlemskapKildeType.ANNEN;
-            }
-            if (MedlemskapKildeType.SRVGOSYS.equals(kildeType)) {
-                kildeType = MedlemskapKildeType.FS22;
-            }
-            if (MedlemskapKildeType.SRVMELOSYS.equals(kildeType)) {
-                kildeType = MedlemskapKildeType.MEDL;
+        if (term != null) {
+            String strTerm = term.getValue();
+            if (strTerm != null) {
+                kildeType = MedlemskapKildeType.fraKode(strTerm);
+                if (kildeType == null) {
+                    kildeType = MedlemskapKildeType.ANNEN;
+                }
+                if (MedlemskapKildeType.SRVGOSYS.equals(kildeType)) {
+                    kildeType = MedlemskapKildeType.FS22;
+                }
+                if (MedlemskapKildeType.SRVMELOSYS.equals(kildeType)) {
+                    kildeType = MedlemskapKildeType.MEDL;
+                }
             }
         }
         return kildeType;
     }
 
-    private boolean bestemErMedlem(String value) {
+    private boolean bestemErMedlem(PeriodetypeMedTerm term) {
         boolean erMedlem = false;
-        if (value != null) {
-            if (MedlemskapsperiodeKoder.PeriodeType.PMMEDSKP.name().compareTo(value) == 0) {
+        if (term != null) {
+            String strTerm = term.getValue();
+            if (MedlemskapsperiodeKoder.PeriodeType.PMMEDSKP.name().equals(strTerm)) {
                 erMedlem = true;
             }
-            if (MedlemskapsperiodeKoder.PeriodeType.PUMEDSKP.name().compareTo(value) == 0) {
+            if (MedlemskapsperiodeKoder.PeriodeType.PUMEDSKP.name().equals(strTerm)) {
                 erMedlem = false;
             }
-            if (MedlemskapsperiodeKoder.PeriodeType.E500INFO.name().compareTo(value) == 0) {
+            if (MedlemskapsperiodeKoder.PeriodeType.E500INFO.name().equals(strTerm)) {
                 erMedlem = false;
             }
         }
