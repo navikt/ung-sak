@@ -84,16 +84,6 @@ public class IverksetteVedtakStegYtelseTest {
     private InfotrygdFeedService infotrygdFeedService;
 
 
-    @Mock
-    private ProsessTaskRepository prosessTaskRepository;
-
-    @Mock
-    private OppgaveTjeneste oppgaveTjeneste;
-
-    @Mock
-    private InfotrygdFeedService infotrygdFeedService;
-
-
     private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
 
     @Before
