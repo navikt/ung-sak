@@ -59,10 +59,11 @@ class MapFraÅrskvantumResultat {
         List<LocalDateSegment<UttakAktivitet>> segmenter = new ArrayList<>();
         for (Aktivitet aktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
             for (Uttaksperiode p : aktivitet.getUttaksperioder()) {
-                LocalDateSegment<UttakAktivitet> uttakAktivitetLocalDateSegment =
-                    new LocalDateSegment<>(p.component1().getFom(), p.getPeriode().getTom(), mapTilUttaksAktiviteter(p, aktivitet.getArbeidsforhold()));
-                segmenter.add(uttakAktivitetLocalDateSegment);
-
+                if (p.getUtfall() == Utfall.INNVILGET) {
+                    LocalDateSegment<UttakAktivitet> uttakAktivitetLocalDateSegment =
+                        new LocalDateSegment<>(p.component1().getFom(), p.getPeriode().getTom(), mapTilUttaksAktiviteter(p, aktivitet.getArbeidsforhold()));
+                    segmenter.add(uttakAktivitetLocalDateSegment);
+                }
             }
         }
 
