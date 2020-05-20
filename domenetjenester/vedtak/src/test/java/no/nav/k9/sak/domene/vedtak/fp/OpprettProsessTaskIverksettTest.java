@@ -27,7 +27,6 @@ import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
-import no.nav.k9.sak.domene.vedtak.årskvantum.ÅrskvantumIverksettingService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -54,8 +53,6 @@ public class OpprettProsessTaskIverksettTest {
     @Mock
     private InfotrygdFeedService infotrygdFeedService;
 
-    @Mock
-    private ÅrskvantumIverksettingService årskvantumIverksettingService;
 
     private Behandling behandling;
     private OpprettProsessTaskIverksett opprettProsessTaskIverksett;
@@ -64,7 +61,7 @@ public class OpprettProsessTaskIverksettTest {
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, årskvantumIverksettingService);
+        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
     }
 
     @Test

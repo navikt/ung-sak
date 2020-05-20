@@ -5,7 +5,6 @@ import javax.inject.Inject;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.vedtak.årskvantum.ÅrskvantumIverksettingService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
@@ -21,8 +20,7 @@ public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksett
     @Inject
     public OpprettProsessTaskIverksettImpl(ProsessTaskRepository prosessTaskRepository,
                                            OppgaveTjeneste oppgaveTjeneste,
-                                           InfotrygdFeedService infotrygdFeedService,
-                                           ÅrskvantumIverksettingService årskvantumIverksettingService) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, årskvantumIverksettingService);
+                                           InfotrygdFeedService infotrygdFeedService) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
     }
 }

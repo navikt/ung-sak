@@ -14,7 +14,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
-import no.nav.k9.sak.domene.vedtak.årskvantum.ÅrskvantumIverksettingService;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
@@ -27,7 +26,6 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     protected ProsessTaskRepository prosessTaskRepository;
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
-    protected ÅrskvantumIverksettingService årskvantumIverksettingService;
 
     protected OpprettProsessTaskIverksettFelles() {
         // for CDI proxy
@@ -35,12 +33,10 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
     public OpprettProsessTaskIverksettFelles(ProsessTaskRepository prosessTaskRepository,
                                              OppgaveTjeneste oppgaveTjeneste,
-                                             InfotrygdFeedService infotrygdFeedService,
-                                             ÅrskvantumIverksettingService årskvantumIverksettingService) {
+                                             InfotrygdFeedService infotrygdFeedService) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
-        this.årskvantumIverksettingService = årskvantumIverksettingService;
     }
 
     @Override
@@ -86,7 +82,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         infotrygdFeedService.publiserHendelse(behandling);
 
-        årskvantumIverksettingService.meldIfraOmIverksettingTilÅrskvantum(behandling);
+        meldIfraOmIverksettingTilÅrskvantum(behandling);
     }
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {

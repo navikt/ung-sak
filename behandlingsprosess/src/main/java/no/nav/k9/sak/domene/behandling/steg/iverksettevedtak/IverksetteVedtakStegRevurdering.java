@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -17,26 +19,21 @@ import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 @FagsakYtelseTypeRef
 @ApplicationScoped
 public class IverksetteVedtakStegRevurdering extends IverksetteVedtakStegTilgrensendeFelles {
-
-    private OpprettProsessTaskIverksett opprettProsessTaskIverksett;
-
+    private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
     IverksetteVedtakStegRevurdering() {
         // for CDI proxy
     }
-
-
     @Inject
     public IverksetteVedtakStegRevurdering(BehandlingRepositoryProvider repositoryProvider,
-                                           @FagsakYtelseTypeRef OpprettProsessTaskIverksett opprettProsessTaskIverksett,
+                                           @Any Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett,
                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
-                                           IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse, 
+                                           IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse,
                                            IverksetteVedtakStatistikk metrikker) {
         super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse, metrikker);
         this.opprettProsessTaskIverksett = opprettProsessTaskIverksett;
     }
-
     @Override
     protected void iverksetter(Behandling behandling) {
-        opprettProsessTaskIverksett.opprettIverksettingstasker(behandling);
+        BehandlingTypeRef.Lookup.find(OpprettProsessTaskIverksett.class, opprettProsessTaskIverksett, behandling.getFagsakYtelseType(), behandling.getType()).orElseThrow().opprettIverksettingstasker(behandling);
     }
 }

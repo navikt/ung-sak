@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -18,7 +20,7 @@ import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 @ApplicationScoped
 public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgrensendeFelles {
 
-    private OpprettProsessTaskIverksett opprettProsessTaskIverksett;
+    private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
 
     IverksetteVedtakStegFørstegang() {
         // for CDI proxy
@@ -26,7 +28,7 @@ public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgren
 
     @Inject
     public IverksetteVedtakStegFørstegang(BehandlingRepositoryProvider repositoryProvider,
-                                          @FagsakYtelseTypeRef OpprettProsessTaskIverksett opprettProsessTaskIverksett,
+                                          @Any Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett,
                                           VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
                                           IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse,
                                           IverksetteVedtakStatistikk metrikker) {
@@ -36,6 +38,6 @@ public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgren
 
     @Override
     protected void iverksetter(Behandling behandling) {
-        opprettProsessTaskIverksett.opprettIverksettingstasker(behandling);
+        BehandlingTypeRef.Lookup.find(OpprettProsessTaskIverksett.class, opprettProsessTaskIverksett, behandling.getFagsakYtelseType(), behandling.getType()).orElseThrow().opprettIverksettingstasker(behandling);
     }
 }

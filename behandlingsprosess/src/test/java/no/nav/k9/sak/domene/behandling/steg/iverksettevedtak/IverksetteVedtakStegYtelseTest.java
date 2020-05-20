@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import javax.enterprise.inject.Instance;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +38,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotr
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
+import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -55,7 +57,7 @@ public class IverksetteVedtakStegYtelseTest {
     private Behandling behandling;
 
     @Mock
-    private OpprettProsessTaskIverksettImpl opprettProsessTaskIverksett;
+    private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
 
     private Repository repository = repoRule.getRepository();
     private BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
@@ -69,15 +71,15 @@ public class IverksetteVedtakStegYtelseTest {
 
     @Mock
     private IverksetteVedtakStatistikk metrikker;
-    
+
     private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
 
     @Before
     public void setup() {
-        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider, 
-            opprettProsessTaskIverksett, 
+        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider,
+            opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse,
-            iverksettingSkalIkkeStoppesAvOverlappendeYtelse, 
+            iverksettingSkalIkkeStoppesAvOverlappendeYtelse,
             metrikker);
         behandling = opprettBehandling();
     }
