@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.årskvantum;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -10,7 +10,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 
-@ApplicationScoped
+@Dependent
 public class ÅrskvantumIverksettingService {
 
     private Instance<ÅrskvantumDeaktiveringTjeneste> deaktiveringTjeneste;
