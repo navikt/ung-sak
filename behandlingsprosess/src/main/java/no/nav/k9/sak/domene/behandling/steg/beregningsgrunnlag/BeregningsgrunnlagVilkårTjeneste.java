@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.weld.exceptions.UnsupportedOperationException;
+
+import com.google.common.collect.ImmutableSet;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -159,7 +162,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
             () -> new UnsupportedOperationException("Har ikke " + VilkårsPerioderTilVurderingTjeneste.class.getName() + " for ytelsetype=" + ytelseTypeKode));
 
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-        var perioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var perioder = new HashSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
 
         if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
             var avslåttePerioder = vilkår.get()
@@ -171,7 +174,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
             perioder.removeAll(avslåttePerioder);
         }
-        return perioder;
+        return ImmutableSet.copyOf(perioder);
     }
 
 }

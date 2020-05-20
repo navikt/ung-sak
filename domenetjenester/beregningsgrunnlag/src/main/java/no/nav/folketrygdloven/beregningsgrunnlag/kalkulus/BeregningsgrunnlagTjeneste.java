@@ -21,6 +21,7 @@ import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -85,6 +86,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
         return vilkår.getPerioder()
             .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .map(it -> hentEksaktFastsatt(ref, it)) // TODO:
             .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))

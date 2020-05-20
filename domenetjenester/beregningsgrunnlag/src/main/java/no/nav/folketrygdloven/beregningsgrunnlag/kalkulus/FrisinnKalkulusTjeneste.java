@@ -41,12 +41,9 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         super(restTjeneste, fagsakRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
     }
 
-
-
-
     @Override
     public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
-        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, referanse.getBehandlingUuid(), referanse.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt());
+        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
         if (startBeregningRequest.getKalkulatorInput().getOpptjeningAktiviteter().getPerioder().isEmpty()) {
             FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
             if (frisinnGrunnlag.getSøkerYtelseForFrilans()) {
