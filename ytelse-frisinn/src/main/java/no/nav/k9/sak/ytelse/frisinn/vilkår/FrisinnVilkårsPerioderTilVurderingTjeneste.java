@@ -31,8 +31,8 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     @Inject
     public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder, UttakRepository uttakRepository) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
-        final var søktePerioder = new SøktePerioder(uttakRepository);
-        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder);
+        final var beregningPeriode = new BeregningPeriode(uttakRepository);
+        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
         this.vilkårUtleder = vilkårUtleder;
     }
 

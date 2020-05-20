@@ -9,14 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 // Bruker en primitiv variant av Composite for å kunne vurderes enkeltvis (løvnode) og sammensatt (rotnode)
 public class EndringsresultatSnapshot {
 
-    private Object grunnlagId;
+    private Long grunnlagId;
+    private UUID grunnlagUuid;
     private Class<?> grunnlagKlasse;
 
     private List<EndringsresultatSnapshot> children = emptyList();
@@ -29,9 +30,14 @@ public class EndringsresultatSnapshot {
     }
 
     // Brukes som Composite-løvnode
-    private EndringsresultatSnapshot(Class<?> grunnlagKlasse, Object grunnlagId) {
+    private EndringsresultatSnapshot(Class<?> grunnlagKlasse, Long grunnlagId) {
         this.grunnlagKlasse = grunnlagKlasse;
         this.grunnlagId = grunnlagId;
+    }
+
+    public EndringsresultatSnapshot(Class<?> grunnlagKlasse, UUID id) {
+        this.grunnlagKlasse = grunnlagKlasse;
+        this.grunnlagUuid = id;
     }
 
     // Oppretter Composite-rotnode
@@ -40,13 +46,18 @@ public class EndringsresultatSnapshot {
     }
 
     // Oppretter Composite-løvnode
-    public static EndringsresultatSnapshot medSnapshot(Class<?> aggregat, Object id) {
+    public static EndringsresultatSnapshot medSnapshot(Class<?> aggregat, Long id) {
+        return new EndringsresultatSnapshot(aggregat, id);
+    }
+
+    // Oppretter Composite-løvnode
+    public static EndringsresultatSnapshot medSnapshot(Class<?> aggregat, UUID id) {
         return new EndringsresultatSnapshot(aggregat, id);
     }
 
     // Oppretter Composite-løvnode
     public static EndringsresultatSnapshot utenSnapshot(Class<?> aggregat) {
-        return new EndringsresultatSnapshot(aggregat, null);
+        return new EndringsresultatSnapshot(aggregat, (UUID) null);
     }
 
     private List<EndringsresultatSnapshot> getChildren() {
@@ -57,9 +68,14 @@ public class EndringsresultatSnapshot {
         return children.isEmpty() ? singletonList(this) : children;
     }
 
-    @SuppressWarnings("unchecked")
-    public <C> Class<C> getGrunnlag() {
-        return (Class<C>) grunnlagKlasse;
+    public Object getGrunnlagRef() {
+        if (grunnlagId != null) {
+            return grunnlagId;
+        }
+        if (grunnlagUuid != null) {
+            return grunnlagUuid;
+        }
+        return null;
     }
 
     public EndringsresultatSnapshot leggTil(EndringsresultatSnapshot endringsresultat) {
@@ -71,7 +87,7 @@ public class EndringsresultatSnapshot {
     public String toString() {
         return "Endringer{" +
             "grunnlagKlasse='" + grunnlagKlasse.getSimpleName() + '\'' +
-            ", grunnlagId=" + grunnlagId +
+            ", grunnlagId=" + getGrunnlagRef() +
             ", type=" + (children.isEmpty() ? "løvnode" : "rotnode") +
             (children.isEmpty() ? "" : (", children=" + children)) +
             '}' + "\n";
@@ -80,11 +96,11 @@ public class EndringsresultatSnapshot {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o==null || !(o instanceof EndringsresultatSnapshot)) return false;
+        if (o == null || !(o instanceof EndringsresultatSnapshot)) return false;
 
         EndringsresultatSnapshot that = (EndringsresultatSnapshot) o;
 
-        return Objects.equals(grunnlagId, that.grunnlagId) &&
+        return Objects.equals(getGrunnlagRef(), that.getGrunnlagRef()) &&
             Objects.equals(grunnlagKlasse, that.grunnlagKlasse);
     }
 
@@ -93,24 +109,18 @@ public class EndringsresultatSnapshot {
         return Objects.hash(grunnlagId, grunnlagKlasse);
     }
 
-    public Optional<EndringsresultatSnapshot> hentDelresultat(Class<?> aggregatKlasse) {
-        return getChildren().stream()
-            .filter(it -> it.getGrunnlag().equals(aggregatKlasse))
-            .findFirst();
-    }
-
     // Sammenstill grunnlagenes snapshot av id, dvs tupple av (grunnlagKlasse, grunnlagId1, grunnlagId2)
     public EndringsresultatDiff minus(EndringsresultatSnapshot etter) {
         EndringsresultatSnapshot før = this;
         EndringsresultatDiff idDiff = EndringsresultatDiff.opprett();
 
         Map<Class<?>, Object> førMap = new HashMap<>();
-        før.children.stream().forEach(endring ->
-            førMap.put(endring.grunnlagKlasse, endring.grunnlagId));
+        før.children.forEach(endring ->
+            førMap.put(endring.grunnlagKlasse, endring.getGrunnlagRef()));
 
         Map<Class<?>, Object> etterMap = new HashMap<>();
-        etter.children.stream().forEach(endring ->
-            etterMap.put(endring.grunnlagKlasse, endring.grunnlagId));
+        etter.children.forEach(endring ->
+            etterMap.put(endring.grunnlagKlasse, endring.getGrunnlagRef()));
 
         Set<Class<?>> alleGrunnlagsklasser = Stream.concat(førMap.keySet().stream(), etterMap.keySet().stream())
             .collect(toSet());
@@ -119,9 +129,5 @@ public class EndringsresultatSnapshot {
             idDiff.leggTilIdDiff(EndringsresultatDiff.medDiff(grunnlag, førMap.get(grunnlag), etterMap.get(grunnlag))));
 
         return idDiff;
-    }
-
-    public Object getGrunnlagId() {
-        return grunnlagId;
     }
 }

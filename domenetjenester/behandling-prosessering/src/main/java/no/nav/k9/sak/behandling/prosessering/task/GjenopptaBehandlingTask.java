@@ -3,14 +3,12 @@ package no.nav.k9.sak.behandling.prosessering.task;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -29,7 +27,6 @@ public class GjenopptaBehandlingTask implements ProsessTaskHandler {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private RegisterdataEndringshåndterer registerdataOppdaterer;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     GjenopptaBehandlingTask() {
@@ -39,12 +36,10 @@ public class GjenopptaBehandlingTask implements ProsessTaskHandler {
     @Inject
     public GjenopptaBehandlingTask(BehandlingRepository behandlingRepository,
                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                   RegisterdataEndringshåndterer registerdataOppdaterer,
                                    BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.registerdataOppdaterer = registerdataOppdaterer;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
     }
 
@@ -62,10 +57,5 @@ public class GjenopptaBehandlingTask implements ProsessTaskHandler {
         behandlendeEnhetTjeneste.sjekkEnhetEtterEndring(behandling).ifPresent(organisasjonsEnhet -> {
             behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, organisasjonsEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, "");
         });
-
-        if (behandling.erYtelseBehandling() && behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.INNHENT_REGISTEROPP)) {
-            registerdataOppdaterer.oppdaterRegisteropplysningerOgReposisjonerBehandlingVedEndringer(behandling);
-        }
-        behandlingskontrollTjeneste.prosesserBehandling(kontekst);
     }
 }

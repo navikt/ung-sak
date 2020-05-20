@@ -317,6 +317,7 @@ public class BehandlingDtoTjeneste {
 
         lagVarselOmRevurderingLink(behandling).ifPresent(dto::leggTil);
         lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
+        lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
         lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
 
@@ -330,6 +331,7 @@ public class BehandlingDtoTjeneste {
         switch (ytelseType) {
             case FRISINN:
                 dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_OPPGITT, "uttak-oppgitt", uuidQueryParams));
+                dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.OPPGITT_OPPTJEING_PATH, "oppgitt-opptjening", uuidQueryParams));
                 break;
             case OMSORGSPENGER:
@@ -403,6 +405,10 @@ public class BehandlingDtoTjeneste {
     private Optional<ResourceLink> lagBeregningsgrunnlagLink(Behandling behandling) {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", queryParams));
+    }
+    private Optional<ResourceLink> lagBeregningsgrunnlagAlleLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_ALLE, "beregningsgrunnlag-alle", queryParams));
     }
 
     private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref) {

@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -24,7 +25,7 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregnings
 @DtoTilServiceAdapter(dto = OverstyrBeregningsgrunnlagDto.class, adapter = Overstyringshåndterer.class)
 public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyringshåndterer<OverstyrBeregningsgrunnlagDto> {
 
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
 
     BeregningsgrunnlagOverstyringshåndterer() {
         // for CDI proxy
@@ -32,7 +33,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
 
     @Inject
     public BeregningsgrunnlagOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
-                                                   KalkulusTjeneste kalkulusTjeneste) {
+                                                   BeregningTjeneste kalkulusTjeneste) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG);
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
@@ -41,7 +42,7 @@ public class BeregningsgrunnlagOverstyringshåndterer extends AbstractOverstyrin
     public OppdateringResultat håndterOverstyring(OverstyrBeregningsgrunnlagDto dto,
                                                   Behandling behandling, BehandlingskontrollKontekst kontekst) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.mapOverstyring(dto);
-        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, BehandlingReferanse.fra(behandling));
+        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, BehandlingReferanse.fra(behandling), dto.getPeriode().getFom());
         // Lag historikk
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         fjernOverstyrtAksjonspunkt(behandling)

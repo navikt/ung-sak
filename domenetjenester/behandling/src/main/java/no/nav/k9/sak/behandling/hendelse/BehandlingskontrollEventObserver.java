@@ -113,7 +113,7 @@ public class BehandlingskontrollEventObserver {
             .medAktørId(behandling.getAktørId().getId())
             .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
             .medEventHendelse(eventHendelse)
-            .medBehandlinStatus(behandling.getStatus().getKode())
+            .medBehandlingStatus(behandling.getStatus().getKode())
             .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())

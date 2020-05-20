@@ -50,20 +50,21 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         Optional<String> hendelse = Optional.ofNullable(prosessTaskData.getPropertyValue(ProsessTaskData.HENDELSE_PROPERTY));
-        if (hendelse.isPresent()) {
+        if (hendelse.isPresent() && !prosessTaskData.getPropertyValue(OPPDATERT_GRUNNLAG_KEY).isEmpty()) {
             validerHendelse(prosessTaskData);
             return;
         }
 
-        boolean overstyr = prosessTaskData.getPropertyValue(OVERSTYR_KEY) != null && OVERSTYR_VALUE.equals(prosessTaskData.getPropertyValue(OVERSTYR_KEY));
-        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
-        LOGGER.info("Innhenter IAY-opplysninger i abakus for behandling: {}", behandling.getId());
-        if (overstyr) {
-            registerdataInnhenter.innhentFullIAYIAbakus(behandling);
-            return;
+        if (hendelse.isEmpty()) {
+            boolean overstyr = prosessTaskData.getPropertyValue(OVERSTYR_KEY) != null && OVERSTYR_VALUE.equals(prosessTaskData.getPropertyValue(OVERSTYR_KEY));
+            Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+            LOGGER.info("Innhenter IAY-opplysninger i abakus for behandling: {}", behandling.getId());
+            if (overstyr) {
+                registerdataInnhenter.innhentFullIAYIAbakus(behandling);
+                return;
+            }
+            registerdataInnhenter.innhentIAYIAbakus(behandling);
         }
-        registerdataInnhenter.innhentIAYIAbakus(behandling);
-
         settTaskPåVent(prosessTaskData);
     }
 

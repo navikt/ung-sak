@@ -4,6 +4,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -17,21 +18,21 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBere
 public class FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer implements AksjonspunktOppdaterer<FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto>{
 
 
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
 
     FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer() {
         // CDI
     }
 
     @Inject
-    public FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer(KalkulusTjeneste kalkulusTjeneste) {
+    public FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer(BeregningTjeneste kalkulusTjeneste) {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto dto, AksjonspunktOppdaterParameter param) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef());
+        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
         return OppdateringResultat.utenOveropp();
 
     }

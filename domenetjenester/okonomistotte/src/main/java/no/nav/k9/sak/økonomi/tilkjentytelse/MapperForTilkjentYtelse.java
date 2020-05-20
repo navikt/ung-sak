@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
@@ -24,8 +25,10 @@ public class MapperForTilkjentYtelse {
 
     private static final Logger logger = LoggerFactory.getLogger(MapperForTilkjentYtelse.class);
 
-    public MapperForTilkjentYtelse() {
-        //hindrer instansiering, som gjør sonarqube glad
+    private final SatsType satsType;
+
+    public MapperForTilkjentYtelse(FagsakYtelseType ytelseType) {
+        satsType = ytelseType == FagsakYtelseType.OMSORGSPENGER ? SatsType.DAG7 : SatsType.DAG;
     }
 
     public List<TilkjentYtelsePeriodeV1> mapTilkjentYtelse(BeregningsresultatEntitet beregningsresultat) {
@@ -34,15 +37,15 @@ public class MapperForTilkjentYtelse {
         }
         return beregningsresultat.getBeregningsresultatPerioder()
             .stream()
-            .map(MapperForTilkjentYtelse::mapPeriode)
+            .map(this::mapPeriode)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 
-    private static TilkjentYtelsePeriodeV1 mapPeriode(BeregningsresultatPeriode periode) {
+    private TilkjentYtelsePeriodeV1 mapPeriode(BeregningsresultatPeriode periode) {
         List<TilkjentYtelseAndelV1> andeler = periode.getBeregningsresultatAndelList()
             .stream()
-            .map(MapperForTilkjentYtelse::mapAndel)
+            .map(this::mapAndel)
             .filter(andel -> andel.getSatsBeløp() != 0)
             .collect(Collectors.toList());
 
@@ -54,7 +57,7 @@ public class MapperForTilkjentYtelse {
         return new TilkjentYtelsePeriodeV1(periode.getBeregningsresultatPeriodeFom(), periode.getBeregningsresultatPeriodeTom(), andeler);
     }
 
-    private static TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel) {
+    private TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel) {
         TilkjentYtelseAndelV1 resultat = mapAndelUtenFeriepenger(andel);
         resultat.medUtbetalingsgrad(andel.getUtbetalingsgrad());
         for (BeregningsresultatFeriepengerPrÅr feriepengerPrÅr : andel.getBeregningsresultatFeriepengerPrÅrListe()) {
@@ -65,11 +68,9 @@ public class MapperForTilkjentYtelse {
         return resultat;
     }
 
-    private static TilkjentYtelseAndelV1 mapAndelUtenFeriepenger(BeregningsresultatAndel andel) {
+    private TilkjentYtelseAndelV1 mapAndelUtenFeriepenger(BeregningsresultatAndel andel) {
         Inntektskategori inntektskategori = MapperForInntektskategori.mapInntektskategori(andel.getInntektskategori());
         int dagsats = andel.getDagsats();
-        SatsType satsType = SatsType.DAG;
-
 
         TilkjentYtelseAndelV1 andelV1 = andel.erBrukerMottaker()
             ? TilkjentYtelseAndelV1.tilBruker(inntektskategori, dagsats, satsType)

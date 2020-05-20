@@ -3,6 +3,9 @@ package no.nav.k9.sak.domene.behandling.steg.iverksettevedtak;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -14,8 +17,9 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
@@ -27,6 +31,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 @ApplicationScoped
 public class HenleggBehandlingTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(HenleggBehandlingTjeneste.class);
+    
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
@@ -34,6 +40,7 @@ public class HenleggBehandlingTjeneste {
     private SøknadRepository søknadRepository;
     private FagsakRepository fagsakRepository;
     private HistorikkRepository historikkRepository;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     public HenleggBehandlingTjeneste() {
         // for CDI proxy
@@ -43,7 +50,9 @@ public class HenleggBehandlingTjeneste {
     public HenleggBehandlingTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                      DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                                     FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      ProsessTaskRepository prosessTaskRepository) {
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
@@ -53,18 +62,26 @@ public class HenleggBehandlingTjeneste {
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
     }
 
-    public void henleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, false);
-    }
-
-    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, boolean avbrytVentendeAutopunkt) {
+    public void henleggBehandlingAvSaksbehandler(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
         BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (avbrytVentendeAutopunkt && behandling.isBehandlingPåVent()) {
+        var søknad = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
+        if (søknad.isEmpty()) {
+            // Må ta behandling av vent for å tillate henleggelse (krav i Behandlingskontroll)
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
         } else {
-            håndterHenleggelseUtenOppgitteSøknadsopplysninger(behandling, kontekst);
+            // har søknad og saksbehandler forsøker å ta av vent
         }
+        
+        fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
+        
+        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+    }
+
+    private void doHenleggBehandling(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør historikkAktør) {
+        BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        
         behandlingskontrollTjeneste.henleggBehandling(kontekst, årsakKode);
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
@@ -73,11 +90,28 @@ public class HenleggBehandlingTjeneste {
             fagsakRepository.fagsakSkalBehandlesAvInfotrygd(behandling.getFagsakId());
             opprettOppgaveTilInfotrygd(behandling);
         }
-        lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, HistorikkAktør.SAKSBEHANDLER);
+        lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
     }
 
-    public void henleggBehandlingAvbrytAutopunkter(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, true);
+    /** Henlegger helt - for forvaltning først og fremst. */
+    public void henleggBehandlingOgAksjonspunkter(String behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
+        BehandlingskontrollKontekst kontekst =  behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        
+        fagsakProsessTaskRepository.ryddProsessTasks(behandling.getFagsakId(), behandling.getId());  // rydd tidligere tasks (eks. registerinnhenting, etc)
+        
+        if(behandling.isBehandlingHenlagt()) {
+            // er allerede henlagt - en saksbehandler kom oss i forkjøpet
+            Fagsak fagsak = behandling.getFagsak();
+            log.warn("Behandling [fagsakId={}, saksnummer={}, behandlingId={}, ytelseType={}] er allerede henlagt", fagsak.getId(), fagsak.getSaksnummer(), behandling.getId(), fagsak.getYtelseType());
+            return;
+        }
+        
+        if(behandling.isBehandlingPåVent()) {
+            behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
+        }
+        
+        doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     private void opprettOppgaveTilInfotrygd(Behandling behandling) {
@@ -85,14 +119,6 @@ public class HenleggBehandlingTjeneste {
         data.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         data.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(data);
-    }
-
-    private void håndterHenleggelseUtenOppgitteSøknadsopplysninger(Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
-        if (søknad == null) {
-            // Må ta behandling av vent for å tillate henleggelse (krav i Behandlingskontroll)
-            behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
-        }
     }
 
     private void sendHenleggelsesbrev(long behandlingId, HistorikkAktør aktør) {

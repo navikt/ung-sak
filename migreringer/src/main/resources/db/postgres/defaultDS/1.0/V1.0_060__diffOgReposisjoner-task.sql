@@ -1,0 +1,1 @@
+Insert into PROSESS_TASK_TYPE (KODE,NAVN,FEIL_MAKS_FORSOEK,FEIL_SEK_MELLOM_FORSOEK,FEILHANDTERING_ALGORITME,BESKRIVELSE) values ('grunnlag.diffOgReposisjoner','Differ behandlingsgrunnlag',1,60,'DEFAULT','Differ behandlingsgrunnlag og flytter pekern hvis tilfelle');

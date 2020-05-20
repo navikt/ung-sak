@@ -1,12 +1,12 @@
 package no.nav.k9.sak.domene.medlem.api;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
-
-import java.time.LocalDate;
-import java.util.Objects;
 
 public class Medlemskapsperiode {
     private LocalDate fom;
@@ -125,50 +125,66 @@ public class Medlemskapsperiode {
         return Objects.hash(fom, tom, datoBesluttet, erMedlem, trygdedekning, kilde, lovvalg, lovvalgsland, studieland, medlId);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+            + String.format("<medlId=%s,fom=%s,tom=%s,erMedlem=%s,trygdedekning=%s,kilde=%s,lovvalg=%s,lovvalgsland=%s>", medlId, fom, tom, erMedlem, trygdedekning, kilde, lovvalg, lovvalgsland);
+    }
+
     public static class Builder {
         private Medlemskapsperiode periodeMal = new Medlemskapsperiode();
 
-        public Builder medFom(LocalDate fom){
+        public Builder medFom(LocalDate fom) {
             periodeMal.setFom(fom);
             return this;
         }
-        public Builder medTom(LocalDate tom){
+
+        public Builder medTom(LocalDate tom) {
             periodeMal.setTom(tom);
             return this;
         }
-        public Builder medDatoBesluttet(LocalDate datoBesluttet){
+
+        public Builder medDatoBesluttet(LocalDate datoBesluttet) {
             periodeMal.setDatoBesluttet(datoBesluttet);
             return this;
         }
-        public Builder medDekning(MedlemskapDekningType dekning){
+
+        public Builder medDekning(MedlemskapDekningType dekning) {
             periodeMal.setTrygdedekning(dekning);
             return this;
         }
-        public Builder medErMedlem(boolean erMedlem){
+
+        public Builder medErMedlem(boolean erMedlem) {
             periodeMal.setErMedlem(erMedlem);
             return this;
         }
-        public Builder medKilde(MedlemskapKildeType kilde){
+
+        public Builder medKilde(MedlemskapKildeType kilde) {
             periodeMal.setKilde(kilde);
             return this;
         }
-        public Builder medLovvalg(MedlemskapType lovvalg){
+
+        public Builder medLovvalg(MedlemskapType lovvalg) {
             periodeMal.setLovvalg(lovvalg);
             return this;
         }
-        public Builder medLovvalgsland(Landkoder lovvalgsland){
+
+        public Builder medLovvalgsland(Landkoder lovvalgsland) {
             periodeMal.setLovvalgsland(lovvalgsland);
             return this;
         }
-        public Builder medStudieland(Landkoder studieland){
+
+        public Builder medStudieland(Landkoder studieland) {
             periodeMal.setStudieland(studieland);
             return this;
         }
-        public Builder medMedlId(Long medlId){
+
+        public Builder medMedlId(Long medlId) {
             periodeMal.setMedlId(medlId);
             return this;
         }
-        public Medlemskapsperiode build(){
+
+        public Medlemskapsperiode build() {
             return periodeMal;
         }
     }

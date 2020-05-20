@@ -67,7 +67,6 @@ public class RevurderingTjenesteImplTest {
     @Inject @Any
     private Instance<GrunnlagKopierer> grunnlagKopierer;
 
-
     @Before
     public void setup() {
         opprettRevurderingsKandidat();
@@ -76,7 +75,7 @@ public class RevurderingTjenesteImplTest {
     @Test
     public void skal_opprette_revurdering() {
         // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER);
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
         scenario.medBehandlingVedtak()
             .medVedtakstidspunkt(LocalDateTime.now())
             .medVedtakResultatType(VedtakResultatType.INNVILGET);

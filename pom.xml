@@ -37,11 +37,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<felles.version>1.7-20200515091535-5bf0951</felles.version>
+		<felles.version>1.8-20200518125722-44b086c</felles.version>
 
 		<metrics.version>4.1.8</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-		<k9format.version>4.0.0-20200427091803-aafdb06</k9format.version>
+		<k9format.version>5.0.0-20200518161226-b6cd151</k9format.version>
 	</properties>
 
     <repositories>
@@ -114,18 +114,18 @@
 			<dependency>
 				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
 				<artifactId>oppdrag-kontrakter</artifactId>
-				<version>1.1-20200427140311-6a168b6</version>
+				<version> 1.1-20200513125235-71deaf2</version>
 			</dependency>
 
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>2.0_20200511083408_ac56b27</version>
+                <version>2.0_20200520101921_abf95ed</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.1-20200514193345-2dd0794</version>
+                <version>0.0.1-20200519194106-6bbe8e1</version>
             </dependency>
 			<dependency>
 				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
@@ -497,7 +497,7 @@
 			<dependency>
 				<groupId>com.vladmihalcea</groupId>
 				<artifactId>hibernate-types-52</artifactId>
-				<version>2.9.9</version>
+				<version>2.9.10</version>
 			</dependency>
 
 		</dependencies>

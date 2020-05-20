@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
@@ -55,8 +57,6 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -73,12 +73,11 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
  */
 @ApplicationScoped
-@FagsakYtelseTypeRef()
+@FagsakYtelseTypeRef
 @Default
-public class KalkulusTjeneste implements BeregningTjeneste {
+public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     protected KalkulusRestTjeneste restTjeneste;
-    private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -89,11 +88,9 @@ public class KalkulusTjeneste implements BeregningTjeneste {
 
     @Inject
     public KalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
-                            BehandlingRepository behandlingRepository,
                             FagsakRepository fagsakRepository,
                             KalkulatorInputTjeneste kalkulatorInputTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.restTjeneste = restTjeneste;
-        this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
@@ -104,10 +101,10 @@ public class KalkulusTjeneste implements BeregningTjeneste {
         List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerDtos = new ArrayList<>();
         arbeidsgiverOpplysninger.forEach((key, value) -> arbeidsgiverOpplysningerDtos.add(mapOpplysning(key, value)));
         overstyringer
-                .stream()
-                .filter(overstyring -> overstyring.getArbeidsgiverNavn() != null) // Vi er kun interessert i overstyringer der SBH har endret navn på arbeidsgiver
-                .findFirst()
-                .ifPresent(arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(arbeidsforhold.getArbeidsgiver()), arbeidsforhold.getArbeidsgiverNavn())));
+            .stream()
+            .filter(overstyring -> overstyring.getArbeidsgiverNavn() != null) // Vi er kun interessert i overstyringer der SBH har endret navn på arbeidsgiver
+            .findFirst()
+            .ifPresent(arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(arbeidsforhold.getArbeidsgiver()), arbeidsforhold.getArbeidsgiverNavn())));
         return arbeidsgiverOpplysningerDtos;
 
     }
@@ -124,48 +121,46 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
-        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag);
+    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
+        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
         TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
     }
 
     @Override
-    public KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType) {
-        TilstandResponse tilstandResponse = restTjeneste.fortsettBeregning(new FortsettBeregningRequest(referanse.getBehandlingUuid(),
-                new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()), new StegType(stegType.getKode())));
+    public KalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, UUID bgReferanse, BehandlingStegType stegType) {
+        TilstandResponse tilstandResponse = restTjeneste.fortsettBeregning(new FortsettBeregningRequest(bgReferanse,
+            new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode()), new StegType(stegType.getKode())));
         return mapFraTilstand(tilstandResponse);
     }
 
     @Override
-    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse) {
-        HåndterBeregningRequest håndterBeregningRequest = new HåndterBeregningRequest(håndterBeregningDto, referanse.getBehandlingUuid());
+    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, UUID bgReferanse) {
+        HåndterBeregningRequest håndterBeregningRequest = new HåndterBeregningRequest(håndterBeregningDto, bgReferanse);
         OppdateringRespons oppdateringRespons = restTjeneste.oppdaterBeregning(håndterBeregningRequest);
         return MapEndringsresultat.mapFraOppdateringRespons(oppdateringRespons);
     }
 
     @Override
-    public Beregningsgrunnlag hentEksaktFastsatt(Long behandlingId) {
-        Optional<Beregningsgrunnlag> beregningsgrunnlag = hentGrunnlag(behandlingId).flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag);
+    public Beregningsgrunnlag hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
+        Optional<Beregningsgrunnlag> beregningsgrunnlag = hentGrunnlag(fagsakYtelseType, bgReferanse).flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag);
         if (beregningsgrunnlag.isPresent()) {
             return beregningsgrunnlag.get();
         }
-        throw new IllegalStateException("Kalkulus har ikke fastsatt for " + behandlingId);
+        throw new IllegalStateException("Kalkulus har ikke fastsatt for " + bgReferanse);
     }
 
     @Override
-    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(Long behandlingId) {
-        HentBeregningsgrunnlagDtoForGUIRequest request = lagHentBeregningsgrunnlagRequest(behandlingId);
+    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse) {
+        HentBeregningsgrunnlagDtoForGUIRequest request = lagHentBeregningsgrunnlagRequest(bgReferanse, referanse);
         return restTjeneste.hentBeregningsgrunnlagDto(request);
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentFastsatt(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        YtelseTyperKalkulusStøtterKontrakt ytelse = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
+    public Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType) {
+        YtelseTyperKalkulusStøtterKontrakt ytelse = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
 
-        HentBeregningsgrunnlagRequest hentBeregningsgrunnlagRequest = new HentBeregningsgrunnlagRequest(behandling.getUuid(), ytelse);
+        HentBeregningsgrunnlagRequest hentBeregningsgrunnlagRequest = new HentBeregningsgrunnlagRequest(bgReferanse, ytelse);
         no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto beregningsgrunnlagDto = restTjeneste.hentFastsatt(hentBeregningsgrunnlagRequest);
         if (beregningsgrunnlagDto == null) {
             return Optional.empty();
@@ -174,13 +169,11 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
+    public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
+        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
         HentBeregningsgrunnlagRequest request = new HentBeregningsgrunnlagRequest(
-                behandling.getUuid(),
-                ytelseSomSkalBeregnes
+            bgReferanse,
+            ytelseSomSkalBeregnes
         );
         BeregningsgrunnlagGrunnlagDto beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlag(request);
         if (beregningsgrunnlagGrunnlagDto == null) {
@@ -190,19 +183,17 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void lagreBeregningsgrunnlag(Long id, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand opprettet) {
+    public void lagreBeregningsgrunnlag(BehandlingReferanse behandlingReferanse, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand opprettet) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID uuid, Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
+    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID bgReferanse, FagsakYtelseType fagsakYtelseType, UUID bgGrunnlagsVersjon) {
+        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
         HentBeregningsgrunnlagGrunnlagForReferanseRequest request = new HentBeregningsgrunnlagGrunnlagForReferanseRequest(
-                behandling.getUuid(),
-                ytelseSomSkalBeregnes,
-                uuid
+            bgReferanse,
+            ytelseSomSkalBeregnes,
+            bgGrunnlagsVersjon
         );
         BeregningsgrunnlagGrunnlagDto beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlagForReferanse(request);
         if (beregningsgrunnlagGrunnlagDto == null) {
@@ -213,74 +204,64 @@ public class KalkulusTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
+    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
+        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
         HentBeregningsgrunnlagRequest request = new HentBeregningsgrunnlagRequest(
-                behandling.getUuid(),
-                ytelseSomSkalBeregnes
+            bgReferanse,
+            ytelseSomSkalBeregnes
         );
         restTjeneste.deaktiverBeregningsgrunnlag(request);
     }
 
     @Override
-    public Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2) {
-        Behandling behandling1 = behandlingRepository.hentBehandling(behandlingId1);
-        Behandling behandling2 = behandlingRepository.hentBehandling(behandlingId2);
+    public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgReferanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2) {
 
-        BehandlingReferanse referanse1 = BehandlingReferanse.fra(behandling1);
-        BehandlingReferanse referanse2 = BehandlingReferanse.fra(behandling2);
-
-        if (!referanse1.getFagsakYtelseType().equals(referanse2.getFagsakYtelseType())) {
+        if (!fagsakYtelseType1.equals(fagsakYtelseType2)) {
             throw new IllegalArgumentException("Kan ikkje sjekke endring for forskjellige ytelsetyper");
         }
 
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse1.getFagsakYtelseType().getKode());
+        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType1.getKode());
         ErEndringIBeregningRequest request = new ErEndringIBeregningRequest(
-                behandling1.getUuid(),
-                behandling2.getUuid(),
-                ytelseSomSkalBeregnes
+            bgReferanse1,
+            bgReferanse2,
+            ytelseSomSkalBeregnes
         );
         return restTjeneste.erEndringIBeregning(request);
     }
 
-    private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
+    private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
-        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(behandlingId, referanse);
-        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
+        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse);
+        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
-                .stream()
-                .map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser)
-                .flatMap(Collection::stream)
-                .map(ref -> new ArbeidsforholdReferanseDto(TilKalkulusMapper.mapTilAktør(ref.getArbeidsgiver()),
-                        new InternArbeidsforholdRefDto(ref.getInternReferanse().getReferanse()),
-                        new EksternArbeidsforholdRef(ref.getEksternReferanse().getReferanse())))
-                .collect(Collectors.toSet());
+            .stream()
+            .map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser)
+            .flatMap(Collection::stream)
+            .map(ref -> new ArbeidsforholdReferanseDto(TilKalkulusMapper.mapTilAktør(ref.getArbeidsgiver()),
+                new InternArbeidsforholdRefDto(ref.getInternReferanse().getReferanse()),
+                new EksternArbeidsforholdRef(ref.getEksternReferanse().getReferanse())))
+            .collect(Collectors.toSet());
 
         return new HentBeregningsgrunnlagDtoForGUIRequest(
-                behandling.getUuid(),
-                ytelseSomSkalBeregnes,
-                arbeidsgiverOpplysningerListe,
-                referanser
+            bgReferanse,
+            ytelseSomSkalBeregnes,
+            arbeidsgiverOpplysningerListe,
+            referanser
         );
     }
 
-    protected StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
-        Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+    protected StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
-        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag);
+        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag, skjæringstidspunkt);
 
         return new StartBeregningRequest(
-                new UuidDto(behandling.getUuid()),
-                fagsak.getSaksnummer().getVerdi(),
-                aktør,
-                new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()),
-                kalkulatorInputDto);
+            new UuidDto(bgReferanse),
+            fagsak.getSaksnummer().getVerdi(),
+            aktør,
+            new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()),
+            kalkulatorInputDto);
     }
 
     protected KalkulusResultat mapFraTilstand(TilstandResponse tilstandResponse) {
@@ -307,16 +288,16 @@ public class KalkulusTjeneste implements BeregningTjeneste {
         return Avslagsårsak.UDEFINERT;
     }
 
-    private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(Long behandlingId, BehandlingReferanse referanse) {
-        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
+    private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(BehandlingReferanse referanse) {
+        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
 
         Map<Arbeidsgiver, ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger = iayGrunnlag.getAktørArbeidFraRegister(referanse.getAktørId())
-                .map(AktørArbeid::hentAlleYrkesaktiviteter)
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(Yrkesaktivitet::getArbeidsgiver)
-                .distinct()
-                .collect(Collectors.toMap(a -> a, arbeidsgiverTjeneste::hent));
+            .map(AktørArbeid::hentAlleYrkesaktiviteter)
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(Yrkesaktivitet::getArbeidsgiver)
+            .distinct()
+            .collect(Collectors.toMap(a -> a, arbeidsgiverTjeneste::hent));
         return mapArbeidsforholdOpplysninger(arbeidsgiverOpplysninger, iayGrunnlag.getArbeidsforholdOverstyringer());
     }
 }

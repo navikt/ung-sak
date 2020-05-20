@@ -136,7 +136,7 @@ public class OpptjeningRepositoryImplTest {
         EndringsresultatSnapshot endringsresultatSnapshot = opptjeningRepository.finnAktivGrunnlagId(behandling);
 
         // Assert
-        assertThat(endringsresultatSnapshot.getGrunnlagId()).isEqualTo(opptjening.getOpptjeningResultat().getId());
+        assertThat(endringsresultatSnapshot.getGrunnlagRef()).isEqualTo(opptjening.getOpptjeningResultat().getId());
     }
 
     private Behandling opprettBehandling() {

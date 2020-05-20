@@ -22,9 +22,8 @@ public abstract class IverksetteVedtakStegYtelseFelles extends IverksetteVedtakS
     }
 
     public IverksetteVedtakStegYtelseFelles(BehandlingRepositoryProvider repositoryProvider,
-                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse, 
-                                            IverksetteVedtakStatistikk metrikker) {
-        super(repositoryProvider, metrikker);
+                                            VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse) {
+        super(repositoryProvider);
         this.historikkRepository = repositoryProvider.getHistorikkRepository();
         this.tidligereBehandlingUnderIverksettelse = tidligereBehandlingUnderIverksettelse;
     }

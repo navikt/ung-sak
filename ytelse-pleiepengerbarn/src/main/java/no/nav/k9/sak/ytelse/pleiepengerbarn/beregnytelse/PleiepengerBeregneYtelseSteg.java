@@ -22,7 +22,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
@@ -39,7 +38,6 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private UttakTjeneste uttakTjeneste;
 
     protected PleiepengerBeregneYtelseSteg() {
@@ -48,13 +46,11 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
     @Inject
     public PleiepengerBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 BeregningTjeneste kalkulusTjeneste,
-                                 UttakTjeneste uttakTjeneste,
-                                 FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
+                                        BeregningTjeneste kalkulusTjeneste,
+                                        UttakTjeneste uttakTjeneste,
+                                        FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
+                                        @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
@@ -66,13 +62,12 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        var ref = BehandlingReferanse.fra(behandling);
         UUID behandlingUuid = ref.getBehandlingUuid();
-        
+
         var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid).orElseThrow(() -> new IllegalStateException("Finner ikke uttaksplan for behandling: " + behandlingUuid));
-        
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(behandlingId);
+
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 
         var uttakResultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraUttaksplan().mapFra(uttaksplan));
         // Kalle regeltjeneste

@@ -1,8 +1,10 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -21,17 +23,23 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_AKTIVITETER_KODE)
 public class AvklarteAktiviteterDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value="beregningsaktivitetLagreDtoList")
+    @JsonProperty(value = "skjæringstidspunkt")
+    @Valid
+    @NotNull
+    private LocalDate skjæringstidspunkt;
+
+    @JsonProperty(value = "beregningsaktivitetLagreDtoList")
     @Valid
     @Size(max = 1000)
     private List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList;
 
     public AvklarteAktiviteterDto() {
-        // 
+        //
     }
 
-    public AvklarteAktiviteterDto(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList, String begrunnelse) { // NOSONAR
+    public AvklarteAktiviteterDto(LocalDate skjæringstidspunkt, List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList, String begrunnelse) { // NOSONAR
         super(begrunnelse);
+        this.skjæringstidspunkt = skjæringstidspunkt;
         this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
     }
 
@@ -39,8 +47,15 @@ public class AvklarteAktiviteterDto extends BekreftetAksjonspunktDto {
         return beregningsaktivitetLagreDtoList;
     }
 
-
     public void setBeregningsaktivitetLagreDtoList(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList) {
         this.beregningsaktivitetLagreDtoList = beregningsaktivitetLagreDtoList;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 }

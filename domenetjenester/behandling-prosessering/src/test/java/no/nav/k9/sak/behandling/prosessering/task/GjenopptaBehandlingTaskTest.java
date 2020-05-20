@@ -19,7 +19,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
@@ -31,7 +30,6 @@ public class GjenopptaBehandlingTaskTest {
 
     private BehandlingRepository mockBehandlingRepository;
     private BehandlingskontrollTjeneste mockBehandlingskontrollTjeneste;
-    private RegisterdataEndringshåndterer mockRegisterdataEndringshåndterer;
     private BehandlendeEnhetTjeneste mockEnhetsTjeneste;
     private OrganisasjonsEnhet organisasjonsEnhet = new OrganisasjonsEnhet("4802", "NAV Bærum");
 
@@ -39,10 +37,9 @@ public class GjenopptaBehandlingTaskTest {
     public void setup() {
         mockBehandlingRepository = mock(BehandlingRepository.class);
         mockBehandlingskontrollTjeneste = mock(BehandlingskontrollTjeneste.class);
-        mockRegisterdataEndringshåndterer = mock(RegisterdataEndringshåndterer.class);
         mockEnhetsTjeneste = mock(BehandlendeEnhetTjeneste.class);
 
-        task = new GjenopptaBehandlingTask(mockBehandlingRepository, mockBehandlingskontrollTjeneste, mockRegisterdataEndringshåndterer, mockEnhetsTjeneste);
+        task = new GjenopptaBehandlingTask(mockBehandlingRepository, mockBehandlingskontrollTjeneste, mockEnhetsTjeneste);
     }
 
     @Test
@@ -60,8 +57,6 @@ public class GjenopptaBehandlingTaskTest {
         prosessTaskData.setBehandling(0L, behandlingId, AktørId.dummy().getId());
 
         task.doTask(prosessTaskData);
-
-        verify(mockBehandlingskontrollTjeneste).prosesserBehandling(any());
     }
 
     @Test
@@ -87,7 +82,6 @@ public class GjenopptaBehandlingTaskTest {
 
         task.doTask(prosessTaskData);
 
-        verify(mockBehandlingskontrollTjeneste).prosesserBehandling(any());
         ArgumentCaptor<OrganisasjonsEnhet> enhetArgumentCaptor = ArgumentCaptor.forClass(OrganisasjonsEnhet.class);
         verify(mockEnhetsTjeneste).oppdaterBehandlendeEnhet(any(), enhetArgumentCaptor.capture(), any(), any());
         assertThat(enhetArgumentCaptor.getValue()).isEqualTo(enhet);

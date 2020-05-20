@@ -30,9 +30,8 @@ public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgren
     public IverksetteVedtakStegFørstegang(BehandlingRepositoryProvider repositoryProvider,
                                           @Any Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett,
                                           VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse,
-                                          IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse,
-                                          IverksetteVedtakStatistikk metrikker) {
-        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse, metrikker);
+                                          IdentifiserOverlappendeInfotrygdYtelseTjeneste identifiserOverlappendeInfotrygdYtelse) {
+        super(repositoryProvider, tidligereBehandlingUnderIverksettelse, identifiserOverlappendeInfotrygdYtelse);
         this.opprettProsessTaskIverksett = opprettProsessTaskIverksett;
     }
 

@@ -2,18 +2,29 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+
+import org.jboss.weld.exceptions.UnsupportedOperationException;
+
+import com.google.common.collect.ImmutableSet;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
@@ -22,15 +33,17 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-@ApplicationScoped
-class BeregningsgrunnlagVilkårTjeneste {
+@Dependent
+public class BeregningsgrunnlagVilkårTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VedtakVarselRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     protected BeregningsgrunnlagVilkårTjeneste() {
         // CDI Proxy
@@ -39,21 +52,21 @@ class BeregningsgrunnlagVilkårTjeneste {
     @Inject
     public BeregningsgrunnlagVilkårTjeneste(BehandlingRepository behandlingRepository,
                                             VedtakVarselRepository behandlingsresultatRepository,
+                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                             VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
-                             DatoIntervallEntitet vilkårsPeriode,
-                             DatoIntervallEntitet orginalVilkårsPeriode,
+                                    DatoIntervallEntitet vilkårsPeriode,
                                     Avslagsårsak avslagsårsak) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettAvslåttVilkårsResultat(
             vilkårene,
             vilkårsPeriode,
-            orginalVilkårsPeriode,
             avslagsårsak);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
@@ -62,11 +75,9 @@ class BeregningsgrunnlagVilkårTjeneste {
     }
 
     void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
-                             boolean vilkårOppfylt,
-                             DatoIntervallEntitet vilkårsPeriode,
-                             DatoIntervallEntitet orginalVilkårsPeriode) {
+                             DatoIntervallEntitet vilkårsPeriode, boolean vilkårOppfylt) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode, orginalVilkårsPeriode);
+        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (!vilkårOppfylt) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
@@ -75,35 +86,11 @@ class BeregningsgrunnlagVilkårTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-
-    void lagreVilkårresultatSkalBehandlesIInfotrygd(BehandlingskontrollKontekst kontekst) {
-        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        vilkårBuilder.leggTil(vilkårBuilder
-            .hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
-            .medUtfall(Utfall.IKKE_OPPFYLT)
-            //FIXME (k9) bestem riktig avslagsårsak og utfall
-            .medMerknad(VilkårUtfallMerknad.VM_1041)
-            .medAvslagsårsak(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
-        builder.leggTil(vilkårBuilder);
-
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
-        behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-    }
-
-
     private VilkårResultatBuilder opprettAvslåttVilkårsResultat(Vilkårene vilkårene,
                                                                 DatoIntervallEntitet vilkårsPeriode,
-                                                                DatoIntervallEntitet orginalVilkårsPeriode,
                                                                 Avslagsårsak avslagsårsak) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        if (!vilkårsPeriode.equals(orginalVilkårsPeriode)) {
-            vilkårBuilder.tilbakestill(orginalVilkårsPeriode);
-        }
         vilkårBuilder
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
@@ -119,12 +106,9 @@ class BeregningsgrunnlagVilkårTjeneste {
     }
 
 
-    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene, DatoIntervallEntitet vilkårsPeriode, DatoIntervallEntitet orginalVilkårsPeriode) {
+    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene, DatoIntervallEntitet vilkårsPeriode) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        if (!vilkårsPeriode.equals(orginalVilkårsPeriode)) {
-            vilkårBuilder.tilbakestill(orginalVilkårsPeriode);
-        }
         vilkårBuilder
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
@@ -170,6 +154,27 @@ class BeregningsgrunnlagVilkårTjeneste {
         }
         behandling.setBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+    }
+
+    public Set<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder) {
+        String ytelseTypeKode = ref.getFagsakYtelseType().getKode();
+        var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, ytelseTypeKode).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + VilkårsPerioderTilVurderingTjeneste.class.getName() + " for ytelsetype=" + ytelseTypeKode));
+
+        var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        var perioder = new HashSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+
+        if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
+            var avslåttePerioder = vilkår.get()
+                .getPerioder()
+                .stream()
+                .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
+                .map(VilkårPeriode::getPeriode)
+                .collect(Collectors.toList());
+
+            perioder.removeAll(avslåttePerioder);
+        }
+        return ImmutableSet.copyOf(perioder);
     }
 
 }

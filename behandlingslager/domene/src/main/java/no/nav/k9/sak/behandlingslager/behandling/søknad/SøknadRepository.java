@@ -29,16 +29,13 @@ public class SøknadRepository {
         this.entityManager = entityManager;
     }
 
+    /** @return Søknad (hvis eksisterer) eller null. */
     public SøknadEntitet hentSøknad(Behandling behandling) {
         Long behandlingId = behandling.getId();
-        return hentSøknad(behandlingId);
-    }
-
-    public SøknadEntitet hentSøknad(Long behandlingId) {
         if (behandlingId == null) {
             return null;
         }
-        return hentSøknadHvisEksisterer(behandlingId).orElseThrow();
+        return hentSøknadHvisEksisterer(behandlingId).orElse(null);
     }
 
     public Optional<SøknadEntitet> hentSøknadHvisEksisterer(Long behandlingId) {
@@ -117,12 +114,12 @@ public class SøknadRepository {
         query.setParameter("fagsakId", fagsakId);
         query.setParameter("pFom", pFom);
         query.setParameter("pTom", pTom);
-        
-        List<Long> behandlingIder = (List<Long>) query.getResultStream().map(v -> Long.valueOf(((Number) v).longValue())).collect(Collectors.<Long>toList());
-        
+
+        List<Long> behandlingIder = (List<Long>) query.getResultStream().map(v -> Long.valueOf(((Number) v).longValue())).collect(Collectors.<Long> toList());
+
         Query queryBeh = entityManager.createQuery("from Behandling where id in (:ids)")
-                .setParameter("ids", behandlingIder);
-               
+            .setParameter("ids", behandlingIder);
+
         return queryBeh.getResultList();
 
     }

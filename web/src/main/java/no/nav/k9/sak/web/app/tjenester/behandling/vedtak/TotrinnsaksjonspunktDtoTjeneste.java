@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +26,6 @@ public class TotrinnsaksjonspunktDtoTjeneste {
         // for CDI proxy
     }
 
-
     @Inject
     public TotrinnsaksjonspunktDtoTjeneste(TotrinnsBeregningDtoTjeneste totrinnsBeregningDtoTjeneste,
                                            TotrinnArbeidsforholdDtoTjeneste totrinnArbeidsforholdDtoTjeneste,
@@ -42,8 +42,8 @@ public class TotrinnsaksjonspunktDtoTjeneste {
             .medAksjonspunktKode(aksjonspunkt.getAksjonspunktDefinisjon())
             .medOpptjeningAktiviteter(totrinnskontrollAktivitetDtoTjeneste.hentAktiviterEndretForOpptjening(aksjonspunkt, behandling,
                 totrinnresultatgrunnlag.flatMap(Totrinnresultatgrunnlag::getGrunnlagUuid)))
-            .medBeregningDto(totrinnsBeregningDtoTjeneste.hentBeregningDto(aksjonspunkt, behandling,
-                totrinnresultatgrunnlag.flatMap(Totrinnresultatgrunnlag::getBeregningsgrunnlagUuid)))
+            .medBeregningDtoer(totrinnsBeregningDtoTjeneste.hentBeregningDto(aksjonspunkt, behandling,
+                totrinnresultatgrunnlag.map(Totrinnresultatgrunnlag::getBeregningsgrunnlagList).orElse(List.of())))
             .medBesluttersBegrunnelse(aksjonspunkt.getBegrunnelse())
             .medArbeidsforhold(totrinnArbeidsforholdDtoTjeneste.hentArbeidsforhold(behandling, aksjonspunkt,
                 totrinnresultatgrunnlag.flatMap(Totrinnresultatgrunnlag::getGrunnlagUuid)))

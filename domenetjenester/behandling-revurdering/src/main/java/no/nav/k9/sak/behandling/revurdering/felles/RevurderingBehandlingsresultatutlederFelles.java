@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.vedtak.util.Tuple;
@@ -64,6 +65,11 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         this.harEtablertYtelse = harEtablertYtelse;
     }
 
+    private static boolean erYtelsenOpphørt(Behandling origBehandling, Behandling revurdering) {
+        return (origBehandling.getBehandlingResultatType().equals(BehandlingResultatType.INNVILGET) &&
+            revurdering.getBehandlingResultatType().equals(BehandlingResultatType.AVSLÅTT));
+    }
+
     private static boolean vurderAvslagPåAslag(Optional<Behandling> resRevurdering, Optional<Behandling> resOriginal, BehandlingType originalBehandlingType) {
         if (resOriginal.isPresent() && resRevurdering.isPresent()) {
             if (BehandlingType.FØRSTEGANGSSØKNAD.equals(originalBehandlingType)) {
@@ -87,6 +93,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         return bestemVedtakVarselRevurderingCore(revurderingRef, revurdering, originalBehandling, erVarselOmRevurderingSendt);
     }
 
+    // TODO ESSV: Teknisk gjeld. Denne logikken må skille Vedtaksbrev (utledning) fra BehandlingResultatType (sideeffekt)
     private VedtakVarsel bestemVedtakVarselRevurderingCore(BehandlingReferanse revurderingRef,
                                                            Behandling revurdering,
                                                            Behandling originalBehandling,
@@ -99,7 +106,6 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
 
         var originalOrg = finnBehandlingsresultatPåOriginalBehandling(originalBehandling);
         VedtakVarsel vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-
         if (vurderAvslagPåAslag(Optional.of(revurdering), Optional.of(originalOrg), originalBehandling.getType())) {
             /* 2b */
             revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
@@ -125,7 +131,24 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             }
         }
 
-        boolean erEndringIBeregning = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId());
+        if (erYtelsenOpphørt(originalOrg, revurdering)) {
+            revurdering.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
+            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
+            return vedtakVarsel;
+        }
+
+        var beregningsvilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        boolean erEndringIBeregning = false;
+        if (beregningsvilkår.isPresent()) {
+            var skjæringstidspunkter = beregningsvilkår.get().getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toList());
+            for (LocalDate skjæringstidspunkt : skjæringstidspunkter) {
+                var erEndring = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId(), skjæringstidspunkt);
+                if (erEndring) {
+                    erEndringIBeregning = erEndring;
+                    break;
+                }
+            }
+        }
 
         Betingelser betingelser = Betingelser.fastsett(erEndringIBeregning, erVarselOmRevurderingSendt,
             harInnvilgetIkkeOpphørtVedtak(revurdering.getFagsak()));

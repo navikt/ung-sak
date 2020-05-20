@@ -2,7 +2,6 @@ package no.nav.k9.sak.mottak.kompletthetssjekk;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
@@ -13,8 +12,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 
@@ -33,7 +30,6 @@ public class KompletthetsjekkerFelles {
     public static final Integer VENTEFRIST_FRAM_I_TID_FRA_MOTATT_DATO_UKER = 3;
     public static final Integer VENTEFRIST_FOR_MANGLENDE_SØKNAD = 4;
 
-    private SøknadRepository søknadRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private BehandlingRepository behandlingRepository;
 
@@ -44,22 +40,12 @@ public class KompletthetsjekkerFelles {
     @Inject
     public KompletthetsjekkerFelles(BehandlingRepositoryProvider provider,
                                     DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
-        this.søknadRepository = provider.getSøknadRepository();
         this.behandlingRepository = provider.getBehandlingRepository();
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
     public Behandling hentBehandling(Long behandlingId) {
         return behandlingRepository.hentBehandling(behandlingId);
-    }
-
-    public Optional<LocalDateTime> finnVentefristTilForTidligMottattSøknad(Long behandlingId) {
-        Objects.requireNonNull(behandlingId, "behandlingId må være satt"); // NOSONAR //$NON-NLS-1$
-        SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
-        Objects.requireNonNull(søknad, "søknad kan ikke være null"); // NOSONAR //$NON-NLS-1$
-
-        final LocalDate ønsketFrist = søknad.getMottattDato().plusWeeks(VENTEFRIST_FRAM_I_TID_FRA_MOTATT_DATO_UKER);
-        return finnVentefrist(ønsketFrist);
     }
 
     public Optional<LocalDateTime> finnVentefrist(LocalDate ønsketFrist) {
