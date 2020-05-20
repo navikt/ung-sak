@@ -4,7 +4,7 @@ where vilkar_id IN (SELECT vp.vilkar_id
                     FROM rs_vilkars_resultat rs
                              inner join behandling b ON rs.behandling_id = b.id
                              inner join fagsak f on b.fagsak_id = f.id
-                             INNER JOIN vr_vilkar vv ON vv.vilkar_resultat_id = rs.id
+                             INNER JOIN vr_vilkar vv ON vv.vilkar_resultat_id = rs.vilkarene_id
                              INNER JOIN vr_vilkar_periode vp ON vv.id = vp.vilkar_id
                     WHERE rs.aktiv = true
                       AND vv.vilkar_type = 'FP_VK_41'
