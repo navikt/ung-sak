@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
@@ -52,6 +52,7 @@ public class OpprettProsessTaskIverksettTest {
 
     @Mock
     private InfotrygdFeedService infotrygdFeedService;
+
 
     private Behandling behandling;
     private OpprettProsessTaskIverksett opprettProsessTaskIverksett;

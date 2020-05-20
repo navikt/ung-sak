@@ -10,4 +10,6 @@ public interface OpprettProsessTaskIverksett {
     default void opprettIverksettingstasker(Behandling behandling, @SuppressWarnings("unused") Optional<String> initiellTaskNavn) {
         opprettIverksettingstasker(behandling);
     }
+
+    default void meldIfraOmIverksettingTilÅrskvantum(Behandling behandling) { }
 }

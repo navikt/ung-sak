@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import javax.enterprise.inject.Instance;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -36,10 +39,14 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotr
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
+import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class IverksetteVedtakStegYtelseTest {
@@ -54,8 +61,7 @@ public class IverksetteVedtakStegYtelseTest {
 
     private Behandling behandling;
 
-    @Mock
-    private OpprettProsessTaskIverksettImpl opprettProsessTaskIverksett;
+    private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
 
     private Repository repository = repoRule.getRepository();
     private BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
@@ -66,13 +72,25 @@ public class IverksetteVedtakStegYtelseTest {
 
     @Mock
     private IdentifiserOverlappendeInfotrygdYtelseTjeneste iverksettingSkalIkkeStoppesAvOverlappendeYtelse;
-    
+
+
+    @Mock
+    private ProsessTaskRepository prosessTaskRepository;
+
+    @Mock
+    private OppgaveTjeneste oppgaveTjeneste;
+
+    @Mock
+    private InfotrygdFeedService infotrygdFeedService;
+
+
     private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
 
     @Before
     public void setup() {
-        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider, 
-            opprettProsessTaskIverksett, 
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService));
+        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider,
+            opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse,
             iverksettingSkalIkkeStoppesAvOverlappendeYtelse);
         behandling = opprettBehandling();
