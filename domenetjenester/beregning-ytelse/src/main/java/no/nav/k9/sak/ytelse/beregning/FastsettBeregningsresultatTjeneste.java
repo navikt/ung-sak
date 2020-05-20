@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -38,7 +40,7 @@ public class FastsettBeregningsresultatTjeneste {
         this.mapBeregningsresultatFraRegelTilVL = mapBeregningsresultatFraRegelTilVL;
     }
 
-    public BeregningsresultatEntitet fastsettBeregningsresultat(Beregningsgrunnlag beregningsgrunnlag, UttakResultat input) {
+    public BeregningsresultatEntitet fastsettBeregningsresultat(List<Beregningsgrunnlag> beregningsgrunnlag, UttakResultat input) {
         // Map til regelmodell
         BeregningsresultatRegelmodell regelmodell = mapBeregningsresultatFraVLTilRegel.mapFra(beregningsgrunnlag, input);
         // Kalle regel

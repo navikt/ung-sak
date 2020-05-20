@@ -1,5 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,7 +13,6 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 
 /**
@@ -23,9 +24,10 @@ public interface BeregningTjeneste {
      * Steg 1. FASTSETT_STP_BER
      * @param referanse {@link BehandlingReferanse}
      * @param ytelseGrunnlag - ytelsespesifikt grunnlag
+     * @param skjæringstidspunkt - key for å finne bgReferanse mot kalkulus
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag);
+    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt);
 
     /** Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
@@ -33,33 +35,36 @@ public interface BeregningTjeneste {
      * Steg 4. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
      * Steg 5. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
-     * @param referanse {@link BehandlingReferanse}
+     * @param ref {@link BehandlingReferanse}
+     * @param skjæringstidspunkt - skjæringstidspunktet
      * @param stegType {@link BehandlingStegType}
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat fortsettBeregning(BehandlingReferanse referanse, BehandlingStegType stegType);
+    KalkulusResultat fortsettBeregning(BehandlingReferanse ref, LocalDate skjæringstidspunkt, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
-     * @param referanse Behandlingreferanse
+     * @param ref {@link BehandlingReferanse}
+     * @param skjæringstidspunkt - skjæringtidspunkt
      * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
-    OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse referanse);
+    OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
-    Beregningsgrunnlag hentEksaktFastsatt(Long behandlingId);
+    Beregningsgrunnlag hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
-    BeregningsgrunnlagDto hentBeregningsgrunnlagDto(Long behandlingId);
+    List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref);
 
-    Optional<Beregningsgrunnlag> hentFastsatt(Long behandlingId);
+    BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
-    Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(Long behandlingId);
+    List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
 
-    void lagreBeregningsgrunnlag(Long id, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand opprettet);
+    Optional<Beregningsgrunnlag> hentFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
-    Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID uuid, Long behandlingId);
+    Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
-    void deaktiverBeregningsgrunnlag(Long behandlingId);
+    Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(BehandlingReferanse ref, LocalDate skjæringstidspunkt, UUID bgGrunnlagsVersjon);
 
-    Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2);
+    void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
+    Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt);
 }

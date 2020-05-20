@@ -1,8 +1,10 @@
 package no.nav.k9.sak.produksjonsstyring.totrinn;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -28,8 +31,9 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
     private Behandling behandling;
 
-    @Column(name = "beregningsgrunnlag_grunnlag_uuid", updatable = false)
-    private UUID beregningsgrunnlagGrunnlagUuid;
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = false)
+    private List<BeregningsgrunnlagToTrinn> beregningsgrunnlagVersjoner;
 
     @Column(name = "iay_grunnlag_uuid", insertable = true, updatable = false)
     private UUID iayGrunnlagUuid;
@@ -41,17 +45,15 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-
     Totrinnresultatgrunnlag() {
         // for hibernate
     }
 
-
     public Totrinnresultatgrunnlag(Behandling behandling,
-                                   UUID beregningsgrunnlagGrunnlagUuid,
+                                   List<BeregningsgrunnlagToTrinn> beregningsgrunnlagGrunnlagUuid,
                                    UUID iayGrunnlagUuid) {
         this.behandling = behandling;
-        this.beregningsgrunnlagGrunnlagUuid = beregningsgrunnlagGrunnlagUuid;
+        this.beregningsgrunnlagVersjoner = beregningsgrunnlagGrunnlagUuid;
         this.iayGrunnlagUuid = iayGrunnlagUuid;
     }
 
@@ -63,12 +65,12 @@ public class Totrinnresultatgrunnlag extends BaseEntitet {
         return aktiv;
     }
 
-    public Optional<UUID> getBeregningsgrunnlagUuid() {
-        return Optional.ofNullable(beregningsgrunnlagGrunnlagUuid);
+    public List<BeregningsgrunnlagToTrinn> getBeregningsgrunnlagList() {
+        return List.copyOf(beregningsgrunnlagVersjoner);
     }
 
-    public void setBeregningsgrunnlag(UUID beregningsgrunnlagGrunnlagUuid) {
-        this.beregningsgrunnlagGrunnlagUuid = beregningsgrunnlagGrunnlagUuid;
+    public void setBeregningsgrunnlagList(List<BeregningsgrunnlagToTrinn> beregningsgrunnlagGrunnlagUuid) {
+        this.beregningsgrunnlagVersjoner = beregningsgrunnlagGrunnlagUuid;
     }
 
     public Optional<UUID> getGrunnlagUuid() {

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -8,6 +9,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -18,7 +20,11 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
 
@@ -48,8 +54,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        var vilkåret = vilkårResultatRepository.hent(kontekst.getBehandlingId())
-            .getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
         var vurdertePerioder = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, behandling);
 
@@ -58,12 +64,39 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))
             .allMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()));
 
+        var noeAvslått = !vilkåret.getPerioder().isEmpty() && vilkåret.getPerioder()
+            .stream()
+            .filter(it -> vurdertePerioder.contains(it.getPeriode()))
+            .anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()));
+
         if (altAvslått) {
+            avslåBerregningsperioderDerHvorOpptjeningErAvslått(kontekst, vilkårene, vilkåret, vurdertePerioder);
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
+        } else if (noeAvslått) {
+            avslåBerregningsperioderDerHvorOpptjeningErAvslått(kontekst, vilkårene, vilkåret, vurdertePerioder);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void avslåBerregningsperioderDerHvorOpptjeningErAvslått(BehandlingskontrollKontekst kontekst, Vilkårene vilkårene, Vilkår vilkåret, Set<DatoIntervallEntitet> vurdertePerioder) {
+        var avslåttePerioder = vilkåret.getPerioder()
+            .stream()
+            .filter(it -> vurdertePerioder.contains(it.getPeriode()))
+            .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()))
+            .collect(Collectors.toList());
+
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        for (VilkårPeriode vilkårPeriode : avslåttePerioder) {
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårPeriode.getPeriode())
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medAvslagsårsak(Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING));
+        }
+        builder.leggTil(vilkårBuilder);
+
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
     }
 
     public Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, Behandling behandling) {

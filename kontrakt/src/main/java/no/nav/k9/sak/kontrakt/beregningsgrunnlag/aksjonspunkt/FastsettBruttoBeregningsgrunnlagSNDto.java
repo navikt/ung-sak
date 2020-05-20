@@ -1,5 +1,8 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
+import java.time.LocalDate;
+
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -19,6 +22,11 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE_KODE)
 public class FastsettBruttoBeregningsgrunnlagSNDto extends BekreftetAksjonspunktDto {
+
+    @JsonProperty(value = "skjæringstidspunkt")
+    @Valid
+    @NotNull
+    private LocalDate skjæringstidspunkt;
 
     @JsonProperty(value = "bruttoBeregningsgrunnlag", required = true)
     @NotNull
@@ -41,5 +49,13 @@ public class FastsettBruttoBeregningsgrunnlagSNDto extends BekreftetAksjonspunkt
 
     public void setBruttoBeregningsgrunnlag(Integer bruttoBeregningsgrunnlag) {
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 }

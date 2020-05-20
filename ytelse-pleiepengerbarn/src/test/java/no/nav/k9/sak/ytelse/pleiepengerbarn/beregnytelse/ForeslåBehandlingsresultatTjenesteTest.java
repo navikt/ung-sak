@@ -24,6 +24,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusApiTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -63,7 +65,9 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
@@ -80,8 +84,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
 
-    @Inject
-    private BehandlingRepositoryProvider repositoryProvider;
+    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
 
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -89,7 +92,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Inject
     private BehandlingRepository behandlingRepository;
 
-    private final BeregningTjeneste kalkulusInMermoryTjeneste = new KalkulusInMermoryTjeneste();
+    private KalkulusApiTjeneste kalkulusApiTjeneste = new KalkulusInMermoryTjeneste();
+
+    private BeregningPerioderGrunnlagRepository grunnlagRepository = new BeregningPerioderGrunnlagRepository(repoRule.getEntityManager(), repositoryProvider.getVilkårResultatRepository());
+    private UnitTestLookupInstanceImpl<KalkulusApiTjeneste> kalkulusTjenester = new UnitTestLookupInstanceImpl<>(kalkulusApiTjeneste);
+    private BeregningTjeneste kalkulusInMermoryTjeneste = new BeregningsgrunnlagTjeneste(kalkulusTjenester, behandlingRepository, repositoryProvider.getVilkårResultatRepository(), grunnlagRepository);
 
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private ForeslåBehandlingsresultatTjeneste tjeneste;

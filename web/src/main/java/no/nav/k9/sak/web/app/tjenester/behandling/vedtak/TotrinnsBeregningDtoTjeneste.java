@@ -1,19 +1,21 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnsBeregningDto;
+import no.nav.k9.sak.produksjonsstyring.totrinn.BeregningsgrunnlagToTrinn;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
 @ApplicationScoped
@@ -29,45 +31,37 @@ public class TotrinnsBeregningDtoTjeneste {
         this.tjeneste = tjeneste;
     }
 
-    TotrinnsBeregningDto hentBeregningDto(Totrinnsvurdering aksjonspunkt,
-                                                  Behandling behandling,
-                                                  Optional<UUID> beregningsgrunnlagGrunnlagUuid) {
-        TotrinnsBeregningDto dto = new TotrinnsBeregningDto();
-        if (aksjonspunkt.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE)) {
-            if (beregningsgrunnlagGrunnlagUuid.isPresent()) {
-                dto.setFastsattVarigEndringNaering(erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(beregningsgrunnlagGrunnlagUuid.get(), behandling.getId()));
-            } else {
-                dto.setFastsattVarigEndringNaering(erVarigEndringFastsattForSelvstendingNæringsdrivendeGittBehandlingId(behandling.getId()));
+    List<TotrinnsBeregningDto> hentBeregningDto(Totrinnsvurdering aksjonspunkt,
+                                                Behandling behandling,
+                                                List<BeregningsgrunnlagToTrinn> beregningsgrunnlagGrunnlagUuid) {
+        if (beregningsgrunnlagGrunnlagUuid.isEmpty()) {
+            return null;
+        }
+        var ref = BehandlingReferanse.fra(behandling);
+        var dtoer = new ArrayList<TotrinnsBeregningDto>();
+        for (BeregningsgrunnlagToTrinn beregningsgrunnlagToTrinn : beregningsgrunnlagGrunnlagUuid) {
+            TotrinnsBeregningDto dto = new TotrinnsBeregningDto();
+            if (aksjonspunkt.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE)) {
+                dto.setFastsattVarigEndringNaering(erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(ref, beregningsgrunnlagToTrinn));
+            }
+            if (AksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN.equals(aksjonspunkt.getAksjonspunktDefinisjon())) {
+                Beregningsgrunnlag bg = hentBeregningsgrunnlag(ref, beregningsgrunnlagToTrinn);
+                List<FaktaOmBeregningTilfelle> tilfeller = bg.getFaktaOmBeregningTilfeller();
+                dto.setFaktaOmBeregningTilfeller(tilfeller);
             }
         }
-        if (AksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN.equals(aksjonspunkt.getAksjonspunktDefinisjon())) {
-            Beregningsgrunnlag bg = hentBeregningsgrunnlag(behandling, beregningsgrunnlagGrunnlagUuid);
-            List<FaktaOmBeregningTilfelle> tilfeller = bg.getFaktaOmBeregningTilfeller();
-            dto.setFaktaOmBeregningTilfeller(tilfeller);
-        }
-        return dto;
+        return dtoer;
     }
 
-    private Beregningsgrunnlag hentBeregningsgrunnlag(Behandling behandling, Optional<UUID> beregningsgrunnlagId) {
-        if (beregningsgrunnlagId.isPresent()) {
-            return tjeneste.hentBeregningsgrunnlagForId(beregningsgrunnlagId.get(), behandling.getId())
-                .orElseThrow(() -> new IllegalStateException("Fant ikkje beregningsgrunnlag med id " + beregningsgrunnlagId.get()));
-        } else {
-            return tjeneste.hentFastsatt(behandling.getId()).orElseThrow();
-        }
+    private Beregningsgrunnlag hentBeregningsgrunnlag(BehandlingReferanse referanse, BeregningsgrunnlagToTrinn beregningsgrunnlagId) {
+        return tjeneste.hentGrunnlag(referanse, beregningsgrunnlagId.getSkjæringstidspunkt())
+            .flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
+            .orElseThrow(() -> new IllegalStateException("Fant ikkje beregningsgrunnlag med id " + beregningsgrunnlagId));
     }
 
-    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittBehandlingId(Long behandlingId) {
-        Beregningsgrunnlag beregningsgrunnlag = tjeneste.hentFastsatt(behandlingId).orElseThrow();
-
-        return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
-            .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
-            .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))
-            .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
-    }
-
-    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(UUID beregningsgrunnlagGrunnlagId, Long behandlingId) {
-        Beregningsgrunnlag beregningsgrunnlag = tjeneste.hentBeregningsgrunnlagForId(beregningsgrunnlagGrunnlagId, behandlingId)
+    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(BehandlingReferanse referanse, BeregningsgrunnlagToTrinn beregningsgrunnlagGrunnlagId) {
+        Beregningsgrunnlag beregningsgrunnlag = tjeneste.hentGrunnlag(referanse, beregningsgrunnlagGrunnlagId.getSkjæringstidspunkt())
+            .flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
             .orElseThrow(() ->
                 new IllegalStateException("Fant ingen beregningsgrunnlag med id " + beregningsgrunnlagGrunnlagId.toString()));
         return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()

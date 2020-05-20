@@ -45,6 +45,11 @@ public class TotrinnskontrollAksjonspunkterDto {
             return this;
         }
 
+        public Builder medBeregningDtoer(List<TotrinnsBeregningDto> beregningDto) {
+            kladd.beregningDtoer = beregningDto;
+            return this;
+        }
+
         public Builder medBesluttersBegrunnelse(String besluttersBegrunnelse) {
             kladd.besluttersBegrunnelse = besluttersBegrunnelse;
             return this;
@@ -79,6 +84,10 @@ public class TotrinnskontrollAksjonspunkterDto {
     @JsonProperty(value = "beregningDto")
     @Valid
     private TotrinnsBeregningDto beregningDto;
+
+    @JsonProperty(value = "beregningDtoer")
+    @Valid
+    private List<TotrinnsBeregningDto> beregningDtoer;
 
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 4000)

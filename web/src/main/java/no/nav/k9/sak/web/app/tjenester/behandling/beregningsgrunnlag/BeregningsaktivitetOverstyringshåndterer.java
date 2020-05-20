@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -20,7 +21,7 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregnings
 @DtoTilServiceAdapter(dto = OverstyrBeregningsaktiviteterDto.class, adapter = Overstyringshåndterer.class)
 public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyringshåndterer<OverstyrBeregningsaktiviteterDto> {
 
-    private KalkulusTjeneste kalkulusTjeneste;
+    private BeregningTjeneste kalkulusTjeneste;
 
     BeregningsaktivitetOverstyringshåndterer() {
         // for CDI proxy
@@ -28,7 +29,7 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
 
     @Inject
     public BeregningsaktivitetOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
-                                                    KalkulusTjeneste kalkulusTjeneste) {
+                                                    BeregningTjeneste kalkulusTjeneste) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNINGSAKTIVITETER);
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
@@ -37,7 +38,7 @@ public class BeregningsaktivitetOverstyringshåndterer extends AbstractOverstyri
     public OppdateringResultat håndterOverstyring(OverstyrBeregningsaktiviteterDto dto, Behandling behandling,
                                                   BehandlingskontrollKontekst kontekst) {
         HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.mapOverstyring(dto);
-        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, BehandlingReferanse.fra(behandling));
+        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, BehandlingReferanse.fra(behandling), dto.getPeriode().getFom());
         return OppdateringResultat.utenOveropp();
     }
 
