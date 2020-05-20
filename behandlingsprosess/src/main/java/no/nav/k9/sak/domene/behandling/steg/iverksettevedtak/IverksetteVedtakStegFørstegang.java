@@ -37,6 +37,6 @@ public class IverksetteVedtakStegFørstegang extends IverksetteVedtakStegTilgren
 
     @Override
     protected void iverksetter(Behandling behandling) {
-        BehandlingTypeRef.Lookup.find(OpprettProsessTaskIverksett.class, opprettProsessTaskIverksett, behandling.getFagsakYtelseType(), behandling.getType()).orElseThrow().opprettIverksettingstasker(behandling);
+        FagsakYtelseTypeRef.Lookup.find(opprettProsessTaskIverksett, behandling.getFagsakYtelseType()).orElseThrow().opprettIverksettingstasker(behandling);
     }
 }
