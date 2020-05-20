@@ -79,7 +79,8 @@ public class TilkjentYtelseTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
-        List<TilkjentYtelsePeriodeV1> perioder = new MapperForTilkjentYtelse().mapTilkjentYtelse(hentTilkjentYtelsePerioder(behandlingId).orElse(null));
+        MapperForTilkjentYtelse mapper = new MapperForTilkjentYtelse(behandling.getFagsakYtelseType());
+        List<TilkjentYtelsePeriodeV1> perioder = mapper.mapTilkjentYtelse(hentTilkjentYtelsePerioder(behandlingId).orElse(null));
 
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
         boolean erOpphør = tjeneste.erOpphør(ref);
