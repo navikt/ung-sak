@@ -9,7 +9,7 @@ FROM gr_beregningsgrunnlag;
 
 ALTER TABLE gr_beregningsgrunnlag add
     constraint FK_GR_BEREGNINGSGRUNNLAG_02
-        foreign key (bg_grunnlag_id) references BG_PERIODER
+        foreign key (bg_grunnlag_id) references BG_PERIODER;
 
 
 INSERT INTO BG_PERIODE (id, ekstern_referanse, skjaeringstidspunkt, bg_grunnlag_id)
