@@ -41,11 +41,14 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
 
         Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(pd.getBehandlingId());
 
-        if (FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType()) || FagsakYtelseType.OMSORGSPENGER.equals(behandling.getFagsakYtelseType())
+        if (FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType())
             && BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType())) {
             logger.info("Setter uttak til inaktivt. behandlingUUID: '{}'", behandling.getUuid());
 
             this.årskvantumRestKlient.deaktiverUttakForBehandling(behandling.getUuid());
+        } else if (!FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType())) {
+            logger.error("Ikke tillatt å deaktivere uttak i årskvantum for andre enn omsorgspenger");
+            throw new IllegalArgumentException("Ikke tillatt å deaktivere uttak i årskvantum for andre enn omsorgspenger");
         }
     }
 }
