@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -132,6 +134,17 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         }
 
         return finnTjeneste(ref.getFagsakYtelseType()).hentGrunnlag(ref.getFagsakYtelseType(), bgReferanse.get());
+    }
+
+    @Override
+    public List<BeregningsgrunnlagKobling> hentKoblinger(BehandlingReferanse ref) {
+        var grunnlagOptional = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        return grunnlagOptional
+            .map(BeregningsgrunnlagPerioderGrunnlag::getGrunnlagPerioder)
+            .orElse(List.of())
+            .stream()
+            .map(it -> new BeregningsgrunnlagKobling(it.getSkjæringstidspunkt(), it.getEksternReferanse()))
+            .collect(Collectors.toList());
     }
 
     @Override
