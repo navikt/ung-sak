@@ -40,7 +40,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
@@ -85,12 +84,20 @@ public class IverksetteVedtakStegYtelseTest {
     private InfotrygdFeedService infotrygdFeedService;
 
 
+    @Mock
+    private ProsessTaskRepository prosessTaskRepository;
+
+    @Mock
+    private OppgaveTjeneste oppgaveTjeneste;
+
+    @Mock
+    private InfotrygdFeedService infotrygdFeedService;
+
+
     private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
 
     @Before
     public void setup() {
-        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider,
-            opprettProsessTaskIverksett,
         opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService));
         iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider,
             opprettProsessTaskIverksett,
