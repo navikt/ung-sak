@@ -77,7 +77,7 @@ public class SakInntektsmeldinger {
     /**
      * Get alle inntektsmelinger for saksnummer. Returneres i rekkefølge innsendingstidspunkt (eldste først).
      */
-    public Set<Inntektsmelding> getAlleInntektsmeldinger() {
+    public List<Inntektsmelding> getAlleInntektsmeldinger() {
 
         Set<Inntektsmelding> inntektsmeldinger = new LinkedHashSet<>();
         for (var entry : data.entrySet()) {
@@ -85,7 +85,7 @@ public class SakInntektsmeldinger {
         }
         var sorted = inntektsmeldinger.stream()
             .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt, Comparator.nullsLast(Comparator.naturalOrder())))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toList());
         return sorted;
     }
 

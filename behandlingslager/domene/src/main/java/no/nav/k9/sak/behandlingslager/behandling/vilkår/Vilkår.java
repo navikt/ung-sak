@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +60,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { getVilkårType() };
+        Object[] keyParts = {getVilkårType()};
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -89,6 +90,10 @@ public class Vilkår extends BaseEntitet implements IndexKey {
             .stream()
             .peek(it -> it.setVilkår(this))
             .collect(Collectors.toList()));
+    }
+
+    public VilkårPeriode finnPeriodeForSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        return this.perioder.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst().orElseThrow();
     }
 
     @Override

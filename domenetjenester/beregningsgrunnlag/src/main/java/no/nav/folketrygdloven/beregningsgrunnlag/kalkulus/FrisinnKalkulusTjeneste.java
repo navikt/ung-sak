@@ -15,7 +15,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -33,12 +33,12 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
     @Inject
     public FrisinnKalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
-                                   BehandlingRepository behandlingRepository,
                                    FagsakRepository fagsakRepository,
                                    KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                   ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
-        super(restTjeneste, fagsakRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
+                                   ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                   VilkårResultatRepository vilkårResultatRepository) {
+        super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
     }
 
     @Override
