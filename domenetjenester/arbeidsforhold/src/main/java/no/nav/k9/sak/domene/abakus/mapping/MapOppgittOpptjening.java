@@ -302,6 +302,7 @@ class MapOppgittOpptjening {
             var virksomhet = tilUtenlandskVirksomhet(dto);
             var builder = OppgittArbeidsforholdBuilder.ny()
                 .medArbeidType(KodeverkMapper.mapArbeidType(dto.getArbeidTypeDto()))
+                .medInntekt(dto.getInntekt())
                 .medErUtenlandskInntekt(dto.isErUtenlandskInntekt())
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(dto1.getFom(), dto1.getTom()))
                 .medUtenlandskVirksomhet(virksomhet);

@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.frisinn.mottak;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -19,6 +21,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -83,6 +86,14 @@ class LagreOppgittOpptjening {
             erNyeOpplysninger |= !egenNæringFør.isEmpty() || !egenNæringSøknadsperiode.isEmpty();
         }
 
+        if (inntekter.getArbeidstaker() != null) {
+            var arbeidstaker = inntekter.getArbeidstaker();
+            arbeidstaker.getInntekterSøknadsperiode().entrySet()
+                    .stream()
+                    .map(this::mapArbeidsforhold)
+                    .forEach(opptjeningBuilder::leggTilOppgittArbeidsforhold);
+        }
+
         if (erNyeOpplysninger) {
             // FIXME K9: håndter lagring i egen task så det blir robust kall til abakus
             iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
@@ -117,6 +128,18 @@ class LagreOppgittOpptjening {
         builder.medVirksomhetType(VirksomhetType.ANNEN);
         builder.medRegnskapsførerNavn(selvstendig.getRegnskapsførerNavn());
         builder.medRegnskapsførerTlf(selvstendig.getRegnskapsførerTlf());
+        return builder;
+    }
+
+    private OppgittArbeidsforholdBuilder mapArbeidsforhold(Entry<Periode, PeriodeInntekt> entry) {
+        Periode periode = entry.getKey();
+        PeriodeInntekt inntekt = entry.getValue();
+
+        OppgittArbeidsforholdBuilder builder = OppgittArbeidsforholdBuilder.ny();
+        builder.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()))
+                .medInntekt(inntekt.getBeløp());
+
         return builder;
     }
 }

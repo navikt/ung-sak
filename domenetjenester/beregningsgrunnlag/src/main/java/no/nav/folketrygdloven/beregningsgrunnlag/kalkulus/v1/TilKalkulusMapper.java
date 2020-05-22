@@ -46,6 +46,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
@@ -60,6 +61,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.Inntektspost;
+import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
@@ -128,12 +130,16 @@ public class TilKalkulusMapper {
         if (overstyrtOppgittOpptjening.isPresent()) {
             return overstyrtOppgittOpptjening.map(oo -> new OppgittOpptjeningDto(
                     oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
-                    mapOppgittEgenNæringListe(oo.getEgenNæring())))
+                    mapOppgittEgenNæringListe(oo.getEgenNæring()),
+                    mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold())))
                     .orElse(null);
         }
-        return oppgittOpptjening.map(oo -> new OppgittOpptjeningDto(
-                oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
-                mapOppgittEgenNæringListe(oo.getEgenNæring())))
+        return oppgittOpptjening.map(oo -> {
+            return new OppgittOpptjeningDto(
+                    oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
+                    mapOppgittEgenNæringListe(oo.getEgenNæring()),
+                    mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold()));
+        })
                 .orElse(null);
     }
 
@@ -153,6 +159,13 @@ public class TilKalkulusMapper {
                 oppgittEgenNæring.getNyIArbeidslivet(),
                 oppgittEgenNæring.getBruttoInntekt()
         );
+    }
+
+    private static List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold) {
+        if (arbeidsforhold == null) {
+            return null;
+        }
+        return arbeidsforhold.stream().map(arb -> new OppgittArbeidsforholdDto(mapPeriode(arb.getPeriode()), arb.getInntekt())).collect(Collectors.toList());
     }
 
     private static OppgittFrilansDto mapOppgittFrilans(OppgittFrilans oppgittFrilans) {

@@ -236,6 +236,11 @@ public class OppgittOpptjeningBuilder {
             return this;
         }
 
+        public OppgittArbeidsforholdBuilder medInntekt(BigDecimal inntekt) {
+            this.entitet.setInntekt(inntekt);
+            return this;
+        }
+
         public OppgittArbeidsforholdBuilder medErUtenlandskInntekt(Boolean erUtenlandskInntekt) {
             this.entitet.setErUtenlandskInntekt(erUtenlandskInntekt);
             return this;
