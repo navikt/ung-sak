@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.iay.modell;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,12 +19,15 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
  * OBS: Legger man til nye felter så skal dette oppdateres mange steder:
  * builder, equals, hashcode etc.
  */
-public class OppgittArbeidsforhold implements IndexKey {
+public class  OppgittArbeidsforhold implements IndexKey {
 
     @ChangeTracked
     private DatoIntervallEntitet periode;
 
     private boolean erUtenlandskInntekt;
+
+    @ChangeTracked
+    private BigDecimal inntekt;
 
     @ChangeTracked
     private ArbeidType arbeidType;
@@ -32,12 +36,13 @@ public class OppgittArbeidsforhold implements IndexKey {
 
     OppgittArbeidsforhold() {
     }
-    
+
     OppgittArbeidsforhold(OppgittArbeidsforhold kopierFra) {
         this.periode = kopierFra.periode;
         this.erUtenlandskInntekt=kopierFra.erUtenlandskInntekt;
         this.arbeidType=kopierFra.arbeidType;
         this.utenlandskVirksomhet = kopierFra.utenlandskVirksomhet;
+        this.inntekt = kopierFra.inntekt;
     }
 
     @Override
@@ -70,34 +75,6 @@ public class OppgittArbeidsforhold implements IndexKey {
         return utenlandskVirksomhet;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof OppgittArbeidsforhold)) return false;
-
-        OppgittArbeidsforhold that = (OppgittArbeidsforhold) o;
-
-        return
-            Objects.equals(periode, that.periode) &&
-            Objects.equals(arbeidType, that.arbeidType) &&
-            Objects.equals(utenlandskVirksomhet, that.utenlandskVirksomhet);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(periode, arbeidType, utenlandskVirksomhet);
-    }
-
-    @Override
-    public String toString() {
-        return "OppgittArbeidsforholdImpl{" +
-            "periode=" + periode +
-            ", erUtenlandskInntekt=" + erUtenlandskInntekt +
-            ", arbeidType=" + arbeidType +
-            ", utenlandskVirksomhet=" + utenlandskVirksomhet +
-            '}';
-    }
-
     void setPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
     }
@@ -112,5 +89,41 @@ public class OppgittArbeidsforhold implements IndexKey {
 
     void setUtenlandskVirksomhet(OppgittUtenlandskVirksomhet utenlandskVirksomhet) {
         this.utenlandskVirksomhet = utenlandskVirksomhet;
+    }
+
+    public BigDecimal getInntekt() {
+        return inntekt;
+    }
+
+    void setInntekt(BigDecimal inntekt) {
+        this.inntekt = inntekt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof OppgittArbeidsforhold)) return false;
+
+        OppgittArbeidsforhold that = (OppgittArbeidsforhold) o;
+
+        return
+                Objects.equals(periode, that.periode) &&
+                        Objects.equals(arbeidType, that.arbeidType) &&
+                        Objects.equals(utenlandskVirksomhet, that.utenlandskVirksomhet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode, arbeidType, utenlandskVirksomhet);
+    }
+
+    @Override
+    public String toString() {
+        return "OppgittArbeidsforholdImpl{" +
+                "periode=" + periode +
+                ", erUtenlandskInntekt=" + erUtenlandskInntekt +
+                ", arbeidType=" + arbeidType +
+                ", utenlandskVirksomhet=" + utenlandskVirksomhet +
+                '}';
     }
 }
