@@ -20,6 +20,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
@@ -38,9 +40,13 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
 
     public static final DatoIntervallEntitet NÆRINGS_PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 12, 31));
+    // https://github.com/navikt/frisinn/releases/tag/1.2
+    private static final LocalDate HENSYNTATT_OPPHØRTE_PERSONLIGE_FORETAK_ETTER = LocalDate.parse("2020-05-20");
+
     private Boolean filterAktivert;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private UttakRepository uttakRepository;
+    private SøknadRepository søknadRepository;
 
     protected FiltrerUtVariantSomIkkeStøttesSteg() {
         // for proxy
@@ -49,10 +55,12 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
     @Inject
     public FiltrerUtVariantSomIkkeStøttesSteg(@KonfigVerdi(value = "FRISINN_VARIANT_FILTER_AKTIVERT", defaultVerdi = "true") Boolean filterAktivert,
                                               InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                              UttakRepository uttakRepository) {
+                                              UttakRepository uttakRepository,
+                                              SøknadRepository søknadRepository) {
         this.filterAktivert = filterAktivert;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.uttakRepository = uttakRepository;
+        this.søknadRepository = søknadRepository;
     }
 
     @Override
@@ -66,16 +74,21 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .orElseThrow();
         var uttakGrunnlag = uttakRepository.hentGrunnlag(behandlingId);
 
-        return filtrerBehandlinger(uttakGrunnlag, oppgittOpptjening);
+        var søknad = søknadRepository.hentSøknadHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke søknad for behandlingId " + behandlingId));
+
+
+        return filtrerBehandlinger(uttakGrunnlag, oppgittOpptjening, søknad);
     }
 
-    BehandleStegResultat filtrerBehandlinger(Optional<UttakGrunnlag> uttakGrunnlag, OppgittOpptjening oppgittOpptjening) {
+    BehandleStegResultat filtrerBehandlinger(Optional<UttakGrunnlag> uttakGrunnlag, OppgittOpptjening oppgittOpptjening, SøknadEntitet søknad) {
         var frilans = oppgittOpptjening.getFrilans();
         var næring = oppgittOpptjening.getEgenNæring();
         var harFrilansInntekter = harFrilansInntekter(frilans);
         var søkerKompensasjonForFrilans = harSøktKompensasjonForFrilans(uttakGrunnlag);
         var harNæringsInntekt = harNæringsinntekt(næring);
         var harNæringsinntektIHele2019 = harNæringsinntektIHele2019(næring);
+        var søknadMottattEtterOpphørtePersonligeForetakBleHensyntatt = søknad.getMottattDato().isAfter(HENSYNTATT_OPPHØRTE_PERSONLIGE_FORETAK_ETTER);
         var næringStartdato = harNæringsinntektIHele2019 ? NÆRINGS_PERIODE.getFomDato() : næringStartdato(næring);
         var søkerKompensasjonForNæring = harSøktKompensasjonForNæring(uttakGrunnlag);
 
@@ -91,7 +104,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
 
         if (søkerKompensasjonForFrilans && harFrilansInntekter && (søkerKompensasjonForNæring || !harNæringsInntekt)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if ((søkerKompensasjonForFrilans || !harFrilansInntekter) && søkerKompensasjonForNæring && harNæringsInntekt && harNæringsinntektIHele2019) {
+        } else if ((søkerKompensasjonForFrilans || !harFrilansInntekter) && søkerKompensasjonForNæring && harNæringsInntekt && (harNæringsinntektIHele2019 || søknadMottattEtterOpphørtePersonligeForetakBleHensyntatt)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
