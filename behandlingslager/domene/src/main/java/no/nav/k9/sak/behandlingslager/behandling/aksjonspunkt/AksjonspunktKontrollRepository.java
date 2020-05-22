@@ -33,7 +33,8 @@ public class AksjonspunktKontrollRepository {
 
     public Aksjonspunkt settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
                                              BehandlingStegType stegType,
-                                             LocalDateTime fristTid, Venteårsak venteårsak) {
+                                             LocalDateTime fristTid, Venteårsak venteårsak,
+                                             String venteårsakVariant) {
 
         log.info("Setter behandling på vent for steg={}, aksjonspunkt={}, fristTid={}, venteÅrsak={}", stegType, aksjonspunktDefinisjon, fristTid, venteårsak);
 
@@ -45,18 +46,19 @@ public class AksjonspunktKontrollRepository {
             if (!aksjonspunkt.erOpprettet()) {
                 this.setReåpnet(aksjonspunkt);
             }
-            this.setFrist(aksjonspunkt, fristTid, venteårsak);
+            this.setFrist(aksjonspunkt, fristTid, venteårsak, venteårsakVariant);
         } else {
             // nytt aksjonspunkt
             aksjonspunkt = this.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.empty(),
-                Optional.ofNullable(fristTid), Optional.ofNullable(venteårsak), Optional.empty());
+                Optional.ofNullable(fristTid), Optional.ofNullable(venteårsak), venteårsakVariant, Optional.empty());
         }
         aksjonspunkt.setBehandlingSteg(stegType);
         return aksjonspunkt;
     }
 
     private Aksjonspunkt leggTilAksjonspunkt(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
-                                             Optional<BehandlingStegType> behandlingStegType, Optional<LocalDateTime> frist, Optional<Venteårsak> venteÅrsak,
+                                             Optional<BehandlingStegType> behandlingStegType, Optional<LocalDateTime> frist, Optional<Venteårsak> venteÅrsak, 
+                                             String venteårsakVariant,
                                              Optional<Boolean> toTrinnskontroll) {
         // sjekk at alle parametere er spesifisert
         Objects.requireNonNull(behandling, "behandling");
@@ -76,9 +78,9 @@ public class AksjonspunktKontrollRepository {
         }
 
         if (venteÅrsak.isPresent()) {
-            adBuilder.medVenteårsak(venteÅrsak.get());
+            adBuilder.medVenteårsak(venteÅrsak.get(), venteårsakVariant);
         } else {
-            adBuilder.medVenteårsak(Venteårsak.UDEFINERT);
+            adBuilder.medVenteårsak(Venteårsak.UDEFINERT, null);
         }
 
         Aksjonspunkt aksjonspunkt = adBuilder.buildFor(behandling);
@@ -86,15 +88,16 @@ public class AksjonspunktKontrollRepository {
         return aksjonspunkt;
     }
 
-    public Aksjonspunkt leggTilAksjonspunkt(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
+    public Aksjonspunkt leggTilAksjonspunkt(Behandling behandling, 
+                                            AksjonspunktDefinisjon aksjonspunktDefinisjon,
                                             BehandlingStegType behandlingStegType) {
         Objects.requireNonNull(behandlingStegType, "behandlingStegType");
-        return leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.ofNullable(behandlingStegType), Optional.empty(), Optional.empty(),
+        return leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.ofNullable(behandlingStegType), Optional.empty(), Optional.empty(), null,
             Optional.empty());
     }
 
     public Aksjonspunkt leggTilAksjonspunkt(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
-        return leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.empty(), Optional.empty(), Optional.empty(),
+        return leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.empty(), Optional.empty(), Optional.empty(), null,
             Optional.empty());
     }
 
@@ -121,9 +124,10 @@ public class AksjonspunktKontrollRepository {
         return aksjonspunkt.setStatus(AksjonspunktStatus.UTFØRT, begrunnelse);
     }
 
-    public void setFrist(Aksjonspunkt ap, LocalDateTime fristTid, Venteårsak venteårsak) {
+    public void setFrist(Aksjonspunkt ap, LocalDateTime fristTid, Venteårsak venteårsak, String venteårsakVariant) {
         ap.setFristTid(fristTid);
         ap.setVenteårsak(venteårsak);
+        ap.setVenteårsakVariant(venteårsakVariant);
     }
 
 }

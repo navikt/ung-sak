@@ -7,9 +7,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -25,7 +22,6 @@ import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class SjekkMotEksisterendeOppgaverTjeneste {
-    private static final Logger log = LoggerFactory.getLogger(SjekkMotEksisterendeOppgaverTjeneste.class);
 
     private HistorikkRepository historikkRepository;
     private OppgaveTjeneste oppgaveTjeneste;

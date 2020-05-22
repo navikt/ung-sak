@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -40,6 +42,11 @@ public class SettBehandlingPaVentDto {
     @JsonProperty(value = "ventearsak")
     private Venteårsak ventearsak;
 
+    @JsonProperty(value = "ventearsakVariant")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Size(max = 200)
+    private String ventearsakVariant;
+
     public SettBehandlingPaVentDto() {
         //
     }
@@ -59,6 +66,10 @@ public class SettBehandlingPaVentDto {
 
     public Venteårsak getVentearsak() {
         return ventearsak;
+    }
+    
+    public String getVentearsakVariant() {
+        return ventearsakVariant;
     }
 
     public void setBehandlingId(Long behandlingId) {

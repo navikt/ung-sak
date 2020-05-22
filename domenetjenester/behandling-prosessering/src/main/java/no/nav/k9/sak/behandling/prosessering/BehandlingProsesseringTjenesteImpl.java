@@ -80,8 +80,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     @Override
-    public void settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon apDef, LocalDateTime fristTid, Venteårsak venteårsak) {
-        behandlingskontrollTjeneste.settBehandlingPåVent(behandling, apDef, behandling.getAktivtBehandlingSteg(), fristTid, venteårsak);
+    public void settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon apDef, LocalDateTime fristTid, Venteårsak venteårsak, String venteårsakVariant) {
+        behandlingskontrollTjeneste.settBehandlingPåVent(behandling, apDef, behandling.getAktivtBehandlingSteg(), fristTid, venteårsak, venteårsakVariant);
     }
 
     // For snapshot av grunnlag før man gjør andre endringer enn registerinnhenting

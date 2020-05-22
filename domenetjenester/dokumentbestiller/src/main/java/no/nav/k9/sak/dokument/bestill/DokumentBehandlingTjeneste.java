@@ -32,10 +32,10 @@ public class DokumentBehandlingTjeneste {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
 
-    public void settBehandlingPåVent(Long behandlingId, Venteårsak venteårsak) {
+    public void settBehandlingPåVent(Long behandlingId, Venteårsak venteårsak, String venteårsakVariant) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         behandlingskontrollTjeneste.settBehandlingPåVentUtenSteg(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT,
-            LocalDateTime.now().plusDays(14), venteårsak);
+            LocalDateTime.now().plusDays(14), venteårsak, venteårsakVariant);
     }
 
     public void utvidBehandlingsfristManuelt(Long behandlingId) {

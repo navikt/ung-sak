@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -124,7 +125,7 @@ public class VilkårBuilder {
     }
 
     private void kobleSammenMellomliggendeVilkårsPerioder() {
-        final var mellomliggendeSegmenter = new ArrayList<DatoIntervallEntitet>();
+        var mellomliggendeSegmenter = new TreeSet<DatoIntervallEntitet>();
         LocalDate tom = null;
         for (LocalDateSegment<WrappedVilkårPeriode> periode : vilkårTidslinje.toSegments()) {
             if (tom != null && erMellomliggendePeriode(tom, periode.getFom())) {

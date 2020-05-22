@@ -1,7 +1,7 @@
 package no.nav.k9.sak.inngangsvilkår.perioder;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.NavigableSet;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
@@ -9,9 +9,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface VilkårsPerioderTilVurderingTjeneste {
-    Set<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType);
+    NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType);
 
-    Map<VilkårType, Set<DatoIntervallEntitet>> utled(Long behandlingId);
+    Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId);
 
     int maksMellomliggendePeriodeAvstand();
 

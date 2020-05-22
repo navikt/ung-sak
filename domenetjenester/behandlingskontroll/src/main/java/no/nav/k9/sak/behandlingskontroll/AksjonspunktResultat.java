@@ -17,7 +17,7 @@ public class AksjonspunktResultat {
     private AksjonspunktDefinisjon aksjonspunktDefinisjon;
     private Venteårsak venteårsak;
     private LocalDateTime frist;
-
+    private String venteårsakVariant;
 
     private AksjonspunktResultat(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         this.aksjonspunktDefinisjon = aksjonspunktDefinisjon;
@@ -25,9 +25,11 @@ public class AksjonspunktResultat {
 
     private AksjonspunktResultat(AksjonspunktDefinisjon aksjonspunktDefinisjon,
                                  Venteårsak venteårsak,
+                                 String venteårsakVariant,
                                  LocalDateTime ventefrist) {
         this.aksjonspunktDefinisjon = aksjonspunktDefinisjon;
         this.venteårsak = venteårsak;
+        this.venteårsakVariant = venteårsakVariant;
         this.frist = ventefrist;
     }
 
@@ -49,7 +51,14 @@ public class AksjonspunktResultat {
      * Factory-metode som linker {@link AksjonspunktDefinisjon} sammen med ventefrist og årsak.
      */
     public static AksjonspunktResultat opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon aksjonspunktDefinisjon, Venteårsak venteårsak, LocalDateTime ventefrist) {
-        return new AksjonspunktResultat(aksjonspunktDefinisjon, venteårsak, ventefrist);
+        return opprettForAksjonspunktMedFrist(aksjonspunktDefinisjon, venteårsak, null, ventefrist);
+    }
+
+    /**
+     * Factory-metode som linker {@link AksjonspunktDefinisjon} sammen med ventefrist og årsak.
+     */
+    public static AksjonspunktResultat opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon aksjonspunktDefinisjon, Venteårsak venteårsak, String venteårsakVariant, LocalDateTime ventefrist) {
+        return new AksjonspunktResultat(aksjonspunktDefinisjon, venteårsak, venteårsakVariant, ventefrist);
     }
 
     public AksjonspunktDefinisjon getAksjonspunktDefinisjon() {
@@ -60,14 +69,21 @@ public class AksjonspunktResultat {
         return venteårsak;
     }
 
+    /** Custom begrunnelse/kode for hvorfor venteårsak har inntruffet. */
+    public String getVenteårsakVariant() {
+        return venteårsakVariant;
+    }
+
     public LocalDateTime getFrist() {
         return frist;
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + aksjonspunktDefinisjon.getKode() + ":" + aksjonspunktDefinisjon.getNavn()
-            + ", frist=" + getFrist() + ", venteårsak=" + getVenteårsak() + ">";
+        return getClass().getSimpleName() + "<" + aksjonspunktDefinisjon.getKode() + ":" + aksjonspunktDefinisjon.getNavn() +
+            ", frist=" + getFrist() + ", venteårsak=" + getVenteårsak() +
+            (venteårsakVariant == null ? "" : ", venteårsakVariant=" + venteårsakVariant) +
+            ">";
     }
 
     @Override

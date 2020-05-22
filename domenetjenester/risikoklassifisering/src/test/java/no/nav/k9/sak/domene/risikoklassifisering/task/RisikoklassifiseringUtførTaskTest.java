@@ -25,8 +25,6 @@ public class RisikoklassifiseringUtførTaskTest {
 
     private static final String KONSUMENT_ID = "konsumentId";
 
-    private static final String RISIKOKLASSIFISERING_JSON = "risikoklassifisering.request.json";
-
     @Mock
     private RisikoklassifiseringKafkaProducer kafkaProducer;
 

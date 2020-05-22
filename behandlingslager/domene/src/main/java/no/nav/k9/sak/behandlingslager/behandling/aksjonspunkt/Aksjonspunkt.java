@@ -66,8 +66,11 @@ public class Aksjonspunkt extends BaseEntitet {
     private AksjonspunktStatus status;
 
     @Convert(converter = VenteårsakKodeverdiConverter.class)
-    @Column(name="vent_aarsak", nullable = false)
+    @Column(name="vent_aarsak")
     private Venteårsak venteårsak = Venteårsak.UDEFINERT;
+    
+    @Column(name="vent_aarsak_variant")
+    private String venteårsakVariant;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -260,7 +263,16 @@ public class Aksjonspunkt extends BaseEntitet {
     public Venteårsak getVenteårsak() {
         return venteårsak;
     }
-
+    
+    /** Variant av venteårsak - er opp til den som setter å håndtere (ikke noe predefinert kodeverk). */
+    public String getVenteårsakVariant() {
+        return venteårsakVariant;
+    }
+    
+    void setVenteårsakVariant(String venteårsakVariant) {
+        this.venteårsakVariant = venteårsakVariant;
+    }
+    
     void setVenteårsak(Venteårsak venteårsak) {
         this.venteårsak = venteårsak;
     }
@@ -351,6 +363,7 @@ public class Aksjonspunkt extends BaseEntitet {
             til.setBegrunnelse(fra.getBegrunnelse());
             til.setPeriode(fra.getPeriode());
             til.setVenteårsak(fra.getVenteårsak());
+            til.setVenteårsakVariant(fra.getVenteårsakVariant());
             til.setFristTid(fra.getFristTid());
             til.setStatus(fra.getStatus(), fra.getBegrunnelse());
         }
@@ -360,8 +373,9 @@ public class Aksjonspunkt extends BaseEntitet {
             return this;
         }
 
-        Aksjonspunkt.Builder medVenteårsak(Venteårsak venteårsak) {
+        Aksjonspunkt.Builder medVenteårsak(Venteårsak venteårsak, String variant) {
             aksjonspunkt.setVenteårsak(venteårsak);
+            aksjonspunkt.setVenteårsakVariant(variant);
             return this;
         }
 

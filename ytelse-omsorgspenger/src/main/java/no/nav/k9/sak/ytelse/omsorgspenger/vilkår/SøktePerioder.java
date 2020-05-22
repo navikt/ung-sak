@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -15,39 +17,39 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
 
-    private OmsorgspengerGrunnlagRepository uttakRepository;
+    private OmsorgspengerGrunnlagRepository grunnlagRepository;
 
-    SøktePerioder(OmsorgspengerGrunnlagRepository uttakRepository) {
-        this.uttakRepository = uttakRepository;
+    SøktePerioder(OmsorgspengerGrunnlagRepository repo) {
+        this.grunnlagRepository = repo;
     }
 
     @Override
-    public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadsperioder = uttakRepository.hentOppgittFraværHvisEksisterer(behandlingId);
+    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        var søknadsperioder = grunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
 
         if (søknadsperioder.isEmpty()) {
-            return Set.of();
+            return Collections.emptyNavigableSet();
         } else {
             return utledPeriodeFraSøknadsPerioder(søknadsperioder.get());
         }
     }
 
-    Set<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(OppgittFravær søknadsperioder) {
+    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(OppgittFravær søknadsperioder) {
         var timeline = new LocalDateTimeline<Boolean>(List.of());
         var perioder = søknadsperioder.getPerioder()
             .stream()
             .map(OppgittFraværPeriode::getPeriode)
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(TreeSet::new));
 
         for (LocalDateSegment<Boolean> periode : perioder) {
             timeline = timeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return timeline.compress()
+        return Collections.unmodifiableNavigableSet(timeline.compress()
             .toSegments()
             .stream()
             .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(TreeSet::new)));
     }
 }

@@ -1,7 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.vilkår;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -21,20 +22,20 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
     }
 
     @Override
-    public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
 
         if (søknadsperioder.isEmpty()) {
-            return Set.of();
+            return Collections.emptyNavigableSet();
         } else {
-            final var perioder = søknadsperioder.map(Søknadsperioder::getPerioder).orElse(Collections.emptySet()).stream().map(Søknadsperiode::getPeriode).collect(Collectors.toSet());
+            var perioder = søknadsperioder.map(Søknadsperioder::getPerioder).orElse(Collections.emptySet()).stream().map(Søknadsperiode::getPeriode).collect(Collectors.toSet());
 
-            final var timeline = new LocalDateTimeline<>(perioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).collect(Collectors.toList())).compress();
+            var timeline = new LocalDateTimeline<>(perioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).collect(Collectors.toList())).compress();
 
-            return timeline.toSegments()
+            return Collections.unmodifiableNavigableSet(timeline.toSegments()
                 .stream()
                 .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new)));
         }
     }
 }

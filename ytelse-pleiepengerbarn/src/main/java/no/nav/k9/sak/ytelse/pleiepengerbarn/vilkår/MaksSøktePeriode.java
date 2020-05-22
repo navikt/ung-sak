@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
+import java.util.Collections;
+import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -15,12 +18,12 @@ class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
     }
 
     @Override
-    public Set<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
         if (søknadsperioder.isEmpty()) {
-            return Set.of();
+            return Collections.emptyNavigableSet();
         } else {
-            return Set.of(søknadsperioder.get().getMaksPeriode());
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(søknadsperioder.get().getMaksPeriode())));
         }
     }
 }

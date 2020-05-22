@@ -123,13 +123,13 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
             return;
         }
 
-            Optional<BehandlingStegTilstand> tilstand = behandling.getBehandlingStegTilstand(behandlingStegType);
-            if (tilstand.isPresent() && BehandlingStegStatus.VENTER.equals(tilstand.get().getBehandlingStegStatus())) {
-                BehandlingModell modell = getModell(behandling.getType(), behandling.getFagsakYtelseType());
-                BehandlingModellVisitor stegVisitor = new TekniskBehandlingStegVenterVisitor(serviceProvider, kontekst);
+        Optional<BehandlingStegTilstand> tilstand = behandling.getBehandlingStegTilstand(behandlingStegType);
+        if (tilstand.isPresent() && BehandlingStegStatus.VENTER.equals(tilstand.get().getBehandlingStegStatus())) {
+            BehandlingModell modell = getModell(behandling.getType(), behandling.getFagsakYtelseType());
+            BehandlingModellVisitor stegVisitor = new TekniskBehandlingStegVenterVisitor(serviceProvider, kontekst);
 
-                prosesserBehandling(kontekst, modell, stegVisitor);
-            }
+            prosesserBehandling(kontekst, modell, stegVisitor);
+        }
     }
 
     private BehandlingStegUtfall prosesserBehandling(BehandlingskontrollKontekst kontekst, BehandlingModell modell, BehandlingModellVisitor visitor) {
@@ -426,17 +426,26 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     }
 
     @Override
-    public Aksjonspunkt settBehandlingPåVentUtenSteg(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjonIn,
-                                                     LocalDateTime fristTid, Venteårsak venteårsak) {
-        return settBehandlingPåVent(behandling, aksjonspunktDefinisjonIn, null, fristTid, venteårsak);
+    public Aksjonspunkt settBehandlingPåVentUtenSteg(Behandling behandling,
+                                                     AksjonspunktDefinisjon aksjonspunktDefinisjonIn,
+                                                     LocalDateTime fristTid,
+                                                     Venteårsak venteårsak,
+                                                     String venteårsakVariant) {
+        return settBehandlingPåVent(behandling, aksjonspunktDefinisjonIn, null, fristTid, venteårsak, venteårsakVariant);
     }
 
     @Override
-    public Aksjonspunkt settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjonIn,
-                                             BehandlingStegType stegType, LocalDateTime fristTid, Venteårsak venteårsak) {
+    public Aksjonspunkt settBehandlingPåVent(Behandling behandling,
+                                             AksjonspunktDefinisjon aksjonspunktDefinisjonIn,
+                                             BehandlingStegType stegType,
+                                             LocalDateTime fristTid,
+                                             Venteårsak venteårsak,
+                                             String venteårsakVariant) {
         BehandlingskontrollKontekst kontekst = initBehandlingskontroll(behandling);
-        Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.settBehandlingPåVent(behandling, aksjonspunktDefinisjonIn, stegType, fristTid,
-            venteårsak);
+        Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.settBehandlingPåVent(behandling, aksjonspunktDefinisjonIn,
+            stegType,
+            fristTid,
+            venteårsak, venteårsakVariant);
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         if (aksjonspunkt != null) {
             aksjonspunkterEndretStatus(kontekst, aksjonspunkt.getBehandlingStegFunnet(), singletonList(aksjonspunkt));

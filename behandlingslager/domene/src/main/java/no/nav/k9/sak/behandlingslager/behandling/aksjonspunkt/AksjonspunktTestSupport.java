@@ -1,4 +1,5 @@
 package no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
  */
 public class AksjonspunktTestSupport {
 
-
     public AksjonspunktTestSupport() {
     }
 
@@ -23,16 +23,20 @@ public class AksjonspunktTestSupport {
                                             BehandlingStegType behandlingStegType) {
         Objects.requireNonNull(behandlingStegType, "behandlingStegType");
         return leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.ofNullable(behandlingStegType), Optional.empty(), Optional.empty(),
+            null,
             Optional.empty());
     }
 
     public Aksjonspunkt leggTilAksjonspunkt(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         return leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon, Optional.empty(), Optional.empty(), Optional.empty(),
+            null,
             Optional.empty());
     }
 
     private Aksjonspunkt leggTilAksjonspunkt(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
-                                             Optional<BehandlingStegType> behandlingStegType, Optional<LocalDateTime> frist, Optional<Venteårsak> venteÅrsak,
+                                             Optional<BehandlingStegType> behandlingStegType, Optional<LocalDateTime> frist,
+                                             Optional<Venteårsak> venteÅrsak,
+                                             String venteårsakVariant,
                                              Optional<Boolean> toTrinnskontroll) {
         // sjekk at alle parametere er spesifisert
         Objects.requireNonNull(behandling, "behandling");
@@ -54,9 +58,9 @@ public class AksjonspunktTestSupport {
         }
 
         if (venteÅrsak.isPresent()) {
-            adBuilder.medVenteårsak(venteÅrsak.get());
+            adBuilder.medVenteårsak(venteÅrsak.get(), venteårsakVariant);
         } else {
-            adBuilder.medVenteårsak(Venteårsak.UDEFINERT);
+            adBuilder.medVenteårsak(Venteårsak.UDEFINERT, null);
         }
 
         Aksjonspunkt aksjonspunkt = adBuilder.buildFor(behandling);
@@ -95,8 +99,13 @@ public class AksjonspunktTestSupport {
         aksjonspunkt.setStatus(AksjonspunktStatus.OPPRETTET, aksjonspunkt.getBegrunnelse());
     }
 
-    public void setFrist(Aksjonspunkt ap, LocalDateTime fristTid, Venteårsak venteårsak) {
+    public void setFrist(Aksjonspunkt ap, LocalDateTime fristTid, Venteårsak venteårsak, String venteårsakVariant) {
         ap.setFristTid(fristTid);
         ap.setVenteårsak(venteårsak);
+        if (venteårsak == null || Venteårsak.UDEFINERT.equals(venteårsak)) {
+            ap.setVenteårsakVariant(null);
+        } else {
+            ap.setVenteårsakVariant(venteårsakVariant);
+        }
     }
 }

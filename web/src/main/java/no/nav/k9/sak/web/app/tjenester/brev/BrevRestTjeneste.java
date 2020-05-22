@@ -112,7 +112,7 @@ public class BrevRestTjeneste {
     }
 
     private void settBehandlingPåVent(Venteårsak avvResponsRevurdering, Long behandlingId) {
-        dokumentBehandlingTjeneste.settBehandlingPåVent(behandlingId, avvResponsRevurdering);
+        dokumentBehandlingTjeneste.settBehandlingPåVent(behandlingId, avvResponsRevurdering, null);
     }
 
     @GET
