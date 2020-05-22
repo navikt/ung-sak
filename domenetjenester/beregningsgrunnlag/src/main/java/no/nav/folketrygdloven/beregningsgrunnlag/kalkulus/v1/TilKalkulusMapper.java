@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -250,8 +251,10 @@ public class TilKalkulusMapper {
     }
 
     private static boolean erNærmereEllerLikeNæreSkjæringtidspunktet(Inntektsmelding gammel, LocalDate nyInntektsmeldingDatoNærmestStp, LocalDate skjæringstidspunkt) {
+        var set = new HashSet<>(Set.of(nyInntektsmeldingDatoNærmestStp));
         var næresteDatoFraEksisterende = finnDatoNærmestSkjæringstidspunktet(gammel, skjæringstidspunkt).orElseThrow();
-        var næmest = Set.of(næresteDatoFraEksisterende, nyInntektsmeldingDatoNærmestStp).stream().min(Comparator.comparingLong(x -> ChronoUnit.DAYS.between(x, skjæringstidspunkt))).orElseThrow();
+        set.add(næresteDatoFraEksisterende);
+        var næmest = set.stream().min(Comparator.comparingLong(x -> ChronoUnit.DAYS.between(x, skjæringstidspunkt))).orElseThrow();
         return næmest.equals(næresteDatoFraEksisterende);
     }
 
@@ -263,13 +266,13 @@ public class TilKalkulusMapper {
         return inntektsmeldingene.stream().noneMatch(arbeidsforholdMatcher(inntektsmelding));
     }
 
-    private static List<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
         return sakInntektsmeldinger.getAlleInntektsmeldinger()
             .stream()
             .filter(it -> it.getOppgittFravær()
                 .stream()
-                .anyMatch(at -> DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()).overlapper(vilkårsPeriode)))
-            .collect(Collectors.toList());
+                .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
+            .collect(Collectors.toSet());
     }
 
     private static Predicate<Inntektsmelding> arbeidsforholdMatcher(Inntektsmelding inntektsmelding) {
