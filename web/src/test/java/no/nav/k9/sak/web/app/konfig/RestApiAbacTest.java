@@ -118,13 +118,17 @@ public class RestApiAbacTest {
     private void assertAtIngenBrukerDummyVerdierPåBeskyttetRessurs(Method metode) {
         Class<?> klasse = metode.getDeclaringClass();
         BeskyttetRessurs annotation = metode.getAnnotation(BeskyttetRessurs.class);
-        if (annotation != null && annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
-            fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
-                + BeskyttetRessursActionAttributt.class.getSimpleName());
-        } else if (annotation != null && annotation.resource().isEmpty() &&
-            annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
-            fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
-                + BeskyttetRessursResourceAttributt.class.getSimpleName());
+        if (annotation != null) {
+            if (annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
+                    + BeskyttetRessursActionAttributt.class.getSimpleName());
+            } else if (annotation.property() != null && !"".equals(annotation.property())) {
+                return; // ok
+            } else if (annotation.resource().isEmpty() &&
+                annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
+                    + BeskyttetRessursResourceAttributt.class.getSimpleName());
+            }
         }
     }
 
@@ -136,6 +140,10 @@ public class RestApiAbacTest {
             .map(it -> extractValueFromField(it))
             .collect(Collectors.toList());
 
+        if (annotation != null && !annotation.property().isEmpty()) {
+            return; // ok
+        }
+        
         if (annotation != null && annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
             if (annotation.resource().isEmpty()) {
                 fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for "
