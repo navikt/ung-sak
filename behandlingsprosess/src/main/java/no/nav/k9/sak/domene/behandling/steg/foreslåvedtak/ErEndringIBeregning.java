@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,14 +26,18 @@ public class ErEndringIBeregning {
 
         Set<LocalDate> allePeriodeDatoer = finnAllePeriodersStartdatoer(revurderingsPerioder, originalePerioder);
 
+        BigDecimal samletRevurderingDagsats = BigDecimal.ZERO;
+        BigDecimal samletOriginalDagsats = BigDecimal.ZERO;
         for (LocalDate dato : allePeriodeDatoer) {
             Long dagsatsRevurderingsgrunnlag = finnGjeldendeDagsatsForDenneDatoen(dato, revurderingsPerioder);
             Long dagsatsOriginaltGrunnlag = finnGjeldendeDagsatsForDenneDatoen(dato, originalePerioder);
-            if (dagsatsOriginaltGrunnlag != null && (dagsatsRevurderingsgrunnlag == null || dagsatsRevurderingsgrunnlag < dagsatsOriginaltGrunnlag)) {
-                return true;
-            }
+            BigDecimal dagsatsRevurdering = dagsatsRevurderingsgrunnlag == null ? BigDecimal.ZERO : BigDecimal.valueOf(dagsatsRevurderingsgrunnlag);
+            BigDecimal dagsatsOriginal = dagsatsOriginaltGrunnlag == null ? BigDecimal.ZERO : BigDecimal.valueOf(dagsatsOriginaltGrunnlag);
+
+            samletRevurderingDagsats = samletRevurderingDagsats.add(dagsatsRevurdering);
+            samletOriginalDagsats = samletOriginalDagsats.add(dagsatsOriginal);
         }
-        return false;
+        return samletRevurderingDagsats.compareTo(samletOriginalDagsats) < 0;
     }
 
     private static Set<LocalDate> finnAllePeriodersStartdatoer(List<BeregningsgrunnlagPeriode> revurderingsPerioder, List<BeregningsgrunnlagPeriode> originalePerioder) {
