@@ -29,6 +29,7 @@ import no.nav.k9.søknad.felles.Periode;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
+import no.nav.vedtak.util.Tuple;
 
 @Dependent
 class LagreOppgittOpptjening {
@@ -51,7 +52,8 @@ class LagreOppgittOpptjening {
 
         Long behandlingId = behandling.getId();
 
-        OppgittOpptjeningBuilder opptjeningBuilder = initOpptjeningBuilder(behandling.getFagsakId(), tidspunkt);
+        Tuple<OppgittOpptjeningBuilder, Boolean> tuple = initOpptjeningBuilderFraEksisterende(behandling.getFagsakId(), tidspunkt);
+        OppgittOpptjeningBuilder opptjeningBuilder = tuple.getElement1();
 
         boolean erNyeOpplysninger = false;
         if (inntekter.getFrilanser() != null) {
@@ -92,30 +94,36 @@ class LagreOppgittOpptjening {
                     .stream()
                     .map(this::mapArbeidsforhold)
                     .forEach(opptjeningBuilder::leggTilOppgittArbeidsforhold);
+            erNyeOpplysninger = true;
         }
 
+        // FIXME K9: håndter lagring i egen task så det blir robust kall til abakus
         if (erNyeOpplysninger) {
-            // FIXME K9: håndter lagring i egen task så det blir robust kall til abakus
-            iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
+            Boolean måOppdatereBasertPåtidligereBehandling = tuple.getElement2();
+            if (måOppdatereBasertPåtidligereBehandling) {
+                iayTjeneste.lagreOverstyrtOppgittOpptjening(behandlingId, opptjeningBuilder);
+            } else {
+                iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
+            }
         }
     }
 
-    private OppgittOpptjeningBuilder initOpptjeningBuilder(Long fagsakId, ZonedDateTime tidspunkt) {
-        OppgittOpptjeningBuilder builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
-
+    private Tuple<OppgittOpptjeningBuilder, Boolean> initOpptjeningBuilderFraEksisterende(Long fagsakId, ZonedDateTime tidspunkt) {
         // bygg på eksisterende hvis tidligere innrapportert for denne ytelsen (sikrer at vi får med originalt rapportert inntektsgrunnlag).
         // TODO: håndtere korreksjoner senere?  vil nå bare akkumulere innrapportert.
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
         if (sisteBehandling.isPresent()) {
-            Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = sisteBehandling.isPresent() ? iayTjeneste.finnGrunnlag(sisteBehandling.get().getId()) : Optional.empty();
+            Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = iayTjeneste.finnGrunnlag(sisteBehandling.get().getId());
             if (iayGrunnlagOpt.isPresent()) {
-                var tidligereRegistrertOpptjening = iayGrunnlagOpt.get().getOppgittOpptjening();
+                // tar utgangspunkt i overstrying hvis det finnes
+                var tidligereRegistrertOpptjening = iayGrunnlagOpt.get().getOverstyrtOppgittOpptjening().isPresent() ?
+                        iayGrunnlagOpt.get().getOverstyrtOppgittOpptjening() : iayGrunnlagOpt.get().getOppgittOpptjening();
                 if (tidligereRegistrertOpptjening.isPresent()) {
-                    builder = OppgittOpptjeningBuilder.nyFraEksisterende(tidligereRegistrertOpptjening.get(), UUID.randomUUID(), tidspunkt.toLocalDateTime());
+                    return new Tuple<>(OppgittOpptjeningBuilder.nyFraEksisterende(tidligereRegistrertOpptjening.get(), UUID.randomUUID(), tidspunkt.toLocalDateTime()), true);
                 }
             }
         }
-        return builder;
+        return new Tuple<>(OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime()), false);
     }
 
     private EgenNæringBuilder mapEgenNæring(SelvstendigNæringsdrivende selvstendig, Map.Entry<Periode, PeriodeInntekt> entry) {
