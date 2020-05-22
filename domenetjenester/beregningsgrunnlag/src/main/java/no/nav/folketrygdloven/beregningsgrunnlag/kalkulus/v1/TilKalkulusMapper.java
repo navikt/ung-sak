@@ -137,18 +137,18 @@ public class TilKalkulusMapper {
     private static OppgittOpptjeningDto mapTilOppgittOpptjeingDto(Optional<OppgittOpptjening> oppgittOpptjening, Optional<OppgittOpptjening> overstyrtOppgittOpptjening) {
         if (overstyrtOppgittOpptjening.isPresent()) {
             return overstyrtOppgittOpptjening.map(oo -> new OppgittOpptjeningDto(
-                    oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
-                    mapOppgittEgenNæringListe(oo.getEgenNæring()),
-                    mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold())))
-                    .orElse(null);
+                oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
+                mapOppgittEgenNæringListe(oo.getEgenNæring()),
+                mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold())))
+                .orElse(null);
         }
         return oppgittOpptjening.map(oo -> {
             return new OppgittOpptjeningDto(
-                    oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
-                    mapOppgittEgenNæringListe(oo.getEgenNæring()),
-                    mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold()));
+                oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
+                mapOppgittEgenNæringListe(oo.getEgenNæring()),
+                mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold()));
         })
-                .orElse(null);
+            .orElse(null);
     }
 
     private static List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring) {
