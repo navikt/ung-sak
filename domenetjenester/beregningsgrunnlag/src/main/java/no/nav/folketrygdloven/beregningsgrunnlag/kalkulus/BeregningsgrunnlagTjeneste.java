@@ -142,7 +142,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
         return vilkår.getPerioder()
             .stream()
-            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .map(it -> new BeregningsgrunnlagKobling(it, finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), it, true)))
             .collect(Collectors.toList());
