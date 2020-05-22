@@ -31,7 +31,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -138,12 +137,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<BeregningsgrunnlagKobling> hentKoblinger(BehandlingReferanse ref) {
-        var grunnlagOptional = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-        return grunnlagOptional
-            .map(BeregningsgrunnlagPerioderGrunnlag::getGrunnlagPerioder)
-            .orElse(List.of())
+        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+
+        return vilkår.getPerioder()
             .stream()
-            .map(it -> new BeregningsgrunnlagKobling(it.getSkjæringstidspunkt(), it.getEksternReferanse()))
+            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .map(it -> new BeregningsgrunnlagKobling(it, finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), it, true)))
             .collect(Collectors.toList());
     }
 

@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
+package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -7,6 +7,9 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
@@ -15,7 +18,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -33,12 +36,12 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
     @Inject
     public FrisinnKalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
-                                   BehandlingRepository behandlingRepository,
                                    FagsakRepository fagsakRepository,
                                    KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                   ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
-        super(restTjeneste, fagsakRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
+                                   ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                   VilkårResultatRepository vilkårResultatRepository) {
+        super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
     }
 
     @Override

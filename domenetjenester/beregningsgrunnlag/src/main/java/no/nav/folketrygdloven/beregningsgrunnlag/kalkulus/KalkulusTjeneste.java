@@ -55,8 +55,10 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -79,6 +81,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     protected KalkulusRestTjeneste restTjeneste;
     private FagsakRepository fagsakRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
@@ -89,9 +92,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     @Inject
     public KalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
                             FagsakRepository fagsakRepository,
-                            KalkulatorInputTjeneste kalkulatorInputTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+                            VilkårResultatRepository vilkårResultatRepository, KalkulatorInputTjeneste kalkulatorInputTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.restTjeneste = restTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
@@ -254,7 +258,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
-        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag, skjæringstidspunkt);
+        var vilkårsPeriode = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow().finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt).getPeriode();
+        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag, vilkårsPeriode);
 
         return new StartBeregningRequest(
             new UuidDto(bgReferanse),

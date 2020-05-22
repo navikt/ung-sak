@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.domene.iay.inntektsmelding.InntektsmeldingErNyereVurderer;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektsmeldingAggregat {
@@ -41,14 +42,18 @@ public class InntektsmeldingAggregat {
 
     /**
      * Alle gjeldende inntektsmeldinger i behandlingen (de som skal brukes)
-     * @return Liste med {@link Inntektsmelding}
      *
-     *Merk denne filtrerer inntektsmeldinger ifht hva som skal brukes. */
+     * @return Liste med {@link Inntektsmelding}
+     * <p>
+     * Merk denne filtrerer inntektsmeldinger ifht hva som skal brukes.
+     */
     public List<Inntektsmelding> getInntektsmeldingerSomSkalBrukes() {
         return inntektsmeldinger.stream().filter(this::skalBrukes).collect(Collectors.toUnmodifiableList());
     }
 
-    /** Get alle inntetksmeldinger (både de som skal brukes og ikke brukes). */
+    /**
+     * Get alle inntetksmeldinger (både de som skal brukes og ikke brukes).
+     */
     public List<Inntektsmelding> getAlleInntektsmeldinger() {
         return List.copyOf(inntektsmeldinger);
     }
@@ -69,6 +74,7 @@ public class InntektsmeldingAggregat {
 
     /**
      * Alle gjeldende inntektsmeldinger for en virksomhet i behandlingen.
+     *
      * @return Liste med {@link Inntektsmelding}
      */
     public List<Inntektsmelding> getInntektsmeldingerFor(Arbeidsgiver arbeidsgiver) {
@@ -97,26 +103,7 @@ public class InntektsmeldingAggregat {
     }
 
     private boolean skalFjerneInntektsmelding(Inntektsmelding gammel, Inntektsmelding ny) {
-        if (gammel.gjelderSammeArbeidsforhold(ny)) {
-            if (ALTINN_SYSTEM_NAVN.equals(gammel.getKildesystem()) || ALTINN_SYSTEM_NAVN.equals(ny.getKildesystem())) {
-                // WTF?  Hvorfor trengs ALTINN å spesialbehandles?
-                if (gammel.getKanalreferanse() != null && ny.getKanalreferanse() != null) {
-                    // skummelt å stole på stigende arkivreferanser fra Altinn. :-(
-                    return ny.getKanalreferanse().compareTo(gammel.getKanalreferanse()) > 0;
-                }
-            }
-            if (gammel.getInnsendingstidspunkt().isBefore(ny.getInnsendingstidspunkt())) {
-                return true;
-            }
-            if (gammel.getInnsendingstidspunkt().equals(ny.getInnsendingstidspunkt()) && ny.getKanalreferanse() != null) {
-                if (gammel.getKanalreferanse() != null) {
-                    // skummelt å stole på stigende arkivreferanser fra Altinn. :-(
-                    return ny.getKanalreferanse().compareTo(gammel.getKanalreferanse()) > 0;
-                }
-                return true;
-            }
-        }
-        return false;
+        return InntektsmeldingErNyereVurderer.erNyere(gammel, ny);
     }
 
     void taHensynTilBetraktninger(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
