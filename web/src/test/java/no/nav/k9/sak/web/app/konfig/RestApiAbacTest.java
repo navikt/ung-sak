@@ -122,7 +122,7 @@ public class RestApiAbacTest {
             if (annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
                 fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
                     + BeskyttetRessursActionAttributt.class.getSimpleName());
-            } else if(annotation.property() != null && !"".equals(annotation.property())) {
+            } else if (annotation.property() != null && !"".equals(annotation.property())) {
                 return; // ok
             } else if (annotation.resource().isEmpty() &&
                 annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
@@ -140,6 +140,10 @@ public class RestApiAbacTest {
             .map(it -> extractValueFromField(it))
             .collect(Collectors.toList());
 
+        if (annotation != null && !annotation.property().isEmpty()) {
+            return; // ok
+        }
+        
         if (annotation != null && annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
             if (annotation.resource().isEmpty()) {
                 fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for "
