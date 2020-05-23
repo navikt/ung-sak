@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -53,6 +54,14 @@ public class VilkårBuilder {
         Objects.requireNonNull(vurderer);
         this.kantIKantVurderer = vurderer;
         return this;
+    }
+
+    public LocalDate getMaxDatoTilVurdering() {
+        return vilkåret.getPerioder().stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getTomDato)
+            .max(LocalDate::compareTo)
+            .orElse(Tid.TIDENES_ENDE);
     }
 
     public VilkårBuilder medType(VilkårType type) {

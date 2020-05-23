@@ -1,4 +1,4 @@
-package no.nav.k9.sak.inngangsvilkår.perioder;
+package no.nav.k9.sak.perioder;
 
 import java.util.Map;
 import java.util.NavigableSet;
