@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
 
-import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -39,7 +39,7 @@ public class InngangsvilkårFellesTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
-    RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, List<DatoIntervallEntitet> intervaller) {
+    RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> intervaller) {
         return regelOrkestrerer.vurderInngangsvilkår(vilkårHåndtertAvSteg, ref, intervaller);
     }
 
@@ -47,7 +47,7 @@ public class InngangsvilkårFellesTjeneste {
         return skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
     }
 
-    public Set<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(perioderTilVurderingTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
         return tjeneste.utled(behandlingId, vilkårType);

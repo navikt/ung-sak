@@ -594,7 +594,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
         var aksjonspunktTestSupport = new AksjonspunktTestSupport();
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        aksjonspunktTestSupport.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT, null);
         return aksjonspunkt;
     }
 }

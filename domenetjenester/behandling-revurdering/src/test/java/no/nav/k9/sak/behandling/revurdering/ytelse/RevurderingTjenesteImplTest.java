@@ -32,7 +32,6 @@ import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -45,9 +44,6 @@ public class RevurderingTjenesteImplTest {
     @Rule
     public final RepositoryRule repoRule = new UnittestRepositoryRule();
     private final EntityManager entityManager = repoRule.getEntityManager();
-
-    @Inject
-    private InntektArbeidYtelseTjeneste iayTjeneste;
 
     @Inject
     private UttakRepository uttakRepository;

@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -60,7 +61,7 @@ public class VurderOpptjeningsvilkårSteg extends VurderOpptjeningsvilkårStegFe
         return utledStegResultat(behandling, behandleStegResultat, vilkåret, vurdertePerioder);
     }
 
-    BehandleStegResultat utledStegResultat(Behandling behandling, BehandleStegResultat behandleStegResultat, Vilkår vilkåret, List<DatoIntervallEntitet> vurdertePerioder) {
+    BehandleStegResultat utledStegResultat(Behandling behandling, BehandleStegResultat behandleStegResultat, Vilkår vilkåret, NavigableSet<DatoIntervallEntitet> vurdertePerioder) {
         var altAvslått = !vilkåret.getPerioder().isEmpty() && vilkåret.getPerioder()
             .stream()
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))

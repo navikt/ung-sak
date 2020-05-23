@@ -18,7 +18,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
@@ -41,7 +40,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -61,7 +59,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
-        vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
     @Override

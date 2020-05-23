@@ -186,7 +186,9 @@ spec:
     # Feature-flag
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
       value: "false"
-
+    - name: OMP_VARIANT_FILTER_AKTIVERT
+      value: "true"
+      
     # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"

@@ -95,7 +95,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
     @Test
     public void skal_sette_behandling_pa_vent() {
         // Act
-        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK);
+        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK, null);
 
         // Assert
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -110,8 +110,8 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
         LocalDate toUkerFrem = LocalDate.now().plusWeeks(2);
 
         // Act
-        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK);
-        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL);
+        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK, null);
+        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL, null);
 
         // Assert
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -125,7 +125,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
         LocalDate toUkerFrem = LocalDate.now().plusWeeks(2);
 
         // Act
-        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL);
+        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL, null);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
         oppgaveBehandlingKoblingRepository.lagre(oppgave);
 
         // Act
-        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK);
+        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(behandlingId, LocalDate.now(), Venteårsak.AVV_DOK, null);
 
         // Assert
         verify(oppgaveTjenesteMock).opprettTaskAvsluttOppgave(any(Behandling.class));

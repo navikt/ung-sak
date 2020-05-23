@@ -48,7 +48,8 @@ class VarselRevurderingHåndterer {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, DokumentMalType.REVURDERING_DOK, adapter.getFritekst());
         bestillBrevDto.setÅrsakskode(RevurderingVarslingÅrsak.ANNET.getKode());
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.SAKSBEHANDLER);
-        settBehandlingPåVent(behandling, adapter.getFrist(), fraDto(adapter.getVenteÅrsakKode()));
+        
+        settBehandlingPåVent(behandling, adapter.getFrist(), fraDto(adapter.getVenteÅrsakKode()), adapter.getBegrunnelse());
         registrerVarselOmRevurdering(behandlingId);
     }
 
@@ -58,10 +59,10 @@ class VarselRevurderingHåndterer {
         vedtakVarselRepository.lagre(behandlingId, varsel);
     }
 
-    private void settBehandlingPåVent(Behandling behandling, LocalDate frist, Venteårsak venteårsak) {
+    private void settBehandlingPåVent(Behandling behandling, LocalDate frist, Venteårsak venteårsak, String venteårsakVariant) {
         opprettTaskAvsluttOppgave(behandling);
         behandlingskontrollTjeneste.settBehandlingPåVentUtenSteg(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT,
-            bestemFristForBehandlingVent(frist), venteårsak);
+            bestemFristForBehandlingVent(frist), venteårsak, venteårsakVariant);
     }
 
     private void opprettTaskAvsluttOppgave(Behandling behandling) {

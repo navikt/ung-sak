@@ -3,7 +3,9 @@ package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -85,7 +87,7 @@ public class VurderOpptjeningsvilkårStegTest {
             .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .build();
 
-        var stegResultat = steg.utledStegResultat(behandling, BehandleStegResultat.utførtUtenAksjonspunkter(), vilkåret, List.of());
+        var stegResultat = steg.utledStegResultat(behandling, BehandleStegResultat.utførtUtenAksjonspunkter(), vilkåret, Collections.emptyNavigableSet());
 
         assertThat(stegResultat).isNotNull();
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
@@ -104,7 +106,7 @@ public class VurderOpptjeningsvilkårStegTest {
                 .medUtfall(Utfall.IKKE_OPPFYLT))
             .build();
 
-        var stegResultat = steg.utledStegResultat(behandling, BehandleStegResultat.utførtUtenAksjonspunkter(), vilkåret, List.of(periode));
+        var stegResultat = steg.utledStegResultat(behandling, BehandleStegResultat.utførtUtenAksjonspunkter(), vilkåret, new TreeSet<>(List.of(periode)));
 
         assertThat(stegResultat).isNotNull();
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);

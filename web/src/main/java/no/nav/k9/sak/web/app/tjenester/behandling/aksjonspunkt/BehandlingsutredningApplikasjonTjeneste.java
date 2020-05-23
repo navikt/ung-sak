@@ -66,14 +66,17 @@ public class BehandlingsutredningApplikasjonTjeneste {
         return behandlinger;
     }
 
-    public void settBehandlingPaVent(Long behandlingsId, LocalDate frist, Venteårsak venteårsak) {
+    public void settBehandlingPaVent(Long behandlingsId, LocalDate frist, Venteårsak venteårsak, String venteårsakVariant) {
         AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
 
-        doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak);
+        doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak, venteårsakVariant);
     }
 
-    private void doSetBehandlingPåVent(Long behandlingsId, AksjonspunktDefinisjon apDef, LocalDate frist,
-                                       Venteårsak venteårsak) {
+    private void doSetBehandlingPåVent(Long behandlingsId, 
+                                       AksjonspunktDefinisjon apDef, 
+                                       LocalDate frist,
+                                       Venteårsak venteårsak, 
+                                       String venteårsakVariant) {
 
         LocalDateTime fristTid = bestemFristForBehandlingVent(frist);
 
@@ -82,17 +85,17 @@ public class BehandlingsutredningApplikasjonTjeneste {
         BehandlingStegType behandlingStegFunnet = behandling.getAksjonspunktMedDefinisjonOptional(apDef)
             .map(Aksjonspunkt::getBehandlingStegFunnet)
             .orElse(null); // Dersom autopunkt ikke allerede er opprettet, så er det ikke tilknyttet steg
-        behandlingskontrollTjeneste.settBehandlingPåVent(behandling, apDef, behandlingStegFunnet, fristTid, venteårsak);
+        behandlingskontrollTjeneste.settBehandlingPåVent(behandling, apDef, behandlingStegFunnet, fristTid, venteårsak, venteårsakVariant);
     }
 
-    public void endreBehandlingPaVent(Long behandlingsId, LocalDate frist, Venteårsak venteårsak) {
+    public void endreBehandlingPaVent(Long behandlingsId, LocalDate frist, Venteårsak venteårsak, String venteårsakVariant) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
         if (!behandling.isBehandlingPåVent()) {
             throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.kanIkkeEndreVentefristForBehandlingIkkePaVent(behandlingsId)
                 .toException();
         }
         AksjonspunktDefinisjon aksjonspunktDefinisjon = behandling.getBehandlingPåVentAksjonspunktDefinisjon();
-        doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak);
+        doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak, venteårsakVariant);
     }
 
     private LocalDateTime bestemFristForBehandlingVent(LocalDate frist) {

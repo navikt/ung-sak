@@ -1,9 +1,9 @@
 package no.nav.k9.sak.inngangsvilkår.perioder;
 
-import java.util.Set;
+import java.util.NavigableSet;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface VilkårsPeriodiseringsFunksjon {
-    Set<DatoIntervallEntitet> utledPeriode(Long behandlingId);
+    NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId);
 }

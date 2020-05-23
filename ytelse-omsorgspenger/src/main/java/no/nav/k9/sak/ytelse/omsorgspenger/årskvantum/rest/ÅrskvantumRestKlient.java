@@ -14,8 +14,6 @@ import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.aarskvantum.kontrakter.MinMaxRequest;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
@@ -33,11 +31,8 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 @Default
 public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
-    private static final String TJENESTE_NAVN = "k9-aarskvantum";
 
     private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
-
-    private static final Logger log = LoggerFactory.getLogger(ÅrskvantumRestKlient.class);
 
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;

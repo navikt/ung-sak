@@ -246,7 +246,7 @@ public class DokumentmottakerInntektsmeldingTest {
                                              LocalDateTime frist) {
 
         Aksjonspunkt aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        aksjonspunktRepository.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT);
+        aksjonspunktRepository.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT, null);
         return aksjonspunkt;
     }
 }

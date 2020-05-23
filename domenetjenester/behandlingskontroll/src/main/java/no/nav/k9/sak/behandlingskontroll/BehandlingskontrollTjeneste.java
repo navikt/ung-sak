@@ -71,7 +71,6 @@ public interface BehandlingskontrollTjeneste {
 
     BehandlingStegKonfigurasjon getBehandlingStegKonfigurasjon();
 
-
     /** Henlegg en behandling. */
     void henleggBehandling(BehandlingskontrollKontekst kontekst, BehandlingResultatType årsakKode);
 
@@ -86,7 +85,6 @@ public interface BehandlingskontrollTjeneste {
      */
     BehandlingskontrollKontekst initBehandlingskontroll(Behandling behandling);
 
-
     /**
      * Initierer ny behandlingskontroll for en ny behandling, som ikke er lagret i behandlingsRepository
      * og derfor ikke har fått tildelt behandlingId
@@ -95,7 +93,6 @@ public interface BehandlingskontrollTjeneste {
      *            - må være med.
      */
     BehandlingskontrollKontekst initBehandlingskontroll(String behandlingd);
-
 
     /**
      * Initier ny Behandlingskontroll, oppretter kontekst som brukes til sikre at parallle behandlinger og kjøringer går
@@ -123,13 +120,13 @@ public interface BehandlingskontrollTjeneste {
      * Lagrer og håndterer avbrutte aksjonspunkt
      */
     void lagreAksjonspunkterAvbrutt(BehandlingskontrollKontekst kontekst, BehandlingStegType behandlingStegType,
-                                   List<Aksjonspunkt> aksjonspunkter);
+                                    List<Aksjonspunkt> aksjonspunkter);
 
     /**
      * Oppretter og håndterer nye aksjonspunkt
      */
     List<Aksjonspunkt> lagreAksjonspunkterFunnet(BehandlingskontrollKontekst kontekst, BehandlingStegType behandlingStegType,
-                                   List<AksjonspunktDefinisjon> aksjonspunkter);
+                                                 List<AksjonspunktDefinisjon> aksjonspunkter);
 
     /**
      * Oppretter og håndterer nye overstyringsaksjonspunkt
@@ -146,6 +143,7 @@ public interface BehandlingskontrollTjeneste {
      */
     void lagreAksjonspunkterUtført(BehandlingskontrollKontekst kontekst, BehandlingStegType behandlingStegType,
                                    Aksjonspunkt aksjonspunkt, String begrunnelse);
+
     /**
      * Lagrer og håndterer utførte aksjonspunkt uten begrunnelse. Dersom man skal lagre begrunnelse - bruk apRepository + aksjonspunkterUtført
      */
@@ -217,10 +215,15 @@ public interface BehandlingskontrollTjeneste {
      * @param BehandlingStegType stegType aksjonspunktet står i.
      * @param fristTid Frist før Behandlingen å adresseres
      * @param venteårsak Årsak til ventingen.
+     * @param venteårsakVariant begrunnelse/variant av venteårsak kode
      *
      */
-    Aksjonspunkt settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon, BehandlingStegType stegType, LocalDateTime fristTid,
-                                      Venteårsak venteårsak);
+    Aksjonspunkt settBehandlingPåVent(Behandling behandling,
+                                      AksjonspunktDefinisjon aksjonspunktDefinisjon,
+                                      BehandlingStegType stegType,
+                                      LocalDateTime fristTid,
+                                      Venteårsak venteårsak,
+                                      String venteårsakVariant);
 
     /**
      * Setter behandlingen på vent.
@@ -229,10 +232,12 @@ public interface BehandlingskontrollTjeneste {
      * @param aksjonspunktDefinisjon hvilket Aksjonspunkt skal holde i 'ventingen'
      * @param fristTid Frist før Behandlingen å adresseres
      * @param venteårsak Årsak til ventingen.
-     *
+     * @param venteårsakVariant begrunnelse/variant for venteårsak
      */
-    Aksjonspunkt settBehandlingPåVentUtenSteg(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon, LocalDateTime fristTid,
-                                              Venteårsak venteårsak);
+    Aksjonspunkt settBehandlingPåVentUtenSteg(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
+                                              LocalDateTime fristTid,
+                                              Venteårsak venteårsak, String venteårsakVariant);
+
     /**
      * Sjekker i behandlingsmodellen om aksjonspunktet skal løses i eller etter det angitte steget.
      *
@@ -241,7 +246,8 @@ public interface BehandlingskontrollTjeneste {
      * @param aksjonspunktDefinisjon aksjonspunktet som skal sjekkes
      * @return true dersom aksjonspunktet skal løses i eller etter det angitte steget.
      */
-    boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, BehandlingStegType behandlingSteg, AksjonspunktDefinisjon aksjonspunktDefinisjon);
+    boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, BehandlingStegType behandlingSteg,
+                                                 AksjonspunktDefinisjon aksjonspunktDefinisjon);
 
     /**
      * Ny metode som forbereder en behandling for prosessering - setter autopunkt til utført og evt tilbakeføring ved gjenopptak.

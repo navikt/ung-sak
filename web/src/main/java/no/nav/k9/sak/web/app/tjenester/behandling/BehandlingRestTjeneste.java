@@ -237,7 +237,7 @@ public class BehandlingRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public void settBehandlingPaVent(@Parameter(description = "Frist for behandling på vent") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SettBehandlingPaVentDto dto) {
         behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(dto.getBehandlingId(), dto.getBehandlingVersjon());
-        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(dto.getBehandlingId(), dto.getFrist(), dto.getVentearsak());
+        behandlingsutredningApplikasjonTjeneste.settBehandlingPaVent(dto.getBehandlingId(), dto.getFrist(), dto.getVentearsak(), dto.getVentearsakVariant());
     }
 
     @POST
@@ -249,7 +249,7 @@ public class BehandlingRestTjeneste {
     public void endreFristForBehandlingPaVent(
                                               @Parameter(description = "Frist for behandling på vent") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SettBehandlingPaVentDto dto) {
         behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(dto.getBehandlingId(), dto.getBehandlingVersjon());
-        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(dto.getBehandlingId(), dto.getFrist(), dto.getVentearsak());
+        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(dto.getBehandlingId(), dto.getFrist(), dto.getVentearsak(), dto.getVentearsakVariant());
     }
 
     @POST

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,7 +68,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     }
 
     private List<AksjonspunktDefinisjon> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        final var intervaller = perioderTilVurdering(kontekst.getBehandlingId(), vilkår);
+        var intervaller = perioderTilVurdering(kontekst.getBehandlingId(), vilkår);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(behandling.getId()));
         RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), ref, intervaller);
 
@@ -134,9 +135,8 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
     }
 
     @Override
-    public List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
-        final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(behandlingId, vilkårType);
-        return new ArrayList<>(perioder);
+    public NavigableSet<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
+        return inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(behandlingId, vilkårType);
     }
 
 }

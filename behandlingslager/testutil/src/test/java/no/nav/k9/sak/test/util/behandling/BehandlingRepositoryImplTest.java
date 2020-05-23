@@ -494,7 +494,7 @@ public class BehandlingRepositoryImplTest {
                                              LocalDateTime frist) {
 
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        aksjonspunktTestSupport.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT, null);
         return aksjonspunkt;
     }
 

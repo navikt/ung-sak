@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.frisinn.vilkår;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.NavigableSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -37,13 +37,13 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     }
 
     @Override
-    public Set<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         return utledPeriode(behandlingId, vilkårType);
     }
 
     @Override
-    public Map<VilkårType, Set<DatoIntervallEntitet>> utled(Long behandlingId) {
-        final var vilkårPeriodeSet = new HashMap<VilkårType, Set<DatoIntervallEntitet>>();
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+        final var vilkårPeriodeSet = new HashMap<VilkårType, NavigableSet<DatoIntervallEntitet>>();
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
@@ -56,7 +56,7 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
         return 365;
     }
 
-    private Set<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkår) {
+    private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkår) {
         return vilkårsPeriodisering.getOrDefault(vilkår, maksSøktePeriode).utledPeriode(behandlingId);
     }
 

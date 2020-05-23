@@ -2,20 +2,17 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-
-import org.jboss.weld.exceptions.UnsupportedOperationException;
-
-import com.google.common.collect.ImmutableSet;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -105,7 +102,6 @@ public class BeregningsgrunnlagVilkårTjeneste {
         return VilkårUtfallMerknad.fraKode(avslagsårsak.getKode());
     }
 
-
     private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene, DatoIntervallEntitet vilkårsPeriode) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
@@ -156,13 +152,13 @@ public class BeregningsgrunnlagVilkårTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    public Set<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder) {
         String ytelseTypeKode = ref.getFagsakYtelseType().getKode();
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, ytelseTypeKode).orElseThrow(
             () -> new UnsupportedOperationException("Har ikke " + VilkårsPerioderTilVurderingTjeneste.class.getName() + " for ytelsetype=" + ytelseTypeKode));
 
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-        var perioder = new HashSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
 
         if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
             var avslåttePerioder = vilkår.get()
@@ -174,7 +170,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
             perioder.removeAll(avslåttePerioder);
         }
-        return ImmutableSet.copyOf(perioder);
+        return Collections.unmodifiableNavigableSet(perioder);
     }
 
 }

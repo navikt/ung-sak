@@ -1,7 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
+import java.util.NavigableSet;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -16,12 +17,12 @@ public class TestVilkårsPerioderTilVurderingTjeneste implements VilkårsPeriode
 
 
     @Override
-    public Set<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
-        return Set.of();
+    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+        return Collections.emptyNavigableSet();
     }
 
     @Override
-    public Map<VilkårType, Set<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
         return Map.of();
     }
 

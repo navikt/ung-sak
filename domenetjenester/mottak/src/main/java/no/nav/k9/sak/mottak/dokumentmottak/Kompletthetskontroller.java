@@ -86,7 +86,7 @@ public class Kompletthetskontroller {
         // TODO (JOL): Logikken nå reflekterer det som lå i EndrKontroll. Avklar om andre autopunkt skal erstattes med det under.
         // Settes på vent til behandlig er komplett
         behandlingProsesseringTjeneste.settBehandlingPåVent(behandling, AUTO_VENT_KOMPLETT_OPPDATERING,
-            kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
+            kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak(), kompletthetResultat.getVenteårsakVariant());
         dokumentmottakerFelles.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling,
             HistorikkinnslagType.BEH_VENT, kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
     }

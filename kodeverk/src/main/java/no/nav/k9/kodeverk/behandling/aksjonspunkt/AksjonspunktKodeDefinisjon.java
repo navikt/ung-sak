@@ -98,6 +98,7 @@ public class AksjonspunktKodeDefinisjon {
     // OMS
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
+    
 
     // FRISINN
     public static final String AUTO_VENT_FRISINN_BEREGNING = "8000";
@@ -105,6 +106,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String OVERSTYRING_FRISINN_OPPGITT_OPPTJENING_KODE = "8004";
     public static final String AUTO_VENT_FRISINN_ATFL_SAMME_ORG_KODE = "8005";
 
+    // Generelt manglende funksjonalitet.
+    public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
 
     // Andre koder
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class RegelOrkestrerer {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, List<DatoIntervallEntitet> perioder) {
+    public RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioder) {
         Objects.requireNonNull(perioder, "Perioden som skal vurderes må være satt");
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         List<Vilkår> matchendeVilkårPåBehandling = vilkårene.getVilkårene()
