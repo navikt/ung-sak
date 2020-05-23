@@ -34,7 +34,7 @@ import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperiode;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
-import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;

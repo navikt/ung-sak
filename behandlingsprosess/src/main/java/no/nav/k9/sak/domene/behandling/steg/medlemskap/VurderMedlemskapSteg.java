@@ -26,7 +26,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
-import no.nav.vedtak.konfig.Tid;
 
 @BehandlingStegRef(kode = "VURDERMV")
 @BehandlingTypeRef
@@ -74,7 +73,7 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
     private VilkårBuilder mapPerioderTilVilkårsPerioder(VilkårBuilder vilkårBuilder,
                                                         Map<LocalDate, VilkårData> vurderingsTilDataMap) {
-        LocalDate forrigedato = Tid.TIDENES_ENDE;
+        LocalDate forrigedato = vilkårBuilder.getMaxDatoTilVurdering();
         final var datoer = vurderingsTilDataMap.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
         for (LocalDate vurderingsdato : datoer) {
             final var vilkårData = vurderingsTilDataMap.get(vurderingsdato);

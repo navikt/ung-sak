@@ -24,6 +24,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
@@ -38,7 +39,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.medlem.impl.MedlemEndringssjekker;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @Dependent
 public class UtledVurderingsdatoerForMedlemskapTjeneste {
@@ -46,7 +47,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
     private Instance<MedlemEndringssjekker> alleEndringssjekkere;
     private MedlemskapRepository medlemskapRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
 
     @Inject
@@ -54,12 +55,12 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
                                                       MedlemskapRepository medlemskapRepository,
                                                       @Any Instance<MedlemEndringssjekker> alleEndringssjekkere,
                                                       PersonopplysningTjeneste personopplysningTjeneste,
-                                                      SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.alleEndringssjekkere = alleEndringssjekkere;
         this.medlemskapRepository = medlemskapRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     UtledVurderingsdatoerForMedlemskapTjeneste() {
@@ -78,41 +79,51 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
      * @return datoer med diff i medlemskap
      */
     public Set<LocalDate> finnVurderingsdatoer(Long behandlingId) {
-        Behandling revurdering = behandlingRepository.hentBehandling(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, revurdering.getFagsakYtelseType())
-            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + revurdering.getFagsakYtelseType().getKode()));
-        LocalDate utledetSkjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(revurdering.getId()).getUtledetSkjæringstidspunkt();
+        var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
+        var vilkårsPerioder = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType())
+            .orElseThrow()
+            .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
+        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
         Set<LocalDate> datoer = new HashSet<>();
-        datoer.add(utledetSkjæringstidspunkt);
 
-        datoer.addAll(utledVurderingsdatoerForTPS(revurdering, utledetSkjæringstidspunkt).keySet());
+        for (DatoIntervallEntitet vilkårsPeriode : vilkårsPerioder) {
+            datoer.add(vilkårsPeriode.getFomDato());
+            datoer.addAll(utledVurderingsdatoerForTPS(behandling, vilkårsPeriode).keySet());
+        }
         datoer.addAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker).keySet());
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
         return datoer.stream()
-            .filter(d -> d.isAfter(utledetSkjæringstidspunkt) || d.equals(utledetSkjæringstidspunkt))
+            .filter(entry -> entry.isAfter(tidligsteStp.minusDays(1)))
             .sorted().collect(Collectors.toCollection(TreeSet::new));
     }
 
     Map<LocalDate, Set<VurderingsÅrsak>> finnVurderingsdatoerMedÅrsak(Long behandlingId) {
-        Behandling revurdering = behandlingRepository.hentBehandling(behandlingId);
-        var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, revurdering.getFagsakYtelseType())
-            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + revurdering.getFagsakYtelseType().getKode()));
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
         Map<LocalDate, Set<VurderingsÅrsak>> datoer = new HashMap<>();
 
-        LocalDate utledetSkjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(revurdering.getId()).getUtledetSkjæringstidspunkt();
-        datoer.putAll(utledVurderingsdatoerForTPS(revurdering, utledetSkjæringstidspunkt));
-        datoer.putAll(utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker));
+        var vilkårsPerioder = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType())
+            .orElseThrow()
+            .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
+        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
+        for (DatoIntervallEntitet periode : vilkårsPerioder) {
+            mergeResultat(datoer, Map.of(periode.getFomDato(), Set.of(VurderingsÅrsak.SKJÆRINGSTIDSPUNKT)));
+            mergeResultat(datoer, utledVurderingsdatoerForTPS(behandling, periode));
+        }
+        mergeResultat(datoer, utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker));
 
-        // ønsker bare å se på datoer etter skjæringstidspunktet
-        return datoer.entrySet().stream().filter(entry -> entry.getKey().isAfter(utledetSkjæringstidspunkt))
+        return datoer.entrySet().stream()
+            .filter(entry -> entry.getKey().isAfter(tidligsteStp.minusDays(1)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<LocalDate, Set<VurderingsÅrsak>> utledVurderingsdatoerForTPS(Behandling revurdering, LocalDate skjæringstidspunkt) {
+    private Map<LocalDate, Set<VurderingsÅrsak>> utledVurderingsdatoerForTPS(Behandling revurdering, DatoIntervallEntitet relevantPeriode) {
         final Map<LocalDate, Set<VurderingsÅrsak>> utledetResultat = new HashMap<>();
-        DatoIntervallEntitet relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt.plusYears(3L));
 
         Optional<PersonopplysningerAggregat> personopplysningerOpt = personopplysningTjeneste
             .hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(revurdering.getId(), revurdering.getAktørId(), relevantPeriode);

@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.inngangsvilkår.perioder.VilkårsPeriodiseringsFunksjon;
+import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
