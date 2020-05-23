@@ -75,7 +75,6 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-
 			<dependency>
 				<groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
 				<artifactId>felles-sikkerhet</artifactId>
