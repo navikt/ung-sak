@@ -37,7 +37,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<felles.version>1.8-20200518125722-44b086c</felles.version>
+		<felles.version>1.8-20200522205027-d0c8c11</felles.version>
 
 		<metrics.version>4.1.8</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
@@ -732,4 +732,3 @@
 	</distributionManagement>
 
 </project>
-
