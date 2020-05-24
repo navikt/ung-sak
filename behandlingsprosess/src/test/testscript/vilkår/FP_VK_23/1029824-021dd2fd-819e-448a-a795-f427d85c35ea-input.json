@@ -17,8 +17,8 @@
     "vurderingsStatus" : "TIL_VURDERING"
   } ],
   "behandlingsDato" : "2018-10-01",
-  "forsteDatoOpptjening" : "2017-11-26",
-  "sisteDatoForOpptjening" : "2018-09-25",
+  "forsteDatoOpptjening" : "2018-09-01",
+  "sisteDatoForOpptjening" : "2018-09-28",
   "inntektPerioder" : [ {
     "datoIntervall" : [ "2018-04-01", "2018-04-30" ],
     "aktivitet" : {

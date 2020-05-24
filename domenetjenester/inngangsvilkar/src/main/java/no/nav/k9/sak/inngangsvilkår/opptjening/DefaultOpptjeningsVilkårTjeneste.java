@@ -57,7 +57,6 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         grunnlag.setMinsteAntallMånederGodkjent(0);
         grunnlag.setMinsteAntallDagerForVent(0);
         grunnlag.setMinsteAntallMånederForVent(0);
-        //TODO(OJR) denne burde kanskje endres til false i en revurdering-kontekts i etterkant?
         grunnlag.setSkalGodkjenneBasertPåAntatt(false);
         grunnlag.setPeriodeAntattGodkjentFørBehandlingstidspunkt(Period.ofMonths(2));
 
