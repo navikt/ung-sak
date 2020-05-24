@@ -2,9 +2,9 @@
   "id" : 1029824,
   "kjøreTidspunkt" : "2018-10-01",
   "vilkarType" : "FP_VK_23",
-  "utfall" : "OPPFYLT",
+  "utfall" : "IKKE_OPPFYLT",
   "avslagKode" : "-",
-  "opptjeningFom" : "2017-11-26",
-  "opptjeningTom" : "2018-09-25",
-  "opptjentTid" : "P10M"
+  "opptjeningFom" : "2018-09-01",
+  "opptjeningTom" : "2018-09-28",
+  "opptjentTid" : "P28D"
 }

@@ -1,15 +1,122 @@
 {
   "aktivitetPerioder" : [ {
-    "datoIntervall" : [ "1995-02-20", "-" ],
+    "datoIntervall" : [ "2020-04-02", "-" ],
     "aktivitet" : {
-      "aktivitetType" : "NÆRING",
-      "aktivitetReferanse" : "971278420",
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "967170232",
       "referanseType" : "ORGNR"
     },
-    "vurderingsStatus" : "VURDERT_GODKJENT"
+    "vurderingsStatus" : "TIL_VURDERING"
+  }, {
+    "datoIntervall" : [ "2000-04-23", "2020-03-30" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "vurderingsStatus" : "TIL_VURDERING"
   } ],
-  "behandlingsDato" : "2018-10-01",
-  "forsteDatoOpptjening" : "2017-12-25",
-  "sisteDatoForOpptjening" : "2018-10-24",
-  "inntektPerioder" : [ ]
+  "behandlingsDato" : "2020-05-24",
+  "forsteDatoOpptjening" : "2020-03-16",
+  "sisteDatoForOpptjening" : "2020-04-12",
+  "inntektPerioder" : [ {
+    "datoIntervall" : [ "2019-06-01", "2019-06-30" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2019-07-01", "2019-07-31" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2019-08-01", "2019-08-31" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2019-09-01", "2019-09-30" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2019-10-01", "2019-10-31" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2019-11-01", "2019-11-30" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2019-12-01", "2019-12-31" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2020-01-01", "2020-01-31" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2020-02-01", "2020-02-29" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2020-03-01", "2020-03-31" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "896929119",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 25000,
+    "inntektValuta" : "NOK"
+  }, {
+    "datoIntervall" : [ "2020-04-01", "2020-04-30" ],
+    "aktivitet" : {
+      "aktivitetType" : "ARBEID",
+      "aktivitetReferanse" : "967170232",
+      "referanseType" : "ORGNR"
+    },
+    "inntektBelop" : 30000,
+    "inntektValuta" : "NOK"
+  } ]
 }
