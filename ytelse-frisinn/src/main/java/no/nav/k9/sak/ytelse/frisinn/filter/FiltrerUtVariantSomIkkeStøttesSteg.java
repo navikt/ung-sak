@@ -74,21 +74,19 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .orElseThrow();
         var uttakGrunnlag = uttakRepository.hentGrunnlag(behandlingId);
 
-        var søknad = søknadRepository.hentSøknadHvisEksisterer(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Fant ikke søknad for behandlingId " + behandlingId));
-
+        var søknad = søknadRepository.hentSøknadHvisEksisterer(behandlingId);
 
         return filtrerBehandlinger(uttakGrunnlag, oppgittOpptjening, søknad);
     }
 
-    BehandleStegResultat filtrerBehandlinger(Optional<UttakGrunnlag> uttakGrunnlag, OppgittOpptjening oppgittOpptjening, SøknadEntitet søknad) {
+    BehandleStegResultat filtrerBehandlinger(Optional<UttakGrunnlag> uttakGrunnlag, OppgittOpptjening oppgittOpptjening, Optional<SøknadEntitet> søknad) {
         var frilans = oppgittOpptjening.getFrilans();
         var næring = oppgittOpptjening.getEgenNæring();
         var harFrilansInntekter = harFrilansInntekter(frilans);
         var søkerKompensasjonForFrilans = harSøktKompensasjonForFrilans(uttakGrunnlag);
         var harNæringsInntekt = harNæringsinntekt(næring);
         var harNæringsinntektIHele2019 = harNæringsinntektIHele2019(næring);
-        var søknadMottattEtterOpphørtePersonligeForetakBleHensyntatt = søknad.getMottattDato().isAfter(HENSYNTATT_OPPHØRTE_PERSONLIGE_FORETAK_ETTER);
+        var søknadMottattEtterOpphørtePersonligeForetakBleHensyntatt = søknadMottattEtterOpphørtePersonligeForetakBleHensyntatt(søknad);
         var næringStartdato = harNæringsinntektIHele2019 ? NÆRINGS_PERIODE.getFomDato() : næringStartdato(næring);
         var søkerKompensasjonForNæring = harSøktKompensasjonForNæring(uttakGrunnlag);
 
@@ -181,4 +179,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .anyMatch(it -> UttakArbeidType.FRILANSER.equals(it.getAktivitetType()));
     }
 
+    private boolean søknadMottattEtterOpphørtePersonligeForetakBleHensyntatt(Optional<SøknadEntitet> søknad) {
+        return søknad.isPresent() && søknad.get().getMottattDato().isAfter(HENSYNTATT_OPPHØRTE_PERSONLIGE_FORETAK_ETTER);
+    }
 }

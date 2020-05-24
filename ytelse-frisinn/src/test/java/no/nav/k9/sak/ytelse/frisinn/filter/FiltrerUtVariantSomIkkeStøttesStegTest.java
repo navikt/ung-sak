@@ -162,7 +162,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         assertThat(stegResultat.getAksjonspunktResultater()).isEmpty();
     }
 
-    private BehandleStegResultat snUtenInntektHele2019(SøknadEntitet søknad) {
+    private BehandleStegResultat snUtenInntektHele2019(Optional<SøknadEntitet> søknad) {
         var opptjeningBuilder = OppgittOpptjeningBuilder.ny();
         var perioden = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(2), LocalDate.now());
         var oppgittOpptjening = opptjeningBuilder
@@ -211,11 +211,11 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
     }
 
-    private SøknadEntitet søknadFørMottakstidspunktBleHensyntatt() {
-        return new SøknadEntitet.Builder().medMottattDato(LocalDate.parse("2020-05-20")).build();
+    private Optional<SøknadEntitet> søknadFørMottakstidspunktBleHensyntatt() {
+        return Optional.of(new SøknadEntitet.Builder().medMottattDato(LocalDate.parse("2020-05-20")).build());
     }
 
-    private SøknadEntitet søknadEtterMottakstidspunktBleHensyntatt() {
-        return new SøknadEntitet.Builder().medMottattDato(LocalDate.parse("2020-05-21")).build();
+    private Optional<SøknadEntitet> søknadEtterMottakstidspunktBleHensyntatt() {
+        return Optional.of(new SøknadEntitet.Builder().medMottattDato(LocalDate.parse("2020-05-21")).build());
     }
 }
