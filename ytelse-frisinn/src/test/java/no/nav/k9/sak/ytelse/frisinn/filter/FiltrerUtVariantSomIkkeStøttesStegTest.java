@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -44,7 +43,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).isEmpty();
     }
@@ -68,7 +67,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
         assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
@@ -93,7 +92,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
         assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
@@ -116,7 +115,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).hasSize(0);
     }
@@ -138,7 +137,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).isEmpty();
     }
@@ -157,12 +156,12 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).isEmpty();
     }
 
-    private BehandleStegResultat snUtenInntektHele2019(SøknadEntitet søknad) {
+    private BehandleStegResultat snUtenInntektHele2019() {
         var opptjeningBuilder = OppgittOpptjeningBuilder.ny();
         var perioden = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(2), LocalDate.now());
         var oppgittOpptjening = opptjeningBuilder
@@ -175,20 +174,14 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        return steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknad);
+        return steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
     }
 
     @Test
-    public void skal_legges_på_vent_hvis_kun_SN_uten_inntenkt_hele_2019_søknad_mottatt_før_21_mai() {
-        var stegResultat = snUtenInntektHele2019(søknadFørMottakstidspunktBleHensyntatt());
+    public void skal_legges_på_vent_hvis_kun_SN_uten_inntenkt_hele_2019() {
+        var stegResultat = snUtenInntektHele2019();
         assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
         assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
-    }
-
-    @Test
-    public void skal_ikke_legges_på_vent_hvis_kun_SN_uten_inntenkt_hele_2019_søknad_mottatt_21_mai_eller_senere() {
-        var stegResultat = snUtenInntektHele2019(søknadEtterMottakstidspunktBleHensyntatt());
-        assertThat(stegResultat.getAksjonspunktResultater()).isEmpty();
     }
 
     @Test
@@ -205,17 +198,9 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var uttakGrunnlag = new UttakGrunnlag(1L, oppgittUttak,
             oppgittUttak, new Søknadsperioder(new Søknadsperiode(perioden)));
 
-        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening, søknadFørMottakstidspunktBleHensyntatt());
+        var stegResultat = steg.filtrerBehandlinger(Optional.of(uttakGrunnlag), oppgittOpptjening);
 
         assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
         assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
-    }
-
-    private SøknadEntitet søknadFørMottakstidspunktBleHensyntatt() {
-        return new SøknadEntitet.Builder().medMottattDato(LocalDate.parse("2020-05-20")).build();
-    }
-
-    private SøknadEntitet søknadEtterMottakstidspunktBleHensyntatt() {
-        return new SøknadEntitet.Builder().medMottattDato(LocalDate.parse("2020-05-21")).build();
     }
 }
