@@ -192,6 +192,13 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
     }
 
     @Test
+    public void skal_legges_på_vent_hvis_kun_SN_uten_inntenkt_hele_2019_uten_tilhørende_søknad() {
+        var stegResultat = snUtenInntektHele2019(Optional.empty());
+        assertThat(stegResultat.getAksjonspunktResultater()).hasSize(1);
+        assertThat(stegResultat.getAksjonspunktResultater().get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_FRISINN_MANGLENDE_FUNKSJONALITET);
+    }
+
+    @Test
     public void skal_legges_på_vent_hvis_kun_SN_kun_inntenkt_i_2020() {
         var opptjeningBuilder = OppgittOpptjeningBuilder.ny();
         var perioden = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(2), LocalDate.now());
