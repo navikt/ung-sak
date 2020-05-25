@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
+import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -61,8 +62,10 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
 
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         var enhet = enhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        Behandling origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
+            .orElseThrow(() -> new IllegalStateException("Kan ikke revurdere fagsak uten tidligere avsluttet behandling"));
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(fagsak, BehandlingÅrsakType.RE_SATS_REGULERING, enhet);
+        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, BehandlingÅrsakType.RE_SATS_REGULERING, enhet);
 
         log.info("GrunnbeløpRegulering har opprettet revurdering på fagsak med fagsakId = {}", fagsakId);
 
