@@ -2,10 +2,13 @@ package no.nav.k9.sak.domene.arbeidsforhold;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -115,6 +118,14 @@ public interface InntektArbeidYtelseTjeneste {
      * @param tilBehandlingId - Ny behandling
      */
     void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId);
+
+    /**
+     * Kopier IAY grunnlag fra en behandling til en annen.
+     * @param fraBehandlingId - Kilde behandling
+     * @param tilBehandlingId - Ny behandling
+     * @param dataset - aggregatene som skal kopieres
+     */
+    void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset);
 
     List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
 

@@ -8,6 +8,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -324,6 +325,23 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
                 iayGrunnlag.fjernSaksbehandlet();
                 konverterOgLagre(behandlingId, iayGrunnlag);
             }
+        }
+    }
+
+    @Override
+    public void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset) {
+        var fraBehandling = behandlingRepository.hentBehandling(fraBehandlingId);
+        var tilBehandling = behandlingRepository.hentBehandling(tilBehandlingId);
+        var request = new KopierGrunnlagRequest(tilBehandling.getFagsak().getSaksnummer().getVerdi(),
+            tilBehandling.getUuid(),
+            fraBehandling.getUuid(),
+            YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
+            new AktørIdPersonident(tilBehandling.getAktørId().getId()),
+            dataset);
+        try {
+            abakusTjeneste.kopierGrunnlag(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
         }
     }
 

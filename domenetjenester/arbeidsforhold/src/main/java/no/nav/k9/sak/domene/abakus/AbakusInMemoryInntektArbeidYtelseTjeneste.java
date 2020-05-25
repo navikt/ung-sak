@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -104,6 +105,35 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         origAggregat.ifPresent(orig -> {
             InntektArbeidYtelseGrunnlag entitet = new InntektArbeidYtelseGrunnlag(orig);
             lagreOgFlush(tilBehandlingId, entitet);
+        });
+    }
+
+    @Override
+    public void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset) {
+        Optional<InntektArbeidYtelseGrunnlag> origAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(fraBehandlingId);
+        origAggregat.ifPresent(orig -> {
+            var builder = InntektArbeidYtelseGrunnlagBuilder.nytt();
+            builder.medInformasjon(orig.getArbeidsforholdInformasjon().orElse(null));
+            for (Dataset data : dataset) {
+                switch (data) {
+                    case REGISTER:
+                        builder.medData(InntektArbeidYtelseAggregatBuilder.oppdatere(orig.getRegisterVersjon(), VersjonType.REGISTER));
+                        break;
+                    case OVERSTYRT:
+                        builder.medData(InntektArbeidYtelseAggregatBuilder.oppdatere(orig.getSaksbehandletVersjon(), VersjonType.SAKSBEHANDLET));
+                        break;
+                    case INNTEKTSMELDING:
+                        builder.medInntektsmeldinger(orig.getInntektsmeldinger().map(InntektsmeldingAggregat::getAlleInntektsmeldinger).orElse(List.of()));
+                        break;
+                    case OPPGITT_OPPTJENING:
+                        builder.medOppgittOpptjening(OppgittOpptjeningBuilder.nyFraEksisterende(orig.getOppgittOpptjening().orElse(null), UUID.randomUUID(), LocalDateTime.now()));
+                        break;
+                    case OVERSTYRT_OPPGITT_OPPTJENING:
+                        builder.medOverstyrtOppgittOpptjening(OppgittOpptjeningBuilder.nyFraEksisterende(orig.getOverstyrtOppgittOpptjening().orElse(null), UUID.randomUUID(), LocalDateTime.now()));
+                        break;
+                }
+            }
+            lagreOgFlush(tilBehandlingId, builder.build());
         });
     }
 
