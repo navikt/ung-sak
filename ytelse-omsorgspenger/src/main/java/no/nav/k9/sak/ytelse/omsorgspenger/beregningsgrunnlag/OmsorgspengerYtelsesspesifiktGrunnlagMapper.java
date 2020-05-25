@@ -22,7 +22,6 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -78,7 +77,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
 
         var arbeidsforholdPerioder = aktiviteter;
         var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.stream()
-            .filter(e -> !e.getUttaksperioder().isEmpty() && e.getUttaksperioder().stream().anyMatch(p -> p.getUtfall() == Utfall.INNVILGET))
+            .filter(e -> !e.getUttaksperioder().isEmpty())
             .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder())).collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
@@ -86,7 +85,6 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(Arbeidsforhold uttakArbeidsforhold, List<Uttaksperiode> perioder) {
         var arbeidsforhold = mapTilKalkulusArbeidsforhold(uttakArbeidsforhold);
         var utbetalingsgrad = perioder.stream()
-            .filter(p -> p.getUtfall() == Utfall.INNVILGET)
             .sorted(COMP_PERIODE) // stabil rekkefølge output
             .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), p.getUtbetalingsgrad()))
             .collect(Collectors.toList());
