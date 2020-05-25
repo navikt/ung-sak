@@ -105,7 +105,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @NotNull
     private BigDecimal mapUtbetalingsgrad(Uttaksperiode p) {
         if (!Utfall.INNVILGET.equals(p.getUtfall()) && !BigDecimal.ZERO.equals(p.getUtbetalingsgrad())) {
-            log.info("Uttaksperiode med utfall={} og utbetalingsgrad({}) er ikke 0 som forventet",
+            log.warn("Uttaksperiode med utfall={} og utbetalingsgrad({}) er ikke 0 som forventet",
                 p.getUtfall(),
                 p.getUtbetalingsgrad());
             throw new IllegalStateException("Uttaksperiode med utfall=" + p.getUtfall()
