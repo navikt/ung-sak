@@ -68,7 +68,7 @@ public class DokumentmottakerFelles {
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
-        
+
         historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, journalpostId, HistorikkinnslagType.BEH_STARTET);
     }
 
@@ -96,8 +96,8 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling revurdering = behandlingsoppretter.opprettRevurdering(fagsak, behandlingÅrsakType);
+    public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
+        Behandling revurdering = behandlingsoppretter.opprettRevurdering(behandling, behandlingÅrsakType);
         mottatteDokumentTjeneste.persisterInntektsmelding(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
         return revurdering;
@@ -108,10 +108,10 @@ public class DokumentmottakerFelles {
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
-        
+
         opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
-    
+
     public boolean skalOppretteNyFørstegangsbehandling(Fagsak fagsak) {
         if (mottatteDokumentTjeneste.erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(fagsak)) {
             return !mottatteDokumentTjeneste.harFristForInnsendingAvDokGåttUt(fagsak);

@@ -42,25 +42,21 @@ public class RevurderingTjeneste {
         this.grunnlagKopierere = grunnlagKopierere;
     }
 
-    public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
-        Behandling behandling = opprettRevurdering(fagsak, revurderingsÅrsak, true, enhet);
+    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+        Behandling behandling = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
         behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
         return behandling;
     }
 
-    public Behandling opprettAutomatiskRevurdering(Fagsak fagsak, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
-        return opprettRevurdering(fagsak, revurderingsÅrsak, false, enhet);
+    public Behandling opprettAutomatiskRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+        return opprettRevurdering(origBehandling, revurderingsÅrsak, false, enhet);
     }
 
-    private Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType revurderingsÅrsak, boolean manueltOpprettet, OrganisasjonsEnhet enhet) {
-        Behandling origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
-            .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
-
-        // lås original behandling først
+    private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, boolean manueltOpprettet, OrganisasjonsEnhet enhet) {
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
 
-        // deretter opprett revurdering
+        // Opprett revurderingsbehandling
         Behandling revurdering = revurderingTjenesteFelles.opprettRevurderingsbehandling(revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, revurdering);
@@ -69,8 +65,8 @@ public class RevurderingTjeneste {
         revurderingTjenesteFelles.kopierVilkårsresultat(origBehandling, revurdering, kontekst);
 
         // Kopier grunnlagsdata
-         var grunnlagKopierer = FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, fagsak.getYtelseType())
-            .orElseThrow(() -> new IllegalStateException("Kopiering av grunnlag for revurdering ikke støttet for " + fagsak.getYtelseType().getKode()));
+         var grunnlagKopierer = FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, origBehandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Kopiering av grunnlag for revurdering ikke støttet for " + origBehandling.getFagsakYtelseType().getKode()));
         grunnlagKopierer.kopierAlleGrunnlagFraTidligereBehandling(origBehandling, revurdering);
 
         // Aksjonspunkt for skjema dersom manuelt opprettet
