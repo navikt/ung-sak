@@ -20,6 +20,9 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -42,8 +45,10 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
     public static final DatoIntervallEntitet NÆRINGS_PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 12, 31));
     // https://github.com/navikt/frisinn/releases/tag/1.2
     private static final LocalDate HENSYNTATT_OPPHØRTE_PERSONLIGE_FORETAK_ETTER = LocalDate.parse("2020-05-20");
+    private static final LocalDate MANUELT_KLARERTE_BEHANDLINGER_TOM = LocalDate.parse("2020-05-14");
 
     private Boolean filterAktivert;
+    private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private UttakRepository uttakRepository;
     private SøknadRepository søknadRepository;
@@ -56,16 +61,20 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
     public FiltrerUtVariantSomIkkeStøttesSteg(@KonfigVerdi(value = "FRISINN_VARIANT_FILTER_AKTIVERT", defaultVerdi = "true") Boolean filterAktivert,
                                               InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                               UttakRepository uttakRepository,
-                                              SøknadRepository søknadRepository) {
+                                              BehandlingRepositoryProvider provider) {
         this.filterAktivert = filterAktivert;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.uttakRepository = uttakRepository;
-        this.søknadRepository = søknadRepository;
+        this.søknadRepository = provider.getSøknadRepository();
+        this.behandlingRepository = provider.getBehandlingRepository();
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         if (!filterAktivert) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+        if (erBehandlingInnenforManueltKlarertPeriode(kontekst.getBehandlingId())) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         Long behandlingId = kontekst.getBehandlingId();
@@ -179,6 +188,11 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
             .orElse(Set.of())
             .stream()
             .anyMatch(it -> UttakArbeidType.FRILANSER.equals(it.getAktivitetType()));
+    }
+
+    private boolean erBehandlingInnenforManueltKlarertPeriode(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return behandling.getOpprettetDato().toLocalDate().isBefore(MANUELT_KLARERTE_BEHANDLINGER_TOM);
     }
 
 }
