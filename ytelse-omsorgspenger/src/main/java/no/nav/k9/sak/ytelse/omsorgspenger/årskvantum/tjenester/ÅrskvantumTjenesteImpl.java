@@ -33,6 +33,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -102,7 +103,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var inntektsmeldingAggregat = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().orElseThrow();
 
-        var fraværPerioder = mapUttaksPerioder(grunnlag, vilkårene, inntektsmeldingAggregat);
+        var fraværPerioder = mapUttaksPerioder(ref, grunnlag, vilkårene, inntektArbeidYtelseGrunnlag);
 
         var datoForSisteInntektsmelding = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes()
             .stream()
@@ -128,9 +129,10 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @NotNull
-    private ArrayList<FraværPeriode> mapUttaksPerioder(OppgittFravær grunnlag, Vilkårene vilkårene, InntektsmeldingAggregat inntektsmeldingAggregat) {
+    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, OppgittFravær grunnlag, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        var inntektsmeldingAggregat = iayGrunnlag.getInntektsmeldinger().orElseThrow();
         var fraværPerioder = new ArrayList<FraværPeriode>();
-        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfallHvisAvslåttVilkår(grunnlag, vilkårene)
+        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, grunnlag, iayGrunnlag, vilkårene)
             .values()
             .stream()
             .flatMap(Collection::stream)

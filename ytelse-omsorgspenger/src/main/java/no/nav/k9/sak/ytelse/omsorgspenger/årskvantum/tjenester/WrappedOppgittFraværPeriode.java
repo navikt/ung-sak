@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
 import java.util.Objects;
 
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class WrappedOppgittFraværPeriode {
@@ -12,7 +13,7 @@ class WrappedOppgittFraværPeriode {
     public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, boolean avslått) {
         this.periode = periode;
         if (periode != null && periode.getAktivitetType() != null) {
-            this.aktivitet = new Aktivitet(periode.getAktivitetType(), periode.getArbeidsgiver(), periode.getArbeidsforholdRef());
+            this.aktivitet = new Aktivitet(periode.getArbeidsgiver(), periode.getArbeidsforholdRef() != null ? periode.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef());
         } else {
             this.aktivitet = null;
         }

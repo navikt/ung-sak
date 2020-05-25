@@ -57,7 +57,7 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
     private Skjemainnhold getSkjemaInnhold() {
         return getSkjema().getSkjemainnhold();
     }
-    
+
     public List<PeriodeAndel> getOppgittFravær() {
         Optional<Omsorgspenger> omsorgspenger = Optional.ofNullable(getSkjemaInnhold().getOmsorgspenger()).map(JAXBElement::getValue);
         if (omsorgspenger.isEmpty()) {
@@ -99,7 +99,8 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
         FagsakYtelseType ytelseType = getYtelse();
         switch (ytelseType) {
             case PLEIEPENGER_SYKT_BARN:
-                return Optional.empty();
+            case SVANGERSKAPSPENGER:
+                return Optional.ofNullable(getSkjemaInnhold().getArbeidsforhold().getValue().getFoersteFravaersdag()).map(JAXBElement::getValue);
             case OMSORGSPENGER:
                 return Optional.empty();
             case OPPLÆRINGSPENGER:
@@ -108,9 +109,6 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
                 return Optional.empty();
             case FORELDREPENGER:
                 return Optional.ofNullable(getSkjemaInnhold().getStartdatoForeldrepengeperiode().getValue());
-            case SVANGERSKAPSPENGER:
-                var førsteFraværsdag = getSkjemaInnhold().getArbeidsforhold().getValue().getFoersteFravaersdag();
-                return Optional.ofNullable(førsteFraværsdag != null ? førsteFraværsdag.getValue() : null);
             default:
                 return Optional.empty();
         }
