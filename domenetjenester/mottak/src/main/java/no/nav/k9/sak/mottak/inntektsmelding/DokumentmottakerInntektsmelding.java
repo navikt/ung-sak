@@ -74,11 +74,11 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
     }
 
-    void håndterAvsluttetTidligereBehandling(MottattDokument mottattDokument, Fagsak fagsak) {
-        if (behandlingsoppretter.erBehandlingOgFørstegangsbehandlingHenlagt(fagsak)) { // #I6
-            opprettTaskForÅVurdereInntektsmelding(fagsak, null, mottattDokument);
+    void håndterAvsluttetTidligereBehandling(MottattDokument mottattDokument, Behandling behandling) {
+        if (behandlingsoppretter.erBehandlingOgFørstegangsbehandlingHenlagt(behandling.getFagsak())) { // #I6
+            opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), null, mottattDokument);
         } else {
-            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, fagsak, getBehandlingÅrsakType());
+            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, behandling, getBehandlingÅrsakType());
         }
     }
 
@@ -93,7 +93,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         if (dokumentMottakerFelles.skalOppretteNyFørstegangsbehandling(avsluttetBehandling.getFagsak())) { // #I3
             opprettNyFørstegangFraAvslag(mottattDokument, fagsak, avsluttetBehandling);
         } else if (harAvslåttPeriode(avsluttetBehandling) && behandlingsoppretter.harBehandlingsresultatOpphørt(avsluttetBehandling)) { // #I4
-            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, fagsak, getBehandlingÅrsakType());
+            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, avsluttetBehandling, getBehandlingÅrsakType());
         } else { // #I5
             opprettTaskForÅVurdereInntektsmelding(fagsak, avsluttetBehandling, mottattDokument);
         }
@@ -132,7 +132,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         doMottaDokument(mottattDokument, fagsak);
         doFireEvent(new Mottatt(fagsak.getYtelseType(), fagsak.getAktørId(), mottattDokument.getJournalpostId()));
     }
-    
+
     /** Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt. */
     protected void doFireEvent(InntektsmeldingEvent event) {
         if (beanManager == null) {
@@ -159,7 +159,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
                 || behandlingsoppretter.harBehandlingsresultatOpphørt(behandling)) {
                 håndterAvslåttEllerOpphørtBehandling(mottattDokument, fagsak, behandling);
             } else {
-                håndterAvsluttetTidligereBehandling(mottattDokument, fagsak);
+                håndterAvsluttetTidligereBehandling(mottattDokument, behandling);
             }
         } else {
             oppdaterÅpenBehandlingMedDokument(behandling, mottattDokument);
