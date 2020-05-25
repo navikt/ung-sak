@@ -70,7 +70,6 @@ public class ProsessModell {
             BehandlingStegType.INIT_PERIODER,
             BehandlingStegType.INIT_VILKÅR,
             BehandlingStegType.INNHENT_REGISTEROPP,
-            BehandlingStegType.VARIANT_FILTER,
             BehandlingStegType.INREG_AVSL,
             BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD,
             BehandlingStegType.KONTROLLER_FAKTA,
