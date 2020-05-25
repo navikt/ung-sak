@@ -3,6 +3,8 @@ package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -30,10 +32,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -88,8 +90,8 @@ public class InntektArbeidYtelseRestTjeneste {
     public InntektArbeidYtelseDto getInntektArbeidYtelser(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Long behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingId != null
-            ? behandlingRepository.hentBehandling(behandlingId)
-            : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+                ? behandlingRepository.hentBehandling(behandlingId)
+                : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         return getInntektArbeidYtelserFraBehandling(behandling);
     }
 
@@ -121,14 +123,10 @@ public class InntektArbeidYtelseRestTjeneste {
         }
 
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = grunnlag.get();
-        OppgittOpptjeningDto oppgittOpptjeningDto;
 
-        // viser overstyrt hvis finnes
-        if (inntektArbeidYtelseGrunnlag.getOverstyrtOppgittOpptjening().isPresent()) {
-            oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(inntektArbeidYtelseGrunnlag.getOverstyrtOppgittOpptjening());
-        } else {
-            oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(inntektArbeidYtelseGrunnlag.getOppgittOpptjening());
-        }
+        OppgittOpptjeningFilter filter = new OppgittOpptjeningFilter(inntektArbeidYtelseGrunnlag.getOppgittOpptjening(), inntektArbeidYtelseGrunnlag.getOverstyrtOppgittOpptjening());
+
+        var oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(Optional.ofNullable(filter.getOppgittOpptjeningFrisinn()));
 
         if (oppgittOpptjeningDto != null) {
             Søknadsperioder søknadsperioder = uttakRepository.hentOppgittSøknadsperioder(behandling.getId());
@@ -168,7 +166,7 @@ public class InntektArbeidYtelseRestTjeneste {
 
         // finn annen part
         UtledArbeidsforholdParametere param = new UtledArbeidsforholdParametere(
-            behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
+                behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
 

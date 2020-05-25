@@ -52,7 +52,7 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
 
     public List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse behandlingReferanse,
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
-                                                                                  OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode, Optional<OppgittOpptjening> oppgittOpptjeningOpt) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
@@ -65,10 +65,9 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
             perioder.addAll(opptjeningsperioder);
         }
 
-        var oppgittOpptjening = grunnlag.getOverstyrtOppgittOpptjening().isPresent() ? grunnlag.getOverstyrtOppgittOpptjening() : grunnlag.getOppgittOpptjening();
-        perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening));
+        perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjeningOpt));
         perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(behandlingReferanse, grunnlag, vurderOpptjening, opptjeningPeriode));
-        lagOpptjeningsperiodeForFrilansAktivitet(behandlingReferanse, oppgittOpptjening.orElse(null), grunnlag, perioder, opptjeningPeriode,
+        lagOpptjeningsperiodeForFrilansAktivitet(behandlingReferanse, oppgittOpptjeningOpt.orElse(null), grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 
         return perioder.stream().sorted(Comparator.comparing(OpptjeningsperiodeForSaksbehandling::getPeriode)).collect(Collectors.toList());
