@@ -10,9 +10,9 @@ public class Aktivitet {
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforholdRef;
 
-    public Aktivitet(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
+    public Aktivitet(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
         this.arbeidsgiver = arbeidsgiver;
-        this.arbeidsforholdRef = arbeidsforholdRef;
+        this.arbeidsforholdRef = Objects.requireNonNull(arbeidsforholdRef);
     }
 
     public Arbeidsgiver getArbeidsgiver() {
@@ -21,6 +21,11 @@ public class Aktivitet {
 
     public InternArbeidsforholdRef getArbeidsforholdRef() {
         return arbeidsforholdRef;
+    }
+
+    public boolean matcher(Aktivitet aktivitet) {
+        return Objects.equals(arbeidsgiver, aktivitet.arbeidsgiver) &&
+            arbeidsforholdRef.gjelderFor(aktivitet.arbeidsforholdRef);
     }
 
     @Override

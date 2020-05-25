@@ -38,7 +38,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ManglendePåkrevdeInntektsmeldingerTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.VurderPermisjonTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -126,7 +125,8 @@ public class VurderArbeidsforholdTjeneste {
             vurderOmArbeidsforholdKanGjenkjennes(result, sakInntektsmeldinger, iayGrunnlag, ref);
         }
 
-        VurderPermisjonTjeneste.leggTilArbeidsforholdMedRelevantPermisjon(ref, result, iayGrunnlag);
+        // Ikke relevant å sjekke permisjonen da dette går til avslag ..
+        //VurderPermisjonTjeneste.leggTilArbeidsforholdMedRelevantPermisjon(ref, result, iayGrunnlag);
         leggTilManglendePåkrevdeInntektsmeldinger(ref, result);
         erRapportertNormalInntektUtenArbeidsforhold(iayGrunnlag, ref);
         erMottattInntektsmeldingUtenArbeidsforhold(result, iayGrunnlag, ref);
