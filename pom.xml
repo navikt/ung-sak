@@ -39,7 +39,7 @@
 
 		<felles.version>1.8-20200522205027-d0c8c11</felles.version>
 
-		<metrics.version>4.1.8</metrics.version>
+		<metrics.version>4.1.9</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
 		<k9format.version>5.0.0-20200518161226-b6cd151</k9format.version>
 	</properties>
