@@ -13,8 +13,6 @@ import javax.persistence.Entity;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
-import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
-import no.nav.k9.sak.behandlingslager.behandling.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
 
 @Dependent
@@ -30,16 +28,6 @@ public class BehandlingÅrsakTjeneste {
     public BehandlingÅrsakTjeneste(@Any Instance<BehandlingÅrsakUtleder> utledere, EndringsresultatSjekker endringsresultatSjekker) {
         this.utledere = utledere;
         this.endringsresultatSjekker = endringsresultatSjekker;
-    }
-
-    public Set<BehandlingÅrsakType> utledBehandlingÅrsakerMotOriginalBehandling(BehandlingReferanse revurdering) {
-        Long origBehandling = revurdering.getOriginalBehandlingId()
-            .orElseThrow(() -> new IllegalStateException("Original behandling mangler på revurdering - skal ikke skje"));
-
-        EndringsresultatSnapshot snapshotOrig = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(origBehandling);
-        EndringsresultatDiff diff = endringsresultatSjekker.finnSporedeEndringerPåBehandlingsgrunnlag(revurdering.getId(), snapshotOrig);
-
-        return utledBehandlingÅrsakerBasertPåDiff(revurdering, diff);
     }
 
     public Set<BehandlingÅrsakType> utledBehandlingÅrsakerBasertPåDiff(BehandlingReferanse behandling, EndringsresultatDiff endringsresultatDiff) {
