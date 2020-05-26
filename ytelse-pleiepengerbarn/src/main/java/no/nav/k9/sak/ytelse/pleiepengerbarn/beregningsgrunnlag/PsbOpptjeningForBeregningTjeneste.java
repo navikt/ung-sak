@@ -19,6 +19,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
@@ -71,6 +72,10 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
             .collect(Collectors.toList());
+    }
+
+    private Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        return iayGrunnlag.getOverstyrtOppgittOpptjening().isPresent() ? iayGrunnlag.getOverstyrtOppgittOpptjening() : iayGrunnlag.getOppgittOpptjening();
     }
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,

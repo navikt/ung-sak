@@ -1,10 +1,15 @@
-package no.nav.k9.sak.domene.iay.modell;
+package no.nav.k9.sak.ytelse.frisinn.filter;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -71,20 +76,20 @@ public class OppgittOpptjeningFilter {
 
         if (senestePeriodeFL.isPresent() && senesteOverstyrtPeriodeFL.isPresent()) {
             if (senestePeriodeFL.get().getTomDato().isAfter(senesteOverstyrtPeriodeFL.get().getTomDato()) && senestePeriodeFL.get().getTomDato().equals(senestePeriode.getTomDato())) {
-                return leggTilFrilans(senestePeriodeFL);
+                return leggTilFrilans(senestePeriodeFL.get());
             }
         } else if (senestePeriodeFL.isPresent() && senesteOverstyrtPeriodeSN.isPresent()) {
             if (senestePeriodeFL.get().getTomDato().isAfter(senesteOverstyrtPeriodeSN.get().getTomDato())) {
-                return leggTilFrilans(senestePeriodeFL);
+                return leggTilFrilans(senestePeriodeFL.get());
             }
         }
         return Optional.empty();
     }
 
-    private Optional<OppgittFrilans> leggTilFrilans(Optional<DatoIntervallEntitet> senestePeriodeFL) {
+    private Optional<OppgittFrilans> leggTilFrilans(DatoIntervallEntitet senestePeriodeFL) {
        return oppgittOpptjening.getFrilans().map(oppgittFrilans -> {
             OppgittFrilansBuilder frilansBuilder = overstyrtOppgittOpptjening.getFrilans().isPresent() ? OppgittFrilansBuilder.fraEksisterende(overstyrtOppgittOpptjening.getFrilans().get()) : OppgittFrilansBuilder.ny();
-            Optional<OppgittFrilansoppdrag> oppdrag = oppgittFrilans.getFrilansoppdrag().stream().filter(oppgittFrilansoppdrag -> oppgittFrilansoppdrag.getPeriode().equals(senestePeriodeFL.get())).findFirst();
+            Optional<OppgittFrilansoppdrag> oppdrag = oppgittFrilans.getFrilansoppdrag().stream().filter(oppgittFrilansoppdrag -> oppgittFrilansoppdrag.getPeriode().equals(senestePeriodeFL)).findFirst();
             oppdrag.ifPresent(frilansBuilder::leggTilFrilansOppdrag);
             return frilansBuilder.build();
         });
@@ -116,12 +121,12 @@ public class OppgittOpptjeningFilter {
     }
 
     private DatoIntervallEntitet senestePeriode(Optional<DatoIntervallEntitet> senestePeriodeSN, Optional<DatoIntervallEntitet> senestePeriodeFL) {
-        if (senestePeriodeFL.isPresent() && senestePeriodeSN.isEmpty()) {
-            return senestePeriodeFL.get();
-        } else if (senestePeriodeSN.isPresent() && senestePeriodeFL.isEmpty()) {
-            return senestePeriodeSN.get();
-        } else if (senestePeriodeFL.isEmpty()) {
+        if (senestePeriodeFL.isEmpty() && senestePeriodeSN.isEmpty()) {
             throw new IllegalStateException("Utviklerfeil: " + senestePeriodeSN + " og " + senestePeriodeFL + " er empty");
+        } else if (senestePeriodeFL.isEmpty()) {
+            return senestePeriodeSN.get();
+        } else if (senestePeriodeSN.isEmpty()) {
+            return senestePeriodeFL.get();
         }
         DatoIntervallEntitet fl = senestePeriodeFL.get();
         DatoIntervallEntitet sn = senestePeriodeSN.get();

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.iay.modell;
+package no.nav.k9.sak.ytelse.frisinn.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
@@ -147,3 +148,5 @@ public class OppgittOpptjeningFilterTest {
         assertThat(oppgittOpptjeningFrisinn.get().getFrilans().get().getFrilansoppdrag()).hasSize(1);
     }
 }
+
+
