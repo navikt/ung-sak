@@ -87,12 +87,12 @@ public class RevurderingTjenesteImplTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        var revurderingTjeneste = new RevurderingTjeneste(repositoryProvider, behandlingskontrollTjeneste,
+        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
             revurderingTjenesteFelles, grunnlagKopierer);
 
         // Act
         Behandling revurdering = revurderingTjeneste
-            .opprettAutomatiskRevurdering(behandlingSomSkalRevurderes.getFagsak(), BehandlingÅrsakType.RE_ANNET, new OrganisasjonsEnhet(null, null));
+            .opprettAutomatiskRevurdering(behandlingSomSkalRevurderes, BehandlingÅrsakType.RE_ANNET, new OrganisasjonsEnhet(null, null));
 
         // Assert
         assertThat(revurdering.getFagsak()).isEqualTo(behandlingSomSkalRevurderes.getFagsak());

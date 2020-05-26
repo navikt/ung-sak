@@ -126,7 +126,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
             var frilansBuilder = OppgittFrilansBuilder.ny();
             frilansBuilder.medErNyoppstartet(utled(oppgittFrilansoppdrag));
-            frilansBuilder.leggTilOppgittOppdrag(oppgittFrilansoppdrag);
+            frilansBuilder.medFrilansOppdrag(oppgittFrilansoppdrag);
             return Optional.of(frilansBuilder.build());
         }
         return Optional.empty();

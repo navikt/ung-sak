@@ -1,19 +1,20 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
@@ -21,6 +22,7 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.søknad.felles.Periode;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @Dependent
@@ -31,8 +33,10 @@ public class SøknadDokumentmottaker {
     private Behandlingsoppretter behandlingsoppretter;
     private LagreSøknad soknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
-    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private LagreOppgittOpptjening lagreOppgittOpptjening;
+    private SøknadRepository søknadRepository;
+    private BehandlingRepository behandlingRepository;
+
     SøknadDokumentmottaker() {
         // for CDI proxy
     }
@@ -43,13 +47,16 @@ public class SøknadDokumentmottaker {
                                   Behandlingsoppretter behandlingsoppretter,
                                   LagreSøknad søknadOversetter,
                                   LagreOppgittOpptjening lagreOppgittOpptjening,
-                                  FagsakTjeneste fagsakTjeneste) {
+                                  FagsakTjeneste fagsakTjeneste,
+                                  BehandlingRepositoryProvider provider) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
+        this.søknadRepository = provider.getSøknadRepository();
         this.soknadOversetter = søknadOversetter;
         this.lagreOppgittOpptjening = lagreOppgittOpptjening;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.behandlingRepository = provider.getBehandlingRepository();
     }
 
     Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato) {
@@ -74,34 +81,46 @@ public class SøknadDokumentmottaker {
     private Behandling tilknyttBehandling(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknad søknad) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
         var periode = søknad.getSøknadsperiode();
-        var eksisterendeBehandlinger = soknadOversetter.finnesSøknadForSammePeriode(fagsak.getId(), periode.getFraOgMed(), periode.getTilOgMed());
+        var forrigeBehandling = finnForrigeAvsluttedeBehandling(fagsak);
+
+        validerSøknadErForNyPeriode(fagsak, periode.getFraOgMed());
+        validerIngenÅpneBehandlinger(fagsak);
 
         Behandling behandling;
-        if (eksisterendeBehandlinger.isEmpty()) {
+        if (forrigeBehandling.isEmpty()) {
             behandling = opprettNyBehandling(journalpostId, søknad, fagsak);
         } else {
-            Optional<Behandling> åpen = finnÅpenBehandling(eksisterendeBehandlinger);
-            if (åpen.isEmpty()) {
-                behandling = opprettEndringBehandling(journalpostId, søknad, fagsak);
-            } else {
-                behandling = åpen.get();
-                leggTilÅpenBehandlingOgTilbakefør(søknad, behandling);
-            }
+            behandling = opprettEndringBehandling(journalpostId, søknad, forrigeBehandling.get());
         }
 
         lagreOppgittOpptjening.lagreOpptjening(behandling, søknad.getInntekter(), søknad.getMottattDato());
-        
+
         return behandling;
     }
 
-    private void leggTilÅpenBehandlingOgTilbakefør(FrisinnSøknad søknad, Behandling behandling) {
-        soknadOversetter.persister(søknad, behandling);
-        behandlingsprosessApplikasjonTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandling.getId(), BehandlingStegType.START_STEG);
+    private Optional<Behandling> finnForrigeAvsluttedeBehandling(Fagsak fagsak) {
+        // Den sist avsluttede behandlingen er mest korrekt ift. HISTORISKE inntektsdata som skal videreføres. Derfor
+        // brukes sist avsluttede behandling fremfor behandling for sist søknadsperiode.
+        // GJELDENDE inntektsdata kommer med selve søknaden.
+        return behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
     }
 
-    private Behandling opprettEndringBehandling(JournalpostId journalpostId, FrisinnSøknad søknad, Fagsak fagsak) {
+    private void validerSøknadErForNyPeriode(Fagsak fagsak, LocalDate fraOgMed) {
+        søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), fraOgMed, LocalDate.now().plusYears(100)).stream()
+            .findAny()
+            .ifPresent(behandling -> { throw new IllegalStateException("Ny søknad for Frisinn må være for nyere perioder enn allerede mottatte søknader. " +
+                "Fant tidligere søknad med periode som gjelder etter" + fraOgMed); });
+    }
+
+    private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
+        if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
+            throw new IllegalStateException("Frisinn er ikke klar til å ta imot søknad. Kan ikke oppdatere åpen behandling");
+        }
+    }
+
+    private Behandling opprettEndringBehandling(JournalpostId journalpostId, FrisinnSøknad søknad, Behandling forrigeBehandling) {
         Behandling behandling;
-        behandling = behandlingsoppretter.opprettRevurdering(fagsak, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
+        behandling = behandlingsoppretter.opprettRevurdering(forrigeBehandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         soknadOversetter.persister(søknad, behandling);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
@@ -114,10 +133,6 @@ public class SøknadDokumentmottaker {
         soknadOversetter.persister(søknad, behandling);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
-    }
-
-    private Optional<Behandling> finnÅpenBehandling(List<Behandling> eksisterendeBehandlinger) {
-        return eksisterendeBehandlinger.stream().filter(b -> b.erÅpnetForEndring()).findFirst();
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {

@@ -9,9 +9,11 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -27,6 +29,7 @@ import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 public class BehandlingsoppretterApplikasjonTjeneste {
 
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     BehandlingsoppretterApplikasjonTjeneste() {
         // CDI
@@ -40,6 +43,7 @@ public class BehandlingsoppretterApplikasjonTjeneste {
                                                    BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
+        this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
     }
 
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
@@ -49,8 +53,12 @@ public class BehandlingsoppretterApplikasjonTjeneste {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
 
+        // TODO (essv): Behandling til revurdering skal mottas fra GUI, ikke utledes backend
+        Behandling origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
+            .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
+
         OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return revurderingTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, enhet);
+        return revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, enhet);
     }
 
     interface BehandlingsoppretterApplikasjonTjenesteFeil extends DeklarerteFeil {
