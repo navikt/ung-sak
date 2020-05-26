@@ -90,6 +90,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .map(it -> hentEksaktFastsatt(ref, it)) // TODO:
+            .filter(v -> v != null)
             .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
             .collect(Collectors.toList());
     }
@@ -109,7 +110,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return beregningsgrunnlagPerioderGrunnlag.get()
                 .getGrunnlagPerioder()
                 .stream()
-                .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse())).collect(Collectors.toList());
+                .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse()))
+                .filter(v -> v != null)
+                .collect(Collectors.toList());
         }
         return List.of();
     }
@@ -175,7 +178,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return false;
         }
 
-        return finnTjeneste(behandling1.getFagsakYtelseType()).erEndringIBeregning(behandling1.getFagsakYtelseType(), bgReferanse1.orElseThrow(), behandling2.getFagsakYtelseType(), bgReferanse2.orElseThrow());
+        return finnTjeneste(behandling1.getFagsakYtelseType()).erEndringIBeregning(behandling1.getFagsakYtelseType(), bgReferanse1.orElseThrow(), behandling2.getFagsakYtelseType(),
+            bgReferanse2.orElseThrow());
     }
 
     private KalkulusApiTjeneste finnTjeneste(FagsakYtelseType fagsakYtelseType) {
@@ -200,7 +204,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
             var beregningsgrunnlagPeriodeOpt = grunnlag.finnFor(skjæringstidspunkt);
 
-            return beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
+            return beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse).filter(v -> v != null);
         }
         return Optional.empty();
     }
