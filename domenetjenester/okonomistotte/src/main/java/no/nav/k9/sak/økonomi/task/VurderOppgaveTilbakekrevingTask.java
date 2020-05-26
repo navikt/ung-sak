@@ -65,7 +65,7 @@ public class VurderOppgaveTilbakekrevingTask extends BehandlingProsessTask {
     private boolean skalOppretteOppgaveTilbakekreving(Behandling behandling) {
         Optional<TilbakekrevingValg> funnetTilbakekrevingValg = tilbakekrevingRepository.hent(behandling.getId());
         return funnetTilbakekrevingValg.map(tilbakekrevingValg ->
-            TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD.equals(tilbakekrevingValg.getVidereBehandling()))
+            TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING.equals(tilbakekrevingValg.getVidereBehandling()))
             .orElse(false);
     }
 

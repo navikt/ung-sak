@@ -26,7 +26,7 @@ public class TilbakekrevingRepositoryImplTest {
 
     private TilbakekrevingRepository repository = new TilbakekrevingRepository(entityManager);
     private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
-    
+
     @Test
     public void skal_gi_empty_når_det_hentes_for_behandling_som_ikke_har_tilbakekrevingsvalg() {
         Behandling behandling = Mockito.mock(Behandling.class);
@@ -38,13 +38,13 @@ public class TilbakekrevingRepositoryImplTest {
     public void skal_lagre_og_hente_tilbakekrevingsvalg() {
         Behandling behandling = opprettBehandling();
 
-        TilbakekrevingValg valg = TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, "Varsel");
+        TilbakekrevingValg valg = TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, "Varsel");
         repository.lagre(behandling, valg);
 
         Optional<TilbakekrevingValg> lagretResultat = repository.hent(behandling.getId());
         assertThat(lagretResultat).isPresent();
         TilbakekrevingValg resultat = lagretResultat.get();
-        assertThat(resultat.getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
+        assertThat(resultat.getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
         assertThat(resultat.getErTilbakekrevingVilkårOppfylt()).isNull();
         assertThat(resultat.getGrunnerTilReduksjon()).isNull();
     }
@@ -53,7 +53,7 @@ public class TilbakekrevingRepositoryImplTest {
     public void skal_oppdatere_tilbakekrevingsvalg() {
         Behandling behandling = opprettBehandling();
 
-        TilbakekrevingValg valg1 = TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, "Varseltekst");
+        TilbakekrevingValg valg1 = TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, "Varseltekst");
         repository.lagre(behandling, valg1);
 
         TilbakekrevingValg valg2 = TilbakekrevingValg.medMulighetForInntrekk(true, false, TilbakekrevingVidereBehandling.INNTREKK);

@@ -51,7 +51,7 @@ public class VurderFeilutbetalingOgInntrekkOppdatererTest {
 
     @Test
     public void skal_lagre_at_videre_behandling_er_behandle_i_infotrygd_når_det_er_valgt() {
-        var dto = new VurderFeilutbetalingOgInntrekkDto("lorem ipsum", true, true, TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
+        var dto = new VurderFeilutbetalingOgInntrekkDto("lorem ipsum", true, true, TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
         Mockito.verify(repository).lagre(Mockito.eq(behandling), captor.capture());
@@ -59,12 +59,12 @@ public class VurderFeilutbetalingOgInntrekkOppdatererTest {
         TilbakekrevingValg tilbakekrevingValg = captor.getValue();
         assertThat(tilbakekrevingValg.getErTilbakekrevingVilkårOppfylt()).isTrue();
         assertThat(tilbakekrevingValg.getGrunnerTilReduksjon()).isTrue();
-        assertThat(tilbakekrevingValg.getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
+        assertThat(tilbakekrevingValg.getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
     }
 
     @Test
     public void skal_feile_når_boolske_variable_indikerer_inntrekk_men_noe_annet_er_valgt() {
-        var dto = new VurderFeilutbetalingOgInntrekkDto("lorem ipsum", true, false, TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
+        var dto = new VurderFeilutbetalingOgInntrekkDto("lorem ipsum", true, false, TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));

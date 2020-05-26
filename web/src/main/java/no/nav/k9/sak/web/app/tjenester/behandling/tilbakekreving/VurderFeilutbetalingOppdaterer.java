@@ -20,7 +20,7 @@ import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 @DtoTilServiceAdapter(dto = VurderFeilutbetalingDto.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderFeilutbetalingOppdaterer implements AksjonspunktOppdaterer<VurderFeilutbetalingDto> {
 
-    static final Set<TilbakekrevingVidereBehandling> LOVLIGE_VALG = Set.of(TilbakekrevingVidereBehandling.IGNORER_TILBAKEKREVING, TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
+    static final Set<TilbakekrevingVidereBehandling> LOVLIGE_VALG = Set.of(TilbakekrevingVidereBehandling.IGNORER_TILBAKEKREVING, TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
     private TilbakekrevingRepository repository;
     private TilbakekrevingvalgHistorikkinnslagBygger historikkInnslagBygger;
 

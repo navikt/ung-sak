@@ -73,7 +73,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         var behandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
 
         var dto = new AvklarSaksopplysningerDto(BEGRUNNELSE + "2", PersonstatusType.BOSA, true);
-        
+
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), behandling.getId());
 
@@ -160,11 +160,11 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     public void skal_ikke_sette_totrinn_når_aksjonspunktet_mangler_skjermlenke_selv_om_det_har_endring_i_begrunnelse() {
         // Arrange
         Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
-        var dto1 = new VurderFeilutbetalingDto(BEGRUNNELSE, TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, null);
+        var dto1 = new VurderFeilutbetalingDto(BEGRUNNELSE, TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, null);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
         Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
-        var dto2 = new VurderFeilutbetalingDto(BEGRUNNELSE + "2", TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, null);
+        var dto2 = new VurderFeilutbetalingDto(BEGRUNNELSE + "2", TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, null);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());

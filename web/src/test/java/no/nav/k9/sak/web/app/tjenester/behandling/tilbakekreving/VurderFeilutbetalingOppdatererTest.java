@@ -41,7 +41,7 @@ public class VurderFeilutbetalingOppdatererTest {
     @Test
     public void skal_lagre_at_videre_behandling_behandle_i_Infotrygd_når_det_er_valgt() {
         String varseltekst = "varsel";
-        VurderFeilutbetalingDto dto = new VurderFeilutbetalingDto("lorem ipsum", TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, varseltekst);
+        VurderFeilutbetalingDto dto = new VurderFeilutbetalingDto("lorem ipsum", TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, varseltekst);
 
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
@@ -50,7 +50,7 @@ public class VurderFeilutbetalingOppdatererTest {
         TilbakekrevingValg tilbakekrevingValg = captor.getValue();
         assertThat(tilbakekrevingValg.getErTilbakekrevingVilkårOppfylt()).isNull();
         assertThat(tilbakekrevingValg.getGrunnerTilReduksjon()).isNull();
-        assertThat(tilbakekrevingValg.getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD);
+        assertThat(tilbakekrevingValg.getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
         assertThat(tilbakekrevingValg.getVarseltekst()).isEqualTo(varseltekst);
     }
 
