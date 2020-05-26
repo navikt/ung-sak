@@ -87,7 +87,7 @@ public class RevurderingTjenesteImplTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        var revurderingTjeneste = new RevurderingTjeneste(repositoryProvider, behandlingskontrollTjeneste,
+        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
             revurderingTjenesteFelles, grunnlagKopierer);
 
         // Act

@@ -1,9 +1,16 @@
-package no.nav.k9.sak.behandling.revurdering;
+package no.nav.k9.sak.ytelse.frisinn.mottak;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
@@ -21,7 +28,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
 
     public GrunnlagKopiererFrisinn() {
         // for CDI proxy
@@ -29,19 +35,19 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
 
     @Inject
     public GrunnlagKopiererFrisinn(BehandlingRepositoryProvider repositoryProvider,
-                                   UttakRepository uttakRepository, InntektArbeidYtelseTjeneste iayTjeneste, AksjonspunktKontrollRepository aksjonspunktKontrollRepository) {
+                                   UttakRepository uttakRepository,
+                                   InntektArbeidYtelseTjeneste iayTjeneste) {
         this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
     }
 
 
     @Override
-    public void kopierAlleGrunnlagFraTidligereBehandling(Behandling original, Behandling ny) {
-        Long originalBehandlingId = original.getId();
-        Long nyBehandlingId = ny.getId();
+    public void kopierGrunnlagVedManuellOpprettelse(Behandling original, Behandling ny) {
+        var originalBehandlingId = original.getId();
+        var nyBehandlingId = ny.getId();
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
@@ -50,8 +56,34 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
     }
 
+
     @Override
-    public void opprettAksjonspunktForSaksbehandlerOverstyring(Behandling revurdering) {
-        aksjonspunktKontrollRepository.leggTilAksjonspunkt(revurdering, AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING);
+    public void kopierGrunnlagVedAutomatiskOpprettelse(Behandling original, Behandling ny) {
+        var originalBehandlingId = original.getId();
+        var nyBehandlingId = ny.getId();
+        personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+
+        // gjør til slutt, innebærer kall til abakus
+        // Delvis kopiering hvor alt unntatt oppgitte opptjening fra søknad kopieres over
+        // Den sistnevnte delen av grunnlaget må legges til i mottak av selve søknaden
+        var datasetMinusOppgittOpptjening = EnumSet.allOf(Dataset.class);
+        datasetMinusOppgittOpptjening.remove(Dataset.OPPGITT_OPPTJENING);
+        iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId, datasetMinusOppgittOpptjening);
+    }
+
+
+    @Override
+    public List<AksjonspunktDefinisjon> getApForManuellRevurdering() {
+        var ap = new ArrayList<AksjonspunktDefinisjon>();
+
+        // Standard for alle
+        ap.addAll(GrunnlagKopierer.super.getApForManuellRevurdering());
+
+        // Kun for frisinn
+        ap.add(AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING);
+
+        return ap;
     }
 }
