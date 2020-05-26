@@ -41,8 +41,8 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 @Dependent
 public class OpptjeningsperioderUtenOverstyringTjeneste {
 
-    private OpptjeningRepository opptjeningRepository;
-    private MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+    private final OpptjeningRepository opptjeningRepository;
+    private final MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
 
     @Inject
     public OpptjeningsperioderUtenOverstyringTjeneste(OpptjeningRepository opptjeningRepository) {
@@ -52,7 +52,9 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
 
     public List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse behandlingReferanse,
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
-                                                                                  OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode, Optional<OppgittOpptjening> oppgittOpptjeningOpt) {
+                                                                                  OpptjeningAktivitetVurdering vurderOpptjening,
+                                                                                  DatoIntervallEntitet opptjeningPeriode,
+                                                                                  OppgittOpptjening oppgittOpptjening) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
@@ -65,9 +67,9 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
             perioder.addAll(opptjeningsperioder);
         }
 
-        perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjeningOpt));
+        perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening));
         perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(behandlingReferanse, grunnlag, vurderOpptjening, opptjeningPeriode));
-        lagOpptjeningsperiodeForFrilansAktivitet(behandlingReferanse, oppgittOpptjeningOpt.orElse(null), grunnlag, perioder, opptjeningPeriode,
+        lagOpptjeningsperiodeForFrilansAktivitet(behandlingReferanse, oppgittOpptjening, grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 
         return perioder.stream().sorted(Comparator.comparing(OpptjeningsperiodeForSaksbehandling::getPeriode)).collect(Collectors.toList());
@@ -77,20 +79,17 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
         return opptjeningRepository.finnOpptjening(behandlingId);
     }
 
-    private List<OpptjeningsperiodeForSaksbehandling> mapOppgittOpptjening(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                                                           Optional<OppgittOpptjening> oppgittOpptjening) {
+    private List<OpptjeningsperiodeForSaksbehandling> mapOppgittOpptjening(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, OppgittOpptjening oppgittOpptjening) {
         List<OpptjeningsperiodeForSaksbehandling> oppgittOpptjeningPerioder = new ArrayList<>();
-        if (oppgittOpptjening.isPresent()) {
-            // map
-            final OppgittOpptjening opptjening = oppgittOpptjening.get();
-            for (Map.Entry<ArbeidType, List<OppgittAnnenAktivitet>> annenAktivitet : opptjening.getAnnenAktivitet().stream()
+        if (oppgittOpptjening != null) {
+            for (Map.Entry<ArbeidType, List<OppgittAnnenAktivitet>> annenAktivitet : oppgittOpptjening.getAnnenAktivitet().stream()
                 .collect(Collectors.groupingBy(OppgittAnnenAktivitet::getArbeidType)).entrySet()) {
                 oppgittOpptjeningPerioder.addAll(mapAnnenAktivitet(annenAktivitet, mapArbeidOpptjening));
             }
-            opptjening.getOppgittArbeidsforhold() // .filter(utenlandskArbforhold -> utenlandskArbforhold.getArbeidType().equals(ArbeidType.UDEFINERT))
+            oppgittOpptjening.getOppgittArbeidsforhold()
                 .forEach(oppgittArbeidsforhold -> oppgittOpptjeningPerioder.add(mapOppgittArbeidsforholdUtenOverstyring(oppgittArbeidsforhold,
                     mapArbeidOpptjening)));
-            opptjening.getEgenNæring().forEach(egenNæring -> oppgittOpptjeningPerioder.add(mapEgenNæring(egenNæring)));
+            oppgittOpptjening.getEgenNæring().forEach(egenNæring -> oppgittOpptjeningPerioder.add(mapEgenNæring(egenNæring)));
         }
         return oppgittOpptjeningPerioder;
     }

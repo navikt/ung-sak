@@ -37,10 +37,10 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
+    private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste;
 
-    private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
+    private final OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
         OpptjeningAktivitetType.ARBEIDSAVKLARING));
@@ -67,7 +67,8 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
         return opptjeningAktiviteter;
     }
 
-    private Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    @Override
+    public Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
         OppgittOpptjeningFilter oppgittOpptjeningFilter = new OppgittOpptjeningFilter(iayGrunnlag.getOppgittOpptjening(), iayGrunnlag.getOverstyrtOppgittOpptjening());
         return Optional.ofNullable(oppgittOpptjeningFilter.getOppgittOpptjeningFrisinn());
     }
@@ -77,7 +78,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
                                                                                                              LocalDate stp, LocalDate fomDato) {
 
         Optional<OppgittOpptjening> oppgittOpptjening = finnOppgittOpptjening(iayGrunnlag);
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening);
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening.orElse(null));
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))

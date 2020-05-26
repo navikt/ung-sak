@@ -1,8 +1,9 @@
-package no.nav.k9.sak.behandling.revurdering;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.revurdering;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;

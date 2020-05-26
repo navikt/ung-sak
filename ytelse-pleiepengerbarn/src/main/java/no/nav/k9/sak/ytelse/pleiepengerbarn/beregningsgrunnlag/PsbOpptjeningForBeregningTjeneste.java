@@ -66,7 +66,7 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(behandlingReferanse.getSkjæringstidspunktOpptjening())).orElseThrow();
 
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag));
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null));
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
@@ -74,7 +74,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .collect(Collectors.toList());
     }
 
-    private Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    @Override
+    public Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
         return iayGrunnlag.getOverstyrtOppgittOpptjening().isPresent() ? iayGrunnlag.getOverstyrtOppgittOpptjening() : iayGrunnlag.getOppgittOpptjening();
     }
 

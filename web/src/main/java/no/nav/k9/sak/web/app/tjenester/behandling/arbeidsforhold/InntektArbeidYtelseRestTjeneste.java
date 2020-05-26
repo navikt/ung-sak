@@ -6,6 +6,8 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -23,15 +25,18 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.Lookup;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
@@ -41,7 +46,6 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.frisinn.filter.OppgittOpptjeningFilter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -58,6 +62,7 @@ public class InntektArbeidYtelseRestTjeneste {
     private InntektArbeidYtelseDtoMapper dtoMapper;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private UttakRepository uttakRepository;
+    private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -70,12 +75,14 @@ public class InntektArbeidYtelseRestTjeneste {
                                            InntektArbeidYtelseDtoMapper dtoMapper,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                           UttakRepository uttakRepository) {
+                                           UttakRepository uttakRepository,
+                                           @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.dtoMapper = dtoMapper;
         this.uttakRepository = uttakRepository;
+        this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
     }
 
     @POST
@@ -123,10 +130,10 @@ public class InntektArbeidYtelseRestTjeneste {
         }
 
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = grunnlag.get();
+        OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste = Lookup.find(this.opptjeningForBeregningTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
+        Optional<OppgittOpptjening> oppgittOpptjening = opptjeningForBeregningTjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag);
 
-        OppgittOpptjeningFilter filter = new OppgittOpptjeningFilter(inntektArbeidYtelseGrunnlag.getOppgittOpptjening(), inntektArbeidYtelseGrunnlag.getOverstyrtOppgittOpptjening());
-
-        var oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(Optional.ofNullable(filter.getOppgittOpptjeningFrisinn()));
+        var oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(oppgittOpptjening);
 
         if (oppgittOpptjeningDto != null) {
             Søknadsperioder søknadsperioder = uttakRepository.hentOppgittSøknadsperioder(behandling.getId());
