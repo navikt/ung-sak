@@ -35,7 +35,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
 
 
     @Override
-    public void kopierAlleGrunnlagFraTidligereBehandling(Behandling original, Behandling ny) {
+    public void kopierGrunnlagVedManuellOpprettelse(Behandling original, Behandling ny) {
         Long originalBehandlingId = original.getId();
         Long nyBehandlingId = ny.getId();
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
@@ -48,7 +48,8 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
     }
 
     @Override
-    public void opprettAksjonspunktForSaksbehandlerOverstyring(Behandling revurdering) {
-        // Ingen overstyring for saksbehandler er implementert
+    public void kopierGrunnlagVedAutomatiskOpprettelse(Behandling original, Behandling ny) {
+        kopierGrunnlagVedManuellOpprettelse(original, ny);
     }
+
 }
