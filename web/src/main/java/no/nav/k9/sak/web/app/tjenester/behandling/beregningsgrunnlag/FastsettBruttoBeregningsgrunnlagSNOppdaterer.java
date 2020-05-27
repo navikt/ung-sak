@@ -10,10 +10,11 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDtoer;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = FastsettBruttoBeregningsgrunnlagSNDto.class, adapter = AksjonspunktOppdaterer.class)
-public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements AksjonspunktOppdaterer<FastsettBruttoBeregningsgrunnlagSNDto>{
+@DtoTilServiceAdapter(dto = FastsettBruttoBeregningsgrunnlagSNDtoer.class, adapter = AksjonspunktOppdaterer.class)
+public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements AksjonspunktOppdaterer<FastsettBruttoBeregningsgrunnlagSNDtoer> {
 
     private BeregningTjeneste kalkulusTjeneste;
 
@@ -27,9 +28,11 @@ public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements Aksjonspunk
     }
 
     @Override
-    public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNDto dto, AksjonspunktOppdaterParameter param) {
-        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+    public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNDtoer dtoer, AksjonspunktOppdaterParameter param) {
+        for (FastsettBruttoBeregningsgrunnlagSNDto dto : dtoer.getGrunnlag()) {
+            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+        }
         return OppdateringResultat.utenOveropp();
     }
 }

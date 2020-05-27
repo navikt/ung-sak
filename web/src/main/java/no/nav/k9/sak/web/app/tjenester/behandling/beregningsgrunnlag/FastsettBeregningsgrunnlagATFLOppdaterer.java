@@ -16,14 +16,15 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDtoer;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = FastsettBeregningsgrunnlagATFLDto.class, adapter = AksjonspunktOppdaterer.class)
-public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOppdaterer<FastsettBeregningsgrunnlagATFLDto> {
+@DtoTilServiceAdapter(dto = FastsettBeregningsgrunnlagATFLDtoer.class, adapter = AksjonspunktOppdaterer.class)
+public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOppdaterer<FastsettBeregningsgrunnlagATFLDtoer> {
 
     private BeregningTjeneste kalkulusTjeneste;
 
-    protected FastsettBeregningsgrunnlagATFLOppdaterer () {
+    protected FastsettBeregningsgrunnlagATFLOppdaterer() {
         // CDI
     }
 
@@ -33,15 +34,17 @@ public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOpp
     }
 
     @Override
-    public OppdateringResultat oppdater(FastsettBeregningsgrunnlagATFLDto dto, AksjonspunktOppdaterParameter param) {
-
-        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-        // TODO FIKS HISTORIKK
+    public OppdateringResultat oppdater(FastsettBeregningsgrunnlagATFLDtoer dtoer, AksjonspunktOppdaterParameter param) {
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
-        håndterEventueltOverflødigAksjonspunkt(param.getBehandling())
-            .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
+        for (FastsettBeregningsgrunnlagATFLDto dto : dtoer.getGrunnlag()) {
+            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+            // TODO FIKS HISTORIKK
+
+            håndterEventueltOverflødigAksjonspunkt(param.getBehandling())
+                .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
+        }
         return builder.build();
     }
 

@@ -16,10 +16,11 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDtoer;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = FastsettBGTidsbegrensetArbeidsforholdDto.class, adapter = AksjonspunktOppdaterer.class)
-public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<FastsettBGTidsbegrensetArbeidsforholdDto> {
+@DtoTilServiceAdapter(dto = FastsettBGTidsbegrensetArbeidsforholdDtoer.class, adapter = AksjonspunktOppdaterer.class)
+public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<FastsettBGTidsbegrensetArbeidsforholdDtoer> {
 
     private BeregningTjeneste kalkulusTjeneste;
 
@@ -33,14 +34,16 @@ public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements Aksjonsp
     }
 
     @Override
-    public OppdateringResultat oppdater(FastsettBGTidsbegrensetArbeidsforholdDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(FastsettBGTidsbegrensetArbeidsforholdDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
-        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-        // TODO FIKS HISTORIKK
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
-        håndterEventueltOverflødigAksjonspunkt(behandling)
-            .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
+        for (FastsettBGTidsbegrensetArbeidsforholdDto dto : dtoer.getGrunnlag()) {
+            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+            // TODO FIKS HISTORIKK
+            håndterEventueltOverflødigAksjonspunkt(behandling)
+                .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
+        }
 
         return builder.build();
     }
@@ -51,7 +54,7 @@ public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements Aksjonsp
     Se https://jira.adeo.no/browse/PFP-2042 for mer informasjon.
      */
     private Optional<Aksjonspunkt> håndterEventueltOverflødigAksjonspunkt(Behandling behandling) {
-         return behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS);
+        return behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS);
     }
 
 }

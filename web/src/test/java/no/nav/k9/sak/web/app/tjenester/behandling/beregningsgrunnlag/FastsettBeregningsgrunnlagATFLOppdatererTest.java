@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDtoer;
 
 public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     private FastsettBeregningsgrunnlagATFLOppdaterer oppdaterer;
@@ -53,7 +55,7 @@ public class FastsettBeregningsgrunnlagATFLOppdatererTest {
         //Dto
         FastsettBeregningsgrunnlagATFLDto dto = new FastsettBeregningsgrunnlagATFLDto("begrunnelse", Collections.emptyList(), null);
         // Act
-        var resultat = oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, ap, dto));
+        var resultat = oppdaterer.oppdater(new FastsettBeregningsgrunnlagATFLDtoer("", List.of(dto)), new AksjonspunktOppdaterParameter(behandling, ap, dto));
 
         //Assert
         assertThat(resultat.getEkstraAksjonspunktResultat()).hasSize(1);

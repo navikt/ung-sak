@@ -18,10 +18,11 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDtoer;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = VurderVarigEndringEllerNyoppstartetSNDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements AksjonspunktOppdaterer<VurderVarigEndringEllerNyoppstartetSNDto> {
+@DtoTilServiceAdapter(dto = VurderVarigEndringEllerNyoppstartetSNDtoer.class, adapter = AksjonspunktOppdaterer.class)
+public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements AksjonspunktOppdaterer<VurderVarigEndringEllerNyoppstartetSNDtoer> {
     private static final AksjonspunktDefinisjon FASTSETTBRUTTOSNKODE = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -39,22 +40,25 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
     }
 
     @Override
-    public OppdateringResultat oppdater(VurderVarigEndringEllerNyoppstartetSNDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(VurderVarigEndringEllerNyoppstartetSNDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
         OppdateringResultat.Builder resultatBuilder = OppdateringResultat.utenTransisjon();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
-        // Aksjonspunkt "opprettet" i GUI må legge til, bør endre på hvordan dette er løst
-        if (dto.getErVarigEndretNaering()) {
-            if (dto.getBruttoBeregningsgrunnlag() != null) {
-                HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-                kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+        for (VurderVarigEndringEllerNyoppstartetSNDto dto : dtoer.getGrunnlag()) {
+
+            // Aksjonspunkt "opprettet" i GUI må legge til, bør endre på hvordan dette er løst
+            if (dto.getErVarigEndretNaering()) {
+                if (dto.getBruttoBeregningsgrunnlag() != null) {
+                    HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+                    kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+                } else {
+                    behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(FASTSETTBRUTTOSNKODE));
+                }
             } else {
-                behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(FASTSETTBRUTTOSNKODE));
+                behandling.getÅpentAksjonspunktMedDefinisjonOptional(FASTSETTBRUTTOSNKODE)
+                    .ifPresent(a -> behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(a)));
             }
-        } else {
-            behandling.getÅpentAksjonspunktMedDefinisjonOptional(FASTSETTBRUTTOSNKODE)
-            .ifPresent(a -> behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(a)));
         }
         return resultatBuilder.build();
     }

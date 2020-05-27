@@ -11,10 +11,11 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDtoer;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = AvklarteAktiviteterDto.class, adapter = AksjonspunktOppdaterer.class)
-public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<AvklarteAktiviteterDto> {
+@DtoTilServiceAdapter(dto = AvklarteAktiviteterDtoer.class, adapter = AksjonspunktOppdaterer.class)
+public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<AvklarteAktiviteterDtoer> {
 
     private BeregningTjeneste kalkulusTjeneste;
 
@@ -28,10 +29,12 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     }
 
     @Override
-    public OppdateringResultat oppdater(AvklarteAktiviteterDto dto, AksjonspunktOppdaterParameter param) {
-        HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-        var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-        // TODO Ta i bruk respons for historikk når dette er klart på kalkulus
+    public OppdateringResultat oppdater(AvklarteAktiviteterDtoer dtoer, AksjonspunktOppdaterParameter param) {
+        for (AvklarteAktiviteterDto dto : dtoer.getGrunnlag()) {
+            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
+            // TODO Ta i bruk respons for historikk når dette er klart på kalkulus
+        }
         return OppdateringResultat.utenOveropp();
     }
 
