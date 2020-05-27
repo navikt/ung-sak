@@ -31,10 +31,10 @@ spec:
     path: /k9/sak/internal/metrics/prometheus
   resources:
     limits:
-      cpu: "500m"
+      cpu: "4000m"
       memory: "2048Mi"
     requests:
-      cpu: "200m"
+      cpu: "500m"
       memory: "1024Mi"
   ingresses:
     - "https://k9-sak.nais.adeo.no/"
@@ -177,7 +177,7 @@ spec:
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
-      
+
     # metrics
     - name: SENSU_HOST
       value: "sensu.nais"
