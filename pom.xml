@@ -71,7 +71,7 @@
 			<dependency>
 				<groupId>no.nav.vedtak.prosesstask</groupId>
 				<artifactId>prosesstask-root</artifactId>
-				<version>2.4-20200521174607-7b541d2</version>
+				<version>2.4-20200527094402-767c9b1</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
