@@ -1,6 +1,8 @@
 package no.nav.k9.sak.metrikker;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,6 +22,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.Tuple;
 
 import org.hibernate.query.NativeQuery;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -32,10 +38,13 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskFeil;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class StatistikkRepository {
+
+    private static final String UDEFINERT = "-";
 
     static final List<String> YTELSER = List.of(
         FagsakYtelseType.FRISINN,
@@ -60,6 +69,8 @@ public class StatistikkRepository {
     static final List<String> VENT_ÅRSAKER = Venteårsak.kodeMap().values().stream().filter(p -> !Venteårsak.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> BREVKODER = Brevkode.kodeMap().values().stream().filter(p -> !Brevkode.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
 
+    private static final ObjectMapper OM = new ObjectMapper();
+
     private EntityManager entityManager;
 
     @Inject
@@ -68,6 +79,8 @@ public class StatistikkRepository {
     }
 
     public List<SensuEvent> hentAlle() {
+        LocalDate dag = LocalDate.now();
+
         List<SensuEvent> metrikker = new ArrayList<>();
         metrikker.addAll(fagsakStatusStatistikk());
         metrikker.addAll(behandlingStatusStatistikk());
@@ -75,8 +88,11 @@ public class StatistikkRepository {
         metrikker.addAll(prosessTaskStatistikk());
         metrikker.addAll(mottattDokumentStatistikk());
         metrikker.addAll(aksjonspunktStatistikk());
+        metrikker.addAll(aksjonspunktStatistikkDaglig(dag));
         metrikker.addAll(aksjonspunktVenteårsakStatistikk());
         metrikker.addAll(avslagStatistikk());
+        metrikker.addAll(avslagStatistikkDaglig(dag));
+        metrikker.addAll(prosessTaskFeilStatistikk());
         return metrikker;
     }
 
@@ -242,6 +258,57 @@ public class StatistikkRepository {
     }
 
     @SuppressWarnings("unchecked")
+    Collection<SensuEvent> avslagStatistikkDaglig(LocalDate dato) {
+        String sql = "select f.ytelse_type, f.saksnummer, b.id as behandling_id, b.behandling_type, b.behandling_resultat_type, vv.vilkar_type, vrp.avslag_kode" +
+            "    , coalesce(b.endret_tid, b.opprettet_tid) as tid " +
+            " from fagsak f " +
+            " inner join behandling b on b.fagsak_id=f.id" +
+            " inner join rs_vilkars_resultat rs on rs.behandling_id=b.id and rs.aktiv=true" +
+            " inner join VR_VILKAR_RESULTAT vr on vr.id=rs.vilkarene_id" +
+            " inner join vr_vilkar vv on vv.vilkar_resultat_id=vr.id" +
+            " inner join vr_vilkar_periode vrp on vrp.vilkar_id=vv.id" +
+            " where b.behandling_status IN (:behStatuser) and vrp.avslag_kode != '-' and vrp.avslag_kode IS NOT NULL" +
+            " and coalesce(b.endret_tid, b.opprettet_tid)>=:startAvDag and coalesce(b.endret_tid, b.opprettet_tid) < :nesteDag";
+
+        String metricName = "avslag_daglig_v1";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("behStatuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode()))
+            .setParameter("startAvDag", dato.atStartOfDay())
+            .setParameter("nesteDag", dato.plusDays(1).atStartOfDay());
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> {
+            String ytelseType = t.get(0, String.class);
+            String saksnummer = t.get(1, String.class);
+            String behandlingId = t.get(2, BigInteger.class).toString();
+            String behandlingType = t.get(3, String.class);
+            String behandlingResultatType =t.get(4, String.class);
+            String vilkårType = t.get(5, String.class);
+            String avslagKode = t.get(6, String.class);
+            
+            return SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", ytelseType,
+                    "saksnummer", saksnummer,
+                    "behandlingId", behandlingId,
+                    "behandlingType", behandlingType
+                    ),
+                Map.of(
+                    "behandlingResultatType", behandlingResultatType,
+                    "vilkårType", vilkårType,
+                    "avslagKode", avslagKode),
+                t.get(7, Timestamp.class).getTime());
+        })
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return values;
+
+    }
+
+    @SuppressWarnings("unchecked")
     Collection<SensuEvent> aksjonspunktStatistikk() {
         String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status," +
             " count(*) as antall" +
@@ -278,6 +345,52 @@ public class StatistikkRepository {
                 metricField, BigInteger.ZERO));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
+
+        return values;
+
+    }
+
+    @SuppressWarnings("unchecked")
+    Collection<SensuEvent> aksjonspunktStatistikkDaglig(LocalDate dato) {
+        String sql = "select f.ytelse_type, f.saksnummer, b.id as behandling_id, a.aksjonspunkt_def as aksjonspunkt, " +
+            "      a.aksjonspunkt_status as status,a.vent_aarsak, coalesce(a.endret_tid, a.opprettet_tid) as tid" +
+            " from aksjonspunkt a " +
+            " inner join behandling b on b.id =a.behandling_id" +
+            " inner join fagsak f on f.id=b.fagsak_id" +
+            " where a.aksjonspunkt_status IN (:statuser)"
+            + " and coalesce(a.endret_tid, a.opprettet_tid)>=:startAvDag and coalesce(a.endret_tid, a.opprettet_tid) < :nesteDag";
+
+        String metricName = "aksjonspunkt_daglig_v1";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("statuser", AKSJONSPUNKT_STATUSER.stream().collect(Collectors.toSet()))
+            .setParameter("startAvDag", dato.atStartOfDay())
+            .setParameter("nesteDag", dato.plusDays(1).atStartOfDay());
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> {
+            String ytelseType = t.get(0, String.class);
+            String saksnummer = t.get(1, String.class);
+            String behandlingId = t.get(2, BigInteger.class).toString();
+            String aksjonspunktKode = t.get(3, String.class);
+            String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
+            String aksjonspunktStatus = t.get(4, String.class);
+            String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
+            return SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", ytelseType,
+                    "saksnummer", saksnummer,
+                    "behandlingId", behandlingId,
+                    "aksjonspunkt", aksjonspunktKode),
+                Map.of(
+                    "aksjonspunkt_status", aksjonspunktStatus,
+                    "aksjonspunkt_navn", aksjonspunktNavn,
+                    "venteÅrsak", venteÅrsak),
+                t.get(6, Timestamp.class).getTime());
+        })
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return values;
 
@@ -404,6 +517,69 @@ public class StatistikkRepository {
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
         return values;
+    }
+
+    Collection<SensuEvent> prosessTaskFeilStatistikk() {
+        String sql = "select f.ytelse_type, f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere"
+            + " from prosess_task p " +
+            " left outer join fagsak_prosess_task fpt ON fpt.prosess_task_id = p.id" +
+            " left outer join fagsak f on f.id=fpt.fagsak_id" +
+            " where p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL";
+
+        String metricName = "prosess_task_feil_log_v1";
+
+        @SuppressWarnings("unchecked")
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
+
+        long now = System.currentTimeMillis();
+
+        Set<SensuEvent> values = stream.map(t -> {
+            String ytelseType = t.get(0, String.class);
+            String saksnummer = t.get(1, String.class);
+            String taskId = t.get(2, BigInteger.class).toString();
+            String taskType = t.get(3, String.class);
+            String status = t.get(4, String.class);
+            Timestamp sistKjørt = t.get(5, Timestamp.class);
+            long tidsstempel = sistKjørt == null ? now : sistKjørt.getTime();
+
+            String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).get();
+            String taskParams = t.get(7, String.class);
+
+            return SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "taskId", taskId,
+                    "saksnummer", coalesce(saksnummer, UDEFINERT),
+                    "ytelseType", coalesce(ytelseType, UDEFINERT),
+                    "prosess_task_type", taskType),
+                Map.of(
+                    "status", status,
+                    "siste_feil", sisteFeil,
+                    "task_parametere", coalesce(taskParams, UDEFINERT)),
+                tidsstempel);
+        })
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return values;
+    }
+
+    private static String coalesce(String str, String defValue) {
+        return str != null ? str : defValue;
+    }
+
+    private static Optional<String> finnStacktraceStartFra(String sisteFeil, int maksLen) {
+        boolean guessItsJson = sisteFeil != null && sisteFeil.startsWith("{");
+        if (guessItsJson) {
+            try {
+                var feil = OM.readValue(sisteFeil, ProsessTaskFeil.class);
+                var strFeil = feil.getStackTrace();
+                return Optional.of(strFeil.substring(0, Math.min(maksLen, strFeil.length()))); // chop-chop
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Ugyldig json: " + sisteFeil, e);
+            }
+        }
+        return Optional.empty();
     }
 
     /** Lager events med 0 målinger for alle kombinasjoner av oppgitte vektorer. */

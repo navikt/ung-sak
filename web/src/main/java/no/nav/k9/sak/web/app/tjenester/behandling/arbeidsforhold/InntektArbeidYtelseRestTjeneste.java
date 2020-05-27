@@ -3,7 +3,11 @@ package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -21,19 +25,21 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.Lookup;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -56,6 +62,7 @@ public class InntektArbeidYtelseRestTjeneste {
     private InntektArbeidYtelseDtoMapper dtoMapper;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private UttakRepository uttakRepository;
+    private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -68,12 +75,14 @@ public class InntektArbeidYtelseRestTjeneste {
                                            InntektArbeidYtelseDtoMapper dtoMapper,
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                           UttakRepository uttakRepository) {
+                                           UttakRepository uttakRepository,
+                                           @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.dtoMapper = dtoMapper;
         this.uttakRepository = uttakRepository;
+        this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
     }
 
     @POST
@@ -88,8 +97,8 @@ public class InntektArbeidYtelseRestTjeneste {
     public InntektArbeidYtelseDto getInntektArbeidYtelser(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Long behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingId != null
-            ? behandlingRepository.hentBehandling(behandlingId)
-            : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+                ? behandlingRepository.hentBehandling(behandlingId)
+                : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         return getInntektArbeidYtelserFraBehandling(behandling);
     }
 
@@ -121,14 +130,10 @@ public class InntektArbeidYtelseRestTjeneste {
         }
 
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = grunnlag.get();
-        OppgittOpptjeningDto oppgittOpptjeningDto;
+        OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste = Lookup.find(this.opptjeningForBeregningTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
+        Optional<OppgittOpptjening> oppgittOpptjening = opptjeningForBeregningTjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag);
 
-        // viser overstyrt hvis finnes
-        if (inntektArbeidYtelseGrunnlag.getOverstyrtOppgittOpptjening().isPresent()) {
-            oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(inntektArbeidYtelseGrunnlag.getOverstyrtOppgittOpptjening());
-        } else {
-            oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(inntektArbeidYtelseGrunnlag.getOppgittOpptjening());
-        }
+        var oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(oppgittOpptjening);
 
         if (oppgittOpptjeningDto != null) {
             Søknadsperioder søknadsperioder = uttakRepository.hentOppgittSøknadsperioder(behandling.getId());
@@ -168,7 +173,7 @@ public class InntektArbeidYtelseRestTjeneste {
 
         // finn annen part
         UtledArbeidsforholdParametere param = new UtledArbeidsforholdParametere(
-            behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
+                behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
 

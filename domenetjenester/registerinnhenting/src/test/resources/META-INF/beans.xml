@@ -5,5 +5,6 @@
        version="2.0">
     <alternatives>
         <class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
+        <class>no.nav.k9.sak.domene.registerinnhenting.StartpunktUtlederMock</class>
     </alternatives>
 </beans>

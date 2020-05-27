@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
@@ -18,6 +19,13 @@ public class OppgittFrilans {
     private List<OppgittFrilansoppdrag> frilansoppdrag;
 
     public OppgittFrilans() {
+    }
+
+    public OppgittFrilans(OppgittFrilans kopierFra) {
+        this.harInntektFraFosterhjem = kopierFra.harInntektFraFosterhjem;
+        this.erNyoppstartet = kopierFra.erNyoppstartet;
+        this.harNærRelasjon = kopierFra.harNærRelasjon;
+        this.setFrilansoppdrag(kopierFra.getFrilansoppdrag().stream().map(OppgittFrilansoppdrag::new).collect(Collectors.toList()));
     }
 
     @Override
@@ -79,7 +87,11 @@ public class OppgittFrilans {
         return Collections.emptyList();
     }
 
-    public void setFrilansoppdrag(List<OppgittFrilansoppdrag> frilansoppdrag) {
+    void setFrilansoppdrag(List<OppgittFrilansoppdrag> frilansoppdrag) {
         this.frilansoppdrag = frilansoppdrag;
+    }
+
+    void leggTilFrilansoppdrag(OppgittFrilansoppdrag frilansoppdrag) {
+        this.frilansoppdrag.add(frilansoppdrag);
     }
 }

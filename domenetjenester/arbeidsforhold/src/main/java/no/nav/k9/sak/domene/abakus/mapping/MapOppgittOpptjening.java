@@ -262,7 +262,7 @@ class MapOppgittOpptjening {
                     .medOppdragsgiver(fjernUnicodeControlOgAlternativeWhitespaceCharacters(f.getOppdragsgiver()))
                     .build());
 
-            frilansBuilder.leggTilOppgittOppdrag(frilansoppdrag);
+            frilansBuilder.medFrilansOppdrag(frilansoppdrag);
             return frilansBuilder.build();
         }
 

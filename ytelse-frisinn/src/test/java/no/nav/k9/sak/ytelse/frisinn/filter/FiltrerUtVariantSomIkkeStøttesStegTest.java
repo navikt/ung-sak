@@ -7,12 +7,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
@@ -32,7 +32,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var oppgittOpptjening = opptjeningBuilder
             .leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .medErNyoppstartet(false)
-                .leggTilOppgittOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
+                .medFrilansOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
                     .medInntekt(BigDecimal.TEN)
                     .medPeriode(perioden).build()))
                 .build())
@@ -56,7 +56,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var oppgittOpptjening = opptjeningBuilder
             .leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .medErNyoppstartet(false)
-                .leggTilOppgittOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
+                .medFrilansOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
                     .medInntekt(BigDecimal.TEN)
                     .medPeriode(perioden).build()))
                 .build())
@@ -81,7 +81,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var oppgittOpptjening = opptjeningBuilder
             .leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .medErNyoppstartet(false)
-                .leggTilOppgittOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
+                .medFrilansOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
                     .medInntekt(BigDecimal.TEN)
                     .medPeriode(perioden).build()))
                 .build())
@@ -106,7 +106,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var oppgittOpptjening = opptjeningBuilder
             .leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .medErNyoppstartet(true)
-                .leggTilOppgittOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
+                .medFrilansOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
                     .medInntekt(BigDecimal.TEN)
                     .medPeriode(perioden).build()))
                 .build())
@@ -128,7 +128,7 @@ public class FiltrerUtVariantSomIkkeStøttesStegTest {
         var oppgittOpptjening = opptjeningBuilder
             .leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .medErNyoppstartet(false)
-                .leggTilOppgittOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
+                .medFrilansOppdrag(List.of(OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder.ny()
                     .medInntekt(BigDecimal.TEN)
                     .medPeriode(perioden).build()))
                 .build())

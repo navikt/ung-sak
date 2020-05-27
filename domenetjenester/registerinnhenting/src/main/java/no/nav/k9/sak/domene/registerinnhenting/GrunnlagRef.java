@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandlingslager.behandling;
+package no.nav.k9.sak.domene.registerinnhenting;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
@@ -15,10 +15,12 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 import javax.persistence.Entity;
+
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 /**
  * Marker type som implementerer interface {@link StartpunktUtleder}.
@@ -49,7 +51,7 @@ public @interface GrunnlagRef {
             return navn;
         }
     }
-    
+
 
     @SuppressWarnings("unchecked")
     public static final class Lookup {
@@ -57,41 +59,37 @@ public @interface GrunnlagRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> lookupClass, String aggregatClassName) {
-            return find(lookupClass, (CDI<I>) CDI.current(), aggregatClassName);
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Class<?> aggregatClass) {
-            return find(cls, (CDI<I>) CDI.current(), getName(aggregatClass));
-        }
-
         private static String getName(Class<?> aggregat) {
             String aggrNavn = aggregat.isAnnotationPresent(Entity.class) ? aggregat.getAnnotation(Entity.class).name()  : aggregat.getSimpleName();
             return aggrNavn;
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, Class<?> aggregatClass) {
-            return find(cls, instances, getName(aggregatClass));
         }
 
         /**
          * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
          * injected med riktig forventet klassetype og @Any qualifier.
          */
-        public static <I> Optional<I> find(Instance<I> instances, Class<?> aggregatClass) {
-            return find(null, instances, getName(aggregatClass));
+        public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType fagsakYtelseType, Instance<I> instances, Class<?> aggregatClass) {
+            return find(cls, instances, getName(aggregatClass), fagsakYtelseType.getKode());
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName) {
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName, String fagsakYtelseType) {
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(aggregatClassName, "*")) {
-                var inst = select(cls, instances, new GrunnlagRefLiteral(fagsakLiteral));
-                if (inst.isResolvable()) {
-                    return Optional.of(getInstance(inst));
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+                var inst = select(cls, instances, new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(fagsakLiteral));
+                if (inst.isUnsatisfied()) {
+                    continue;
                 } else {
-                    if (inst.isAmbiguous()) {
-                        throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral);
+                    for (var grunnlagLiteral : coalesce(aggregatClassName, "*")) {
+                        var ginst = select(cls, inst, new GrunnlagRefLiteral(grunnlagLiteral));
+                        if (ginst.isResolvable()) {
+                            return Optional.of(getInstance(ginst));
+                        } else {
+                            if (ginst.isAmbiguous()) {
+                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() +
+                                    ", aggegatKlasse=" + aggregatClassName + ", fagsakType=" + fagsakYtelseType);
+                            }
+                        }
                     }
                 }
             }
@@ -121,7 +119,7 @@ public @interface GrunnlagRef {
 
     /**
      * container for repeatable annotations.
-     * 
+     *
      * @see https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html
      */
     @Inherited

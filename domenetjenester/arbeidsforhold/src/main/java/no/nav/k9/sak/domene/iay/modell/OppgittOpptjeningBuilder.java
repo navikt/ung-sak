@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -164,8 +165,20 @@ public class OppgittOpptjeningBuilder {
             return new OppgittFrilansBuilder(new OppgittFrilans());
         }
 
-        public OppgittFrilansBuilder leggTilOppgittOppdrag(List<OppgittFrilansoppdrag> frilansoppdrag) {
+        public static OppgittFrilansBuilder fraEksisterende(OppgittFrilans oppgittFrilans) {
+            return new OppgittFrilansBuilder(new OppgittFrilans(oppgittFrilans));
+        }
+
+        public OppgittFrilansBuilder medFrilansOppdrag(List<OppgittFrilansoppdrag> frilansoppdrag) {
             this.kladd.setFrilansoppdrag(frilansoppdrag);
+            return this;
+        }
+
+        public OppgittFrilansBuilder leggTilFrilansOppdrag(OppgittFrilansoppdrag frilansoppdrag) {
+            if (this.kladd.getFrilansoppdrag().isEmpty()) {
+                this.kladd.setFrilansoppdrag(new ArrayList<>());
+            }
+            this.kladd.leggTilFrilansoppdrag(frilansoppdrag);
             return this;
         }
 

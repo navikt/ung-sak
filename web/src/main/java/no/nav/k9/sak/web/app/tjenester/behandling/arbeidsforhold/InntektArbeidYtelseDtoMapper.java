@@ -5,6 +5,7 @@ import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -281,10 +282,17 @@ public class InntektArbeidYtelseDtoMapper {
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeFraSøknad.getFom(), periodeFraSøknad.getTom());
         OppgittOpptjeningDto dto = new OppgittOpptjeningDto();
 
-        dto.setOppgittEgenNæring(oppgittOpptjeningDto.getOppgittEgenNæring().stream().filter(oppgittEgenNæringDto -> !periode.overlapper(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getFom())).collect(Collectors.toList()));
+        dto.setOppgittEgenNæring(oppgittOpptjeningDto.getOppgittEgenNæring().stream()
+                .filter(oppgittEgenNæringDto -> !periode.overlapper(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getFom()))
+                .sorted(Comparator.comparing(o -> o.getPeriode().getFom()))
+                .collect(Collectors.toList()));
+
         if (oppgittOpptjeningDto.getOppgittFrilans() != null) {
             OppgittFrilansDto oppgittFrilansDto = new OppgittFrilansDto();
-            oppgittFrilansDto.setOppgittFrilansoppdrag(oppgittOpptjeningDto.getOppgittFrilans().getOppgittFrilansoppdrag().stream().filter(oppgittFrilansoppdragDto -> !periode.overlapper(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getFom())).collect(Collectors.toList()));
+            oppgittFrilansDto.setOppgittFrilansoppdrag(oppgittOpptjeningDto.getOppgittFrilans().getOppgittFrilansoppdrag().stream()
+                    .filter(oppgittFrilansoppdragDto -> !periode.overlapper(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getFom()))
+                    .sorted(Comparator.comparing(f -> f.getPeriode().getFom()))
+                    .collect(Collectors.toList()));
             dto.setOppgittFrilans(oppgittFrilansDto);
         }
         return dto;

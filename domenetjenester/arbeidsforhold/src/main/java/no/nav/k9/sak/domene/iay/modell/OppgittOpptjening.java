@@ -51,17 +51,18 @@ public class OppgittOpptjening {
         this.opprettetTidspunkt = opprettetTidspunktOriginalt;
 
         this.oppgittArbeidsforhold = kopierFra.oppgittArbeidsforhold == null
-            ? Collections.emptyList()
+            ? new ArrayList<>()
             : kopierFra.oppgittArbeidsforhold.stream().map(OppgittArbeidsforhold::new).collect(Collectors.toList());
 
         this.egenNæring = kopierFra.egenNæring == null
-            ? Collections.emptyList()
+            ? new ArrayList<>()
             : kopierFra.egenNæring.stream().map(OppgittEgenNæring::new).collect(Collectors.toList());
 
         this.annenAktivitet = kopierFra.annenAktivitet == null
-            ? Collections.emptyList()
+            ? new ArrayList<>()
             : kopierFra.annenAktivitet.stream().map(OppgittAnnenAktivitet::new).collect(Collectors.toList());
 
+        this.frilans = kopierFra.frilans == null ? null : new OppgittFrilans(kopierFra.frilans);
     }
 
     /** Identifisere en immutable instans av grunnlaget unikt og er egnet for utveksling (eks. til abakus eller andre systemer) */

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -54,8 +53,15 @@ public class MapOppgittFraværOgVilkårsResultat {
     private LocalDateTimeline<WrappedOppgittFraværPeriode> mergeTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> wrappedOppgittFraværPeriodeLocalDateTimeline,
                                                                            List<LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdSomMatcher) {
         var tidslinje = wrappedOppgittFraværPeriodeLocalDateTimeline;
+        var arbeidsforholdTidslinje = mergeTidslinjer(arbeidsforholdSomMatcher);
+        tidslinje = tidslinje.combine(arbeidsforholdTidslinje, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        return tidslinje.compress();
+    }
+
+    private LocalDateTimeline<WrappedOppgittFraværPeriode> mergeTidslinjer(List<LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdSomMatcher) {
+        var tidslinje = new LocalDateTimeline<WrappedOppgittFraværPeriode>(List.of());
         for (LocalDateTimeline<WrappedOppgittFraværPeriode> oppgittFraværPeriodeLocalDateTimeline : arbeidsforholdSomMatcher) {
-            tidslinje = tidslinje.combine(oppgittFraværPeriodeLocalDateTimeline, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            tidslinje = tidslinje.combine(oppgittFraværPeriodeLocalDateTimeline, this::mergePeriodePrioOppfylt, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         return tidslinje.compress();
     }
@@ -86,7 +92,7 @@ public class MapOppgittFraværOgVilkårsResultat {
 
         LocalDateTimeline<WrappedOppgittFraværPeriode> arbeidsforholdTidslinje = allVerdenAvTid;
         for (LocalDateSegment<WrappedOppgittFraværPeriode> segment : ansettelsesPerioder) {
-            arbeidsforholdTidslinje = arbeidsforholdTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            arbeidsforholdTidslinje = arbeidsforholdTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), this::mergePeriodePrioOppfylt, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         for (LocalDateSegment<WrappedOppgittFraværPeriode> segment : permisjonsPerioder) {
             arbeidsforholdTidslinje = arbeidsforholdTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
@@ -171,6 +177,28 @@ public class MapOppgittFraværOgVilkårsResultat {
             return lagSegment(di, første.getErAvslått(), utledOppgittPeriode(første.getPeriode(), siste.getPeriode()));
         } else if (!første.getErAvslått() && siste.getErAvslått()) {
             return lagSegment(di, siste.getErAvslått(), utledOppgittPeriode(siste.getPeriode(), første.getPeriode()));
+        } else if (første.getErAvslått() == siste.getErAvslått()) {
+            return lagSegment(di, siste.getErAvslått(), utledOppgittPeriode(siste.getPeriode(), første.getPeriode()));
+        } else {
+            return sisteVersjon;
+        }
+    }
+
+
+    private LocalDateSegment<WrappedOppgittFraværPeriode> mergePeriodePrioOppfylt(LocalDateInterval di,
+                                                                                  LocalDateSegment<WrappedOppgittFraværPeriode> førsteVersjon,
+                                                                                  LocalDateSegment<WrappedOppgittFraværPeriode> sisteVersjon) {
+        if (førsteVersjon == null && sisteVersjon != null) {
+            return lagSegment(di, sisteVersjon.getValue());
+        } else if (sisteVersjon == null && førsteVersjon != null) {
+            return lagSegment(di, førsteVersjon.getValue());
+        }
+        var første = førsteVersjon.getValue();
+        var siste = sisteVersjon.getValue();
+        if (første.getErAvslått() && !siste.getErAvslått()) {
+            return lagSegment(di, siste.getErAvslått(), utledOppgittPeriode(første.getPeriode(), siste.getPeriode()));
+        } else if (!første.getErAvslått() && siste.getErAvslått()) {
+            return lagSegment(di, første.getErAvslått(), utledOppgittPeriode(siste.getPeriode(), første.getPeriode()));
         } else if (første.getErAvslått() == siste.getErAvslått()) {
             return lagSegment(di, siste.getErAvslått(), utledOppgittPeriode(siste.getPeriode(), første.getPeriode()));
         } else {
