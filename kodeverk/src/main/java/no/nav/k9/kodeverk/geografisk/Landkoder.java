@@ -123,6 +123,7 @@ public class Landkoder implements Kodeverdi {
         map.put("XXX", new Landkoder("XXX"));
         map.put("XXK", new Landkoder("XXK"));
         map.put("YUG", new Landkoder("YUG"));
+        map.put("SCG", new Landkoder("SCG"));
 
         return Collections.unmodifiableMap(map);
     }
