@@ -78,7 +78,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void deaktiverer_eksisterende_tilbakekrevingValg_ved_hopp_over_bakover() {
         // Arrange
-        tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.TILBAKEKREV_I_INFOTRYGD, "varsel"));
+        tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, "varsel"));
         repoRule.getRepository().flushAndClear();
 
         steg = opprettSteg();
