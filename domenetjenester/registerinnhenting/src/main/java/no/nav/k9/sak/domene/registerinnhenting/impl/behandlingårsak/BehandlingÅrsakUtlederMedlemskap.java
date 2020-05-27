@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.GrunnlagRef;
+import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")

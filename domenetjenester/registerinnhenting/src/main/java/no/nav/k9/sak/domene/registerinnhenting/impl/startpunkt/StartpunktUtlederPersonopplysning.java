@@ -9,14 +9,16 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.GrunnlagRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
+import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 
 @ApplicationScoped
+@FagsakYtelseTypeRef
 @GrunnlagRef("PersonInformasjon")
 class StartpunktUtlederPersonopplysning implements StartpunktUtleder {
 
@@ -104,7 +106,7 @@ class StartpunktUtlederPersonopplysning implements StartpunktUtleder {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), StartpunktType.UDEFINERT, "personopplysning - relasjon på grunn av fødsel", g1Id, g2Id);
             startpunkter.add(StartpunktType.UDEFINERT);
         }
-        
+
         var relasjonStartpunkt = StartpunktType.KONTROLLER_FAKTA;
         if (poDiff.erRelasjonerEndretForSøkerUtenomNyeBarn()) {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(this.getClass().getSimpleName(), relasjonStartpunkt, "personopplysning - brukers relasjoner annet enn fødsel", g1Id, g2Id);
