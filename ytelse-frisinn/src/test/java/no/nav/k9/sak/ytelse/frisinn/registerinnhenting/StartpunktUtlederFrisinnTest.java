@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.registerinnhenting;
+package no.nav.k9.sak.ytelse.frisinn.registerinnhenting;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -16,19 +16,23 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjeneste;
+import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjenesteImpl;
+import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 
 @RunWith(CdiRunner.class)
-public class StartpunktTjenesteImplTest {
+public class StartpunktUtlederFrisinnTest {
 
     private StartpunktTjeneste tjeneste;
 
@@ -48,9 +52,10 @@ public class StartpunktTjenesteImplTest {
     }
 
     @Test
-    public void skal_returnere_startpunkt_for_endret_aggregat() {
+    public void skal_anvende_ytelsesspefifikk_startpunktutleder() {
         // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad();
+        // Bruker Frisinn-behandling som skal kalle ytelsesspesifikk startpunktutleder-mock injected i test
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.FRISINN);
         var behandling = scenario.lagre(repositoryProvider);
 
         // To forskjellige id-er indikerer endring på grunnlag
@@ -59,7 +64,7 @@ public class StartpunktTjenesteImplTest {
         var behRef = BehandlingReferanse.fra(behandling, LocalDate.now());
 
         // Act/Assert
-        assertThat(tjeneste.utledStartpunktForDiffBehandlingsgrunnlag(behRef, endringsresultat)).isEqualTo(StartpunktType.KONTROLLER_FAKTA);
+        assertThat(tjeneste.utledStartpunktForDiffBehandlingsgrunnlag(behRef, endringsresultat)).isEqualTo(StartpunktType.BEREGNING);
     }
 
     private EndringsresultatDiff opprettEndringsresultat(Long grunnlagId1, Long grunnlagId2) {

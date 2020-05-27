@@ -6,6 +6,5 @@
     <alternatives>
         <class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
         <class>no.nav.k9.sak.domene.registerinnhenting.StartpunktUtlederMock</class>
-        <class>no.nav.k9.sak.domene.registerinnhenting.StartpunktUtlederFrisinnMock</class>
     </alternatives>
 </beans>

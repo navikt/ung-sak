@@ -6,5 +6,7 @@
 	<alternatives>
         <class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
         <class>no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste</class>
+        <class>no.nav.k9.sak.ytelse.frisinn.registerinnhenting.StartpunktUtlederMock</class>
+        <class>no.nav.k9.sak.ytelse.frisinn.registerinnhenting.StartpunktUtlederFrisinnMock</class>
     </alternatives>
 </beans>
