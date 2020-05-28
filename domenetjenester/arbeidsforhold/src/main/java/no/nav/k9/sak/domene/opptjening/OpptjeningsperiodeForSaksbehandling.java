@@ -10,19 +10,19 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class OpptjeningsperiodeForSaksbehandling {
 
-    protected OpptjeningAktivitetType opptjeningAktivitetType;
-    protected Opptjeningsnøkkel grupperingNøkkel;
-    protected Arbeidsgiver arbeidsgiver;
-    protected Stillingsprosent stillingsprosent;
-    protected DatoIntervallEntitet periode;
-    protected VurderingsStatus vurderingsStatus;
-    protected Boolean erPeriodeEndret = false;
-    protected Boolean erManueltRegistrert = false;
-    protected String begrunnelse;
-    protected Boolean manueltBehandlet = false;
-    protected String arbeidsgiverUtlandNavn;
+    private OpptjeningAktivitetType opptjeningAktivitetType;
+    private Opptjeningsnøkkel grupperingNøkkel;
+    private Arbeidsgiver arbeidsgiver;
+    private Stillingsprosent stillingsprosent;
+    private DatoIntervallEntitet periode;
+    private VurderingsStatus vurderingsStatus;
+    private Boolean erPeriodeEndret = false;
+    private Boolean erManueltRegistrert = false;
+    private String begrunnelse;
+    private Boolean manueltBehandlet = false;
+    private String arbeidsgiverUtlandNavn;
 
-    protected OpptjeningsperiodeForSaksbehandling() {
+    public OpptjeningsperiodeForSaksbehandling() {
     }
 
     public DatoIntervallEntitet getPeriode() {

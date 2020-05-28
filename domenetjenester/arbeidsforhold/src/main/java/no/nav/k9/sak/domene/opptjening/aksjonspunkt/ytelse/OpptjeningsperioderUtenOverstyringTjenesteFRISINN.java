@@ -27,7 +27,7 @@ public class OpptjeningsperioderUtenOverstyringTjenesteFRISINN extends Opptjenin
 
     @Override
     protected OpptjeningsperiodeForSaksbehandling mapOppgittArbeidsperiode(OppgittArbeidsforhold oppgittArbeidsforhold, OpptjeningAktivitetType type) {
-        final OpptjeningsperiodeForSaksbehandlingFRISINN.Builder builder = OpptjeningsperiodeForSaksbehandlingFRISINN.Builder.ny();
+        final OpptjeningsperiodeForSaksbehandlingFRISINN.Builder builder = new OpptjeningsperiodeForSaksbehandlingFRISINN.Builder();
         DatoIntervallEntitet periode = oppgittArbeidsforhold.getPeriode();
         builder.medOpptjeningAktivitetType(type)
             .medPeriode(periode);
