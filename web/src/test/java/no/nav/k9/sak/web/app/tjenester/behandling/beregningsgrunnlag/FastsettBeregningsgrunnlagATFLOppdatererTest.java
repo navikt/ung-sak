@@ -55,7 +55,8 @@ public class FastsettBeregningsgrunnlagATFLOppdatererTest {
         //Dto
         FastsettBeregningsgrunnlagATFLDto dto = new FastsettBeregningsgrunnlagATFLDto("begrunnelse", Collections.emptyList(), null);
         // Act
-        var resultat = oppdaterer.oppdater(new FastsettBeregningsgrunnlagATFLDtoer("", List.of(dto)), new AksjonspunktOppdaterParameter(behandling, ap, dto));
+        FastsettBeregningsgrunnlagATFLDtoer dtoer = new FastsettBeregningsgrunnlagATFLDtoer("", List.of(dto));
+        var resultat = oppdaterer.oppdater(dtoer, new AksjonspunktOppdaterParameter(behandling, ap, dtoer));
 
         //Assert
         assertThat(resultat.getEkstraAksjonspunktResultat()).hasSize(1);

@@ -13,6 +13,7 @@ import no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregn
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.BekreftetBeregningsgrunnlagDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDto;
@@ -31,7 +32,7 @@ class MapDtoTilRequest {
      * @param dto BekreftAksjonspunktDto
      * @return Dto for håndtering av aksjonspunk i Kalkulus
      */
-    public static HåndterBeregningDto map(BekreftetAksjonspunktDto dto) {
+    public static HåndterBeregningDto map(BekreftetBeregningsgrunnlagDto dto) {
         if (dto instanceof AvklarteAktiviteterDto) {
             AvklarteAktiviteterDto avklarteAktiviteterDto = (AvklarteAktiviteterDto) dto;
             return new AvklarAktiviteterHåndteringDto(OppdatererDtoMapper.mapAvklarteAktiviteterDto(avklarteAktiviteterDto));
