@@ -29,7 +29,7 @@ import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.vedtak.exception.TekniskException;
+import no.nav.vedtak.exception.IntegrasjonException;
 
 @BehandlingStegRef(kode = "SIMOPP")
 @BehandlingTypeRef
@@ -69,7 +69,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
         try {
             startSimulering(behandling);
             return utledAksjonspunkt(behandling);
-        } catch (TekniskException e) {
+        } catch (IntegrasjonException e) {
             opprettFortsettBehandlingTask(behandling);
             return BehandleStegResultat.settPåVent();
         }
