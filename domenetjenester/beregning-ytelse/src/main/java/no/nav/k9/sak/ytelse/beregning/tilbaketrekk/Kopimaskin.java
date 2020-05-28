@@ -44,7 +44,7 @@ public class Kopimaskin {
         }
         try {
             Class objectClass = object.getClass();
-            Constructor ctor = objectClass.getConstructor();
+            Constructor ctor = objectClass.getDeclaredConstructor();
             ctor.setAccessible(true);
             T newObject = (T) ctor.newInstance();
             for (Field field : objectClass.getDeclaredFields()) {
