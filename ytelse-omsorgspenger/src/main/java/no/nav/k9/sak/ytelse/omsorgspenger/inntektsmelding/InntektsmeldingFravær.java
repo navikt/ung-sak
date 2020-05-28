@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -15,7 +16,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class InntektsmeldingFravær {
 
-    public List<OppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(List<Inntektsmelding> inntektsmeldinger) {
+    public List<OppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Set<Inntektsmelding> inntektsmeldinger) {
         var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
         List<OppgittFraværPeriode> alle = new ArrayList<>();
         Map<Object, List<OppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
