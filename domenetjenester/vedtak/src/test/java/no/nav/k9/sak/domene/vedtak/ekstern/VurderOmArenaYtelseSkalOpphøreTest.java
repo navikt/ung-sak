@@ -15,12 +15,14 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
@@ -66,7 +68,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
 
     private Behandling behandling;
 
-    private BeregningsresultatEntitet.Builder beregningsresultatFPBuilder;
+    private BeregningsresultatEntitet.Builder beregningsresultatBuilder;
     private BeregningsresultatPeriode.Builder brPeriodebuilder;
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
@@ -77,10 +79,10 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_arena_ytelser_finnes_ikke() {
         // Arrange
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(7);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
         byggScenarioUtenYtelseIArena();
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -89,97 +91,97 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     // T2: Første forventede utbetalingsdato for ARENA-ytelse etter vedtaksdato for foreldrepenger
 
     @Test
-    public void skal_teste_startdatoFP_før_T1() {
+    public void skal_teste_startdato_før_T1() {
         // Arrange
         // Startdato før T1 , vedtaksdato etter T1
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(2);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(36);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
 
     @Test
-    public void skal_teste_startdatoFP_før_T1_FPFEIL_3526() {
+    public void skal_teste_startdato_før_T1_FEIL_3526() {
         // Arrange
         // Startdato før T1 , vedtaksdato etter T1
         LocalDate meldekortT1 = LocalDate.of(2018, 8, 12);
         LocalDate ytelseVedtakFOM = LocalDate.of(2018, 7, 29);
         LocalDate ytelseVedtakTOM = LocalDate.of(2018, 8, 26);
         LocalDate vedtaksDato = LocalDate.of(2018, 11, 14);
-        LocalDate startDatoFP = LocalDate.of(2018, 4, 6);
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = LocalDate.of(2018, 4, 6);
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
 
     @Test
-    public void skal_teste_startdatoFP_etter_T2() {
+    public void skal_teste_startdato_etter_T2() {
         // Arrange
         // Startdato før T2, vedtaksdato etter T2
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(64);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(19);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(49);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
 
     @Test
-    public void skal_teste_startdatoFP_mellom_T1_T2_vedtaksdato_mindre_enn_8_dager_etter_T1() {
+    public void skal_teste_startdato_mellom_T1_T2_vedtaksdato_mindre_enn_8_dager_etter_T1() {
         // Arrange
         // startdato mellom T1 og T2, vedtaksdato mellom T1 og (T1 + 8 dager)
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(5);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(4);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
 
     @Test
-    public void skal_teste_startdatoFP_mellom_T1_T2_vedtaksdato_mindre_enn_8_dager_før_T2() {
+    public void skal_teste_startdato_mellom_T1_T2_vedtaksdato_mindre_enn_8_dager_før_T2() {
         // Arrange
         // startdato mellom T1 og T2, vedtaksdato mellom (T2 - 8 dager) og T2
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(8);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(4);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
 
     @Test
-    public void skal_teste_Arena_ytelse_interval_før_vedtaksdato_fom_overlapper_FP() {
+    public void skal_teste_Arena_ytelse_interval_før_vedtaksdato_fom_overlapper_() {
         // Arrange
         // Arena ytelser etter startdato men før vedtaksdato .
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE + 7);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = meldekortT1.plusDays(MELDEKORTPERIODE);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(47);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
@@ -187,15 +189,15 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     @Test
     public void skal_teste_startdato_er_like_T1_og_T2_er_null() {
         // Arrange
-        // Arena ytelser før vedtaksdato og mellom startdato FP og sluttdato FP.
+        // Arena ytelser før vedtaksdato og mellom startdato og sluttdato .
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT;
         LocalDate ytelseVedtakFOM = SKJÆRINGSTIDSPUNKT.minusDays(MELDEKORTPERIODE * 2);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.minusDays(1);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(47);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT.minusDays(1);
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT.minusDays(1);
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -203,31 +205,31 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     @Test
     public void skal_teste_vedtaksdato_er_like_T2() {
         // Arrange
-        // Arena ytelser før vedtaksdato og mellom startdato FP og sluttdato FP.
+        // Arena ytelser før vedtaksdato og mellom startdato og sluttdato .
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT;
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT.plusDays(10);
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT.plusDays(10);
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
 
     @Test
-    public void skal_teste_startdato_før_T1_og_FP_overlapper_ikke_ARENA_ytelse() {
+    public void skal_teste_startdato_før_T1_og__overlapper_ikke_ARENA_ytelse() {
         // Arrange
-        // Arena ytelser før vedtaksdato og utenfor startdato FP og sluttdato FP.
+        // Arena ytelser før vedtaksdato og utenfor startdato og sluttdato .
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(7);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(54);
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT;
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
@@ -235,15 +237,15 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     @Test
     public void skal_teste_startdato_for_5910() {
         // Arrange
-        // Arena ytelser før vedtaksdato og utenfor startdato FP og sluttdato FP.
+        // Arena ytelser før vedtaksdato og utenfor startdato og sluttdato .
         LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(5); // 2019-02-03
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE); // 2019-01-21
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusMonths(6);// 2019-10-01
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(7); // 2019-02-15
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT; // 2019-02-08
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
@@ -256,10 +258,10 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         LocalDate ytelseVedtakFOM = SKJÆRINGSTIDSPUNKT.minusDays(MELDEKORTPERIODE * 2 - 1); // 2019-01-21
         LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.minusDays(1);// 2019-10-01
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(7); // 2019-02-15
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT; // 2019-02-08
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -272,10 +274,10 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE * 8); // 2019-01-21
         LocalDate ytelseVedtakTOM = meldekortT1.plusDays(MELDEKORTPERIODE * 8);// 2019-10-01
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(14); // 2019-02-15
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT; // 2019-02-08
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -288,10 +290,10 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE * 8); // 2019-01-21
         LocalDate ytelseVedtakTOM = meldekortT1.plusDays(MELDEKORTPERIODE * 8);// 2019-10-01
         LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(4); // 2019-02-15
-        LocalDate startDatoFP = SKJÆRINGSTIDSPUNKT; // 2019-02-08
-        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDatoFP, Fagsystem.ARENA);
+        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
-        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDatoFP, vedtaksDato);
+        boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
         // Assert
         assertThat(resultat).isTrue();
     }
@@ -301,33 +303,33 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     }
 
     private void byggScenario(LocalDate ytelserFom, LocalDate ytelserTom, LocalDate t1, LocalDate vedtaksdato,
-                              LocalDate startdatoFP, Fagsystem fagsystem) {
+                              LocalDate startdato, Fagsystem fagsystem) {
         byggScenario(ytelserFom, ytelserTom, t1, vedtaksdato.atStartOfDay(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(startdatoFP, startdatoFP.plusDays(90)), fagsystem);
+            DatoIntervallEntitet.fraOgMedTilOgMed(startdato, startdato.plusDays(90)), fagsystem);
     }
 
     private void byggScenario(LocalDate ytelserFom, LocalDate ytelserTom, LocalDate t1, LocalDateTime vedtakstidspunkt,
                               DatoIntervallEntitet fpIntervall, Fagsystem fagsystem) {
         scenario.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         behandling = lagre(scenario);
-        
+
         // Legg til ytelse
         InntektArbeidYtelseAggregatBuilder aggregatBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder aktørYtelseBuilder = aggregatBuilder.getAktørYtelseBuilder(AKTØR_ID);
         aktørYtelseBuilder.leggTilYtelse(byggYtelser(ytelserFom, ytelserTom, t1, fagsystem));
         aggregatBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
         iayTjeneste.lagreIayAggregat(behandling.getId(), aggregatBuilder);
-        
+
         // Legg til beregningresultat
-        beregningsresultatFPBuilder = BeregningsresultatEntitet.builder();
+        beregningsresultatBuilder = BeregningsresultatEntitet.builder();
         brPeriodebuilder = BeregningsresultatPeriode.builder();
-        BeregningsresultatEntitet beregningsresultat = byggBeregningsresultatFP(fpIntervall.getFomDato(), fpIntervall.getTomDato());
+        BeregningsresultatEntitet beregningsresultat = byggBeregningsresultat(fpIntervall.getFomDato(), fpIntervall.getTomDato());
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
-        
+
         // Legg til behandling resultat
         repository.lagre(behandling);
         repository.flushAndClear();
-        
+
         // Legg til vedtak
         final BehandlingVedtak behandlingVedtak = BehandlingVedtak.builder(behandling.getId())
             .medVedtakResultatType(VedtakResultatType.INNVILGET)
@@ -372,8 +374,8 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         return ytelseAnvistList;
     }
 
-    private BeregningsresultatEntitet byggBeregningsresultatFP(LocalDate fom, LocalDate tom) {
-        BeregningsresultatEntitet beregningsresultat = beregningsresultatFPBuilder
+    private BeregningsresultatEntitet byggBeregningsresultat(LocalDate fom, LocalDate tom) {
+        BeregningsresultatEntitet beregningsresultat = beregningsresultatBuilder
             .medRegelInput("clob1")
             .medRegelSporing("clob2")
             .build();
@@ -383,8 +385,17 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
 
     private BeregningsresultatPeriode byggBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat,
                                                                     LocalDate fom, LocalDate tom) {
-        return brPeriodebuilder
+        var brPeriode = brPeriodebuilder
             .medBeregningsresultatPeriodeFomOgTom(fom, tom)
             .build(beregningsresultat);
+        BeregningsresultatAndel.builder()
+            .medDagsats(10)
+            .medStillingsprosent(BigDecimal.valueOf(100))
+            .medUtbetalingsgrad(BigDecimal.valueOf(100))
+            .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
+            .medDagsatsFraBg(10)
+            .medBrukerErMottaker(true)
+            .build(brPeriode);
+        return brPeriode;
     }
 }

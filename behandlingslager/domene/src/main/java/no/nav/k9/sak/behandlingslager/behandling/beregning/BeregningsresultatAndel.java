@@ -90,6 +90,10 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "inntektskategori", nullable = false)
     private Inntektskategori inntektskategori;
 
+    BeregningsresultatAndel() {
+        //
+    }
+    
     public Long getId() {
         return id;
     }
