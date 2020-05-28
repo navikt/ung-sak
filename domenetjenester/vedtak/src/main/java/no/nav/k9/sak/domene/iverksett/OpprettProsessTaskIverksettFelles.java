@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -86,8 +87,11 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
     }
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
+
         // varsle Arena for andre ytelser enn FRISINN
-        return !(FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType()));
+        // FIXME K9: varsler heller ikke Arena dersom Omsorgspenger (ennå sålenge) - til VARIANT FILTERT åpnes.
+        var skipYtelser = Set.of(FagsakYtelseType.FRISINN, FagsakYtelseType.OMSORGSPENGER);
+        return !(skipYtelser.contains(behandling.getFagsakYtelseType()));
     }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {

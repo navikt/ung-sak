@@ -123,7 +123,7 @@ public class TpsTjenesteTest {
         public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
             if (aktørId == AKTØR_ID_SOM_TRIGGER_EXCEPTION) {
                 throw new TpsException(FeilFactory.create(TpsFeilmeldinger.class)
-                    .tpsUtilgjengeligSikkerhetsbegrensning(new HentPersonSikkerhetsbegrensning("String", null)));
+                    .tpsUtilgjengeligSikkerhetsbegrensning(null, new HentPersonSikkerhetsbegrensning("String", null)));
             }
             return Optional.ofNullable(FNR_VED_AKTØR_ID.get(aktørId));
         }
