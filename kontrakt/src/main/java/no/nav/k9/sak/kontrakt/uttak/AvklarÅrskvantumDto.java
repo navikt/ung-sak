@@ -23,7 +23,7 @@ public class AvklarÅrskvantumDto extends BekreftetAksjonspunktDto {
     private Boolean fortsettBehandling;
 
     @JsonCreator
-    public AvklarÅrskvantumDto(@JsonProperty(value = "begrunnelse", required = true) String begrunnelse, @JsonProperty(value = "fortsettBehandling", required = true) @NotNull Boolean fortsettBehandling) {
+    public AvklarÅrskvantumDto(@JsonProperty(value = "begrunnelse", required = true) @NotNull String begrunnelse, @JsonProperty(value = "fortsettBehandling", required = true) @NotNull Boolean fortsettBehandling) {
         super(begrunnelse);
         this.fortsettBehandling = fortsettBehandling;
     }
