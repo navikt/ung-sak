@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
@@ -31,7 +33,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
-    private OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste;
+    private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
+
 
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
@@ -43,8 +46,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     }
 
     @Inject
-    public OmsorgspengerOpptjeningForBeregningTjeneste(OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste) {
-        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+    public OmsorgspengerOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
+        this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
     }
 
 
@@ -58,6 +61,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                               InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                                               LocalDate stp) {
+        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
 
         Long behandlingId = behandlingReferanse.getId();
 
@@ -112,5 +117,4 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
             .orElse(null);
         return OpptjeningAktiviteter.nyPeriode(ops.getOpptjeningAktivitetType(), periode, orgnummer, aktørId, arbeidsforholdId);
     }
-
 }

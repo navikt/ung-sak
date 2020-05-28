@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
@@ -31,7 +33,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
-    private OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste;
+    private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
 
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
@@ -43,8 +45,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     }
 
     @Inject
-    public PsbOpptjeningForBeregningTjeneste(OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste) {
-        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+    public PsbOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
+        this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
     }
 
 
@@ -56,8 +58,10 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
-                                                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                                      LocalDate stp) {
+                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                              LocalDate stp) {
+        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
 
         Long behandlingId = behandlingReferanse.getId();
 
