@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.tilbaketrekk;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -43,7 +44,9 @@ public class Kopimaskin {
         }
         try {
             Class objectClass = object.getClass();
-            T newObject = (T) objectClass.getConstructor().newInstance();
+            Constructor ctor = objectClass.getDeclaredConstructor();
+            ctor.setAccessible(true);
+            T newObject = (T) ctor.newInstance();
             for (Field field : objectClass.getDeclaredFields()) {
                 if (COMMON_FIELD_NAMES.contains(field.getName()) || field.getAnnotation(JsonIgnore.class) != null) {
                     continue;

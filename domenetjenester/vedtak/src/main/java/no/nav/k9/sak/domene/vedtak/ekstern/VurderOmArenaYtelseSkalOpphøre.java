@@ -66,10 +66,10 @@ public class VurderOmArenaYtelseSkalOpphøre {
             return;
         }
         LocalDate vedtaksDato = vedtak.getVedtaksdato();
-        LocalDate startdatoFP = finnFørsteAnvistDato(behandlingId).orElse(skjæringstidspunkt);
+        LocalDate startdatoYtelsen = finnFørsteAnvistDato(behandlingId).orElse(skjæringstidspunkt);
 
-        if (vurderArenaYtelserOpphøres(behandlingId, aktørId, startdatoFP, vedtaksDato)) {
-            String oppgaveId = oppgaveTjeneste.opprettOppgaveStopUtbetalingAvARENAYtelse(behandlingId, startdatoFP);
+        if (vurderArenaYtelserOpphøres(behandlingId, aktørId, startdatoYtelsen, vedtaksDato)) {
+            String oppgaveId = oppgaveTjeneste.opprettOppgaveStopUtbetalingAvARENAYtelse(behandlingId, startdatoYtelsen);
             log.info("Oppgave opprettet i GOSYS slik at NØS kan behandle saken videre. Oppgavenummer: {}", oppgaveId);
         }
     }
@@ -79,9 +79,9 @@ public class VurderOmArenaYtelseSkalOpphøre {
      * og utbetalt ytelse i ARENA. FPSAK skal benytte lagrede registerdata om meldekortperioder for å vurdere om
      * startdatoen for foreldrepenger overlapper med ytelse i ARENA.
      *
-     * @param behandling         behandling til saken i FP
+     * @param behandling behandling til saken i FP
      * @param førsteAnvistDato første dato for utbetaling
-     * @param vedtaksDato        vedtaksdato
+     * @param vedtaksDato vedtaksdato
      * @return true hvis det finnes en overlappende ytelse i ARENA, ellers false
      */
     boolean vurderArenaYtelserOpphøres(Long behandlingId, AktørId aktørId, LocalDate førsteAnvistDato, LocalDate vedtaksDato) {
@@ -97,18 +97,32 @@ public class VurderOmArenaYtelseSkalOpphøre {
         if (sisteArenaAnvistDatoFørVedtaksdato == null) {
             return false;
         }
-        Optional<LocalDate> nesteArenaAnvistDatoEtterVedtaksdato = finnNesteArenaAnvistDatoEtterVedtaksdato(arenaYtelser, vedtaksDato, sisteArenaAnvistDatoFørVedtaksdato);
         if (førsteAnvistDato.isBefore(sisteArenaAnvistDatoFørVedtaksdato)) {
             return true;
         }
-        return (nesteArenaAnvistDatoEtterVedtaksdato.isPresent() &&
-            DatoIntervallEntitet.fraOgMedTilOgMed(sisteArenaAnvistDatoFørVedtaksdato, nesteArenaAnvistDatoEtterVedtaksdato.get()).inkluderer(førsteAnvistDato) &&
-            vedtaksDato.isAfter(nesteArenaAnvistDatoEtterVedtaksdato.get().minusDays(HALV_MELDEKORT_PERIODE)));
+
+        if (utbetalesDetTilBrukerDirekte(behandlingId)) {
+            // sjekk frem i tid også dersom bruker er mottaker (mot meldekort)
+            Optional<LocalDate> nesteArenaAnvistDatoEtterVedtaksdato = finnNesteArenaAnvistDatoEtterVedtaksdato(arenaYtelser, vedtaksDato, sisteArenaAnvistDatoFørVedtaksdato);
+            return (nesteArenaAnvistDatoEtterVedtaksdato.isPresent() &&
+                DatoIntervallEntitet.fraOgMedTilOgMed(sisteArenaAnvistDatoFørVedtaksdato, nesteArenaAnvistDatoEtterVedtaksdato.get()).inkluderer(førsteAnvistDato) &&
+                vedtaksDato.isAfter(nesteArenaAnvistDatoEtterVedtaksdato.get().minusDays(HALV_MELDEKORT_PERIODE)));
+        } else {
+            // sjekker ikke fremtidig datoer når det kun er for arbeidsgivers refusjon
+            return false;
+        }
+    }
+
+    private boolean utbetalesDetTilBrukerDirekte(Long behandlingId) {
+        return beregningsresultatRepository.hentUtbetBeregningsresultat(behandlingId)
+            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
+            .flatMap(brp -> brp.getBeregningsresultatAndelList().stream())
+            .anyMatch(ba -> ba.erBrukerMottaker() && ba.getDagsats() > 0);
     }
 
     private Collection<Ytelse> hentArenaYtelser(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunkt) {
         var ytelseFilter = iayTjeneste.finnGrunnlag(behandlingId)
-                .map(it -> new YtelseFilter(it.getAktørYtelseFraRegister(aktørId)).før(skjæringstidspunkt)).orElse(YtelseFilter.EMPTY);
+            .map(it -> new YtelseFilter(it.getAktørYtelseFraRegister(aktørId)).før(skjæringstidspunkt)).orElse(YtelseFilter.EMPTY);
 
         return ytelseFilter
             .filter(y -> Fagsystem.ARENA.equals(y.getKilde()))

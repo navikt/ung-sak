@@ -23,11 +23,11 @@ public interface TpsFeilmeldinger extends DeklarerteFeil {
     @TekniskFeil(feilkode = "FP-164686", feilmelding = "Person er ikke Bruker, kan ikke hente ut brukerinformasjon", logLevel = LogLevel.WARN)
     Feil ukjentBrukerType();
 
-    @ManglerTilgangFeil(feilkode = "FP-432142", feilmelding = "TPS ikke tilgjengelig (sikkerhetsbegrensning)", logLevel = ERROR)
-    Feil tpsUtilgjengeligSikkerhetsbegrensning(HentPersonSikkerhetsbegrensning cause);
+    @ManglerTilgangFeil(feilkode = "FP-432142", feilmelding = "TPS ikke tilgjengelig (sikkerhetsbegrensning): %s", logLevel = ERROR)
+    Feil tpsUtilgjengeligSikkerhetsbegrensning(String faultInfoFraTps, HentPersonSikkerhetsbegrensning cause);
 
-    @ManglerTilgangFeil(feilkode = "FP-432144", feilmelding = "TPS ikke tilgjengelig (sikkerhetsbegrensning)", logLevel = ERROR)
-    Feil tpsUtilgjengeligSikkerhetsbegrensning(HentPersonhistorikkSikkerhetsbegrensning cause);
+    @ManglerTilgangFeil(feilkode = "FP-432144", feilmelding = "TPS ikke tilgjengelig (sikkerhetsbegrensning): %s", logLevel = ERROR)
+    Feil tpsUtilgjengeligSikkerhetsbegrensning(String faultInfoFraTps, HentPersonhistorikkSikkerhetsbegrensning cause);
 
     @TekniskFeil(feilkode = "FP-715013", feilmelding = "Fant ikke person i TPS", logLevel = WARN)
     Feil fantIkkePerson(HentPersonPersonIkkeFunnet cause);
@@ -38,8 +38,8 @@ public interface TpsFeilmeldinger extends DeklarerteFeil {
     @TekniskFeil(feilkode = "FP-181235", feilmelding = "Fant ikke aktørId i TPS", logLevel = WARN)
     Feil fantIkkePersonForAktørId();
 
-    @ManglerTilgangFeil(feilkode = "FP-115180", feilmelding = "TPS ikke tilgjengelig (sikkerhetsbegrensning)", logLevel = ERROR)
-    Feil tpsUtilgjengeligGeografiskTilknytningSikkerhetsbegrensing(HentGeografiskTilknytningSikkerhetsbegrensing cause);
+    @ManglerTilgangFeil(feilkode = "FP-115180", feilmelding = "TPS ikke tilgjengelig (sikkerhetsbegrensning): %s", logLevel = ERROR)
+    Feil tpsUtilgjengeligGeografiskTilknytningSikkerhetsbegrensing(String faultInfoFraTps, HentGeografiskTilknytningSikkerhetsbegrensing cause);
 
     @TekniskFeil(feilkode = "FP-349049", feilmelding = "Fant ikke geografisk informasjon for person", logLevel = WARN)
     Feil geografiskTilknytningIkkeFunnet(HentGeografiskTilknytningPersonIkkeFunnet cause);

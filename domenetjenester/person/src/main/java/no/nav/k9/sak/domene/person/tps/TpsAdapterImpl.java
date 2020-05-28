@@ -20,6 +20,7 @@ import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.feil.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Familierelasjon;
@@ -76,7 +77,7 @@ public class TpsAdapterImpl implements TpsAdapter {
     }
 
     private Personinfo håndterPersoninfoRespons(AktørId aktørId, HentPersonRequest request)
-        throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
+            throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         HentPersonResponse response = personConsumer.hentPersonResponse(request);
         Person person = response.getPerson();
         if (!(person instanceof Bruker)) {
@@ -86,7 +87,7 @@ public class TpsAdapterImpl implements TpsAdapter {
     }
 
     private Personhistorikkinfo håndterPersonhistorikkRespons(HentPersonhistorikkRequest request, String aktørId)
-        throws HentPersonhistorikkSikkerhetsbegrensning, HentPersonhistorikkPersonIkkeFunnet {
+            throws HentPersonhistorikkSikkerhetsbegrensning, HentPersonhistorikkPersonIkkeFunnet {
         HentPersonhistorikkResponse response = personConsumer.hentPersonhistorikkResponse(request);
         return tpsOversetter.tilPersonhistorikkInfo(aktørId, response);
     }
@@ -103,7 +104,7 @@ public class TpsAdapterImpl implements TpsAdapter {
         } catch (HentPersonPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(e).toException();
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
         }
     }
 
@@ -125,7 +126,7 @@ public class TpsAdapterImpl implements TpsAdapter {
         } catch (HentPersonhistorikkPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePersonhistorikkForAktørId(e).toException();
         } catch (HentPersonhistorikkSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(e).toException();
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
         }
     }
 
@@ -141,7 +142,7 @@ public class TpsAdapterImpl implements TpsAdapter {
         } catch (HentPersonPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(e).toException();
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
         }
     }
 
@@ -153,10 +154,28 @@ public class TpsAdapterImpl implements TpsAdapter {
             HentGeografiskTilknytningResponse response = personConsumer.hentGeografiskTilknytning(request);
             return tpsOversetter.tilGeografiskTilknytning(response.getGeografiskTilknytning(), response.getDiskresjonskode());
         } catch (HentGeografiskTilknytningSikkerhetsbegrensing e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligGeografiskTilknytningSikkerhetsbegrensing(e).toException();
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligGeografiskTilknytningSikkerhetsbegrensing(formatter(e.getFaultInfo()), e).toException();
         } catch (HentGeografiskTilknytningPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.geografiskTilknytningIkkeFunnet(e).toException();
         }
+    }
+
+    private String formatter(Sikkerhetsbegrensning faultInfo) {
+        if (faultInfo == null) {
+            return null;
+        }
+        var begr = faultInfo.getSikkerhetsbegrensning();
+        String sikkerhetsbegrensninger = begr == null ? null : begr.stream().map(b -> b.getValue()).collect(Collectors.joining(", "));
+        String feilaarsak = faultInfo.getFeilaarsak();
+        String feilkilde = faultInfo.getFeilkilde();
+        String feilmelding = faultInfo.getFeilmelding();
+
+        return faultInfo.getClass().getSimpleName() + "<"
+            + (feilaarsak == null ? "" : "feilaarsak=" + feilaarsak)
+            + (feilkilde == null ? "" : ", feilkilde=" + feilkilde)
+            + (feilmelding == null ? "" : ", feilmelding=" + feilmelding)
+            + (sikkerhetsbegrensninger == null ? "" : ", sikkerhetsbegrensninger=[" + sikkerhetsbegrensninger + "]")
+            + ">";
     }
 
     @Override
@@ -171,10 +190,9 @@ public class TpsAdapterImpl implements TpsAdapter {
         } catch (HentPersonPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(e).toException();
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
         }
     }
-
 
     @Override
     public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
@@ -196,7 +214,7 @@ public class TpsAdapterImpl implements TpsAdapter {
         } catch (HentPersonPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(e).toException();
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
         }
     }
 
