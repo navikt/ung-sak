@@ -29,7 +29,7 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     /** Folketrygdloven K4 ytelser. */
     DAGPENGER("DAG", "Dagpenger"),
-    
+
     /** Ny ytelse for kompenasasjon for koronatiltak for Selvstendig næringsdrivende og Frilansere (Anmodning 10). */
     FRISINN("FRISINN", "FRIlansere og Selstendig næringsdrivendes INNtektskompensasjon"),
 
@@ -131,7 +131,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     public static FagsakYtelseType fromString(String kode) {
         return fraKode(kode);
     }
@@ -140,11 +140,12 @@ public enum FagsakYtelseType implements Kodeverdi {
         FORELDREPENGER,
         Set.of(ENSLIG_FORSØRGER, SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER,
             PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER),
-        FRISINN, Set.of(),
+        FRISINN, Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, ARBEIDSAVKLARINGSPENGER,
+            PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER),
         SVANGERSKAPSPENGER,
         Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER,
             PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER),
-        
+
         // FIXME K9 Verdiene under er høyst sannsynlig feil -- kun lagt inn for å komme videre i verdikjedetest.
         PLEIEPENGER_SYKT_BARN,
         Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, ENSLIG_FORSØRGER,
@@ -161,7 +162,7 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
         return relatertYtelseTypeSet.contains(this);
     }
-    
+
     public static final class PlainYtelseSerializer extends StdSerializer<FagsakYtelseType> {
         public PlainYtelseSerializer() {
             super(FagsakYtelseType.class);

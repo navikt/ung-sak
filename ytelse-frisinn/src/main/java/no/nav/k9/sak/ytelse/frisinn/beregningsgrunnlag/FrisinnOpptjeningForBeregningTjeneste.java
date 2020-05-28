@@ -42,8 +42,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     private final OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
-        OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
-        OpptjeningAktivitetType.ARBEIDSAVKLARING));
+        OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD));
 
     protected FrisinnOpptjeningForBeregningTjeneste() {
         // For proxy
