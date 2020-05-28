@@ -17,20 +17,20 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE)
 public class AvklarÅrskvantumDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "harNyeRammevedtakIInfotrygd", required = true)
+    @JsonProperty(value = "fortsettBehandling", required = true)
     @NotNull
-    private Boolean harNyeRammevedtakIInfotrygd;
+    private Boolean fortsettBehandling;
 
-    public AvklarÅrskvantumDto(String begrunnelse, @JsonProperty(value = "harNyeRammevedtakIInfotrygd", required = true) @NotNull Boolean harNyeRammevedtakIInfotrygd) {
+    public AvklarÅrskvantumDto(String begrunnelse, @JsonProperty(value = "fortsettBehandling", required = true) @NotNull Boolean fortsettBehandling) {
         super(begrunnelse);
-        this.harNyeRammevedtakIInfotrygd = harNyeRammevedtakIInfotrygd;
+        this.fortsettBehandling = fortsettBehandling;
     }
 
     protected AvklarÅrskvantumDto() {
         //
     }
 
-    public Boolean getHarNyeRammevedtakIInfotrygd() {
-        return harNyeRammevedtakIInfotrygd;
+    public Boolean getfortsettBehandling() {
+        return fortsettBehandling;
     }
 }

@@ -87,6 +87,11 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
+    public void bekreftUttaksplan(Long behandlingId) {
+        // TODO implementer i årskvantum
+    }
+
+    @Override
     public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
 
         var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId()).orElseThrow();

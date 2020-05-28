@@ -18,4 +18,5 @@ public interface ÅrskvantumTjeneste {
 
     void deaktiverUttakForBehandling(UUID behandlingUuid);
 
+    void bekreftUttaksplan(Long behandlingId);
 }
