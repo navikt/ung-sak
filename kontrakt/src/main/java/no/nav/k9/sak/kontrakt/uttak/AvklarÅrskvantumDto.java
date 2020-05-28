@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.uttak;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +22,8 @@ public class AvklarÅrskvantumDto extends BekreftetAksjonspunktDto {
     @NotNull
     private Boolean fortsettBehandling;
 
-    public AvklarÅrskvantumDto(String begrunnelse, @JsonProperty(value = "fortsettBehandling", required = true) @NotNull Boolean fortsettBehandling) {
+    @JsonCreator
+    public AvklarÅrskvantumDto(@JsonProperty(value = "begrunnelse", required = true) String begrunnelse, @JsonProperty(value = "fortsettBehandling", required = true) @NotNull Boolean fortsettBehandling) {
         super(begrunnelse);
         this.fortsettBehandling = fortsettBehandling;
     }
