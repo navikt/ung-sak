@@ -46,7 +46,7 @@ public class KalkulatorInputTjeneste {
 
         var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode);
 
-        var opptjeningAktiviteter = hentOpptjeningAktiviteter(referanse, inntektArbeidYtelseGrunnlag);
+        var opptjeningAktiviteter = hentOpptjeningAktiviteter(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnbeløpsatser, grunnlagDto, opptjeningAktiviteterDto, stp);
@@ -60,10 +60,10 @@ public class KalkulatorInputTjeneste {
         return kalkulatorInputDto;
     }
 
-    private OpptjeningAktiviteter hentOpptjeningAktiviteter(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
+    private OpptjeningAktiviteter hentOpptjeningAktiviteter(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         var ytelseType = ref.getFagsakYtelseType();
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
-        return tjeneste.hentEksaktOpptjeningForBeregning(ref, inntektArbeidYtelseGrunnlag);
+        return tjeneste.hentEksaktOpptjeningForBeregning(ref, inntektArbeidYtelseGrunnlag, vilkårsperiode);
     }
 }
