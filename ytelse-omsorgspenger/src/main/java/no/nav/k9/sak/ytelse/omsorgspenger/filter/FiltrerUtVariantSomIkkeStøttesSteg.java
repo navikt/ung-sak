@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.filter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -96,7 +97,7 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
                             .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), yt.getYtelseType()))
                             .sorted()
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toCollection(LinkedHashSet::new));
 
                         var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter);
                         var intersection = anvistTimeline.intersection(vilkårTimeline);
