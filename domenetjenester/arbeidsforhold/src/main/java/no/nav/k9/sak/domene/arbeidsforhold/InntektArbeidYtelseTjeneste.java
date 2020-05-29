@@ -2,13 +2,13 @@ package no.nav.k9.sak.domene.arbeidsforhold;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -128,6 +128,8 @@ public interface InntektArbeidYtelseTjeneste {
     void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset);
 
     List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
+
+    List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
 
     List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer);
 

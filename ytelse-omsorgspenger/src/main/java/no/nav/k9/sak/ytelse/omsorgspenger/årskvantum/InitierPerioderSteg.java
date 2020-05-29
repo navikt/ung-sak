@@ -4,27 +4,33 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.InntektsmeldingFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-/** Samle sammen fakta for fravær. */
+/**
+ * Samle sammen fakta for fravær.
+ */
 @ApplicationScoped
 @BehandlingStegRef(kode = "INIT_PERIODER")
 @BehandlingTypeRef
@@ -33,8 +39,9 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
+    private BehandlingRepository behandlingRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     protected InitierPerioderSteg() {
         // for proxy
@@ -42,33 +49,37 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     @Inject
     public InitierPerioderSteg(OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                       InntektArbeidYtelseTjeneste iayTjeneste,
-                                       InntektsmeldingTjeneste inntektsmeldingTjeneste,
-                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                               BehandlingRepository behandlingRepository,
+                               MottatteDokumentRepository mottatteDokumentRepository,
+                               InntektArbeidYtelseTjeneste iayTjeneste,
+                               InntektsmeldingTjeneste inntektsmeldingTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        AktørId aktørId = kontekst.getAktørId();
 
-        var samletFravær = samleSammenOppgittFravær(behandlingId, aktørId);
+        var samletFravær = samleSammenOppgittFravær(behandlingId);
         grunnlagRepository.lagreOgFlushOppgittFravær(behandlingId, samletFravær);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private OppgittFravær samleSammenOppgittFravær(Long behandlingId, AktørId aktørId) {
+    private OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
         Set<OppgittFraværPeriode> fravær = new LinkedHashSet<>();
-        var oppgittOpt = annetOppgittFravær(behandlingId);
-        if (oppgittOpt.isPresent()) {
-            fravær.addAll(oppgittOpt.get().getPerioder());
+
+        var fraværFraInntektsmeldinger = fraværFraInntektsmeldinger(behandlingId);
+
+        if (fraværFraInntektsmeldinger.isEmpty()) {
+            // Dette bør da være "revurderinger" hvor vi behandler samme periode som forrige behandling på nytt
+            var oppgittOpt = annetOppgittFravær(behandlingId);
+            fravær.addAll(oppgittOpt.orElseThrow().getPerioder());
         }
-        var fraværFraInntektsmeldinger = fraværFraInntektsmeldinger(behandlingId, aktørId);
         fravær.addAll(fraværFraInntektsmeldinger);
         return new OppgittFravær(fravær);
     }
@@ -77,14 +88,29 @@ public class InitierPerioderSteg implements BehandlingSteg {
         return grunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
     }
 
-    private List<OppgittFraværPeriode> fraværFraInntektsmeldinger(Long behandlingId, AktørId aktørId) {
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandlingId);
-        var inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(aktørId, skjæringstidspunkt, iayGrunnlag);
+    private List<OppgittFraværPeriode> fraværFraInntektsmeldinger(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .filter(it -> it.getBehandlingId().equals(behandlingId))
+            .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+
+        var fagsak = behandling.getFagsak();
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
+        if(!inntektsmeldingerJournalposter.isEmpty() && sakInntektsmeldinger.isEmpty()) {
+            // Abakus setter ikke ytelsetype på "koblingen" før registerinnhenting så vil bare være feil før første registerinnhenting..
+            sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), FagsakYtelseType.UDEFINERT);
+        }
+        var inntektsmeldinger = sakInntektsmeldinger.stream()
+            .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
+            .collect(Collectors.toSet());
+
         return trekkUtFravær(inntektsmeldinger);
     }
 
-    private List<OppgittFraværPeriode> trekkUtFravær(List<Inntektsmelding> inntektsmeldinger) {
+    private List<OppgittFraværPeriode> trekkUtFravær(Set<Inntektsmelding> inntektsmeldinger) {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
     }
 
