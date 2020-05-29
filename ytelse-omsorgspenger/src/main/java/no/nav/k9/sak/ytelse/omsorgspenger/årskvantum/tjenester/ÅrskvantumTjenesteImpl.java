@@ -30,6 +30,7 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -58,6 +59,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
     private final MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
+    private BehandlingRepository behandlingRepository;
     private ÅrskvantumKlient årskvantumKlient;
     private TpsTjeneste tpsTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -68,12 +70,14 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Inject
-    public ÅrskvantumTjenesteImpl(OmsorgspengerGrunnlagRepository grunnlagRepository,
+    public ÅrskvantumTjenesteImpl(BehandlingRepository behandlingRepository,
+                                  OmsorgspengerGrunnlagRepository grunnlagRepository,
                                   VilkårResultatRepository vilkårResultatRepository,
                                   InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                   ÅrskvantumRestKlient årskvantumRestKlient,
                                   TpsTjeneste tpsTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
+        this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.årskvantumKlient = årskvantumRestKlient;
@@ -88,7 +92,13 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
     @Override
     public void bekreftUttaksplan(Long behandlingId) {
-        // TODO implementer i årskvantum
+        årskvantumKlient.settUttaksplanTilManueltBekreftet(behandlingRepository.hentBehandling(behandlingId).getUuid());
+
+    }
+
+    @Override
+    public void slettUttaksplan(Long behandlingId) {
+        årskvantumKlient.slettUttaksplan(behandlingRepository.hentBehandling(behandlingId).getUuid());
     }
 
     @Override

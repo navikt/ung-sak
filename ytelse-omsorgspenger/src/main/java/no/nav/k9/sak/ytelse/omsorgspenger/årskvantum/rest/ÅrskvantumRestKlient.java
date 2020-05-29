@@ -73,6 +73,26 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public void settUttaksplanTilManueltBekreftet(UUID behandlingUUID) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/bekreft?behandlingUUID=" + behandlingUUID.toString());
+            restKlient.patch(endpoint, Object.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilsettUttaksplanTilManueltBekreftet(e).toException();
+        }
+    }
+
+    @Override
+    public void slettUttaksplan(UUID behandlingUUID) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/slett?behandlingUUID=" + behandlingUUID.toString());
+            restKlient.patch(endpoint, Object.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilslettUttaksplan(e).toException();
+        }
+    }
+
+    @Override
     public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/forbruktedager?behandlingUUID=" + behandlingUUID.toString());
@@ -128,6 +148,12 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000092", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke beregne uttaksplan for årskvantum: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilÅrskvantum(Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000093", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke settUttaksplanTilManueltBekreftet: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilsettUttaksplanTilManueltBekreftet(Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000094", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke slettUttaksplan: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilslettUttaksplan(Throwable t);
 
     }
 
