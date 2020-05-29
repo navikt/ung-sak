@@ -24,6 +24,7 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -55,8 +56,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
-                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                              LocalDate stp) {
+                                                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                                      LocalDate stp) {
 
         Long behandlingId = behandlingReferanse.getId();
 
@@ -80,8 +81,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     }
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      LocalDate stp) {
+                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                       LocalDate stp) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp).stream()
             .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
         if (opptjeningsPerioder.isEmpty()) {
@@ -92,8 +93,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     @Override
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, ref.getUtledetSkjæringstidspunkt());
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
 
         if (opptjeningAktiviteter.isEmpty()) {
             throw new IllegalStateException("Forventer opptjening!!!");
