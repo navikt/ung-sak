@@ -26,6 +26,16 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public void settUttaksplanTilManueltBekreftet(UUID behandlingUUID) {
+
+    }
+
+    @Override
+    public void slettUttaksplan(UUID behandlingUUID) {
+
+    }
+
+    @Override
     public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID) {
         return null;
     }
