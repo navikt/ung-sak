@@ -69,12 +69,12 @@ public class Kompletthetskontroller {
             spolKomplettBehandlingTilStartpunkt(behandling, grunnlagSnapshot);
             Long behandlingId = behandling.getId();
             if (kompletthetModell.erKompletthetssjekkPassert(behandlingId)) {
-                behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling);
+                behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
             } else {
                 behandlingProsesseringTjeneste.opprettTasksForFortsettBehandling(behandling);
             }
         }
-        
+
         return kompletthetResultat;
     }
 
@@ -119,7 +119,7 @@ public class Kompletthetskontroller {
     }
 
     public void vurderNyForretningshendelse(Behandling behandling) {
-        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling);
+        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
     }
 
     void spolKomplettBehandlingTilStartpunkt(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {

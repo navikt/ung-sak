@@ -105,7 +105,7 @@ public class KompletthetskontrollerTest {
 
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 
-        verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling));
+        verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling));
+        verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
 
         // Arrange 2
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
@@ -157,7 +157,7 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller.vurderNyForretningshendelse(behandling);
 
         verify(behandlingProsesseringTjeneste).finnGrunnlagsEndring(behandling, endringsresultatSnapshot);
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(behandling);
+        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(behandling, eq(false));
     }
 
     @Test

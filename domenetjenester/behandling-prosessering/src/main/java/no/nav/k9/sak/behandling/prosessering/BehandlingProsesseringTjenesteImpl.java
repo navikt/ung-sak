@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+import no.nav.vedtak.log.mdc.MDCOperations;
 
 /**
  * Grensesnitt for å kjøre behandlingsprosess, herunder gjenopptak, registeroppdatering, koordinering av sakskompleks mv.
@@ -158,7 +159,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
-    public String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling) {
+    public String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
         ProsessTaskData gjenopptaBehandlingTask = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
@@ -179,7 +180,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
-        gruppe.setCallIdFraEksisterende();
+        if (nyCallId) {
+            gruppe.setCallId(MDCOperations.generateCallId());
+        } else {
+            gruppe.setCallIdFraEksisterende();
+        }
         return prosessTaskRepository.lagre(gruppe);
     }
 
