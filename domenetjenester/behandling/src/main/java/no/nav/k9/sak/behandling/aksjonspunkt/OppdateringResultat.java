@@ -17,6 +17,7 @@ public class OppdateringResultat {
     private OverhoppKontroll overhoppKontroll;
     private BehandlingResultatType henleggelseResultat;
     private String henleggingsbegrunnelse;
+    private boolean skalRekjøreSteg = false;
     private boolean beholdAksjonspunktÅpent = false;
     private boolean avbrytAksjonspunkt = false;
     private boolean totrinnsKontroll = false;
@@ -114,6 +115,18 @@ public class OppdateringResultat {
 
     public List<Tuple<AksjonspunktDefinisjon, AksjonspunktStatus>> getEkstraAksjonspunktResultat() {
         return ekstraAksjonspunktResultat;
+    }
+
+    public boolean getSkalRekjøreSteg() {
+        return skalRekjøreSteg;
+    }
+
+    public void skalRekjøreSteg() {
+        this.skalRekjøreSteg = true;
+    }
+
+    public void setSteg(BehandlingStegType håndtertISteg) {
+        this.nesteSteg = håndtertISteg;
     }
 
     public static class Builder {

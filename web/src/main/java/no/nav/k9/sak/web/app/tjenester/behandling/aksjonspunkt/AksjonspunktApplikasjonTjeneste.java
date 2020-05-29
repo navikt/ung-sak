@@ -128,7 +128,7 @@ public class AksjonspunktApplikasjonTjeneste {
             // Skal ikke fortsette behandling dersom behandling ble satt på vent
             return;
         }
-        fortsettBehandlingen(behandling, overhoppResultat);// skal ikke reinnhente her, avgjøres i steg?
+        fortsettBehandlingen(behandling, kontekst, overhoppResultat);// skal ikke reinnhente her, avgjøres i steg?
     }
 
     protected void setAnsvarligSaksbehandler(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Behandling behandling) {
@@ -150,7 +150,7 @@ public class AksjonspunktApplikasjonTjeneste {
         // Her sikres at behandlingskontroll hopper tilbake til aksjonspunktenes tidligste "løsesteg" dersom aktivt
         // behandlingssteg er lenger fremme i sekvensen
         List<String> bekreftedeApKoder = aksjonspunktDtoer.stream()
-            .map(dto -> dto.getKode())
+            .map(AksjonspunktKode::getKode)
             .collect(toList());
 
         behandlingskontrollTjeneste.behandlingTilbakeføringTilTidligsteAksjonspunkt(kontekst, bekreftedeApKoder);
@@ -192,13 +192,18 @@ public class AksjonspunktApplikasjonTjeneste {
             // Skal ikke fortsette behandling dersom behandling ble satt på vent
             return;
         }
-        fortsettBehandlingen(behandling, overhoppForOverstyring);// skal ikke reinnhente her, avgjøres i steg?
+        fortsettBehandlingen(behandling, kontekst, overhoppForOverstyring);// skal ikke reinnhente her, avgjøres i steg?
     }
 
-    private void fortsettBehandlingen(Behandling behandling, OverhoppResultat overhoppResultat) {
+    private void fortsettBehandlingen(Behandling behandling, BehandlingskontrollKontekst kontekst, OverhoppResultat overhoppResultat) {
         if (overhoppResultat.skalOppdatereGrunnlag()) {
             behandlingsprosessApplikasjonTjeneste.asynkRegisteroppdateringKjørProsess(behandling);
         } else {
+            if (overhoppResultat.skalRekjøreSteg()) {
+                var behandlingSteg = overhoppResultat.stegSomSkalRekjøres();
+                // Denne bør tilbakeføre til inngangen av steget
+                behandlingskontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, behandlingSteg);
+            }
             behandlingsprosessApplikasjonTjeneste.asynkKjørProsess(behandling);
         }
     }
@@ -361,6 +366,12 @@ public class AksjonspunktApplikasjonTjeneste {
         AksjonspunktOppdaterer<BekreftetAksjonspunktDto> oppdaterer = finnAksjonspunktOppdaterer(dto.getClass(), dto.getKode());
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, Optional.of(aksjonspunkt), skjæringstidspunkter, vilkårBuilder, dto);
         OppdateringResultat delresultat = oppdaterer.oppdater(dto, param);
+
+        if (aksjonspunkt.tilbakehoppVedGjenopptakelse()) {
+            delresultat.skalRekjøreSteg();
+            delresultat.setSteg(aksjonspunkt.getAksjonspunktDefinisjon().getBehandlingSteg());
+        }
+
         overhoppResultat.leggTil(delresultat);
 
         settToTrinnHvisRevurderingOgEndring(behandling, aksjonspunkt, dto.getBegrunnelse(), snapshotFør, delresultat.kreverTotrinnsKontroll());
