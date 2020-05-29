@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
 import no.nav.k9.aarskvantum.kontrakter.Hjemmel;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
@@ -50,7 +51,7 @@ public class MapFraÅrskvantumResultatTest {
 
 
     private Uttaksplan lagUttaksplan() {
-        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false, true);
+        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false, true, Bekreftet.SYSTEMBEKREFTET);
 
         return uttaksplanOmsorgspenger;
     }
