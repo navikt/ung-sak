@@ -1,7 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
@@ -13,18 +14,23 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 
 class MapSøknadUttak {
-    private FrisinnSøknad søknad;
+    private final FrisinnSøknad søknad;
 
     MapSøknadUttak(FrisinnSøknad søknad) {
         this.søknad = søknad;
     }
 
-    UttakGrunnlag lagGrunnlag(Long behandlingId) {
+    UttakGrunnlag lagGrunnlag(Long behandlingId, Set<UttakAktivitetPeriode> perioder) {
         var søknadsperioder = mapSøknadsperiode(søknad);
         Inntekter inntekter = søknad.getInntekter();
         var frilanser = inntekter.getFrilanser();
         var selvstendig = inntekter.getSelvstendig();
-        List<UttakAktivitetPeriode> uttakPerioder = new ArrayList<>();
+
+        List<UttakAktivitetPeriode> uttakPerioder = perioder
+                .stream()
+                .map(uttakAktivitetPeriode -> new UttakAktivitetPeriode(uttakAktivitetPeriode.getAktivitetType(), uttakAktivitetPeriode.getPeriode().getFomDato(), uttakAktivitetPeriode.getPeriode().getTomDato()))
+                .collect(Collectors.toList());
+
         if (frilanser != null && frilanser.getSøkerKompensasjon()) {
             var periode = frilanser.getMaksSøknadsperiode();
             uttakPerioder.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, periode.getFraOgMed(), periode.getTilOgMed()));
