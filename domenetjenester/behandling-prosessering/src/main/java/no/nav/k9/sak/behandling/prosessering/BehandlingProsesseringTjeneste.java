@@ -28,7 +28,7 @@ public interface BehandlingProsesseringTjeneste {
 
     // AV/PÅ Vent
     void taBehandlingAvVent(Behandling behandling);
-    
+
     void settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon apDef, LocalDateTime fristTid, Venteårsak venteårsak, String venteårsakVariant);
 
     // For snapshot av grunnlag før man gjør andre endringer enn registerinnhenting
@@ -49,7 +49,7 @@ public interface BehandlingProsesseringTjeneste {
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     // NB oppdaterer registerdata Lagrer tasks. Returnerer gruppe-handle
-    String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling);
+    String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
 
     String opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 }
