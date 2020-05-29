@@ -1,0 +1,1 @@
+update prosess_task_type set cron_expression ='0 30 7,12,17 * * *' where kode='batch.retryFeilendeTasks';
