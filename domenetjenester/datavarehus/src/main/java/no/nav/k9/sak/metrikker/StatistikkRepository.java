@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,7 +116,7 @@ public class StatistikkRepository {
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "fagsak_status", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toCollection(ArrayList::new));
+            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -164,7 +165,7 @@ public class StatistikkRepository {
                 metricField1, t.get(3, BigInteger.class),
                 metricField2, t.get(4, BigInteger.class),
                 metricField3, t.get(5, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -205,7 +206,7 @@ public class StatistikkRepository {
                 "behandling_status", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden behandling endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -252,7 +253,7 @@ public class StatistikkRepository {
                 "avslag_kode", t.get(4, String.class)),
             Map.of(
                 metricField, t.get(5, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toList());
 
         return values;
 
@@ -302,7 +303,7 @@ public class StatistikkRepository {
                     "behandlingId", behandlingId),
                 tidsstempel);
         })
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toList());
 
         return values;
 
@@ -333,7 +334,7 @@ public class StatistikkRepository {
                 "aksjonspunkt_status", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -422,7 +423,7 @@ public class StatistikkRepository {
                 "vent_aarsak", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -458,7 +459,7 @@ public class StatistikkRepository {
                 "type", t.get(1, String.class)),
             Map.of(
                 "totalt_antall", t.get(2, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -504,7 +505,7 @@ public class StatistikkRepository {
                 "status", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(ArrayList::new));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
