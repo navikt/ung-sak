@@ -62,6 +62,12 @@ public class OppgittOpptjeningBuilder {
         return this;
     }
 
+    public OppgittFrilansBuilder getFrilansBuilder() {
+        return this.kladd.getFrilans().isPresent() ?
+                OppgittFrilansBuilder.fraEksisterende(kladd.getFrilans().get()) :
+                OppgittFrilansBuilder.ny();
+    }
+
 
     public OppgittOpptjening build() {
         return kladd;
@@ -170,7 +176,7 @@ public class OppgittOpptjeningBuilder {
         }
 
         public OppgittFrilansBuilder medFrilansOppdrag(List<OppgittFrilansoppdrag> frilansoppdrag) {
-            this.kladd.setFrilansoppdrag(frilansoppdrag);
+            frilansoppdrag.forEach(this::leggTilFrilansOppdrag);
             return this;
         }
 
