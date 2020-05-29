@@ -36,10 +36,11 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                               OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                               Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
                                                                               Yrkesaktivitet overstyrtAktivitet,
-                                                                              DatoIntervallEntitet opptjeningPeriode) {
+                                                                              DatoIntervallEntitet opptjeningPeriode,
+                                                                              LocalDate skjæringstidspunkt) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, registerAktivitet.getArbeidType());
         return new ArrayList<>(mapAktivitetsavtaler(behandlingReferanse, registerAktivitet, grunnlag,
-            vurderForSaksbehandling, type, overstyrtAktivitet, opptjeningPeriode));
+            vurderForSaksbehandling, type, overstyrtAktivitet, opptjeningPeriode, skjæringstidspunkt));
     }
 
     private static OpptjeningAktivitetType utledOpptjeningType(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, ArbeidType arbeidType) {
@@ -55,9 +56,9 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                                   OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                                                                   OpptjeningAktivitetType type,
                                                                                   Yrkesaktivitet overstyrtAktivitet,
-                                                                                  DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  DatoIntervallEntitet opptjeningPeriode,
+                                                                                  LocalDate skjæringstidspunkt) {
         List<OpptjeningsperiodeForSaksbehandling> perioderForAktivitetsavtaler = new ArrayList<>();
-        LocalDate skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         for (AktivitetsAvtale avtale : gjeldendeAvtaler(grunnlag, skjæringstidspunkt, registerAktivitet, overstyrtAktivitet)) {
             var builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medOpptjeningAktivitetType(type)

@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 import static no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType.NÆRING;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -54,16 +55,15 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
                                                                                   DatoIntervallEntitet opptjeningPeriode,
-                                                                                  OppgittOpptjening oppgittOpptjening) {
+                                                                                  OppgittOpptjening oppgittOpptjening, LocalDate skjæringstidspunkt) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
-        var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
         for (var yrkesaktivitet : filter.getYrkesaktiviteterForBeregning()) {
             var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(
-                behandlingReferanse, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, null, opptjeningPeriode);
+                behandlingReferanse, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, null, opptjeningPeriode, skjæringstidspunkt);
             perioder.addAll(opptjeningsperioder);
         }
 

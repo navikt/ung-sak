@@ -66,7 +66,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(behandlingReferanse.getSkjæringstidspunktOpptjening())).orElseThrow();
 
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null));
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null), stp);
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
@@ -92,8 +92,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
 
     @Override
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, ref.getUtledetSkjæringstidspunkt());
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp);
 
         if (opptjeningAktiviteter.isEmpty()) {
             throw new IllegalStateException("Forventer opptjening!!!");

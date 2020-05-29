@@ -112,7 +112,7 @@ public class OpptjeningsperioderTjeneste {
 
         Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         for (Yrkesaktivitet yrkesaktivitet : filter.getYrkesaktiviteter()) {
-            mapYrkesaktivitet(behandlingReferanse, perioder, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjening.getOpptjeningPeriode());
+            mapYrkesaktivitet(behandlingReferanse, perioder, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjening.getOpptjeningPeriode(), skjæringstidspunkt);
         }
 
         final Optional<OppgittOpptjening> optOppgittOpptjening = grunnlag.getOppgittOpptjening();
@@ -254,13 +254,14 @@ public class OpptjeningsperioderTjeneste {
                                    InntektArbeidYtelseGrunnlag grunnlag,
                                    OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                    Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                   DatoIntervallEntitet opptjeningPeriode) {
+                                   DatoIntervallEntitet opptjeningPeriode,
+                                   LocalDate skjæringstidspunkt) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         var filter = new YrkesaktivitetFilter(null, grunnlag.getBekreftetAnnenOpptjening(aktørId));
 
         var overstyrtAktivitet = finnTilsvarende(filter, registerAktivitet).orElse(null);
         var opptjeningsperioderForSaksbehandling = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(behandlingReferanse,
-            registerAktivitet, grunnlag, vurderForSaksbehandling, mapArbeidOpptjening, overstyrtAktivitet, opptjeningPeriode);
+            registerAktivitet, grunnlag, vurderForSaksbehandling, mapArbeidOpptjening, overstyrtAktivitet, opptjeningPeriode, skjæringstidspunkt);
         perioder.addAll(opptjeningsperioderForSaksbehandling);
     }
 

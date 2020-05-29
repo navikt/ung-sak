@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -12,6 +13,6 @@ public interface OpptjeningForBeregningTjeneste {
 
     Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag);
 
-    OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag);
+    OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp);
 
 }

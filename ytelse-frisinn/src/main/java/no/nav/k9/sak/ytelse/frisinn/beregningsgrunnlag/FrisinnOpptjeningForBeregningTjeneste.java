@@ -55,8 +55,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     @Override
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        LocalDate stp = ref.getUtledetSkjæringstidspunkt();
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         LocalDate fom = THE_FOM;
         OpptjeningAktiviteter opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp, fom);
 
@@ -77,7 +76,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
                                                                                                              LocalDate stp, LocalDate fomDato) {
 
         Optional<OppgittOpptjening> oppgittOpptjening = finnOppgittOpptjening(iayGrunnlag);
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening.orElse(null));
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening.orElse(null), stp);
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))
