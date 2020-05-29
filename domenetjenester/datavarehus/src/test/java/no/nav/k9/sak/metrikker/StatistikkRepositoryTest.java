@@ -21,7 +21,7 @@ public class StatistikkRepositoryTest {
     @Test
     public void skal_kunne_hente_statistikk() throws Exception {
 
-        assertThat(statistikkRepository.prosessTaskStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task_v3"));
+        assertThat(statistikkRepository.prosessTaskStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER));
 
         assertThat(statistikkRepository.behandlingResultatStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("behandling_resultat_v1"));
 
@@ -32,8 +32,7 @@ public class StatistikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("fagsak_status_v2"))
             .anyMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
             .anyMatch(v -> v.toString().contains("aksjonspunkt_ytelse_type_vent_aarsak_v3"))
-            .anyMatch(v -> v.toString().contains("prosess_task_v3"));
-        
+            .anyMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER));
 
     }
 

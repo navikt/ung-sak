@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,6 +70,8 @@ public class StatistikkRepository {
 
     private static final ObjectMapper OM = new ObjectMapper();
 
+    static final String PROSESS_TASK_VER = "v4";
+
     private EntityManager entityManager;
 
     @Inject
@@ -114,7 +115,7 @@ public class StatistikkRepository {
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "fagsak_status", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toCollection(LinkedHashSet::new));
+            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toCollection(ArrayList::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -163,7 +164,7 @@ public class StatistikkRepository {
                 metricField1, t.get(3, BigInteger.class),
                 metricField2, t.get(4, BigInteger.class),
                 metricField3, t.get(5, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -204,7 +205,7 @@ public class StatistikkRepository {
                 "behandling_status", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         /* siden behandling endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -251,7 +252,7 @@ public class StatistikkRepository {
                 "avslag_kode", t.get(4, String.class)),
             Map.of(
                 metricField, t.get(5, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         return values;
 
@@ -270,7 +271,7 @@ public class StatistikkRepository {
             " where b.behandling_status IN (:behStatuser) and vrp.avslag_kode != '-' and vrp.avslag_kode IS NOT NULL" +
             " and coalesce(b.endret_tid, b.opprettet_tid)>=:startAvDag and coalesce(b.endret_tid, b.opprettet_tid) < :nesteDag";
 
-        String metricName = "avslag_daglig_v1";
+        String metricName = "avslag_daglig_v2";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("behStatuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode()))
@@ -285,24 +286,23 @@ public class StatistikkRepository {
             String saksnummer = t.get(1, String.class);
             String behandlingId = t.get(2, BigInteger.class).toString();
             String behandlingType = t.get(3, String.class);
-            String behandlingResultatType =t.get(4, String.class);
+            String behandlingResultatType = t.get(4, String.class);
             String vilkårType = t.get(5, String.class);
             String avslagKode = t.get(6, String.class);
-            
+            long tidsstempel = t.get(7, Timestamp.class).getTime();
             return SensuEvent.createSensuEvent(metricName,
                 toMap(
                     "ytelse_type", ytelseType,
-                    "saksnummer", saksnummer,
-                    "behandlingId", behandlingId,
-                    "behandlingType", behandlingType
-                    ),
-                Map.of(
+                    "behandlingType", behandlingType,
                     "behandlingResultatType", behandlingResultatType,
                     "vilkårType", vilkårType,
                     "avslagKode", avslagKode),
-                t.get(7, Timestamp.class).getTime());
+                Map.of(
+                    "saksnummer", saksnummer,
+                    "behandlingId", behandlingId),
+                tidsstempel);
         })
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         return values;
 
@@ -333,7 +333,7 @@ public class StatistikkRepository {
                 "aksjonspunkt_status", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -360,7 +360,7 @@ public class StatistikkRepository {
             " where a.aksjonspunkt_status IN (:statuser)"
             + " and coalesce(a.endret_tid, a.opprettet_tid)>=:startAvDag and coalesce(a.endret_tid, a.opprettet_tid) < :nesteDag";
 
-        String metricName = "aksjonspunkt_daglig_v1";
+        String metricName = "aksjonspunkt_daglig_v2";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("statuser", AKSJONSPUNKT_STATUSER.stream().collect(Collectors.toSet()))
@@ -378,19 +378,20 @@ public class StatistikkRepository {
             String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
             String aksjonspunktStatus = t.get(4, String.class);
             String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
+            long tidsstempel = t.get(6, Timestamp.class).getTime();
             return SensuEvent.createSensuEvent(metricName,
                 toMap(
                     "ytelse_type", ytelseType,
-                    "saksnummer", saksnummer,
-                    "behandlingId", behandlingId,
+                    "aksjonspunkt_status", aksjonspunktStatus,
+                    "venteÅrsak", venteÅrsak,
                     "aksjonspunkt", aksjonspunktKode),
                 Map.of(
-                    "aksjonspunkt_status", aksjonspunktStatus,
                     "aksjonspunkt_navn", aksjonspunktNavn,
-                    "venteÅrsak", venteÅrsak),
-                t.get(6, Timestamp.class).getTime());
+                    "saksnummer", saksnummer,
+                    "behandlingId", behandlingId),
+                tidsstempel);
         })
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toList());
 
         return values;
 
@@ -421,7 +422,7 @@ public class StatistikkRepository {
                 "vent_aarsak", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -457,7 +458,7 @@ public class StatistikkRepository {
                 "type", t.get(1, String.class)),
             Map.of(
                 "totalt_antall", t.get(2, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -486,7 +487,7 @@ public class StatistikkRepository {
             " group by 1, 2, 3" +
             " order by 1, 2, 3";
 
-        String metricName = "prosess_task_v3";
+        String metricName = "prosess_task_" + PROSESS_TASK_VER;
         String metricField = "totalt_antall";
 
         NativeQuery<Tuple> queryType = (NativeQuery<Tuple>) entityManager.createNativeQuery("select kode from prosess_task_type", Tuple.class);
@@ -503,7 +504,7 @@ public class StatistikkRepository {
                 "status", t.get(2, String.class)),
             Map.of(
                 metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -526,7 +527,7 @@ public class StatistikkRepository {
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
             " where p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL";
 
-        String metricName = "prosess_task_feil_log_v1";
+        String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
 
         @SuppressWarnings("unchecked")
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
@@ -535,7 +536,7 @@ public class StatistikkRepository {
 
         long now = System.currentTimeMillis();
 
-        Set<SensuEvent> values = stream.map(t -> {
+        Collection<SensuEvent> values = stream.map(t -> {
             String ytelseType = t.get(0, String.class);
             String saksnummer = t.get(1, String.class);
             String taskId = t.get(2, BigInteger.class).toString();
@@ -549,17 +550,17 @@ public class StatistikkRepository {
 
             return SensuEvent.createSensuEvent(metricName,
                 toMap(
-                    "taskId", taskId,
-                    "saksnummer", coalesce(saksnummer, UDEFINERT),
                     "ytelseType", coalesce(ytelseType, UDEFINERT),
+                    "status", status,
                     "prosess_task_type", taskType),
                 Map.of(
-                    "status", status,
+                    "taskId", taskId,
+                    "saksnummer", coalesce(saksnummer, UDEFINERT),
                     "siste_feil", sisteFeil,
                     "task_parametere", coalesce(taskParams, UDEFINERT)),
                 tidsstempel);
         })
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toList());
 
         return values;
     }
@@ -583,11 +584,11 @@ public class StatistikkRepository {
     }
 
     /** Lager events med 0 målinger for alle kombinasjoner av oppgitte vektorer. */
-    private Set<SensuEvent> emptyEvents(String metricName, Map<String, Collection<String>> vectors, Map<String, Object> defaultVals) {
+    private Collection<SensuEvent> emptyEvents(String metricName, Map<String, Collection<String>> vectors, Map<String, Object> defaultVals) {
         List<Map<String, String>> matrix = new CombineLists<String>(vectors).toMap();
         return matrix.stream()
             .map(v -> SensuEvent.createSensuEvent(metricName, v, defaultVals))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
