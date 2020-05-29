@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -24,11 +27,23 @@ public class InntektsmeldingFravær {
             var arbeidsgiver = im.getArbeidsgiver();
             var arbeidsforholdRef = im.getArbeidsforholdRef();
             var dummyGruppe = Arrays.asList(aktivitetType, arbeidsgiver, arbeidsforholdRef);
-
+            var aktiviteter = mapByAktivitet.getOrDefault(dummyGruppe, new ArrayList<>());
             var liste = im.getOppgittFravær().stream()
                 .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag()))
                 .collect(Collectors.toList());
-            mapByAktivitet.computeIfAbsent(dummyGruppe, k -> new ArrayList<>()).addAll(liste);
+
+            var timeline = mapTilTimeline(aktiviteter);
+
+            timeline = timeline.combine(mapTilTimeline(liste), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+            var oppdatertListe = timeline.compress()
+                .toSegments()
+                .stream()
+                .filter(it -> it.getValue() != null)
+                .map(this::opprettHoldKonsistens)
+                .collect(Collectors.toList());
+
+            mapByAktivitet.put(dummyGruppe, oppdatertListe);
             alle.addAll(liste);
         }
 
@@ -40,4 +55,15 @@ public class InntektsmeldingFravær {
         return alle;
     }
 
+    @NotNull
+    private LocalDateTimeline<OppgittFraværPeriode> mapTilTimeline(List<OppgittFraværPeriode> aktiviteter) {
+        return new LocalDateTimeline<>(aktiviteter.stream()
+            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), it))
+            .collect(Collectors.toList()));
+    }
+
+    private OppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<OppgittFraværPeriode> segment) {
+        var value = segment.getValue();
+        return new OppgittFraværPeriode(segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag());
+    }
 }

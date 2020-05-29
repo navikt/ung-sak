@@ -32,6 +32,7 @@ import no.nav.abakus.iaygrunnlag.request.KopierGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -180,13 +181,26 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     @Override
+    public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
+        Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
+
+        if (fagsakOpt.isPresent()) {
+            Fagsak fagsak = fagsakOpt.get();
+            // Hent grunnlag fra abakus
+            return hentOgMapAlleInntektsmeldinger(aktørId, fagsak.getSaksnummer(), ytelseType);
+
+        }
+        return List.of();
+    }
+
+    @Override
     public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
         Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
 
         if (fagsakOpt.isPresent()) {
             Fagsak fagsak = fagsakOpt.get();
             // Hent grunnlag fra abakus
-            return hentOgMapAlleInntektsmeldinger(fagsak);
+            return hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
 
         }
         return List.of();
@@ -437,10 +451,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private InntektsmeldingerRequest initInntektsmeldingerRequest(Fagsak fagsak) {
-        var request = new InntektsmeldingerRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
-        request.setSaksnummer(fagsak.getSaksnummer().getVerdi());
-        request.setYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
+    private InntektsmeldingerRequest initInntektsmeldingerRequest(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
+        var request = new InntektsmeldingerRequest(new AktørIdPersonident(aktørId.getId()));
+        request.setSaksnummer(saksnummer.getVerdi());
+        request.setYtelseType(YtelseType.fraKode(ytelseType.getKode()));
         return request;
     }
 
@@ -453,14 +467,14 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private List<Inntektsmelding> hentOgMapAlleInntektsmeldinger(Fagsak fagsak) {
-        var request = initInntektsmeldingerRequest(fagsak);
+    private List<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
+        var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
         var dto = hentUnikeInntektsmeldinger(request);
         return mapResult(dto).getAlleInntektsmeldinger();
     }
 
     private List<RefusjonskravDato> hentOgMapAlleRefusjonskravDatoer(Fagsak fagsak) {
-        var request = initInntektsmeldingerRequest(fagsak);
+        var request = initInntektsmeldingerRequest(fagsak.getAktørId(), fagsak.getSaksnummer(), fagsak.getYtelseType());
         var dto = hentRefusjonskravDatoer(request);
         return mapResult(dto);
     }

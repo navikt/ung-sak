@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -96,9 +97,13 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
-        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(behandling.getFagsak().getSaksnummer());
-        var inntektsmeldinger = sakInntektsmeldinger.getAlleInntektsmeldinger()
-            .stream()
+        var fagsak = behandling.getFagsak();
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
+        if(!inntektsmeldingerJournalposter.isEmpty() && sakInntektsmeldinger.isEmpty()) {
+            // Abakus setter ikke ytelsetype på "koblingen" før registerinnhenting så vil bare være feil før første registerinnhenting..
+            sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), FagsakYtelseType.UDEFINERT);
+        }
+        var inntektsmeldinger = sakInntektsmeldinger.stream()
             .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
             .collect(Collectors.toSet());
 

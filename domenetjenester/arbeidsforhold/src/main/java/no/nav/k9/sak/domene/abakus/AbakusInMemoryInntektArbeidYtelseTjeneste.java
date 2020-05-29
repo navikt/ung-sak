@@ -25,6 +25,7 @@ import javax.enterprise.inject.Alternative;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
@@ -139,6 +140,11 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
 
     @Override
     public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
+        return new ArrayList<>(hentInntektsmeldinger(saksnummer).getAlleInntektsmeldinger());
+    }
+
+    @Override
+    public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
         return new ArrayList<>(hentInntektsmeldinger(saksnummer).getAlleInntektsmeldinger());
     }
 
