@@ -5,9 +5,9 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 
-class BeregningResultatMapper {
+public class BeregningResultatMapper {
 
-    static AksjonspunktResultat map(BeregningAksjonspunktResultat beregningResultat) {
+    public static AksjonspunktResultat map(BeregningAksjonspunktResultat beregningResultat) {
         if (beregningResultat.harFrist()) {
             return AksjonspunktResultat.opprettForAksjonspunktMedFrist(
                 AksjonspunktDefinisjon.fraKode(beregningResultat.getBeregningAksjonspunktDefinisjon().getKode()),

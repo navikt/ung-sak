@@ -57,7 +57,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
+    public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
                                     DatoIntervallEntitet vilkårsPeriode,
                                     Avslagsårsak avslagsårsak) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
@@ -71,7 +71,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
+    public void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
                              DatoIntervallEntitet vilkårsPeriode, boolean vilkårOppfylt) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode);
@@ -115,7 +115,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         return builder;
     }
 
-    void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
+    public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
         Optional<VedtakVarsel> behandlingresultatOpt = behandlingsresultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         ryddOppVilkårsvurdering(kontekst, behandlingresultatOpt, vilkårsPeriode);
         nullstillVedtaksresultat(kontekst, behandlingresultatOpt);

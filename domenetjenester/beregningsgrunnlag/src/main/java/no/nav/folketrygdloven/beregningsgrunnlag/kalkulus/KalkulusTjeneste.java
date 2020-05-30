@@ -32,6 +32,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsgiverOpplysningerDto;
@@ -46,6 +47,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -69,6 +71,7 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 /**
@@ -273,21 +276,33 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         List<BeregningAksjonspunktResultat> aksjonspunktResultatList = tilstandResponse.getAksjonspunktMedTilstandDto().stream().map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
             dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist())).collect(Collectors.toList());
         KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
+        if (tilstandResponse.getVilkårsperioder() != null) {
+            tilstandResponse.getVilkårsperioder().forEach(vp -> {
+                Periode periode = vp.getVilkårsperiode();
+                DatoIntervallEntitet vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+                if (!vp.isErVilkårOppfylt()) {
+                    kalkulusResultat.leggTilVilkårResultat(vilkårPeriode, false, mapTilAvslagsårsak(vp.getVilkårsavslagsårsak()));
+                } else {
+                    kalkulusResultat.leggTilVilkårResultat(vilkårPeriode, true, null);
+
+                }
+            });
+        }
         if (tilstandResponse.getVilkarOppfylt() != null) {
             if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
-                return kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse));
+                return kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse.getVilkårsavslagsårsak()));
             }
             return kalkulusResultat.medVilkårResulatat(tilstandResponse.getVilkarOppfylt());
         }
         return kalkulusResultat;
     }
 
-    private Avslagsårsak mapTilAvslagsårsak(TilstandResponse tilstandResponse) {
-        if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.SØKT_FL_INGEN_FL_INNTEKT.getKode())) {
+    private Avslagsårsak mapTilAvslagsårsak(Vilkårsavslagsårsak vilkårsavslagsårsak) {
+        if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.SØKT_FL_INGEN_FL_INNTEKT.getKode())) {
             return Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT;
-        } else if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG.getKode())) {
+        } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG.getKode())) {
             return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG;
-        } else if (tilstandResponse.getVilkårsavslagsårsak().getKode().equals(BeregningAvslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT.getKode())) {
+        } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT.getKode())) {
             return Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT;
         }
         return Avslagsårsak.UDEFINERT;
