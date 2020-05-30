@@ -1,14 +1,18 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.output;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class KalkulusResultat {
 
     private List<BeregningAksjonspunktResultat> beregningAksjonspunktResultat;
     private Boolean vilkårOppfylt;
     private Avslagsårsak avslagsårsak;
+    private Map<DatoIntervallEntitet, BeregningVilkårResultat> vilkårResultatPrPeriode = new HashMap<>();
 
     public KalkulusResultat(List<BeregningAksjonspunktResultat> beregningAksjonspunktResultat) {
         this.beregningAksjonspunktResultat = beregningAksjonspunktResultat;
@@ -25,8 +29,17 @@ public class KalkulusResultat {
         return this;
     }
 
+    public KalkulusResultat leggTilVilkårResultat(DatoIntervallEntitet periode, boolean vilkårOppfylt, Avslagsårsak avslagsårsak) {
+        this.vilkårResultatPrPeriode.put(periode, new BeregningVilkårResultat(vilkårOppfylt, avslagsårsak));
+        return this;
+    }
+
     public List<BeregningAksjonspunktResultat> getBeregningAksjonspunktResultat() {
         return beregningAksjonspunktResultat;
+    }
+
+    public Map<DatoIntervallEntitet, BeregningVilkårResultat> getVilkårResultatPrPeriode() {
+        return vilkårResultatPrPeriode;
     }
 
     public Boolean getVilkårOppfylt() {

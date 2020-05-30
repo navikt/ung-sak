@@ -55,6 +55,8 @@ public interface BeregningTjeneste {
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref);
 
+    Optional<Beregningsgrunnlag> hentEksaktFastsattForFørstePeriode(BehandlingReferanse ref);
+
     BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
     List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
