@@ -20,13 +20,14 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FastsettBeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "FAST_BERGRUNN")
 @BehandlingTypeRef
 @ApplicationScoped
-public class FastsettBeregningsgrunnlagStegFRISINN implements BeregningsgrunnlagSteg {
+public class FastsettBeregningsgrunnlagStegFRISINN extends FastsettBeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
     private BeregningTjeneste kalkulusTjeneste;
@@ -63,15 +64,5 @@ public class FastsettBeregningsgrunnlagStegFRISINN implements Beregningsgrunnlag
         }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
-    }
-
-    @Override
-    public void vedHoppOverFramover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType fraSteg, BehandlingStegType tilSteg) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (tilSteg.equals(BehandlingStegType.SØKNADSFRIST)) {
-            if (behandling.erRevurdering()) {
-                throw new IllegalStateException("Støtter ikke denne ennå, lag støtte i kalkulus");
-            }
-        }
     }
 }

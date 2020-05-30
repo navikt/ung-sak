@@ -23,13 +23,14 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningResultatMapper;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FordelBeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "FORDEL_BERGRUNN")
 @BehandlingTypeRef
 @ApplicationScoped
-public class FordelBeregningsgrunnlagStegFRISINN implements BeregningsgrunnlagSteg {
+public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
@@ -69,20 +70,4 @@ public class FordelBeregningsgrunnlagStegFRISINN implements BeregningsgrunnlagSt
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 
-    @Override
-    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (tilSteg.equals(FORDEL_BEREGNINGSGRUNNLAG)) {
-            throw new IllegalStateException("imp i kalkulus");
-        } else {
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            var ref = BehandlingReferanse.fra(behandling);
-            beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
-                .forEach(periode -> deaktiverResultatOgSettPeriodeTilVurdering(ref, kontekst, periode));
-        }
-    }
-
-    private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periode) {
-        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode);
-        kalkulusTjeneste.deaktiverBeregningsgrunnlag(ref, periode.getFomDato());
-    }
 }

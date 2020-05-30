@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -60,13 +62,14 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForFørstePeriode(BehandlingReferanse.fra(behandling));
 
         UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
         UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag
+            .map(List::of).orElse(List.of()), uttakResultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
