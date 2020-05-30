@@ -58,13 +58,19 @@ public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnla
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
             var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, periode.getFomDato(), FORDEL_BEREGNINGSGRUNNLAG);
-            kalkulusResultat.getVilkårResultatPrPeriode().forEach((key, value) -> {
-                if (!value.getVilkårOppfylt()) {
-                    beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, key, value.getAvslagsårsak());
-                } else {
-                    beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, key, value.getVilkårOppfylt());
-                }
-            });
+            if (kalkulusResultat.getVilkårOppfylt() != null && !kalkulusResultat.getVilkårOppfylt()) {
+                beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, periode, kalkulusResultat.getAvslagsårsak());
+            } else if (kalkulusResultat.getVilkårOppfylt() != null) {
+                beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, periode, kalkulusResultat.getVilkårOppfylt());
+            } else {
+                kalkulusResultat.getVilkårResultatPrPeriode().forEach((key, value) -> {
+                    if (!value.getVilkårOppfylt()) {
+                        beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, key, value.getAvslagsårsak());
+                    } else {
+                        beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, key, value.getVilkårOppfylt());
+                    }
+                });
+            }
             aksjonspunktResultater.addAll(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
         }
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);

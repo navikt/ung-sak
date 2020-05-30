@@ -56,11 +56,15 @@ public class FastsettBeregningsgrunnlagStegFRISINN extends FastsettBeregningsgru
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
             var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, periode.getFomDato(), FASTSETT_BEREGNINGSGRUNNLAG);
-            kalkulusResultat.getVilkårResultatPrPeriode().forEach((key, value) -> {
-                if (!value.getVilkårOppfylt()) {
-                    vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, key, value.getAvslagsårsak());
-                }
-            });
+            if (kalkulusResultat.getVilkårOppfylt() != null && !kalkulusResultat.getVilkårOppfylt()) {
+                vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, periode, kalkulusResultat.getAvslagsårsak());
+            } else {
+                kalkulusResultat.getVilkårResultatPrPeriode().forEach((key, value) -> {
+                    if (!value.getVilkårOppfylt()) {
+                        vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, key, value.getAvslagsårsak());
+                    }
+                });
+            }
         }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
