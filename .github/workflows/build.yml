@@ -42,7 +42,7 @@ jobs:
             \connect k9sak_unit;
             create extension if not exists btree_gist;
           EOSQL
-      - uses: actions/checkout@v2.2.0
+      - uses: actions/checkout@v2.0.0
       - uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.11
@@ -50,7 +50,7 @@ jobs:
       - name: Set cache key
         run: echo "::set-env name=CACHE_KEY::$(date +%U)"
 
-      - uses: actions/cache@v2.0.0
+      - uses: actions/cache@v1.1.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ env.CACHE_KEY }}
