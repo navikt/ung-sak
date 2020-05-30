@@ -137,6 +137,7 @@ class MapOppgittOpptjening {
                 dto.setLandkode(Landkode.NOR);
             }
 
+            dto.setInntekt(arbeidsforhold.getInntekt());
             return dto;
         }
 

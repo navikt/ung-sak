@@ -12,12 +12,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
@@ -38,11 +39,16 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
-@Dependent
+@ApplicationScoped
+@FagsakYtelseTypeRef("*")
 public class OpptjeningsperioderUtenOverstyringTjeneste {
 
-    private final OpptjeningRepository opptjeningRepository;
-    private final MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+    protected OpptjeningRepository opptjeningRepository;
+    private MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+
+    public OpptjeningsperioderUtenOverstyringTjeneste() {
+        // CDI
+    }
 
     @Inject
     public OpptjeningsperioderUtenOverstyringTjeneste(OpptjeningRepository opptjeningRepository) {
@@ -100,7 +106,7 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
         return mapOppgittArbeidsperiode(oppgittArbeidsforhold, type);
     }
 
-    private OpptjeningsperiodeForSaksbehandling mapOppgittArbeidsperiode(OppgittArbeidsforhold oppgittArbeidsforhold, OpptjeningAktivitetType type) {
+    protected OpptjeningsperiodeForSaksbehandling mapOppgittArbeidsperiode(OppgittArbeidsforhold oppgittArbeidsforhold, OpptjeningAktivitetType type) {
         final OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny();
         DatoIntervallEntitet periode = oppgittArbeidsforhold.getPeriode();
         builder.medOpptjeningAktivitetType(type)

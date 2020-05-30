@@ -22,7 +22,7 @@ public class OpptjeningsperiodeForSaksbehandling {
     private Boolean manueltBehandlet = false;
     private String arbeidsgiverUtlandNavn;
 
-    private OpptjeningsperiodeForSaksbehandling() {
+    public OpptjeningsperiodeForSaksbehandling() {
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -113,7 +113,10 @@ public class OpptjeningsperiodeForSaksbehandling {
     }
 
     public static class Builder {
-        private OpptjeningsperiodeForSaksbehandling kladd;
+        protected OpptjeningsperiodeForSaksbehandling kladd;
+
+        protected Builder() {
+        }
 
         private Builder(OpptjeningsperiodeForSaksbehandling periode) {
             kladd = periode;
@@ -184,12 +187,15 @@ public class OpptjeningsperiodeForSaksbehandling {
             return kladd;
         }
 
-        private void valider() {
+        protected void valider() {
             // Opptjeningsperiode av typen arbeid krever alltid arbeidsgiver
             if (kladd.opptjeningAktivitetType == OpptjeningAktivitetType.ARBEID && kladd.arbeidsgiver == null
                 && (kladd.grupperingNøkkel == null || kladd.grupperingNøkkel.getArbeidsgiverType() == null)) {
-                throw   new IllegalStateException("Informasjon om arbeidsgiver mangler for " + kladd.toString());
+                throw new IllegalStateException("Informasjon om arbeidsgiver mangler for " + toString());
             }
         }
+
     }
+
+
 }

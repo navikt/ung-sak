@@ -7,8 +7,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +28,6 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.frisinn.filter.OppgittOpptjeningFilter;
 
@@ -38,7 +40,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
-    private OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste;
+    private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
 
     private final OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
@@ -49,8 +51,8 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     }
 
     @Inject
-    public FrisinnOpptjeningForBeregningTjeneste(OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste) {
-        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+    public FrisinnOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
+        this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
     }
 
     @Override
@@ -77,6 +79,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
                                                                                                              LocalDate stp, LocalDate fomDato) {
 
         Optional<OppgittOpptjening> oppgittOpptjening = finnOppgittOpptjening(iayGrunnlag);
+        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening.orElse(null));
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
