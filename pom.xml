@@ -159,7 +159,7 @@
 			<dependency>
 				<groupId>no.nav.folketrygdloven.kalkulus</groupId>
 				<artifactId>kontrakt</artifactId>
-				<version>1.0-2020.05.30.142642-6093b9b</version>
+				<version>1.0-2020.05.31.200555-8f27d91</version>
 			</dependency>
 
 			<dependency>
