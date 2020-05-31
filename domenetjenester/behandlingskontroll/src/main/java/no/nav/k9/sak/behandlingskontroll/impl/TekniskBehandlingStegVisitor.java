@@ -47,7 +47,7 @@ public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
 
         /*
          * NB: nullstiller her og ikke i finally block, siden det da fjernes før vi får logget det sammen exceptions.
-         * Hele settet fjernes så i MDCFilter/Task eller tilsvarende uansett. Steg er del av koden så fanges uansett i
+         * Hele settet fjernes så i ResetLogContextHandler/Task eller tilsvarende uansett. Steg er del av koden så fanges uansett i
          * stacktrace men trengs her for å kunne ta med i log eks. på DEBUG/INFO/WARN nivå.
          */
         LOG_CONTEXT.remove("steg"); // NOSONAR //$NON-NLS-1$

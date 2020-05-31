@@ -59,7 +59,7 @@ public class ApplicationConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>(new RestImplementationClasses().getImplementationClasses());
-
+        
         classes.add(OpenApiResource.class);
 
         classes.add(ConstraintViolationMapper.class);

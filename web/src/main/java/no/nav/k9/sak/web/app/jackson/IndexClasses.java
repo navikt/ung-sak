@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app;
+package no.nav.k9.sak.web.app.jackson;
 
 import java.io.IOException;
 import java.io.InputStream;

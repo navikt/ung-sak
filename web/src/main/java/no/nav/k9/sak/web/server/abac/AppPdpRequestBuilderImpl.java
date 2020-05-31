@@ -1,5 +1,23 @@
 package no.nav.k9.sak.web.server.abac;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.annotation.Priority;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Alternative;
+import javax.inject.Inject;
+
+import org.slf4j.MDC;
+
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
@@ -13,13 +31,6 @@ import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.vedtak.sikkerhet.abac.PdpKlient;
 import no.nav.vedtak.sikkerhet.abac.PdpRequest;
 import no.nav.vedtak.sikkerhet.abac.PdpRequestBuilder;
-
-import javax.annotation.Priority;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Dependent
 @Alternative
@@ -51,8 +62,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     @Override
     public PdpRequest lagPdpRequest(AbacAttributtSamling attributter) {
-        LOG_CONTEXT.clear();
-        
         Optional<Long> behandlingIder = utledBehandlingIder(attributter);
         Optional<PipBehandlingsData> behandlingData = behandlingIder.isPresent()
             ? pipRepository.hentDataForBehandling(behandlingIder.get())
@@ -65,7 +74,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
         if (!fagsakIder.isEmpty()) {
             LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
-        }
+        } 
         behandlingIder.ifPresent(behId -> {
             LOG_CONTEXT.add("behandling", behId);
         });

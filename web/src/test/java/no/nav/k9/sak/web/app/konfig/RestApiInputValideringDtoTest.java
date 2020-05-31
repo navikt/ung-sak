@@ -53,7 +53,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.sak.web.app.IndexClasses;
+import no.nav.k9.sak.web.app.jackson.IndexClasses;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @RunWith(Parameterized.class)
