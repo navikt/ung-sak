@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
@@ -58,6 +59,12 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkår) {
         return vilkårsPeriodisering.getOrDefault(vilkår, maksSøktePeriode).utledPeriode(behandlingId);
+    }
+
+
+    @Override
+    public KantIKantVurderer getKantIKantVurderer() {
+        return new IkkeKantIKant();
     }
 
 }

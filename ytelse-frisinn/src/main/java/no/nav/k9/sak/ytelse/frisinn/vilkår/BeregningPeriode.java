@@ -12,7 +12,6 @@ import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 
 class BeregningPeriode implements VilkårsPeriodiseringsFunksjon {
 
-    private final LocalDate skjæringstidspunkt = LocalDate.of(2020, 3, 1);
     private UttakRepository uttakRepository;
 
     BeregningPeriode(UttakRepository uttakRepository) {
@@ -26,7 +25,7 @@ class BeregningPeriode implements VilkårsPeriodiseringsFunksjon {
             return Collections.emptyNavigableSet();
         } else {
             var maksPeriode = søknadsperioder.get().getMaksPeriode();
-            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, maksPeriode.getTomDato()))));
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(maksPeriode.getFomDato(), maksPeriode.getTomDato()))));
         }
     }
 }

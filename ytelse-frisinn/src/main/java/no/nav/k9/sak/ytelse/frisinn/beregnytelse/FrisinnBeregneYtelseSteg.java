@@ -62,14 +62,13 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForFørstePeriode(BehandlingReferanse.fra(behandling));
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
 
         UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
         UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag
-            .map(List::of).orElse(List.of()), uttakResultat);
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);

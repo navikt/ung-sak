@@ -36,6 +36,7 @@ import no.nav.k9.sak.ytelse.frisinn.filter.OppgittOpptjeningFilter;
 public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
     /** alle må starte et sted. */
     private static final LocalDate THE_FOM = LocalDate.of(2017, 3, 1);
+    private final LocalDate skjæringstidspunkt = LocalDate.of(2020, 3, 1);
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -57,13 +58,13 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     @Override
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        LocalDate stp = vilkårsperiode.getFomDato();
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                  DatoIntervallEntitet vilkårsperiode) {
         LocalDate fom = THE_FOM;
-        OpptjeningAktiviteter opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp, fom);
+        OpptjeningAktiviteter opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, skjæringstidspunkt, fom);
 
         if (opptjeningAktiviteter.getOpptjeningPerioder().isEmpty()) {
-            log.debug("Har ikke opptjening.ref={}, stp={}, fom={}", ref, stp, fom);
+            log.debug("Har ikke opptjening.ref={}, stp={}, fom={}", ref, skjæringstidspunkt, fom);
         }
         return opptjeningAktiviteter;
     }

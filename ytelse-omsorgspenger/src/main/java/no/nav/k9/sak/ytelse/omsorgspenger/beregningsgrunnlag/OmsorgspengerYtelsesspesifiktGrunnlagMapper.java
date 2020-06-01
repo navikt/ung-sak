@@ -32,6 +32,7 @@ import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
@@ -75,7 +76,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     }
 
     @Override
-    public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
+    public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var årskvantum = årskvantumTjeneste.hentÅrskvantumUttak(ref);
         var aktiviteter = årskvantum.getUttaksplan().getAktiviteter();
         if (aktiviteter == null || aktiviteter.isEmpty()) {

@@ -5,11 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 
@@ -29,7 +31,7 @@ public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
 
         UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of(uttakAktivitetPeriode, uttakAktivitetPeriode2));
 
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = frisinnYtelsesspesifiktGrunnlagMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = frisinnYtelsesspesifiktGrunnlagMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet, DatoIntervallEntitet.fraOgMedTilOgMed(dato1, dato3));
 
         periodeMedSøkerInfoDtos.sort(Comparator.comparing(o -> o.getPeriode().getFom()));
 
@@ -63,7 +65,7 @@ public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
 
         UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of(uttakAktivitetPeriode, uttakAktivitetPeriode2,uttakAktivitetPeriode3, uttakAktivitetPeriode4));
 
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = frisinnYtelsesspesifiktGrunnlagMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = frisinnYtelsesspesifiktGrunnlagMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet, DatoIntervallEntitet.fraOgMedTilOgMed(startFLIMai, sluttenIMai));
 
         periodeMedSøkerInfoDtos.sort(Comparator.comparing(o -> o.getPeriode().getFom()));
 
