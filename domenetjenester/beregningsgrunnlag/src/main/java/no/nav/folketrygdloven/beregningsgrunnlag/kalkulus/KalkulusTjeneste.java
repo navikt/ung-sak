@@ -83,9 +83,9 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     protected KalkulusRestTjeneste restTjeneste;
-    private FagsakRepository fagsakRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private KalkulatorInputTjeneste kalkulatorInputTjeneste;
+    protected FagsakRepository fagsakRepository;
+    protected VilkårResultatRepository vilkårResultatRepository;
+    protected KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
