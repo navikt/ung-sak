@@ -183,9 +183,11 @@ public class VilkårBuilder {
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
+        if (kantIKantVurderer.erKomprimerbar()) {
+            vilkårTidslinje.compress();
+        }
         bygget = true;
         var vilkårsPerioderRaw = vilkårTidslinje
-            .compress()
             .toSegments()
             .stream()
             .filter(it -> it.getValue() != null)

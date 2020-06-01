@@ -12,4 +12,9 @@ public class IkkeKantIKant implements KantIKantVurderer {
         return false;
     }
 
+    @Override
+    public boolean erKomprimerbar() {
+        return false;
+    }
+
 }
