@@ -17,7 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
@@ -26,7 +25,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     private PersonopplysningRepository personopplysningRepository;
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
-    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     public GrunnlagKopiererFrisinn() {
@@ -36,13 +34,11 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererFrisinn(BehandlingRepositoryProvider repositoryProvider,
                                    UttakRepository uttakRepository,
-                                   BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                    InntektArbeidYtelseTjeneste iayTjeneste) {
         this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
 
@@ -53,7 +49,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
@@ -67,7 +62,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         // Delvis kopiering hvor alt unntatt oppgitte opptjening fra søknad kopieres over
