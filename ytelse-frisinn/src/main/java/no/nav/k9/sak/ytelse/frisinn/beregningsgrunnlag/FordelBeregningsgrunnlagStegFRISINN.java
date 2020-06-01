@@ -9,11 +9,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -21,7 +19,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningResultatMapper;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FordelBeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -33,7 +30,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private BeregningsgrunnlagVilkårTjenesteFRISINN beregningsgrunnlagVilkårTjeneste;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BeregningTjeneste kalkulusTjeneste;
 
     protected FordelBeregningsgrunnlagStegFRISINN() {
@@ -42,7 +39,7 @@ public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnla
 
     @Inject
     public FordelBeregningsgrunnlagStegFRISINN(BehandlingRepository behandlingRepository,
-                                               BeregningsgrunnlagVilkårTjenesteFRISINN beregningsgrunnlagVilkårTjeneste,
+                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                                BeregningTjeneste kalkulusTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
@@ -54,7 +51,7 @@ public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnla
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
             var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, periode.getFomDato(), FORDEL_BEREGNINGSGRUNNLAG);

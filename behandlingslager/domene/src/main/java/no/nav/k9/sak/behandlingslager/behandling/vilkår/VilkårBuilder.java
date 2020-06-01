@@ -50,7 +50,7 @@ public class VilkårBuilder {
         return avstand > 0 && avstand < mellomliggendePeriodeAvstand;
     }
 
-    public VilkårBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
+    VilkårBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
         Objects.requireNonNull(vurderer);
         this.kantIKantVurderer = vurderer;
         return this;
