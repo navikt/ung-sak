@@ -31,7 +31,7 @@ public class FastsettBeregningsgrunnlagStegFRISINN extends FastsettBeregningsgru
 
     private BehandlingRepository behandlingRepository;
     private BeregningTjeneste kalkulusTjeneste;
-    private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
+    private BeregningsgrunnlagVilkårTjenesteFRISINN vilkårTjeneste;
 
     protected FastsettBeregningsgrunnlagStegFRISINN() {
         // for CDI proxy
@@ -40,7 +40,7 @@ public class FastsettBeregningsgrunnlagStegFRISINN extends FastsettBeregningsgru
     @Inject
     public FastsettBeregningsgrunnlagStegFRISINN(BehandlingRepository behandlingRepository,
                                                  BeregningTjeneste kalkulusTjeneste,
-                                                 BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
+                                                 BeregningsgrunnlagVilkårTjenesteFRISINN vilkårTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -52,7 +52,7 @@ public class FastsettBeregningsgrunnlagStegFRISINN extends FastsettBeregningsgru
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
 
-        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, false);
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
             var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, periode.getFomDato(), FASTSETT_BEREGNINGSGRUNNLAG);

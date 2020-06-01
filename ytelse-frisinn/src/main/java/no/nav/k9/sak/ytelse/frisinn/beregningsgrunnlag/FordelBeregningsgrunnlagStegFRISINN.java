@@ -33,7 +33,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private BeregningsgrunnlagVilkårTjenesteFRISINN beregningsgrunnlagVilkårTjeneste;
     private BeregningTjeneste kalkulusTjeneste;
 
     protected FordelBeregningsgrunnlagStegFRISINN() {
@@ -42,7 +42,7 @@ public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnla
 
     @Inject
     public FordelBeregningsgrunnlagStegFRISINN(BehandlingRepository behandlingRepository,
-                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                               BeregningsgrunnlagVilkårTjenesteFRISINN beregningsgrunnlagVilkårTjeneste,
                                                BeregningTjeneste kalkulusTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
@@ -54,7 +54,7 @@ public class FordelBeregningsgrunnlagStegFRISINN extends FordelBeregningsgrunnla
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
             var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, periode.getFomDato(), FORDEL_BEREGNINGSGRUNNLAG);
