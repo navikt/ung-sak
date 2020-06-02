@@ -10,15 +10,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.Vilkår;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -64,7 +67,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
 
-        if (skalDetLagesAksjonspunkt(årskvantumResultat.getUttaksplan())) {
+        if (skalDetLagesAksjonspunkt(årskvantumResultat)) {
             try {
                 log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
                     "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat));
@@ -75,14 +78,17 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(opprettAksjonspunktForÅrskvantum().getAksjonspunktDefinisjon()));
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-            //TODO 2 kan vi innvilge deler av periodene og avslå resten?
         }
 
-        // K9 TODO:
-        // 1. Lag AksjonspunktOppdaterer for å la steget kjøre på nytt.()
-        // 2. Lag AksjonspunktLøser for å kjøre videre med begrunnelse(skal ikke kunne kjøre videre hvis noen av periodene er uavklarte(dette gjelder overlapp med infotrygd))
-
     }
+
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
+        if (!førsteSteg.equals(sisteSteg)) {
+            årskvantumTjeneste.slettUttaksplan(kontekst.getBehandlingId());
+        }
+    }
+
 
     private AksjonspunktResultat opprettAksjonspunktForÅrskvantum() {
         AksjonspunktDefinisjon apDef = AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE;
@@ -90,14 +96,16 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
     }
 
 
-    public boolean skalDetLagesAksjonspunkt(Uttaksplan uttaksplanOmsorgspenger) {
-        for (Aktivitet uttaksPlanOmsorgspengerAktivitet : uttaksplanOmsorgspenger.getAktiviteter()) {
-            for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
-                for(Vilkår vilkår : uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().keySet()) {
-                    if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår))  &&
-                        (uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT) ||
-                            uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.UAVKLART))) {
-                        return true;
+    public boolean skalDetLagesAksjonspunkt(ÅrskvantumResultat årskvantumResultat) {
+        if (!Bekreftet.MANUELTBEKREFTET.equals(årskvantumResultat.getUttaksplan().getBekreftet())) {
+            for (Aktivitet uttaksPlanOmsorgspengerAktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
+                for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
+                    for (Vilkår vilkår : uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().keySet()) {
+                        if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår)) &&
+                            (uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT) ||
+                                uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.UAVKLART))) {
+                            return true;
+                        }
                     }
                 }
             }

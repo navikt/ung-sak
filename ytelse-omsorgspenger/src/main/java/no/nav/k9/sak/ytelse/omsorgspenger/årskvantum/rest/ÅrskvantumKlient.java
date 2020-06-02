@@ -13,6 +13,10 @@ public interface ÅrskvantumKlient {
 
     void deaktiverUttakForBehandling(UUID behandlingUUID);
 
+    void settUttaksplanTilManueltBekreftet(UUID behandlingUUID);
+
+    void slettUttaksplan(UUID behandlingUUID);
+
     ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID);
 
     Periode hentPeriodeForFagsak(String saksnummer);
