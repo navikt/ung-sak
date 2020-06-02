@@ -30,6 +30,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
+    private NulledePerioder nulledePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
 
     OMPVilkårsPerioderTilVurderingTjeneste() {
@@ -41,12 +42,18 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
+        nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
         var maksSøktePeriode = new MaksSøktePeriode(omsorgspengerGrunnlagRepository);
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
         vilkårsPeriodisering.put(VilkårType.OPPTJENINGSVILKÅRET, søktePerioder);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søktePerioder); // Støtter da bare et skjæringstidspunkt per behandling
+    }
+
+    @Override
+    public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
+        return nulledePerioder.utledPeriode(behandlingId);
     }
 
     @Override

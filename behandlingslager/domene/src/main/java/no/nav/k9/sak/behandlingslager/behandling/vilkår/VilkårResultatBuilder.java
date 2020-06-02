@@ -1,7 +1,10 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Set;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -80,6 +83,23 @@ public class VilkårResultatBuilder {
                 .medKantIKantVurderer(kantIKantVurderer))
             .peek(v -> intervaller.forEach(p -> v.leggTil(v.hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT))))
             .forEach(builder -> kladd.leggTilVilkår(builder.build()));
+        return this;
+    }
+
+    public VilkårResultatBuilder tilbakestill(Set<VilkårType> vilkår, NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
+        vilkår.forEach(v -> hentBuilderFor(v).medType(v).tilbakestill(perioderSomSkalTilbakestilles));
+        return this;
+    }
+
+    public VilkårResultatBuilder leggTilIkkeVurderteVilkår(Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap) {
+        vilkårPeriodeMap.forEach((k, v) -> {
+            var builder = hentBuilderFor(k)
+                .medType(k)
+                .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
+                .medKantIKantVurderer(kantIKantVurderer);
+            v.forEach(periode -> builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT));
+            kladd.leggTilVilkår(builder.build());
+        });
         return this;
     }
 }

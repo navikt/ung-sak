@@ -7,6 +7,7 @@ import java.util.Properties;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårPeriodeBuilder {
@@ -69,6 +70,11 @@ public class VilkårPeriodeBuilder {
 
     public VilkårPeriodeBuilder medBegrunnelse(String begrunnelse) {
         this.entitet.setBegrunnelse(begrunnelse);
+        return this;
+    }
+
+    public VilkårPeriodeBuilder tilbakestillManuellVurdering() {
+        this.entitet.setManueltVurdert(false);
         return this;
     }
 

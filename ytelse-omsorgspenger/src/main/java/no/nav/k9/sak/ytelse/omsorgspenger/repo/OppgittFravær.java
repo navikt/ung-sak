@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,11 +68,13 @@ public class OppgittFravær extends BaseEntitet {
     public DatoIntervallEntitet getMaksPeriode() {
         var perioder = getPerioder();
         var fom = perioder.stream()
+            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
             .min(LocalDate::compareTo)
             .orElseThrow();
         var tom = perioder.stream()
+            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
             .map(DatoIntervallEntitet::getTomDato)
             .max(LocalDate::compareTo)

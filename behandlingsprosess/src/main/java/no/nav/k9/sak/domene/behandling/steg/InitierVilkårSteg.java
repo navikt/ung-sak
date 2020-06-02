@@ -1,8 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -37,8 +34,8 @@ public class InitierVilkårSteg implements BehandlingSteg {
 
     @Inject
     public InitierVilkårSteg(BehandlingRepository behandlingRepository,
-                     VilkårResultatRepository vilkårResultatRepository,
-                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                             VilkårResultatRepository vilkårResultatRepository,
+                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
@@ -64,10 +61,12 @@ public class InitierVilkårSteg implements BehandlingSteg {
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
-        vilkårPeriodeMap.forEach((key, value) -> vilkårBuilder
+        var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
+        vilkårBuilder.tilbakestill(vilkårPeriodeMap.keySet(), perioderSomSkalTilbakestilles);
+        vilkårBuilder
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
-            .leggTilIkkeVurderteVilkår(new ArrayList<>(value), List.of(key)));
+            .leggTilIkkeVurderteVilkår(vilkårPeriodeMap);
         var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
