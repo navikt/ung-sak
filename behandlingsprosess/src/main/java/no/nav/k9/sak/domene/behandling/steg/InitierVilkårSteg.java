@@ -62,11 +62,9 @@ public class InitierVilkårSteg implements BehandlingSteg {
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
-        vilkårBuilder.tilbakestill(vilkårPeriodeMap.keySet(), perioderSomSkalTilbakestilles);
-        vilkårBuilder
-            .medMaksMellomliggendePeriodeAvstand(utledetAvstand)
+        vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
-            .leggTilIkkeVurderteVilkår(vilkårPeriodeMap);
+            .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
         var vilkårResultat = vilkårBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }

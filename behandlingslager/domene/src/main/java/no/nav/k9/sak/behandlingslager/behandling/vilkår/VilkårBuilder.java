@@ -217,9 +217,11 @@ public class VilkårBuilder {
         var datoerSomOverlapper = tilbakestiltePerioder.stream().map(DatoIntervallEntitet::getTomDato).map(it -> it.plusDays(1)).map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it)).collect(Collectors.toSet());
 
         for (DatoIntervallEntitet datoIntervallEntitet : datoerSomOverlapper) {
-            var periodeBuilder = hentBuilderFor(datoIntervallEntitet)
-                .medUtfall(Utfall.IKKE_VURDERT);
-            leggTil(periodeBuilder);
+            if (vilkårTidslinje.intersects(new LocalDateTimeline<>(List.of(new LocalDateSegment<WrappedVilkårPeriode>(datoIntervallEntitet.getFomDato(), datoIntervallEntitet.getTomDato(), null))))) {
+                var periodeBuilder = hentBuilderFor(datoIntervallEntitet)
+                    .medUtfall(Utfall.IKKE_VURDERT);
+                leggTil(periodeBuilder);
+            }
         }
     }
 
