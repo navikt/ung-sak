@@ -1,11 +1,9 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
@@ -33,5 +31,5 @@ class MapTilBeregningsgrunnlag {
 
         return List.of(bgBuilder.build());
     }
-    
+
 }

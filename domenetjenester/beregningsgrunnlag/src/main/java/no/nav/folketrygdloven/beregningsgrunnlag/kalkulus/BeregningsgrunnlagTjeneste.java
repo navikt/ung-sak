@@ -87,6 +87,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
         return vilkår.getPerioder()
             .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .min(LocalDate::compareTo)
             .map(it -> hentEksaktFastsatt(ref, it));
