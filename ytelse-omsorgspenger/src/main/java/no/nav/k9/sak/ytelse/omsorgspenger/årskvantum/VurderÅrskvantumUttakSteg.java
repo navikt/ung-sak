@@ -84,7 +84,9 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
-        årskvantumTjeneste.slettUttaksplan(kontekst.getBehandlingId());
+        if (!førsteSteg.equals(sisteSteg)) {
+            årskvantumTjeneste.slettUttaksplan(kontekst.getBehandlingId());
+        }
     }
 
 
