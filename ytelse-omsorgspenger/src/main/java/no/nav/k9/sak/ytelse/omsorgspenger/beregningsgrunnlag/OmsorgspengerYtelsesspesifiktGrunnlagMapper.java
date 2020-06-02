@@ -76,8 +76,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
 
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
-        var årskvantum = årskvantumTjeneste.hentÅrskvantumUttak(ref);
-        var aktiviteter = årskvantum.getUttaksplan().getAktiviteter();
+        var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+        var aktiviteter = forbrukteDager.getSisteUttaksplan().getAktiviteter();
         if (aktiviteter == null || aktiviteter.isEmpty()) {
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
