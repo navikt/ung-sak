@@ -63,6 +63,13 @@ public interface KalkulusApiTjeneste {
 
     Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID bgReferanse, FagsakYtelseType fagsakYtelseType, UUID uuid);
 
+    /** Deaktiverer beregningsgrunnlag og kalkulatorinput.
+     *
+     * Skal kun kalles fra første beregningssteg.
+     *
+     * @param fagsakYtelseType Fagsakytelsetype
+     * @param bgReferanse koblingreferanse
+     */
     void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
 
     Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2);

@@ -67,6 +67,13 @@ public interface BeregningTjeneste {
 
     Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(BehandlingReferanse ref, LocalDate skjæringstidspunkt, UUID bgGrunnlagsVersjon);
 
+    /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
+     *
+     * Deaktivering skal kun kalles i første steg i beregning.
+     *
+     * @param ref Behandlingreferanse
+     * @param skjæringstidspunkt skjæringstidspunkt
+     */
     void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
     Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt);

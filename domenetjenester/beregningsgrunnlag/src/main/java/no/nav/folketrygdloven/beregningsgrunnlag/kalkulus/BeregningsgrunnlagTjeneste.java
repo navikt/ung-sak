@@ -163,7 +163,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
         var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
-
         finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), bgReferanse);
     }
 

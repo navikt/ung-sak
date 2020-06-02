@@ -68,14 +68,7 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (tilSteg.equals(FORDEL_BEREGNINGSGRUNNLAG)) {
-            throw new IllegalStateException("imp i kalkulus");
-//            Set<Aksjonspunkt> aps = behandlingRepository.hentBehandling(kontekst.getBehandlingId()).getAksjonspunkter();
-//            boolean harAksjonspunktSomErUtførtIUtgang = tilSteg.getAksjonspunktDefinisjonerUtgang().stream()
-//                    .anyMatch(ap -> aps.stream().filter(a -> a.getAksjonspunktDefinisjon().equals(ap))
-//                            .anyMatch(a -> !a.erAvbrutt()));
-//            beregningsgrunnlagTjeneste.getRyddBeregningsgrunnlag(kontekst).ryddFordelBeregningsgrunnlagVedTilbakeføring(harAksjonspunktSomErUtførtIUtgang);
-        } else {
+        if (!tilSteg.equals(FORDEL_BEREGNINGSGRUNNLAG)) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
             var ref = BehandlingReferanse.fra(behandling);
             beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
@@ -85,6 +78,5 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periode) {
         beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode);
-        kalkulusTjeneste.deaktiverBeregningsgrunnlag(ref, periode.getFomDato());
     }
 }
