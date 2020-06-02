@@ -81,19 +81,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentEksaktFastsattForFørstePeriode(BehandlingReferanse ref) {
-        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
-        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
-
-        return vilkår.getPerioder()
-            .stream()
-            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
-            .map(VilkårPeriode::getSkjæringstidspunkt)
-            .min(LocalDate::compareTo)
-            .map(it -> hentEksaktFastsatt(ref, it));
-    }
-
-    @Override
     public List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref) {
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
