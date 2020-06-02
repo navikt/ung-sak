@@ -90,7 +90,12 @@ public class TilKalkulusMapper {
 
     public static final String KODEVERDI_UNDEFINED = "-";
 
-    public static InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag, SakInntektsmeldinger sakInntektsmeldinger, AktørId aktørId, DatoIntervallEntitet vilkårsPeriode) {
+    public static InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag,
+                                                           SakInntektsmeldinger sakInntektsmeldinger,
+                                                           AktørId aktørId,
+                                                           DatoIntervallEntitet vilkårsPeriode,
+                                                           OppgittOpptjening oppgittOpptjening) {
+
         var skjæringstidspunktBeregning = vilkårsPeriode.getFomDato();
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
@@ -106,7 +111,7 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
         inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
-        inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeingDto(grunnlag.getOppgittOpptjening(), grunnlag.getOverstyrtOppgittOpptjening()));
+        inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeingDto(oppgittOpptjening));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
 
         return inntektArbeidYtelseGrunnlagDto;
@@ -134,21 +139,14 @@ public class TilKalkulusMapper {
         return null;
     }
 
-    private static OppgittOpptjeningDto mapTilOppgittOpptjeingDto(Optional<OppgittOpptjening> oppgittOpptjening, Optional<OppgittOpptjening> overstyrtOppgittOpptjening) {
-        if (overstyrtOppgittOpptjening.isPresent()) {
-            return overstyrtOppgittOpptjening.map(oo -> new OppgittOpptjeningDto(
-                oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
-                mapOppgittEgenNæringListe(oo.getEgenNæring()),
-                mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold())))
-                .orElse(null);
-        }
-        return oppgittOpptjening.map(oo -> {
+    private static OppgittOpptjeningDto mapTilOppgittOpptjeingDto(OppgittOpptjening oppgittOpptjening) {
+        if (oppgittOpptjening != null) {
             return new OppgittOpptjeningDto(
-                oo.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
-                mapOppgittEgenNæringListe(oo.getEgenNæring()),
-                mapOppgittArbeidsforholdDto(oo.getOppgittArbeidsforhold()));
-        })
-            .orElse(null);
+                oppgittOpptjening.getFrilans().map(TilKalkulusMapper::mapOppgittFrilans).orElse(null),
+                mapOppgittEgenNæringListe(oppgittOpptjening.getEgenNæring()),
+                mapOppgittArbeidsforholdDto(oppgittOpptjening.getOppgittArbeidsforhold()));
+        }
+        return null;
     }
 
     private static List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring) {

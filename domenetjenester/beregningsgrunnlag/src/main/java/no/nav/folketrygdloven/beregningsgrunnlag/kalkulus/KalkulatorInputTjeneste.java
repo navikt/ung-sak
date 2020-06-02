@@ -11,10 +11,10 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -44,9 +44,10 @@ public class KalkulatorInputTjeneste {
         var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(referanse.getSaksnummer());
         var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
 
-        var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode);
+        OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
 
-        var opptjeningAktiviteter = hentOpptjeningAktiviteter(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
+        var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, tjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag).orElse(null));
+        var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnbeløpsatser, grunnlagDto, opptjeningAktiviteterDto, stp);
@@ -60,10 +61,10 @@ public class KalkulatorInputTjeneste {
         return kalkulatorInputDto;
     }
 
-    private OpptjeningAktiviteter hentOpptjeningAktiviteter(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        var ytelseType = ref.getFagsakYtelseType();
+    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse referanse) {
+        FagsakYtelseType ytelseType = referanse.getFagsakYtelseType();
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
-        return tjeneste.hentEksaktOpptjeningForBeregning(ref, inntektArbeidYtelseGrunnlag, vilkårsperiode);
+                .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
+        return tjeneste;
     }
 }
