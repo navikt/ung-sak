@@ -80,6 +80,10 @@ public class OppgittOpptjeningBuilder {
             this.entitet = entitet;
         }
 
+        public static EgenNæringBuilder fraEksisterende(OppgittEgenNæring kopierFra) {
+            return new EgenNæringBuilder(new OppgittEgenNæring(kopierFra));
+        }
+
         public static EgenNæringBuilder ny() {
             return new EgenNæringBuilder(new OppgittEgenNæring());
         }

@@ -112,7 +112,7 @@ public class OppgittOpptjeningFilter {
 
     private Optional<List<EgenNæringBuilder>> leggTilSN(DatoIntervallEntitet senestePeriodeSN) {
         List<OppgittEgenNæring> egenNæring = oppgittOpptjening.getEgenNæring().stream().filter(oppgittEgenNæring -> oppgittEgenNæring.getPeriode().equals(senestePeriodeSN)).collect(Collectors.toList());
-        List<EgenNæringBuilder> egenNæringBuilder = egenNæring.stream().map(en -> EgenNæringBuilder.ny()
+        List<EgenNæringBuilder> egenNæringBuilder = egenNæring.stream().map(en -> EgenNæringBuilder.fraEksisterende(en)
                 .medPeriode(en.getPeriode())
                 .medBruttoInntekt(en.getBruttoInntekt()))
                 .collect(Collectors.toList());
