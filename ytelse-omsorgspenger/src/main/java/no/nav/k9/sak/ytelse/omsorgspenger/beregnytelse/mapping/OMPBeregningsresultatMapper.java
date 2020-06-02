@@ -22,7 +22,6 @@ import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -80,11 +79,11 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     public BeregningsresultatDto map(Behandling behandling,
                                      BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
-        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumUttak(ref));
+        var forbrukteDager = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid()));
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), uttaksplan.map(ÅrskvantumResultat::getUttaksplan)))
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), forbrukteDager.map(ÅrskvantumForbrukteDager::getSisteUttaksplan)))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }

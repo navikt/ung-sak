@@ -70,8 +70,8 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 
-        var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
-        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(årskvantumResultat));
+        var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(forbrukteDager));
 
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
