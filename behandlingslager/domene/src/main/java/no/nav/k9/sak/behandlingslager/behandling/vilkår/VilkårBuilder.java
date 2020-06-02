@@ -24,9 +24,9 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class VilkårBuilder {
 
     private final Vilkår vilkåret;
+    private final NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder = new TreeSet<>();
     private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
-    private NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder = new TreeSet<>();
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;
 
@@ -109,14 +109,6 @@ public class VilkårBuilder {
         }
         this.tilbakestiltePerioder.addAll(perioder);
         return this;
-    }
-
-    VilkårType getVilkårType() {
-        return this.vilkåret.getVilkårType();
-    }
-
-    NavigableSet<DatoIntervallEntitet> getTilbakestiltePerioder() {
-        return this.tilbakestiltePerioder;
     }
 
     private LocalDateSegment<WrappedVilkårPeriode> sjekkVurdering(LocalDateInterval di,
