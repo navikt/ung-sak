@@ -40,7 +40,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
     @JsonValue
     @NotNull
     @Size(max = 20)
-    @Pattern(regexp = "^\\d+$", message = "ident '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^\\d+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String ident;
 
     PersonIdent() {
@@ -48,7 +48,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
     }
 
     @JsonCreator
-    public PersonIdent(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "ident '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String ident) {
+    public PersonIdent(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String ident) {
         Objects.requireNonNull(ident, "ident kan ikke være null");
         this.ident = ident;
     }

@@ -28,7 +28,7 @@ public class VilkårMedPerioderDto {
 
     @JsonProperty(value = "lovReferanse")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String lovReferanse;
 
     @JsonProperty(value = "overstyrbar")

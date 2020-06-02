@@ -97,7 +97,7 @@ public class InnloggetAnsattDto {
 
     @JsonProperty(value = "brukernavn", required = true)
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @NotNull
     private final String brukernavn;
 
@@ -129,7 +129,7 @@ public class InnloggetAnsattDto {
     @JsonProperty(value = "navn")
     @NotNull
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private final String navn;
 
     @JsonProperty(value = "skalViseDetaljerteFeilmeldinger")

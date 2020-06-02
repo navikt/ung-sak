@@ -28,7 +28,7 @@ public class Periode implements Comparable<Periode>{
     @JsonValue
     @NotNull
     @Size(max = 10 + 1 + 10)
-    @Pattern(regexp = "^[\\p{Alnum}:\\-/]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}:\\-/]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String iso8601Periode;
 

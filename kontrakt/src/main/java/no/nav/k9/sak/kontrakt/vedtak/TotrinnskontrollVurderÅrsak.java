@@ -24,7 +24,7 @@ public class TotrinnskontrollVurderÅrsak {
     @JsonProperty(value = "kode", required = true)
     @NotNull
     @Size(max = 10)
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String kode;
 
     /** @deprecated Bruk {@link VurderÅrsak} i stedet for denne klassen. */
@@ -32,7 +32,7 @@ public class TotrinnskontrollVurderÅrsak {
     @JsonProperty(value = "navn", required = true)
     @NotNull
     @Size(max = 10)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{P}\\p{M}\\p{Sc}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{P}\\p{M}\\p{Sc}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navn;
 
     public TotrinnskontrollVurderÅrsak() {

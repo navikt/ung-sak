@@ -8,7 +8,7 @@ public final class OrganisasjonsNummerValidator {
     public static boolean erGyldig(String orgnummer) {
 
         // Skal inneholde 9 siffer og kun tall
-        if (orgnummer == null || orgnummer.length() != 9) {
+        if (orgnummer == null || (orgnummer = orgnummer.trim()).length() != 9) { // NOSONAR
             return false;
         }
 

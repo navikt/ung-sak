@@ -33,7 +33,7 @@ public class ArbeidsgiverDto {
     /** Navn på arbeidgiver - virksomhet eller privatperson som arbeidsgiver. */
     @JsonProperty(value = "navn")
     @Size(max = 200)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navn;
 
     @JsonAlias({ "orgNummer" })

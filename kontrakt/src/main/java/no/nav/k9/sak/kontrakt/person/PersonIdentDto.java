@@ -33,7 +33,7 @@ public abstract class PersonIdentDto {
 
     @JsonProperty(value = "fnr")
     @Size(max = 11)
-    @Pattern(regexp = "^[\\p{Alnum}]{11}+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}]{11}+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fnr;
 
     public PersonIdentDto() {

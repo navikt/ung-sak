@@ -73,7 +73,7 @@ public class TotrinnskontrollAksjonspunkterDto {
 
     @JsonProperty(value = "aksjonspunktKode")
     @Size(max = 10)
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String aksjonspunktKode;
 
     @JsonProperty(value = "arbeidsforholdDtos")
@@ -91,7 +91,7 @@ public class TotrinnskontrollAksjonspunkterDto {
 
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String besluttersBegrunnelse;
 
     @JsonProperty(value = "opptjeningAktiviteter")

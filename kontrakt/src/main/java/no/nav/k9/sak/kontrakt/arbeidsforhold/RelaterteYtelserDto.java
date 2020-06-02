@@ -22,7 +22,7 @@ public class RelaterteYtelserDto {
 
     @NotNull
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "relatertYtelseType")
     private String relatertYtelseType;
 

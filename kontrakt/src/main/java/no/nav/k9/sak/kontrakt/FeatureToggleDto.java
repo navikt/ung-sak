@@ -21,7 +21,7 @@ public class FeatureToggleDto {
     @JsonProperty(value = "featureToggles")
     @Size(max = 50)
     @Valid
-    private Map<@Size(max = 100) @NotNull @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}\\p{P}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String, @NotNull Boolean> featureToggles;
+    private Map<@Size(max = 100) @NotNull @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}\\p{P}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String, @NotNull Boolean> featureToggles;
 
     public FeatureToggleDto(Map<String, Boolean> featureToggles) {
         this.featureToggles = featureToggles;

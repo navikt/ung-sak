@@ -99,9 +99,4 @@ public enum AdresseType implements Kodeverdi {
         return offisiellKode;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
-    }
-
-
 }

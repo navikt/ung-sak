@@ -21,11 +21,11 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 public class FastsattOpptjeningAktivitetDto {
 
     @JsonProperty(value = "aktivitetReferanse")
-    @Pattern(regexp = "^[\\p{Alnum}:_\\-/\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}:_\\-/\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String aktivitetReferanse;
 
     @JsonProperty(value = "arbeidsgiverNavn")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverNavn;
 
     @JsonProperty(value = "fom")

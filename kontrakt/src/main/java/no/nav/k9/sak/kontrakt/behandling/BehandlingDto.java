@@ -39,7 +39,7 @@ public class BehandlingDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "ansvarligSaksbehandler")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String ansvarligSaksbehandler;
 
     @JsonInclude(value = Include.NON_NULL)
@@ -49,13 +49,13 @@ public class BehandlingDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "behandlendeEnhetId")
     @Size(max = 20)
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String behandlendeEnhetId;
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "behandlendeEnhetNavn")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String behandlendeEnhetNavn;
 
     @JsonProperty(value = "behandlingÅrsaker")
@@ -90,7 +90,7 @@ public class BehandlingDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "endretAvBrukernavn")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String endretAvBrukernavn;
 
     @JsonProperty(value = "erPaaVent")
@@ -111,7 +111,7 @@ public class BehandlingDto {
     @JsonAlias("fristBehandlingPåVent")
     @JsonProperty("fristBehandlingPaaVent")
     @Size(max = 20)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fristBehandlingPåVent;
 
     @JsonProperty(value = "gjeldendeVedtak")
@@ -178,13 +178,13 @@ public class BehandlingDto {
     @JsonAlias("venteÅrsakKode")
     @JsonProperty("venteArsakKode")
     @Size(max = 20)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String venteÅrsakKode;
 
     @JsonInclude(value = Include.NON_NULL)
     @JsonProperty("ansvarligBeslutter")
     @Size(max = 100000)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String ansvarligBeslutter;
 
     @JsonProperty(value = "behandlingHenlagt")

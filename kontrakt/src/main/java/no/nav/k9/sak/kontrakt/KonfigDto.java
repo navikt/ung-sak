@@ -19,12 +19,12 @@ public class KonfigDto {
     @JsonProperty(value = "property", required = true)
     @NotNull
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}\\p{P}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}\\p{P}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String property;
 
     @JsonProperty(value = "verdi", required = true)
     @NotNull
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String verdi;
 
     @JsonCreator

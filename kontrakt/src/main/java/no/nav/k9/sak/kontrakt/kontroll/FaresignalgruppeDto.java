@@ -24,7 +24,7 @@ public class FaresignalgruppeDto {
     @JsonProperty(value = "faresignaler")
     @Valid
     @Size(max = 50)
-    private List<@NotNull @Size(max = 5000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String> faresignaler = Collections
+    private List<@NotNull @Size(max = 5000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String> faresignaler = Collections
         .emptyList();
 
     @JsonProperty(value = "kontrollresultat", required = true)

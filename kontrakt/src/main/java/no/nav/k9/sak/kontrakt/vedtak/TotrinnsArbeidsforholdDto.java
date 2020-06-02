@@ -24,7 +24,7 @@ public class TotrinnsArbeidsforholdDto {
 
     @JsonProperty(value = "arbeidsforholdId")
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdId;
 
     /**
@@ -34,7 +34,7 @@ public class TotrinnsArbeidsforholdDto {
     @JsonAlias({ "arbeidsgiverIdentifikator" })
     @JsonProperty(value = "organisasjonsnummer")
     @Size(max = 20)
-    @Pattern(regexp = "^[1-9][0-9\\-.]{6,20}+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[1-9][0-9\\-.]{6,20}+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverIdentifikator;
 
     @JsonProperty(value = "brukPermisjon")
@@ -42,7 +42,7 @@ public class TotrinnsArbeidsforholdDto {
 
     @JsonProperty(value = "navn", required = true)
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navn;
 
     public TotrinnsArbeidsforholdDto() {

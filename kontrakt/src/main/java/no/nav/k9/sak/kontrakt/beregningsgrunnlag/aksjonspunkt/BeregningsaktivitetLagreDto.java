@@ -71,12 +71,12 @@ public class BeregningsaktivitetLagreDto {
 
     @JsonProperty(value = "arbeidsforholdRef")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{XDigit}\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{XDigit}\\-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdRef;
 
     @JsonProperty(value = "arbeidsgiverIdentifikator")
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverIdentifikator;
 
     @JsonProperty(value = "fom", required = true)
