@@ -16,11 +16,11 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
+class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
 
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
 
-    SøktePerioder(OmsorgspengerGrunnlagRepository repo) {
+    NulledePerioder(OmsorgspengerGrunnlagRepository repo) {
         this.grunnlagRepository = repo;
     }
 
@@ -39,7 +39,7 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
         var timeline = new LocalDateTimeline<Boolean>(List.of());
         var perioder = søknadsperioder.getPerioder()
             .stream()
-            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
+            .filter(it -> Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
             .collect(Collectors.toCollection(TreeSet::new));

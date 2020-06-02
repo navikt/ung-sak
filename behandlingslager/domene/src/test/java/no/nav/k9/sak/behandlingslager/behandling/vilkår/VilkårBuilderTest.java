@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -274,5 +275,38 @@ public class VilkårBuilderTest {
         var oppdatertVilkår = oppdateringBuilder.build();
         assertThat(oppdatertVilkår).isNotNull();
         assertThat(oppdatertVilkår.getPerioder()).hasSize(2);
+    }
+
+    @Test
+    public void skal_nullstille_ved_nulltimer() {
+        var vilkårBuilder = new VilkårBuilder()
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
+
+        var førsteSkjæringstidspunkt = LocalDate.now();
+        var sluttFørstePeriode = LocalDate.now().plusMonths(3);
+        var førstePeriode = vilkårBuilder.hentBuilderFor(førsteSkjæringstidspunkt, sluttFørstePeriode)
+            .medUtfall(Utfall.IKKE_OPPFYLT)
+            .medUtfallOverstyrt(Utfall.OPPFYLT);
+        var andreSkjæringstidspunkt = LocalDate.now().plusMonths(3).plusDays(7);
+        var andrePeriode = vilkårBuilder.hentBuilderFor(andreSkjæringstidspunkt, LocalDate.now().plusMonths(5))
+            .medUtfall(Utfall.OPPFYLT);
+
+        vilkårBuilder.leggTil(førstePeriode)
+            .leggTil(andrePeriode);
+
+        var vilkår = vilkårBuilder.build();
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+
+        var oppdateringBuilder = new VilkårBuilder(vilkår);
+        oppdateringBuilder.tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(andreSkjæringstidspunkt.plusDays(7), andreSkjæringstidspunkt.plusDays(10)));
+
+        var oppdatertVilkår = oppdateringBuilder.build();
+        assertThat(oppdatertVilkår).isNotNull();
+        assertThat(oppdatertVilkår.getPerioder()).hasSize(3);
+        assertThat(oppdatertVilkår.getPerioder().stream().filter(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT)).collect(Collectors.toList())).hasSize(1);
     }
 }

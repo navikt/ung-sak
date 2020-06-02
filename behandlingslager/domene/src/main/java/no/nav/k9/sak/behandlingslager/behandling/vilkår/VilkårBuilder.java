@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,7 @@ public class VilkårBuilder {
     private final Vilkår vilkåret;
     private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
+    private NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder = new TreeSet<>();
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;
 
@@ -91,11 +94,29 @@ public class VilkårBuilder {
 
     public VilkårBuilder tilbakestill(DatoIntervallEntitet periode) {
         validerBuilder();
-        var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
-        var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
 
-        this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tilbakestill(new TreeSet<>(Set.of(periode)));
         return this;
+    }
+
+    public VilkårBuilder tilbakestill(NavigableSet<DatoIntervallEntitet> perioder) {
+        validerBuilder();
+        for (DatoIntervallEntitet periode : perioder) {
+            var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
+            var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
+
+            this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        this.tilbakestiltePerioder.addAll(perioder);
+        return this;
+    }
+
+    VilkårType getVilkårType() {
+        return this.vilkåret.getVilkårType();
+    }
+
+    NavigableSet<DatoIntervallEntitet> getTilbakestiltePerioder() {
+        return this.tilbakestiltePerioder;
     }
 
     private LocalDateSegment<WrappedVilkårPeriode> sjekkVurdering(LocalDateInterval di,
@@ -180,6 +201,9 @@ public class VilkårBuilder {
      */
     public Vilkår build() {
         validerBuilder();
+        if (!tilbakestiltePerioder.isEmpty()) {
+            justereUtfallVedTilbakestillingIForkant();
+        }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
@@ -195,6 +219,16 @@ public class VilkårBuilder {
         var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw);
         vilkåret.setPerioder(vilkårsPerioder);
         return vilkåret;
+    }
+
+    private void justereUtfallVedTilbakestillingIForkant() {
+        var datoerSomOverlapper = tilbakestiltePerioder.stream().map(DatoIntervallEntitet::getTomDato).map(it -> it.plusDays(1)).map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it)).collect(Collectors.toSet());
+
+        for (DatoIntervallEntitet datoIntervallEntitet : datoerSomOverlapper) {
+            var periodeBuilder = hentBuilderFor(datoIntervallEntitet)
+                .medUtfall(Utfall.IKKE_VURDERT);
+            leggTil(periodeBuilder);
+        }
     }
 
     private List<VilkårPeriode> sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(List<VilkårPeriode> vilkårsPerioderRaw) {
@@ -213,7 +247,7 @@ public class VilkårBuilder {
                         .medPeriode(periode.getFom(), vilkårPeriode.getTom())
                         .medUtfall(Utfall.IKKE_VURDERT)
                         .medUtfallOverstyrt(Utfall.UDEFINERT)
-                        .medUtfallManuell(Utfall.UDEFINERT)
+                        .tilbakestillManuellVurdering()
                         .build();
                 } else {
                     vilkårPerioder.add(periode);
