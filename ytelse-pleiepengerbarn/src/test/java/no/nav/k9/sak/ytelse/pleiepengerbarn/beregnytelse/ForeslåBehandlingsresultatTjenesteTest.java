@@ -37,7 +37,7 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
-import no.nav.k9.sak.behandling.revurdering.ytelse.HarEtablertYtelseImpl;
+import no.nav.k9.sak.behandling.revurdering.ytelse.DefaultRevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -111,11 +111,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         when(uttakRepository.hentOppgittUttak(anyLong())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
-        revurderingBehandlingsresultatutleder = Mockito.spy(new RevurderingBehandlingsresultatutleder(repositoryProvider,
-            vedtakVarselRepository,
-            kalkulusInMermoryTjeneste,
-            new HarEtablertYtelseImpl(vedtakVarselRepository),
-            medlemTjeneste));
+        revurderingBehandlingsresultatutleder = Mockito.spy(new DefaultRevurderingBehandlingsresultatutleder());
         tjeneste = new UttakForeslåBehandlingsresultatTjeneste(repositoryProvider,
             vedtakVarselRepository,
             uttakRepository,
@@ -163,7 +159,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         foreslåBehandlingsresultat(revurdering);
 
         // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(Mockito.any(), anyBoolean());
+        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(Mockito.any(), any(), anyBoolean());
     }
 
     @Test
@@ -192,7 +188,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         foreslåBehandlingsresultat(revurdering);
 
         // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), anyBoolean());
+        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), any(), anyBoolean());
     }
 
     @Test
@@ -223,7 +219,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         foreslåBehandlingsresultat(revurdering);
 
         // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), anyBoolean());
+        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), any(), anyBoolean());
     }
 
     private Behandling lagRevurdering(Behandling originalBehandling) {

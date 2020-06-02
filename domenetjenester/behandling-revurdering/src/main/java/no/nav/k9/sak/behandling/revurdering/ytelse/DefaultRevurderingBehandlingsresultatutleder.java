@@ -1,0 +1,22 @@
+package no.nav.k9.sak.behandling.revurdering.ytelse;
+
+import javax.enterprise.context.Dependent;
+
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
+
+@Dependent
+@FagsakYtelseTypeRef
+@BehandlingTypeRef("BT-004")
+public class DefaultRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {
+
+    public DefaultRevurderingBehandlingsresultatutleder() {
+    }
+
+    @Override
+    public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, VedtakVarsel vedtakVarsel, boolean erVarselOmRevurderingSendt) {
+        return vedtakVarsel == null ? new VedtakVarsel() : vedtakVarsel;
+    }
+}

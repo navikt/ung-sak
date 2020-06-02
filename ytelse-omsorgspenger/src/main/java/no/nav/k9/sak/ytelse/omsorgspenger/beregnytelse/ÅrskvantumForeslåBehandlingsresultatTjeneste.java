@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.revurdering.felles.RevurderingBehandlingsresultatutlederFelles;
+import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
@@ -33,7 +33,7 @@ public class ÅrskvantumForeslåBehandlingsresultatTjeneste extends ForeslåBeha
                                                         VedtakVarselRepository vedtakVarselRepository,
                                                         OmsorgspengerGrunnlagRepository grunnlagRepository,
                                                         ÅrskvantumTjeneste årskvantumTjeneste,
-                                                        @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
+                                                        @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.grunnlagRepository = grunnlagRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
