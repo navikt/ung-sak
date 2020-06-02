@@ -19,6 +19,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.BeregningsgrunnlagFRISINNDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -100,6 +101,23 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
 
         return finnTjeneste(ref.getFagsakYtelseType()).hentBeregningsgrunnlagDto(ref, bgReferanse);
+    }
+
+    @Override
+    public BeregningsgrunnlagFRISINNDto hentBeregningsgrunnlagFrisinnDto(BehandlingReferanse ref) {
+        var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+
+        if (beregningsgrunnlagPerioderGrunnlag.isPresent()) {
+            var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
+
+            return beregningsgrunnlagPerioderGrunnlag.get()
+                .getGrunnlagPerioder()
+                .stream()
+                .findFirst()
+                .map(it -> tjeneste.hentBeregningsgrunnlagFRISINNDto(ref, it.getEksternReferanse()))
+                .orElse(null);
+        }
+        return null;
     }
 
     @Override

@@ -47,6 +47,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.BeregningsgrunnlagFRISINNDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
@@ -164,6 +165,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
+    public BeregningsgrunnlagFRISINNDto hentBeregningsgrunnlagFRISINNDto(BehandlingReferanse referanse, UUID bgReferanse) {
+        return null;
+    }
+
+    @Override
     public Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType) {
         YtelseTyperKalkulusStøtterKontrakt ytelse = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
 
@@ -236,7 +242,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return restTjeneste.erEndringIBeregning(request);
     }
 
-    private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse) {
+    protected HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
         List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse);
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());

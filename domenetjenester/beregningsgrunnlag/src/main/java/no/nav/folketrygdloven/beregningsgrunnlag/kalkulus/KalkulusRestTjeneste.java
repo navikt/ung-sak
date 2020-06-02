@@ -30,6 +30,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.BeregningsgrunnlagFRISINNDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.vedtak.feil.Feil;
@@ -76,13 +77,13 @@ public class KalkulusRestTjeneste {
                                 @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
         this.oidcRestClient = oidcRestClient;
         this.kalkulusEndpoint = endpoint;
-
         this.startEndpoint = toUri("/api/kalkulus/v1/start");
         this.fortsettEndpoint = toUri("/api/kalkulus/v1/fortsett");
         this.oppdaterEndpoint = toUri("/api/kalkulus/v1/oppdater");
         this.fastsattEndpoint = toUri("/api/kalkulus/v1/fastsatt");
         this.beregningsgrunnlagDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlag");
         this.beregningsgrunnlagGrunnlagEndpoint = toUri("/api/kalkulus/v1/grunnlag");
+
         this.beregningsgrunnlagGrunnlagForReferanseEndpoint = toUri("/api/kalkulus/v1/grunnlagForReferanse");
         this.erEndringIBeregningEndpoint = toUri("/api/kalkulus/v1/erEndring");
         this.deaktiverBeregningsgrunnlag = toUri("/api/kalkulus/v1/deaktiver");
@@ -191,6 +192,7 @@ public class KalkulusRestTjeneste {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
         }
     }
+
 
     private BeregningsgrunnlagGrunnlagDto getBeregningsgrunnlagGrunnlagDtoResponse(URI endpoint, String json) {
         try {
@@ -309,13 +311,13 @@ public class KalkulusRestTjeneste {
     interface RestTjenesteFeil extends DeklarerteFeil {
         static final KalkulusRestTjeneste.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestTjeneste.RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
+        @TekniskFeil(feilkode = "F-FT-K-1000004", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilKalkulus(String feilmelding);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000002", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "F-FT-K-1000005", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilKalkulus(String feilmelding);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000003", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "F-FT-K-1000006", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
     }
 }
