@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering.felles;
+package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
 import java.time.LocalDate;
 import java.time.chrono.ChronoLocalDate;
@@ -10,6 +10,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -19,7 +22,10 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
-import no.nav.k9.sak.behandling.revurdering.felles.FastsettResultatVedEndring.Betingelser;
+import no.nav.k9.sak.behandling.revurdering.felles.HarEtablertYtelse;
+import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -34,29 +40,27 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.vedtak.util.Tuple;
 
-public abstract class RevurderingBehandlingsresultatutlederFelles {
+@Dependent
+@FagsakYtelseTypeRef("FRISINN")
+@BehandlingTypeRef("BT-004")
+public class FrisinnRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {
 
     private BeregningTjeneste kalkulusTjeneste;
     private MedlemTjeneste medlemTjeneste;
-
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private VedtakVarselRepository vedtakVarselRepository;
     private HarEtablertYtelse harEtablertYtelse;
-
     private VilkårResultatRepository vilkårResultatRepository;
 
-    protected RevurderingBehandlingsresultatutlederFelles() {
-        // for CDI proxy
-    }
+    @Inject
+    public FrisinnRevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider, // NOSONAR
+                                                        VedtakVarselRepository vedtakVarselRepository,
+                                                        BeregningTjeneste beregningsgrunnlagTjeneste,
+                                                        @FagsakYtelseTypeRef HarEtablertYtelse harEtablertYtelse,
+                                                        MedlemTjeneste medlemTjeneste) {
 
-    public RevurderingBehandlingsresultatutlederFelles(BehandlingRepositoryProvider repositoryProvider,
-                                                       VedtakVarselRepository vedtakVarselRepository,
-                                                       BeregningTjeneste kalkulusTjeneste,
-                                                       MedlemTjeneste medlemTjeneste,
-                                                       HarEtablertYtelse harEtablertYtelse) {
-
-        this.kalkulusTjeneste = kalkulusTjeneste;
+        this.kalkulusTjeneste = beregningsgrunnlagTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.medlemTjeneste = medlemTjeneste;
@@ -64,6 +68,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.harEtablertYtelse = harEtablertYtelse;
     }
+
 
     private static boolean erYtelsenOpphørt(Behandling origBehandling, Behandling revurdering) {
         return (origBehandling.getBehandlingResultatType().equals(BehandlingResultatType.INNVILGET) &&
@@ -84,7 +89,8 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
         return false;
     }
 
-    public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, boolean erVarselOmRevurderingSendt) {
+    @Override
+    public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, VedtakVarsel vedtakVarsel, boolean erVarselOmRevurderingSendt) {
         Behandling revurdering = behandlingRepository.hentBehandling(revurderingRef.getBehandlingId());
 
         Behandling originalBehandling = revurdering.getOriginalBehandling()
@@ -150,7 +156,7 @@ public abstract class RevurderingBehandlingsresultatutlederFelles {
             }
         }
 
-        Betingelser betingelser = Betingelser.fastsett(erEndringIBeregning, erVarselOmRevurderingSendt,
+        FastsettResultatVedEndring.Betingelser betingelser = FastsettResultatVedEndring.Betingelser.fastsett(erEndringIBeregning, erVarselOmRevurderingSendt,
             harInnvilgetIkkeOpphørtVedtak(revurdering.getFagsak()));
 
         return FastsettResultatVedEndring.fastsett(revurdering, vedtakVarsel, betingelser, harEtablertYtelse);

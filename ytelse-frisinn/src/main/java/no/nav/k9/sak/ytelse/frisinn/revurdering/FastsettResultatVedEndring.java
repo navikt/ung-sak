@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering.felles;
+package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.KonsekvensForYtelsen;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.sak.behandling.revurdering.felles.HarEtablertYtelse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 
@@ -23,7 +24,6 @@ class FastsettResultatVedEndring {
         if (!harEtablertYtelse.vurder(er.minstEnInnvilgetBehandlingUtenPåfølgendeOpphør)) {
             return harEtablertYtelse.fastsettForIkkeEtablertYtelse(revurdering);
         }
-
         Vedtaksbrev vedtaksbrev = utledVedtaksbrev(konsekvenserForYtelsen, er.varselOmRevurderingSendt);
         BehandlingResultatType behandlingResultatType = utledBehandlingResultatType(konsekvenserForYtelsen);
 

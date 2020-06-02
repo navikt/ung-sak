@@ -5,7 +5,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.revurdering.felles.RevurderingBehandlingsresultatutlederFelles;
+import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -20,7 +20,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public abstract class ForeslåBehandlingsresultatTjeneste {
 
-    private RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder;
+    private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private VedtakVarselRepository vedtakVarselRepository;
 
     private FagsakRepository fagsakRepository;
@@ -34,7 +34,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                               VedtakVarselRepository vedtakVarselRepository,
-                                              RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
+                                              RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.revurderingBehandlingsresultatutleder = revurderingBehandlingsresultatutleder;
         this.vedtakVarselRepository = vedtakVarselRepository;
@@ -64,7 +64,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     private VedtakVarsel foreslåVedtakVarselInnvilget(BehandlingReferanse ref, VedtakVarsel vedtakVarsel) {
         if (ref.erRevurdering()) {
-            return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt(ref));
+            return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, vedtakVarsel, erVarselOmRevurderingSendt(ref));
         }
         return vedtakVarsel == null ? new VedtakVarsel() : vedtakVarsel;
     }
@@ -107,7 +107,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     private VedtakVarsel foreslåVedtakVarselAvslått(BehandlingReferanse ref, Behandling behandling, VedtakVarsel vedtakVarsel) {
         if (ref.erRevurdering()) {
-            return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, erVarselOmRevurderingSendt(ref));
+            return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, vedtakVarsel, erVarselOmRevurderingSendt(ref));
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
 

@@ -3,7 +3,7 @@ package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandling.revurdering.felles.RevurderingBehandlingsresultatutlederFelles;
+import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
@@ -25,7 +25,7 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
     public UttakForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                    VedtakVarselRepository vedtakVarselRepository,
                                                    UttakRepository uttakRepository,
-                                                   @FagsakYtelseTypeRef RevurderingBehandlingsresultatutlederFelles revurderingBehandlingsresultatutleder) {
+                                                   @FagsakYtelseTypeRef("FRISINN") RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.uttakRepository = uttakRepository;
     }
