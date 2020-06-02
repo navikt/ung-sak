@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,8 +26,7 @@ import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
-import no.nav.k9.aarskvantum.kontrakter.Årskvantum;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
@@ -39,7 +39,7 @@ public class MapFraÅrskvantumResultatTest {
     @Test
     public void map_fra_årskvantum_resultat() throws Exception {
 
-        var år = new ÅrskvantumResultat(new Årskvantum("2020", "1234567890", 10, 10, BigDecimal.TEN), lagUttaksplan());
+        var år = new ÅrskvantumForbrukteDager(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, Duration.ZERO, BigDecimal.TEN, Duration.ZERO, lagUttaksplan(),new LinkedList<>());
 
 
         List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
