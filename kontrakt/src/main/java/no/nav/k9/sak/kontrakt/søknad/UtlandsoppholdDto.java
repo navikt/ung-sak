@@ -25,7 +25,7 @@ public class UtlandsoppholdDto {
     @JsonProperty(value = "landNavn", required = true)
     @NotNull
     @Size(max = 1000)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String landNavn;
 
     @JsonProperty(value = "tom", required = true)

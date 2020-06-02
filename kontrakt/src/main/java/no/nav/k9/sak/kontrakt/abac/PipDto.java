@@ -28,14 +28,14 @@ public class PipDto {
     @Deprecated(forRemoval = true)
     @JsonProperty(value = "behandlingStatus")
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String behandlingStatus;
 
     /** @deprecated Ikke helt godt kodeverk - her er tittel i stedet. */
     @Deprecated(forRemoval = true)
     @JsonProperty(value = "fagsakStatus")
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fagsakStatus;
 
     public Set<AktørId> getAktørIder() {

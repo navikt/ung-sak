@@ -27,7 +27,7 @@ public class Legeerklæring {
 
     @JsonProperty(value = "diagnosekode", required = true)
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String diagnosekode;
 
     @JsonProperty(value = "fom", required = true)

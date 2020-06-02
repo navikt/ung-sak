@@ -45,7 +45,7 @@ public class VedtakVarselDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "avslagsarsakFritekst")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String avslagsarsakFritekst;
 
     @JsonInclude(value = Include.NON_EMPTY)
@@ -56,7 +56,7 @@ public class VedtakVarselDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "fritekstbrev")
     @Size(max = 100000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fritekstbrev;
 
     /**
@@ -71,7 +71,7 @@ public class VedtakVarselDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "overskrift")
     @Size(max = 1000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{M}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String overskrift;
 
     @JsonProperty(value = "skjæringstidspunkt", required = true)

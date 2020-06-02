@@ -112,10 +112,6 @@ public enum ArbeidType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
-    }
-
     public boolean erAnnenOpptjening() {
         return visGui;
     }

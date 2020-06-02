@@ -29,26 +29,26 @@ public class VilkårDto {
     @JsonProperty(value = "avslagKode")
     @Size(max = 20)
     @Size(max = 1000000)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String avslagKode;
 
     @JsonProperty(value = "evaluering", access = Access.READ_ONLY)
     @JsonRawValue
     @JsonInclude(Include.NON_NULL)
     @Size(max = 1000000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String evaluering;
 
     @JsonProperty(value = "input", access = Access.READ_ONLY)
     @JsonRawValue
     @JsonInclude(Include.NON_NULL)
     @Size(max = 1000000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String input;
 
     @JsonProperty(value = "lovReferanse")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String lovReferanse;
 
     @JsonProperty(value = "merknadParametere")

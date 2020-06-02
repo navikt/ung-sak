@@ -33,7 +33,7 @@ public class BehandlingIdDto {
     @JsonProperty(value = NAME, required = true)
     @Size(max = 50)
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String id;
 
     public BehandlingIdDto(Integer id) {

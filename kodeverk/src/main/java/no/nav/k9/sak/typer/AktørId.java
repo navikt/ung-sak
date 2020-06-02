@@ -27,7 +27,7 @@ public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
     @JsonValue
     @NotNull
     @Size(max = 20)
-    @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^\\d+$", message = "AktørId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String aktørId; // NOSONAR
 
     protected AktørId() {
@@ -35,13 +35,16 @@ public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
     }
 
     public AktørId(Long aktørId) {
-        Objects.requireNonNull(aktørId, "aktørId");
-        this.aktørId = aktørId.toString();
+        this(Objects.requireNonNull(aktørId, "aktørId").toString());
     }
 
     @JsonCreator
-    public AktørId(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "AktørId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String aktørId) {
-        this.aktørId = Objects.requireNonNull(aktørId, "aktørId");
+    public AktørId(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "AktørId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String aktørId) {
+        this.aktørId = Objects.requireNonNull(nonEmpty(aktørId), "aktørId");
+    }
+
+    private String nonEmpty(String str) {
+        return str==null || str.trim().isEmpty()?null: str.trim();
     }
 
     @Override

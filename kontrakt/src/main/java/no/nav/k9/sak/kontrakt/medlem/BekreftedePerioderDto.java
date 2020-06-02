@@ -26,11 +26,11 @@ public class BekreftedePerioderDto {
     @JsonProperty(value = "aksjonspunkter")
     @Size(max = 100)
     @Valid
-    private List<@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String> aksjonspunkter = new ArrayList<>();
+    private List<@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String> aksjonspunkter = new ArrayList<>();
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonProperty(value = "bosattVurdering")

@@ -25,7 +25,7 @@ public class TotrinnskontrollSkjermlenkeContextDto {
     @JsonProperty(value = "skjermlenkeType", required = true)
     @NotNull
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\s\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\s\\-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String skjermlenkeType;
 
     @JsonProperty(value = "totrinnskontrollAksjonspunkter")

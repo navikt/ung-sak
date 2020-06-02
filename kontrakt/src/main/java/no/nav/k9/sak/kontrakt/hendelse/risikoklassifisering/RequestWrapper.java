@@ -19,7 +19,7 @@ public class RequestWrapper {
     @JsonProperty(value = "callId", required = true)
     @NotNull
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String callId;
 
     @JsonProperty(value = "request", required = true)

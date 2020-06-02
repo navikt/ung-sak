@@ -33,7 +33,7 @@ public class OrgNummer implements Comparable<OrgNummer>, IndexKey {
     @JsonValue
     @NotNull
     @Size(max=20)
-    @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String orgNummer; // NOSONAR
 
     @JsonCreator
@@ -43,7 +43,7 @@ public class OrgNummer implements Comparable<OrgNummer>, IndexKey {
             // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.
             throw new IllegalArgumentException("Ikke gyldig orgnummer: " + orgNummer);
         }
-        this.orgNummer = orgNummer;
+        this.orgNummer = orgNummer.trim();
     }
 
     protected OrgNummer() {

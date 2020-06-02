@@ -31,18 +31,18 @@ public class TilgrensendeYtelserDto implements Comparable<TilgrensendeYtelserDto
 
     @JsonProperty(value = "relatertYtelseType")
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String relatertYtelseType;
 
     @JsonProperty(value = "saksNummer")
     @JsonAlias(value = "saksnummer")
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}\\-_/:\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\-_/:\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String saksNummer;
 
     @JsonProperty(value = "status")
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String status;
 
     public TilgrensendeYtelserDto() {

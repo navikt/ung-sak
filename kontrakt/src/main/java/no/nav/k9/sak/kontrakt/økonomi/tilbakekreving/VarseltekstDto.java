@@ -18,7 +18,7 @@ public class VarseltekstDto {
     @JsonProperty(value = "varseltekst", required = true)
     @NotNull
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{P}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{P}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String varseltekst;
 
     public VarseltekstDto(String varseltekst) {

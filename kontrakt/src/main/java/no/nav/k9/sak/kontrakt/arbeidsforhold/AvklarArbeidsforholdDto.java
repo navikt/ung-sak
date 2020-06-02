@@ -30,7 +30,7 @@ public class AvklarArbeidsforholdDto {
 
     // For mottak fra GUI (orgnr for virksomhet, og aktørId for person-arbeidsgiver)
     @JsonProperty(value = "arbeidsgiverIdentifikator")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverIdentifikator;
 
     @JsonProperty(value = "basertPaInntektsmelding")
@@ -38,7 +38,7 @@ public class AvklarArbeidsforholdDto {
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonProperty(value = "brukArbeidsforholdet")
@@ -52,7 +52,7 @@ public class AvklarArbeidsforholdDto {
 
     @JsonProperty(value = "erstatterArbeidsforholdId")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String erstatterArbeidsforholdId;
 
     @JsonProperty(value = "fomDato", required = true)
@@ -63,7 +63,7 @@ public class AvklarArbeidsforholdDto {
     private Boolean fortsettBehandlingUtenInntektsmelding;
 
     @JsonProperty(value = "id")
-    @Pattern(regexp = "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String id;
 
     @JsonProperty(value = "inntektMedTilBeregningsgrunnlag")
@@ -76,7 +76,7 @@ public class AvklarArbeidsforholdDto {
     private LocalDate mottattDatoInntektsmelding;
 
     @JsonProperty(value = "navn")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navn;
 
     @JsonProperty(value = "overstyrtTom")

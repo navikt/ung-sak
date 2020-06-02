@@ -43,7 +43,7 @@ public class SettBehandlingPaVentDto {
     private Venteårsak ventearsak;
 
     @JsonProperty(value = "ventearsakVariant")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Size(max = 200)
     private String ventearsakVariant;
 

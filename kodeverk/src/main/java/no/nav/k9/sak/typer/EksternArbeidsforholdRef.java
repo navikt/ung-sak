@@ -29,7 +29,7 @@ public class EksternArbeidsforholdRef implements IndexKey, Serializable {
 
     @JsonValue
     @NotNull
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message="'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String referanse;
 
     EksternArbeidsforholdRef() {
@@ -37,11 +37,16 @@ public class EksternArbeidsforholdRef implements IndexKey, Serializable {
 
     @JsonCreator
     protected EksternArbeidsforholdRef(String referanse) {
-        this.referanse = referanse;
+        this.referanse = nonEmpty(referanse);
+    }
+
+    private static String nonEmpty(String str) {
+        return str == null || str.trim().isEmpty() ? null : str.trim();
     }
 
     public static EksternArbeidsforholdRef ref(String referanse) {
-        return new EksternArbeidsforholdRef(referanse);
+        String s = nonEmpty(referanse);
+        return s == null ? null : new EksternArbeidsforholdRef(s);
     }
 
     public static EksternArbeidsforholdRef nullRef() {

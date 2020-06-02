@@ -28,7 +28,7 @@ public class JournalpostId implements Serializable, IndexKey {
     @JsonValue
     @NotNull
     @Size(max = 50, min = 3)
-    @Pattern(regexp = GYLDIG, message = "Saksnummer '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = GYLDIG, message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String journalpostId; // NOSONAR
 
     JournalpostId() {
@@ -41,8 +41,12 @@ public class JournalpostId implements Serializable, IndexKey {
     }
 
     @JsonCreator
-    public JournalpostId(@NotNull @Size(max = 50, min = 3) @Pattern(regexp = GYLDIG, message = "JournalpostId '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String journalpostId) {
-        this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
+    public JournalpostId(@NotNull @Size(max = 50, min = 3) @Pattern(regexp = GYLDIG, message = "JournalpostId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String journalpostId) {
+        this.journalpostId = Objects.requireNonNull(nonEmpty(journalpostId), "journalpostId");
+    }
+
+    private String nonEmpty(String str) {
+        return str==null || str.trim().isEmpty()?null: str.trim();
     }
 
     public static boolean erGyldig(String input) {

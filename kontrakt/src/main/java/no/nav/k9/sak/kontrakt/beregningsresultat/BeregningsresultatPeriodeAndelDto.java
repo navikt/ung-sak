@@ -140,7 +140,7 @@ public class BeregningsresultatPeriodeAndelDto {
 
     @JsonProperty(value = "arbeidsforholdId")
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Graph}\\-\\p{P}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\-\\p{P}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdId;
 
     @JsonProperty(value = "arbeidsforholdType")
@@ -149,7 +149,7 @@ public class BeregningsresultatPeriodeAndelDto {
 
     @JsonProperty(value = "arbeidsgiverNavn")
     @Size(max = 200)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverNavn;
 
     @JsonAlias("orgNummer")
@@ -159,7 +159,7 @@ public class BeregningsresultatPeriodeAndelDto {
 
     @JsonProperty(value = "eksternArbeidsforholdId")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String eksternArbeidsforholdId;
 
     @JsonProperty(value = "refusjon")

@@ -80,10 +80,6 @@ public enum DokumentKategori implements Kodeverdi {
         return navn;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet().stream().map(k -> "'" + k + "'").collect(Collectors.toList()));
-    }
-
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {

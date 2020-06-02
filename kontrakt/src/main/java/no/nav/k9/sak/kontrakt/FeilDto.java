@@ -24,7 +24,7 @@ public class FeilDto implements Serializable {
     @JsonProperty(value = "feilmelding", required = true)
     @NotNull
     @Size(max = 2000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String feilmelding;
 
     @JsonInclude(value = Include.NON_EMPTY)

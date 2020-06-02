@@ -19,12 +19,12 @@ public class SystemNedeDto {
 
     @JsonProperty(value = "endepunkt")
     @Size(max = 500)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String endepunkt;
 
     @JsonProperty(value = "feilmelding")
     @Size(max = 50000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String feilmelding;
 
     @JsonProperty(value = "nedeFremTilTidspunkt")
@@ -32,13 +32,13 @@ public class SystemNedeDto {
 
     @JsonProperty(value = "stackTrace")
     @Size(max = 50000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String stackTrace;
 
     @JsonProperty(value = "systemNavn", required = true)
     @NotNull
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String systemNavn;
 
     public SystemNedeDto(String systemNavn, String endepunkt, LocalDateTime nedeFremTilTidspunkt, String feilmelding, String stackTrace) {

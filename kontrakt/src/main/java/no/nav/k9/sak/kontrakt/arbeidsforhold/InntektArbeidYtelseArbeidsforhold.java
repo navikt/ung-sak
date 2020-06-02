@@ -34,14 +34,14 @@ public class InntektArbeidYtelseArbeidsforhold {
 
     // For mottak fra GUI (orgnr for virksomhet, og aktørId for person-arbeidsgiver)
     @JsonProperty(value = "arbeidsgiverIdentifikator")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverIdentifikator;
 
     // For visning i GUI (orgnr for virksomhet, og fødselsdato formatert dd.MM.yyyy for person-arbeidsgiver)
     @JsonProperty(value = "arbeidsgiverIdentifiktorGUI")
     @JsonAlias(value = "arbeidsgiverIdentifikatorForVisning")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverIdentifikatorGUI;
 
     @JsonProperty(value = "basertPaInntektsmelding")
@@ -49,7 +49,7 @@ public class InntektArbeidYtelseArbeidsforhold {
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 400)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonProperty(value = "brukArbeidsforholdet")
@@ -63,7 +63,7 @@ public class InntektArbeidYtelseArbeidsforhold {
 
     @JsonProperty(value = "eksternArbeidsforholdId")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String eksternArbeidsforholdId;
 
     @JsonProperty(value = "erEndret")
@@ -77,7 +77,7 @@ public class InntektArbeidYtelseArbeidsforhold {
 
     @JsonProperty(value = "erstatterArbeidsforholdId")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String erstatterArbeidsforholdId;
 
     @JsonProperty(value = "fomDato", required = true)
@@ -96,7 +96,7 @@ public class InntektArbeidYtelseArbeidsforhold {
     private Boolean harErstattetEttEllerFlere;
 
     @JsonProperty(value = "id")
-    @Pattern(regexp = "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String id;
 
     @JsonProperty(value = "ikkeRegistrertIAaRegister")
@@ -117,7 +117,7 @@ public class InntektArbeidYtelseArbeidsforhold {
     private LocalDate mottattDatoInntektsmelding;
 
     @JsonProperty(value = "navn")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navn;
 
     @JsonProperty(value = "overstyrtTom")

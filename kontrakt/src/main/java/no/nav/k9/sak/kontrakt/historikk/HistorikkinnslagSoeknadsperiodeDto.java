@@ -20,7 +20,7 @@ public class HistorikkinnslagSoeknadsperiodeDto {
 
     @JsonProperty(value = "navnVerdi")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navnVerdi;
 
     @JsonProperty(value = "soeknadsperiodeType")
@@ -30,7 +30,7 @@ public class HistorikkinnslagSoeknadsperiodeDto {
 
     @JsonProperty(value = "tilVerdi")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String tilVerdi;
 
     public HistorikkinnslagSoeknadsperiodeDto() {

@@ -36,7 +36,7 @@ public class HistorikkinnslagDto implements Comparable<HistorikkinnslagDto> {
 
     @JsonProperty(value = "opprettetAv")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String opprettetAv;
 
     @JsonProperty(value = "opprettetTidspunkt")

@@ -32,7 +32,7 @@ public class UttakArbeidsforhold implements Comparable<UttakArbeidsforhold> {
     @JsonProperty(value = "organisasjonsnummer")
     @Valid
     @Size(max = 20)
-    @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String organisasjonsnummer;
 
     /**
@@ -52,13 +52,13 @@ public class UttakArbeidsforhold implements Comparable<UttakArbeidsforhold> {
     @JsonProperty(value = "arbeidsforholdId")
     @Valid
     @Size(max = 40)
-    @Pattern(regexp = "^[\\p{Alnum}_\\.\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}_\\.\\-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdId;
 
-    public UttakArbeidsforhold(@JsonProperty(value = "organisasjonsnummer") @Valid @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String organisasjonsnummer,
+    public UttakArbeidsforhold(@JsonProperty(value = "organisasjonsnummer") @Valid @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String organisasjonsnummer,
                                @JsonProperty(value = "aktørId") @Valid AktørId aktørId,
                                @JsonProperty(value = "type") @Valid UttakArbeidType type,
-                               @JsonProperty(value = "arbeidsforholdId") @Valid @Size(max = 40) @Pattern(regexp = "^[\\p{Alnum}_\\.\\-]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String arbeidsforholdId) {
+                               @JsonProperty(value = "arbeidsforholdId") @Valid @Size(max = 40) @Pattern(regexp = "^[\\p{Alnum}_\\.\\-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String arbeidsforholdId) {
         if (aktørId != null && organisasjonsnummer != null) {
             throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver med både orgnr og aktørId");
         }

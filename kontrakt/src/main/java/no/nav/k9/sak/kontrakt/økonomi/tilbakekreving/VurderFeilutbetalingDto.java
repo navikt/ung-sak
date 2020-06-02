@@ -23,7 +23,7 @@ public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "varseltekst")
     @Size(max = 3000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String varseltekst;
 
     @JsonProperty(value = "videreBehandling", required = true)

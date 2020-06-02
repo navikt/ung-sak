@@ -26,7 +26,7 @@ public class Arbeidsgiver implements IndexKey {
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     @Size(max=20)
-    @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverOrgnr;
 
     /**
@@ -41,13 +41,18 @@ public class Arbeidsgiver implements IndexKey {
     }
 
     protected Arbeidsgiver(String arbeidsgiverOrgnr, AktørId arbeidsgiverAktørId) {
-        if (arbeidsgiverAktørId == null && arbeidsgiverOrgnr == null) {
+        this.arbeidsgiverOrgnr = nonEmpty(arbeidsgiverOrgnr);
+        this.arbeidsgiverAktørId = arbeidsgiverAktørId;
+        
+        if (this.arbeidsgiverAktørId == null && this.arbeidsgiverOrgnr == null) {
             throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver uten hverken orgnr eller aktørId");
-        } else if (arbeidsgiverAktørId != null && arbeidsgiverOrgnr != null) {
+        } else if (this.arbeidsgiverAktørId != null && this.arbeidsgiverOrgnr != null) {
             throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver med både orgnr og aktørId");
         }
-        this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
-        this.arbeidsgiverAktørId = arbeidsgiverAktørId;
+    }
+
+    private String nonEmpty(String str) {
+        return str==null || str.trim().isEmpty()?null: str.trim();
     }
 
     @Override

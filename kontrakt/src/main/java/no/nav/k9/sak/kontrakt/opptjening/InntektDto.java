@@ -33,7 +33,7 @@ public class InntektDto {
 
     @JsonProperty(value = "utbetaler")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}\\p{M}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String utbetaler;
 
     /** Inntektspost - om det er vanlig LØNN, en ytelse, etc.*/
@@ -58,7 +58,7 @@ public class InntektDto {
     @Deprecated(forRemoval = true)
     @JsonProperty(value = "navn")
     @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{M}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String navn;
 
     public InntektDto() {

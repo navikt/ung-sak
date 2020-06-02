@@ -19,7 +19,7 @@ public class AnnenPart {
 
     @JsonProperty(value = "utenlandskFnr")
     @Size(max = 50)
-    @Pattern(regexp = "^[\\p{Alnum}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String utenlandskFnr;
 
     public AnnenPart(AktoerId annenPartAktoerId) {

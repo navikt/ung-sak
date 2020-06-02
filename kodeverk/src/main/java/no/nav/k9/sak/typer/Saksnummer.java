@@ -23,7 +23,7 @@ public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
 
     @JsonValue
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer '${validatedValue}' matcher ikke tillatt pattern '{regexp}'")
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String saksnummer; // NOSONAR
 
     protected Saksnummer() {
@@ -31,9 +31,12 @@ public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
     }
 
     @JsonCreator
-    public Saksnummer(@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer '${validatedValue}' matcher ikke tillatt pattern '{regexp}'") String saksnummer) {
-        Objects.requireNonNull(saksnummer, "saksnummer");
-        this.saksnummer = saksnummer;
+    public Saksnummer(@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String saksnummer) {
+        this.saksnummer = Objects.requireNonNull(nonEmpty(saksnummer), "saksnummer");
+    }
+    
+    private String nonEmpty(String str) {
+        return str==null || str.trim().isEmpty()?null: str.trim();
     }
 
     @Override
