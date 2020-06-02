@@ -65,6 +65,14 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         var ref = BehandlingReferanse.fra(behandling, stp);
 
 
+
+        var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+
+        // Hvis vi manuellt har bekreftet uttaksplan ikke generer ny uttaksplan, men kjør videre uten aksjonspunkt
+        if (forbrukteDager.getSisteUttaksplan() != null && Bekreftet.MANUELTBEKREFTET.equals(forbrukteDager.getSisteUttaksplan().getBekreftet())) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
         var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
 
         if (skalDetLagesAksjonspunkt(årskvantumResultat)) {
