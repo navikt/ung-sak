@@ -276,18 +276,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         List<BeregningAksjonspunktResultat> aksjonspunktResultatList = tilstandResponse.getAksjonspunktMedTilstandDto().stream().map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
             dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist())).collect(Collectors.toList());
         KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
-        if (tilstandResponse.getVilkårsperioder() != null) {
-            tilstandResponse.getVilkårsperioder().forEach(vp -> {
-                Periode periode = vp.getVilkårsperiode();
-                DatoIntervallEntitet vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
-                if (!vp.isErVilkårOppfylt()) {
-                    kalkulusResultat.leggTilVilkårResultat(vilkårPeriode, false, mapTilAvslagsårsak(vp.getVilkårsavslagsårsak()));
-                } else {
-                    kalkulusResultat.leggTilVilkårResultat(vilkårPeriode, true, null);
-
-                }
-            });
-        }
         if (tilstandResponse.getVilkarOppfylt() != null) {
             if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
                 return kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse.getVilkårsavslagsårsak()));

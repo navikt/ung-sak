@@ -8,6 +8,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -62,14 +63,21 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForFørstePeriode(BehandlingReferanse.fra(behandling));
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
+
+        if (beregningsgrunnlag.size() > 1) {
+            throw new IllegalStateException("Fant flere beregningsgrunnlag for FRISINN.");
+        }
 
         UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
         UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
         // Kalle regeltjeneste
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag
-            .map(List::of).orElse(List.of()), uttakResultat);
+        List<Beregningsgrunnlag> beregningsgrunnlagListe = beregningsgrunnlag.stream()
+            .findFirst()
+            .map(MapTilBeregningsgrunnlag::mapBeregningsgrunnlag)
+            .orElse(List.of());
+        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlagListe, uttakResultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
