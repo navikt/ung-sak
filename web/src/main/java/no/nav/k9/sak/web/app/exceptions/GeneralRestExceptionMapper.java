@@ -40,6 +40,9 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationEx
         if (cause instanceof VLException) {
             return handleVLException((VLException) cause, callId);
         }
+        if (cause instanceof UnsupportedOperationException) {
+            return handleUnsupportedException(callId, cause);
+        }
 
         return handleGenerellFeil(cause, callId);
     }
@@ -85,6 +88,15 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationEx
         String feilmelding = feil.getFeilmelding();
         FeilType feilType = FeilType.BEHANDLING_ENDRET_FEIL;
         return Response.status(Response.Status.CONFLICT)
+            .entity(new FeilDto(feilType, feilmelding))
+            .type(MediaType.APPLICATION_JSON)
+            .build();
+    }
+
+    private Response handleUnsupportedException(String callId, Throwable cause) {
+        String feilmelding = "Funksjonalitet er ikke støttet: " + cause.getMessage() + ". Meld til support med referanse-id: " + callId; //$NON-NLS-1$ //$NON-NLS-2$
+        FeilType feilType = FeilType.GENERELL_FEIL;
+        return Response.status(Response.Status.NOT_IMPLEMENTED)
             .entity(new FeilDto(feilType, feilmelding))
             .type(MediaType.APPLICATION_JSON)
             .build();

@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
-import static no.nav.vedtak.feil.LogLevel.WARN;
-
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,10 +22,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.IntegrasjonFeil;
 
 @Dependent
 public class SøknadDokumentmottaker {
@@ -118,7 +112,7 @@ public class SøknadDokumentmottaker {
 
     private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
         if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
-            throw SøknadDokumentmottakerFeil.FACTORY.fagsakHarAlleredeÅpenBehandling(fagsak.getSaksnummer()).toException();
+            throw new UnsupportedOperationException("Frisinn støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
         }
     }
 
@@ -145,10 +139,4 @@ public class SøknadDokumentmottaker {
         return fagsak;
     }
 
-    interface SøknadDokumentmottakerFeil extends DeklarerteFeil {
-        SøknadDokumentmottakerFeil FACTORY = FeilFactory.create(SøknadDokumentmottakerFeil.class); // NOSONAR
-
-        @IntegrasjonFeil(feilkode = "K9-366942", feilmelding = "Fagsak [%s] har allerede en åpen behandling. Søknaden kan ikke behandles får den åpne behandlingen er avsluttet", logLevel = WARN, exceptionClass = BehandlingÅpenException.class)
-        Feil fagsakHarAlleredeÅpenBehandling(Saksnummer saksnummer);
-    }
 }
