@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -35,6 +36,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 @ApplicationScoped
 public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
+    private static final LocalDate STP_FRISINN = LocalDate.of(2020, 3, 1);
     private BehandlingRepository behandlingRepository;
     private BeregningTjeneste kalkulusTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
@@ -63,20 +65,13 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
-
-        if (beregningsgrunnlag.size() > 1) {
-            throw new IllegalStateException("Fant flere beregningsgrunnlag for FRISINN.");
-        }
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
 
         UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
         UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
         // Kalle regeltjeneste
-        List<Beregningsgrunnlag> beregningsgrunnlagListe = beregningsgrunnlag.stream()
-            .findFirst()
-            .map(MapTilBeregningsgrunnlag::mapBeregningsgrunnlag)
-            .orElse(List.of());
+        List<Beregningsgrunnlag> beregningsgrunnlagListe = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlagListe, uttakResultat);
 
         // Verifiser beregningsresultat
