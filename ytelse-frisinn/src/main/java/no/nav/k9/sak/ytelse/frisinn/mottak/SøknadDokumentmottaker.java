@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -22,7 +21,6 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.søknad.felles.Periode;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @Dependent
@@ -108,13 +106,13 @@ public class SøknadDokumentmottaker {
     private void validerSøknadErForNyPeriode(Fagsak fagsak, LocalDate fraOgMed) {
         søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), fraOgMed, LocalDate.now().plusYears(100)).stream()
             .findAny()
-            .ifPresent(behandling -> { throw new IllegalStateException("Ny søknad for Frisinn må være for nyere perioder enn allerede mottatte søknader. " +
-                "Fant tidligere søknad med periode som gjelder etter" + fraOgMed); });
+            .ifPresent(behandling -> { throw new IllegalStateException("Fant tidligere Frisinn-søknad som overlapper samme periode " +
+                "for saksnummer " + fagsak.getSaksnummer() + " fra og med " + fraOgMed); });
     }
 
     private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
         if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
-            throw new IllegalStateException("Frisinn er ikke klar til å ta imot søknad. Kan ikke oppdatere åpen behandling");
+            throw new UnsupportedOperationException("Frisinn støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
         }
     }
 
@@ -140,4 +138,5 @@ public class SøknadDokumentmottaker {
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }
+
 }
