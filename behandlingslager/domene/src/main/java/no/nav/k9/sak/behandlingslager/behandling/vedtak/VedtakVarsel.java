@@ -1,9 +1,14 @@
 package no.nav.k9.sak.behandlingslager.behandling.vedtak;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import javax.persistence.AttributeConverter;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.Converter;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -52,6 +57,11 @@ public class VedtakVarsel extends BaseEntitet {
 
     @Column(name = "sendt_varsel_om_revurdering")
     private Boolean harSendtVarselOmRevurdering;
+
+    @Column(name = "redusert_utbetaling_aarsaker")
+    @Convert(converter = StringSetConverter.class)
+    private Set<String> redusertUtbetalingÅrsaker = new HashSet<>();
+
 
     public VedtakVarsel() {
         // for hibernate
@@ -120,18 +130,43 @@ public class VedtakVarsel extends BaseEntitet {
     public void setBehandlingId(Long behandlingId) {
         this.behandlingId = behandlingId;
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(getBehandlingId());
     }
-    
+
     public void setHarSendtVarselOmRevurdering(Boolean harSendtVarselOmRevurdering) {
         this.harSendtVarselOmRevurdering = harSendtVarselOmRevurdering;
     }
 
     public boolean getErVarselOmRevurderingSendt() {
         return harSendtVarselOmRevurdering == null ? false : harSendtVarselOmRevurdering;
+    }
+
+    public Set<String> getRedusertUtbetalingÅrsaker() {
+        return Collections.unmodifiableSet(redusertUtbetalingÅrsaker);
+    }
+
+    public void addRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
+        this.redusertUtbetalingÅrsaker.addAll(redusertUtbetalingÅrsaker);
+    }
+
+    @Converter
+    static class StringSetConverter implements AttributeConverter<Set<String>, String> {
+
+        private static final String SPLIT_CHAR = ",";
+
+        @Override
+        public String convertToDatabaseColumn(Set<String> set) {
+            return String.join(",", set);
+        }
+
+        @Override
+        public Set<String> convertToEntityAttribute(String joined) {
+            return Set.of(joined.split(SPLIT_CHAR));
+        }
+
     }
 
 }
