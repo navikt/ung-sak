@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -498,5 +499,32 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     @Override
     public String toString() {
         return super.toString() + "('" + getKode() + "')";
+    }
+
+    public static void main(String[] args) {
+        var sb = new StringBuilder(100 * 1000);
+
+        sb.append("kode,type,ytelse,navn,defaultTotrinn,behandlingSteg\n");
+
+        for (var v : values()) {
+            var k = v.getKode();
+
+            var ytelseTyper = v.ytelseTyper == null || v.ytelseTyper.isEmpty() ? Set.of(FagsakYtelseType.UDEFINERT) : v.ytelseTyper;
+            for (var yt : ytelseTyper) {
+                var sb2 = new StringBuilder(300);
+                sb2.append(k).append(",");
+                sb2.append(v.aksjonspunktType.getKode()).append(",");
+                sb2.append(yt.getKode()).append(",");
+                String navn = v.navn==null?"":"\""+v.navn+"\"";
+                sb2.append(navn).append(",");
+                sb2.append(v.defaultTotrinnBehandling).append(",");
+                sb2.append(v.behandlingStegType==null?"":v.behandlingStegType.getKode() + (v.vurderingspunktType==null?"":":"+v.vurderingspunktType));
+                
+                sb.append(sb2).append("\n");
+            }
+
+        }
+
+        System.out.println(sb.toString());
     }
 }
