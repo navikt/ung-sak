@@ -16,9 +16,8 @@ public class FrontendLoginResource {
 
     @GET
     @Path("")
-    public Response login(@QueryParam("redirectTo") @DefaultValue("/") String redirectTo) {
-        var relativePath = "/";
-        relativePath = URI.create(redirectTo).getPath();
+    public Response login(@QueryParam("redirectTo") @DefaultValue("/k9/web/") String redirectTo) {
+        var relativePath = URI.create(redirectTo).getPath();
         if (!relativePath.startsWith("/")) {
             relativePath = "/" + relativePath;
         }
