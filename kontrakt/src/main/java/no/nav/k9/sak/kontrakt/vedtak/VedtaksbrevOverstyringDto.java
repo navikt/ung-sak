@@ -1,5 +1,10 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.Collections;
+import java.util.Set;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -29,16 +34,22 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
     @JsonProperty(value = "skalBrukeOverstyrendeFritekstBrev", required = true)
     private boolean skalBrukeOverstyrendeFritekstBrev;
 
+    @JsonProperty(value = "redusertUtbetalingÅrsaker")
+    @Size(max = 50)
+    @Valid
+    private Set<@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String> redusertUtbetalingÅrsaker;
+
     protected VedtaksbrevOverstyringDto() {
         // For Jackson
     }
 
     protected VedtaksbrevOverstyringDto(String begrunnelse, String overskrift, String fritekstBrev,
-                                        boolean skalBrukeOverstyrendeFritekstBrev) {
+                                        boolean skalBrukeOverstyrendeFritekstBrev, Set<@NotNull String> redusertUtbetalingÅrsaker) {
         super(begrunnelse);
         this.overskrift = overskrift;
         this.fritekstBrev = fritekstBrev;
         this.skalBrukeOverstyrendeFritekstBrev = skalBrukeOverstyrendeFritekstBrev;
+        this.redusertUtbetalingÅrsaker = redusertUtbetalingÅrsaker == null ? Collections.emptySet() : Set.copyOf(redusertUtbetalingÅrsaker);;
     }
 
     public String getFritekstBrev() {
@@ -51,6 +62,10 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
 
     public boolean isSkalBrukeOverstyrendeFritekstBrev() {
         return skalBrukeOverstyrendeFritekstBrev;
+    }
+
+    public Set<String> getRedusertUtbetalingÅrsaker() {
+        return Collections.unmodifiableSet(redusertUtbetalingÅrsaker);
     }
 
     public void setFritekstBrev(String fritekstBrev) {

@@ -60,7 +60,7 @@ public class VedtakVarsel extends BaseEntitet {
 
     @Column(name = "redusert_utbetaling_aarsaker")
     @Convert(converter = StringSetConverter.class)
-    private Set<String> redusertUtbetalingÅrsaker = new HashSet<>();
+    private Set<String> redusertUtbetalingÅrsaker = Collections.emptySet();
 
 
     public VedtakVarsel() {
@@ -148,8 +148,8 @@ public class VedtakVarsel extends BaseEntitet {
         return Collections.unmodifiableSet(redusertUtbetalingÅrsaker);
     }
 
-    public void addRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
-        this.redusertUtbetalingÅrsaker.addAll(redusertUtbetalingÅrsaker);
+    public void setRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
+        this.redusertUtbetalingÅrsaker = Set.copyOf(redusertUtbetalingÅrsaker);
     }
 
     @Converter

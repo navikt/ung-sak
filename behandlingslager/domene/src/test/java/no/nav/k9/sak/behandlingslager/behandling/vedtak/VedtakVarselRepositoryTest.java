@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
-public class VedtakVarselRepositorylTest {
+public class VedtakVarselRepositoryTest {
 
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -59,7 +59,7 @@ public class VedtakVarselRepositorylTest {
         vedtakVarsel.setHarSendtVarselOmRevurdering(true);
         vedtakVarsel.setOverskrift("en overskrift");
         vedtakVarsel.setVedtaksbrev(AUTOMATISK);
-        vedtakVarsel.addRedusertUtbetalingÅrsaker(Set.of("ÅRSAK_1", "ÅRSAK_2"));
+        vedtakVarsel.setRedusertUtbetalingÅrsaker(Set.of("ÅRSAK_1", "ÅRSAK_2"));
         return vedtakVarsel;
     }
 }

@@ -53,10 +53,10 @@ public class AksjonspunktOppdatererTest {
 
     @Inject
     private VedtakTjeneste vedtakTjeneste;
-    
+
     @Inject
     private OpprettToTrinnsgrunnlag opprettTotrinnsgrunnlag;
-    
+
     @Inject
     private VedtakVarselRepository vedtakVarselRepository;
 
@@ -67,9 +67,9 @@ public class AksjonspunktOppdatererTest {
 
         Behandling behandling = scenario.lagre(repositoryProvider);
 
-        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false);
+        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null);
         ForeslåVedtakAksjonspunktOppdaterer foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(
-            vedtakVarselRepository, 
+            vedtakVarselRepository,
             mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,
             vedtakTjeneste) {

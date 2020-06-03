@@ -20,7 +20,6 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtaksbrevOverstyringDto;
 
 public abstract class AbstractVedtaksbrevOverstyringshåndterer {
-    public static final String FPSAK_LAGRE_FRITEKST_INN_FORMIDLING = "fpsak.lagre_fritekst_inn_fpformidling";
     protected HistorikkTjenesteAdapter historikkApplikasjonTjeneste;
     VedtakVarselRepository vedtakVarselRepository;
     protected OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag;
@@ -54,7 +53,7 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         this.unleash = unleash;
     }
 
-    void oppdaterVedtaksbrev(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
+    void oppdaterVedtaksbrevForFritekst(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
             settFritekstBrev(param.getBehandlingId(), dto.getOverskrift(), dto.getFritekstBrev());
 
@@ -118,5 +117,11 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         innslag.setBehandlingId(behandling.getId());
         tekstBuilder.build(innslag);
         historikkApplikasjonTjeneste.lagInnslag(innslag);
+    }
+
+    void oppdaterRedusertUtbetalingÅrsaker(VedtaksbrevOverstyringDto dto, Long behandlingId) {
+        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(
+            v -> v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker())
+        );
     }
 }

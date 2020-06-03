@@ -39,12 +39,14 @@ public class ForeslåVedtakAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
-            super.oppdaterVedtaksbrev(dto, param, builder);
+            super.oppdaterVedtaksbrevForFritekst(dto, param, builder);
         } else {
             opprettAksjonspunktForFatterVedtak(builder);
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
             opprettHistorikkinnslag(behandling);
         }
+
+        oppdaterRedusertUtbetalingÅrsaker(dto, param.getBehandlingId());
         return builder.build();
     }
 
