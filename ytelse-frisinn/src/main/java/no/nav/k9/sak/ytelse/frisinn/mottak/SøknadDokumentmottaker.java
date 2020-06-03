@@ -1,7 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
+import static no.nav.vedtak.feil.LogLevel.WARN;
+
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -22,8 +23,11 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.søknad.felles.Periode;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
+import no.nav.vedtak.feil.Feil;
+import no.nav.vedtak.feil.FeilFactory;
+import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
+import no.nav.vedtak.feil.deklarasjon.IntegrasjonFeil;
 
 @Dependent
 public class SøknadDokumentmottaker {
@@ -108,13 +112,13 @@ public class SøknadDokumentmottaker {
     private void validerSøknadErForNyPeriode(Fagsak fagsak, LocalDate fraOgMed) {
         søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), fraOgMed, LocalDate.now().plusYears(100)).stream()
             .findAny()
-            .ifPresent(behandling -> { throw new IllegalStateException("Ny søknad for Frisinn må være for nyere perioder enn allerede mottatte søknader. " +
-                "Fant tidligere søknad med periode som gjelder etter" + fraOgMed); });
+            .ifPresent(behandling -> { throw new IllegalStateException("Fant tidligere Frisinn-søknad som overlapper samme periode " +
+                "for saksnummer " + fagsak.getSaksnummer() + " fra og med " + fraOgMed); });
     }
 
     private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
         if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
-            throw new IllegalStateException("Frisinn er ikke klar til å ta imot søknad. Kan ikke oppdatere åpen behandling");
+            throw SøknadDokumentmottakerFeil.FACTORY.fagsakHarAlleredeÅpenBehandling(fagsak.getSaksnummer()).toException();
         }
     }
 
@@ -139,5 +143,12 @@ public class SøknadDokumentmottaker {
         final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, fom, tom);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
+    }
+
+    interface SøknadDokumentmottakerFeil extends DeklarerteFeil {
+        SøknadDokumentmottakerFeil FACTORY = FeilFactory.create(SøknadDokumentmottakerFeil.class); // NOSONAR
+
+        @IntegrasjonFeil(feilkode = "K9-366942", feilmelding = "Fagsak [%s] har allerede en åpen behandling. Søknaden kan ikke behandles får den åpne behandlingen er avsluttet", logLevel = WARN, exceptionClass = BehandlingÅpenException.class)
+        Feil fagsakHarAlleredeÅpenBehandling(Saksnummer saksnummer);
     }
 }
