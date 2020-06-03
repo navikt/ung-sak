@@ -1,0 +1,1 @@
+update aksjonspunkt set TOTRINN_BEHANDLING=FALSE where aksjonspunkt_status='OPPR' AND aksjonspunkt_def='9003';
