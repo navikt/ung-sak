@@ -32,7 +32,7 @@ public class MapOmsorgspengerFravær {
             .orElse(Stream.empty());
 
         List<LocalDateSegment<Duration>> segmenter = fravær
-            .map(f -> new LocalDateSegment<Duration>(f.getDato().getValue(), f.getDato().getValue(), PeriodeAndel.toDuration(f.getTimer().getValue())))
+            .map(f -> new LocalDateSegment<Duration>(f.getDato().getValue(), f.getDato().getValue(), f.getTimer()==null? Duration.ZERO: PeriodeAndel.toDuration(f.getTimer().getValue())))
             .collect(Collectors.toList());
         return new LocalDateTimeline<Duration>(segmenter);
     }
