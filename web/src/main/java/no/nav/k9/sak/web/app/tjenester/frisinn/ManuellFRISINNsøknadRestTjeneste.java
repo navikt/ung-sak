@@ -56,6 +56,7 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class ManuellFRISINNsøknadRestTjeneste {
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
+    public static final String IKKE_I_BRUK = "IKKE_I_BRUK";
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -91,7 +92,7 @@ public class ManuellFRISINNsøknadRestTjeneste {
 
             frisinnSøknadInnsending.setSøknad(FrisinnSøknad.builder()
                 .språk(Språk.NORSK_BOKMÅL)
-                .søknadId(SøknadId.of("Manuell" + fagsak.getSaksnummer().getVerdi()))
+                .søknadId(SøknadId.of(IKKE_I_BRUK))
                 .inntekter(lagDummyInntekt(manuellSøknadDto))
                 .søknadsperiode(manuellSøknadDto.getPeriode())
                 .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
