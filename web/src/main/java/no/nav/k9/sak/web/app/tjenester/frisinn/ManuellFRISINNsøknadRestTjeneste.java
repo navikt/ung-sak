@@ -84,7 +84,7 @@ public class ManuellFRISINNsøknadRestTjeneste {
     @POST
     @Path("/frisinn/opprett-manuell-frisinn")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Opprett Frisinn søknad for gitt FNR og periode", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "frisinn", responses = {
+    @Operation(description = "Opprett Frisinn søknad for gitt FNR og periode", summary = ("Returnerer saksnummer som er tilknyttet den nye fagsaken som har blitt opprettet."), tags = "frisinn", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer saksnummer", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
     })
     @Produces(JSON_UTF8)
