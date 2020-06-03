@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -95,11 +96,11 @@ public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
                         overlapp.put(yt.getYtelseType(), new TreeSet<>(Set.of(overlappPeriode.get())));
                     } else {
                         var anvistSegmenter = yt.getYtelseAnvist().stream()
-                            .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), yt.getYtelseType()))
+                            .map(ya -> new LocalDateSegment<>(ya.getAnvistFOM(), ya.getAnvistTOM(), Boolean.TRUE))
                             .sorted()
                             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-                        var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter);
+                        var anvistTimeline = new LocalDateTimeline<>(anvistSegmenter, StandardCombinators::alwaysTrueForMatch);
                         var intersection = anvistTimeline.intersection(vilkårTimeline);
                         if (!intersection.isEmpty()) {
                             overlapp.put(yt.getYtelseType(), intersection.getDatoIntervaller());
