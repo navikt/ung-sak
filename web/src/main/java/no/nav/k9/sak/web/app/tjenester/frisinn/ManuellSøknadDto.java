@@ -2,6 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.frisinn;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,6 +23,8 @@ public class ManuellSøknadDto {
     @JsonProperty(value = "fnr")
     @Valid
     @NotNull
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Size(min = 11, max = 11)
     private String fnr;
 
     @JsonProperty(value = "periode")
