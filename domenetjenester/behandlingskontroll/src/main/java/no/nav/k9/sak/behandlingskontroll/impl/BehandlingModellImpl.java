@@ -113,6 +113,11 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
 
     }
 
+    @SuppressWarnings("resource")
+    public static BehandlingModellBuilder builder(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
+        return new BehandlingModellBuilder(new BehandlingModellImpl(behandlingType, fagsakYtelseType, false));
+    }
+
     @Override
     public BehandlingType getBehandlingType() {
         return behandlingType;
@@ -349,7 +354,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
      * Visit alle steg definert i denne modellen.
      *
      * @param førsteSteg - Kode for første steg vi starter fra. Hvis null, begynn fra begynnelsen.
-     * @param visitor - kalles for hvert steg definert
+     * @param visitor    - kalles for hvert steg definert
      * @return null hvis alle steg til slutt ble kalt. Eller siste stegType som ble forsøkt.
      */
     @Override
@@ -396,7 +401,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     protected void leggTilAksjonspunktDefinisjoner(BehandlingStegType stegType, BehandlingStegModellImpl entry) {
         AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType, VurderingspunktType.INN)
             .forEach(ad -> entry.leggTilAksjonspunktVurderingInngang(ad.getKode()));
-        
+
         AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType, VurderingspunktType.UT)
             .forEach(ad -> entry.leggTilAksjonspunktVurderingUtgang(ad.getKode()));
     }
@@ -439,8 +444,8 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
                 return i;
             }
         }
-        throw new IllegalArgumentException("Ukjent behandlingssteg: " + stegKode + ", [behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //
-                                                                                                                                 // NOSONAR
+        throw new IllegalArgumentException("Ukjent behandlingssteg: " + stegKode + ", [fagsakYtelseType=" + fagsakYtelseType + ",behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //
+        // NOSONAR
     }
 
     @Override
@@ -448,7 +453,9 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
         return indexOf(stegA) < indexOf(stegB);
     }
 
-    /** Legger til default. */
+    /**
+     * Legger til default.
+     */
     protected void leggTil(BehandlingStegType... stegTyper) {
         List.of(stegTyper).forEach(s -> leggTil(s, behandlingType, fagsakYtelseType));
     }
@@ -487,11 +494,6 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
             return new BehandlingStegModellImpl(behandlingModell, instance, stegType);
         }
 
-    }
-
-    @SuppressWarnings("resource")
-    public static BehandlingModellBuilder builder(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
-        return new BehandlingModellBuilder(new BehandlingModellImpl(behandlingType, fagsakYtelseType, false));
     }
 
     public static class BehandlingModellBuilder {
