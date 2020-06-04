@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -40,7 +39,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @BehandlingStegRef(kode = "VARIANT_FILTER")
 @BehandlingTypeRef
 @ApplicationScoped
-public class FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
+public class  FiltrerUtVariantSomIkkeStøttesSteg implements BeregneYtelseSteg {
 
     public static final DatoIntervallEntitet NÆRINGS_PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 12, 31));
     // https://github.com/navikt/frisinn/releases/tag/1.2
