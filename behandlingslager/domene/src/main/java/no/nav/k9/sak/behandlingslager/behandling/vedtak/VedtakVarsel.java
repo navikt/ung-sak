@@ -149,7 +149,7 @@ public class VedtakVarsel extends BaseEntitet {
     }
 
     public void setRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
-        this.redusertUtbetalingÅrsaker = Set.copyOf(redusertUtbetalingÅrsaker);
+        this.redusertUtbetalingÅrsaker = redusertUtbetalingÅrsaker == null ? Collections.emptySet() : Set.copyOf(redusertUtbetalingÅrsaker);
     }
 
     @Converter

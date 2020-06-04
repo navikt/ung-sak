@@ -49,7 +49,7 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
         this.overskrift = overskrift;
         this.fritekstBrev = fritekstBrev;
         this.skalBrukeOverstyrendeFritekstBrev = skalBrukeOverstyrendeFritekstBrev;
-        this.redusertUtbetalingÅrsaker = redusertUtbetalingÅrsaker == null ? Collections.emptySet() : Set.copyOf(redusertUtbetalingÅrsaker);;
+        this.setRedusertUtbetalingÅrsaker(redusertUtbetalingÅrsaker);
     }
 
     public String getFritekstBrev() {
@@ -78,5 +78,9 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
 
     public void setSkalBrukeOverstyrendeFritekstBrev(boolean skalBrukeOverstyrendeFritekstBrev) {
         this.skalBrukeOverstyrendeFritekstBrev = skalBrukeOverstyrendeFritekstBrev;
+    }
+
+    public void setRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
+        this.redusertUtbetalingÅrsaker = redusertUtbetalingÅrsaker == null ? Collections.emptySet() : Set.copyOf(redusertUtbetalingÅrsaker);
     }
 }
