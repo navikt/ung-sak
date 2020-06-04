@@ -34,7 +34,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
             return Optional.empty();
         }
         Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(fnr);
-        if (!aktørId.isPresent()) {
+        if (aktørId.isEmpty()) {
             return Optional.empty();
         }
         try {
