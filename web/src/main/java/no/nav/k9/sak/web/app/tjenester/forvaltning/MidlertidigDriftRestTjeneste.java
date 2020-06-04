@@ -1,7 +1,7 @@
-package no.nav.k9.sak.web.app.tjenester.frisinn;
+package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
@@ -12,7 +12,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -30,6 +29,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -54,70 +54,80 @@ import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
+
+/**
+ * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
+ * ENDRINGER I DENNE KLASSEN SKAL KLARERES OG KODE-REVIEWES MED ANSVARLIG APPLIKASJONSARKITEKT.
+ */
 @Path("")
 @ApplicationScoped
 @Transactional
-public class ManuellFRISINNsøknadRestTjeneste {
+public class MidlertidigDriftRestTjeneste {
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
-    public static final String IKKE_I_BRUK = "IKKE_I_BRUK";
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private FagsakTjeneste fagsakTjeneste;
 
-    public ManuellFRISINNsøknadRestTjeneste() {
+    public MidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
 
 
     @Inject
-    public ManuellFRISINNsøknadRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
-                                            TpsTjeneste tpsTjeneste,
-                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
+    public MidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
+                                        TpsTjeneste tpsTjeneste,
+                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste, FagsakTjeneste fagsakTjeneste) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+        this.fagsakTjeneste = fagsakTjeneste;
     }
 
 
     @POST
-    @Path("/frisinn/opprett-manuell-frisinn")
+    @Path("/frisinn/opprett-manuell-frisinn/TO_BE_REMOVED")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Opprett behandling hvor saksbehandler kan legge inn inntektsopplysninger", summary = ("Returnerer saksnummer som er tilknyttet den nye fagsaken som har blitt opprettet."), tags = "frisinn", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer saksnummer", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
     })
     @Produces(JSON_UTF8)
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public Response opprettManuellFrisinnSøknad(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ManuellSøknadDto manuellSøknadDto) {
         PersonIdent fnr = new PersonIdent(manuellSøknadDto.getFnr());
-        Optional<AktørId> aktørIdOpt = tpsTjeneste.hentAktørForFnr(fnr);
-        if (aktørIdOpt.isPresent()) {
-            AktørId aktørId = aktørIdOpt.get();
-            Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now());
-            FrisinnSøknadInnsending frisinnSøknadInnsending = new FrisinnSøknadInnsending();
-
-            frisinnSøknadInnsending.setSøknad(FrisinnSøknad.builder()
-                .språk(Språk.NORSK_BOKMÅL)
-                //denne lagres ikke
-                .søknadId(SøknadId.of(IKKE_I_BRUK))
-                .inntekter(lagDummyInntekt(manuellSøknadDto))
-                .søknadsperiode(manuellSøknadDto.getPeriode())
-                .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
-                .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
-                .build());
-
-            var behandling = frisinnSøknadMottaker.mottaSøknad(fagsak.getSaksnummer(), null, frisinnSøknadInnsending);
-
-            BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-            //ønsker at saksbehandler må ta stilling til disse
-            behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(OVERSTYRING_FRISINN_OPPGITT_OPPTJENING, KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
-
-            return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
-
-        } else {
-            return Response.noContent().build();
+        AktørId aktørId = tpsTjeneste.hentAktørForFnr(fnr).orElse(null);
+        if (aktørId == null) {
+            throw new IllegalArgumentException("Oppgitt personummer er ukjent");
         }
+        if (finnesFrisinnFagsak(aktørId)) {
+            throw new IllegalArgumentException("Personummer har allerede fagsak for frisinn. Tjenesten kan ikke benyttes");
+        }
+
+        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now());
+
+        FrisinnSøknadInnsending frisinnSøknadInnsending = new FrisinnSøknadInnsending();
+        frisinnSøknadInnsending.setSøknad(FrisinnSøknad.builder()
+            .språk(Språk.NORSK_BOKMÅL)
+            .søknadId(SøknadId.of("ManueltOpprettet" + fagsak.getSaksnummer().getVerdi())) // lagres ingensteds
+            .inntekter(lagDummyInntekt(manuellSøknadDto))
+            .søknadsperiode(manuellSøknadDto.getPeriode())
+            .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
+            .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
+            .build());
+        var behandling = frisinnSøknadMottaker.mottaSøknad(fagsak.getSaksnummer(), null, frisinnSøknadInnsending);
+
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
+        //ønsker at saksbehandler må ta stilling til disse
+        behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(OVERSTYRING_FRISINN_OPPGITT_OPPTJENING, KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
+
+        return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
+    }
+
+    private boolean finnesFrisinnFagsak(AktørId aktørId) {
+        return fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
+            .anyMatch(sak -> sak.getYtelseType().equals(FagsakYtelseType.FRISINN));
     }
 
     private Inntekter lagDummyInntekt(ManuellSøknadDto manuellSøknadDto) {

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.frisinn;
+package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

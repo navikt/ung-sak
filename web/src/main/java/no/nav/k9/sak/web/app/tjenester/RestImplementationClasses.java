@@ -30,7 +30,7 @@ import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.frisinn.ManuellFRISINNsøknadRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.MidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.FeatureToggleRestTjeneste;
@@ -75,7 +75,7 @@ public class RestImplementationClasses {
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(UttakRestTjeneste.class);
-        classes.add(ManuellFRISINNsøknadRestTjeneste.class);
+        classes.add(MidlertidigDriftRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 
