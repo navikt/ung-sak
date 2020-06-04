@@ -159,12 +159,12 @@ public class VedtakVarsel extends BaseEntitet {
 
         @Override
         public String convertToDatabaseColumn(Set<String> set) {
-            return String.join(",", set);
+            return set.isEmpty() ? null : String.join(",", set);
         }
 
         @Override
         public Set<String> convertToEntityAttribute(String joined) {
-            return Set.of(joined.split(SPLIT_CHAR));
+            return joined == null ? Collections.emptySet() : Set.of(joined.split(SPLIT_CHAR));
         }
 
     }

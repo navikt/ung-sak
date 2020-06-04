@@ -42,6 +42,19 @@ public class VedtakVarselRepositoryTest {
     @Test
     public void skal_lagre_redusert_utbetaling_årsaker() {
         VedtakVarsel vedtakVarsel = lagVedtakVarsel();
+        vedtakVarsel.setRedusertUtbetalingÅrsaker(Set.of("ÅRSAK_1", "ÅRSAK_2"));
+        lagre(vedtakVarsel);
+
+        Long id = vedtakVarsel.getId();
+        assertThat(id).isNotNull();
+
+        VedtakVarsel lagret = repository.hent(VedtakVarsel.class, id);
+        assertThat(lagret.getRedusertUtbetalingÅrsaker()).isEqualTo(vedtakVarsel.getRedusertUtbetalingÅrsaker());
+    }
+
+    @Test
+    public void skal_håndtere_ingen_redusert_utbetaling_årsaker() {
+        VedtakVarsel vedtakVarsel = lagVedtakVarsel();
         lagre(vedtakVarsel);
 
         Long id = vedtakVarsel.getId();
@@ -59,7 +72,7 @@ public class VedtakVarselRepositoryTest {
         vedtakVarsel.setHarSendtVarselOmRevurdering(true);
         vedtakVarsel.setOverskrift("en overskrift");
         vedtakVarsel.setVedtaksbrev(AUTOMATISK);
-        vedtakVarsel.setRedusertUtbetalingÅrsaker(Set.of("ÅRSAK_1", "ÅRSAK_2"));
+
         return vedtakVarsel;
     }
 }
