@@ -37,7 +37,8 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
     @JsonProperty(value = "redusertUtbetalingÅrsaker")
     @Size(max = 50)
     @Valid
-    private Set<@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String> redusertUtbetalingÅrsaker;
+    private Set<@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String>
+        redusertUtbetalingÅrsaker = Collections.emptySet();
 
     protected VedtaksbrevOverstyringDto() {
         // For Jackson
