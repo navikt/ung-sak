@@ -92,14 +92,14 @@ public class InitierPerioderSteg implements BehandlingSteg {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
             .stream()
-            .filter(it -> it.getBehandlingId().equals(behandlingId))
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
+            .filter(it -> behandlingId.equals(it.getBehandlingId()) || it.getBehandlingId() == null)
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
         var fagsak = behandling.getFagsak();
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
-        if(!inntektsmeldingerJournalposter.isEmpty() && sakInntektsmeldinger.isEmpty()) {
+        if (!inntektsmeldingerJournalposter.isEmpty() && sakInntektsmeldinger.isEmpty()) {
             // Abakus setter ikke ytelsetype på "koblingen" før registerinnhenting så vil bare være feil før første registerinnhenting..
             sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), FagsakYtelseType.UDEFINERT);
         }
