@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,8 +23,9 @@ public class BekreftVedtakUtenTotrinnskontrollDto extends VedtaksbrevOverstyring
     public BekreftVedtakUtenTotrinnskontrollDto(String begrunnelse,
                                                 String overskrift,
                                                 String fritekstBrev,
-                                                boolean skalBrukeOverstyrendeFritekstBrev) { // NOSONAR
-        super(begrunnelse, overskrift, fritekstBrev, skalBrukeOverstyrendeFritekstBrev);
+                                                boolean skalBrukeOverstyrendeFritekstBrev,
+                                                Set<String> redusertUtbetalingÅrsaker) { // NOSONAR
+        super(begrunnelse, overskrift, fritekstBrev, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker);
     }
 
 }

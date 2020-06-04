@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,8 +23,9 @@ public class ForeslaVedtakAksjonspunktDto extends VedtaksbrevOverstyringDto {
     public ForeslaVedtakAksjonspunktDto(String begrunnelse,
                                         String overskrift,
                                         String fritekst,
-                                        boolean skalBrukeOverstyrendeFritekstBrev) {
-        super(begrunnelse, overskrift, fritekst, skalBrukeOverstyrendeFritekstBrev);
+                                        boolean skalBrukeOverstyrendeFritekstBrev,
+                                        Set<String> redusertUtbetalingÅrsaker) {
+        super(begrunnelse, overskrift, fritekst, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker);
     }
 
 }

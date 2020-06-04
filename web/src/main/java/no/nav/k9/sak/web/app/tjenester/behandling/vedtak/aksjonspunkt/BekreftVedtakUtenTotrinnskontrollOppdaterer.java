@@ -33,9 +33,11 @@ class BekreftVedtakUtenTotrinnskontrollOppdaterer extends AbstractVedtaksbrevOve
     public OppdateringResultat oppdater(BekreftVedtakUtenTotrinnskontrollDto dto, AksjonspunktOppdaterParameter param) {
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
-            super.oppdaterVedtaksbrev(dto, param, builder);
+            super.oppdaterVedtaksbrevForFritekst(dto, param, builder);
             builder.medFremoverHopp(FellesTransisjoner.FREMHOPP_TIL_FATTE_VEDTAK);
         }
+
+        oppdaterRedusertUtbetalingÅrsaker(dto, param.getBehandlingId());
         return builder.build();
     }
 }
