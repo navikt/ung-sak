@@ -34,7 +34,6 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private ErEndringIBeregning erEndringIBeregning = new ErEndringIBeregning();
 
     ForeslåVedtakRevurderingStegImpl() {
     }
@@ -86,7 +85,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         var orginalBeregning = kalkulusTjeneste.hentFastsatt(orginalBehandling, skjæringstidspuntk);
         var revurderingsBeregning = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
 
-        return erEndringIBeregning.vurderUgunst(revurderingsBeregning, orginalBeregning);
+        return ErEndringIBeregning.vurderUgunst(revurderingsBeregning, orginalBeregning);
     }
 
 }
