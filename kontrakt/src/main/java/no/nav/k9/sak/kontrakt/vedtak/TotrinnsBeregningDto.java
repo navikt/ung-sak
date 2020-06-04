@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,9 @@ public class TotrinnsBeregningDto {
     @JsonProperty(value = "fastsattVarigEndringNaering")
     private boolean fastsattVarigEndringNaering;
 
+    @JsonProperty(value = "skjæringstidspunkt")
+    private LocalDate skjæringstidspunkt;
+
     public TotrinnsBeregningDto() {
         //
     }
@@ -46,5 +50,13 @@ public class TotrinnsBeregningDto {
 
     public void setFastsattVarigEndringNaering(boolean fastsattVarigEndringNaering) {
         this.fastsattVarigEndringNaering = fastsattVarigEndringNaering;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 }

@@ -29,6 +29,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAktivitetHandlingType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -97,6 +98,12 @@ public class FraKalkulusMapper {
         beregningsgrunnlagDto.getAktivitetStatuser().forEach(aktivitetStatus -> {
             builder.leggTilAktivitetStatus(BeregningsgrunnlagAktivitetStatus.builder().medAktivitetStatus(AktivitetStatus.fraKode(aktivitetStatus.getKode())));
         });
+        if (beregningsgrunnlagDto.getFaktaOmBeregningTilfeller() != null) {
+            List<FaktaOmBeregningTilfelle> tilfeller = beregningsgrunnlagDto.getFaktaOmBeregningTilfeller().stream()
+                .map(t -> FaktaOmBeregningTilfelle.fraKode(t.getKode()))
+                .collect(Collectors.toList());
+            builder.leggTilFaktaOmBeregningTilfeller(tilfeller);
+        }
         Beregningsgrunnlag bg = builder.build();
 
         mapPerioder(beregningsgrunnlagDto.getBeregningsgrunnlagPerioder())
