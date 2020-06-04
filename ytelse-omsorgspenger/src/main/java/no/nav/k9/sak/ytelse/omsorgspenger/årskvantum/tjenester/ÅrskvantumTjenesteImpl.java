@@ -109,6 +109,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         var barna = personMedRelasjoner.getFamilierelasjoner()
             .stream()
             .filter(it -> it.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
+            .filter(it -> !it.getPersonIdent().erFdatNummer())
             .map(this::innhentPersonopplysningForBarn)
             .map(this::mapBarn)
             .collect(Collectors.toList());
@@ -190,7 +191,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
     @NotNull
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Tuple<Familierelasjon, Optional<Personinfo>> it) {
-        return new Barn(it.getElement2().orElseThrow().getPersonIdent().getIdent(), it.getElement2().orElseThrow().getFødselsdato(), it.getElement2().orElseThrow().getDødsdato(), it.getElement1().getHarSammeBosted());
+        var personinfo = it.getElement2().orElseThrow();
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted());
     }
 
     private boolean kreverArbeidsgiverRefusjon(InntektsmeldingAggregat inntektsmeldingAggregat,
