@@ -8,14 +8,14 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
+import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(HenleggBehandlingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class HenleggBehandlingTask extends FagsakProsessTask {
+public class HenleggBehandlingTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "behandlingskontroll.henleggBehandling";
 
@@ -31,13 +31,13 @@ public class HenleggBehandlingTask extends FagsakProsessTask {
     @Inject
     public HenleggBehandlingTask(BehandlingRepositoryProvider repositoryProvider,
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste) {
-        super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
+        super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
 
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData) {
         var behandlingId = prosessTaskData.getBehandlingId();
 
         BehandlingResultatType henleggelseType = Optional.ofNullable(prosessTaskData.getPropertyValue(HENLEGGELSE_TYPE_KEY))

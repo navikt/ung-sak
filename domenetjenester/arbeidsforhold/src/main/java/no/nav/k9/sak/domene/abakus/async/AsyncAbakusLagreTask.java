@@ -10,9 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -20,7 +21,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 @ApplicationScoped
 @ProsessTask(AsyncAbakusLagreTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class AsyncAbakusLagreTask extends BehandlingProsessTask {
+public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
     static final String TASKTYPE = "abakus.async.lagre";
     static final String KEY = "action";
 
@@ -51,13 +52,14 @@ public class AsyncAbakusLagreTask extends BehandlingProsessTask {
     }
 
     @Inject
-    public AsyncAbakusLagreTask(BehandlingRepository behandlingRepository, AbakusTjeneste abakusTjeneste) {
+    public AsyncAbakusLagreTask(BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, AbakusTjeneste abakusTjeneste) {
+        super(behandlingRepository, behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.abakusTjeneste = abakusTjeneste;
     }
 
     @Override
-    protected void prosesser(ProsessTaskData input) {
+    protected void doProsesser(ProsessTaskData input) {
 
         String behandlingId = input.getBehandlingId();
         Action action = Action.valueOf(input.getPropertyValue(KEY));

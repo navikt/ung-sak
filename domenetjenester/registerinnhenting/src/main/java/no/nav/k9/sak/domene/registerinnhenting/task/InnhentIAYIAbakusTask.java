@@ -17,11 +17,14 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
+import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 
 @ApplicationScoped
 @ProsessTask(InnhentIAYIAbakusTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
+
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     public static final String TASKTYPE = "innhentsaksopplysninger.abakus";
     public static final String OVERSTYR_KEY = "overstyrt";
@@ -49,6 +52,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+        
         Optional<String> hendelse = Optional.ofNullable(prosessTaskData.getPropertyValue(ProsessTaskData.HENDELSE_PROPERTY));
         if (hendelse.isPresent() && !prosessTaskData.getPropertyValue(OPPDATERT_GRUNNLAG_KEY).isEmpty()) {
             validerHendelse(prosessTaskData);
@@ -58,7 +62,9 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
         if (hendelse.isEmpty()) {
             boolean overstyr = prosessTaskData.getPropertyValue(OVERSTYR_KEY) != null && OVERSTYR_VALUE.equals(prosessTaskData.getPropertyValue(OVERSTYR_KEY));
             Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
-            LOGGER.info("Innhenter IAY-opplysninger i abakus for behandling: {}", behandling.getId());
+            
+            precondition(behandling);
+            
             if (overstyr) {
                 registerdataInnhenter.innhentFullIAYIAbakus(behandling);
                 return;
@@ -66,6 +72,19 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
             registerdataInnhenter.innhentIAYIAbakus(behandling);
         }
         settTaskPåVent(prosessTaskData);
+    }
+
+    private void precondition(Behandling behandling) {
+        logContext(behandling);
+        
+        if (behandling.erSaksbehandlingAvsluttet()) {
+            throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
+                + ", behandlingStatus=" + behandling.getStatus()
+                + ", startpunkt=" + behandling.getStartpunkt()
+                + ", resultat=" + behandling.getBehandlingResultatType());
+        } else {
+            LOGGER.info("Innhenter IAY-opplysninger i abakus for behandling: {}", behandling.getId());
+        }
     }
 
     private void validerHendelse(ProsessTaskData prosessTaskData) {
@@ -84,4 +103,11 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }
+    
+    private void logContext(Behandling behandling) {
+        LOG_CONTEXT.add("saksnummer", behandling.getFagsak().getSaksnummer());
+        LOG_CONTEXT.add("ytelseType", behandling.getFagsakYtelseType());
+        LOG_CONTEXT.add("behandling_status", behandling.getStatus());
+    }
+
 }

@@ -48,6 +48,7 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEn
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
@@ -97,6 +98,7 @@ public class RegisterdataInnhenter {
     private MedlemskapRepository medlemskapRepository;
     private AbakusTjeneste abakusTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private BehandlingLåsRepository behandlingLåsRepository;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -114,6 +116,7 @@ public class RegisterdataInnhenter {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.medlemskapRepository = medlemskapRepository;
         this.abakusTjeneste = abakusTjeneste;
     }
@@ -133,15 +136,13 @@ public class RegisterdataInnhenter {
         }
 
         // Innhent øvrige data fra TPS
-        innhentPersonopplysninger(behandling, søkerInfo);
-        return søkerInfo;
-    }
-
-    public void innhentPersonopplysninger(Behandling behandling, Personinfo søkerInfo) {
-
-        final PersonInformasjonBuilder personInformasjonBuilder = byggPersonopplysningMedRelasjoner(søkerInfo, behandling);
-
+        var personInformasjonBuilder = byggPersonopplysningMedRelasjoner(søkerInfo, behandling);
+        
+        // lagre alt
+        behandlingLåsRepository.taLås(behandling.getId());
         personopplysningRepository.lagre(behandling.getId(), personInformasjonBuilder);
+        
+        return søkerInfo;
     }
 
     public void innhentMedlemskapsOpplysning(Behandling behandling) {

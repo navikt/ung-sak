@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -39,7 +40,7 @@ public class GjenopptaBehandlingTaskTest {
         mockBehandlingskontrollTjeneste = mock(BehandlingskontrollTjeneste.class);
         mockEnhetsTjeneste = mock(BehandlendeEnhetTjeneste.class);
 
-        task = new GjenopptaBehandlingTask(mockBehandlingRepository, mockBehandlingskontrollTjeneste, mockEnhetsTjeneste);
+        task = new GjenopptaBehandlingTask(mockBehandlingRepository, Mockito.mock(BehandlingLåsRepository.class), mockBehandlingskontrollTjeneste, mockEnhetsTjeneste);
     }
 
     @Test

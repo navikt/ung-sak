@@ -658,7 +658,7 @@ public class Behandling extends BaseEntitet {
     }
 
     public boolean erSaksbehandlingAvsluttet() {
-        return (erAvsluttet() || erUnderIverksettelse() || erHenlagt());
+        return (erStatusFerdigbehandlet() || erHenlagt());
     }
 
     private boolean erHenlagt() {

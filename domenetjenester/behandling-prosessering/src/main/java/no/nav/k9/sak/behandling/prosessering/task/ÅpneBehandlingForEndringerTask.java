@@ -17,14 +17,14 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class ÅpneBehandlingForEndringerTask extends BehandlingProsessTask {
+public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask {
     public static final String TASKTYPE = "behandlingskontroll.åpneBehandlingForEndringer";
     
     public static final String START_STEG = "behandlingskontroll.startSteg";
@@ -39,13 +39,13 @@ public class ÅpneBehandlingForEndringerTask extends BehandlingProsessTask {
     @Inject
     public ÅpneBehandlingForEndringerTask(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                           BehandlingRepositoryProvider repositoryProvider) {
-        super(repositoryProvider.getBehandlingLåsRepository());
+        super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData) {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         var steg = BehandlingStegType.fraKode(prosessTaskData.getPropertyValue(START_STEG));
         
