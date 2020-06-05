@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
@@ -133,6 +134,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             fraværPerioder,
             personMedRelasjoner.getPersonIdent().getIdent(),
             personMedRelasjoner.getFødselsdato(),
+            personMedRelasjoner.getDødsdato(),
             barna);
 
         try {
@@ -174,6 +176,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                     arbeidsforholdId);
             }
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
+                ArbeidsforholdStatus.AKTIVT, //FIXME hent riktig verdi
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
