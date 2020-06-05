@@ -7,7 +7,6 @@ package no.nav.k9.sak.domene.medlem.impl;
  */
 public enum MedlemResultat {
     AVKLAR_OM_ER_BOSATT,
-    AVKLAR_FORTSATT_MEDLEMSKAP,
     AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE,
     AVKLAR_OPPHOLDSRETT,
     AVKLAR_LOVLIG_OPPHOLD,
