@@ -153,6 +153,7 @@ public class BrevRestTjeneste {
         dto.setVedtaksbrev(vedtakVarsel.getVedtaksbrev());
         dto.setOverskrift(vedtakVarsel.getOverskrift());
         dto.setFritekstbrev(vedtakVarsel.getFritekstbrev());
+        dto.setRedusertUtbetalingÅrsaker(vedtakVarsel.getRedusertUtbetalingÅrsaker());
 
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakFor(behandlingUuid);
         behandlingVedtak.ifPresent(v -> dto.setVedtaksdato(v.getVedtaksdato()));

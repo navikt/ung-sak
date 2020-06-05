@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,6 +100,11 @@ public class VedtakVarselDto {
     @Valid
     private LocalDate vedtaksdato;
 
+    @JsonProperty(value = "redusertUtbetalingÅrsaker")
+    @Size(max = 50)
+    @Valid
+    private Set<String> redusertUtbetalingÅrsaker = Collections.emptySet();
+
     public VedtakVarselDto() {
         // trengs for deserialisering av JSON
     }
@@ -121,6 +127,10 @@ public class VedtakVarselDto {
 
     public String getFritekstbrev() {
         return fritekstbrev;
+    }
+
+    public Set<String> getRedusertUtbetalingÅrsaker() {
+        return Set.copyOf(redusertUtbetalingÅrsaker);
     }
 
     public void setFritekstbrev(String fritekstbrev) {
@@ -197,5 +207,10 @@ public class VedtakVarselDto {
 
     public void setAvslagsarsaker(Map<VilkårType, Set<Avslagsårsak>> avslagsarsaker) {
         this.avslagsarsaker = avslagsarsaker;
+    }
+
+    public void setRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
+        this.redusertUtbetalingÅrsaker =
+            redusertUtbetalingÅrsaker == null ? Collections.emptySet() : Set.copyOf(redusertUtbetalingÅrsaker);
     }
 }
