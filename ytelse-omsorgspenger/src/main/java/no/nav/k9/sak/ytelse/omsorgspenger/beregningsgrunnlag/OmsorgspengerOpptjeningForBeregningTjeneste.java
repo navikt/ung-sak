@@ -70,7 +70,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         if (opptjeningResultat.isEmpty()) {
             return Collections.emptyList();
         }
-        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(behandlingReferanse.getSkjæringstidspunktOpptjening())).orElseThrow();
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
 
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null));
         return aktiviteter.stream()
