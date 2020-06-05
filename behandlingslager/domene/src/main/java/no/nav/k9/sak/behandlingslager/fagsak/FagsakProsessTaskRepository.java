@@ -246,6 +246,29 @@ public class FagsakProsessTaskRepository {
         return resultList.stream().map(ProsessTaskEntitet::tilProsessTask).collect(Collectors.toList());
     }
 
+
+    /** Sett feilet prosesstasks som er koblet til fagsak+behandling til suspendert. */
+    public void settFeiletTilSuspendert(Long fagsakId, Long behandlingId) {
+
+        Set<ProsessTaskStatus> feiletStatus = EnumSet.of(ProsessTaskStatus.FEILET);
+
+        var skalSuspenderes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, feiletStatus, Tid.TIDENES_BEGYNNELSE.atStartOfDay(), Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
+        if (!skalSuspenderes.isEmpty()) {
+            em.flush(); // flush alt annet
+            for (var s : skalSuspenderes) {
+                em.createNativeQuery("update prosess_task p set status = :nyStatus where p.id = :pid")
+                    .setParameter("nyStatus", ProsessTaskStatus.SUSPENDERT.getDbKode())
+                    .setParameter("pid", s.getId())
+                    .executeUpdate();
+                em.flush();
+                Optional<FagsakProsessTask> fagsakProsessTaskOpt = hent(s.getId(), true);
+                fagsakProsessTaskOpt.ifPresent(task -> fjern(fagsakId, s.getId(), task.getGruppeSekvensNr()));
+            }
+
+        }
+
+    }
+
     /** Sletter prosesstasks som er koblet til fagsak+behandling og er ikke kjørt. */
     public void ryddProsessTasks(Long fagsakId, Long behandlingId) {
 
@@ -256,7 +279,7 @@ public class FagsakProsessTaskRepository {
             em.flush(); // flush alt annet
             em.createNativeQuery("delete from fagsak_prosess_task fpt where fpt.fagsak_id=:fagsakId and fpt.behandling_id=:behandlingId")
                 .setParameter("fagsakId", fagsakId)
-                .setParameter("behandlingId", behandlingId)
+                .setParameter("behandlingId", "'" + behandlingId + "'")
                 .executeUpdate();
             em.flush();
             for (var s : skalSlettes) {
