@@ -35,7 +35,7 @@ public class OppgittFravær extends BaseEntitet {
     private Long id;
 
     @ChangeTracked
-    @OneToMany(mappedBy = "oppgittFravær", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    @OneToMany(mappedBy = "oppgittFravær", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<OppgittFraværPeriode> perioder;
 
     @Version
@@ -71,21 +71,30 @@ public class OppgittFravær extends BaseEntitet {
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
-            .min(LocalDate::compareTo)
-            .orElseThrow();
+            .min(LocalDate::compareTo);
         var tom = perioder.stream()
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)
             .map(DatoIntervallEntitet::getTomDato)
-            .max(LocalDate::compareTo)
-            .orElseThrow();
+            .max(LocalDate::compareTo);
 
-        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        if (tom.isEmpty() && fom.isEmpty()) {
+            fom = perioder.stream()
+                .map(OppgittFraværPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getFomDato)
+                .min(LocalDate::compareTo);
+            tom = perioder.stream()
+                .map(OppgittFraværPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getTomDato)
+                .max(LocalDate::compareTo);
+        }
+
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fom.orElseThrow(), tom.orElseThrow());
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() +"<" +
+        return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", perioder=" + perioder +
             '>';

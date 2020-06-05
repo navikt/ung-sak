@@ -59,17 +59,20 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
+        var perioderSomSkalTilbakestilles = perioderSomSkalTilbakestilles(behandlingId);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(vilkårene.get(), perioder);
+            return utledVilkårsPerioderFraPerioderTilVurdering(vilkårene.get(), perioder, perioderSomSkalTilbakestilles);
         }
         return perioder;
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Vilkår vilkår, Set<DatoIntervallEntitet> perioder,
+                                                                                           NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
         return vilkår.getPerioder()
             .stream()
-            .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p)))
+            .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p))
+                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().overlapper(p)))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
