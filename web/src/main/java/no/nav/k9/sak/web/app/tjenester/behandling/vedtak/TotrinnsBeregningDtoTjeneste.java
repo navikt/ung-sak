@@ -48,7 +48,9 @@ public class TotrinnsBeregningDtoTjeneste {
                 Beregningsgrunnlag bg = hentBeregningsgrunnlag(ref, beregningsgrunnlagToTrinn);
                 List<FaktaOmBeregningTilfelle> tilfeller = bg.getFaktaOmBeregningTilfeller();
                 dto.setFaktaOmBeregningTilfeller(tilfeller);
+                dto.setSkjæringstidspunkt(bg.getSkjæringstidspunkt());
             }
+            dtoer.add(dto);
         }
         return dtoer;
     }

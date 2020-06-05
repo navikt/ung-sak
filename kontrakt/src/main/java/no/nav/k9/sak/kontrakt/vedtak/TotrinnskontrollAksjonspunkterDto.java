@@ -131,6 +131,10 @@ public class TotrinnskontrollAksjonspunkterDto {
         return Collections.unmodifiableList(opptjeningAktiviteter);
     }
 
+    public List<TotrinnsBeregningDto> getBeregningDtoer() {
+        return beregningDtoer;
+    }
+
     public Boolean getTotrinnskontrollGodkjent() {
         return totrinnskontrollGodkjent;
     }
