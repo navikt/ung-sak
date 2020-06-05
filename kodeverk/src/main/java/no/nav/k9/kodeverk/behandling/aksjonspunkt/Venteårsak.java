@@ -83,6 +83,7 @@ public enum Venteårsak implements Kodeverdi {
     FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "Mangler funksjonalitet for å behandle saken."),
     FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "Mangler funksjonalitet for å behandle saken."),
     FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020("FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "Mangler funksjonalitet for å behandle saken."),
+    FRISINN_VARIANT_ENDRET_INNTEKTSTYPE("FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "Mangler funksjonalitet for å behandle saken."),
     ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();
