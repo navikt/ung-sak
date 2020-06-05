@@ -176,15 +176,30 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                     arbeidsforholdId);
             }
             var uttaksperiodeOmsorgspenger = new FraværPeriode(arbeidsforhold,
-                ArbeidsforholdStatus.AKTIVT, //FIXME hent riktig verdi
+                utledArbeidsforholdStatus(wrappedOppgittFraværPeriode),
                 periode,
                 fraværPeriode.getFraværPerDag(),
                 true,
                 kreverRefusjon,
-                wrappedOppgittFraværPeriode.getErAvslått() ? Utfall.AVSLÅTT : Utfall.INNVILGET);
+                utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
+    }
+
+    private Utfall utledUtfallIngangsvilkår(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
+        var erAvslåttInngangsvilkår = wrappedOppgittFraværPeriode.getErAvslåttInngangsvilkår();
+        return erAvslåttInngangsvilkår != null && erAvslåttInngangsvilkår ? Utfall.AVSLÅTT : Utfall.INNVILGET;
+    }
+
+    private ArbeidsforholdStatus utledArbeidsforholdStatus(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
+        if (wrappedOppgittFraværPeriode.getErIkkeIArbeid() != null && wrappedOppgittFraværPeriode.getErIkkeIArbeid()) {
+            return ArbeidsforholdStatus.AVSLUTTET;
+        }
+        if (wrappedOppgittFraværPeriode.getErIPermisjon() != null && wrappedOppgittFraværPeriode.getErIPermisjon()) {
+            return ArbeidsforholdStatus.PERMITERT;
+        }
+        return ArbeidsforholdStatus.AKTIVT;
     }
 
     @NotNull
