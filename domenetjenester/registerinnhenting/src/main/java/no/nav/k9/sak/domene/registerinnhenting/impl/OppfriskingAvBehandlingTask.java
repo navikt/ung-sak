@@ -13,7 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
@@ -23,7 +23,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 @ApplicationScoped
 @ProsessTask(OppfriskingAvBehandlingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class OppfriskingAvBehandlingTask extends BehandlingProsessTask {
+public class OppfriskingAvBehandlingTask extends UnderBehandlingProsessTask {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskingAvBehandlingTask.class);
 
@@ -37,25 +37,19 @@ public class OppfriskingAvBehandlingTask extends BehandlingProsessTask {
     }
 
     @Inject
-    public OppfriskingAvBehandlingTask(BehandlingRepositoryProvider behandlingRepositoryProvider,
+    public OppfriskingAvBehandlingTask(BehandlingRepositoryProvider repositoryProvider,
                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
-        super(behandlingRepositoryProvider.getBehandlingLåsRepository());
+        super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData) {
         var behandlingsId = prosessTaskData.getBehandlingId();
         // NB lås før hent behandling
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingsId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
-
-        // sjekk forhåndsbetingelser for å innhente registerdata
-        if (behandling.erSaksbehandlingAvsluttet() || !behandling.erYtelseBehandling()) {
-            log.info("Behandling er avsluttet eller feil type, kan ikke innhente registerdata: behandlingId={} status={}", behandlingsId, behandling.getStatus());
-            return;
-        }
 
         if (!behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.INNHENT_REGISTEROPP)) {
             log.info("Behandling har ikke etablert grunnlag, skal ikke innhente registerdata: behandlingId={}", behandlingsId);

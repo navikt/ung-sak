@@ -7,12 +7,13 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 /**
  * Utfører automatisk gjenopptagelse av en behandling som har
@@ -21,7 +22,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 @ApplicationScoped
 @ProsessTask(GjenopptaBehandlingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class GjenopptaBehandlingTask implements ProsessTaskHandler {
+public class GjenopptaBehandlingTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "behandlingskontroll.gjenopptaBehandling";
 
@@ -35,16 +36,17 @@ public class GjenopptaBehandlingTask implements ProsessTaskHandler {
 
     @Inject
     public GjenopptaBehandlingTask(BehandlingRepository behandlingRepository,
+                                   BehandlingLåsRepository behandlingLåsRepository,
                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                    BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
-
+        super(behandlingRepository, behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData) {
 
         var behandlingsId = prosessTaskData.getBehandlingId();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingsId);

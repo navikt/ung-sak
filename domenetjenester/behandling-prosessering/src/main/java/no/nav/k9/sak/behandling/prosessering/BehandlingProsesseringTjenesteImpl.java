@@ -38,7 +38,8 @@ import no.nav.vedtak.log.mdc.MDCOperations;
  * Merk Dem:
  * - ta av vent og grunnlagsoppdatering kan føre til reposisjonering av behandling til annet steg
  * - grunnlag endres ved ankomst av dokument, ved registerinnhenting og ved senere overstyring ("bekreft AP" eller egne overstyringAP)
- * - Hendelser: Ny behandling (Manuell, dokument, mv), Gjenopptak (Manuell/Frist), Interaktiv (Oppdater/Fortsett), Dokument, Datahendelse, Vedtak, KØ-hendelser
+ * - Hendelser: Ny behandling (Manuell, dokument, mv), Gjenopptak (Manuell/Frist), Interaktiv (Oppdater/Fortsett), Dokument, Datahendelse,
+ * Vedtak, KØ-hendelser
  **/
 @Dependent
 public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesseringTjeneste {
@@ -104,6 +105,14 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     @Override
     public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling) {
+
+        if (behandling.erSaksbehandlingAvsluttet()) {
+            throw new IllegalStateException("Utvikler feil: Kan ikke oppdater behandling med nye data når er allerede i iverksettelse/avsluttet. behandlingId=" + behandling.getId()
+                + ", behandlingStatus=" + behandling.getStatus()
+                + ", startpunkt=" + behandling.getStartpunkt()
+                + ", resultat=" + behandling.getBehandlingResultatType());
+        }
+
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
         ProsessTaskData registerdataOppdatererTask = new ProsessTaskData(OppfriskingAvBehandlingTask.TASKTYPE);

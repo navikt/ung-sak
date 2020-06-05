@@ -10,7 +10,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataInnhenter;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -18,7 +18,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 @ApplicationScoped
 @ProsessTask(SettRegisterdataInnhentetTidspunktTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class SettRegisterdataInnhentetTidspunktTask extends BehandlingProsessTask {
+public class SettRegisterdataInnhentetTidspunktTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "innhentsaksopplysninger.oppdaterttidspunkt";
     private static final Logger LOGGER = LoggerFactory.getLogger(SettRegisterdataInnhentetTidspunktTask.class);
@@ -30,15 +30,15 @@ public class SettRegisterdataInnhentetTidspunktTask extends BehandlingProsessTas
     }
 
     @Inject
-    public SettRegisterdataInnhentetTidspunktTask(BehandlingRepositoryProvider behandlingRepositoryProvider,
+    public SettRegisterdataInnhentetTidspunktTask(BehandlingRepositoryProvider repositoryProvider,
                                                   RegisterdataInnhenter registerdataInnhenter) {
-        super(behandlingRepositoryProvider.getBehandlingLåsRepository());
-        this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        super(repositoryProvider.getBehandlingRepository(), null);
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.registerdataInnhenter = registerdataInnhenter;
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData) {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         LOGGER.info("Oppdaterer registerdata innhentet tidspunkt behandling med id={} og uuid={}", behandling.getId(), behandling.getUuid());
         registerdataInnhenter.oppdaterSistOppdatertTidspunkt(behandling);
