@@ -56,7 +56,7 @@ public class FiltrerUtVariantSomIkkeStøttesRevurderingSteg implements BeregneYt
     }
 
 
-    BehandleStegResultat filtrerBehandlinger(Behandling nyBehandling, Behandling origBehandling) {
+    private BehandleStegResultat filtrerBehandlinger(Behandling nyBehandling, Behandling origBehandling) {
         var erNySøknadperiode = erNySøknadperiode(nyBehandling, origBehandling);
         var harSøktForNyInntektstype = harSøktForNyInntektstype(nyBehandling, origBehandling);
 
@@ -82,14 +82,14 @@ public class FiltrerUtVariantSomIkkeStøttesRevurderingSteg implements BeregneYt
         var nyttUttakGrunnlag = uttakRepository.hentGrunnlag(nyBehandling.getId());
         var origUttakGrunnlag = uttakRepository.hentGrunnlag(origBehandling.getId());
 
-        var nyeUttakAktiviteter = hentSøkteUttaksaktviteter(nyttUttakGrunnlag);
-        var origUttakAktiviteter = hentSøkteUttaksaktviteter(origUttakGrunnlag);
+        var nyeUttakAktiviteter = hentUttaksaktviteter(nyttUttakGrunnlag);
+        var origUttakAktiviteter = hentUttaksaktviteter(origUttakGrunnlag);
 
         return !nyeUttakAktiviteter.equals(origUttakAktiviteter);
     }
 
-    private Set<UttakArbeidType> hentSøkteUttaksaktviteter(Optional<UttakGrunnlag> uttakGrunnlag) {
-        return uttakGrunnlag.map(UttakGrunnlag::getOppgittUttak)
+    private Set<UttakArbeidType> hentUttaksaktviteter(Optional<UttakGrunnlag> uttakGrunnlag) {
+        return uttakGrunnlag.map(UttakGrunnlag::getFastsattUttak)
             .map(UttakAktivitet::getPerioder).orElse(Set.of()).stream()
             .map(UttakAktivitetPeriode::getAktivitetType)
             .collect(Collectors.toSet());
