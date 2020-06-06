@@ -1,8 +1,10 @@
 package no.nav.k9.sak.behandlingslager.task;
 
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
+import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 
 /**
  * Task som utfører noe på en behandling, før prosessen kjøres videre.
@@ -10,6 +12,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
  * Tasks som forsøker å kjøre behandling videre bør extende denne.
  */
 public abstract class BehandlingProsessTask implements ProsessTaskHandler {
+
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     private BehandlingLåsRepository behandlingLåsRepository;
 
@@ -33,5 +37,13 @@ public abstract class BehandlingProsessTask implements ProsessTaskHandler {
     }
 
     protected abstract void prosesser(ProsessTaskData prosessTaskData);
+
+    public static void logContext(Behandling behandling) {
+        LOG_CONTEXT.add("saksnummer", behandling.getFagsak().getSaksnummer());
+        LOG_CONTEXT.add("ytelseType", behandling.getFagsakYtelseType());
+        LOG_CONTEXT.add("behandling_status", behandling.getStatus());
+        behandling.getBehandlingStegTilstand().ifPresent(st -> LOG_CONTEXT.add("steg", st.getBehandlingSteg()));
+        behandling.getBehandlingStegTilstand().ifPresent(st -> LOG_CONTEXT.add("steg_status", st.getBehandlingStegStatus()));
+    }
 
 }

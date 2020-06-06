@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -15,8 +16,6 @@ import javax.annotation.Priority;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
-
-import org.slf4j.MDC;
 
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
@@ -74,7 +73,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
         if (!fagsakIder.isEmpty()) {
             LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
-        } 
+        }
         behandlingIder.ifPresent(behId -> {
             LOG_CONTEXT.add("behandling", behId);
         });
@@ -94,16 +93,25 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         PdpRequest pdpRequest = new PdpRequest();
         pdpRequest.put(AbacAttributter.RESOURCE_FELLES_DOMENE, ABAC_DOMAIN);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, attributter.getIdToken());
-        pdpRequest.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
-        pdpRequest.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
+
+        addToPdpRequest(pdpRequest, AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
+        addToPdpRequest(pdpRequest, AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
+
         if (!aktører.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktører);
         }
         if (!fnrs.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fnrs);
         }
-        pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
+        if (!aksjonspunktType.isEmpty()) {
+            pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
+        }
         return pdpRequest;
+    }
+
+    private void addToPdpRequest(PdpRequest pdpRequest, String key, String val) {
+        String v = val == null || (val = val.trim()).isEmpty() ? null : val;
+        pdpRequest.put(key, Objects.requireNonNull(v, "Fikk null eller empty verdi for : " + key));
     }
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Collection<String> aksjonspunktType,

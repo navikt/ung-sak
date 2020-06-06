@@ -11,20 +11,18 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataInnhenter;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
-import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 
 @ApplicationScoped
 @ProsessTask(InnhentIAYIAbakusTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
-
-    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     public static final String TASKTYPE = "innhentsaksopplysninger.abakus";
     public static final String OVERSTYR_KEY = "overstyrt";
@@ -75,7 +73,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
     }
 
     private void precondition(Behandling behandling) {
-        logContext(behandling);
+        BehandlingProsessTask.logContext(behandling);
         
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
@@ -104,10 +102,4 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
         prosessTaskRepository.lagre(prosessTaskData);
     }
     
-    private void logContext(Behandling behandling) {
-        LOG_CONTEXT.add("saksnummer", behandling.getFagsak().getSaksnummer());
-        LOG_CONTEXT.add("ytelseType", behandling.getFagsakYtelseType());
-        LOG_CONTEXT.add("behandling_status", behandling.getStatus());
-    }
-
 }

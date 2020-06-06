@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

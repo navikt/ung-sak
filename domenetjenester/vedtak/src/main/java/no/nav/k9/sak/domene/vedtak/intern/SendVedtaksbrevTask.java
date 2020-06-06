@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
@@ -23,6 +24,8 @@ public class SendVedtaksbrevTask extends BehandlingProsessTask {
 
     private SendVedtaksbrev tjeneste;
 
+    private BehandlingRepository behandlingRepository;
+
     SendVedtaksbrevTask() {
         // for CDI proxy
     }
@@ -31,11 +34,15 @@ public class SendVedtaksbrevTask extends BehandlingProsessTask {
     public SendVedtaksbrevTask(SendVedtaksbrev tjeneste, BehandlingRepositoryProvider repositoryProvider) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.tjeneste = tjeneste;
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var behandlingId = prosessTaskData.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        logContext(behandling);
+        
         tjeneste.sendVedtaksbrev(behandlingId);
         log.info("Utført for behandling: {}", behandlingId);
     }

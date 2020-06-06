@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
@@ -37,6 +38,7 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
 
     private K9OppdragRestKlient restKlient;
     private TilkjentYtelseTjeneste tilkjentYtelseTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     SendØkonomiOppdragTask() {
         // for CDI proxy
@@ -47,6 +49,7 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
                                   K9OppdragRestKlient restKlient,
                                   TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
         super(repositoryProvider.getBehandlingLåsRepository());
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.restKlient = restKlient;
         this.tilkjentYtelseTjeneste = tilkjentYtelseTjeneste;
     }
@@ -54,6 +57,9 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        logContext(behandling);
+        
         TilkjentYtelseOppdrag input = tilkjentYtelseTjeneste.hentTilkjentYtelseOppdrag(behandlingId);
         input.getBehandlingsinfo().setBehandlingTidspunkt(hentOpprinneligIverksettelseTidspunkt(prosessTaskData));
 

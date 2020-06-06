@@ -11,7 +11,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
