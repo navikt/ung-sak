@@ -10,6 +10,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -25,8 +26,8 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
     BehandlingRepositoryProvider repositoryProvider;
     ÅrskvantumRestKlient årskvantumRestKlient;
 
-    public ÅrskvantumDeaktiveringTask() {
-        // CDI
+    protected ÅrskvantumDeaktiveringTask() {
+        // CDI proxy
     }
 
     @Inject
@@ -38,17 +39,20 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData pd) {
-
         Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(pd.getBehandlingId());
+        
+        precondition(behandling);
 
-        if (FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType())
-            && BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType())) {
+        if (BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType())) {
             logger.info("Setter uttak til inaktivt. behandlingUUID: '{}'", behandling.getUuid());
-
             this.årskvantumRestKlient.deaktiverUttakForBehandling(behandling.getUuid());
-        } else if (!FagsakYtelseType.OMP.equals(behandling.getFagsakYtelseType())) {
-            logger.error("Ikke tillatt å deaktivere uttak i årskvantum for andre enn omsorgspenger");
-            throw new IllegalArgumentException("Ikke tillatt å deaktivere uttak i årskvantum for andre enn omsorgspenger");
+        }
+    }
+
+    private void precondition(Behandling behandling) {
+        BehandlingProsessTask.logContext(behandling);
+        if (!FagsakYtelseType.OMSORGSPENGER.equals(behandling.getFagsakYtelseType())) {
+            throw new IllegalArgumentException("Utvikler-feil: Ikke tillatt å deaktivere uttak i årskvantum for andre enn omsorgspenger");
         }
     }
 }

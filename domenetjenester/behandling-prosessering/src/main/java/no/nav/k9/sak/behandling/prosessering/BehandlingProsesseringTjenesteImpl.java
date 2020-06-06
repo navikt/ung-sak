@@ -169,6 +169,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
+
+        if (behandling.erSaksbehandlingAvsluttet()) {
+            throw new IllegalStateException("Utvikler-feil: kan ikke gjenoppta behandling når saksbehandling er avsluttet: behandlingId=" + behandling.getId() + ", status=" + behandling.getStatus());
+        }
+
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
         ProsessTaskData gjenopptaBehandlingTask = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);

@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
@@ -29,6 +30,8 @@ public class VurderOppgaveArenaTask extends BehandlingProsessTask {
 
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
+    private BehandlingRepository behandlingRepository;
+
     VurderOppgaveArenaTask() {
         // for CDI proxy
     }
@@ -40,11 +43,15 @@ public class VurderOppgaveArenaTask extends BehandlingProsessTask {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.vurdereOmArenaYtelseSkalOpphøre = vurdereOmArenaYtelseSkalOpphøre;
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        var behandlingId = Long.parseLong(prosessTaskData.getBehandlingId());
+        Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        logContext(behandling);
+        
         AktørId aktørId = new AktørId(prosessTaskData.getAktørId());
         LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
         vurdereOmArenaYtelseSkalOpphøre.opprettOppgaveHvisArenaytelseSkalOpphøre(behandlingId, aktørId, skjæringstidspunkt);

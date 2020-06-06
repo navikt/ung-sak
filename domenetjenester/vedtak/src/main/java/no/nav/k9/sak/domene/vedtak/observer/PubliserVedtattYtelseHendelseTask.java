@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -60,14 +61,16 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        final String behandingIdString = prosessTaskData.getPropertyValue(KEY);
+        String behandingIdString = prosessTaskData.getPropertyValue(KEY);
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
-            final long behandlingId = Long.parseLong(behandingIdString);
+            long behandlingId = Long.parseLong(behandingIdString);
 
-            final Optional<Behandling> behandlingOptional = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
+            Optional<Behandling> behandlingOptional = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
             if (behandlingOptional.isPresent()) {
-                final String payload = generatePayload(behandlingOptional.get());
-
+                var behandling = behandlingOptional.get();
+                BehandlingProsessTask.logContext(behandling);
+                
+                String payload = generatePayload(behandling);
                 producer.sendJson(payload);
             }
         }

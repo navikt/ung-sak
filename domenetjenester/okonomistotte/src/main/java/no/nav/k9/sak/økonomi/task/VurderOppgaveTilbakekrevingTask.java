@@ -52,6 +52,8 @@ public class VurderOppgaveTilbakekrevingTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var behandlingId = prosessTaskData.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        logContext(behandling);
+        
         var ref = BehandlingReferanse.fra(behandling);
         if (skalOppretteOppgaveTilbakekreving(behandling)) {
             FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
