@@ -532,7 +532,7 @@ public class StatistikkRepository {
             + "       (p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL)" // har feilet
             + "    OR (p.status IN ('KLAR', 'VETO') AND p.blokkert_av IS NOT NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < :ts )" // har ligget med veto lenge
             + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge
-            + "    OR (p.status IN ('KLAR') AND p.blokkert_av IS NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < : ts)" // har ligget klar lenge
+            + "    OR (p.status IN ('KLAR') AND p.blokkert_av IS NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < :ts)" // har ligget klar lenge
             + " )";
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
