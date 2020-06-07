@@ -530,7 +530,7 @@ public class StatistikkRepository {
             " where ("
             + "       (p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL)" // har feilet
             + "    OR (p.status IN ('KLAR', 'VETO') AND p.blokkert_av IS NOT NULL AND p.opprettet_tid < :ts )" // har ligget med veto lenge
-            + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge 
+            + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge
             + " )";
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
@@ -539,7 +539,7 @@ public class StatistikkRepository {
         @SuppressWarnings("unchecked")
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("ts", startAvDag);
-        
+
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
 
@@ -556,10 +556,10 @@ public class StatistikkRepository {
 
             String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
             String taskParams = t.get(7, String.class);
-            
+
             BigInteger blokkertAvId = t.get(8, BigInteger.class);
-            String blokkertAv = blokkertAvId==null ? null: blokkertAvId.toString();
-            
+            String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
+
             String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
 
             return SensuEvent.createSensuEvent(metricName,
@@ -591,7 +591,7 @@ public class StatistikkRepository {
             try {
                 var feil = OM.readValue(sisteFeil, ProsessTaskFeil.class);
                 var strFeil = feil.getStackTrace();
-                return Optional.of(strFeil.substring(0, Math.min(maksLen, strFeil.length()))); // chop-chop
+                return strFeil == null ? Optional.empty() : Optional.of(strFeil.substring(0, Math.min(maksLen, strFeil.length()))); // chop-chop
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Ugyldig json: " + sisteFeil, e);
             }
