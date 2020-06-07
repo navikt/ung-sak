@@ -529,8 +529,8 @@ public class StatistikkRepository {
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
             " where ("
             + "       (p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL)" // har feilet
-            + "    OR (p.status IN ('VETO') AND p.blokkert_av IS NOT NULL AND p.opprettet_tid < :startAvDag )" // har ligget med veto fra i går
-            + "    OR (p.status IN ('VENTER_SVAR') AND p.opprettet_tid < :startAvDag )" // har ligget og ventet svar fra i går
+            + "    OR (p.status IN ('KLAR', 'VETO') AND p.blokkert_av IS NOT NULL AND p.opprettet_tid < :ts )" // har ligget med veto lenge
+            + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge 
             + " )";
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
@@ -538,7 +538,7 @@ public class StatistikkRepository {
 
         @SuppressWarnings("unchecked")
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("startAvDag", startAvDag);
+            .setParameter("ts", startAvDag);
         
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
@@ -554,7 +554,7 @@ public class StatistikkRepository {
             Timestamp sistKjørt = t.get(5, Timestamp.class);
             long tidsstempel = sistKjørt == null ? now : sistKjørt.getTime();
 
-            String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).get();
+            String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
             String taskParams = t.get(7, String.class);
             
             BigInteger blokkertAvId = t.get(8, BigInteger.class);
