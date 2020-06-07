@@ -3,6 +3,7 @@ package no.nav.k9.sak.metrikker;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -522,16 +523,23 @@ public class StatistikkRepository {
     }
 
     Collection<SensuEvent> prosessTaskFeilStatistikk() {
-        String sql = "select f.ytelse_type, f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere"
+        String sql = "select f.ytelse_type, f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere, p.blokkert_av, p.opprettet_tid"
             + " from prosess_task p " +
             " left outer join fagsak_prosess_task fpt ON fpt.prosess_task_id = p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
-            " where p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL";
+            " where ("
+            + "       (p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL)" // har feilet
+            + "    OR (p.status IN ('VETO') AND p.blokkert_av IS NOT NULL AND p.opprettet_tid < :startAvDag )" // har ligget med veto fra i går
+            + "    OR (p.status IN ('VENTER_SVAR') AND p.opprettet_tid < :startAvDag )" // har ligget og ventet svar fra i går
+            + " )";
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
+        LocalDateTime startAvDag = LocalDate.now().atStartOfDay();
 
         @SuppressWarnings("unchecked")
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("startAvDag", startAvDag);
+        
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
 
@@ -548,6 +556,11 @@ public class StatistikkRepository {
 
             String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).get();
             String taskParams = t.get(7, String.class);
+            
+            BigInteger blokkertAvId = t.get(8, BigInteger.class);
+            String blokkertAv = blokkertAvId==null ? null: blokkertAvId.toString();
+            
+            String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
 
             return SensuEvent.createSensuEvent(metricName,
                 toMap(
@@ -558,7 +571,9 @@ public class StatistikkRepository {
                     "taskId", taskId,
                     "saksnummer", coalesce(saksnummer, UDEFINERT),
                     "siste_feil", sisteFeil,
-                    "task_parametere", coalesce(taskParams, UDEFINERT)),
+                    "task_parametere", coalesce(taskParams, UDEFINERT),
+                    "blokkert_av", coalesce(blokkertAv, UDEFINERT),
+                    "opprettet_tid", opprettetTid),
                 tidsstempel);
         })
             .collect(Collectors.toList());
