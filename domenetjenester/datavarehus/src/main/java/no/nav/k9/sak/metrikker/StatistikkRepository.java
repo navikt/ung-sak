@@ -523,14 +523,16 @@ public class StatistikkRepository {
     }
 
     Collection<SensuEvent> prosessTaskFeilStatistikk() {
-        String sql = "select f.ytelse_type, f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere, p.blokkert_av, p.opprettet_tid"
+        String sql = "select f.ytelse_type, f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere"
+            + " , p.blokkert_av, p.opprettet_tid, fpt.gruppe_sekvensnr"
             + " from prosess_task p " +
             " left outer join fagsak_prosess_task fpt ON fpt.prosess_task_id = p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
             " where ("
             + "       (p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL)" // har feilet
-            + "    OR (p.status IN ('KLAR', 'VETO') AND p.blokkert_av IS NOT NULL AND p.opprettet_tid < :ts )" // har ligget med veto lenge
+            + "    OR (p.status IN ('KLAR', 'VETO') AND p.blokkert_av IS NOT NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < :ts )" // har ligget med veto lenge
             + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge
+            + "    OR (p.status IN ('KLAR') AND p.blokkert_av IS NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < : ts)" // har ligget klar lenge
             + " )";
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
@@ -561,6 +563,8 @@ public class StatistikkRepository {
             String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
 
             String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
+            
+            String gruppeSekvensnr = t.get(10, String.class);
 
             return SensuEvent.createSensuEvent(metricName,
                 toMap(
@@ -573,7 +577,8 @@ public class StatistikkRepository {
                     "siste_feil", sisteFeil,
                     "task_parametere", coalesce(taskParams, UDEFINERT),
                     "blokkert_av", coalesce(blokkertAv, UDEFINERT),
-                    "opprettet_tid", opprettetTid),
+                    "opprettet_tid", opprettetTid,
+                    "gruppe_sekvensnr", coalesce(gruppeSekvensnr, UDEFINERT)),
                 tidsstempel);
         })
             .collect(Collectors.toList());
