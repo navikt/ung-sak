@@ -563,8 +563,8 @@ public class StatistikkRepository {
             String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
 
             String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
-            
-            String gruppeSekvensnr = t.get(10, String.class);
+
+            var gruppeSekvensnr = t.get(10, BigInteger.class);
 
             return SensuEvent.createSensuEvent(metricName,
                 toMap(
@@ -578,7 +578,7 @@ public class StatistikkRepository {
                     "task_parametere", coalesce(taskParams, UDEFINERT),
                     "blokkert_av", coalesce(blokkertAv, UDEFINERT),
                     "opprettet_tid", opprettetTid,
-                    "gruppe_sekvensnr", coalesce(gruppeSekvensnr, UDEFINERT)),
+                    "gruppe_sekvensnr", gruppeSekvensnr == null ? UDEFINERT : gruppeSekvensnr.toString()),
                 tidsstempel);
         })
             .collect(Collectors.toList());
