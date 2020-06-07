@@ -8,28 +8,40 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 class WrappedOppgittFraværPeriode {
     private OppgittFraværPeriode periode;
     private Aktivitet aktivitet;
-    private boolean avslått;
+    private Boolean iPermisjon;
+    private Boolean ikkeIArbeid;
+    private Boolean avslåttInngangsvilkår;
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, boolean avslått) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, Boolean iPermisjon, Boolean ikkeIArbeid, Boolean avslåttInngangsvilkår) {
         this.periode = periode;
+        this.iPermisjon = iPermisjon;
+        this.ikkeIArbeid = ikkeIArbeid;
         if (periode != null && periode.getAktivitetType() != null) {
             this.aktivitet = new Aktivitet(periode.getArbeidsgiver(), periode.getArbeidsforholdRef() != null ? periode.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef());
         } else {
             this.aktivitet = null;
         }
-        this.avslått = avslått;
+        this.avslåttInngangsvilkår = avslåttInngangsvilkår;
     }
 
     public OppgittFraværPeriode getPeriode() {
         return periode;
     }
 
-    public boolean getErAvslått() {
-        return avslått;
+    public Boolean getErAvslåttInngangsvilkår() {
+        return avslåttInngangsvilkår;
     }
 
     public Aktivitet getAktivitet() {
         return aktivitet;
+    }
+
+    public Boolean getErIPermisjon() {
+        return iPermisjon;
+    }
+
+    public Boolean getErIkkeIArbeid() {
+        return ikkeIArbeid;
     }
 
     @Override
@@ -37,7 +49,9 @@ class WrappedOppgittFraværPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WrappedOppgittFraværPeriode that = (WrappedOppgittFraværPeriode) o;
-        return avslått == that.avslått
+        return Objects.equals(avslåttInngangsvilkår, that.avslåttInngangsvilkår)
+            && Objects.equals(ikkeIArbeid, that.ikkeIArbeid)
+            && Objects.equals(iPermisjon, that.iPermisjon)
             && Objects.equals(aktivitet, that.aktivitet)
             && periodeEquals(that);
     }
@@ -52,14 +66,16 @@ class WrappedOppgittFraværPeriode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslått);
+        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslåttInngangsvilkår, iPermisjon, ikkeIArbeid);
     }
 
     @Override
     public String toString() {
         return "WrappedOppgittFraværPeriode{" +
             "periode=" + periode +
-            ", avslått=" + avslått +
+            ", avslåttInngangsvilkår=" + avslåttInngangsvilkår +
+            ", iPermisjon=" + iPermisjon +
+            ", ikkeIArbeid=" + ikkeIArbeid +
             '}';
     }
 
