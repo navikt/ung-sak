@@ -1,0 +1,16 @@
+INSERT INTO PROSESS_TASK_TYPE (
+KODE,
+NAVN,
+FEIL_MAKS_FORSOEK,
+FEIL_SEK_MELLOM_FORSOEK,
+FEILHANDTERING_ALGORITME,
+BESKRIVELSE)
+VALUES (
+'beregning.tilbakeTilStart',
+'Flytt til beregning',
+1,
+30,
+'DEFAULT',
+'Flytter til start av beregning');
+
+
