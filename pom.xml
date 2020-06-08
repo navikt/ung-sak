@@ -17,7 +17,8 @@
 		<module>behandlingslager</module>
 		<module>domenetjenester</module>
 		<module>behandlingsprosess</module>
-
+        
+        <!--ytelsespesifikke moduler-->
 		<module>ytelse-omsorgspenger</module>
 		<module>ytelse-pleiepengerbarn</module>
 		<module>ytelse-frisinn</module>
