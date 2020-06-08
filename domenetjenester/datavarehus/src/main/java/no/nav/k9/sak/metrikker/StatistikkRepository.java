@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -530,17 +531,17 @@ public class StatistikkRepository {
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
             " where ("
             + "       (p.status IN ('FEILET') AND p.siste_kjoering_feil_tekst IS NOT NULL)" // har feilet
-            + "    OR (p.status IN ('KLAR', 'VETO') AND p.blokkert_av IS NOT NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < :ts )" // har ligget med veto lenge
+            + "    OR (p.status IN ('KLAR', 'VETO') AND p.opprettet_tid < :ts AND (p.neste_kjoering_etter IS NULL OR p.neste_kjoering_etter < :ts2))" // har ligget med veto, klar lenge
             + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge
-            + "    OR (p.status IN ('KLAR') AND p.blokkert_av IS NULL AND coalesce(p.neste_kjoering_etter, p.opprettet_tid) < :ts)" // har ligget klar lenge
             + " )";
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
-        LocalDateTime startAvDag = LocalDate.now().atStartOfDay();
-
+        LocalDateTime nå = LocalDateTime.now();
+        
         @SuppressWarnings("unchecked")
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("ts", startAvDag);
+            .setParameter("ts", nå.truncatedTo(ChronoUnit.DAYS))
+            .setParameter("ts2", nå);
 
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
