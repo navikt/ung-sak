@@ -26,6 +26,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "VARIANT_FILTER")
@@ -37,18 +38,26 @@ public class FiltrerUtVariantSomIkkeStøttesRevurderingSteg implements BeregneYt
     private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
 
+    private Boolean filterAktivert;
+
     protected FiltrerUtVariantSomIkkeStøttesRevurderingSteg() {
         // for proxy
     }
 
     @Inject
-    public FiltrerUtVariantSomIkkeStøttesRevurderingSteg(UttakRepository uttakRepository, BehandlingRepositoryProvider provider) {
+    public FiltrerUtVariantSomIkkeStøttesRevurderingSteg(@KonfigVerdi(value = "FRISINN_VARIANT_FILTER_AKTIVERT", defaultVerdi = "true") Boolean filterAktivert,
+                                                         UttakRepository uttakRepository,
+                                                         BehandlingRepositoryProvider provider) {
+        this.filterAktivert = filterAktivert;
         this.uttakRepository = uttakRepository;
         this.behandlingRepository = provider.getBehandlingRepository();
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        if (!filterAktivert) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
         var nyBehandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var origBehandling = nyBehandling.getOriginalBehandling().orElseThrow();
 
