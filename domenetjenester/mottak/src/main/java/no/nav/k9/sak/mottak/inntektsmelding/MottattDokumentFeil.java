@@ -31,4 +31,7 @@ public interface MottattDokumentFeil extends DeklarerteFeil {
 
     @TekniskFeil(feilkode = "FP-187531", feilmelding = "Ukjent type arbeidsforhold i svangerskapspengesøknad", logLevel = WARN)
     Feil ukjentArbeidsForholdType();
+
+    @TekniskFeil(feilkode = "FP-187532", feilmelding = "Behandling [%s] pågår, avventer å håndtere mottatt dokument til det er prosessert", logLevel = WARN)
+    Feil behandlingPågårAvventerKnytteMottattDokumentTilBehandling(Long id);
 }

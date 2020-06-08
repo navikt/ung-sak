@@ -11,6 +11,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
@@ -29,6 +30,7 @@ class SøknadDokumentmottaker {
     private Behandlingsoppretter behandlingsoppretter;
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     SøknadDokumentmottaker() {
         // for CDI proxy
@@ -36,17 +38,18 @@ class SøknadDokumentmottaker {
 
     @Inject
     SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
-                                                 SaksnummerRepository saksnummerRepository,
-                                                 Behandlingsoppretter behandlingsoppretter,
-                                                 SøknadOversetter pleiepengerBarnSoknadOversetter,
-                                                 FagsakTjeneste fagsakTjeneste) {
+                           BehandlingRepository behandlingRepository,
+                           SaksnummerRepository saksnummerRepository,
+                           Behandlingsoppretter behandlingsoppretter,
+                           SøknadOversetter pleiepengerBarnSoknadOversetter,
+                           FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
+        this.behandlingRepository = behandlingRepository;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.fagsakTjeneste = fagsakTjeneste;
     }
-
 
     Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato) {
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, startDato.minusWeeks(25), startDato.plusWeeks(25));
@@ -62,18 +65,26 @@ class SøknadDokumentmottaker {
         Objects.requireNonNull(søknad);
 
         new PleiepengerBarnSøknadValidator().forsikreValidert(søknad);
-
+        
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, behandling);
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
-        
+
         return behandling;
+    }
+
+    private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
+        if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
+            throw new UnsupportedOperationException("PSB støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
+        }
     }
 
     private Behandling tilknyttBehandling(Saksnummer saksnummer) {
         // FIXME K9 Legg til logikk for valg av fagsak
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
+
+        validerIngenÅpneBehandlinger(fagsak);
 
         // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType
         return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
