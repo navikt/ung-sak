@@ -22,6 +22,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
 public class SøknadDokumentmottaker {
@@ -35,18 +36,22 @@ public class SøknadDokumentmottaker {
     private SøknadRepository søknadRepository;
     private BehandlingRepository behandlingRepository;
 
+    private Boolean flereSøknaderSammeDag;
+
     SøknadDokumentmottaker() {
         // for CDI proxy
     }
 
     @Inject
-    public SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
+    public SøknadDokumentmottaker(@KonfigVerdi(value = "FRISINN_FLERE_SOKNADER_SAMME_DAG", defaultVerdi = "true") Boolean flereSøknaderSammeDag,
+                                  DokumentmottakerFelles dokumentmottakerFelles,
                                   SaksnummerRepository saksnummerRepository,
                                   Behandlingsoppretter behandlingsoppretter,
                                   LagreSøknad søknadOversetter,
                                   LagreOppgittOpptjening lagreOppgittOpptjening,
                                   FagsakTjeneste fagsakTjeneste,
                                   BehandlingRepositoryProvider provider) {
+        this.flereSøknaderSammeDag = flereSøknaderSammeDag;
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -83,6 +88,7 @@ public class SøknadDokumentmottaker {
 
         validerSøknadErForNyPeriode(fagsak, periode.getFraOgMed());
         validerIngenÅpneBehandlinger(fagsak);
+        validerIngenAvsluttedeBehandlingerIDag(fagsak);
 
         Behandling behandling;
         if (forrigeBehandling.isEmpty()) {
@@ -113,6 +119,19 @@ public class SøknadDokumentmottaker {
     private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
         if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
             throw new UnsupportedOperationException("Frisinn støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
+        }
+    }
+
+    private void validerIngenAvsluttedeBehandlingerIDag(Fagsak fagsak) {
+        if (flereSøknaderSammeDag) {
+            return;
+        }
+        // For å forhindre at k9-forsendelse gjør flere brevutsendelser samme dag.
+        // Økonomi (OS) må ha kjørt utbetaling for returnere riktig etterbetaling til k9-forsendelse.
+        var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (behandling.isPresent()
+            && behandling.get().getAvsluttetDato().toLocalDate().isEqual(LocalDate.now())) {
+            throw new UnsupportedOperationException("Frisinn har avsluttet behandling i dag. Ny søknad kan først behandles i morgen, saksnummer = " + fagsak.getSaksnummer());
         }
     }
 
