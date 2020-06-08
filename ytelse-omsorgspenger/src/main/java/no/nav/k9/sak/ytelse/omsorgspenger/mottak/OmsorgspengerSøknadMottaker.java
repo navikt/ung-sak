@@ -70,7 +70,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
 
     private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
         if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
-            throw new UnsupportedOperationException("Frisinn støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
+            throw new UnsupportedOperationException("Omsorgspenger støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
         }
     }
 
