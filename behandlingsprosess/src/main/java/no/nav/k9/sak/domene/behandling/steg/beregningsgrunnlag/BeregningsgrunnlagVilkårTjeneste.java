@@ -133,13 +133,12 @@ public class BeregningsgrunnlagVilkårTjeneste {
         if (beregningsvilkåret.isEmpty()) {
             return;
         }
-        var behandlingsresultat = behandlingresultatOpt.get();
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(vilkårsPeriode);
         vilkårBuilder.leggTil(vilkårPeriodeBuilder.medUtfall(IKKE_VURDERT));
         var nyttResultat = builder.build();
-        behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), behandlingsresultat);
+        behandlingresultatOpt.ifPresent(br -> behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), br));
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), nyttResultat);
     }
 
