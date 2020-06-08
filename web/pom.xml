@@ -13,7 +13,7 @@
 	<artifactId>web-webapp</artifactId>
 	<packaging>jar</packaging>
 	<name>K9SAK :: Webapp</name>
-    
+
     <properties>
         <simple.client.version>0.9.0</simple.client.version>
     </properties>
@@ -103,7 +103,7 @@
 		</dependency>
 
 
-		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde 
+		<!-- Server Provided Libraries. Transitive avhengigheter som ikke burde
 			vært her da de trekkes inn av server. -->
 		<dependency>
 			<groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
@@ -344,7 +344,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>3.25.0</version>
+				<version>3.26.0</version>
 			</dependency>
 
 			<dependency>
