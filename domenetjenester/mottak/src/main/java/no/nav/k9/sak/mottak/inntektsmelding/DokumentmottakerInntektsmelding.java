@@ -12,6 +12,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
@@ -45,6 +46,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     private BehandlingRepository behandlingRepository;
 
     private BeanManager beanManager;
+    private BehandlingLåsRepository behandlingLåsRepository;
 
     @Inject
     public DokumentmottakerInntektsmelding(DokumentmottakerFelles dokumentMottakerFelles,
@@ -65,6 +67,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
     }
 
     void håndterIngenTidligereBehandling(Fagsak fagsak, MottattDokument mottattDokument) { // #I1
@@ -108,7 +111,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         ProsessTaskData prosessTaskData = new ProsessTaskData(OpprettOppgaveVurderDokumentTask.TASKTYPE);
         prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_BEHANDLENDE_ENHET, behandlendeEnhetsId);
         prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_DOKUMENT_TYPE, mottattDokument.getType().getKode());
-        prosessTaskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId());
+        prosessTaskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId());  // tar ikke med behandling her siden det evt. gjelder ny
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }
@@ -150,6 +153,8 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         }
 
         Behandling behandling = sisteYtelsesbehandling.get();
+        sjekkBehandlingKanLåses(behandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
+        
         boolean sisteYtelseErFerdigbehandlet = sisteYtelsesbehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(Boolean.FALSE);
         if (sisteYtelseErFerdigbehandlet) {
             Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
@@ -164,6 +169,15 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         } else {
             oppdaterÅpenBehandlingMedDokument(behandling, mottattDokument);
         }
+    }
+
+    private void sjekkBehandlingKanLåses(Behandling behandling) {
+        var lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
+        if (lås == null) {
+            // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
+            throw MottattDokumentFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
+        }
+
     }
 
     protected final boolean erAvslag(Behandling avsluttetBehandling) {

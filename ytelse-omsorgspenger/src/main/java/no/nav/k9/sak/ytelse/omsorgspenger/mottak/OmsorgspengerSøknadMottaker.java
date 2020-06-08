@@ -12,6 +12,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
@@ -29,6 +30,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     private SaksnummerRepository saksnummerRepository;
     private DokumentmottakerFelles dokumentmottakerFelles;
     private Behandlingsoppretter behandlingsoppretter;
+    private BehandlingRepository behandlingRepository;
 
     OmsorgspengerSøknadMottaker() {
         // proxy
@@ -36,29 +38,40 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
 
     @Inject
     public OmsorgspengerSøknadMottaker(DokumentmottakerFelles dokumentmottakerFelles,
+                                       BehandlingRepository behandlingRepository,
                                        SaksnummerRepository saksnummerRepository,
                                        Behandlingsoppretter behandlingsoppretter,
                                        FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
+        this.behandlingRepository = behandlingRepository;
         this.behandlingsoppretter = behandlingsoppretter;
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
     }
 
     @Override
-    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId,  OmsorgspengerSøknadInnsending søknadInnsending) {
+    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, OmsorgspengerSøknadInnsending søknadInnsending) {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknadInnsending);
+
         // FIXME K9 Legg til logikk for valg av fagsak og behandling type
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
+        validerIngenÅpneBehandlinger(fagsak);
+
         var behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
 
         // FIXME K9 Persister søknad
         persisterSøknad(behandling, søknadInnsending);
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
-        
+
         return behandling;
+    }
+
+    private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
+        if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
+            throw new UnsupportedOperationException("Frisinn støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
+        }
     }
 
     @SuppressWarnings("unused")

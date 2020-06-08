@@ -20,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 public class BehandlingLåsRepository {
 
     private static final Map<String, Object> BYPASS_PROPS = Map.of("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
-    
+
     private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
     private EntityManager entityManager;
 
@@ -92,8 +92,8 @@ public class BehandlingLåsRepository {
             oppdaterLåsVersjon(lås.getBehandlingId());
         } // else NO-OP (for ny behandling uten id)
     }
-  
-    private Object oppdaterLåsVersjon(Long id) {      
+
+    private Object oppdaterLåsVersjon(Long id) {
         var entity = entityManager.find(Behandling.class, id, BYPASS_PROPS);
         if (entity == null) {
             throw BehandlingRepositoryFeil.FACTORY.fantIkkeEntitetForLåsing(Behandling.class.getSimpleName(), id).toException();
@@ -102,6 +102,14 @@ public class BehandlingLåsRepository {
             entityManager.lock(entity, lockMode);
         }
         return entity;
+    }
+
+    /** ta lås hvis ledig, ellers returner null. */
+    @SuppressWarnings("unchecked")
+    public BehandlingLås taLåsHvisLedig(Long behandlingId) {
+        return (BehandlingLås) entityManager.createNativeQuery("select beh.id from BEHANDLING beh where id=:id FOR UPDATE SKIP LOCKED")
+            .setParameter("id", behandlingId)
+            .getResultList().stream().findFirst().map(f -> new BehandlingLås(behandlingId)).orElse(null);
     }
 
 }
