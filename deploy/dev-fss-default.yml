@@ -177,7 +177,7 @@ spec:
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
-      
+
     - name: SENSU_HOST
       value: "sensu.nais"
     - name: SENSU_PORT
@@ -186,9 +186,11 @@ spec:
     # Feature-flag
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
       value: "false"
+    - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
+      value: "true"
     - name: OMP_VARIANT_FILTER_AKTIVERT
       value: "true"
-      
+
     # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
