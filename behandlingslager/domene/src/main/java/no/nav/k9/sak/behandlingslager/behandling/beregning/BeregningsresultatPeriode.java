@@ -1,12 +1,14 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.AttributeOverride;
@@ -40,29 +42,38 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @DynamicUpdate
 public class BeregningsresultatPeriode extends BaseEntitet {
 
+    private static final Comparator<BeregningsresultatAndel> COMP_BEREGININGSRESULTAT_ANDEL = Comparator
+        .comparing((BeregningsresultatAndel ba) -> ba.getArbeidsforholdIdentifikator(), Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(ba -> ba.getArbeidsforholdRef().getReferanse(), Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(ba -> ba.getAktivitetStatus(), Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(ba -> ba.getInntektskategori(), Comparator.nullsLast(Comparator.naturalOrder()));
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BR_PERIODE")
     private Long id;
-
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "BEREGNINGSRESULTAT_FP_ID", nullable = false, updatable = false)
     @JsonBackReference
     private BeregningsresultatEntitet beregningsresultat;
-
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatPeriode", cascade = CascadeType.PERSIST, orphanRemoval = true)
     @OrderBy("arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
-
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
         @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
     })
     private DatoIntervallEntitet periode;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(BeregningsresultatPeriode eksisterendeBeregningsresultatPeriode) {
+        return new Builder(eksisterendeBeregningsresultatPeriode);
+    }
 
     public Long getId() {
         return id;
@@ -82,9 +93,16 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     public List<BeregningsresultatAndel> getBeregningsresultatAndelList() {
         return Collections.unmodifiableList(beregningsresultatAndelList)
-                .stream()
-                .sorted(COMP_BEREGININGSRESULTAT_ANDEL)
-                .collect(Collectors.toList());
+            .stream()
+            .sorted(COMP_BEREGININGSRESULTAT_ANDEL)
+            .collect(Collectors.toList());
+    }
+
+    public Optional<BigDecimal> getLavestUtbetalingsgrad() {
+        return getBeregningsresultatAndelList().stream()
+            .filter(a -> a.getDagsats() > 0)
+            .map(BeregningsresultatAndel::getUtbetalingsgrad)
+            .min(Comparator.naturalOrder());
     }
 
     public BeregningsresultatEntitet getBeregningsresultat() {
@@ -122,14 +140,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return Objects.hash(periode);
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder builder(BeregningsresultatPeriode eksisterendeBeregningsresultatPeriode) {
-        return new Builder(eksisterendeBeregningsresultatPeriode);
-    }
-
     public static class Builder {
         private BeregningsresultatPeriode beregningsresultatPeriodeMal;
 
@@ -161,13 +171,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             Objects.requireNonNull(beregningsresultatPeriodeMal.periode.getTomDato(), "beregningsresultaPeriodeTom");
         }
     }
-
-    private static final Comparator<BeregningsresultatAndel> COMP_BEREGININGSRESULTAT_ANDEL = Comparator
-            .comparing((BeregningsresultatAndel ba) -> ba.getArbeidsforholdIdentifikator(), Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(ba -> ba.getArbeidsforholdRef().getReferanse(), Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(ba -> ba.getAktivitetStatus(), Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparing(ba -> ba.getInntektskategori(), Comparator.nullsLast(Comparator.naturalOrder()))
-            ;
 
 }
 
