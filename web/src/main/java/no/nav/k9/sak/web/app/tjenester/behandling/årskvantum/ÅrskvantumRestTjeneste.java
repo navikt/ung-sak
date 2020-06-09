@@ -35,10 +35,10 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @ApplicationScoped
 public class ÅrskvantumRestTjeneste {
 
-    public static final String FORBRUKTEDAGER_PATH = "forbruktedager";
-    public static final String INPUT_PATH = "input";
+    public static final String FORBRUKTEDAGER_PATH = "/forbruktedager";
+    public static final String INPUT_PATH = "/input";
     static final String BASE_PATH = "/behandling/aarskvantum";
-    public static final String FORBRUKTEDAGER = BASE_PATH + "/forbruktedager";
+    public static final String FORBRUKTEDAGER = BASE_PATH + FORBRUKTEDAGER_PATH;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
     public ÅrskvantumRestTjeneste() {
