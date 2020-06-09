@@ -3,7 +3,9 @@ package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -40,12 +42,16 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
+import no.nav.k9.sak.kontrakt.frisinn.SøknadsperiodeOgOppgittOpptjeningV2Dto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -57,6 +63,7 @@ public class InntektArbeidYtelseRestTjeneste {
 
     public static final String INNTEKT_ARBEID_YTELSE_PATH = "/behandling/inntekt-arbeid-ytelse";
     public static final String OPPGITT_OPPTJEING_PATH = "/behandling/oppgitt-opptjening";
+    public static final String OPPGITT_OPPTJEING_PATH_V2 = "/behandling/oppgitt-opptjening_v2";
 
     private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseDtoMapper dtoMapper;
@@ -155,6 +162,44 @@ public class InntektArbeidYtelseRestTjeneste {
             return dto;
         }
         return new SøknadsperiodeOgOppgittOpptjeningDto();
+    }
+
+    @GET
+    @Path(OPPGITT_OPPTJEING_PATH_V2)
+    @Operation(description = "Hent informasjon om oppgitt opptjening for alle søknadsperioder", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningV2Dto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public SøknadsperiodeOgOppgittOpptjeningV2Dto getOppgittOpptjeningV2(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var grunnlag = iayTjeneste.finnGrunnlag(behandling.getId());
+        if (grunnlag.isEmpty()) {
+            // Fins ikke ennå, returnerer tom dto for legacy kompatibilitet med frontend
+            return new SøknadsperiodeOgOppgittOpptjeningV2Dto();
+        }
+
+        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = grunnlag.get();
+        OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste = Lookup.find(this.opptjeningForBeregningTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
+        Optional<OppgittOpptjening> oppgittOpptjening = opptjeningForBeregningTjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag);
+
+        var oppgittOpptjeningDto = InntektArbeidYtelseDtoMapper.mapOppgittOpptjening(oppgittOpptjening);
+
+        if (oppgittOpptjeningDto != null) {
+            var dto = new SøknadsperiodeOgOppgittOpptjeningV2Dto();
+            var fastsattUttak = uttakRepository.hentFastsattUttak(behandling.getId());
+            var perioder = FrisinnMapper.finnMåneder(fastsattUttak);
+            List<PeriodeMedSNOgFLDto> iSøknad = perioder
+                .stream()
+                .map(periode -> FrisinnMapper.map(periode, InntektArbeidYtelseDtoMapper.mapTilPeriode(oppgittOpptjeningDto, periode), fastsattUttak))
+                .collect(Collectors.toList());
+
+            OppgittOpptjeningDto førSøknad = InntektArbeidYtelseDtoMapper.mapUtenomPeriode(oppgittOpptjeningDto, new PeriodeDto(fastsattUttak.getMaksPeriode().getFomDato(), fastsattUttak.getMaksPeriode().getTomDato()));
+            dto.setFørSøkerPerioden(førSøknad);
+            dto.setMåneder(iSøknad);
+            return dto;
+        }
+        return new SøknadsperiodeOgOppgittOpptjeningV2Dto();
     }
 
     private InntektArbeidYtelseDto getInntektArbeidYtelserFraBehandling(Behandling behandling) {
