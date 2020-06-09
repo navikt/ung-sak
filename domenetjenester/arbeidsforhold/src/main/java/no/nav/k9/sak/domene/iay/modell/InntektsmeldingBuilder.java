@@ -16,7 +16,6 @@ import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.PeriodeAndel;
 import no.nav.vedtak.konfig.Tid;
 
 public class InntektsmeldingBuilder {
@@ -83,7 +82,7 @@ public class InntektsmeldingBuilder {
         return this;
     }
 
-    
+
     public InntektsmeldingBuilder leggTil(Refusjon refusjon) {
         precondition();
         kladd.leggTil(refusjon);

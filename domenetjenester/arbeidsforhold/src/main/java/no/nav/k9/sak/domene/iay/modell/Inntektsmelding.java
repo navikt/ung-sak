@@ -18,7 +18,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.PeriodeAndel;
 
 public class Inntektsmelding implements IndexKey {
 

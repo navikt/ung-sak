@@ -73,7 +73,7 @@ public class YrkesaktivitetFilter {
     private Set<AktivitetsAvtale> internGetAktivitetsAvtalerForArbeid(Yrkesaktivitet ya) {
         return ya.getAlleAktivitetsAvtaler().stream()
             .filter(av -> (!ya.erArbeidsforhold() || !av.erAnsettelsesPeriode()))
-            .filter(av -> skalMedEtterSkjæringstidspunktVurdering(av))
+            .filter(this::skalMedEtterSkjæringstidspunktVurdering)
             .collect(Collectors.toUnmodifiableSet());
     }
 

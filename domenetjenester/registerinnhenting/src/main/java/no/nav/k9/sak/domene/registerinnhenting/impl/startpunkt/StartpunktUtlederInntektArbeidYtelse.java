@@ -40,6 +40,7 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private StartpunktUtlederInntektsmelding startpunktUtlederInntektsmelding;
+    private StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger;
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -53,10 +54,12 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                          BehandlingRepositoryProvider repositoryProvider,
                                          StartpunktUtlederInntektsmelding startpunktUtlederInntektsmelding,
+                                         StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger,
                                          VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.startpunktUtlederInntektsmelding = startpunktUtlederInntektsmelding;
+        this.startpunktUtlederInntektsmeldinger = startpunktUtlederInntektsmeldinger;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
@@ -85,7 +88,8 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
         IAYGrunnlagDiff iayGrunnlagDiff = new IAYGrunnlagDiff(grunnlag1, grunnlag2);
         boolean erAktørArbeidEndretForSøker = iayGrunnlagDiff.erEndringPåAktørArbeidForAktør(skjæringstidspunkt, ref.getAktørId());
         boolean erAktørInntektEndretForSøker = iayGrunnlagDiff.erEndringPåAktørInntektForAktør(skjæringstidspunkt, ref.getAktørId());
-        boolean erInntektsmeldingEndret = iayGrunnlagDiff.erEndringPåInntektsmelding();
+        var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag1);
+        boolean erInntektsmeldingEndret = erInntektsmeldingEndret(ref, iayGrunnlagDiff, startpunktType);
 
         Saksnummer saksnummer = ref.getSaksnummer();
         AktørYtelseEndring aktørYtelseEndringForSøker = iayGrunnlagDiff.endringPåAktørYtelseForAktør(saksnummer, skjæringstidspunkt, ref.getAktørId());
@@ -108,10 +112,15 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt");
         }
         if (erInntektsmeldingEndret) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "inntektsmelding");
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktUtlederInntektsmelding.utledStartpunkt(ref, grunnlag1, grunnlag2), "inntektsmelding");
         }
 
         return startpunkter;
+    }
+
+    private boolean erInntektsmeldingEndret(BehandlingReferanse ref, IAYGrunnlagDiff iayGrunnlagDiff, StartpunktType startpunktType) {
+        return startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref) ? !StartpunktType.UDEFINERT.equals(startpunktType) : iayGrunnlagDiff.erEndringPåInntektsmelding();
     }
 
     private boolean skalTaStillingTilEndringerIArbeidsforhold(BehandlingReferanse behandlingReferanse) {

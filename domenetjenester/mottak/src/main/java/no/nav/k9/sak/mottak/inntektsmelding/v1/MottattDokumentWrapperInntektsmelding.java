@@ -11,7 +11,7 @@ import javax.xml.bind.JAXBElement;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.mottak.inntektsmelding.MapYtelseTypeFraInntektsmelding;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;
-import no.nav.k9.sak.typer.PeriodeAndel;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.seres.xsd.nav.inntektsmelding_m._201809.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsgiver;
