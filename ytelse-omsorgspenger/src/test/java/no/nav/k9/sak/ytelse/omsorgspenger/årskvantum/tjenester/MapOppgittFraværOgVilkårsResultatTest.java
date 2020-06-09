@@ -291,8 +291,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
             .leggTilYrkesaktivitet(yaBuilder2
                 .medArbeidsgiver(arbeidsgiver)
                 .medArbeidsforholdId(InternArbeidsforholdRef.ref(UUID.randomUUID()))
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(90), LocalDate.now().minusDays(31)), true))
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(90), LocalDate.now().minusDays(20)), false)
+                .leggTilAktivitetsAvtale(yaBuilder2.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(90), LocalDate.now().minusDays(31)), true))
+                .leggTilAktivitetsAvtale(yaBuilder2.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(90), LocalDate.now().minusDays(20)), false)
                     .medProsentsats(Stillingsprosent.HUNDRED)
                     .medBeskrivelse("asd")
                     .medSisteLønnsendringsdato(LocalDate.now().minusDays(30)))));
