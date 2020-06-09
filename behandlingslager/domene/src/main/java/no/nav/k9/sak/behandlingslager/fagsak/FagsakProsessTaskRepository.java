@@ -200,10 +200,11 @@ public class FagsakProsessTaskRepository {
                 "order by gruppeSekvensNr ",
                 FagsakProsessTask.class);
             query.setParameter("fagsakId", fagsakId); // NOSONAR
-
+            query.setMaxResults(1);
+            
             FagsakProsessTask førsteFagsakProsessTask = query.getResultList().stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Skal ikke være mulig å havne her, da eksistens av matchende fagsaktask er verifisert ovenfor."));
+                .orElseThrow(() -> new IllegalStateException("Skal ikke være mulig å havne her, da en må i minste finne input task her."));
             if (!førsteFagsakProsessTask.getGruppeSekvensNr().equals(fagsakProsessTask.getGruppeSekvensNr())) {
                 // Den første tasken (sortert på gruppe_sekvensnr) er ikke samme som gjeldende => en blokkerende task
                 return Optional.of(førsteFagsakProsessTask);
