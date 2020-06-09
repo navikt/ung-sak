@@ -60,7 +60,7 @@ class StartpunktUtlederInntektsmelding {
         if (ref.getBehandlingType().equals(BehandlingType.FØRSTEGANGSSØKNAD)) {
             // Utlederen er nødt til å spesialhåndtere førstegangsbehandling, da videre kode forutsetter at det finnes et vedtak
             // Startpunkt i førstegangsbehandling skal imidlertid alltid være på starten, se EndringskontrollerImpl som overstyrer dette
-            return StartpunktType.INNGANGSVILKÅR_OPPLYSNINGSPLIKT;
+            return StartpunktType.INIT_PERIODER;
         }
 
         List<Inntektsmelding> origIm = hentInntektsmeldingerFraGrunnlag(ref, grunnlag1, grunnlag2);
@@ -85,9 +85,6 @@ class StartpunktUtlederInntektsmelding {
     }
 
     private StartpunktType finnStartpunktForNyIm(BehandlingReferanse ref, Map.Entry<ArbeidforholdNøkkel, Inntektsmelding> nyImEntry, Map<ArbeidforholdNøkkel, Inntektsmelding> origImMap) {
-        if (erStartpunktForNyImInngangsvilkår(ref, nyImEntry.getValue())) {//NOSONAR utrykket evaluerer ikke alltid til true
-            return StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP;
-        }
         if (erStartpunktForNyImBeregning(nyImEntry, origImMap, ref)) {
             return StartpunktType.BEREGNING;
         }
@@ -136,22 +133,6 @@ class StartpunktUtlederInntektsmelding {
             .collect(Collectors.toMap(ArbeidforholdNøkkel::new, im -> im));
     }
 
-    private boolean erStartpunktForNyImInngangsvilkår(BehandlingReferanse ref, Inntektsmelding nyIm) {
-        // Samme logikk som 5045 AksjonspunktutlederForAvklarStartdatoForForeldrepengeperioden
-        LocalDate førsteUttaksDato = endreDatoHvisLørdagEllerSøndag(ref.getFørsteUttaksdato());
-        LocalDate startDatoIm = endreDatoHvisLørdagEllerSøndag(nyIm.getStartDatoPermisjon().orElse(Tid.TIDENES_BEGYNNELSE));
-        return !førsteUttaksDato.equals(startDatoIm);
-    }
-
-    LocalDate endreDatoHvisLørdagEllerSøndag(LocalDate dato) {
-        if (dato.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
-            return dato.plusDays(2L);
-        } else if (dato.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
-            return dato.plusDays(1L);
-        }
-        return dato;
-    }
-
     private boolean erEndringPåNaturalYtelser(List<NaturalYtelse> nyA, List<NaturalYtelse> nyB) {
         return (nyA.size() != nyB.size()
             || !nyA.containsAll(nyB));
@@ -182,17 +163,13 @@ class StartpunktUtlederInntektsmelding {
             return false;
         }
         Optional<Behandling> originalBehandling = this.behandlingRepository.hentBehandlingHvisFinnes(originalBehandlingId);
-        if (!originalBehandling.isPresent() || originalBehandling.get().getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()) {
+        if (originalBehandling.isEmpty() || originalBehandling.get().getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()) {
             return false;
         }
 
         Optional<BeregningsresultatEntitet> originalBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(originalBehandlingId);
 
-        if (!originalBeregningsresultat.isPresent()) {
-            return false;
-        }
-
-        return StartpunktutlederHjelper.finnesAktivitetHvorAlleHarDagsatsNull(originalBeregningsresultat.get());
+        return originalBeregningsresultat.filter(StartpunktutlederHjelper::finnesAktivitetHvorAlleHarDagsatsNull).isPresent();
     }
 
     private static class ArbeidforholdNøkkel {

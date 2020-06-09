@@ -89,6 +89,28 @@ public class SakInntektsmeldinger {
         return sorted;
     }
 
+    public Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Long behandlingId, UUID eksternReferanse) {
+        if (eksternReferanse == null) {
+            return Set.of();
+        }
+        var key = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId) && it.grunnlagEksternReferanse.equals(eksternReferanse)).findAny().orElseThrow();
+        var orignInntektsmeldinger = data.get(key);
+        var relevanteKeys = data.keySet()
+            .stream()
+            .filter(it -> Objects.equals(it.behandlingId, behandlingId) && it.opprettetTidspunkt.isAfter(key.opprettetTidspunkt))
+            .collect(Collectors.toList());
+
+        var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
+
+        relevanteKeys.stream()
+            .map(data::get)
+            .forEach(it -> it.stream()
+                .filter(at -> !orignInntektsmeldinger.contains(at))
+                .forEach(nyeInntektsmeldinger::add));
+
+        return nyeInntektsmeldinger;
+    }
+
     static class Key {
         final Long behandlingId;
         final UUID grunnlagEksternReferanse;

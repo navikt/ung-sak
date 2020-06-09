@@ -81,7 +81,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
-import no.nav.k9.sak.typer.PeriodeAndel;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 
 /**
  * Mapper fra k9-format til kalkulus-format, benytter kontrakt v1 fra kalkulus

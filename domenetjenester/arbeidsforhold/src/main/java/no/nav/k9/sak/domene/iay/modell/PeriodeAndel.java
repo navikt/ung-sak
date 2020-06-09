@@ -1,4 +1,4 @@
-package no.nav.k9.sak.typer;
+package no.nav.k9.sak.domene.iay.modell;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,17 +16,24 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.typer.Periode;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class PeriodeAndel {
 
+    @ChangeTracked
     @JsonProperty(value = "periode", required = true)
     @NotNull
     @Valid
     private Periode periode;
 
-    /** antall timer per dag (og minutter). Hvis null antas hel arbeidsdag skal telles. */
+    /**
+     * antall timer per dag (og minutter). Hvis null antas hel arbeidsdag skal telles.
+     */
+    @ChangeTracked
     @JsonProperty(value = "varighetPerDag")
     @Valid
     private Duration varighetPerDag;
@@ -46,7 +53,9 @@ public class PeriodeAndel {
         this(new Periode(fom, tom), toDuration(timerPerDag));
     }
 
-    /** Antal hel dag skal telles med. */
+    /**
+     * Antal hel dag skal telles med.
+     */
     public PeriodeAndel(Periode periode) {
         this(periode, (Duration) null);
     }
@@ -57,6 +66,17 @@ public class PeriodeAndel {
 
     public PeriodeAndel(Periode periode, BigDecimal timerPerDag) {
         this(periode, toDuration(timerPerDag));
+    }
+
+    public static Duration toDuration(BigDecimal timerPerDag) {
+        int timer = timerPerDag.intValue();
+        BigDecimal andelAvTime = timerPerDag.subtract(BigDecimal.valueOf(timer));
+
+        int minutterPerTime = 60;
+        int minutterPerIntervall = 30;
+        BigDecimal antallIntervaller = andelAvTime.multiply(BigDecimal.valueOf(minutterPerTime / minutterPerIntervall)).setScale(0, RoundingMode.HALF_UP);
+        int minutterAvrundet = antallIntervaller.intValue() * minutterPerIntervall;
+        return Duration.ofHours(timer).plusMinutes(minutterAvrundet);
     }
 
     public Periode getPeriode() {
@@ -94,16 +114,5 @@ public class PeriodeAndel {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + periode + " =" + varighetPerDag + ">";
-    }
-
-    public static Duration toDuration(BigDecimal timerPerDag) {
-        int timer = timerPerDag.intValue();
-        BigDecimal andelAvTime = timerPerDag.subtract(BigDecimal.valueOf(timer));
-
-        int minutterPerTime = 60;
-        int minutterPerIntervall = 30;
-        BigDecimal antallIntervaller = andelAvTime.multiply(BigDecimal.valueOf(minutterPerTime / minutterPerIntervall)).setScale(0, RoundingMode.HALF_UP);
-        int minutterAvrundet = antallIntervaller.intValue() * minutterPerIntervall;
-        return Duration.ofHours(timer).plusMinutes(minutterAvrundet);
     }
 }

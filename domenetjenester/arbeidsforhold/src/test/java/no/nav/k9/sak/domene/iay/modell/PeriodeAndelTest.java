@@ -1,4 +1,4 @@
-package no.nav.k9.sak.typer;
+package no.nav.k9.sak.domene.iay.modell;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,8 +8,9 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
-public class PeriodeAndelTest {
+import no.nav.k9.sak.typer.Periode;
 
+public class PeriodeAndelTest {
     @Test
     public void skal_konvertere_BigDecimal_timer_til_Duration() throws Exception {
         var fom = LocalDate.now();

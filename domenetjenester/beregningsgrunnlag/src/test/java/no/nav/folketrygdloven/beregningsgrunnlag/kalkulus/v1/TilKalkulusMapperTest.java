@@ -16,7 +16,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.PeriodeAndel;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class TilKalkulusMapperTest {

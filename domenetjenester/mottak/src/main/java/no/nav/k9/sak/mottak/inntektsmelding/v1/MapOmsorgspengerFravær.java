@@ -10,7 +10,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.k9.sak.typer.PeriodeAndel;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.DelvisFravaer;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.DelvisFravaersListe;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.FravaersPeriodeListe;
