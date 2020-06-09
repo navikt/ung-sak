@@ -35,7 +35,7 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private OmsorgspengerOpphørtidspunktTjeneste opphørTidspunktTjeneste;
-    
+
     private Period periodeFør = Period.parse("P12M");
 
     OmsorgspengerSkjæringstidspunktTjenesteImpl() {
@@ -114,7 +114,6 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
                 if (spesifiktVilkår.isPresent() && førstePeriode.isPresent()) {
                     final var vilkårPeriode = spesifiktVilkår.get().getPerioder()
                         .stream()
-                        .filter(it -> it.getPeriode().hengerSammen(førstePeriode.get()))
                         .map(VilkårPeriode::getPeriode)
                         .min(DatoIntervallEntitet::compareTo);
 
@@ -134,7 +133,7 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
     }
-    
+
     @Override
     public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
