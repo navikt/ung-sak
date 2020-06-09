@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
+package no.nav.k9.sak.ytelse.frisinn.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,13 +12,13 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 
-public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
+public class FrisinnMapperTest {
 
 
     @Test
     public void skal_mappe_frisinn_rikitg_inn() {
-        FrisinnYtelsesspesifiktGrunnlagMapper frisinnYtelsesspesifiktGrunnlagMapper = new FrisinnYtelsesspesifiktGrunnlagMapper();
         LocalDate dato3 = LocalDate.of(2020, 4, 30);
 
         LocalDate dato1 = LocalDate.of(2020, 4, 15);
@@ -29,7 +29,7 @@ public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
 
         UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of(uttakAktivitetPeriode, uttakAktivitetPeriode2));
 
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = frisinnYtelsesspesifiktGrunnlagMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
 
         periodeMedSøkerInfoDtos.sort(Comparator.comparing(o -> o.getPeriode().getFom()));
 
@@ -47,7 +47,6 @@ public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
 
     @Test
     public void skal_mappe_frisinngrunnlag_rikitg_inn_kompleks() {
-        FrisinnYtelsesspesifiktGrunnlagMapper frisinnYtelsesspesifiktGrunnlagMapper = new FrisinnYtelsesspesifiktGrunnlagMapper();
         LocalDate sluttenIApril = LocalDate.of(2020, 4, 30);
         LocalDate sluttenIMai = LocalDate.of(2020, 5, 31);
 
@@ -63,7 +62,7 @@ public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
 
         UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of(uttakAktivitetPeriode, uttakAktivitetPeriode2,uttakAktivitetPeriode3, uttakAktivitetPeriode4));
 
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = frisinnYtelsesspesifiktGrunnlagMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
 
         periodeMedSøkerInfoDtos.sort(Comparator.comparing(o -> o.getPeriode().getFom()));
 
@@ -87,5 +86,31 @@ public class FrisinnYtelsesspesifiktGrunnlagMapperTest {
         assertThat(periodeMedSøkerInfoDtos.get(3).getPeriode().getTom()).isEqualTo(sluttenIMai);
         assertThat(periodeMedSøkerInfoDtos.get(3).getSøkerFrilansIPeriode()).isTrue();
         assertThat(periodeMedSøkerInfoDtos.get(3).getSøkerNæringIPeriode()).isTrue();
+    }
+
+    @Test
+    public void skal_gi_riktig_sett_med_måneder() {
+        LocalDate sluttenIApril = LocalDate.of(2020, 4, 30);
+        LocalDate sluttenIMai = LocalDate.of(2020, 5, 31);
+
+        LocalDate startFLIApril = LocalDate.of(2020, 4, 15);
+        LocalDate startSNIApril = LocalDate.of(2020, 4, 25);
+        LocalDate startFLIMai = LocalDate.of(2020, 5, 2);
+        LocalDate startSNIMai = LocalDate.of(2020, 5, 10);
+
+        UttakAktivitetPeriode uttakAktivitetPeriode = new UttakAktivitetPeriode(startFLIApril, sluttenIApril, UttakArbeidType.FRILANSER, null, null);
+        UttakAktivitetPeriode uttakAktivitetPeriode2 = new UttakAktivitetPeriode(startSNIApril, sluttenIApril, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, null, null);
+        UttakAktivitetPeriode uttakAktivitetPeriode3 = new UttakAktivitetPeriode(startFLIMai, sluttenIMai, UttakArbeidType.FRILANSER, null, null);
+        UttakAktivitetPeriode uttakAktivitetPeriode4 = new UttakAktivitetPeriode(startSNIMai, sluttenIMai, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, null, null);
+
+        UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of(uttakAktivitetPeriode, uttakAktivitetPeriode2,uttakAktivitetPeriode3, uttakAktivitetPeriode4));
+
+        List<PeriodeDto> perioder = FrisinnMapper.finnMåneder(uttakAktivitet);
+        assertThat(perioder).hasSize(2);
+        assertThat(perioder.get(0).getFom()).isEqualTo(LocalDate.of(2020, 4, 1));
+        assertThat(perioder.get(0).getTom()).isEqualTo(LocalDate.of(2020, 4, 30));
+        assertThat(perioder.get(1).getFom()).isEqualTo(LocalDate.of(2020, 5, 1));
+        assertThat(perioder.get(1).getTom()).isEqualTo(LocalDate.of(2020, 5, 31));
+
     }
 }
