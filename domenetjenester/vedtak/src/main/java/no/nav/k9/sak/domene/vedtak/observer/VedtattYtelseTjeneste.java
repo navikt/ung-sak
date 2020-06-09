@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.vedtak.observer;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +14,7 @@ import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.vedtak.ytelse.Aktør;
+import no.nav.abakus.vedtak.ytelse.Desimaltall;
 import no.nav.abakus.vedtak.ytelse.Periode;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
@@ -78,6 +80,8 @@ public class VedtattYtelseTjeneste {
         p.setFom(periode.getBeregningsresultatPeriodeFom());
         p.setTom(periode.getBeregningsresultatPeriodeTom());
         anvisning.setPeriode(p);
+        anvisning.setDagsats(new Desimaltall(new BigDecimal(periode.getDagsats())));
+        anvisning.setUtbetalingsgrad(periode.getLavestUtbetalingsgrad().map(Desimaltall::new).orElse(null));
         return anvisning;
     }
 
