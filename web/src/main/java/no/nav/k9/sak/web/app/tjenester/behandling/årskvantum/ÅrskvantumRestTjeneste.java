@@ -10,10 +10,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,19 +29,17 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
-@ApplicationScoped
-@Transactional
-@Path("")
+@Path(ÅrskvantumRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
+@Transactional
+@ApplicationScoped
 public class ÅrskvantumRestTjeneste {
 
+    public static final String FORBRUKTEDAGER_PATH = "/forbruktedager";
+    public static final String INPUT_PATH = "/input";
     static final String BASE_PATH = "/behandling/aarskvantum";
-
-    public static final String FORBRUKTEDAGER = BASE_PATH + "/forbruktedager";
-
+    public static final String FORBRUKTEDAGER = BASE_PATH + FORBRUKTEDAGER_PATH;
     private ÅrskvantumTjeneste årskvantumTjeneste;
-
-
 
     public ÅrskvantumRestTjeneste() {
         // for proxying
@@ -55,9 +55,9 @@ public class ÅrskvantumRestTjeneste {
      */
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path(FORBRUKTEDAGER)
+    @Path(FORBRUKTEDAGER_PATH)
     @Operation(description = "Hent forbrukte dager", tags = "behandling - årskvantum/uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer forbrukte dager av totalt årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ÅrskvantumForbrukteDager.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer forbrukte dager av totalt årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ÅrskvantumForbrukteDager.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -65,4 +65,22 @@ public class ÅrskvantumRestTjeneste {
         return årskvantumTjeneste.hentÅrskvantumForBehandling(behandlingIdDto.getBehandlingUuid());
     }
 
+
+    /**
+     * Hent oppgitt uttak for angitt behandling.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(INPUT_PATH)
+    @Operation(description = "Hent input til beregning av årskvantum", tags = "behandling - årskvantum/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "input til beregning av årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response inputTilÅrskvantumsBeregning(@NotNull @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+
+        var request = årskvantumTjeneste.hentInputTilBeregning(behandlingIdDto.getBehandlingUuid());
+
+        return Response.ok(request).build();
+    }
 }

@@ -103,8 +103,12 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
+    public ÅrskvantumGrunnlag hentInputTilBeregning(UUID behandlingUuid) {
+        var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingUuid));
+        return hentForRef(ref);
+    }
 
+    private ÅrskvantumGrunnlag hentForRef(BehandlingReferanse ref) {
         var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId()).orElseThrow();
 
         var barna = personMedRelasjoner.getFamilierelasjoner()
@@ -128,7 +132,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             .max(LocalDateTime::compareTo)
             .orElseThrow();
 
-        var årskvantumRequest = new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
+        return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
             datoForSisteInntektsmelding,
             ref.getBehandlingUuid().toString(),
             fraværPerioder,
@@ -136,6 +140,11 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             personMedRelasjoner.getFødselsdato(),
             personMedRelasjoner.getDødsdato(),
             barna);
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
+        var årskvantumRequest = hentForRef(ref);
 
         try {
             log.debug("Sender request til årskvantum" +
