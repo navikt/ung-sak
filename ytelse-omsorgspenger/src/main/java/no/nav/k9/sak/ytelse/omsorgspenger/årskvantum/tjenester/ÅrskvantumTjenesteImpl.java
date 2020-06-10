@@ -219,7 +219,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     @NotNull
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Tuple<Familierelasjon, Optional<Personinfo>> it) {
         var personinfo = it.getElement2().orElseThrow();
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted());
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), false);
     }
 
     private boolean kreverArbeidsgiverRefusjon(InntektsmeldingAggregat inntektsmeldingAggregat,

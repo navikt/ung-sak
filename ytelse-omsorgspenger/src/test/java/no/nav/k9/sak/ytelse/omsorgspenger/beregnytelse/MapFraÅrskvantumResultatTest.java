@@ -39,7 +39,7 @@ public class MapFraÅrskvantumResultatTest {
     @Test
     public void map_fra_årskvantum_resultat() throws Exception {
 
-        var år = new ÅrskvantumForbrukteDager(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, Duration.ZERO, BigDecimal.TEN, Duration.ZERO, lagUttaksplan(),new LinkedList<>());
+        var år = new ÅrskvantumForbrukteDager(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, Duration.ZERO, BigDecimal.TEN, Duration.ZERO, lagUttaksplan(),new LinkedList<>(), new LinkedList<>());
 
 
         List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
