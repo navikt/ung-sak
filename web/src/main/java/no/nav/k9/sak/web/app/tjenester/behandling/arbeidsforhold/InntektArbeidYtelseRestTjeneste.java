@@ -63,7 +63,7 @@ public class InntektArbeidYtelseRestTjeneste {
 
     public static final String INNTEKT_ARBEID_YTELSE_PATH = "/behandling/inntekt-arbeid-ytelse";
     public static final String OPPGITT_OPPTJEING_PATH = "/behandling/oppgitt-opptjening";
-    public static final String OPPGITT_OPPTJEING_PATH_V2 = "/behandling/oppgitt-opptjening_v2";
+    public static final String OPPGITT_OPPTJEING_PATH_V2 = "/behandling/oppgitt-opptjening-v2";
 
     private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseDtoMapper dtoMapper;

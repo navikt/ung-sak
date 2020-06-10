@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,8 +36,8 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.BekreftOverstyrOppgittOpptjeningDto
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
+import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
+import no.nav.k9.sak.kontrakt.frisinn.SøknadsperiodeOgOppgittOpptjeningV2Dto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftOverstyrOppgittOpptjeningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -60,13 +60,13 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
     @Override
     public OppdateringResultat oppdater(BekreftOverstyrOppgittOpptjeningDto dto, AksjonspunktOppdaterParameter param) {
-        HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder = historikkAdapter.tekstBuilder();
+        var historikkInnslagTekstBuilder = historikkAdapter.tekstBuilder();
         var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny();
         var søknadsperiodeOgOppgittOpptjening = dto.getSøknadsperiodeOgOppgittOpptjeningDto();
         leggerTilEgenæring(søknadsperiodeOgOppgittOpptjening, historikkInnslagTekstBuilder).ifPresent(oppgittOpptjeningBuilder::leggTilEgneNæringer);
         leggerTilFrilans(søknadsperiodeOgOppgittOpptjening, historikkInnslagTekstBuilder).ifPresent(oppgittOpptjeningBuilder::leggTilFrilansOpplysninger);
 
-        ArrayList<UttakAktivitetPeriode> perioderSomSkalMed = utledePerioder(dto);
+        var perioderSomSkalMed = utledePerioder(dto);
         uttakRepository.lagreOgFlushFastsattUttak(param.getBehandlingId(), new UttakAktivitet(perioderSomSkalMed));
 
         inntektArbeidYtelseTjeneste.lagreOverstyrtOppgittOpptjening(param.getBehandlingId(), oppgittOpptjeningBuilder);
@@ -76,30 +76,32 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
     }
 
     private ArrayList<UttakAktivitetPeriode> utledePerioder(BekreftOverstyrOppgittOpptjeningDto dto) {
-        PeriodeDto periodeFraSøknad = dto.getSøknadsperiodeOgOppgittOpptjeningDto().getPeriodeFraSøknad();
-
-
+        var periodeFraSøknad = dto.getSøknadsperiodeOgOppgittOpptjeningDto().getMåneder();
         var perioderSomSkalMed = new ArrayList<UttakAktivitetPeriode>();
-        if (dto.getSøknadsperiodeOgOppgittOpptjeningDto().getSøkerYtelseForFrilans()) {
-            var tidligsteDato = finnFraOgMedDatoFL(dto.getSøknadsperiodeOgOppgittOpptjeningDto());
-            perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, tidligsteDato, periodeFraSøknad.getTom()));
-        }
-        if (dto.getSøknadsperiodeOgOppgittOpptjeningDto().getSøkerYtelseForNæring()) {
-            var tidligsteDato = finnFraOgMedDatoSN(dto.getSøknadsperiodeOgOppgittOpptjeningDto());
-            perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, tidligsteDato, periodeFraSøknad.getTom()));
+
+        for (PeriodeMedSNOgFLDto periode : periodeFraSøknad) {
+            if (periode.getSøkerFL()) {
+                var tidligsteDato = finnFraOgMedDatoFL(periode.getOppgittIMåned());
+                perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, tidligsteDato, periode.getMåned().getTom()));
+            }
+            if (periode.getSøkerSN()) {
+                var tidligsteDato = finnFraOgMedDatoSN(periode.getOppgittIMåned());
+                perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, tidligsteDato, periode.getMåned().getTom()));
+            }
         }
         return perioderSomSkalMed;
     }
 
-    LocalDate finnFraOgMedDatoSN(SøknadsperiodeOgOppgittOpptjeningDto dto) {
-        OppgittOpptjeningDto iSøkerPerioden = dto.getISøkerPerioden();
-        return iSøkerPerioden.getOppgittEgenNæring().stream().map(egenNæringDto -> egenNæringDto.getPeriode().getFom()).min(LocalDate::compareTo).orElseThrow(() -> new IllegalStateException("Fant ikke startdato for SN-perioden."));
+    LocalDate finnFraOgMedDatoSN(OppgittOpptjeningDto oppgittIMåned) {
+        return oppgittIMåned.getOppgittEgenNæring()
+            .stream()
+            .map(egenNæringDto -> egenNæringDto.getPeriode().getFom())
+            .min(LocalDate::compareTo)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke startdato for SN-perioden."));
     }
 
-    LocalDate finnFraOgMedDatoFL(SøknadsperiodeOgOppgittOpptjeningDto dto) {
-        OppgittOpptjeningDto iSøkerPerioden = dto.getISøkerPerioden();
-        OppgittFrilansDto oppgittFrilans = iSøkerPerioden.getOppgittFrilans();
-
+    LocalDate finnFraOgMedDatoFL(OppgittOpptjeningDto oppgittIMåned) {
+        var oppgittFrilans = oppgittIMåned.getOppgittFrilans();
         return Optional.ofNullable(oppgittFrilans)
                 .orElseThrow(() -> new IllegalStateException("Fant ikke startdato for FL-perioden."))
                 .getOppgittFrilansoppdrag().stream().map(frilans -> frilans.getPeriode().getFom()).min(LocalDate::compareTo)
@@ -107,15 +109,15 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
     }
 
-    private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
-        var frilansI = søknadsperiodeOgOppgittOpptjening.getISøkerPerioden().getOppgittFrilans();
-        var frilansFør = søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittFrilans();
+    private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
+        var oppdragI = søknadsperiodeOgOppgittOpptjening.getMåneder()
+            .stream().map(m -> m.getOppgittIMåned().getOppgittFrilans())
+            .map(OppgittFrilansDto::getOppgittFrilansoppdrag)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
-        if (frilansI != null || frilansFør != null) {
-            var oppdrag = Optional.ofNullable(frilansI).map(OppgittFrilansDto::getOppgittFrilansoppdrag).orElse(Collections.emptyList());
-            oppdrag.addAll(Optional.ofNullable(frilansFør).map(OppgittFrilansDto::getOppgittFrilansoppdrag).orElse(Collections.emptyList()));
-
-            var oppgittFrilansoppdrag = oppdrag.stream().map(oppgittFrilansoppdragDto -> {
+        if (!oppdragI.isEmpty()) {
+            var oppgittFrilansoppdrag = oppdragI.stream().map(oppgittFrilansoppdragDto -> {
                 var frilansOppdragBuilder = OppgittFrilansOppdragBuilder.ny();
                 BigDecimal verdi = oppgittFrilansoppdragDto.getBruttoInntekt().getVerdi();
                 frilansOppdragBuilder.medInntekt(verdi);
@@ -142,10 +144,13 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         return false;
     }
 
-    private Optional<List<EgenNæringBuilder>> leggerTilEgenæring(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
+    private Optional<List<EgenNæringBuilder>> leggerTilEgenæring(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
         List<OppgittEgenNæringDto> egenNæring = new ArrayList<>();
         Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
-        Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getISøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
+        egenNæring.addAll(søknadsperiodeOgOppgittOpptjening.getMåneder()
+            .stream().map(o -> o.getOppgittIMåned().getOppgittEgenNæring())
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList()));
 
         if (!egenNæring.isEmpty()) {
             return Optional.of(egenNæring.stream().map(oppgittEgenNæringDto -> {

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.frisinn.SøknadsperiodeOgOppgittOpptjeningV2Dto;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,13 +28,13 @@ public class BekreftOverstyrOppgittOpptjeningDto extends BekreftetAksjonspunktDt
     @JsonProperty(value = "søknadsperiodeOgOppgittOpptjeningDto", required = true)
     @NotNull
     @Valid
-    private SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto;
+    private SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjeningDto;
 
-    public SøknadsperiodeOgOppgittOpptjeningDto getSøknadsperiodeOgOppgittOpptjeningDto() {
+    public SøknadsperiodeOgOppgittOpptjeningV2Dto getSøknadsperiodeOgOppgittOpptjeningDto() {
         return søknadsperiodeOgOppgittOpptjeningDto;
     }
 
-    public void setSøknadsperiodeOgOppgittOpptjeningDto(SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto) {
+    public void setSøknadsperiodeOgOppgittOpptjeningDto(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjeningDto) {
         this.søknadsperiodeOgOppgittOpptjeningDto = søknadsperiodeOgOppgittOpptjeningDto;
     }
 }
