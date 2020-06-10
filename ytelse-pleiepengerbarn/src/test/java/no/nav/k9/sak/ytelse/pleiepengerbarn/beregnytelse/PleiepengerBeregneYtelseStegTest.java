@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,11 +95,12 @@ public class PleiepengerBeregneYtelseStegTest {
         return scenario.lagre(repositoryProvider);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void skalUtførStegForFørstegangsbehandling() {
         // Arrange
 
-        when(fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(Mockito.any(List.class), Mockito.any())).thenReturn(beregningsresultat);
+        when(fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(any(List.class), Mockito.any())).thenReturn(beregningsresultat);
 
         Tuple<Behandling, BehandlingskontrollKontekst> behandlingKontekst = byggGrunnlag(true, true);
         Behandling behandling = behandlingKontekst.getElement1();

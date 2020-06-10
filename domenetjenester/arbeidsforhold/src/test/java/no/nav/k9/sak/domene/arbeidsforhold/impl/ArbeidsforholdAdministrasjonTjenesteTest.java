@@ -24,6 +24,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -582,7 +583,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
             .build();
         final Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, personinfo.getAktørId());
         fagsakRepository.opprettNy(fagsak);
-        final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
+        final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES);
         final Behandling behandling = builder.build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         return behandling;

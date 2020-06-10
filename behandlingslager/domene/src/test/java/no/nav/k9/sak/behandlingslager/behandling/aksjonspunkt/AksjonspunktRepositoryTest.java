@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -42,7 +43,7 @@ public class AksjonspunktRepositoryTest {
     public void setup() {
         fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"));
         fagsakRepository.opprettNy(fagsak);
-        behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }
 

@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -542,7 +543,7 @@ public class BehandlingRepositoryImplTest {
 
     private Behandling.Builder opprettBuilderForBehandling() {
         fagsakRepository.opprettNy(fagsak);
-        return Behandling.forFørstegangssøknad(fagsak);
+        return Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES);
 
     }
 }

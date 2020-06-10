@@ -213,10 +213,11 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         boolean apAvbrutt = false;
 
         opprettBehandlingFor(Optional.empty());
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_FATTE_VEDTAK);
-
+        
         TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.of(aksjonspunktDefinisjon), Optional.empty());
         opprettAksjonspunkt(behandling, aksjonspunktDefinisjon, apAvbrutt);
+
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_FATTE_VEDTAK);
 
         setFelleseMockMetoder(totrinnskontrollAksjonspunkterDto, Collections.emptyList());
 
@@ -353,6 +354,8 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         aksjonspunktRepository.setToTrinnsBehandlingKreves(aksjonspunkt);
         if (erAvbrutt) {
             aksjonspunktRepository.setTilAvbrutt(aksjonspunkt);
+        } else {
+            aksjonspunktRepository.setTilUtført(aksjonspunkt, "");
         }
     }
 

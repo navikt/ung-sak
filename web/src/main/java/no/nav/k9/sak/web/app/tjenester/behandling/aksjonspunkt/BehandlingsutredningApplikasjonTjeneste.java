@@ -13,6 +13,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -22,13 +23,17 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
+import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
@@ -39,7 +44,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
     private OppgaveTjeneste oppgaveTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
-
+    private SjekkProsessering sjekkProsessering;
     BehandlingsutredningApplikasjonTjeneste() {
         // for CDI proxy
     }
@@ -49,9 +54,11 @@ public class BehandlingsutredningApplikasjonTjeneste {
                                                    BehandlingRepositoryProvider behandlingRepositoryProvider,
                                                    OppgaveTjeneste oppgaveTjeneste,
                                                    BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+                                                   SjekkProsessering sjekkProsessering,
                                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
-        this.defaultVenteFrist = defaultVenteFrist;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
+        this.defaultVenteFrist = defaultVenteFrist;
+        this.sjekkProsessering = sjekkProsessering;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -111,19 +118,31 @@ public class BehandlingsutredningApplikasjonTjeneste {
 
     public void kanEndreBehandling(Long behandlingId, Long versjon) {
         Boolean uendret = behandlingRepository.erVersjonUendret(behandlingId, versjon);
+        var beh = behandlingRepository.hentBehandling(behandlingId);
         if (!uendret) {
-            var beh = behandlingRepository.hentBehandling(behandlingId);
             throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.endringerHarForekommetPåBehandlingen(behandlingId, versjon, beh.getVersjon()).toException();
+        }
+        validerIngenPågåendeProsess(beh);
+    }
+    
+    private void validerIngenPågåendeProsess(Behandling behandling) {
+        var res = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);
+        if(res.isPresent()) {
+            Fagsak fagsak = behandling.getFagsak();
+            throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.prosessUnderveisKanIkkeEndreTilKlart(fagsak.getYtelseType(), behandling.getId(), fagsak.getSaksnummer(), res.get()).toException();
         }
     }
 
     interface BehandlingsutredningApplikasjonTjenesteFeil extends DeklarerteFeil {
         BehandlingsutredningApplikasjonTjenesteFeil FACTORY = FeilFactory.create(BehandlingsutredningApplikasjonTjenesteFeil.class); // NOSONAR
 
-        @FunksjonellFeil(feilkode = "FP-992332", feilmelding = "BehandlingId %s er ikke satt på vent, og ventefrist kan derfor ikke oppdateres", løsningsforslag = "Forsett saksbehandlingen", logLevel = ERROR)
+        @FunksjonellFeil(feilkode = "K9-992332", feilmelding = "BehandlingId %s er ikke satt på vent, og ventefrist kan derfor ikke oppdateres", løsningsforslag = "Forsett saksbehandlingen", logLevel = ERROR)
         Feil kanIkkeEndreVentefristForBehandlingIkkePaVent(Long behandlingId);
 
-        @FunksjonellFeil(feilkode = "FP-837578", feilmelding = "Behandlingen [%s] er endret av en annen saksbehandler, eller har blitt oppdatert med ny informasjon av systemet. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
+        @TekniskFeil(feilkode = "K9-760741", feilmelding = "Behandling [ytelseType=%s, behandlingId=%s, saksnummer=%s] pågår eller feilet, kan ikke gjøre endringer inntil det er klart: %s", logLevel = WARN)
+        Feil prosessUnderveisKanIkkeEndreTilKlart(FagsakYtelseType ytelseType, Long behandlingId, Saksnummer saksnummer, AsyncPollingStatus st);
+
+        @FunksjonellFeil(feilkode = "K9-837578", feilmelding = "Behandlingen [%s] er endret av en annen saksbehandler, eller har blitt oppdatert med ny informasjon av systemet. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
         Feil endringerHarForekommetPåBehandlingen(Long behandlingId, Long versjonInn, Long versjonEksisterende);
     }
 }

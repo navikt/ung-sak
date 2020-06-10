@@ -334,6 +334,8 @@ public class Behandling extends BaseEntitet {
      * Marker behandling som avsluttet.
      */
     public void avsluttBehandling() {
+        getAksjonspunkterStream().filter(a -> a.erÅpentAksjonspunkt()).forEach(a -> a.avbryt());
+
         lukkBehandlingStegStatuser(this.behandlingStegTilstander, BehandlingStegStatus.UTFØRT);
         this.status = BehandlingStatus.AVSLUTTET;
         this.avsluttetDato = LocalDateTime.now();
@@ -530,7 +532,14 @@ public class Behandling extends BaseEntitet {
      * Internt API, IKKE BRUK.
      */
     void addAksjonspunkt(Aksjonspunkt aksjonspunkt) {
+        validerKanLeggeTilAksjonspunkt(aksjonspunkt.getAksjonspunktDefinisjon());
         aksjonspunkter.add(aksjonspunkt);
+    }
+
+    private void validerKanLeggeTilAksjonspunkt(AksjonspunktDefinisjon def) {
+        if (!def.kanUtføres(getStatus())) {
+            throw new IllegalArgumentException("Kan ikke legge til aksjonspunkt: " + def + " i gjelden status for behandling:" + this);
+        }
     }
 
     public List<Aksjonspunkt> getAksjonspunkterMedTotrinnskontroll() {
@@ -750,6 +759,7 @@ public class Behandling extends BaseEntitet {
 
         private BehandlingÅrsak.Builder behandlingÅrsakBuilder;
         private BehandlingResultatType behandlingResultatType;
+        private BehandlingStatus status;
 
         private Builder(Fagsak fagsak, BehandlingType behandlingType) {
             this(behandlingType);
@@ -777,6 +787,11 @@ public class Behandling extends BaseEntitet {
          */
         public Builder medOpprettetDato(LocalDateTime tid) {
             this.opprettetDato = tid == null ? null : tid.withNano(0);
+            return this;
+        }
+
+        public Builder medBehandlingStatus(BehandlingStatus status) {
+            this.status = status;
             return this;
         }
 
@@ -840,20 +855,23 @@ public class Behandling extends BaseEntitet {
                 behandling.behandlingstidFrist = behandlingstidFrist;
             }
 
-            if (behandlingResultatType != null) {
-                behandling.setBehandlingResultatType(behandlingResultatType);
+            if (this.behandlingResultatType != null) {
+                behandling.setBehandlingResultatType(this.behandlingResultatType);
             }
-            if (opprettetDato != null) {
-                behandling.opprettetDato = opprettetDato.withNano(0);
+            if (this.opprettetDato != null) {
+                behandling.opprettetDato = this.opprettetDato.withNano(0);
             } else {
                 behandling.opprettetDato = behandling.getOpprettetTidspunkt().withNano(0);
             }
-            if (avsluttetDato != null) {
-                behandling.avsluttetDato = avsluttetDato.withNano(0);
+            if (this.avsluttetDato != null) {
+                behandling.avsluttetDato = this.avsluttetDato.withNano(0);
             }
 
-            if (behandlingÅrsakBuilder != null) {
-                behandlingÅrsakBuilder.buildFor(behandling);
+            if (this.behandlingÅrsakBuilder != null) {
+                this.behandlingÅrsakBuilder.buildFor(behandling);
+            }
+            if (this.status != null) {
+                behandling.status = this.status;
             }
 
             return behandling;

@@ -235,6 +235,8 @@ public class BehandlingRepository {
                 "Behandling#id [" + behandling.getId() + "] og lås#behandlingId [" + lås.getBehandlingId() + "] må være like, eller begge må være null."); //$NON-NLS-1$
         }
 
+        håndterAksjonspunkt(behandling);
+
         long behandlingId = lagre(behandling);
         verifiserBehandlingLås(lås);
 
@@ -242,6 +244,15 @@ public class BehandlingRepository {
         lås.setBehandlingId(behandlingId);
 
         return behandlingId;
+    }
+
+    private void håndterAksjonspunkt(Behandling behandling) {
+        for (var a : behandling.getAksjonspunkter()) {
+            if (a.erÅpentAksjonspunkt() && !a.getAksjonspunktDefinisjon().kanUtføres(behandling.getStatus())) {
+                throw new IllegalStateException("Ugyldig tilstand: Har åpent aksjonspunkt: " + a + " for behandling:" + behandling + ". Aksjonspunktet kan kun være åpent for status:"
+                    + a.getAksjonspunktDefinisjon().getGyldigBehandlingStatus());
+            }
+        }
     }
 
     public Optional<Behandling> finnSisteAvsluttedeIkkeHenlagteBehandling(Long fagsakId) {
