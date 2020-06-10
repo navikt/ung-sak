@@ -91,7 +91,7 @@ public class ProsesseringAsynkTjeneste {
     }
 
     private Map<String, List<ProsessTaskData>> sjekkStatusProsessTasksGrouped(Long fagsakId, String behandlingId, String gruppe) {
-        List<ProsessTaskData> tasks = fagsakProsessTaskRepository.sjekkStatusProsessTasks(fagsakId, behandlingId, gruppe, true);
+        List<ProsessTaskData> tasks = fagsakProsessTaskRepository.sjekkStatusProsessTasks(fagsakId, behandlingId, gruppe);
         return tasks.stream().collect(Collectors.groupingBy(ProsessTaskData::getGruppe));
     }
 
