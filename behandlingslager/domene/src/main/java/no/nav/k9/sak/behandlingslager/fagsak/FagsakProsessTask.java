@@ -44,7 +44,7 @@ public class FagsakProsessTask extends BaseEntitet {
         // Hibernate trenger en
     }
 
-    public FagsakProsessTask(Long fagsakId, Long prosessTaskId, String taskType, String behandlingId, Long gruppeSekvensNr) {
+    public FagsakProsessTask(Long fagsakId, String behandlingId, Long prosessTaskId, Long gruppeSekvensNr, String taskType) {
         this.fagsakId = fagsakId;
         this.prosessTaskId = prosessTaskId;
         this.behandlingId = behandlingId;

@@ -90,7 +90,7 @@ public class HåndterRekkefølgeAvFagsakProsessTaskGrupper implements ProsessTas
                 }
                 FagsakProsesstaskRekkefølge rekkefølge = beanClass.getAnnotation(FagsakProsesstaskRekkefølge.class);
                 Long sekvensNr = rekkefølge.gruppeSekvens() ? gruppeSekvensNr : null;
-                repository.lagre(new FagsakProsessTask(task.getFagsakId(), task.getId(), task.getBehandlingId(), task.getTaskType(), sekvensNr));
+                repository.lagre(new FagsakProsessTask(task.getFagsakId(), task.getBehandlingId(), task.getId(), sekvensNr, task.getTaskType()));
             }
         }
     }
