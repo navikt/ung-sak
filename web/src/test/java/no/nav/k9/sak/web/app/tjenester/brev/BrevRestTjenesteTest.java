@@ -60,6 +60,7 @@ public class BrevRestTjenesteTest {
         verify(dokumentBestillerApplikasjonTjenesteMock).bestillDokument(eq(bestillBrevDto), eq(HistorikkAktør.SAKSBEHANDLER));
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void skal_hente_redusertUtbetalingÅrsaker_hentVedtakVarsel() {
         // Arrange

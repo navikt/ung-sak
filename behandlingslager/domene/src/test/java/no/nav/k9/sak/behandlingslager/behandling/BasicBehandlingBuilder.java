@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandlingslager.behandling;
 
 import javax.persistence.EntityManager;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -32,13 +33,25 @@ public class BasicBehandlingBuilder {
         vilkårResultatRepository = new VilkårResultatRepository(em);
     }
 
+    public Behandling opprettOgLagreFørstegangssøknad(FagsakYtelseType ytelse, BehandlingStatus startStatus) {
+        Fagsak fagsak = opprettFagsak(ytelse);
+        
+        var builder = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(startStatus);
+        Behandling behandling = builder.build();
+        
+        lagreBehandling(behandling);
+        
+        em.flush();
+        return behandling;
+    }
+    
     public Behandling opprettOgLagreFørstegangssøknad(FagsakYtelseType ytelse) {
         Fagsak fagsak = opprettFagsak(ytelse);
         return opprettOgLagreFørstegangssøknad(fagsak);
     }
 
     public Behandling opprettOgLagreFørstegangssøknad(Fagsak fagsak) {
-        final Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
+        var builder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = builder.build();
 
         lagreBehandling(behandling);

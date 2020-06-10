@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -129,6 +130,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private PersonInformasjon.Builder personInformasjonBuilder;
     private boolean manueltOpprettet;
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
+    private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -441,7 +443,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     public Behandling lagre(EntityManager entityManager) {
         return lagre(new BehandlingRepositoryProvider(entityManager));
     }
-    
+
     public Behandling lagre(BehandlingRepositoryProvider repositoryProvider) {
 
         build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
@@ -475,12 +477,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
             personer.stream().filter(a -> a.getType().equals(PersonopplysningVersjonType.OVERSTYRT))
                 .findFirst().ifPresent(b -> {
-                if (personer.stream().noneMatch(c -> c.getType().equals(PersonopplysningVersjonType.REGISTRERT))) {
-                    // Sjekker om overstyring er ok, mao om registeropplysninger finnes
-                    personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
-                }
-                lagrePersoninfo(behandling, b, personopplysningRepository);
-            });
+                    if (personer.stream().noneMatch(c -> c.getType().equals(PersonopplysningVersjonType.REGISTRERT))) {
+                        // Sjekker om overstyring er ok, mao om registeropplysninger finnes
+                        personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
+                    }
+                    lagrePersoninfo(behandling, b, personopplysningRepository);
+                });
 
         } else {
             PersonInformasjon registerInformasjon = PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT)
@@ -660,13 +662,16 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             behandlingBuilder.medBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, null));
         }
 
+        behandlingBuilder.medBehandlingStatus(behandlingStatus);
+
         return behandlingBuilder;
 
     }
 
     private void lagFagsak(FagsakRepository fagsakRepo) {
-        if(fagsak!=null) return;
-        
+        if (fagsak != null)
+            return;
+
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
         fagsak = fagsakBuilder.build();
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
@@ -734,8 +739,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
+    public S medBehandlingStatus(BehandlingStatus status) {
+        this.behandlingStatus = Objects.requireNonNull(status, "status");
+        return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public S medBehandlingsresultat(BehandlingResultatType behandlingResultatType) {
-        this.behandlingResultatType  = behandlingResultatType;
+        this.behandlingResultatType = behandlingResultatType;
         return (S) this;
     }
 

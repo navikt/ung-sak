@@ -12,6 +12,7 @@ import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
@@ -20,11 +21,10 @@ import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 public abstract class OpprettProsessTaskIverksettFelles implements OpprettProsessTaskIverksett {
 
-    protected ProsessTaskRepository prosessTaskRepository;
+    protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
 
@@ -32,10 +32,10 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
         // for CDI proxy
     }
 
-    public OpprettProsessTaskIverksettFelles(ProsessTaskRepository prosessTaskRepository,
+    public OpprettProsessTaskIverksettFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                              OppgaveTjeneste oppgaveTjeneste,
                                              InfotrygdFeedService infotrygdFeedService) {
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
     }
@@ -76,10 +76,12 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         taskData.setCallIdFraEksisterende();
 
-        prosessTaskRepository.lagre(taskData);
+        var fagsakId = behandling.getFagsakId();
+        var behandlingId = behandling.getId();
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), taskData);
 
         // Opprettes som egen task da den er uavhengig av de andre
-        prosessTaskRepository.lagre(opprettTaskVurderOppgaveTilbakekreving(behandling));
+        fagsakProsessTaskRepository.lagreNyGruppe(opprettTaskVurderOppgaveTilbakekreving(behandling));
 
         infotrygdFeedService.publiserHendelse(behandling);
 

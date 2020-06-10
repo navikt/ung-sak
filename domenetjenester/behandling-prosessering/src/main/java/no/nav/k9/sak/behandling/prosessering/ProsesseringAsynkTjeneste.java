@@ -16,24 +16,21 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class ProsesseringAsynkTjeneste {
 
-    private ProsessTaskRepository prosessTaskRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
-    private final Set<ProsessTaskStatus> ferdigStatuser= Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
-    
+    private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
+
     ProsesseringAsynkTjeneste() {
         // For CDI proxy
     }
 
     @Inject
-    public ProsesseringAsynkTjeneste(ProsessTaskRepository prosessTaskRepository, FagsakProsessTaskRepository fagsakProsessTaskRepository) {
-        this.prosessTaskRepository = prosessTaskRepository;
+    public ProsesseringAsynkTjeneste(FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
@@ -62,8 +59,9 @@ public class ProsesseringAsynkTjeneste {
     }
 
     /**
-     * Merge ny gruppe med eksisterende, hvis tidligere gruppe er i gang ignoreres input gruppe her. Hvis tidligere gruppe har feil, overskrives
-     * denne (ny skrives, gamle fjernes). For å merge sees det på individuelle tasks inne i gruppen (da gruppe id kan være forskjellig uansett).
+     * Merge ny gruppe med eksisterende, hvis tidligere gruppe er i gang ignoreres input gruppe her. Hvis tidligere gruppe har feil kastes
+     * exception.
+     * For å merge sees det på individuelle tasks inne i gruppen (da gruppe id kan være forskjellig uansett).
      */
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, String behandlingId, ProsessTaskGruppe gruppe) {
         return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
@@ -93,34 +91,27 @@ public class ProsesseringAsynkTjeneste {
     }
 
     private Map<String, List<ProsessTaskData>> sjekkStatusProsessTasksGrouped(Long fagsakId, String behandlingId, String gruppe) {
-        List<ProsessTaskData> tasks = fagsakProsessTaskRepository.sjekkStatusProsessTasks(fagsakId, behandlingId, gruppe);
+        List<ProsessTaskData> tasks = fagsakProsessTaskRepository.sjekkStatusProsessTasks(fagsakId, behandlingId, gruppe, true);
         return tasks.stream().collect(Collectors.groupingBy(ProsessTaskData::getGruppe));
     }
 
     /**
      * Kjør prosess asynkront (i egen prosess task) videre.
+     * 
      * @return gruppe assignet til prosess task
      */
     public String asynkStartBehandlingProsess(Behandling behandling) {
+        ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
         ProsessTaskData taskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
-        return prosessTaskRepository.lagre(taskData);
+        gruppe.addNesteSekvensiell(taskData);
+        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()), gruppe);
     }
 
     /**
      * Kjør prosess asynkront (i egen prosess task) videre.
-     * @return gruppe assignet til prosess task
-     */
-    public String asynkProsesserBehandling(Behandling behandling) {
-        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        taskData.setCallIdFraEksisterende();
-        return prosessTaskRepository.lagre(taskData);
-    }
-
-    /**
-     * Kjør prosess asynkront (i egen prosess task) videre.
+     * 
      * @return gruppe assignet til prosess task
      */
     public String asynkProsesserBehandlingMergeGruppe(Behandling behandling) {
@@ -131,5 +122,5 @@ public class ProsesseringAsynkTjeneste {
         gruppe.addNesteSekvensiell(taskData);
         return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()), gruppe);
     }
-    
+
 }
