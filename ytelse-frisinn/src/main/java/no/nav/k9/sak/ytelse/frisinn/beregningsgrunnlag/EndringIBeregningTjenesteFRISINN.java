@@ -31,9 +31,8 @@ public class EndringIBeregningTjenesteFRISINN extends EndringIBeregningTjeneste 
     public boolean vurderUgunst(BehandlingReferanse orginalbehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
         var originaltGrunnlag = kalkulusTjeneste.hentFastsatt(orginalbehandling, skjæringstidspuntk);
         var revurderingsGrunnlag = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
-        UttakAktivitet uttakAktivitet = uttakRepository.hentFastsattUttak(orginalbehandling.getBehandlingId());
-        LocalDate førsteUttaksdato = uttakAktivitet.getPerioder().stream().map(p -> p.getPeriode().getFomDato()).min(LocalDate::compareTo).orElseThrow();
-        return ErEndringIBeregningFRISINN.vurder(revurderingsGrunnlag, originaltGrunnlag, førsteUttaksdato);
+        UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(orginalbehandling.getBehandlingId());
+        return ErEndringIBeregningFRISINN.vurder(revurderingsGrunnlag, originaltGrunnlag, orginaltUttak);
     }
 
 
