@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -135,6 +136,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
     private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
         var oppdragI = søknadsperiodeOgOppgittOpptjening.getMåneder()
             .stream().map(m -> m.getOppgittIMåned().getOppgittFrilans())
+            .filter(Objects::nonNull)
             .map(OppgittFrilansDto::getOppgittFrilansoppdrag)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
