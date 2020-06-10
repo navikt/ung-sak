@@ -31,8 +31,12 @@ public class FrontendLoginResourceTest {
 
     @Test
     public void innlogging_fra_k9_sak_web() {
+        var basepath = "https://app.adeo.no";
+        var response = resource.login(basepath);
+        assertEquals(URI.create("/"), response.getLocation());
+
         var hovedside = "/k9/web/";
-        var response = resource.login(hovedside);
+        response = resource.login(hovedside);
         assertEquals(URI.create(hovedside), response.getLocation());
 
         var medQuery = "/k9/web/fagsak/1234/behandling/?collapsed=true";
@@ -47,5 +51,4 @@ public class FrontendLoginResourceTest {
         response = resource.login(medQueryOgFragment);
         assertEquals(URI.create(medQueryOgFragment), response.getLocation());
     }
-
 }
