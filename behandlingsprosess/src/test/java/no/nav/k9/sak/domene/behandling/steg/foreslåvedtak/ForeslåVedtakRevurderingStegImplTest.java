@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -73,6 +74,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
     @Mock
     private VedtakVarsel orginalBehandlingsresultat;
 
+    private EndringIBeregningTjeneste endringIBeregningTjeneste;
+
     private BehandlingRepositoryProvider repositoryProvider = mock(BehandlingRepositoryProvider.class);
     private ForeslåVedtakRevurderingStegImpl foreslåVedtakRevurderingStegForeldrepenger;
 
@@ -105,8 +108,10 @@ public class ForeslåVedtakRevurderingStegImplTest {
         when(kontekstRevurdering.getSkriveLås()).thenReturn(behandlingLås);
         when(behandlingRepository.hentBehandling(kontekstRevurdering.getBehandlingId())).thenReturn(revurdering);
 
+        endringIBeregningTjeneste = new EndringIBeregningTjeneste(beregningsgrunnlagTjeneste);
+
         foreslåVedtakRevurderingStegForeldrepenger =
-            new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, beregningsgrunnlagTjeneste, repositoryProvider);
+            new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste));
         when(foreslåVedtakTjeneste.foreslåVedtak(revurdering, kontekstRevurdering)).thenReturn(behandleStegResultat);
         when(behandleStegResultat.getAksjonspunktResultater()).thenReturn(Collections.emptyList());
     }

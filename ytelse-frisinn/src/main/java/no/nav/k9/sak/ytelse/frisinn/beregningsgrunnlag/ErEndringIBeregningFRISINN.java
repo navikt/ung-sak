@@ -21,6 +21,7 @@ public class ErEndringIBeregningFRISINN {
     }
 
     public static boolean vurder(Optional<Beregningsgrunnlag> revurderingsGrunnlag, Optional<Beregningsgrunnlag> originaltGrunnlag, UttakAktivitet orginaltUttak) {
+
         if (revurderingsGrunnlag.isEmpty()) {
             return originaltGrunnlag.isPresent();
         }
@@ -34,7 +35,7 @@ public class ErEndringIBeregningFRISINN {
             PeriodeMedSøkerInfoDto periode = uttaksperioder.next();
             BigDecimal orginalUtbetalingIPerioden = finnUtbetalingIPerioden(periode, originalePerioder);
             BigDecimal revurderingUtbetalingIPerioden = finnUtbetalingIPerioden(periode, revurderingsPerioder);
-            if (orginalUtbetalingIPerioden.compareTo(revurderingUtbetalingIPerioden) < 0) {
+            if (orginalUtbetalingIPerioden.compareTo(revurderingUtbetalingIPerioden) > 0) {
                 return true;
             }
         }
