@@ -51,7 +51,7 @@ public interface KalkulusApiTjeneste {
      */
     OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, UUID behandlingUuid);
 
-    Beregningsgrunnlag hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
+    Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
 
     BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse);
 

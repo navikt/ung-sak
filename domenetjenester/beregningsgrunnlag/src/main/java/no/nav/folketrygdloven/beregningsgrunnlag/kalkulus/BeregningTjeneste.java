@@ -51,7 +51,7 @@ public interface BeregningTjeneste {
      */
     OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
-    Beregningsgrunnlag hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
+    Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref);
 
