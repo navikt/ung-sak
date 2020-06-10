@@ -74,6 +74,7 @@ public class YrkesaktivitetFilter {
         return ya.getAlleAktivitetsAvtaler().stream()
             .filter(av -> (!ya.erArbeidsforhold() || !av.erAnsettelsesPeriode()))
             .filter(this::skalMedEtterSkjæringstidspunktVurdering)
+            .distinct()
             .collect(Collectors.toUnmodifiableSet());
     }
 
