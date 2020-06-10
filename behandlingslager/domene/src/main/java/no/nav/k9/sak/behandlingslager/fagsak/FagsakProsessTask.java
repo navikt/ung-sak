@@ -32,6 +32,10 @@ public class FagsakProsessTask extends BaseEntitet {
     @Column(name = "gruppe_sekvensnr", updatable = false)
     private Long gruppeSekvensNr;
 
+    /** duplisert fra ProsessTask for å kunne ha db constraints på type her (uten å sette inn kompositt-nøkler). */
+    @Column(name = "task_type", updatable = false)
+    private String taskType;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -40,11 +44,12 @@ public class FagsakProsessTask extends BaseEntitet {
         // Hibernate trenger en
     }
 
-    public FagsakProsessTask(Long fagsakId, Long prosessTaskId, String behandlingId, Long gruppeSekvensNr) {
+    public FagsakProsessTask(Long fagsakId, Long prosessTaskId, String taskType, String behandlingId, Long gruppeSekvensNr) {
         this.fagsakId = fagsakId;
         this.prosessTaskId = prosessTaskId;
         this.behandlingId = behandlingId;
         this.gruppeSekvensNr = gruppeSekvensNr;
+        this.taskType = Objects.requireNonNull(taskType, "taskType");
     }
 
     public Long getFagsakId() {
@@ -59,6 +64,10 @@ public class FagsakProsessTask extends BaseEntitet {
         return gruppeSekvensNr;
     }
 
+    public String getTaskType() {
+        return taskType;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -69,21 +78,23 @@ public class FagsakProsessTask extends BaseEntitet {
         FagsakProsessTask other = (FagsakProsessTask) obj;
         return Objects.equals(prosessTaskId, other.prosessTaskId)
             && Objects.equals(fagsakId, other.fagsakId)
+            && Objects.equals(taskType, other.taskType)
             && Objects.equals(behandlingId, other.behandlingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(prosessTaskId, fagsakId, behandlingId);
+        return Objects.hash(prosessTaskId, fagsakId, behandlingId, taskType);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" //$NON-NLS-1$
-            + "prosessTask=" + prosessTaskId //$NON-NLS-1$
-            + ", fagsak=" + fagsakId //$NON-NLS-1$
-            + (behandlingId == null ? "" : ", behandling=" + behandlingId) //$NON-NLS-1$ //$NON-NLS-2$
-            + (gruppeSekvensNr == null ? "" : ", gruppeSekvensNr=" + gruppeSekvensNr)//$NON-NLS-1$ //$NON-NLS-2$
-            + ">"; //$NON-NLS-1$
+        return getClass().getSimpleName() + "<"
+            + "prosessTask=" + prosessTaskId
+            + ", fagsak=" + fagsakId
+            + (behandlingId == null ? "" : ", behandling=" + behandlingId)
+            + (taskType == null ? "" : ", taskType=" + taskType)
+            + (gruppeSekvensNr == null ? "" : ", gruppeSekvensNr=" + gruppeSekvensNr)
+            + ">";
     }
 }
