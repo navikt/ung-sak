@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -19,7 +22,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
@@ -37,7 +39,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @FagsakYtelseTypeRef("OMP")
 public class InitierPerioderSteg implements BehandlingSteg {
 
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
+    private static final Logger log = LoggerFactory.getLogger(InitierPerioderSteg.class);
+
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -51,13 +54,11 @@ public class InitierPerioderSteg implements BehandlingSteg {
     public InitierPerioderSteg(OmsorgspengerGrunnlagRepository grunnlagRepository,
                                BehandlingRepository behandlingRepository,
                                MottatteDokumentRepository mottatteDokumentRepository,
-                               InntektArbeidYtelseTjeneste iayTjeneste,
-                               InntektsmeldingTjeneste inntektsmeldingTjeneste) {
+                               InntektArbeidYtelseTjeneste iayTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
-        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
     }
 
     @Override
@@ -93,7 +94,8 @@ public class InitierPerioderSteg implements BehandlingSteg {
         var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
-            .filter(it -> behandlingId.equals(it.getBehandlingId()) || it.getBehandlingId() == null)
+            .filter(it -> it.getBehandlingId() != null)
+            .filter(it -> behandlingId.equals(it.getBehandlingId()))
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
@@ -106,6 +108,16 @@ public class InitierPerioderSteg implements BehandlingSteg {
         var inntektsmeldinger = sakInntektsmeldinger.stream()
             .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
             .collect(Collectors.toSet());
+
+        if (inntektsmeldinger.size() != inntektsmeldingerJournalposter.size()) {
+            var journalposterSomMangler = inntektsmeldingerJournalposter.stream()
+                .filter(it -> inntektsmeldinger.stream()
+                    .map(Inntektsmelding::getJournalpostId)
+                    .noneMatch(it::equals))
+                .collect(Collectors.toSet());
+            log.warn("Fant inntektsmeldinger '{}' knyttet til behandlingen men følgende mangler '{}'", inntektsmeldingerJournalposter, journalposterSomMangler);
+            throw new IllegalStateException("Har inntektsmeldinger som er knyttet til behandlingen, men finner ikke disse i abakus");
+        }
 
         return trekkUtFravær(inntektsmeldinger);
     }
