@@ -2,7 +2,6 @@ package no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,16 +32,6 @@ public class AksjonspunktRepository {
     @Inject
     public AksjonspunktRepository(EntityManager em) {
         this.em = em;
-    }
-
-    public void lagre(Aksjonspunkt aks) {
-        em.persist(aks);
-        em.flush();
-    }
-
-    public void lagre(Collection<Aksjonspunkt> aks) {
-        aks.forEach(em::persist);
-        em.flush();
     }
 
     public void setToTrinnsBehandlingKreves(Aksjonspunkt aksjonspunkt) {

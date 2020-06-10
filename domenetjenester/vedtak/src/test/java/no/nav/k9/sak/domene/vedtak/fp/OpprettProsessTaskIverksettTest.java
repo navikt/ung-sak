@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoRule;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
@@ -46,7 +47,8 @@ public class OpprettProsessTaskIverksettTest {
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
-
+    private FagsakProsessTaskRepository FagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository);
+    
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
 
@@ -61,7 +63,7 @@ public class OpprettProsessTaskIverksettTest {
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
+        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(FagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
     }
 
     @Test

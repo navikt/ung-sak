@@ -1,5 +1,29 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
+
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -10,7 +34,11 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.kontrakt.aksjonspunkt.*;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyrteAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -19,24 +47,6 @@ import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 @ApplicationScoped
 @Transactional
@@ -59,10 +69,10 @@ public class AksjonspunktRestTjeneste {
     }
 
     @Inject
-    public AksjonspunktRestTjeneste(
-                                    AksjonspunktApplikasjonTjeneste aksjonpunktApplikasjonTjeneste,
+    public AksjonspunktRestTjeneste(AksjonspunktApplikasjonTjeneste aksjonpunktApplikasjonTjeneste,
                                     BehandlingRepository behandlingRepository,
-                                    BehandlingsutredningApplikasjonTjeneste behandlingutredningTjeneste, TotrinnTjeneste totrinnTjeneste) {
+                                    BehandlingsutredningApplikasjonTjeneste behandlingutredningTjeneste,
+                                    TotrinnTjeneste totrinnTjeneste) {
 
         this.applikasjonstjeneste = aksjonpunktApplikasjonTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -213,8 +223,6 @@ public class AksjonspunktRestTjeneste {
     }
 
     private void validerBetingelserForAksjonspunkt(Behandling behandling, Collection<? extends AksjonspunktKode> aksjonspunktDtoer) {
-        // TODO (FC): skal ikke ha spesfikke pre-conditions inne i denne tjenesten (sjekk på status FATTER_VEDTAK). Se
-        // om kan håndteres annerledes.
         if (behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK) && !erFatteVedtakAkpt(aksjonspunktDtoer)) {
             throw AksjonspunktRestTjenesteFeil.FACTORY.totrinnsbehandlingErStartet(String.valueOf(behandling.getId())).toException();
         }

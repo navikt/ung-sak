@@ -32,7 +32,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Dependent
-class SjekkProsessering {
+public class SjekkProsessering {
 
     private static final ProsesseringFeil FEIL = FeilFactory.create(ProsesseringFeil.class);
 
@@ -47,10 +47,10 @@ class SjekkProsessering {
     }
 
     @Inject
-    SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
-                             BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                             @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
-                             BehandlingRepository behandlingRepository) {
+    public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
+                      BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
+                      @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
+                      BehandlingRepository behandlingRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.gruppenavnSaksbehandler = gruppenavnSaksbehandler;

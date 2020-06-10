@@ -132,6 +132,8 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
                     case OVERSTYRT_OPPGITT_OPPTJENING:
                         builder.medOverstyrtOppgittOpptjening(OppgittOpptjeningBuilder.nyFraEksisterende(orig.getOverstyrtOppgittOpptjening().orElse(null), UUID.randomUUID(), LocalDateTime.now()));
                         break;
+                    default:
+                        throw new UnsupportedOperationException("Har ikke implementert støtte for Dataset:" + data);
                 }
             }
             lagreOgFlush(tilBehandlingId, builder.build());

@@ -32,7 +32,7 @@ public class AsyncPollingStatus {
 
         private int httpStatus;
 
-        Status(int httpStatus){
+        Status(int httpStatus) {
             this.httpStatus = httpStatus;
         }
 
@@ -40,26 +40,26 @@ public class AsyncPollingStatus {
             return httpStatus;
         }
     }
-    
-    @JsonProperty(value="cancelUri")
+
+    @JsonProperty(value = "cancelUri")
     private URI cancelUri;
-    
-    @JsonProperty(value="eta")
+
+    @JsonProperty(value = "eta")
     private LocalDateTime eta;
-    
-    @JsonProperty(value="location")
+
+    @JsonProperty(value = "location")
     private URI location;
-    
-    @JsonProperty(value="message")
+
+    @JsonProperty(value = "message")
     private String message;
-    
-    @JsonProperty(value="pollIntervalMillis")
+
+    @JsonProperty(value = "pollIntervalMillis")
     private Long pollIntervalMillis;
-    
-    @JsonProperty(value="readOnly")
+
+    @JsonProperty(value = "readOnly")
     private boolean readOnly;
 
-    @JsonProperty(value="status")
+    @JsonProperty(value = "status")
     private Status status;
 
     public AsyncPollingStatus(Status status) {
@@ -125,5 +125,18 @@ public class AsyncPollingStatus {
 
     public void setLocation(URI uri) {
         this.location = uri;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<"
+            + "status=" + status
+            + (message == null ? "" : ", message=" + message)
+            + (eta == null ? "" : ", eta=" + eta)
+            + (", readOnly=" + readOnly)
+            + (pollIntervalMillis == null ? "" : ", pollIntervalMillis=" + pollIntervalMillis)
+            + (location == null ? "" : ", location=" + location)
+            + (cancelUri == null ? "" : ", cancelUri=" + cancelUri)
+            + ">";
     }
 }

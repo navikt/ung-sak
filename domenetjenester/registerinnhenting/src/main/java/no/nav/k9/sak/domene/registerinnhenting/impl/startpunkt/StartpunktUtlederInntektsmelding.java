@@ -2,8 +2,6 @@ package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
 import static java.util.Collections.emptyList;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +31,6 @@ import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.konfig.Tid;
 
 @Dependent
 class StartpunktUtlederInntektsmelding {

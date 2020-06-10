@@ -1,5 +1,34 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.abac.BeskyttetRessursKoder.VENTEFRIST;
+import static no.nav.vedtak.feil.LogLevel.ERROR;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
+
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -18,7 +47,17 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
-import no.nav.k9.sak.kontrakt.behandling.*;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingRettigheterDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
+import no.nav.k9.sak.kontrakt.behandling.GjenopptaBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.HenleggBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsoppretterApplikasjonTjeneste;
@@ -33,26 +72,6 @@ import no.nav.vedtak.felles.jpa.TomtResultatException;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.abac.BeskyttetRessursKoder.VENTEFRIST;
-import static no.nav.vedtak.feil.LogLevel.ERROR;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.*;
 
 @ApplicationScoped
 @Transactional
@@ -411,14 +430,15 @@ public class BehandlingRestTjeneste {
     private interface BehandlingRestTjenesteFeil extends DeklarerteFeil {
         BehandlingRestTjenesteFeil FACTORY = FeilFactory.create(BehandlingRestTjenesteFeil.class); // NOSONAR
 
-        @TekniskFeil(feilkode = "FP-760410", feilmelding = "Fant ikke fagsak med saksnummer %s", logLevel = ERROR, exceptionClass = TomtResultatException.class)
+        @TekniskFeil(feilkode = "K9-760410", feilmelding = "Fant ikke fagsak med saksnummer %s", logLevel = ERROR, exceptionClass = TomtResultatException.class)
         Feil fantIkkeFagsak(Saksnummer saksnummer);
 
-        @FunksjonellFeil(feilkode = "FP-722320", feilmelding = "Behandling må tas av vent før den kan åpnes", løsningsforslag = "Ta behandling av vent")
+        @FunksjonellFeil(feilkode = "K9-722320", feilmelding = "Behandling må tas av vent før den kan åpnes", løsningsforslag = "Ta behandling av vent")
         Feil måTaAvVent(Long behandlingId);
 
-        @FunksjonellFeil(feilkode = "FP-722321", feilmelding = "Behandling er berørt må gjennomføres", løsningsforslag = "Behandle ferdig berørt og opprett revurdering")
+        @FunksjonellFeil(feilkode = "K9-722321", feilmelding = "Behandling er berørt må gjennomføres", løsningsforslag = "Behandle ferdig berørt og opprett revurdering")
         Feil erBerørtBehandling(Long behandlingId);
+        
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {
