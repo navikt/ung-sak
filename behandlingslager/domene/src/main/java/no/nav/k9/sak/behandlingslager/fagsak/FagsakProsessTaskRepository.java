@@ -137,7 +137,7 @@ public class FagsakProsessTaskRepository {
         // oppretter nye tasks hvis gamle har feilet og matcher angitt gruppe, eller tidligere er FERDIG. Ignorerer hvis tidligere gruppe fortsatt
         // er KLAR
         List<Entry> nyeTasks = gruppe.getTasks();
-        List<ProsessTaskData> eksisterendeTasks = sjekkStatusProsessTasks(fagsakId, behandlingId, null, true);
+        List<ProsessTaskData> eksisterendeTasks = sjekkStatusProsessTasks(fagsakId, behandlingId, null);
 
         List<ProsessTaskData> matchedTasks = eksisterendeTasks;
 
@@ -178,7 +178,7 @@ public class FagsakProsessTaskRepository {
         return tasks.stream().map(t -> t.getTask()).map(Object::toString).collect(Collectors.joining(", "));
     }
 
-    public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, String behandlingId, String gruppe, boolean kunGruppeSekvens) {
+    public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, String behandlingId, String gruppe) {
         Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR
 
         // et tidsrom for neste kjøring vi kan ta hensyn til. Det som er lenger ut i fremtiden er ikke relevant her, kun det vi kan forvente
@@ -186,7 +186,8 @@ public class FagsakProsessTaskRepository {
         // grunn).
         LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
         LocalDateTime tom = Tid.TIDENES_ENDE.atStartOfDay(); // kun det som forventes kjørt om kort tid.
-
+        boolean kunGruppeSekvens = true;
+        
         EnumSet<ProsessTaskStatus> statuser = EnumSet.allOf(ProsessTaskStatus.class);
         List<ProsessTaskData> tasks = Collections.emptyList();
         if (gruppe != null) {
