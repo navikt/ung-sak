@@ -23,6 +23,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
 @ProsessTask(TilbakeTilStartBeregningTask.TASKNAME)
+// gruppeSekvens = false for å kunne hoppe tilbake ved feilende fortsettBehandling task
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class TilbakeTilStartBeregningTask implements ProsessTaskHandler {
 
