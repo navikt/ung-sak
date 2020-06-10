@@ -38,6 +38,7 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.GraderingPeriodeDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektsmeldingDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansoppdragDto;
@@ -260,6 +261,15 @@ public class InntektArbeidYtelseDtoMapper {
             return oppgittEgenNæringDto;
         }).collect(Collectors.toList());
 
+        List<OppgittArbeidsforholdDto> oppgittArbeidsforhold = oppgittOpptjening.getOppgittArbeidsforhold().stream().map(arb -> {
+            OppgittArbeidsforholdDto dto = new OppgittArbeidsforholdDto();
+            dto.setInntekt(new Beløp(arb.getInntekt()));
+            dto.setPeriode(new PeriodeDto(arb.getPeriode().getFomDato(), arb.getPeriode().getTomDato()));
+            return dto;
+        }).collect(Collectors.toList());
+
+        oppgittOpptjeningDto.setOppgittArbeidsforhold(oppgittArbeidsforhold);
+
         oppgittOpptjeningDto.setOppgittEgenNæring(egenNæringList);
         return oppgittOpptjeningDto;
     }
@@ -268,7 +278,16 @@ public class InntektArbeidYtelseDtoMapper {
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeFraSøknad.getFom(), periodeFraSøknad.getTom());
         OppgittOpptjeningDto dto = new OppgittOpptjeningDto();
 
-        dto.setOppgittEgenNæring(oppgittOpptjeningDto.getOppgittEgenNæring().stream().filter(oppgittEgenNæringDto -> periode.overlapper(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getFom())).collect(Collectors.toList()));
+        dto.setOppgittEgenNæring(oppgittOpptjeningDto.getOppgittEgenNæring()
+            .stream()
+            .filter(oppgittEgenNæringDto -> periode.overlapper(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getFom()))
+            .collect(Collectors.toList()));
+
+        dto.setOppgittArbeidsforhold(oppgittOpptjeningDto.getOppgittArbeidsforhold()
+            .stream()
+            .filter(oppgittArbeidsforholdDto -> periode.overlapper(oppgittArbeidsforholdDto.getPeriode().getFom(), oppgittArbeidsforholdDto.getPeriode().getFom()))
+            .collect(Collectors.toList()));
+
         if (oppgittOpptjeningDto.getOppgittFrilans() != null) {
             OppgittFrilansDto oppgittFrilansDto = new OppgittFrilansDto();
             oppgittFrilansDto.setOppgittFrilansoppdrag(oppgittOpptjeningDto.getOppgittFrilans().getOppgittFrilansoppdrag().stream().filter(oppgittFrilansoppdragDto -> periode.overlapper(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getFom())).collect(Collectors.toList()));

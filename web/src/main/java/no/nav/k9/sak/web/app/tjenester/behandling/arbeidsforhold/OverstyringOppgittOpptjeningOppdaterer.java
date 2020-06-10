@@ -24,6 +24,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -65,6 +66,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         var søknadsperiodeOgOppgittOpptjening = dto.getSøknadsperiodeOgOppgittOpptjeningDto();
         leggerTilEgenæring(søknadsperiodeOgOppgittOpptjening, historikkInnslagTekstBuilder).ifPresent(oppgittOpptjeningBuilder::leggTilEgneNæringer);
         leggerTilFrilans(søknadsperiodeOgOppgittOpptjening, historikkInnslagTekstBuilder).ifPresent(oppgittOpptjeningBuilder::leggTilFrilansOpplysninger);
+        leggerTilArbeidsforhold(søknadsperiodeOgOppgittOpptjening, historikkInnslagTekstBuilder).ifPresent(oppgittOpptjeningBuilder::leggTilOppgittArbeidsforhold);
 
         var perioderSomSkalMed = utledePerioder(dto);
         uttakRepository.lagreOgFlushFastsattUttak(param.getBehandlingId(), new UttakAktivitet(perioderSomSkalMed));
@@ -75,6 +77,34 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         return OppdateringResultat.utenOveropp();
     }
 
+    private Optional<OppgittArbeidsforholdBuilder> leggerTilArbeidsforhold(SøknadsperiodeOgOppgittOpptjeningV2Dto dto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
+        dto.getMåneder().stream().map(periodeMedSNOgFLDto -> {
+            OppgittOpptjeningDto oppgittIMåned = periodeMedSNOgFLDto.getOppgittIMåned();
+            if (!oppgittIMåned.getOppgittArbeidsforhold().isEmpty()) {
+                OppgittArbeidsforholdBuilder builder = OppgittArbeidsforholdBuilder.ny();
+                builder.medInntekt(oppgittIMåned.getOppgittArbeidsforhold().get(0).getInntekt().getVerdi());
+                LocalDate tidligste = finnTidligste(finnFraOgMedDatoSN(oppgittIMåned).orElse(null), finnFraOgMedDatoFL(oppgittIMåned).orElse(null));
+                builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tidligste, periodeMedSNOgFLDto.getMåned().getTom()));
+
+                return Optional.of(builder);
+            }
+            return Optional.empty();
+        });
+        return Optional.empty();
+    }
+
+    private LocalDate finnTidligste(LocalDate sn, LocalDate fl) {
+        if (sn == null && fl == null) {
+            return null;
+        }
+        if (fl == null) {
+            return sn;
+        } else if (sn == null) {
+            return fl;
+        }
+        return sn.isBefore(fl) ? sn : fl;
+    }
+
     private ArrayList<UttakAktivitetPeriode> utledePerioder(BekreftOverstyrOppgittOpptjeningDto dto) {
         var periodeFraSøknad = dto.getSøknadsperiodeOgOppgittOpptjeningDto().getMåneder();
         var perioderSomSkalMed = new ArrayList<UttakAktivitetPeriode>();
@@ -82,31 +112,24 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         for (PeriodeMedSNOgFLDto periode : periodeFraSøknad) {
             if (periode.getSøkerFL()) {
                 var tidligsteDato = finnFraOgMedDatoFL(periode.getOppgittIMåned());
-                perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, tidligsteDato, periode.getMåned().getTom()));
+                perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, tidligsteDato.orElseThrow(() -> new IllegalStateException("Fant ikke startdato for FL-perioden.")), periode.getMåned().getTom()));
             }
             if (periode.getSøkerSN()) {
                 var tidligsteDato = finnFraOgMedDatoSN(periode.getOppgittIMåned());
-                perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, tidligsteDato, periode.getMåned().getTom()));
+                perioderSomSkalMed.add(new UttakAktivitetPeriode(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, tidligsteDato.orElseThrow(() -> new IllegalStateException("Fant ikke startdato for SN-perioden.")), periode.getMåned().getTom()));
             }
         }
         return perioderSomSkalMed;
     }
 
-    LocalDate finnFraOgMedDatoSN(OppgittOpptjeningDto oppgittIMåned) {
-        return oppgittIMåned.getOppgittEgenNæring()
-            .stream()
-            .map(egenNæringDto -> egenNæringDto.getPeriode().getFom())
-            .min(LocalDate::compareTo)
-            .orElseThrow(() -> new IllegalStateException("Fant ikke startdato for SN-perioden."));
+    Optional<LocalDate> finnFraOgMedDatoSN(OppgittOpptjeningDto oppgittIMåned) {
+        return oppgittIMåned.getOppgittEgenNæring().stream().map(p -> p.getPeriode().getFom()).findFirst();
     }
 
-    LocalDate finnFraOgMedDatoFL(OppgittOpptjeningDto oppgittIMåned) {
-        var oppgittFrilans = oppgittIMåned.getOppgittFrilans();
-        return Optional.ofNullable(oppgittFrilans)
-                .orElseThrow(() -> new IllegalStateException("Fant ikke startdato for FL-perioden."))
-                .getOppgittFrilansoppdrag().stream().map(frilans -> frilans.getPeriode().getFom()).min(LocalDate::compareTo)
-                .orElseThrow(() -> new IllegalStateException("Fant ikke startdato for FL-perioden."));
-
+    Optional<LocalDate> finnFraOgMedDatoFL(OppgittOpptjeningDto oppgittIMåned) {
+        return Optional.ofNullable(oppgittIMåned.getOppgittFrilans())
+            .map(OppgittFrilansDto::getOppgittFrilansoppdrag)
+            .flatMap(f -> f.stream().map(oppgittFrilansoppdragDto -> oppgittFrilansoppdragDto.getPeriode().getFom()).findFirst());
     }
 
     private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
