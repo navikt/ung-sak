@@ -1,8 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -73,14 +73,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
 
     @Override
     public List<AksjonspunktDefinisjon> getApForManuellRevurdering() {
-        var ap = new ArrayList<AksjonspunktDefinisjon>();
-
-        // Standard for alle
-        ap.addAll(GrunnlagKopierer.super.getApForManuellRevurdering());
-
-        // Kun for frisinn
-        ap.add(AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING);
-
-        return ap;
+        return List.of(AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING);
     }
 }
