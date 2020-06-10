@@ -48,9 +48,9 @@ public class SjekkProsessering {
 
     @Inject
     public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
-                      BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                      @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
-                      BehandlingRepository behandlingRepository) {
+                             BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
+                             @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
+                             BehandlingRepository behandlingRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.gruppenavnSaksbehandler = gruppenavnSaksbehandler;
@@ -96,8 +96,22 @@ public class SjekkProsessering {
         if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return Optional.empty();
         }
+
+        if (pågårEllerFeiletTasks(behandling)) {
+            return Optional.empty();
+        }
+
         // henter alltid registeropplysninger og kjører alltid prosess
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
+    }
+
+    private boolean pågårEllerFeiletTasks(Behandling behandling) {
+        var taskStatus = sjekkProsessTaskPågårForBehandling(behandling, null);
+        if (taskStatus.isPresent()) {
+            var st = taskStatus.get();
+            return st.isReadOnly();
+        }
+        return false;
     }
 
     /**
