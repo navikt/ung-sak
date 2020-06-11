@@ -80,7 +80,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
         var skjæringstidspunktForPeriode = vilkårsperiode.getFomDato();
-        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref);
+        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
         var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunktForPeriode);
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         if (vilkårOppfylt != null && !vilkårOppfylt) {

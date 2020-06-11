@@ -25,6 +25,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
@@ -32,7 +33,9 @@ import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -41,6 +44,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     private static final Logger log = LoggerFactory.getLogger(OmsorgspengerYtelsesspesifiktGrunnlagMapper.class);
     private static final Comparator<Uttaksperiode> COMP_PERIODE = comparing(uttaksperiode -> uttaksperiode.getPeriode().getFom());
 
+    private Boolean hentFullUttaksplan;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
     protected OmsorgspengerYtelsesspesifiktGrunnlagMapper() {
@@ -48,7 +52,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     }
 
     @Inject
-    public OmsorgspengerYtelsesspesifiktGrunnlagMapper(ÅrskvantumTjeneste årskvantumTjeneste) {
+    public OmsorgspengerYtelsesspesifiktGrunnlagMapper(@KonfigVerdi(value = "OMP_HENT_FULLUTTAKSPLAN_AKTIVERT", defaultVerdi = "true") Boolean hentFullUttaksplan, ÅrskvantumTjeneste årskvantumTjeneste) {
+        this.hentFullUttaksplan = hentFullUttaksplan;
         this.årskvantumTjeneste = årskvantumTjeneste;
     }
 
@@ -75,9 +80,8 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     }
 
     @Override
-    public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref) {
-        var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
-        var aktiviteter = forbrukteDager.getSisteUttaksplan().getAktiviteter();
+    public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
+        List<Aktivitet> aktiviteter = hentAktiviteter(ref);
         if (aktiviteter == null || aktiviteter.isEmpty()) {
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
@@ -85,8 +89,21 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         var arbeidsforholdPerioder = aktiviteter;
         var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.stream()
             .filter(e -> !e.getUttaksperioder().isEmpty())
-            .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder())).collect(Collectors.toList());
+            .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder().stream()
+                .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom())))
+                .collect(Collectors.toList()))).collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
+    }
+
+    @NotNull
+    private List<Aktivitet> hentAktiviteter(BehandlingReferanse ref) {
+        if (hentFullUttaksplan) {
+            var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
+            return fullUttaksplan.getAktiviteter();
+        } else {
+            var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+            return forbrukteDager.getSisteUttaksplan().getAktiviteter();
+        }
     }
 
     private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(Arbeidsforhold uttakArbeidsforhold, List<Uttaksperiode> perioder) {

@@ -40,7 +40,7 @@ public class MapFraÅrskvantumResultatTest {
         var år = new ÅrskvantumForbrukteDager(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN, Duration.ZERO, BigDecimal.TEN, Duration.ZERO, lagUttaksplan(),new LinkedList<>(), new LinkedList<>());
 
 
-        List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år);
+        List<UttakResultatPeriode> perioder = new MapFraÅrskvantumResultat().mapFra(år.getSisteUttaksplan().getAktiviteter());
         assertThat(perioder).hasSize(4);
 
         assertThat(perioder.stream().filter(p -> p.getErOppholdsPeriode())).hasSize(2);

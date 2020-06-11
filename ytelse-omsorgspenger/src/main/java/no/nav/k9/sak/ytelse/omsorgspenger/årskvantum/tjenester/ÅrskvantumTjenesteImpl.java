@@ -22,6 +22,7 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
@@ -143,7 +144,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumUttak(BehandlingReferanse ref) {
+    public ÅrskvantumResultat beregnÅrskvantumUttak(BehandlingReferanse ref) {
         var årskvantumRequest = hentForRef(ref);
 
         try {
@@ -259,8 +260,13 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
+    public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
+        return årskvantumKlient.hentFullUttaksplan(saksnummer);
+    }
+
+    @Override
     public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
-        return årskvantumKlient.hentPeriodeForFagsak(saksnummer.getVerdi());
+        return årskvantumKlient.hentPeriodeForFagsak(saksnummer);
     }
 
 }

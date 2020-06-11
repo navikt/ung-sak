@@ -184,12 +184,14 @@ public class BehandlingReferanse {
         return aktørId;
     }
 
+    @Deprecated
     public LocalDate getUtledetSkjæringstidspunkt() {
         // precondition
         sjekkSkjæringstidspunkt();
         return skjæringstidspunkt.getUtledetSkjæringstidspunkt();
     }
 
+    @Deprecated
     public Skjæringstidspunkt getSkjæringstidspunkt() {
         sjekkSkjæringstidspunkt();
         return skjæringstidspunkt;
@@ -203,22 +205,11 @@ public class BehandlingReferanse {
         return behandlingResultatType;
     }
 
-    public LocalDate getSkjæringstidspunktBeregning() {
-        // precondition
-        sjekkSkjæringstidspunkt();
-        return skjæringstidspunkt.getSkjæringstidspunktBeregning();
-    }
-
+    @Deprecated
     public LocalDate getSkjæringstidspunktOpptjening() {
         // precondition
         sjekkSkjæringstidspunkt();
         return skjæringstidspunkt.getSkjæringstidspunktOpptjening();
-    }
-
-    public LocalDate getFørsteUttaksdato() {
-        // precondition
-        sjekkSkjæringstidspunkt();
-        return skjæringstidspunkt.getFørsteUttaksdato();
     }
 
     public BehandlingType getBehandlingType() {
