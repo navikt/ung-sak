@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandlingslager.task;
 
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -33,10 +34,10 @@ public abstract class UnderBehandlingProsessTask extends BehandlingProsessTask {
                 + ", startpunkt=" + behandling.getStartpunkt()
                 + ", resultat=" + behandling.getBehandlingResultatType());
         } else {
-            doProsesser(prosessTaskData);
+            doProsesser(prosessTaskData, behandling);
         }
     }
 
-    protected abstract void doProsesser(ProsessTaskData prosessTaskData);
+    protected abstract void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling);
 
 }

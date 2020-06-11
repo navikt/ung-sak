@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -87,6 +88,7 @@ public class FagsakProsessTaskRepository {
     }
 
     public List<ProsessTaskData> finnAlleForAngittSøk(Long fagsakId, String behandlingId, String gruppeId, Collection<ProsessTaskStatus> statuser,
+                                                      boolean kunGruppeSekvens,
                                                       LocalDateTime nesteKjoeringFraOgMed,
                                                       LocalDateTime nesteKjoeringTilOgMed) {
 
@@ -94,23 +96,26 @@ public class FagsakProsessTaskRepository {
 
         // native sql for å håndtere join og subselect,
         // samt cast til hibernate spesifikk håndtering av parametere som kan være NULL
+        String sql = "SELECT pt.* FROM PROSESS_TASK pt"
+            + " INNER JOIN FAGSAK_PROSESS_TASK fpt ON fpt.prosess_task_id = pt.id"
+            + " WHERE pt.status IN (:statuses)"
+            + " AND pt.task_gruppe = coalesce(:gruppe, pt.task_gruppe)"
+            + (kunGruppeSekvens ? " AND fpt.gruppe_sekvensnr IS NOT NULL" : "") // tar kun hensyn til de som følger rekkefølge av tasks
+            + " AND (pt.neste_kjoering_etter IS NULL"
+            + "      OR ("
+            + "           pt.neste_kjoering_etter >= cast(:nesteKjoeringFraOgMed as timestamp(0)) AND pt.neste_kjoering_etter <= cast(:nesteKjoeringTilOgMed as timestamp(0))"
+            + "      ))"
+            + " AND fpt.fagsak_id = :fagsakId AND fpt.behandling_id = coalesce(:behandlingId, fpt.behandling_id)";
+
         @SuppressWarnings("unchecked")
         NativeQuery<ProsessTaskEntitet> query = (NativeQuery<ProsessTaskEntitet>) em
             .createNativeQuery(
-                "SELECT pt.* FROM PROSESS_TASK pt"
-                    + " INNER JOIN FAGSAK_PROSESS_TASK fpt ON fpt.prosess_task_id = pt.id"
-                    + " WHERE pt.status IN (:statuses)"
-                    + " AND pt.task_gruppe = coalesce(:gruppe, pt.task_gruppe)"
-                    + " AND (pt.neste_kjoering_etter IS NULL"
-                    + "      OR ("
-                    + "           pt.neste_kjoering_etter >= cast(:nesteKjoeringFraOgMed as timestamp(0)) AND pt.neste_kjoering_etter <= cast(:nesteKjoeringTilOgMed as timestamp(0))"
-                    + "      ))"
-                    + " AND fpt.fagsak_id = :fagsakId AND fpt.behandling_id = coalesce(:behandlingId, fpt.behandling_id)",
+                sql,
                 ProsessTaskEntitet.class);
 
         query.setParameter("statuses", statusNames)
             .setParameter("gruppe", gruppeId, StringType.INSTANCE)
-            .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_eTtter er sekunder
+            .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_etter er sekunder
             .setParameter("nesteKjoeringTilOgMed", nesteKjoeringTilOgMed)
             .setParameter("fagsakId", fagsakId) // NOSONAR
             .setParameter("behandlingId", behandlingId, StringType.INSTANCE) // NOSONAR
@@ -118,6 +123,14 @@ public class FagsakProsessTaskRepository {
 
         List<ProsessTaskEntitet> resultList = query.getResultList();
         return tilProsessTask(resultList);
+    }
+    
+    public String lagreNyGruppe(ProsessTaskData taskData) {
+        return prosessTaskRepository.lagre(taskData);
+    }
+    
+    public String lagreNyGruppe(ProsessTaskGruppe gruppe) {
+        return prosessTaskRepository.lagre(gruppe);
     }
 
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, String behandlingId, ProsessTaskGruppe gruppe) {
@@ -132,43 +145,53 @@ public class FagsakProsessTaskRepository {
 
         if (matchedTasks.isEmpty()) {
             // legg inn nye
-            return prosessTaskRepository.lagre(gruppe);
+            return lagreNyGruppe(gruppe);
         } else {
 
-            // hvis noen er FEILET så oppretter vi ikke ny
+            // hvis noen er FEILET så oppretter vi ikke nye
             Optional<ProsessTaskData> feilet = matchedTasks.stream().filter(t -> t.getStatus().equals(ProsessTaskStatus.FEILET)).findFirst();
 
             Set<String> nyeTaskTyper = nyeTasks.stream().map(t -> t.getTask().getTaskType()).collect(Collectors.toSet());
             Set<String> eksisterendeTaskTyper = eksisterendeTasks.stream().map(t -> t.getTaskType()).collect(Collectors.toSet());
 
             if (!feilet.isPresent()) {
-                if (eksisterendeTaskTyper.containsAll(nyeTaskTyper)) {
-                    return eksisterendeTasks.get(0).getGruppe();
+                var rest = new HashSet<>(eksisterendeTaskTyper);
+                rest.retainAll(nyeTaskTyper);
+
+                if (!rest.isEmpty()) {
+                    throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "].  Har allerede [" + toStringTask(eksisterendeTasks) + "]");
                 } else {
-                    return prosessTaskRepository.lagre(gruppe);
+                    return lagreNyGruppe(gruppe);
                 }
             } else {
-                return feilet.get().getGruppe();
+                throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "].  Har allerede feilende task [" + feilet.get() + "]");
             }
         }
 
     }
 
+    private String toStringTask(Collection<ProsessTaskData> tasks) {
+        return tasks.stream().map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    private String toStringEntry(Collection<Entry> tasks) {
+        return tasks.stream().map(t -> t.getTask()).map(Object::toString).collect(Collectors.joining(", "));
+    }
+
     public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, String behandlingId, String gruppe) {
         Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR
-
-        LocalDateTime now = LocalDateTime.now().withNano(0).withSecond(0);
 
         // et tidsrom for neste kjøring vi kan ta hensyn til. Det som er lenger ut i fremtiden er ikke relevant her, kun det vi kan forvente
         // kjøres i umiddelbar fremtid. tar i tillegg hensyn til alt som skulle ha vært kjørt tilbake i tid (som har stoppet av en eller annen
         // grunn).
-        LocalDateTime fom = now.minusWeeks(2);
-        LocalDateTime tom = now.plusMinutes(10); // kun det som forventes kjørt om kort tid.
-
+        LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
+        LocalDateTime tom = Tid.TIDENES_ENDE.atStartOfDay(); // kun det som forventes kjørt om kort tid.
+        boolean kunGruppeSekvens = true;
+        
         EnumSet<ProsessTaskStatus> statuser = EnumSet.allOf(ProsessTaskStatus.class);
         List<ProsessTaskData> tasks = Collections.emptyList();
         if (gruppe != null) {
-            tasks = finnAlleForAngittSøk(fagsakId, behandlingId, gruppe, new ArrayList<>(statuser), fom, tom);
+            tasks = finnAlleForAngittSøk(fagsakId, behandlingId, gruppe, new ArrayList<>(statuser), kunGruppeSekvens, fom, tom);
         }
 
         if (tasks.isEmpty()) {
@@ -176,7 +199,7 @@ public class FagsakProsessTaskRepository {
             statuser.remove(ProsessTaskStatus.FERDIG);
             statuser.remove(ProsessTaskStatus.KJOERT);
             statuser.remove(ProsessTaskStatus.SUSPENDERT);
-            tasks = finnAlleForAngittSøk(fagsakId, behandlingId, null, new ArrayList<>(statuser), fom, tom);
+            tasks = finnAlleForAngittSøk(fagsakId, behandlingId, null, new ArrayList<>(statuser), kunGruppeSekvens, fom, tom);
         }
 
         return tasks;
@@ -201,7 +224,7 @@ public class FagsakProsessTaskRepository {
                 FagsakProsessTask.class);
             query.setParameter("fagsakId", fagsakId); // NOSONAR
             query.setMaxResults(1);
-            
+
             FagsakProsessTask førsteFagsakProsessTask = query.getResultList().stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Skal ikke være mulig å havne her, da en må i minste finne input task her."));
@@ -247,13 +270,13 @@ public class FagsakProsessTaskRepository {
         return resultList.stream().map(ProsessTaskEntitet::tilProsessTask).collect(Collectors.toList());
     }
 
-
     /** Sett feilet prosesstasks som er koblet til fagsak+behandling til suspendert. */
     public void settFeiletTilSuspendert(Long fagsakId, Long behandlingId) {
 
         Set<ProsessTaskStatus> feiletStatus = EnumSet.of(ProsessTaskStatus.FEILET);
 
-        var skalSuspenderes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, feiletStatus, Tid.TIDENES_BEGYNNELSE.atStartOfDay(), Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
+        var skalSuspenderes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, feiletStatus, false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(),
+            Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
         if (!skalSuspenderes.isEmpty()) {
             em.flush(); // flush alt annet
             for (var s : skalSuspenderes) {
@@ -275,7 +298,8 @@ public class FagsakProsessTaskRepository {
 
         Set<ProsessTaskStatus> uferdigStatuser = EnumSet.complementOf(EnumSet.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT));
 
-        var skalSlettes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, uferdigStatuser, Tid.TIDENES_BEGYNNELSE.atStartOfDay(), Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
+        var skalSlettes = finnAlleForAngittSøk(fagsakId, String.valueOf(behandlingId), null, uferdigStatuser, false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(),
+            Tid.TIDENES_ENDE.plusDays(1).atStartOfDay());
         if (!skalSlettes.isEmpty()) {
             em.flush(); // flush alt annet
             em.createNativeQuery("delete from fagsak_prosess_task fpt where fpt.fagsak_id=:fagsakId and fpt.behandling_id=:behandlingId")

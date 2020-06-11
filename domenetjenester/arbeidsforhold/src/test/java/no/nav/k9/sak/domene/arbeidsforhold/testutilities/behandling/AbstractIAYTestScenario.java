@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -42,7 +43,7 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
     private static final AtomicLong FAKE_ID = new AtomicLong(100999L);
     private final FagsakBuilder fagsakBuilder;
     private Behandling behandling;
-
+    private BehandlingStatus status = BehandlingStatus.UTREDES;
     private Fagsak fagsak;
 
     private Long fagsakId = nyId();
@@ -169,7 +170,7 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
         }
 
         // oppprett og lagre behandling
-        Builder behandlingBuilder = Behandling.nyBehandlingFor(fagsak, behandlingType);
+        Builder behandlingBuilder = Behandling.nyBehandlingFor(fagsak, behandlingType).medBehandlingStatus(status);
 
         return behandlingBuilder;
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -28,7 +29,6 @@ public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
     private static final ObjectMapper MAPPER = IayGrunnlagJsonMapper.getMapper();
 
     private AbakusTjeneste abakusTjeneste;
-    private BehandlingRepository behandlingRepository;
 
     public enum Action {
         LAGRE_OPPGITT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
@@ -54,17 +54,15 @@ public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
     @Inject
     public AsyncAbakusLagreTask(BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, AbakusTjeneste abakusTjeneste) {
         super(behandlingRepository, behandlingLåsRepository);
-        this.behandlingRepository = behandlingRepository;
         this.abakusTjeneste = abakusTjeneste;
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData input) {
+    protected void doProsesser(ProsessTaskData input, Behandling behandling) {
 
         String behandlingId = input.getBehandlingId();
         Action action = Action.valueOf(input.getPropertyValue(KEY));
         String payload = input.getPayloadAsString();
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         try {
             switch (action) {

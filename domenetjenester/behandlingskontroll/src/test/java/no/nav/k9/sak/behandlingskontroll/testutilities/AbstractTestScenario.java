@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -38,6 +39,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     private Fagsak fagsak;
     private BehandlingStegType startSteg;
+    private BehandlingStatus status = BehandlingStatus.UTREDES;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
     private BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
@@ -91,7 +93,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         lagFagsak(fagsakRepo);
 
         // oppprett og lagre behandling
-        return Behandling.nyBehandlingFor(fagsak, behandlingType);
+        return Behandling.nyBehandlingFor(fagsak, behandlingType).medBehandlingStatus(status);
     }
 
     private void lagFagsak(FagsakRepository fagsakRepo) {

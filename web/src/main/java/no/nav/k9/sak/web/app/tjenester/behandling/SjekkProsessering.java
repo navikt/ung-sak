@@ -32,7 +32,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Dependent
-class SjekkProsessering {
+public class SjekkProsessering {
 
     private static final ProsesseringFeil FEIL = FeilFactory.create(ProsesseringFeil.class);
 
@@ -47,7 +47,7 @@ class SjekkProsessering {
     }
 
     @Inject
-    SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
+    public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
                              BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                              @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
                              BehandlingRepository behandlingRepository) {
@@ -96,8 +96,22 @@ class SjekkProsessering {
         if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return Optional.empty();
         }
+
+        if (pågårEllerFeiletTasks(behandling)) {
+            return Optional.empty();
+        }
+
         // henter alltid registeropplysninger og kjører alltid prosess
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
+    }
+
+    private boolean pågårEllerFeiletTasks(Behandling behandling) {
+        var taskStatus = sjekkProsessTaskPågårForBehandling(behandling, null);
+        if (taskStatus.isPresent()) {
+            var st = taskStatus.get();
+            return st.isReadOnly();
+        }
+        return false;
     }
 
     /**

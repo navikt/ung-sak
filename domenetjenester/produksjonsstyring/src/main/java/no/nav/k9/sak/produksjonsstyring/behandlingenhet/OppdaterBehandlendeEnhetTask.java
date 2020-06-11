@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
@@ -30,7 +29,6 @@ public class OppdaterBehandlendeEnhetTask extends UnderBehandlingProsessTask {
     private static final Logger log = LoggerFactory.getLogger(OppdaterBehandlendeEnhetTask.class);
 
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
-    private BehandlingRepository behandlingRepository;
 
     OppdaterBehandlendeEnhetTask() {
         // for CDI proxy
@@ -40,15 +38,13 @@ public class OppdaterBehandlendeEnhetTask extends UnderBehandlingProsessTask {
     public OppdaterBehandlendeEnhetTask(BehandlingRepositoryProvider repositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData prosessTaskData) {
-        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         Optional<OrganisasjonsEnhet> nyEnhet = behandlendeEnhetTjeneste.sjekkOppdatertEnhetEtterReallokering(behandling);
         if (nyEnhet.isPresent()) {
-            log.info("Endrer behandlende enhet for behandling: {}", prosessTaskData.getBehandlingId()); //NOSONAR
+            log.info("Endrer behandlende enhet for behandling: {}", prosessTaskData.getBehandlingId()); // NOSONAR
             behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, nyEnhet.get(), HistorikkAktør.VEDTAKSLØSNINGEN, BEGRUNNELSE);
         }
     }

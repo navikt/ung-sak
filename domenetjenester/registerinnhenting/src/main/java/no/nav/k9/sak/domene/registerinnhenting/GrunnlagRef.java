@@ -53,7 +53,6 @@ public @interface GrunnlagRef {
     }
 
 
-    @SuppressWarnings("unchecked")
     public static final class Lookup {
 
         private Lookup() {

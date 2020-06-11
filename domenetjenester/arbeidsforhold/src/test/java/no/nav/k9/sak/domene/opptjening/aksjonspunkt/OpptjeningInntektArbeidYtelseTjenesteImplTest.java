@@ -172,7 +172,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
             .hasSize(1);
     }
 
-    private Behandling opprettBehandling(LocalDate iDag) {
+    private Behandling opprettBehandling(LocalDate stp) {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AKTØRID);
         fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
@@ -181,7 +181,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         vilkårResultatRepository.lagre(behandling.getId(), nyttResultat);
 
-        repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, skjæringstidspunkt.minusMonths(10), skjæringstidspunkt, false);
+        repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, stp.minusMonths(10), stp, false);
         return behandling;
     }
 }

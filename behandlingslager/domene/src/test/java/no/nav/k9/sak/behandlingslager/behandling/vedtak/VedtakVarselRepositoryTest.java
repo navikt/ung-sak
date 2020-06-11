@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,8 +20,6 @@ public class VedtakVarselRepositoryTest {
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
     private final Repository repository = repoRule.getRepository();
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private final VedtakVarselRepository fagsakRepository = new VedtakVarselRepository(entityManager);
 
     private Behandling behandling;
 

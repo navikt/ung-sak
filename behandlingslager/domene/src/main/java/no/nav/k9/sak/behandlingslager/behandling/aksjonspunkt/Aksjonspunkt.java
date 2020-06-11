@@ -392,6 +392,14 @@ public class Aksjonspunkt extends BaseEntitet {
     public boolean erAvbrutt() {
         return Objects.equals(status, AksjonspunktStatus.AVBRUTT);
     }
+    
+    public boolean avbryt() {
+        if(erÅpentAksjonspunkt()) {
+            this.status = AksjonspunktStatus.AVBRUTT;
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public String toString() {

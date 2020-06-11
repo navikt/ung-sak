@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
@@ -22,7 +21,6 @@ public class InnhentMedlemskapOpplysningerTask extends UnderBehandlingProsessTas
 
     public static final String TASKTYPE = "innhentsaksopplysninger.medlemskap";
     private static final Logger LOGGER = LoggerFactory.getLogger(InnhentMedlemskapOpplysningerTask.class);
-    private BehandlingRepository behandlingRepository;
     private RegisterdataInnhenter registerdataInnhenter;
 
     InnhentMedlemskapOpplysningerTask() {
@@ -32,14 +30,12 @@ public class InnhentMedlemskapOpplysningerTask extends UnderBehandlingProsessTas
     @Inject
     public InnhentMedlemskapOpplysningerTask(BehandlingRepositoryProvider repositoryProvider,
                                              RegisterdataInnhenter registerdataInnhenter) {
-        super(repositoryProvider.getBehandlingRepository(), null /* håndterer låsing selv på senere tidspunkt*/);
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        super(repositoryProvider.getBehandlingRepository(), null /* håndterer låsing selv på senere tidspunkt */);
         this.registerdataInnhenter = registerdataInnhenter;
     }
 
     @Override
-    public void doProsesser(ProsessTaskData prosessTaskData) {
-        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+    public void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         LOGGER.info("Innhenter medlemskapsopplysninger for behandling: {}", behandling.getId());
         registerdataInnhenter.innhentMedlemskapsOpplysning(behandling);
     }

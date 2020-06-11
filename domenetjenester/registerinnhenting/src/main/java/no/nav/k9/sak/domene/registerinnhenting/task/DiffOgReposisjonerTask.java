@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.registerinnhenting.task;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -20,7 +21,6 @@ public class DiffOgReposisjonerTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "grunnlag.diffOgReposisjoner";
 
-    private BehandlingRepository repository;
     private RegisterdataEndringshåndterer endringshåndterer;
 
     DiffOgReposisjonerTask() {
@@ -30,13 +30,11 @@ public class DiffOgReposisjonerTask extends UnderBehandlingProsessTask {
     @Inject
     public DiffOgReposisjonerTask(BehandlingRepository repository, BehandlingLåsRepository behandlingLåsRepository, RegisterdataEndringshåndterer endringshåndterer) {
         super(repository, behandlingLåsRepository);
-        this.repository = repository;
         this.endringshåndterer = endringshåndterer;
     }
 
     @Override
-    public void doProsesser(ProsessTaskData prosessTaskData) {
-        var behandling = repository.hentBehandling(prosessTaskData.getBehandlingId());
+    public void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         endringshåndterer.utledDiffOgReposisjonerBehandlingVedEndringer(behandling, hentUtSnapshotFraPayload(prosessTaskData));
     }
 

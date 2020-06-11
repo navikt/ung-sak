@@ -61,9 +61,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 
-/**
- * ALLE ENDRINGER I DENNE KLASSEN SKAL KLARERES OG KODE-REVIEWES MED ANSVARLIG APPLIKASJONSARKITEKT (SE UTVIKLERHÅNDBOK).
- */
 @RequestScoped // må være RequestScoped sålenge ikke nøstet prosessering støttes.
 public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjeneste {
 
