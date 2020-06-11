@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
@@ -23,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @BehandlingStegRef(kode = "FORVEDSTEG")
 @BehandlingTypeRef("BT-004") //Revurdering
@@ -30,23 +33,22 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 @ApplicationScoped
 public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
-    private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private ErEndringIBeregning erEndringIBeregning = new ErEndringIBeregning();
+    private Instance<EndringIBeregningTjeneste> endringIBeregningTjenester;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
 
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                                     BeregningTjeneste kalkulusTjeneste,
-                                     BehandlingRepositoryProvider repositoryProvider) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
+                                     BehandlingRepositoryProvider repositoryProvider,
+                                     @Any Instance<EndringIBeregningTjeneste> endringIBeregningTjenester) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
+        this.endringIBeregningTjenester = endringIBeregningTjenester;
     }
 
     @Override
@@ -83,10 +85,10 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     }
 
     private boolean erRevurderingensBeregningsgrunnlagMindreEnnOrginal(BehandlingReferanse orginalBehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
-        var orginalBeregning = kalkulusTjeneste.hentFastsatt(orginalBehandling, skjæringstidspuntk);
-        var revurderingsBeregning = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
+        var endringIBeregningTjeneste = FagsakYtelseTypeRef.Lookup.find(endringIBeregningTjenester, revurdering.getFagsakYtelseType())
+            .orElseThrow();
 
-        return erEndringIBeregning.vurderUgunst(revurderingsBeregning, orginalBeregning);
+        return endringIBeregningTjeneste.vurderUgunst(orginalBehandling, revurdering, skjæringstidspuntk);
     }
 
 }

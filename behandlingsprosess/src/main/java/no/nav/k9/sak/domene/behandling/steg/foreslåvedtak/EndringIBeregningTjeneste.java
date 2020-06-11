@@ -1,5 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,11 +16,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
+@ApplicationScoped
+@FagsakYtelseTypeRef("*")
+public class EndringIBeregningTjeneste {
 
-public class ErEndringIBeregning {
-    public ErEndringIBeregning() {
+    protected BeregningTjeneste kalkulusTjeneste;
+
+    public EndringIBeregningTjeneste() {
+        // CDI
+    }
+
+    @Inject
+    public EndringIBeregningTjeneste(BeregningTjeneste kalkulusTjeneste) {
+        this.kalkulusTjeneste = kalkulusTjeneste;
+    }
+
+    public boolean vurderUgunst(BehandlingReferanse orginalBeregning, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
+        var originaltGrunnlag = kalkulusTjeneste.hentFastsatt(orginalBeregning, skjæringstidspuntk);
+        var revurderingsGrunnlag = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
+
+        return vurderUgunst(revurderingsGrunnlag, originaltGrunnlag);
     }
 
     public boolean vurderUgunst(Optional<Beregningsgrunnlag> revurderingsGrunnlag, Optional<Beregningsgrunnlag> originaltGrunnlag) {
@@ -59,5 +82,4 @@ public class ErEndringIBeregning {
         }
         return 0L; // Antar her ingen endring (ved ukjent periode etc)
     }
-
 }
