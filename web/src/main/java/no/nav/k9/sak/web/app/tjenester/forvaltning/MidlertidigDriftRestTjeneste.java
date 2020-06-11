@@ -101,10 +101,6 @@ public class MidlertidigDriftRestTjeneste {
         if (aktørId == null) {
             throw new IllegalArgumentException("Oppgitt personummer er ukjent");
         }
-        if (finnesFrisinnFagsak(aktørId)) {
-            throw new IllegalArgumentException("Personummer har allerede fagsak for frisinn. Tjenesten kan ikke benyttes");
-        }
-
         Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now());
 
         FrisinnSøknadInnsending frisinnSøknadInnsending = new FrisinnSøknadInnsending();
