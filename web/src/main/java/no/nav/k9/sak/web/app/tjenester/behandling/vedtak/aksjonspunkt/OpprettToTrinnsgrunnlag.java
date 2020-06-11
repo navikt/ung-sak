@@ -52,7 +52,7 @@ public class OpprettToTrinnsgrunnlag {
     }
 
     private List<BeregningsgrunnlagToTrinn> opprettBeregningToTrinn(BehandlingReferanse referanse) {
-        return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(referanse, true)
+        return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(referanse, false)
             .stream()
             .map(it -> beregningsgrunnlagTjeneste.hentGrunnlag(referanse, it.getFomDato())
                 .map(at -> new BeregningsgrunnlagToTrinn(it.getFomDato()))
