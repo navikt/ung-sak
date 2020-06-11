@@ -149,11 +149,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     @Override
     public Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
         return hentGrunnlag(fagsakYtelseType, bgReferanse).flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag);
-//        if (beregningsgrunnlag.isPresent()) {
-//            return beregningsgrunnlag.get();
-//        }
-//
-//        throw new IllegalStateException("Kalkulus har ikke fastsatt for " + bgReferanse);
     }
 
     @Override

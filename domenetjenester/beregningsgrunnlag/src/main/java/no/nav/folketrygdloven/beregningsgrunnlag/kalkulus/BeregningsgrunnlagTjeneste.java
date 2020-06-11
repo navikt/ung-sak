@@ -113,7 +113,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 .getGrunnlagPerioder()
                 .stream()
                 .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse()))
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         }
         return List.of();
