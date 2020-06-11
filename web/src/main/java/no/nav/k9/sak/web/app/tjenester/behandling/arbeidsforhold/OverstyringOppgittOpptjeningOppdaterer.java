@@ -13,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -35,6 +36,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.BekreftOverstyrOppgittOpptjeningDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
@@ -78,21 +80,33 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         return OppdateringResultat.utenOveropp();
     }
 
-    private Optional<OppgittArbeidsforholdBuilder> leggerTilArbeidsforhold(SøknadsperiodeOgOppgittOpptjeningV2Dto dto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
-        dto.getMåneder().stream().map(periodeMedSNOgFLDto -> {
-            OppgittOpptjeningDto oppgittIMåned = periodeMedSNOgFLDto.getOppgittIMåned();
-            if (!oppgittIMåned.getOppgittArbeidsforhold().isEmpty()) {
+    private Optional<List<OppgittArbeidsforholdBuilder>>leggerTilArbeidsforhold(SøknadsperiodeOgOppgittOpptjeningV2Dto dto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
+        List<OppgittArbeidsforholdBuilder> builders = new ArrayList<>();
+
+        List<PeriodeMedSNOgFLDto> måneder = dto.getMåneder();
+        for (PeriodeMedSNOgFLDto periodeMedSNOgFLDto : måneder) {
+            builders.addAll(mapArbeidsforhold(periodeMedSNOgFLDto));
+        }
+        return Optional.of(builders);
+    }
+
+    private List<OppgittArbeidsforholdBuilder> mapArbeidsforhold(PeriodeMedSNOgFLDto periodeMedSNOgFLDto) {
+        OppgittOpptjeningDto oppgittIMåned = periodeMedSNOgFLDto.getOppgittIMåned();
+        List<OppgittArbeidsforholdDto> oppgittArbeidsforhold = oppgittIMåned.getOppgittArbeidsforhold();
+        List<OppgittArbeidsforholdBuilder> builders = new ArrayList<>();
+        if (oppgittArbeidsforhold != null) {
+            for (OppgittArbeidsforholdDto dto : oppgittArbeidsforhold) {
                 OppgittArbeidsforholdBuilder builder = OppgittArbeidsforholdBuilder.ny();
-                builder.medInntekt(oppgittIMåned.getOppgittArbeidsforhold().get(0).getInntekt().getVerdi());
+                builder.medInntekt(dto.getInntekt().getVerdi());
                 LocalDate tidligste = finnTidligste(finnFraOgMedDatoSN(oppgittIMåned).orElse(null), finnFraOgMedDatoFL(oppgittIMåned).orElse(null));
                 builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tidligste, periodeMedSNOgFLDto.getMåned().getTom()));
-
-                return Optional.of(builder);
+                builder.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+                builders.add(builder);
             }
-            return Optional.empty();
-        });
-        return Optional.empty();
+        }
+        return builders;
     }
+
 
     private LocalDate finnTidligste(LocalDate sn, LocalDate fl) {
         if (sn == null && fl == null) {
