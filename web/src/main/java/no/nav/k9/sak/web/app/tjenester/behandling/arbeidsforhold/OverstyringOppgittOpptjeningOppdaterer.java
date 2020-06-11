@@ -85,28 +85,57 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
         List<PeriodeMedSNOgFLDto> måneder = dto.getMåneder();
         for (PeriodeMedSNOgFLDto periodeMedSNOgFLDto : måneder) {
-            builders.addAll(mapArbeidsforhold(periodeMedSNOgFLDto));
+            builders.addAll(mapArbeidsforhold(periodeMedSNOgFLDto, historikkInnslagTekstBuilder));
         }
         return Optional.of(builders);
     }
 
-    private List<OppgittArbeidsforholdBuilder> mapArbeidsforhold(PeriodeMedSNOgFLDto periodeMedSNOgFLDto) {
+    private Optional<List<EgenNæringBuilder>> leggerTilEgenæring(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
+        List<OppgittEgenNæringDto> egenNæring = new ArrayList<>();
+        Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
+        egenNæring.addAll(søknadsperiodeOgOppgittOpptjening.getMåneder()
+            .stream().map(o -> o.getOppgittIMåned().getOppgittEgenNæring())
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList()));
+
+        if (!egenNæring.isEmpty()) {
+            return mapTilEgenNæring(builder, egenNæring);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
+        var oppdragI = søknadsperiodeOgOppgittOpptjening.getMåneder()
+            .stream().map(m -> m.getOppgittIMåned().getOppgittFrilans())
+            .filter(Objects::nonNull)
+            .map(OppgittFrilansDto::getOppgittFrilansoppdrag)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        if (!oppdragI.isEmpty()) {
+            return mapTilFrilans(builder, oppdragI);
+        }
+        return Optional.empty();
+    }
+
+    private List<OppgittArbeidsforholdBuilder> mapArbeidsforhold(PeriodeMedSNOgFLDto periodeMedSNOgFLDto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
         OppgittOpptjeningDto oppgittIMåned = periodeMedSNOgFLDto.getOppgittIMåned();
         List<OppgittArbeidsforholdDto> oppgittArbeidsforhold = oppgittIMåned.getOppgittArbeidsforhold();
         List<OppgittArbeidsforholdBuilder> builders = new ArrayList<>();
         if (oppgittArbeidsforhold != null) {
             for (OppgittArbeidsforholdDto dto : oppgittArbeidsforhold) {
                 OppgittArbeidsforholdBuilder builder = OppgittArbeidsforholdBuilder.ny();
-                builder.medInntekt(dto.getInntekt().getVerdi());
+                BigDecimal verdi = dto.getInntekt().getVerdi();
+                builder.medInntekt(verdi);
                 LocalDate tidligste = finnTidligste(finnFraOgMedDatoSN(oppgittIMåned).orElse(null), finnFraOgMedDatoFL(oppgittIMåned).orElse(null));
                 builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tidligste, periodeMedSNOgFLDto.getMåned().getTom()));
                 builder.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
                 builders.add(builder);
+                historikkInnslagTekstBuilder.medEndretFelt(HistorikkEndretFeltType.ARBEIDSFORHOLD, null, verdi);
             }
         }
         return builders;
     }
-
 
     private LocalDate finnTidligste(LocalDate sn, LocalDate fl) {
         if (sn == null && fl == null) {
@@ -147,32 +176,6 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
             .flatMap(f -> f.stream().map(oppgittFrilansoppdragDto -> oppgittFrilansoppdragDto.getPeriode().getFom()).findFirst());
     }
 
-    private Optional<OppgittFrilans> leggerTilFrilans(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
-        var oppdragI = søknadsperiodeOgOppgittOpptjening.getMåneder()
-            .stream().map(m -> m.getOppgittIMåned().getOppgittFrilans())
-            .filter(Objects::nonNull)
-            .map(OppgittFrilansDto::getOppgittFrilansoppdrag)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-
-        if (!oppdragI.isEmpty()) {
-            var oppgittFrilansoppdrag = oppdragI.stream().map(oppgittFrilansoppdragDto -> {
-                var frilansOppdragBuilder = OppgittFrilansOppdragBuilder.ny();
-                BigDecimal verdi = oppgittFrilansoppdragDto.getBruttoInntekt().getVerdi();
-                frilansOppdragBuilder.medInntekt(verdi);
-                frilansOppdragBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getTom()));
-                builder.medEndretFelt(HistorikkEndretFeltType.FRILANS_INNTEKT, null, verdi);
-                return frilansOppdragBuilder.build();
-            }).collect(Collectors.toList());
-
-            var frilansBuilder = OppgittFrilansBuilder.ny();
-            frilansBuilder.medErNyoppstartet(utled(oppgittFrilansoppdrag));
-            frilansBuilder.medFrilansOppdrag(oppgittFrilansoppdrag);
-            return Optional.of(frilansBuilder.build());
-        }
-        return Optional.empty();
-    }
-
     private boolean utled(List<OppgittFrilansoppdrag> oppgittFrilansoppdrag) {
         Optional<LocalDate> førstFomOpt = oppgittFrilansoppdrag.stream().map(oppdrag -> oppdrag.getPeriode().getFomDato()).min(LocalDate::compareTo);
         if (førstFomOpt.isPresent()) {
@@ -183,25 +186,31 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         return false;
     }
 
-    private Optional<List<EgenNæringBuilder>> leggerTilEgenæring(SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjening, HistorikkInnslagTekstBuilder builder) {
-        List<OppgittEgenNæringDto> egenNæring = new ArrayList<>();
-        Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
-        egenNæring.addAll(søknadsperiodeOgOppgittOpptjening.getMåneder()
-            .stream().map(o -> o.getOppgittIMåned().getOppgittEgenNæring())
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList()));
+    private Optional<List<EgenNæringBuilder>> mapTilEgenNæring(HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder, List<OppgittEgenNæringDto> egenNæring) {
+        return Optional.of(egenNæring.stream().map(oppgittEgenNæringDto -> {
+            var egenNæringBuilder = EgenNæringBuilder.ny();
+            BigDecimal verdi = oppgittEgenNæringDto.getBruttoInntekt().getVerdi();
+            egenNæringBuilder.medBruttoInntekt(verdi);
+            egenNæringBuilder.medVirksomhetType(VirksomhetType.ANNEN);
+            egenNæringBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getTom()));
+            historikkInnslagTekstBuilder.medEndretFelt(HistorikkEndretFeltType.SELVSTENDIG_NÆRINGSDRIVENDE, null, verdi);
+            return egenNæringBuilder;
+        }).collect(Collectors.toList()));
+    }
 
-        if (!egenNæring.isEmpty()) {
-            return Optional.of(egenNæring.stream().map(oppgittEgenNæringDto -> {
-                var egenNæringBuilder = EgenNæringBuilder.ny();
-                BigDecimal verdi = oppgittEgenNæringDto.getBruttoInntekt().getVerdi();
-                egenNæringBuilder.medBruttoInntekt(verdi);
-                egenNæringBuilder.medVirksomhetType(VirksomhetType.ANNEN);
-                egenNæringBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(oppgittEgenNæringDto.getPeriode().getFom(), oppgittEgenNæringDto.getPeriode().getTom()));
-                builder.medEndretFelt(HistorikkEndretFeltType.SELVSTENDIG_NÆRINGSDRIVENDE, null, verdi);
-                return egenNæringBuilder;
-            }).collect(Collectors.toList()));
-        }
-        return Optional.empty();
+    private Optional<OppgittFrilans> mapTilFrilans(HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder, List<no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansoppdragDto> oppdragI) {
+        var oppgittFrilansoppdrag = oppdragI.stream().map(oppgittFrilansoppdragDto -> {
+            var frilansOppdragBuilder = OppgittFrilansOppdragBuilder.ny();
+            BigDecimal verdi = oppgittFrilansoppdragDto.getBruttoInntekt().getVerdi();
+            frilansOppdragBuilder.medInntekt(verdi);
+            frilansOppdragBuilder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(oppgittFrilansoppdragDto.getPeriode().getFom(), oppgittFrilansoppdragDto.getPeriode().getTom()));
+            historikkInnslagTekstBuilder.medEndretFelt(HistorikkEndretFeltType.FRILANS_INNTEKT, null, verdi);
+            return frilansOppdragBuilder.build();
+        }).collect(Collectors.toList());
+
+        var frilansBuilder = OppgittFrilansBuilder.ny();
+        frilansBuilder.medErNyoppstartet(utled(oppgittFrilansoppdrag));
+        frilansBuilder.medFrilansOppdrag(oppgittFrilansoppdrag);
+        return Optional.of(frilansBuilder.build());
     }
 }
