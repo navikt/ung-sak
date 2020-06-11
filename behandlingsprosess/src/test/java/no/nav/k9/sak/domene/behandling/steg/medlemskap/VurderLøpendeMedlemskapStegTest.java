@@ -46,7 +46,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -62,7 +61,6 @@ public class VurderLøpendeMedlemskapStegTest {
     private MedlemskapRepository medlemskapRepository = provider.getMedlemskapRepository();
     private PersonopplysningRepository personopplysningRepository = provider.getPersonopplysningRepository();
     private FagsakRepository fagsakRepository = provider.getFagsakRepository();
-    private UttakRepository uttakRepository = new UttakRepository(repositoryRule.getEntityManager());
 
     private VurderMedlemskapSteg steg;
 

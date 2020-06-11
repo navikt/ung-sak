@@ -1,7 +1,5 @@
 package no.nav.k9.sak.behandling.prosessering;
 
-import static no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties.GJENOPPTA_STEG;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 
@@ -11,13 +9,14 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTaskProperties;
+import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.k9.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
@@ -48,15 +47,18 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     private RegisterdataEndringshåndterer registerdataEndringshåndterer;
     private EndringsresultatSjekker endringsresultatSjekker;
     private ProsessTaskRepository prosessTaskRepository;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     @Inject
     public BehandlingProsesseringTjenesteImpl(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                               RegisterdataEndringshåndterer registerdataEndringshåndterer,
                                               EndringsresultatSjekker endringsresultatSjekker,
+                                              FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                               ProsessTaskRepository prosessTaskRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.registerdataEndringshåndterer = registerdataEndringshåndterer;
         this.endringsresultatSjekker = endringsresultatSjekker;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
@@ -129,9 +131,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             }
             gruppe.addNesteSekvensiell(diffOgReposisjoner);
         }
-        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
+        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        fortsettBehandlingTask.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
+        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
         gruppe.setCallIdFraEksisterende();
         return gruppe;
@@ -149,21 +151,25 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     // Til bruk ved gjenopptak fra vent (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public String opprettTasksForFortsettBehandling(Behandling behandling) {
-        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        taskData.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
-        return lagreMedCallId(taskData);
+        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        Long fagsakId = behandling.getFagsakId();
+        Long behandlingId = behandling.getId();
+        taskData.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
+        taskData.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
+        return lagreMedCallId(fagsakId, behandlingId, taskData);
     }
 
     @Override
     public String opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(Behandling behandling, BehandlingStegType behandlingStegType, LocalDateTime nesteKjøringEtter) {
-        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        taskData.setProperty(FortsettBehandlingTaskProperties.GJENOPPTA_STEG, behandlingStegType.getKode());
+        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        Long behandlingId = behandling.getId();
+        Long fagsakId = behandling.getFagsakId();
+        taskData.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
+        taskData.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, behandlingStegType.getKode());
         if (nesteKjøringEtter != null) {
             taskData.setNesteKjøringEtter(nesteKjøringEtter);
         }
-        return lagreMedCallId(taskData);
+        return lagreMedCallId(fagsakId, behandlingId, taskData);
     }
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
@@ -190,9 +196,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             }
             gruppe.addNesteSekvensiell(diffOgReposisjoner);
         }
-        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
+        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        fortsettBehandlingTask.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
+        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
         if (nyCallId) {
             gruppe.setCallId(MDCOperations.generateCallId());
@@ -209,11 +215,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
 
         // Starter opp prosessen igjen fra steget hvor den var satt på vent
-        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTaskProperties.TASKTYPE);
+        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         // NB: Viktig
-        fortsettBehandlingTask.setProperty(GJENOPPTA_STEG, BehandlingStegType.INNHENT_REGISTEROPP.getKode());
-        fortsettBehandlingTask.setProperty(FortsettBehandlingTaskProperties.MANUELL_FORTSETTELSE, String.valueOf(true));
+        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, BehandlingStegType.INNHENT_REGISTEROPP.getKode());
+        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
         gruppe.setCallIdFraEksisterende();
         return prosessTaskRepository.lagre(gruppe);
@@ -235,8 +241,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         gruppe.addNesteSekvensiell(oppdaterInnhentTidspunkt);
     }
 
-    private String lagreMedCallId(ProsessTaskData prosessTaskData) {
+    private String lagreMedCallId(Long fagsakId, Long behandlingId, ProsessTaskData prosessTaskData) {
+        var gruppe = new ProsessTaskGruppe(prosessTaskData);
         prosessTaskData.setCallIdFraEksisterende();
-        return prosessTaskRepository.lagre(prosessTaskData);
+        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), gruppe);
     }
 }

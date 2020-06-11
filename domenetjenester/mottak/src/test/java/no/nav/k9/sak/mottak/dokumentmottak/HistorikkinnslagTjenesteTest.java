@@ -25,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
-import no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery;
 import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
 import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Dokumentvariant;
 import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost;
@@ -36,7 +35,6 @@ import no.nav.k9.sak.typer.JournalpostId;
 public class HistorikkinnslagTjenesteTest {
 
     private static final JournalpostId JOURNALPOST_ID = new JournalpostId("5");
-    private static final JournalpostQuery journalpostQuery = new JournalpostQuery(JOURNALPOST_ID.getVerdi());
     private static final String HOVEDDOKUMENT_DOKUMENT_ID = "1";
     private static final String VEDLEGG_DOKUMENT_ID = "2";
 

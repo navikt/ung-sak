@@ -70,8 +70,7 @@ public class SendVedtaksbrevTest {
         sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository,
             repositoryProvider.getBehandlingVedtakRepository(),
             vedtakVarselRepository,
-            dokumentBestillerApplikasjonTjeneste,
-            dokumentBehandlingTjeneste);
+            dokumentBestillerApplikasjonTjeneste);
 
     }
 

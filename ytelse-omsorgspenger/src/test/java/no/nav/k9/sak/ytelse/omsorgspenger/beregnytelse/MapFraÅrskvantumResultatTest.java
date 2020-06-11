@@ -27,8 +27,6 @@ import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 
 public class MapFraÅrskvantumResultatTest {
@@ -71,9 +69,6 @@ public class MapFraÅrskvantumResultatTest {
     private List<Uttaksperiode> lagUttaksperioder() {
         var fom = LocalDate.now();
         var tom = fom.plusDays(3);
-        var arbeidsforhold1 = new UttakArbeidsforhold("921484240", null, UttakArbeidType.ARBEIDSTAKER, null);
-        var arbeidsforhold2 = new UttakArbeidsforhold("90589477", null, UttakArbeidType.ARBEIDSTAKER, null);
-        var arbeidsforhold3 = new UttakArbeidsforhold("980484939", null, UttakArbeidType.ARBEIDSTAKER, null);
         return List.of(
             innvilget(fom, tom, _100),
             avslått(fom, tom),

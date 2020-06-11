@@ -23,10 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusApiTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -65,9 +61,7 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
@@ -92,12 +86,6 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Inject
     private BehandlingRepository behandlingRepository;
 
-    private KalkulusApiTjeneste kalkulusApiTjeneste = new KalkulusInMermoryTjeneste();
-
-    private BeregningPerioderGrunnlagRepository grunnlagRepository = new BeregningPerioderGrunnlagRepository(repoRule.getEntityManager(), repositoryProvider.getVilkårResultatRepository());
-    private UnitTestLookupInstanceImpl<KalkulusApiTjeneste> kalkulusTjenester = new UnitTestLookupInstanceImpl<>(kalkulusApiTjeneste);
-    private BeregningTjeneste kalkulusInMermoryTjeneste = new BeregningsgrunnlagTjeneste(kalkulusTjenester, behandlingRepository, repositoryProvider.getVilkårResultatRepository(), grunnlagRepository);
-
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private ForeslåBehandlingsresultatTjeneste tjeneste;
 
@@ -108,7 +96,8 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     @Before
     public void setup() {
         when(uttakRepository.hentOppgittSøknadsperioder(anyLong())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
-        when(uttakRepository.hentOppgittUttak(anyLong())).thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
+        when(uttakRepository.hentOppgittUttak(anyLong()))
+            .thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new DefaultRevurderingBehandlingsresultatutleder());
