@@ -93,6 +93,15 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         this.periode = periode;
     }
 
+    public OppgittFraværPeriode(OppgittFraværPeriode periode) {
+        this.arbeidsgiver = periode.arbeidsgiver;
+        this.arbeidsforholdRef = periode.arbeidsforholdRef;
+        this.fraværPerDag = periode.fraværPerDag;
+        this.aktivitetType = Objects.requireNonNull(periode.aktivitetType, "aktivitetType");
+        this.periode = periode.periode;
+    }
+
+
     @Override
     public String getIndexKey() {
         return IndexKeyComposer.createKey(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);

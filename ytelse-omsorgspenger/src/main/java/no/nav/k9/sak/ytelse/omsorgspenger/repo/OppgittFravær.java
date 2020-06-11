@@ -53,6 +53,7 @@ public class OppgittFravær extends BaseEntitet {
     public OppgittFravær(Collection<OppgittFraværPeriode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
+            .map(OppgittFraværPeriode::new)
             .peek(it -> it.setFravær(this))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
