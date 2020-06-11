@@ -124,13 +124,17 @@ public class FagsakProsessTaskRepository {
         List<ProsessTaskEntitet> resultList = query.getResultList();
         return tilProsessTask(resultList);
     }
-    
+
     public String lagreNyGruppe(ProsessTaskData taskData) {
         return prosessTaskRepository.lagre(taskData);
     }
-    
+
     public String lagreNyGruppe(ProsessTaskGruppe gruppe) {
         return prosessTaskRepository.lagre(gruppe);
+    }
+
+    public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
+        return lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), gruppe);
     }
 
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, String behandlingId, ProsessTaskGruppe gruppe) {
@@ -187,7 +191,7 @@ public class FagsakProsessTaskRepository {
         LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
         LocalDateTime tom = Tid.TIDENES_ENDE.atStartOfDay(); // kun det som forventes kjørt om kort tid.
         boolean kunGruppeSekvens = true;
-        
+
         EnumSet<ProsessTaskStatus> statuser = EnumSet.allOf(ProsessTaskStatus.class);
         List<ProsessTaskData> tasks = Collections.emptyList();
         if (gruppe != null) {
@@ -315,6 +319,13 @@ public class FagsakProsessTaskRepository {
             }
         }
 
+    }
+
+    public List<ProsessTaskData> finnAlleÅpneTasksForAngittSøk(Long fagsakId, Long behandlingId, String gruppe) {
+        Set<ProsessTaskStatus> uferdigStatuser = EnumSet.complementOf(EnumSet.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT));
+        var fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
+        var tom = Tid.TIDENES_ENDE.plusDays(1).atStartOfDay();
+        return finnAlleForAngittSøk(fagsakId, behandlingId.toString(), gruppe, uferdigStatuser, true, fom, tom);
     }
 
 }

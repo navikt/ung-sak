@@ -106,7 +106,7 @@ public class ProsesseringAsynkTjeneste {
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         gruppe.addNesteSekvensiell(taskData);
-        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()), gruppe);
+        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), behandling.getId(), gruppe);
     }
 
     /**
@@ -120,7 +120,7 @@ public class ProsesseringAsynkTjeneste {
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         gruppe.addNesteSekvensiell(taskData);
-        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()), gruppe);
+        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), behandling.getId(), gruppe);
     }
 
 }

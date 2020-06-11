@@ -48,8 +48,8 @@ public interface BehandlingProsesseringTjeneste {
     String opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(Behandling behandling, BehandlingStegType behandlingStegType, LocalDateTime nesteKjøringEtter);
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
-    // NB oppdaterer registerdata Lagrer tasks. Returnerer gruppe-handle
-    String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
+    // NB oppdaterer registerdata Lagrer tasks
+    void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
 
-    String opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
+    void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 }

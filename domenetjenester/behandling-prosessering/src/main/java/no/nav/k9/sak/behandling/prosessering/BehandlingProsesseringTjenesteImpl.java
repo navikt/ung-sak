@@ -2,9 +2,14 @@ package no.nav.k9.sak.behandling.prosessering;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -28,7 +33,6 @@ import no.nav.k9.sak.domene.registerinnhenting.task.SettRegisterdataInnhentetTid
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.log.mdc.MDCOperations;
 
 /**
@@ -42,24 +46,22 @@ import no.nav.vedtak.log.mdc.MDCOperations;
  **/
 @Dependent
 public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesseringTjeneste {
-
+    private static final Logger log = LoggerFactory.getLogger(BehandlingProsesseringTjenesteImpl.class);
+    
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RegisterdataEndringshåndterer registerdataEndringshåndterer;
     private EndringsresultatSjekker endringsresultatSjekker;
-    private ProsessTaskRepository prosessTaskRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     @Inject
     public BehandlingProsesseringTjenesteImpl(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                               RegisterdataEndringshåndterer registerdataEndringshåndterer,
                                               EndringsresultatSjekker endringsresultatSjekker,
-                                              FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                              ProsessTaskRepository prosessTaskRepository) {
+                                              FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.registerdataEndringshåndterer = registerdataEndringshåndterer;
         this.endringsresultatSjekker = endringsresultatSjekker;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
-        this.prosessTaskRepository = prosessTaskRepository;
     }
 
     public BehandlingProsesseringTjenesteImpl() {
@@ -174,30 +176,39 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
-    public String opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
+    public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
 
+        Long fagsakId = behandling.getFagsakId();
+        Long behandlingId = behandling.getId();
         if (behandling.erSaksbehandlingAvsluttet()) {
-            throw new IllegalStateException("Utvikler-feil: kan ikke gjenoppta behandling når saksbehandling er avsluttet: behandlingId=" + behandling.getId() + ", status=" + behandling.getStatus());
+            throw new IllegalStateException("Utvikler-feil: kan ikke gjenoppta behandling når saksbehandling er avsluttet: behandlingId=" + behandlingId + ", status=" + behandling.getStatus());
+        }
+        
+        ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
+        String gjenopptaTaskType = GjenopptaBehandlingTask.TASKTYPE;
+        var gjenopptaBehandlingTask = new ProsessTaskData(gjenopptaTaskType);
+        var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
+        var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        
+        var eksisterendeGjenopptaTask = getEksisterendeTaskAvType(fagsakId, behandlingId, gjenopptaTaskType);
+        if(eksisterendeGjenopptaTask.isPresent()) {
+            log.warn("Har eksisterende task [{}], oppretter ikke nye for fagsakId={}, behandlingId={}: {}", gjenopptaTaskType, fagsakId, behandlingId, eksisterendeGjenopptaTask.get());
+            return;
         }
 
-        ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
-
-        ProsessTaskData gjenopptaBehandlingTask = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
-        gjenopptaBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        gjenopptaBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(gjenopptaBehandlingTask);
         if (skalHenteInnRegisterData(behandling)) {
             leggTilInnhentRegisterdataTasks(behandling, gruppe);
-            var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
-            diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+            diffOgReposisjoner.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
             try {
-                diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId())));
+                diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId)));
             } catch (IOException e) {
                 throw new RuntimeException("Feil ved serialisering av snapshot", e);
             }
             gruppe.addNesteSekvensiell(diffOgReposisjoner);
         }
-        ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
-        fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        fortsettBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
         if (nyCallId) {
@@ -205,11 +216,17 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         } else {
             gruppe.setCallIdFraEksisterende();
         }
-        return prosessTaskRepository.lagre(gruppe);
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
+    }
+
+    private Optional<ProsessTaskData> getEksisterendeTaskAvType(Long fagsakId, Long behandlingId, String taskType) {
+        var åpneTasks = fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(fagsakId, behandlingId, null);
+        var task = åpneTasks.stream().filter(t -> Objects.equals(t.getTaskType(), taskType)).findFirst();
+        return task;
     }
 
     @Override
-    public String opprettTasksForInitiellRegisterInnhenting(Behandling behandling) {
+    public void opprettTasksForInitiellRegisterInnhenting(Behandling behandling) {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
@@ -222,7 +239,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
         gruppe.setCallIdFraEksisterende();
-        return prosessTaskRepository.lagre(gruppe);
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), behandling.getId(), gruppe);
     }
 
     private void leggTilInnhentRegisterdataTasks(Behandling behandling, ProsessTaskGruppe gruppe) {
@@ -244,6 +261,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     private String lagreMedCallId(Long fagsakId, Long behandlingId, ProsessTaskData prosessTaskData) {
         var gruppe = new ProsessTaskGruppe(prosessTaskData);
         prosessTaskData.setCallIdFraEksisterende();
-        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), gruppe);
+        return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
     }
 }
