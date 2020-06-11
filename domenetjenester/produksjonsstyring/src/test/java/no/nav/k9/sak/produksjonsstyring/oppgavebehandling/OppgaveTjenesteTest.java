@@ -77,12 +77,12 @@ public class OppgaveTjenesteTest {
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
-        String oppgaveId = tjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), OppgaveÅrsak.VURDER_DOKUMENT_VL, "2010", "bla bla", false);
+        String oppgaveId = tjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), OppgaveÅrsak.VURDER_DOKUMENT, "2010", "bla bla", false);
 
         // Assert
         OpprettOppgave request = captor.getValue().build();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
-        assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.VURDER_DOKUMENT_VL.getKode());
+        assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.VURDER_DOKUMENT.getKode());
         assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());
     }
 
@@ -90,11 +90,11 @@ public class OppgaveTjenesteTest {
     @Test
     public void skal_hente_oppgave_liste() throws Exception {
         // Arrange
-        when(oppgaveRestKlient.finnÅpneOppgaver(any(), eq("OMS"), eq(List.of(OppgaveÅrsak.VURDER_DOKUMENT_VL.getKode())))).thenReturn(List.of(OPPGAVE));
+        when(oppgaveRestKlient.finnÅpneOppgaver(any(), eq("OMS"), eq(List.of(OppgaveÅrsak.VURDER_DOKUMENT.getKode())))).thenReturn(List.of(OPPGAVE));
         when(oppgaveRestKlient.finnÅpneOppgaver(any(), eq("OMS"), eq(List.of(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode())))).thenReturn(Collections.emptyList());
 
         // Act
-        var harVurderDok = tjeneste.harÅpneOppgaverAvType(behandling.getAktørId(), OppgaveÅrsak.VURDER_DOKUMENT_VL, FagsakYtelseType.PSB);
+        var harVurderDok = tjeneste.harÅpneOppgaverAvType(behandling.getAktørId(), OppgaveÅrsak.VURDER_DOKUMENT, FagsakYtelseType.PSB);
         var harVurderKY = tjeneste.harÅpneOppgaverAvType(behandling.getAktørId(), OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, FagsakYtelseType.PSB);
 
         // Assert

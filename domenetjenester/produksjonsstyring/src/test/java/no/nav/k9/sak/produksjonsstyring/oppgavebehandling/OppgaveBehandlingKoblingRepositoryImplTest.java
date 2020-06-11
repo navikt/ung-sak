@@ -51,7 +51,7 @@ public class OppgaveBehandlingKoblingRepositoryImplTest {
         bsAvsl.ferdigstillOppgave("I11111");
         OppgaveBehandlingKobling bsAapen = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "O1235", DUMMY_SAKSNUMMER, behandling);
         OppgaveBehandlingKobling godkjenn = new OppgaveBehandlingKobling(OppgaveÅrsak.GODKJENN_VEDTAK_VL, "O1236", DUMMY_SAKSNUMMER, behandling);
-        OppgaveBehandlingKobling registrer = new OppgaveBehandlingKobling(OppgaveÅrsak.VURDER_DOKUMENT_VL, "O1238", DUMMY_SAKSNUMMER, behandling);
+        OppgaveBehandlingKobling registrer = new OppgaveBehandlingKobling(OppgaveÅrsak.VURDER_DOKUMENT, "O1238", DUMMY_SAKSNUMMER, behandling);
         OppgaveBehandlingKobling revurder = new OppgaveBehandlingKobling(OppgaveÅrsak.REVURDER_VL, "O1237", DUMMY_SAKSNUMMER, behandling);
 
         lagOppgave(bsAapen);

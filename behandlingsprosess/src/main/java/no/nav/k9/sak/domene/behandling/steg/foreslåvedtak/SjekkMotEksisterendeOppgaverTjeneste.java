@@ -52,9 +52,9 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
             aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
             opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
         }
-        if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_DOKUMENT_VL, behandling.getFagsakYtelseType())) {
+        if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_DOKUMENT, behandling.getFagsakYtelseType())) {
             aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK);
-            opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_DOKUMENT_VL, historikkInnslagFraRepo);
+            opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_DOKUMENT, historikkInnslagFraRepo);
         }
         return aksjonspunktliste;
     }

@@ -7,7 +7,7 @@ import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 public class Oppgaveinfo {
 
     public static final Oppgaveinfo VURDER_KONST_YTELSE = new Oppgaveinfo(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode(), null);
-    public static final Oppgaveinfo VURDER_DOKUMENT = new Oppgaveinfo(OppgaveÅrsak.VURDER_DOKUMENT_VL.getKode(), null);
+    public static final Oppgaveinfo VURDER_DOKUMENT = new Oppgaveinfo(OppgaveÅrsak.VURDER_DOKUMENT.getKode(), null);
 
     private String oppgaveType;
     private String status;

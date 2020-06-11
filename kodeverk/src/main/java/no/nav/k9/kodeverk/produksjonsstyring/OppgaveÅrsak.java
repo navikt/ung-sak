@@ -23,7 +23,7 @@ public enum OppgaveÅrsak implements Kodeverdi {
     GODKJENN_VEDTAK_VL("GOD_VED_VL", "Godkjenne vedtak i VL"),
     REG_SOKNAD_VL("REG_SOK_VL", "Registrere søknad i VL"),
     VURDER_KONSEKVENS_YTELSE("VUR_KONS_YTE", "Vurder konsekvens for ytelse"),
-    VURDER_DOKUMENT_VL("VUR_VL", "Vurder dokument i VL"),
+    VURDER_DOKUMENT("VUR", "Vurder dokument"),
     FEILUTBETALING("FEILUTBET", "Feilutbetalingsvedtak"),
     INNHENT_DOK("INNH_DOK", "Innhent dokumentasjon"),
     SETTVENT("SETTVENT", "Sett utbetaling på vent"),
