@@ -47,7 +47,7 @@ public class OpprettProsessTaskIverksettTest {
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
-    private FagsakProsessTaskRepository FagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository);
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository);
     
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
@@ -63,7 +63,7 @@ public class OpprettProsessTaskIverksettTest {
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(FagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
+        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService);
     }
 
     @Test
