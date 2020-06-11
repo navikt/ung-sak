@@ -25,6 +25,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -126,10 +127,16 @@ public class FagsakProsessTaskRepository {
     }
 
     public String lagreNyGruppe(ProsessTaskData taskData) {
+        Optional.ofNullable(MDC.get("prosess_task_id")).ifPresent(v -> taskData.setProperty("parent.task_id", v));
+        Optional.ofNullable(MDC.get("prosess_task")).ifPresent(v -> taskData.setProperty("parent.task", v));
+        Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> taskData.setProperty("parent.steg", v));
         return prosessTaskRepository.lagre(taskData);
     }
 
     public String lagreNyGruppe(ProsessTaskGruppe gruppe) {
+        Optional.ofNullable(MDC.get("prosess_task_id")).ifPresent(v -> gruppe.setProperty("parent.task_id", v));
+        Optional.ofNullable(MDC.get("prosess_task")).ifPresent(v -> gruppe.setProperty("parent.task", v));
+        Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> gruppe.setProperty("parent.steg", v));
         return prosessTaskRepository.lagre(gruppe);
     }
 
