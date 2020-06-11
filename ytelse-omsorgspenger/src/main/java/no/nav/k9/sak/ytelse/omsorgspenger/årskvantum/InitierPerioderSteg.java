@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -74,14 +75,19 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
         Set<OppgittFraværPeriode> fravær = new LinkedHashSet<>();
 
-        var fraværFraInntektsmeldinger = fraværFraInntektsmeldinger(behandlingId);
-
-        if (fraværFraInntektsmeldinger.isEmpty()) {
-            // Dette bør da være "revurderinger" hvor vi behandler samme periode som forrige behandling på nytt
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var fraværFraInntektsmeldinger = fraværFraInntektsmeldinger(behandling);
+        if (behandling.erManueltOpprettet()) {
             var oppgittOpt = annetOppgittFravær(behandlingId);
             fravær.addAll(oppgittOpt.orElseThrow().getPerioder());
+        } else {
+            if (fraværFraInntektsmeldinger.isEmpty()) {
+                // Dette bør da være manuelle "revurderinger" hvor vi behandler samme periode som forrige behandling på nytt
+                var oppgittOpt = annetOppgittFravær(behandlingId);
+                fravær.addAll(oppgittOpt.orElseThrow().getPerioder());
+            }
         }
-        fravær.addAll(fraværFraInntektsmeldinger);
+        fravær.addAll(fraværFraInntektsmeldinger); // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
         return new OppgittFravær(fravær);
     }
 
@@ -89,13 +95,12 @@ public class InitierPerioderSteg implements BehandlingSteg {
         return grunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
     }
 
-    private List<OppgittFraværPeriode> fraværFraInntektsmeldinger(Long behandlingId) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
+    private List<OppgittFraværPeriode> fraværFraInntektsmeldinger(Behandling behandling) {
         var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
             .filter(it -> it.getBehandlingId() != null)
-            .filter(it -> behandlingId.equals(it.getBehandlingId()))
+            .filter(it -> behandling.getId().equals(it.getBehandlingId()))
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
