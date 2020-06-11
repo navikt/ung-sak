@@ -26,7 +26,6 @@ public class GjenopptaBehandlingTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "behandlingskontroll.gjenopptaBehandling";
 
-    private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
@@ -40,17 +39,15 @@ public class GjenopptaBehandlingTask extends UnderBehandlingProsessTask {
                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                    BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         super(behandlingRepository, behandlingLåsRepository);
-        this.behandlingRepository = behandlingRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
 
         var behandlingsId = prosessTaskData.getBehandlingId();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingsId);
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
 
         if (behandling.isBehandlingPåVent()) {
             behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);

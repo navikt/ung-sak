@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
@@ -37,7 +38,7 @@ public class HenleggBehandlingTask extends UnderBehandlingProsessTask {
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         var behandlingId = prosessTaskData.getBehandlingId();
 
         BehandlingResultatType henleggelseType = Optional.ofNullable(prosessTaskData.getPropertyValue(HENLEGGELSE_TYPE_KEY))

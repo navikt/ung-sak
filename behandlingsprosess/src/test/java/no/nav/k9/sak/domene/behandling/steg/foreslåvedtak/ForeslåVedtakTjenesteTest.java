@@ -174,6 +174,7 @@ public class ForeslåVedtakTjenesteTest {
         oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_DOKUMENT);
 
         // Act
+        @SuppressWarnings("unused")
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
 
         //TODO: Skrives inn når VKY for K9 er på plass

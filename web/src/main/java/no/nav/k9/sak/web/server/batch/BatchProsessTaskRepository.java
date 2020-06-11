@@ -8,8 +8,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 
 /**
@@ -19,21 +17,18 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 public class BatchProsessTaskRepository {
 
     private EntityManager entityManager;
-    private ProsessTaskRepository prosessTaskRepository;
 
     BatchProsessTaskRepository() {
         // for CDI proxying
     }
 
     @Inject
-    public BatchProsessTaskRepository(EntityManager entityManager,
-                                      ProsessTaskRepository prosessTaskRepository) {
+    public BatchProsessTaskRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager");
         this.entityManager = entityManager;
-        this.prosessTaskRepository = prosessTaskRepository;
     }
 
-    static String utledPartisjonsNr(LocalDate date) {
+    private static String utledPartisjonsNr(LocalDate date) {
         int måned = date.plusMonths(1).getMonth().getValue();
         if (måned < 10) {
             return "0" + måned;
@@ -54,7 +49,7 @@ public class BatchProsessTaskRepository {
         return updatedRows;
     }
 
-    public int tømNestePartisjon() {
+    int tømNestePartisjon() {
         String partisjonsNr = utledPartisjonsNr(LocalDate.now());
         Query query = entityManager.createNativeQuery("TRUNCATE prosess_task_partition_ferdig_" + partisjonsNr);
         int updatedRows = query.executeUpdate();
@@ -63,7 +58,4 @@ public class BatchProsessTaskRepository {
         return updatedRows;
     }
 
-    public String lagre(ProsessTaskData taskData) {
-        return prosessTaskRepository.lagre(taskData);
-    }
 }

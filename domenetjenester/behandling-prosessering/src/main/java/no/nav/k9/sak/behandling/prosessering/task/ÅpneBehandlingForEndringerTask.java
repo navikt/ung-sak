@@ -14,7 +14,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
@@ -30,7 +29,6 @@ public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask 
     public static final String START_STEG = "behandlingskontroll.startSteg";
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private BehandlingRepository behandlingRepository;
 
     ÅpneBehandlingForEndringerTask() {
         // for CDI proxy
@@ -41,12 +39,10 @@ public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask 
                                           BehandlingRepositoryProvider repositoryProvider) {
         super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData prosessTaskData) {
-        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         var steg = BehandlingStegType.fraKode(prosessTaskData.getPropertyValue(START_STEG));
         
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);

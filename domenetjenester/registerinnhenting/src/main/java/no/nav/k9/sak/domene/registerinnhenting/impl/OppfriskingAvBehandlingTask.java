@@ -10,7 +10,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
@@ -30,7 +29,6 @@ public class OppfriskingAvBehandlingTask extends UnderBehandlingProsessTask {
     public static final String TASKTYPE = "behandlingskontroll.registerdataOppdaterBehandling";
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private BehandlingRepository behandlingRepository;
 
     OppfriskingAvBehandlingTask() {
         // for CDI proxy
@@ -41,15 +39,13 @@ public class OppfriskingAvBehandlingTask extends UnderBehandlingProsessTask {
                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData prosessTaskData) {
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         var behandlingsId = prosessTaskData.getBehandlingId();
         // NB lås før hent behandling
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingsId);
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
 
         if (!behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.INNHENT_REGISTEROPP)) {
             log.info("Behandling har ikke etablert grunnlag, skal ikke innhente registerdata: behandlingId={}", behandlingsId);
