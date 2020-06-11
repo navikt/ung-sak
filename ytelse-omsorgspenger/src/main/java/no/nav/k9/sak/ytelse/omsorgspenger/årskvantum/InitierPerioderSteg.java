@@ -99,9 +99,15 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
+        log.info("Fant inntektsmeldinger knyttet til behandlingen: {}", inntektsmeldingerJournalposter);
+
+        if (inntektsmeldingerJournalposter.isEmpty()) {
+            return List.of();
+        }
+
         var fagsak = behandling.getFagsak();
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
-        if (!inntektsmeldingerJournalposter.isEmpty() && sakInntektsmeldinger.isEmpty()) {
+        if (sakInntektsmeldinger.isEmpty()) {
             // Abakus setter ikke ytelsetype på "koblingen" før registerinnhenting så vil bare være feil før første registerinnhenting..
             sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), FagsakYtelseType.UDEFINERT);
         }
