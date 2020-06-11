@@ -37,6 +37,7 @@ public enum Avslagsårsak implements Kodeverdi {
     FOR_LAVT_BEREGNINGSGRUNNLAG_8_47("1042", "For lavt brutto beregningsgrunnlag", Map.of(FagsakYtelseType.OMP, "8-47 5. ledd", FagsakYtelseType.PSB, "8-47 5. ledd")),
     SØKT_FRILANS_UTEN_FRILANS_INNTEKT("8000", "Søkt frilans uten frilansinntekt", Map.of(FagsakYtelseType.FRISINN, "koronaloven § 1 1. ledd")),
     AVKORTET_GRUNNET_ANNEN_INNTEKT("8001", "Avkortet grunnet annen inntekt", Map.of(FagsakYtelseType.FRISINN, "koronaloven § 2 2. ledd")),
+    INGEN_STØNADSDAGER_I_SØKNADSPERIODEN("8002", "Ingen stønadsdager i søknadsperioden", Map.of(FagsakYtelseType.FRISINN, "21-3")),
 
     IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE("1067", "Ikke dokumentert sykdom, skade eller lyte.", Map.of(FagsakYtelseType.PSB, "9-10 1. ledd")),
     DOKUMENTASJON_IKKE_FRA_RETT_ORGAN("1068", "Ikke mottatt dokumentasjon fra rett organ.", Map.of(FagsakYtelseType.PSB, "9-16")),

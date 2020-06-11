@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -67,20 +68,24 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
 
-        UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
-        UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
+        if (beregningsgrunnlag.isPresent()) {
+            UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
+            UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
-        // Kalle regeltjeneste
-        List<Beregningsgrunnlag> beregningsgrunnlagListe = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
-        var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlagListe, uttakResultat);
+            // Kalle regeltjeneste
+            List<Beregningsgrunnlag> beregningsgrunnlagListe = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get());
+            var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlagListe, uttakResultat);
 
-        // Verifiser beregningsresultat
-        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
+            // Verifiser beregningsresultat
+            BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
-        // Beregner ikke feriepenger for frisinn
+            // Beregner ikke feriepenger for frisinn
 
-        // Lagre beregningsresultat
-        beregningsresultatRepository.lagre(behandling, beregningsresultat);
+            // Lagre beregningsresultat
+            beregningsresultatRepository.lagre(behandling, beregningsresultat);
+        } else {
+            beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build());
+        }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

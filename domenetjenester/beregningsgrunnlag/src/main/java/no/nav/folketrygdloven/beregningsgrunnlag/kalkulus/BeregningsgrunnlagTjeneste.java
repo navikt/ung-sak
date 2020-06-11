@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public Beregningsgrunnlag hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
+    public Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
         var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
 
         return finnTjeneste(ref.getFagsakYtelseType()).hentEksaktFastsatt(ref.getFagsakYtelseType(), bgReferanse);
@@ -90,7 +91,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .map(it -> hentEksaktFastsatt(ref, it)) // TODO:
-            .filter(v -> v != null)
+            .flatMap(Optional::stream)
+            .filter(Objects::nonNull)
             .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
             .collect(Collectors.toList());
     }
@@ -111,7 +113,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 .getGrunnlagPerioder()
                 .stream()
                 .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse()))
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         }
         return List.of();

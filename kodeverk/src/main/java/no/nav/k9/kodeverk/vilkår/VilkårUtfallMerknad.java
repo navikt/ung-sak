@@ -62,6 +62,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
 
     VM_8000("8000", "søkt frilans uten frilansinntekt"),
     VM_8001("8001", "avkortet grunnet annen inntekt"),
+    VM_8002("8002", "ingen stønadsdager i søknadsperioden"),
 
 
     UDEFINERT("-", "Ikke definert"),

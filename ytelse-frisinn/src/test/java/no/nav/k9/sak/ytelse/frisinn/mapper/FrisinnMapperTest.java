@@ -113,4 +113,12 @@ public class FrisinnMapperTest {
         assertThat(perioder.get(1).getTom()).isEqualTo(LocalDate.of(2020, 5, 31));
 
     }
+
+    @Test
+    public void skal_gi_tom_liste_når_det_ikke_finnes_uttak_aktiviteter() {
+        UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of());
+
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(uttakAktivitet);
+        assertThat(periodeMedSøkerInfoDtos).isEmpty();
+    }
 }

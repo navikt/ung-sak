@@ -83,7 +83,7 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public Beregningsgrunnlag hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
+    public Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
         var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse, k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
             throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse);
@@ -95,7 +95,7 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
 
         if (first.isPresent()) {
             BeregningsgrunnlagGrunnlag beregningsgrunnlagGrunnlag = first.get();
-            return beregningsgrunnlagGrunnlag.getBeregningsgrunnlag().orElseThrow(() -> new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse));
+            return beregningsgrunnlagGrunnlag.getBeregningsgrunnlag();
         }
         throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse);
     }

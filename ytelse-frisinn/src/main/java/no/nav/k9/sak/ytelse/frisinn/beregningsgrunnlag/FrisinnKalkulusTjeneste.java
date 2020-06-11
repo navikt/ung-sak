@@ -46,16 +46,20 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
     @Override
     public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
+        FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
+        if (frisinnGrunnlag.getPerioderMedSøkerInfo().isEmpty()) {
+            return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN);
+        }
+
         StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
         if (startBeregningRequest.getKalkulatorInput().getOpptjeningAktiviteter().getPerioder().isEmpty()) {
-            FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
             if (frisinnGrunnlag.getSøkerYtelseForFrilans()) {
                 return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT);
             }
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
         }
+
         TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
     }
-
 }
