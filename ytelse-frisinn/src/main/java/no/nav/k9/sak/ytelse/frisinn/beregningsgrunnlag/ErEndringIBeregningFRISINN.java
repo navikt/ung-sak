@@ -2,10 +2,10 @@ package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
-import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -26,13 +26,13 @@ public class ErEndringIBeregningFRISINN {
             return originaltGrunnlag.isPresent();
         }
 
-        Iterator<PeriodeMedSøkerInfoDto> uttaksperioder = FrisinnMapper.mapPeriodeMedSøkerInfoDto(orginaltUttak).iterator();
+        Iterator<Periode> uttaksperioder = FrisinnSøknadsperiodeMapper.map(orginaltUttak).iterator();
 
         List<BeregningsgrunnlagPeriode> originalePerioder = originaltGrunnlag.map(Beregningsgrunnlag::getBeregningsgrunnlagPerioder).orElse(Collections.emptyList());
         List<BeregningsgrunnlagPeriode> revurderingsPerioder = revurderingsGrunnlag.map(Beregningsgrunnlag::getBeregningsgrunnlagPerioder).orElse(Collections.emptyList());
 
         while (uttaksperioder.hasNext()) {
-            PeriodeMedSøkerInfoDto periode = uttaksperioder.next();
+            Periode periode = uttaksperioder.next();
             BigDecimal orginalUtbetalingIPerioden = finnUtbetalingIPerioden(periode, originalePerioder);
             BigDecimal revurderingUtbetalingIPerioden = finnUtbetalingIPerioden(periode, revurderingsPerioder);
             if (orginalUtbetalingIPerioden.compareTo(revurderingUtbetalingIPerioden) > 0) {
@@ -42,10 +42,10 @@ public class ErEndringIBeregningFRISINN {
         return false;
     }
 
-    private static BigDecimal finnUtbetalingIPerioden(PeriodeMedSøkerInfoDto uttaksperiode, List<BeregningsgrunnlagPeriode> bgPerioder) {
+    private static BigDecimal finnUtbetalingIPerioden(Periode uttaksperiode, List<BeregningsgrunnlagPeriode> bgPerioder) {
         List<BeregningsgrunnlagPeriode> overlappendeBGPerioder = bgPerioder.stream()
-            .filter(bgp -> !bgp.getBeregningsgrunnlagPeriodeFom().isBefore(uttaksperiode.getPeriode().getFom())
-                && !bgp.getBeregningsgrunnlagPeriodeTom().isAfter(uttaksperiode.getPeriode().getTom()))
+            .filter(bgp -> !bgp.getBeregningsgrunnlagPeriodeFom().isBefore(uttaksperiode.getFom())
+                && !bgp.getBeregningsgrunnlagPeriodeTom().isAfter(uttaksperiode.getTom()))
             .collect(Collectors.toList());
         return overlappendeBGPerioder.stream()
             .map(ErEndringIBeregningFRISINN::utbetalingIPerioden).reduce(BigDecimal::add)
