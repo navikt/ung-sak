@@ -73,13 +73,16 @@ public class InitierPerioderSteg implements BehandlingSteg {
     }
 
     private OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
-        Set<OppgittFraværPeriode> fravær = new LinkedHashSet<>();
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var fraværFraInntektsmeldinger = fraværFraInntektsmeldinger(behandling);
+        log.info("Legger til {} perioder fra inntektsmeldinger", fraværFraInntektsmeldinger.size());
+        Set<OppgittFraværPeriode> fravær = fraværFraInntektsmeldinger.isEmpty() ? new LinkedHashSet<>() : new LinkedHashSet<>(fraværFraInntektsmeldinger); // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
         if (behandling.erManueltOpprettet()) {
             var oppgittOpt = annetOppgittFravær(behandlingId);
-            fravær.addAll(oppgittOpt.orElseThrow().getPerioder());
+            var perioder = oppgittOpt.orElseThrow().getPerioder();
+            log.info("Legger til {} perioder fra kopiert grunnlag", perioder.size());
+            fravær.addAll(perioder);
         } else {
             if (fraværFraInntektsmeldinger.isEmpty()) {
                 // Dette bør da være manuelle "revurderinger" hvor vi behandler samme periode som forrige behandling på nytt
@@ -87,7 +90,10 @@ public class InitierPerioderSteg implements BehandlingSteg {
                 fravær.addAll(oppgittOpt.orElseThrow().getPerioder());
             }
         }
-        fravær.addAll(fraværFraInntektsmeldinger); // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
+        log.info("Fravær har totalt {} perioder", fravær.size());
+        if (fravær.isEmpty()) {
+            throw new IllegalStateException("Utvikler feil, forventer fraværsperioder til behandlingen");
+        }
         return new OppgittFravær(fravær);
     }
 
