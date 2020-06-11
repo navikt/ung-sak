@@ -42,7 +42,7 @@ public class OppgittOpptjeningBuilder {
         return new OppgittOpptjeningBuilder(new OppgittOpptjening(eksternReferanse, opprettetTidspunktOriginalt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
     }
 
-    public OppgittOpptjeningBuilder leggTilAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet){
+    public OppgittOpptjeningBuilder leggTilAnnenAktivitet(OppgittAnnenAktivitet annenAktivitet) {
         this.kladd.leggTilAnnenAktivitet(annenAktivitet);
         return this;
     }
@@ -62,12 +62,16 @@ public class OppgittOpptjeningBuilder {
         return this;
     }
 
-    public OppgittFrilansBuilder getFrilansBuilder() {
-        return this.kladd.getFrilans().isPresent() ?
-                OppgittFrilansBuilder.fraEksisterende(kladd.getFrilans().get()) :
-                OppgittFrilansBuilder.ny();
+    public OppgittOpptjeningBuilder leggTilOppgittArbeidsforhold(List<OppgittArbeidsforholdBuilder> builder) {
+        builder.forEach(builders -> this.kladd.leggTilOppgittArbeidsforhold(builders.build()));
+        return this;
     }
 
+    public OppgittFrilansBuilder getFrilansBuilder() {
+        return this.kladd.getFrilans().isPresent() ?
+            OppgittFrilansBuilder.fraEksisterende(kladd.getFrilans().get()) :
+            OppgittFrilansBuilder.ny();
+    }
 
     public OppgittOpptjening build() {
         return kladd;
@@ -207,12 +211,12 @@ public class OppgittOpptjeningBuilder {
             return this;
         }
 
-        public OppgittFrilans build () {
+        public OppgittFrilans build() {
             return kladd;
         }
     }
 
-    public static class OppgittFrilansOppdragBuilder{
+    public static class OppgittFrilansOppdragBuilder {
         private final OppgittFrilansoppdrag kladd;
 
         private OppgittFrilansOppdragBuilder(OppgittFrilansoppdrag kladd) {

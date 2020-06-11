@@ -13,7 +13,8 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansoppdragDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.SøknadsperiodeOgOppgittOpptjeningDto;
+import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
+import no.nav.k9.sak.kontrakt.frisinn.SøknadsperiodeOgOppgittOpptjeningV2Dto;
 import no.nav.k9.sak.typer.Beløp;
 
 public class OverstyringOppgittOpptjeningOppdatererTest {
@@ -31,9 +32,9 @@ public class OverstyringOppgittOpptjeningOppdatererTest {
         PeriodeDto snPeriode = new PeriodeDto(startSN, slutt);
         PeriodeDto flPeriode = new PeriodeDto(startFL, slutt);
 
-        SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto = lagDto(true, true, snPeriode, flPeriode, søkerPeriode);
+        SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjeningDto = lagDto(true, true, snPeriode, flPeriode, søkerPeriode);
 
-        LocalDate dato = oppdaterer.finnFraOgMedDatoFL(søknadsperiodeOgOppgittOpptjeningDto);
+        LocalDate dato = oppdaterer.finnFraOgMedDatoFL(søknadsperiodeOgOppgittOpptjeningDto.getMåneder().get(0).getOppgittIMåned()).get();
 
         Assertions.assertThat(dato).isEqualTo(startFL);
     }
@@ -50,18 +51,22 @@ public class OverstyringOppgittOpptjeningOppdatererTest {
         PeriodeDto snPeriode = new PeriodeDto(startSN, slutt);
         PeriodeDto flPeriode = new PeriodeDto(startFL, slutt);
 
-        SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto = lagDto(true, true, snPeriode, flPeriode, søkerPeriode);
+        SøknadsperiodeOgOppgittOpptjeningV2Dto søknadsperiodeOgOppgittOpptjeningDto = lagDto(true, true, snPeriode, flPeriode, søkerPeriode);
 
-        LocalDate dato = oppdaterer.finnFraOgMedDatoSN(søknadsperiodeOgOppgittOpptjeningDto);
+        LocalDate dato = oppdaterer.finnFraOgMedDatoSN(søknadsperiodeOgOppgittOpptjeningDto.getMåneder().get(0).getOppgittIMåned()).get();
 
         Assertions.assertThat(dato).isEqualTo(startSN);
     }
 
-    private SøknadsperiodeOgOppgittOpptjeningDto lagDto(Boolean søkerFrilans, Boolean søkerSN, PeriodeDto periodeSN, PeriodeDto periodeFL, PeriodeDto periodeFraSøknad) {
-        SøknadsperiodeOgOppgittOpptjeningDto søknadsperiodeOgOppgittOpptjeningDto = new SøknadsperiodeOgOppgittOpptjeningDto();
-        søknadsperiodeOgOppgittOpptjeningDto.setPeriodeFraSøknad(periodeFraSøknad);
-        søknadsperiodeOgOppgittOpptjeningDto.setSøkerYtelseForFrilans(søkerFrilans);
-        søknadsperiodeOgOppgittOpptjeningDto.setSøkerYtelseForNæring(søkerSN);
+    private SøknadsperiodeOgOppgittOpptjeningV2Dto lagDto(Boolean søkerFrilans, Boolean søkerSN, PeriodeDto periodeSN, PeriodeDto periodeFL, PeriodeDto periodeFraSøknad) {
+        SøknadsperiodeOgOppgittOpptjeningV2Dto dto = new SøknadsperiodeOgOppgittOpptjeningV2Dto();
+
+
+        PeriodeMedSNOgFLDto periodeMedSNOgFLDto = new PeriodeMedSNOgFLDto();
+
+        periodeMedSNOgFLDto.setMåned(periodeFraSøknad);
+        periodeMedSNOgFLDto.setSøkerFL(søkerFrilans);
+        periodeMedSNOgFLDto.setSøkerSN(søkerSN);
         OppgittOpptjeningDto oppgittOpptjeningDtoI = new OppgittOpptjeningDto();
         OppgittOpptjeningDto oppgittOpptjeningDtoFør = new OppgittOpptjeningDto();
 
@@ -77,9 +82,10 @@ public class OverstyringOppgittOpptjeningOppdatererTest {
         egenNæringDto.setBruttoInntekt(new Beløp(BigDecimal.TEN));
         oppgittOpptjeningDtoI.setOppgittEgenNæring(List.of(egenNæringDto));
 
-        søknadsperiodeOgOppgittOpptjeningDto.setISøkerPerioden(oppgittOpptjeningDtoI);
-        søknadsperiodeOgOppgittOpptjeningDto.setFørSøkerPerioden(oppgittOpptjeningDtoFør);
+        periodeMedSNOgFLDto.setOppgittIMåned(oppgittOpptjeningDtoI);
+        dto.setMåneder(List.of(periodeMedSNOgFLDto));
+        dto.setFørSøkerPerioden(oppgittOpptjeningDtoFør);
 
-        return søknadsperiodeOgOppgittOpptjeningDto;
+        return dto;
     }
 }

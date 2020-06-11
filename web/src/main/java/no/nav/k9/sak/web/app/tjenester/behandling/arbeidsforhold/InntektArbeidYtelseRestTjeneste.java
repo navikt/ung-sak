@@ -62,8 +62,8 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class InntektArbeidYtelseRestTjeneste {
 
     public static final String INNTEKT_ARBEID_YTELSE_PATH = "/behandling/inntekt-arbeid-ytelse";
-    public static final String OPPGITT_OPPTJEING_PATH = "/behandling/oppgitt-opptjening";
-    public static final String OPPGITT_OPPTJEING_PATH_V2 = "/behandling/oppgitt-opptjening_v2";
+    public static final String OPPGITT_OPPTJENING_PATH = "/behandling/oppgitt-opptjening";
+    public static final String OPPGITT_OPPTJENING_PATH_V2 = "/behandling/oppgitt-opptjening-v2";
 
     private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseDtoMapper dtoMapper;
@@ -122,7 +122,7 @@ public class InntektArbeidYtelseRestTjeneste {
     }
 
     @GET
-    @Path(OPPGITT_OPPTJEING_PATH)
+    @Path(OPPGITT_OPPTJENING_PATH)
     @Operation(description = "Hent informasjon om oppgitt opptjening og søknadsperiode", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningDto.class)))
     })
@@ -165,7 +165,7 @@ public class InntektArbeidYtelseRestTjeneste {
     }
 
     @GET
-    @Path(OPPGITT_OPPTJEING_PATH_V2)
+    @Path(OPPGITT_OPPTJENING_PATH_V2)
     @Operation(description = "Hent informasjon om oppgitt opptjening for alle søknadsperioder", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningV2Dto.class)))
     })

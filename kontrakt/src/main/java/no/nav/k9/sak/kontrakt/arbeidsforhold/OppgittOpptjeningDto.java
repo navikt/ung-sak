@@ -31,6 +31,10 @@ public class OppgittOpptjeningDto {
     @JsonProperty(value = "oppgittFrilans")
     private OppgittFrilansDto oppgittFrilans;
 
+    @Valid
+    @Size(max = 100)
+    @JsonProperty(value = "oppgittArbeidsforhold")
+    private List<OppgittArbeidsforholdDto> oppgittArbeidsforhold;
 
     public void setOppgittEgenNæring(List<OppgittEgenNæringDto> oppgittEgenNæring) {
         this.oppgittEgenNæring = oppgittEgenNæring;
@@ -46,5 +50,13 @@ public class OppgittOpptjeningDto {
 
     public OppgittFrilansDto getOppgittFrilans() {
         return oppgittFrilans;
+    }
+
+    public List<OppgittArbeidsforholdDto> getOppgittArbeidsforhold() {
+        return oppgittArbeidsforhold;
+    }
+
+    public void setOppgittArbeidsforhold(List<OppgittArbeidsforholdDto> oppgittArbeidsforhold) {
+        this.oppgittArbeidsforhold = oppgittArbeidsforhold;
     }
 }
