@@ -65,18 +65,18 @@ public class RegelOrkestrerer {
         Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater = new HashMap<>();
 
         for (DatoIntervallEntitet periode : perioder) {
-            VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
-            // Ekstraresultat
-            if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
-                final var ekstradataMap = ekstraResultater.getOrDefault(vilkårDataResultat.getVilkårType(), new HashMap<>());
-                ekstradataMap.put(vilkårDataResultat.getPeriode(), vilkårDataResultat.getEkstraVilkårresultat());
-                ekstraResultater.put(vilkårDataResultat.getVilkårType(), ekstradataMap);
-            }
-
-            // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
-            vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårDataResultat, vilkårene);
-            // Aksjonspunkter
             if (!erPeriodenOverstyrt(vilkår, periode)) {
+                VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
+                // Ekstraresultat
+                if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
+                    final var ekstradataMap = ekstraResultater.getOrDefault(vilkårDataResultat.getVilkårType(), new HashMap<>());
+                    ekstradataMap.put(vilkårDataResultat.getPeriode(), vilkårDataResultat.getEkstraVilkårresultat());
+                    ekstraResultater.put(vilkårDataResultat.getVilkårType(), ekstradataMap);
+                }
+
+                // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
+                vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårDataResultat, vilkårene);
+                // Aksjonspunkter
                 aksjonspunktDefinisjoner.addAll(vilkårDataResultat.getApDefinisjoner());
             }
         }

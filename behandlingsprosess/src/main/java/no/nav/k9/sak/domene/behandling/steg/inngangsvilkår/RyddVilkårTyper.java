@@ -44,7 +44,7 @@ public class RyddVilkårTyper {
     }
 
     private void nullstillVedtaksresultat() {
-        if ( Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
+        if (Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
             return;
         }
 

@@ -169,7 +169,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
      * @return VilkårUtfallType
      */
     public Utfall getGjeldendeUtfall() {
-        if (!overstyrtUtfall.equals(Utfall.UDEFINERT)) {
+        if (getErOverstyrt()) {
             return overstyrtUtfall;
         }
         return utfall;

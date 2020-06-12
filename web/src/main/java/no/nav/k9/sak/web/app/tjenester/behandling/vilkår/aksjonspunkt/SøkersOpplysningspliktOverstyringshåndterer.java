@@ -50,7 +50,7 @@ public class SøkersOpplysningspliktOverstyringshåndterer extends AbstractOvers
                                                   BehandlingskontrollKontekst kontekst) {
 
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        inngangsvilkårTjeneste.overstyrAksjonspunktForSøkersopplysningsplikt(behandling.getId(), utfall, kontekst, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+        inngangsvilkårTjeneste.overstyrAksjonspunktForSøkersopplysningsplikt(behandling.getId(), utfall, kontekst, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, dto.getBegrunnelse());
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         if (Utfall.OPPFYLT.equals(utfall)) {

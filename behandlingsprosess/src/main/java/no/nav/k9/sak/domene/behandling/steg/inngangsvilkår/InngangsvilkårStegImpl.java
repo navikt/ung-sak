@@ -22,7 +22,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.RegelResultat;
 
@@ -123,13 +122,20 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         Optional<Vilkårene> resultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (resultatOpt.isPresent()) {
             Vilkårene vilkårene = resultatOpt.get();
-            return vilkårene.getVilkårene()
+            var periode = vilkårene.getVilkårene()
                 .stream()
                 .filter(vilkår -> vilkårHåndtertAvSteg().contains(vilkår.getVilkårType()))
                 .map(Vilkår::getPerioder)
                 .flatMap(Collection::stream)
-                .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
-                .anyMatch(VilkårPeriode::getErOverstyrt);
+                .filter(it -> it.getPeriode().equals(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
+                .collect(Collectors.toSet());
+            if (periode.size() == 0) {
+                return false;
+            } else if (periode.size() == 1) {
+                return periode.iterator().next().getErOverstyrt();
+            } else {
+                throw new IllegalStateException("Fant flere vilkårsperioder som er like med søkt periode..");
+            }
         }
         return false;
     }

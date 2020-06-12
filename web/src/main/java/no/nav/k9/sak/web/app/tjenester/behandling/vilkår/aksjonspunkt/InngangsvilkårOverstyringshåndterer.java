@@ -33,7 +33,7 @@ public abstract class InngangsvilkårOverstyringshåndterer<T extends Overstyrin
     public OppdateringResultat håndterOverstyring(T dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
 
-        inngangsvilkårTjeneste.overstyrAksjonspunkt(behandling.getId(), vilkårType, utfall, dto.getAvslagskode(), kontekst, dto.getPeriode().getFom(), dto.getPeriode().getTom());
+        inngangsvilkårTjeneste.overstyrAksjonspunkt(behandling.getId(), vilkårType, utfall, dto.getAvslagskode(), kontekst, dto.getPeriode().getFom(), dto.getPeriode().getTom(), dto.getBegrunnelse());
 
         return OppdateringResultat.utenOveropp();
     }

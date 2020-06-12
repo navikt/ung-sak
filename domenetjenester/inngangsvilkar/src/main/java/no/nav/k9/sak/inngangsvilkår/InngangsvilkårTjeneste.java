@@ -8,6 +8,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -29,6 +32,8 @@ import no.nav.k9.sak.inngangsvilkår.VilkårTypeRef.VilkårTypeRefLiteral;
  */
 @ApplicationScoped
 public class InngangsvilkårTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(InngangsvilkårTjeneste.class);
 
     private Instance<Inngangsvilkår> alleInngangsvilkår;
     private BehandlingRepository behandlingRepository;
@@ -78,7 +83,7 @@ public class InngangsvilkårTjeneste {
     /**
      * Overstyr søkers opplysningsplikt.
      */
-    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, Utfall utfall, BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom) {
+    public void overstyrAksjonspunktForSøkersopplysningsplikt(Long behandlingId, Utfall utfall, BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom, String begrunnelse) {
         Avslagsårsak avslagsårsak = Avslagsårsak.MANGLENDE_DOKUMENTASJON;
         VilkårType vilkårType = VilkårType.SØKERSOPPLYSNINGSPLIKT;
 
@@ -87,11 +92,12 @@ public class InngangsvilkårTjeneste {
         Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
 
-        final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
         builder.leggTil(vilkårBuilder
             .leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
                 .medUtfallOverstyrt(utfall)
                 .medAvslagsårsak(Utfall.IKKE_OPPFYLT.equals(utfall) ? avslagsårsak : null)
+                .medBegrunnelse(begrunnelse)
             )
         );
         final var oppdatertVikårResultat = builder.build();
@@ -103,19 +109,21 @@ public class InngangsvilkårTjeneste {
      * Overstyr gitt aksjonspunkt på Inngangsvilkår.
      */
     public void overstyrAksjonspunkt(Long behandlingId, VilkårType vilkårType, Utfall utfall, String avslagsårsakKode,
-                                     BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom) {
+                                     BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom, String begrunnelse) {
+        log.info("Overstyrer {} periode :[{}-{}] -> '{}' [{}]", vilkårType, fom, tom, utfall, avslagsårsakKode);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
 
         Avslagsårsak avslagsårsak = finnAvslagsårsak(avslagsårsakKode, utfall);
-        final var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
         builder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallOverstyrt(utfall)
-            .medAvslagsårsak(avslagsårsak)));
+            .medAvslagsårsak(Utfall.IKKE_OPPFYLT.equals(utfall) ? avslagsårsak : null)
+            .medBegrunnelse(begrunnelse)));
 
-        Vilkårene oppdatertVikårResultat = builder.build();
+        var oppdatertVikårResultat = builder.build();
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         vilkårResultatRepository.lagre(behandlingId, oppdatertVikårResultat);
     }
