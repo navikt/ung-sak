@@ -3,6 +3,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_KOMPLETT_OPPDATERING;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -13,6 +14,8 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
+import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
@@ -33,7 +36,7 @@ public class Kompletthetskontroller {
     private DokumentmottakerFelles dokumentmottakerFelles;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private KompletthetModell kompletthetModell;
-    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     public Kompletthetskontroller() {
@@ -53,13 +56,17 @@ public class Kompletthetskontroller {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
-    public KompletthetResultat persisterDokumentOgVurderKompletthet(Behandling behandling, MottattDokument mottattDokument) {
+    public void persisterDokumentOgVurderKompletthet(Behandling behandling, MottattDokument mottattDokument) {
         // Ta snapshot av gjeldende grunnlag-id-er før oppdateringer
+        Long behandlingId = behandling.getId();
 
+        preconditionIkkeAksepterKobling(behandling);
+
+        // ta snapshot før lagre inntektsmelding
         EndringsresultatSnapshot grunnlagSnapshot = behandlingProsesseringTjeneste.taSnapshotAvBehandlingsgrunnlag(behandling);
 
         // Persister dokument (dvs. knytt dokument til behandlingen)
-        mottatteDokumentTjeneste.persisterInntektsmelding(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
 
         // Vurder kompletthet etter at dokument knyttet til behandling
         var kompletthetResultat = vurderBehandlingKomplett(behandling);
@@ -67,7 +74,6 @@ public class Kompletthetskontroller {
             settPåVent(behandling, kompletthetResultat);
         } else {
             spolKomplettBehandlingTilStartpunkt(behandling, grunnlagSnapshot);
-            Long behandlingId = behandling.getId();
             if (kompletthetModell.erKompletthetssjekkPassert(behandlingId)) {
                 behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
             } else {
@@ -75,7 +81,15 @@ public class Kompletthetskontroller {
             }
         }
 
-        return kompletthetResultat;
+    }
+
+    private void preconditionIkkeAksepterKobling(Behandling behandling) {
+        Long behandlingId = behandling.getId();
+        if (kompletthetModell.erKompletthetssjekkPassert(behandlingId) && !kompletthetModell.erRegisterInnhentingPassert(behandlingId)) {
+            throw new IllegalStateException("Kan ikke kjøre fordi behandlingen er vurdert komplett men ikke klargjort med registerinnhenting: " + behandling);
+        } else {
+            behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, Set.of(FortsettBehandlingTask.TASKTYPE, GjenopptaBehandlingTask.TASKTYPE));
+        }
     }
 
     private void settPåVent(Behandling behandling, KompletthetResultat kompletthetResultat) {
@@ -93,7 +107,7 @@ public class Kompletthetskontroller {
 
     void persisterKøetDokumentOgVurderKompletthet(Behandling behandling, MottattDokument mottattDokument) {
         // Persister dokument (dvs. knytt dokument til behandlingen)
-        mottatteDokumentTjeneste.persisterInntektsmelding(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
         vurderKompletthetForKøetBehandling(behandling);
     }
 

@@ -173,7 +173,9 @@ public class FagsakProsessTaskRepository {
                 rest.retainAll(nyeTaskTyper);
 
                 if (!rest.isEmpty()) {
-                    throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "].  Har allerede [" + toStringTask(eksisterendeTasks) + "]");
+                    throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "]"
+                        + " Har allerede [" + toStringTask(eksisterendeTasks) + "]"
+                        + " Eksisterende tasktyper hensyntatt [" + eksisterendeTaskTyper + "]");
                 } else {
                     return lagreNyGruppe(gruppe);
                 }
@@ -190,6 +192,10 @@ public class FagsakProsessTaskRepository {
 
     private String toStringEntry(Collection<Entry> tasks) {
         return tasks.stream().map(t -> t.getTask()).map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, Long behandlingId, String gruppe) {
+        return sjekkStatusProsessTasks(fagsakId, behandlingId.toString(), gruppe);
     }
 
     public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, String behandlingId, String gruppe) {

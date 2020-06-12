@@ -29,6 +29,7 @@ public class FrontendLoginResourceTest {
         assertThat(response.getLocation()).hasPath("/fagsak/1234/behandling/1234/opptjening");
     }
 
+    @SuppressWarnings("resource")
     @Test
     public void innlogging_fra_k9_sak_web() {
         var basepath = "https://app.adeo.no";

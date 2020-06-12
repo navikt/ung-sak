@@ -73,7 +73,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     void håndterIngenTidligereBehandling(Fagsak fagsak, MottattDokument mottattDokument) { // #I1
         // Opprett ny førstegangsbehandling
         Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        mottatteDokumentTjeneste.persisterInntektsmelding(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
         dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
     }
 

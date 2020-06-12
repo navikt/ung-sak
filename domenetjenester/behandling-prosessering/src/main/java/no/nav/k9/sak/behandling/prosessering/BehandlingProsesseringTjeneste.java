@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandling.prosessering;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -52,4 +53,6 @@ public interface BehandlingProsesseringTjeneste {
     void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
 
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
+
+    void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Set<String> set);
 }

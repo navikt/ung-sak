@@ -70,11 +70,10 @@ public class JournalpostMottakDto {
     public JournalpostMottakDto(Saksnummer saksnummer,
                                 JournalpostId journalpostId,
                                 FagsakYtelseType ytelseType,
-                                String kanalReferanse, 
+                                String kanalReferanse,
                                 Brevkode type,
                                 LocalDateTime forsendelseMottattTidspunkt,
-                                String payloadRawString
-                                ) {
+                                String payloadRawString) {
         this.saksnummer = saksnummer;
         this.journalpostId = journalpostId;
         this.kanalReferanse = kanalReferanse;
@@ -118,9 +117,20 @@ public class JournalpostMottakDto {
     public FagsakYtelseType getYtelseType() {
         return ytelseType;
     }
-    
+
     public String getKanalReferanse() {
         return kanalReferanse;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<"
+            + "ytelseType=" + ytelseType
+            + ", journalpostId=" + journalpostId
+            + ", saksnummer=" + saksnummer
+            + ", brevkode=" + type
+            + ", forsendelseMottattTidspunkt=" + forsendelseMottattTidspunkt
+            + ">";
     }
 
 }

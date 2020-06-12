@@ -98,7 +98,7 @@ public class DokumentmottakerFelles {
 
     public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettRevurdering(behandling, behandlingÅrsakType);
-        mottatteDokumentTjeneste.persisterInntektsmelding(revurdering, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
         return revurdering;
     }

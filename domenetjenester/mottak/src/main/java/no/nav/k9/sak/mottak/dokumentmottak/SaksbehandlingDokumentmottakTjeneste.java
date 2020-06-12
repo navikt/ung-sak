@@ -51,9 +51,9 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
         Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
-        var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTaskProperties.TASKTYPE);
+        var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTask.TASKTYPE);
         prosessTaskData.setFagsakId(saksdokument.getFagsakId());
-        prosessTaskData.setProperty(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY, mottattDokumentId.toString());
+        prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, mottattDokumentId.toString());
         settÅrsakHvisDefinert(saksdokument.getBehandlingÅrsakType(), prosessTaskData);
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
@@ -61,7 +61,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private void settÅrsakHvisDefinert(BehandlingÅrsakType behandlingÅrsakType, ProsessTaskData prosessTaskData) {
         if (behandlingÅrsakType != null && !BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
-            prosessTaskData.setProperty(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY, behandlingÅrsakType.getKode());
+            prosessTaskData.setProperty(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY, behandlingÅrsakType.getKode());
         }
     }
 }
