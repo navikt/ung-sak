@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -91,7 +92,9 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             .filter(e -> !e.getUttaksperioder().isEmpty())
             .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder().stream()
                 .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom())))
-                .collect(Collectors.toList()))).collect(Collectors.toList());
+                .collect(Collectors.toList())))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
         return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
     }
 
@@ -113,8 +116,11 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), mapUtbetalingsgrad(p)))
             .collect(Collectors.toList());
 
-        if (perioder.isEmpty() || utbetalingsgrad.isEmpty()) {
+        if (perioder.size() != utbetalingsgrad.size()) {
             throw new IllegalArgumentException("Utvikler-feil: Skal ikke komme til kalkulus uten innvilgede perioder for " + arbeidsforhold + ", angitte uttaksperioder: " + perioder);
+        }
+        if (perioder.isEmpty()) {
+            return null;
         }
         return new UtbetalingsgradPrAktivitetDto(arbeidsforhold, utbetalingsgrad);
     }
