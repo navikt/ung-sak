@@ -15,6 +15,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -37,6 +38,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
 
 @Ignore
 public class OpprettProsessTaskIverksettTest {
@@ -47,7 +49,7 @@ public class OpprettProsessTaskIverksettTest {
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
-    private FagsakProsessTaskRepository fagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository);
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository, Mockito.mock(TaskManager.class));
     
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
