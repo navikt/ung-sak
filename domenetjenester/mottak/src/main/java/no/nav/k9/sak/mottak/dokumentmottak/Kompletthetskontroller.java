@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
+import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
@@ -88,7 +89,8 @@ public class Kompletthetskontroller {
         if (kompletthetModell.erKompletthetssjekkPassert(behandlingId) && !kompletthetModell.erRegisterInnhentingPassert(behandlingId)) {
             throw new IllegalStateException("Kan ikke kjøre fordi behandlingen er vurdert komplett men ikke klargjort med registerinnhenting: " + behandling);
         } else {
-            behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, Set.of(FortsettBehandlingTask.TASKTYPE, GjenopptaBehandlingTask.TASKTYPE));
+            Set<String> treeAmigos = Set.of(StartBehandlingTask.TASKTYPE, FortsettBehandlingTask.TASKTYPE, GjenopptaBehandlingTask.TASKTYPE);
+            behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, treeAmigos);
         }
     }
 
