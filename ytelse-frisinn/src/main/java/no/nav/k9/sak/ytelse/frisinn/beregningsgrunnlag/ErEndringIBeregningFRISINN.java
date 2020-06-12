@@ -43,9 +43,10 @@ public class ErEndringIBeregningFRISINN {
     }
 
     private static BigDecimal finnUtbetalingIPerioden(Periode uttaksperiode, List<BeregningsgrunnlagPeriode> bgPerioder) {
+        ÅpenDatoIntervallEntitet uttak = ÅpenDatoIntervallEntitet.fraOgMedTilOgMed(uttaksperiode.getFom(), uttaksperiode.getTom());
         List<BeregningsgrunnlagPeriode> overlappendeBGPerioder = bgPerioder.stream()
-            .filter(bgp -> !bgp.getBeregningsgrunnlagPeriodeFom().isAfter(uttaksperiode.getFom())
-                && !bgp.getBeregningsgrunnlagPeriodeTom().isBefore(uttaksperiode.getTom()))
+            .filter(bgp -> uttak.overlapper(bgp.getPeriode())
+                || bgp.getPeriode().overlapper(uttak))
             .collect(Collectors.toList());
         return overlappendeBGPerioder.stream()
             .map(ErEndringIBeregningFRISINN::utbetalingIPerioden).reduce(BigDecimal::add)
