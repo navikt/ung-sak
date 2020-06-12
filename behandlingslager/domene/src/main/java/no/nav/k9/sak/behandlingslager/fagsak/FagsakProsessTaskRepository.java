@@ -35,6 +35,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe.Entry;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskEntitet;
+import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
 import no.nav.vedtak.konfig.Tid;
 
 /** Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks. */
@@ -48,14 +49,17 @@ public class FagsakProsessTaskRepository {
 
     private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
 
+    private TaskManager taskManager;
+
     FagsakProsessTaskRepository() {
         // for proxy
     }
 
     @Inject
-    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository) {
+    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository, TaskManager taskManager) {
         this.em = entityManager;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.taskManager = taskManager;
     }
 
     public void lagre(FagsakProsessTask fagsakProsessTask) {
@@ -127,15 +131,11 @@ public class FagsakProsessTaskRepository {
     }
 
     public String lagreNyGruppe(ProsessTaskData taskData) {
-        Optional.ofNullable(MDC.get("prosess_task_id")).ifPresent(v -> taskData.setProperty("parent.task_id", v));
-        Optional.ofNullable(MDC.get("prosess_task")).ifPresent(v -> taskData.setProperty("parent.task", v));
         Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> taskData.setProperty("parent.steg", v));
         return prosessTaskRepository.lagre(taskData);
     }
 
     public String lagreNyGruppe(ProsessTaskGruppe gruppe) {
-        Optional.ofNullable(MDC.get("prosess_task_id")).ifPresent(v -> gruppe.setProperty("parent.task_id", v));
-        Optional.ofNullable(MDC.get("prosess_task")).ifPresent(v -> gruppe.setProperty("parent.task", v));
         Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> gruppe.setProperty("parent.steg", v));
         return prosessTaskRepository.lagre(gruppe);
     }
@@ -161,9 +161,12 @@ public class FagsakProsessTaskRepository {
 
             // hvis noen er FEILET så oppretter vi ikke nye
             Optional<ProsessTaskData> feilet = matchedTasks.stream().filter(t -> t.getStatus().equals(ProsessTaskStatus.FEILET)).findFirst();
+            var currentTaskData = taskManager.getCurrentTask();
 
             Set<String> nyeTaskTyper = nyeTasks.stream().map(t -> t.getTask().getTaskType()).collect(Collectors.toSet());
-            Set<String> eksisterendeTaskTyper = eksisterendeTasks.stream().map(t -> t.getTaskType()).collect(Collectors.toSet());
+            Set<String> eksisterendeTaskTyper = eksisterendeTasks.stream()
+                .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task
+                .map(t -> t.getTaskType()).collect(Collectors.toSet());
 
             if (!feilet.isPresent()) {
                 var rest = new HashSet<>(eksisterendeTaskTyper);
