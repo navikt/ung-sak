@@ -95,6 +95,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         Optional.ofNullable(søknadsperiodeOgOppgittOpptjening.getFørSøkerPerioden().getOppgittEgenNæring()).ifPresent(egenNæring::addAll);
         egenNæring.addAll(søknadsperiodeOgOppgittOpptjening.getMåneder()
             .stream().map(o -> o.getOppgittIMåned().getOppgittEgenNæring())
+            .filter(Objects::nonNull)
             .flatMap(Collection::stream)
             .collect(Collectors.toList()));
 
