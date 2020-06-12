@@ -71,6 +71,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -81,7 +82,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 
 /**
  * Mapper fra k9-format til kalkulus-format, benytter kontrakt v1 fra kalkulus
@@ -188,6 +188,8 @@ public class TilKalkulusMapper {
             return null;
         }
 
+        // TODO: Skal vi ta hensyn til endringer i refusjonskrav så må dette konstrueres fra alle inntektsmeldingene som overlapper med perioden
+        // Da denne informasjonen ikke er periodisert for IM for OMP så må det mappes fra inntektsmeldingene i kronologisk rekkefølge
         List<Inntektsmelding> inntektsmeldingerForPerioden = utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsPeriode);
 
         List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(inntektsmelding -> {
