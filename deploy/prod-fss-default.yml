@@ -191,6 +191,8 @@ spec:
       value: "false"
     - name: OMP_VARIANT_FILTER_AKTIVERT
       value: "true"
+    - name: OMP_HENT_FULLUTTAKSPLAN_AKTIVERT
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

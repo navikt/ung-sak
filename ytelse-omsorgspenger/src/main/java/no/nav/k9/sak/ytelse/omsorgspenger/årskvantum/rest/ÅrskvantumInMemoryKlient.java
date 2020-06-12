@@ -5,10 +5,12 @@ import java.util.UUID;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @RequestScoped
 @Alternative
@@ -41,7 +43,12 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public Periode hentPeriodeForFagsak(String saksnummer) {
+    public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
+        return null;
+    }
+
+    @Override
+    public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
         return null;
     }
 

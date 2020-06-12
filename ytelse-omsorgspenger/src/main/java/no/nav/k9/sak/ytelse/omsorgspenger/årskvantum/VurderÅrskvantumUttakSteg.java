@@ -61,10 +61,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var stp = stpTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, stp);
-
-
+        var ref = BehandlingReferanse.fra(behandling);
 
         var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
 
@@ -73,7 +70,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        var årskvantumResultat = årskvantumTjeneste.hentÅrskvantumUttak(ref);
+        var årskvantumResultat = årskvantumTjeneste.beregnÅrskvantumUttak(ref);
 
         if (skalDetLagesAksjonspunkt(årskvantumResultat)) {
             try {

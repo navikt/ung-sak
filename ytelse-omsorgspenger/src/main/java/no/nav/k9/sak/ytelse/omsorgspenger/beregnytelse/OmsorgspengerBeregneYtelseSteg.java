@@ -1,11 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -25,6 +28,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 
 @FagsakYtelseTypeRef("OMP")
@@ -38,6 +42,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
+    private Boolean hentFullUttaksplan;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
@@ -51,7 +56,8 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                          @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
+                                          @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
+                                          @KonfigVerdi(value = "OMP_HENT_FULLUTTAKSPLAN_AKTIVERT", defaultVerdi = "true") Boolean hentFullUttaksplan) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -59,6 +65,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
+        this.hentFullUttaksplan = hentFullUttaksplan;
     }
 
     @Override
@@ -70,8 +77,15 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 
-        var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
-        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(forbrukteDager));
+        List<Aktivitet> aktiviteter;
+        if (hentFullUttaksplan) {
+            var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
+            aktiviteter = fullUttaksplan.getAktiviteter();
+        } else {
+            var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+            aktiviteter = forbrukteDager.getSisteUttaksplan().getAktiviteter();
+        }
+        var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(aktiviteter));
 
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);

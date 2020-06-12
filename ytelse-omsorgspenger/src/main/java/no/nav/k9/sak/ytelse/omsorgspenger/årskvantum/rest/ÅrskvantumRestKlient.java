@@ -15,11 +15,13 @@ import javax.ws.rs.core.HttpHeaders;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.MinMaxRequest;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -108,13 +110,28 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public Periode hentPeriodeForFagsak(String saksnummer) {
+    public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/minmax");
-            var result = restKlient.post(endpoint, new MinMaxRequest(saksnummer), Set.of(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())), Periode.class);
+            var result = restKlient.post(endpoint, new MinMaxRequest(saksnummer.getVerdi()), Set.of(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())), Periode.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", saksnummer=" + saksnummer + ": " + constraints);
+            }
+            return result;
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForFagsak(e).toException();
+        }
+    }
+
+    @Override
+    public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/uttaksplan?saksnummer=" + saksnummer.getVerdi());
+            var result = restKlient.get(endpoint, FullUttaksplan.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", : " + constraints);
             }
             return result;
         } catch (Exception e) {

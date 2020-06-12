@@ -13,10 +13,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
@@ -49,6 +52,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -59,6 +63,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private Boolean hentFullUttaksplan;
 
     OMPBeregningsresultatMapper() {
         // For inject
@@ -68,22 +73,24 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     public OMPBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        ÅrskvantumTjeneste årskvantumTjeneste,
-                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                       @KonfigVerdi(value = "OMP_HENT_FULLUTTAKSPLAN_AKTIVERT", defaultVerdi = "true") Boolean hentFullUttaksplan) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.hentFullUttaksplan = hentFullUttaksplan;
     }
 
     @Override
     public BeregningsresultatDto map(Behandling behandling,
                                      BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
-        var forbrukteDager = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid()));
+        Optional<List<Aktivitet>> forbrukteDager = hentUttaksplan(ref);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), forbrukteDager.map(ÅrskvantumForbrukteDager::getSisteUttaksplan)))
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat(), forbrukteDager))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
@@ -91,7 +98,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     @Override
     public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
-        var uttaksplan = Optional.ofNullable(årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid())).map(ÅrskvantumForbrukteDager::getSisteUttaksplan);
+        Optional<List<Aktivitet>> uttaksplan = hentUttaksplan(ref);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatMedUtbetaltePeriodeDto.build()
             .medOpphoersdato(opphørsdato)
@@ -101,7 +108,20 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
             .create();
     }
 
-    public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat, Optional<Uttaksplan> uttaksplan) {
+    @NotNull
+    private Optional<List<Aktivitet>> hentUttaksplan(BehandlingReferanse ref) {
+        if (hentFullUttaksplan) {
+            var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
+            return Optional.ofNullable(fullUttaksplan).map(FullUttaksplan::getAktiviteter);
+        } else {
+            var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
+            return Optional.ofNullable(forbrukteDager)
+                .map(ÅrskvantumForbrukteDager::getSisteUttaksplan)
+                .map(Uttaksplan::getAktiviteter);
+        }
+    }
+
+    public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat, Optional<List<Aktivitet>> uttaksplan) {
         if (beregningsresultat == null) {
             return List.of();
         }
@@ -129,7 +149,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     List<BeregningsresultatPeriodeAndelDto> lagAndeler(BeregningsresultatPeriode beregningsresultatPeriode,
                                                        Map<Tuple<AktivitetStatus, Optional<String>>, Optional<LocalDate>> andelTilSisteUtbetalingsdatoMap,
-                                                       Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag, Optional<Uttaksplan> uttaksplan) {
+                                                       Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag, Optional<List<Aktivitet>> uttaksplan) {
 
         var beregningsresultatAndelList = beregningsresultatPeriode.getBeregningsresultatAndelList();
 
@@ -171,8 +191,8 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
             .collect(Collectors.toList());
     }
 
-    private void mapUttakForAndel(DatoIntervallEntitet periode, BeregningsresultatAndel brukersAndel, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder, Uttaksplan uttaksplan) {
-        var uttaksPeriodeForAndel = uttaksplan.getAktiviteter().stream()
+    private void mapUttakForAndel(DatoIntervallEntitet periode, BeregningsresultatAndel brukersAndel, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder, List<Aktivitet> aktiviteter) {
+        var uttaksPeriodeForAndel = aktiviteter.stream()
             .filter(it -> matcherArbeidsforhold(it.getArbeidsforhold(), brukersAndel))
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)

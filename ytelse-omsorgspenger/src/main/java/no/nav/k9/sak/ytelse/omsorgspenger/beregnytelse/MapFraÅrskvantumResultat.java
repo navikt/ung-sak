@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
@@ -47,17 +45,9 @@ class MapFraÅrskvantumResultat {
         return arbeidsforhold;
     }
 
-    List<UttakResultatPeriode> mapFra(ÅrskvantumForbrukteDager forbrukteDager) {
-        List<UttakResultatPeriode> res = new ArrayList<>();
-        res.addAll(getInnvilgetTimeline(forbrukteDager));
-        res.addAll(getAvslåttTimeline(forbrukteDager));
-        Collections.sort(res, COMP_PERIODE);
-        return res;
-    }
-
-    private static List<UttakResultatPeriode> getInnvilgetTimeline(ÅrskvantumForbrukteDager forbrukteDager) {
+    private static List<UttakResultatPeriode> getInnvilgetTimeline(List<Aktivitet> aktiviteter) {
         List<LocalDateSegment<UttakAktivitet>> segmenter = new ArrayList<>();
-        for (Aktivitet aktivitet : forbrukteDager.getSisteUttaksplan().getAktiviteter()) {
+        for (Aktivitet aktivitet : aktiviteter) {
             for (Uttaksperiode p : aktivitet.getUttaksperioder()) {
                 if (p.getUtfall() == Utfall.INNVILGET) {
                     LocalDateSegment<UttakAktivitet> uttakAktivitetLocalDateSegment =
@@ -76,9 +66,9 @@ class MapFraÅrskvantumResultat {
         return res;
     }
 
-    private static List<UttakResultatPeriode> getAvslåttTimeline(ÅrskvantumForbrukteDager forbrukteDager) {
+    private static List<UttakResultatPeriode> getAvslåttTimeline(List<Aktivitet> aktiviteter) {
         List<LocalDateSegment<UttakAktivitet>> segmenter = new ArrayList<>();
-        for (Aktivitet aktivitet : forbrukteDager.getSisteUttaksplan().getAktiviteter()) {
+        for (Aktivitet aktivitet : aktiviteter) {
             for (Uttaksperiode p : aktivitet.getUttaksperioder()) {
                 if (p.getUtfall() == Utfall.AVSLÅTT) {
                     LocalDateSegment<UttakAktivitet> uttakAktivitetLocalDateSegment =
@@ -94,6 +84,14 @@ class MapFraÅrskvantumResultat {
         timeline.toSegments().forEach(seg -> {
             res.add(new UttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue(), true));
         });
+        return res;
+    }
+
+    List<UttakResultatPeriode> mapFra(List<Aktivitet> aktiviteter) {
+        List<UttakResultatPeriode> res = new ArrayList<>();
+        res.addAll(getInnvilgetTimeline(aktiviteter));
+        res.addAll(getAvslåttTimeline(aktiviteter));
+        res.sort(COMP_PERIODE);
         return res;
     }
 
