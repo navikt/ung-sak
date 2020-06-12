@@ -17,16 +17,19 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
-@ProsessTask(HåndterMottattDokumentTaskProperties.TASKTYPE)
+@ProsessTask(HåndterMottattDokumentTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     public static final String TASKTYPE = "innhentsaksopplysninger.håndterMottattDokument";
+    public static final String MOTTATT_DOKUMENT_ID_KEY = "mottattDokumentId";
+    public static final String BEHANDLING_ÅRSAK_TYPE_KEY = "arsakType";
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlingRepository behandlingRepository;
     private InntektsmeldingParser dokumentPersistererTjeneste;
+
 
     HåndterMottattDokumentTask() {
         // for CDI proxy
@@ -46,14 +49,14 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        Long dokumentId = Long.valueOf(prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.MOTTATT_DOKUMENT_ID_KEY));
+        Long dokumentId = Long.valueOf(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY));
         String feilmelding = "Utviklerfeil: HåndterMottattDokument uten gyldig mottatt dokument, id=" + dokumentId;
         MottattDokument mottattDokument = mottatteDokumentTjeneste.hentMottattDokument(dokumentId)
                 .orElseThrow(() -> new IllegalStateException(feilmelding));
         
         BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
-        if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
-            behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTaskProperties.BEHANDLING_ÅRSAK_TYPE_KEY));
+        if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
+            behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY));
         } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.harPayload()) {
              dokumentPersistererTjeneste.xmlTilWrapper(mottattDokument);
         }

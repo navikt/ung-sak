@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -47,7 +48,7 @@ import no.nav.vedtak.log.mdc.MDCOperations;
 @Dependent
 public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesseringTjeneste {
     private static final Logger log = LoggerFactory.getLogger(BehandlingProsesseringTjenesteImpl.class);
-    
+
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RegisterdataEndringshåndterer registerdataEndringshåndterer;
     private EndringsresultatSjekker endringsresultatSjekker;
@@ -183,15 +184,15 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil: kan ikke gjenoppta behandling når saksbehandling er avsluttet: behandlingId=" + behandlingId + ", status=" + behandling.getStatus());
         }
-        
+
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
         String gjenopptaTaskType = GjenopptaBehandlingTask.TASKTYPE;
         var gjenopptaBehandlingTask = new ProsessTaskData(gjenopptaTaskType);
         var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
         var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
-        
+
         var eksisterendeGjenopptaTask = getEksisterendeTaskAvType(fagsakId, behandlingId, gjenopptaTaskType);
-        if(eksisterendeGjenopptaTask.isPresent()) {
+        if (eksisterendeGjenopptaTask.isPresent()) {
             log.warn("Har eksisterende task [{}], oppretter ikke nye for fagsakId={}, behandlingId={}: {}", gjenopptaTaskType, fagsakId, behandlingId, eksisterendeGjenopptaTask.get());
             return;
         }
@@ -262,5 +263,17 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var gruppe = new ProsessTaskGruppe(prosessTaskData);
         prosessTaskData.setCallIdFraEksisterende();
         return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
+    }
+
+    @Override
+    public void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Set<String> tasktyper) {
+        if (tasktyper.isEmpty()) {
+            return;
+        }
+        var pågår = fagsakProsessTaskRepository.sjekkStatusProsessTasks(behandling.getFagsakId(), behandling.getId(), null);
+        Optional<ProsessTaskData> firstMatch = pågår.stream().filter(p -> tasktyper.contains(p.getTaskType())).findFirst();
+        if (firstMatch.isPresent()) {
+            throw new IllegalStateException("Kan ikke kjøre fordi annen task blokkerer: " + firstMatch.get());
+        }
     }
 }

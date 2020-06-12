@@ -59,7 +59,7 @@ public class MottatteDokumentTjeneste {
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
-    public void persisterInntektsmelding(Behandling behandling, MottattDokument dokument) {
+    public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, MottattDokument dokument) {
         if (dokument.harPayload()) {
             var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(behandling, dokument);
             // sendte bare ett dokument her, så forventer kun et svar:

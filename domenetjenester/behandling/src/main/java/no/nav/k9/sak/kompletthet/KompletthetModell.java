@@ -79,6 +79,10 @@ public class KompletthetModell {
     public boolean erKompletthetssjekkPassert(Long behandlingId) {
         return behandlingskontrollTjeneste.erStegPassert(behandlingId, BehandlingStegType.VURDER_KOMPLETTHET);
     }
+    
+    public boolean erRegisterInnhentingPassert(Long behandlingId) {
+        return behandlingskontrollTjeneste.erStegPassert(behandlingId, BehandlingStegType.INNHENT_REGISTEROPP);
+    }
 
     public KompletthetResultat vurderKompletthet(BehandlingReferanse ref, List<AksjonspunktDefinisjon> åpneAksjonspunkter) {
         Optional<AksjonspunktDefinisjon> åpentAutopunkt = åpneAksjonspunkter.stream()
