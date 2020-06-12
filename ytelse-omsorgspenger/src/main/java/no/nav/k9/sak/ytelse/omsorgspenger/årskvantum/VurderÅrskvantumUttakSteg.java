@@ -28,7 +28,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
@@ -40,7 +39,6 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
     private static final Logger log = LoggerFactory.getLogger(VurderÅrskvantumUttakSteg.class);
 
     private BehandlingRepository behandlingRepository;
-    private SkjæringstidspunktTjeneste stpTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
 
@@ -50,10 +48,8 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     @Inject
     public VurderÅrskvantumUttakSteg(BehandlingRepository behandlingRepository,
-                                     SkjæringstidspunktTjeneste stpTjeneste,
                                      ÅrskvantumTjeneste årskvantumTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.stpTjeneste = stpTjeneste;
         this.årskvantumTjeneste = årskvantumTjeneste;
     }
 
