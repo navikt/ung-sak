@@ -168,7 +168,9 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
     }
 
     Optional<LocalDate> finnFraOgMedDatoSN(OppgittOpptjeningDto oppgittIMåned) {
-        return oppgittIMåned.getOppgittEgenNæring().stream().map(p -> p.getPeriode().getFom()).findFirst();
+        return oppgittIMåned.getOppgittEgenNæring() != null ?
+            oppgittIMåned.getOppgittEgenNæring().stream()
+                .map(p -> p.getPeriode().getFom()).findFirst() : Optional.empty();
     }
 
     Optional<LocalDate> finnFraOgMedDatoFL(OppgittOpptjeningDto oppgittIMåned) {
