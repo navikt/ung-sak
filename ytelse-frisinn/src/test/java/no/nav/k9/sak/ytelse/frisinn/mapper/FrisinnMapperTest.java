@@ -107,11 +107,10 @@ public class FrisinnMapperTest {
 
         List<PeriodeDto> perioder = FrisinnMapper.finnMåneder(uttakAktivitet);
         assertThat(perioder).hasSize(2);
-        assertThat(perioder.get(0).getFom()).isEqualTo(LocalDate.of(2020, 4, 1));
+        assertThat(perioder.get(0).getFom()).isEqualTo(LocalDate.of(2020, 3, 30));
         assertThat(perioder.get(0).getTom()).isEqualTo(LocalDate.of(2020, 4, 30));
         assertThat(perioder.get(1).getFom()).isEqualTo(LocalDate.of(2020, 5, 1));
         assertThat(perioder.get(1).getTom()).isEqualTo(LocalDate.of(2020, 5, 31));
-
     }
 
     @Test
