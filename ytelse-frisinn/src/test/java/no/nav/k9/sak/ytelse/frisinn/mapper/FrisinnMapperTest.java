@@ -115,6 +115,25 @@ public class FrisinnMapperTest {
     }
 
     @Test
+    public void skal_gi_riktig_sett_med_måneder_kan_starte_i_mars() {
+        LocalDate sluttenIApril = LocalDate.of(2020, 4, 30);
+
+        LocalDate startFLIApril = LocalDate.of(2020, 3, 30);
+        LocalDate startSNIApril = LocalDate.of(2020, 4, 25);
+
+        UttakAktivitetPeriode uttakAktivitetPeriode = new UttakAktivitetPeriode(startFLIApril, sluttenIApril, UttakArbeidType.FRILANSER, null, null);
+        UttakAktivitetPeriode uttakAktivitetPeriode2 = new UttakAktivitetPeriode(startSNIApril, sluttenIApril, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, null, null);
+
+        UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of(uttakAktivitetPeriode, uttakAktivitetPeriode2));
+
+        List<PeriodeDto> perioder = FrisinnMapper.finnMåneder(uttakAktivitet);
+        assertThat(perioder).hasSize(1);
+        assertThat(perioder.get(0).getFom()).isEqualTo(LocalDate.of(2020, 3, 30));
+        assertThat(perioder.get(0).getTom()).isEqualTo(LocalDate.of(2020, 4, 30));
+
+    }
+
+    @Test
     public void skal_gi_tom_liste_når_det_ikke_finnes_uttak_aktiviteter() {
         UttakAktivitet uttakAktivitet = new UttakAktivitet(List.of());
 

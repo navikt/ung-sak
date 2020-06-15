@@ -13,12 +13,16 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
 
 public class FrisinnMapper {
+
+    public static final LocalDate FØRSTE_DAG_I_APRIL = LocalDate.of(2020, 4, 1);
+    public static final LocalDate SISTE_DAG_I_APRIL = LocalDate.of(2020, 4, 30);
 
     public static List<PeriodeMedSøkerInfoDto> mapPeriodeMedSøkerInfoDto(UttakAktivitet fastsattUttak) {
         List<LocalDateSegment<PeriodeMedSøkerInfoDto>> frilans = lagSegmenter(fastsattUttak, UttakArbeidType.FRILANSER);
@@ -37,15 +41,22 @@ public class FrisinnMapper {
     public static List<PeriodeDto> finnMåneder(UttakAktivitet fastsattUttak) {
         return fastsattUttak.getPerioder()
             .stream()
-            .map(uttakAktivitetPeriode -> finnMåned(uttakAktivitetPeriode.getPeriode().getTomDato()))
+            .map(uttakAktivitetPeriode -> finnMåned(uttakAktivitetPeriode.getPeriode(), fastsattUttak))
             .distinct()
             .sorted((Comparator.comparing(PeriodeDto::getTom)))
             .collect(Collectors.toList());
     }
 
-    private static PeriodeDto finnMåned(LocalDate sisteDag) {
-        LocalDate føsteDag = MonthDay.of(sisteDag.getMonth(), 1).atYear(LocalDate.now().getYear());
-        return new PeriodeDto(føsteDag, sisteDag);
+    private static PeriodeDto finnMåned(DatoIntervallEntitet periode, UttakAktivitet fastsattUttak) {
+        LocalDate førstDagSøkt = fastsattUttak.getPerioder().stream().map(p -> p.getPeriode().getFomDato()).min(LocalDate::compareTo).orElseThrow(() -> new IllegalStateException("skal alltid finnes"));
+        LocalDate tomDato = periode.getTomDato();
+
+        //spesial behandling der noen april søknader starter med fom i mars
+        if (førstDagSøkt.isBefore(FØRSTE_DAG_I_APRIL) && tomDato.isEqual(SISTE_DAG_I_APRIL)) {
+            return new PeriodeDto(førstDagSøkt, tomDato);
+        }
+        LocalDate føsteDag = MonthDay.of(tomDato.getMonth(), 1).atYear(LocalDate.now().getYear());
+        return new PeriodeDto(føsteDag, tomDato);
     }
 
     private static List<LocalDateSegment<PeriodeMedSøkerInfoDto>> lagSegmenter(UttakAktivitet fastsattUttak, UttakArbeidType aktivitetType) {
