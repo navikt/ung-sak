@@ -72,7 +72,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkår.getPerioder()
             .stream()
             .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p))
-                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().overlapper(p)))
+                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().inkluderer(p.getTomDato().plusDays(1))))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
