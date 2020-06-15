@@ -23,6 +23,7 @@ public class FrisinnMapper {
 
     public static final LocalDate FØRSTE_DAG_I_APRIL = LocalDate.of(2020, 4, 1);
     public static final LocalDate SISTE_DAG_I_APRIL = LocalDate.of(2020, 4, 30);
+    public static final LocalDate SISTE_DAG_I_MARS = LocalDate.of(2020, 3, 30);
 
     public static List<PeriodeMedSøkerInfoDto> mapPeriodeMedSøkerInfoDto(UttakAktivitet fastsattUttak) {
         List<LocalDateSegment<PeriodeMedSøkerInfoDto>> frilans = lagSegmenter(fastsattUttak, UttakArbeidType.FRILANSER);
@@ -41,19 +42,18 @@ public class FrisinnMapper {
     public static List<PeriodeDto> finnMåneder(UttakAktivitet fastsattUttak) {
         return fastsattUttak.getPerioder()
             .stream()
-            .map(uttakAktivitetPeriode -> finnMåned(uttakAktivitetPeriode.getPeriode(), fastsattUttak))
+            .map(uttakAktivitetPeriode -> finnMåned(uttakAktivitetPeriode.getPeriode()))
             .distinct()
             .sorted((Comparator.comparing(PeriodeDto::getTom)))
             .collect(Collectors.toList());
     }
 
-    private static PeriodeDto finnMåned(DatoIntervallEntitet periode, UttakAktivitet fastsattUttak) {
-        LocalDate førstDagSøkt = fastsattUttak.getPerioder().stream().map(p -> p.getPeriode().getFomDato()).min(LocalDate::compareTo).orElseThrow(() -> new IllegalStateException("skal alltid finnes"));
+    private static PeriodeDto finnMåned(DatoIntervallEntitet periode) {
         LocalDate tomDato = periode.getTomDato();
+        //spesial behandling der april søknader starter med fom i mars
 
-        //spesial behandling der noen april søknader starter med fom i mars
-        if (førstDagSøkt.isBefore(FØRSTE_DAG_I_APRIL) && tomDato.isEqual(SISTE_DAG_I_APRIL)) {
-            return new PeriodeDto(førstDagSøkt, tomDato);
+        if (tomDato.isEqual(SISTE_DAG_I_APRIL)) {
+            return new PeriodeDto(SISTE_DAG_I_MARS, tomDato);
         }
         LocalDate føsteDag = MonthDay.of(tomDato.getMonth(), 1).atYear(LocalDate.now().getYear());
         return new PeriodeDto(føsteDag, tomDato);
