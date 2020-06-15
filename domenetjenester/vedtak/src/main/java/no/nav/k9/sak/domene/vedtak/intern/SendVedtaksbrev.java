@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class SendVedtaksbrev {
 
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
-    private VedtakVarselRepository behandlingsresultatRepository;
+    private VedtakVarselRepository vedtakvarselRepository;
 
     SendVedtaksbrev() {
         // for CDI proxy
@@ -39,11 +40,11 @@ public class SendVedtaksbrev {
     @Inject
     public SendVedtaksbrev(BehandlingRepository behandlingRepository,
                            BehandlingVedtakRepository behandlingVedtakRepository,
-                           VedtakVarselRepository behandlingsresultatRepository,
+                           VedtakVarselRepository vedtakvarselRepository,
                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.vedtakvarselRepository = vedtakvarselRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
@@ -69,7 +70,7 @@ public class SendVedtaksbrev {
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde())) {
-            var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
+            var behandlingsresultat = vedtakvarselRepository.hent(behandlingId);
             boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
             if (!fritekstVedtaksbrev) {
                 log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", behandlingId);
@@ -79,6 +80,11 @@ public class SendVedtaksbrev {
 
         if (erBehandlingEtterKlage(behandling)) {
             log.info("Sender ikke vedtaksbrev for vedtak fra omgjøring fra klageinstansen på behandling {}, gjelder medhold fra klageinstans", behandlingId); //$NON-NLS-1$
+            return;
+        }
+
+        if (erOverstyrtVedtaksbrevFrisinn(ref)) {
+            log.info("Vedtaksbrev for frisinn overstyrt og sendes derfor ikke automatisk for behandling {}", behandlingId); //$NON-NLS-1$
             return;
         }
 
@@ -93,6 +99,15 @@ public class SendVedtaksbrev {
 
     private boolean erKunRefusjonTilArbeidsgiver(BehandlingReferanse ref) {
         return ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER;
+    }
+
+    private boolean erOverstyrtVedtaksbrevFrisinn(BehandlingReferanse ref) {
+        boolean fritekstVedtaksbrev = vedtakvarselRepository.hentHvisEksisterer(ref.getBehandlingId())
+            .map(VedtakVarsel::getVedtaksbrev)
+            .map(Vedtaksbrev.FRITEKST::equals)
+            .orElse(false);
+
+        return ref.getFagsakYtelseType() == FagsakYtelseType.FRISINN && fritekstVedtaksbrev;
     }
 
     private boolean erBehandlingEtterKlage(Behandling behandling) {

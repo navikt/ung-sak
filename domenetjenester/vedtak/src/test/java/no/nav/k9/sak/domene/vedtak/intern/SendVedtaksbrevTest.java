@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verify;
 
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -138,6 +140,38 @@ public class SendVedtaksbrevTest {
         sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
 
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
+    }
+
+    @Test
+    public void senderIkkeBrevForFrisinnVedOverstyrt() {
+        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.FRISINN)
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+
+        VedtakVarsel varsel = new VedtakVarsel();
+        varsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
+        vedtakVarselRepository.lagre(behandling.getId(), varsel);
+
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
+
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
+    }
+
+    @Test
+    public void senderFritekstbrevVedOverstyrt() {
+        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+
+        VedtakVarsel varsel = new VedtakVarsel();
+        varsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
+        vedtakVarselRepository.lagre(behandling.getId(), varsel);
+
+        sendVedtaksbrev.sendVedtaksbrev(BehandlingReferanse.fra(behandling));
+
+        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
     }
 
     @Test
