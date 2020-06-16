@@ -326,6 +326,7 @@ public class BehandlingDtoTjeneste {
 
     private void leggTilYtelsespesifikkResourceLinks(Behandling behandling, BehandlingDto dto) {
         var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        var saksnummerQueryParam = Map.of("saksnummer", behandling.getFagsak().getSaksnummer().toString());
 
         var ytelseType = behandling.getFagsakYtelseType();
         switch (ytelseType) {
@@ -340,6 +341,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FORBRUKTEDAGER, "forbrukte-dager", uuidQueryParams));
+                dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerQueryParam));
                 break;
             case PLEIEPENGER_NÆRSTÅENDE:
             case OPPLÆRINGSPENGER:

@@ -22,8 +22,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
@@ -36,9 +38,11 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class ÅrskvantumRestTjeneste {
 
     public static final String FORBRUKTEDAGER_PATH = "/forbruktedager";
+    public static final String FULL_UTTAKSPLAN_PATH = "/uttaksplan";
     public static final String INPUT_PATH = "/input";
     static final String BASE_PATH = "/behandling/aarskvantum";
     public static final String FORBRUKTEDAGER = BASE_PATH + FORBRUKTEDAGER_PATH;
+    public static final String FULL_UTTAKSPLAN = BASE_PATH + FULL_UTTAKSPLAN_PATH;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
     public ÅrskvantumRestTjeneste() {
@@ -65,6 +69,20 @@ public class ÅrskvantumRestTjeneste {
         return årskvantumTjeneste.hentÅrskvantumForBehandling(behandlingIdDto.getBehandlingUuid());
     }
 
+    /**
+     * Hent den totale uttaksplanen for en sak.
+     */
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(FULL_UTTAKSPLAN_PATH)
+    @Operation(description = "Hent full uttaksplan", tags = "behandling - årskvantum/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public FullUttaksplan getFullUttaksplan(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
+        return årskvantumTjeneste.hentFullUttaksplan(saksnummerDto.getVerdi());
+    }
 
     /**
      * Hent oppgitt uttak for angitt behandling.
