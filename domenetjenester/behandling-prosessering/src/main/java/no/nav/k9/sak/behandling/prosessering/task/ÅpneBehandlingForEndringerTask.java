@@ -3,7 +3,6 @@ package no.nav.k9.sak.behandling.prosessering.task;
 import static no.nav.k9.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask.TASKTYPE;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -61,6 +60,6 @@ public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask 
         behandling.getAksjonspunkter().stream()
             .filter(ap -> aksjonspunkterFraOgMedStartpunkt.contains(ap.getAksjonspunktDefinisjon().getKode()))
             .filter(ap -> !AksjonspunktType.AUTOPUNKT.equals(ap.getAksjonspunktDefinisjon().getAksjonspunktType()))
-            .forEach(ap -> behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, List.of(ap), Optional.of(Boolean.TRUE)));
+            .forEach(ap -> behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, List.of(ap), true));
     }
 }

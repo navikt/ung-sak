@@ -136,7 +136,7 @@ public interface BehandlingskontrollTjeneste {
     /**
      * Lagrer og håndterer reåpning av aksjonspunkt
      */
-    void lagreAksjonspunkterReåpnet(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, Optional<Boolean> setTotrinn);
+    void lagreAksjonspunkterReåpnet(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, boolean setTotrinn);
 
     /**
      * Lagrer og håndterer utførte aksjonspunkt uten begrunnelse. Dersom man skal lagre begrunnelse - bruk apRepository + aksjonspunkterUtført

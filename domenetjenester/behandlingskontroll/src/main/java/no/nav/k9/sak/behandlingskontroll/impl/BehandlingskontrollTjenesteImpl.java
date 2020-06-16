@@ -366,12 +366,12 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     }
 
     @Override
-    public void lagreAksjonspunkterReåpnet(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, Optional<Boolean> setTotrinn) {
+    public void lagreAksjonspunkterReåpnet(BehandlingskontrollKontekst kontekst, List<Aksjonspunkt> aksjonspunkter, boolean setTotrinn) {
         Behandling behandling = serviceProvider.hentBehandling(kontekst.getBehandlingId());
         List<Aksjonspunkt> reåpnet = new ArrayList<>();
-        boolean totrinn = setTotrinn.orElse(Boolean.FALSE);
         aksjonspunkter.stream().filter(ap -> !ap.erOpprettet()).forEach(ap -> {
-            aksjonspunktKontrollRepository.setReåpnetMedTotrinn(ap, totrinn);
+            // TODO (FC): Mangler sjekk på at angitt aksjonspunkt fins som allerede utført i Behandling. bør dobbeltsjekkes/strammes til etterhvert.
+            aksjonspunktKontrollRepository.setReåpnetMedTotrinn(ap, setTotrinn);
             reåpnet.add(ap);
         });
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());

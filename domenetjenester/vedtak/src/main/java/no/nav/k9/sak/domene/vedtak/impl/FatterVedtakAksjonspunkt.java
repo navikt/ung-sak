@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.vedtak.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,6 +65,6 @@ public class FatterVedtakAksjonspunkt {
         totrinnTjeneste.settNyeTotrinnaksjonspunktvurderinger(behandling, totrinnsvurderinger);
         vedtakTjeneste.lagHistorikkinnslagFattVedtak(behandling);
         // Noe spesialhåndtering ifm totrinn og tilbakeføring fra FVED
-        behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, skalReåpnes, Optional.of(Boolean.TRUE));
+        behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, skalReåpnes, true);
     }
 }

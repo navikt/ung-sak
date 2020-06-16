@@ -50,6 +50,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -532,12 +533,12 @@ public class Behandling extends BaseEntitet {
      * Internt API, IKKE BRUK.
      */
     void addAksjonspunkt(Aksjonspunkt aksjonspunkt) {
-        validerKanLeggeTilAksjonspunkt(aksjonspunkt.getAksjonspunktDefinisjon());
+        validerKanLeggeTilAksjonspunkt(aksjonspunkt.getStatus(), aksjonspunkt.getAksjonspunktDefinisjon());
         aksjonspunkter.add(aksjonspunkt);
     }
 
-    private void validerKanLeggeTilAksjonspunkt(AksjonspunktDefinisjon def) {
-        if (!def.kanUtføres(getStatus())) {
+    private void validerKanLeggeTilAksjonspunkt(AksjonspunktStatus aksjonspunktStatus, AksjonspunktDefinisjon def) {
+        if (!def.validerGyldigStatusEndring(aksjonspunktStatus, getStatus())) {
             throw new IllegalArgumentException("Kan ikke legge til aksjonspunkt: " + def + " i gjelden status for behandling:" + this);
         }
     }
