@@ -2,6 +2,7 @@ package no.nav.k9.kodeverk.geografisk;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -118,12 +119,19 @@ public class Landkoder implements Kodeverdi {
             map.put(c, landkode);
             map.put(iso3cc, landkode);
         }
-        map.put("-", new Landkoder("-"));
-        map.put("???", new Landkoder("???"));
-        map.put("XXX", new Landkoder("XXX"));
-        map.put("XXK", new Landkoder("XXK"));
-        map.put("YUG", new Landkoder("YUG"));
-        map.put("SCG", new Landkoder("SCG"));
+        // udefinerte koder
+        List.of("-", "???")
+            .forEach(c -> map.put(c, new Landkoder(c)));
+
+        // ISO user defined codes (NAV spesifikke)
+        // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#User-assigned_code_elements
+        List.of("XXX", "XXK")
+            .forEach(c -> map.put(c, new Landkoder(c)));
+
+        // ISO transitional codes.
+        // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Transitional_reservations
+        List.of("ANT", "BUR", "BYS", "CSK", "ROM", "SCG", "TMP", "YUG", "ZAR")
+            .forEach(c -> map.put(c, new Landkoder(c)));
 
         return Collections.unmodifiableMap(map);
     }
