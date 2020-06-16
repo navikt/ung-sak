@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.opptjening;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -60,6 +61,7 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
         } else {
             return inntektsmeldingSomMatcherUttak.stream()
                 .map(Beløp::getVerdi)
+                .filter(Objects::nonNull)
                 .anyMatch(BigDecimal.ZERO::equals);
         }
     }
