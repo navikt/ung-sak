@@ -248,7 +248,7 @@ public class BehandlingRepository {
 
     private void håndterAksjonspunkt(Behandling behandling) {
         for (var a : behandling.getAksjonspunkter()) {
-            if (a.erÅpentAksjonspunkt() && !a.getAksjonspunktDefinisjon().kanUtføres(behandling.getStatus())) {
+            if (a.erÅpentAksjonspunkt() && !a.getAksjonspunktDefinisjon().validerGyldigStatusEndring(a.getStatus(), behandling.getStatus())) {
                 throw new IllegalStateException("Ugyldig tilstand: Har åpent aksjonspunkt: " + a + " for behandling:" + behandling + ". Aksjonspunktet kan kun være åpent for status:"
                     + a.getAksjonspunktDefinisjon().getGyldigBehandlingStatus());
             }

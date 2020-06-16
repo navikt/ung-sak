@@ -61,7 +61,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, EnumSet.of(OMP, PSB)),
     VEDTAK_UTEN_TOTRINNSKONTROLL(
             AksjonspunktKodeDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL_KODE, AksjonspunktType.MANUELL, "Foreslå vedtak uten totrinnskontroll",
-            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+            BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     AVKLAR_LOVLIG_OPPHOLD(AksjonspunktKodeDefinisjon.AVKLAR_LOVLIG_OPPHOLD_KODE,
             AksjonspunktType.MANUELL, "Avklar lovlig opphold.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
             VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, EnumSet.of(OMP, PSB)),
@@ -84,7 +84,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
     FORESLÅ_VEDTAK_MANUELT(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_MANUELT_KODE,
             AksjonspunktType.MANUELL, "Foreslå vedtak manuelt", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR,
-            SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     AVKLAR_VERGE(AksjonspunktKodeDefinisjon.AVKLAR_VERGE_KODE, AksjonspunktType.MANUELL,
             "Avklar verge", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_VERGE, ENTRINN, EnumSet.of(OMP, PSB)),
     VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
@@ -138,7 +138,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING(
             AksjonspunktKodeDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE, AksjonspunktType.MANUELL,
-            "Kontroll av manuelt opprettet revurderingsbehandling", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE,
+            "Kontroll av manuelt opprettet revurderingsbehandling", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
+            UTEN_VILKÅR, UTEN_SKJERMLENKE,
             ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     VURDER_FAKTA_FOR_ATFL_SN(AksjonspunktKodeDefinisjon.VURDER_FAKTA_FOR_ATFL_SN_KODE,
             AksjonspunktType.MANUELL, "Vurder fakta for arbeidstaker, frilans og selvstendig næringsdrivende", BehandlingStatus.UTREDES,
@@ -255,7 +256,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", EnumSet.of(FRISINN)),
 
     OVERSTYRING_FRISINN_OPPGITT_OPPTJENING(AksjonspunktKodeDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING_KODE, AksjonspunktType.MANUELL, "Saksbehandler overstyrer oppgitt opptjening",
-            Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, Set.of(FRISINN)),
+            Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
+            Set.of(FRISINN)),
 
     // Gruppe : 90xx
 
@@ -503,8 +505,14 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return navn;
     }
 
-    public boolean kanUtføres(BehandlingStatus status) {
-        return behandlingStatus.contains(status);
+    public boolean validerGyldigStatusEndring(AksjonspunktStatus aksjonspunktStatus, BehandlingStatus status) {
+        return behandlingStatus.contains(status) || isFatterVedtak(aksjonspunktStatus, status);
+    }
+
+    private boolean isFatterVedtak(AksjonspunktStatus aksjonspunktStatus, BehandlingStatus status) {
+        // I FatterVedtak kan beslutter reåpne (derav OPPRETTET) eksisterende aksjonspunkter før det sendes tilbake til saksbehandler
+        return Objects.equals(BehandlingStatus.FATTER_VEDTAK, status)
+            && Objects.equals(aksjonspunktStatus, AksjonspunktStatus.OPPRETTET);
     }
 
     @JsonProperty(value = "kode")
