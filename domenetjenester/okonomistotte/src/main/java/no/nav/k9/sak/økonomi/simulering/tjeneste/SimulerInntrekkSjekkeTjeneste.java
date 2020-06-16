@@ -3,6 +3,7 @@ package no.nav.k9.sak.økonomi.simulering.tjeneste;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -12,11 +13,12 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
+import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 
@@ -26,6 +28,7 @@ public class SimulerInntrekkSjekkeTjeneste {
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private HistorikkRepository historikkRepository;
+    private Instance<SimulerOppdragAksjonspunktTjeneste> tjeneste;
 
     SimulerInntrekkSjekkeTjeneste() {
         // for CDI proxy
@@ -34,10 +37,12 @@ public class SimulerInntrekkSjekkeTjeneste {
     @Inject
     public SimulerInntrekkSjekkeTjeneste(SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                                          TilbakekrevingRepository tilbakekrevingRepository,
-                                         HistorikkRepository historikkRepository) {
+                                         HistorikkRepository historikkRepository,
+                                         Instance<SimulerOppdragAksjonspunktTjeneste> tjeneste) {
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.historikkRepository = historikkRepository;
+        this.tjeneste = tjeneste;
     }
 
     public void sjekkIntrekk(Behandling behandling) {
@@ -47,7 +52,8 @@ public class SimulerInntrekkSjekkeTjeneste {
 
             Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
             if (simuleringResultatDto.isPresent()) {
-                Optional<AksjonspunktDefinisjon> aksjonspunkt = SimulerOppdragAksjonspunktUtleder.utledAksjonspunkt(simuleringResultatDto.get());
+                SimulerOppdragAksjonspunktTjeneste simulerOppdragAksjonspunktTjeneste = finnTjeneste(behandling);
+                Optional<AksjonspunktDefinisjon> aksjonspunkt = simulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(simuleringResultatDto.get());
                 if (aksjonspunkt.filter(aksjonspunktDefinisjon -> aksjonspunktDefinisjon.equals(AksjonspunktDefinisjon.VURDER_FEILUTBETALING)).isPresent()) {
                     tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, null));
                     opprettHistorikkInnslag(behandling.getId());
@@ -67,6 +73,11 @@ public class SimulerInntrekkSjekkeTjeneste {
         tekstBuilder.medEndretFelt(HistorikkEndretFeltType.FASTSETT_VIDERE_BEHANDLING, TilbakekrevingVidereBehandling.INNTREKK, TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
         tekstBuilder.build(innslag);
         historikkRepository.lagre(innslag);
+    }
+
+    private SimulerOppdragAksjonspunktTjeneste finnTjeneste(Behandling behandling) {
+        return FagsakYtelseTypeRef.Lookup.find(SimulerOppdragAksjonspunktTjeneste.class, tjeneste, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + SimulerOppdragAksjonspunktTjeneste.class.getSimpleName() + " for " + behandling.getUuid()));
     }
 
 }

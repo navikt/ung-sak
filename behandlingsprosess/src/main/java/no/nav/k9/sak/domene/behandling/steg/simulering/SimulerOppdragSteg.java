@@ -8,6 +8,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -24,7 +26,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
+import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
@@ -45,6 +47,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private FptilbakeRestKlient fptilbakeRestKlient;
+    private Instance<SimulerOppdragAksjonspunktTjeneste> tjenesteInstance;
 
     SimulerOppdragSteg() {
         // for CDI proxy
@@ -55,12 +58,14 @@ public class SimulerOppdragSteg implements BehandlingSteg {
                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                               SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                               TilbakekrevingRepository tilbakekrevingRepository,
-                              FptilbakeRestKlient fptilbakeRestKlient) {
+                              FptilbakeRestKlient fptilbakeRestKlient,
+                              @Any Instance<SimulerOppdragAksjonspunktTjeneste> tjenesteInstance) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.fptilbakeRestKlient = fptilbakeRestKlient;
+        this.tjenesteInstance = tjenesteInstance;
     }
 
     @Override
@@ -110,8 +115,8 @@ public class SimulerOppdragSteg implements BehandlingSteg {
         Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
         if (simuleringResultatDto.isPresent()) {
             tilbakekrevingRepository.lagre(behandling, simuleringResultatDto.get().isSlåttAvInntrekk());
+            Optional<AksjonspunktDefinisjon> utledetAksjonspunkt = finnTjeneste(behandling).utledAksjonspunkt(simuleringResultatDto.get());
 
-            Optional<AksjonspunktDefinisjon> utledetAksjonspunkt = SimulerOppdragAksjonspunktUtleder.utledAksjonspunkt(simuleringResultatDto.get());
             if (utledetAksjonspunkt.isPresent()) {
                 AksjonspunktDefinisjon aksjonspunktDefinisjon = utledetAksjonspunkt.get();
                 //(Team Tonic) Midlertidig løsning for automatisk inntrekk inntil vi har funksjonalitet for å slå det av
@@ -149,5 +154,10 @@ public class SimulerOppdragSteg implements BehandlingSteg {
 
     private void lagreTilbakekrevingValg(Behandling behandling, TilbakekrevingValg tilbakekrevingValg) {
         tilbakekrevingRepository.lagre(behandling, tilbakekrevingValg);
+    }
+
+    private SimulerOppdragAksjonspunktTjeneste finnTjeneste(Behandling behandling) {
+        return FagsakYtelseTypeRef.Lookup.find(SimulerOppdragAksjonspunktTjeneste.class, tjenesteInstance, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + SimulerOppdragAksjonspunktTjeneste.class.getSimpleName() + " for " + behandling.getUuid()));
     }
 }

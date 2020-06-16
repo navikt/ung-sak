@@ -1,12 +1,5 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
-import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
-import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
-
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,13 +7,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
+
 public class ErEndringIBeregningFRISINN {
+
+  public final static BigDecimal TOLERANSE_GRENSE_DAGSATS = BigDecimal.valueOf(1172);
 
     private ErEndringIBeregningFRISINN() {
         // Skjuler default
     }
 
-    public static boolean vurder(Optional<Beregningsgrunnlag> revurderingsGrunnlag, Optional<Beregningsgrunnlag> originaltGrunnlag, UttakAktivitet orginaltUttak) {
+    public static boolean erUgust(Optional<Beregningsgrunnlag> revurderingsGrunnlag, Optional<Beregningsgrunnlag> originaltGrunnlag, UttakAktivitet orginaltUttak) {
 
         if (revurderingsGrunnlag.isEmpty()) {
             return originaltGrunnlag.isPresent();
@@ -35,11 +37,17 @@ public class ErEndringIBeregningFRISINN {
             Periode periode = uttaksperioder.next();
             BigDecimal orginalUtbetalingIPerioden = finnUtbetalingIPerioden(periode, originalePerioder);
             BigDecimal revurderingUtbetalingIPerioden = finnUtbetalingIPerioden(periode, revurderingsPerioder);
-            if (orginalUtbetalingIPerioden.compareTo(revurderingUtbetalingIPerioden) > 0) {
+            if (erUgustBeløpStørreEnnToleranseGrensen(orginalUtbetalingIPerioden, revurderingUtbetalingIPerioden)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean erUgustBeløpStørreEnnToleranseGrensen(BigDecimal orginalBeløp, BigDecimal nyttBeløp) {
+        BigDecimal diff = orginalBeløp.subtract(nyttBeløp);
+
+        return (diff.compareTo(TOLERANSE_GRENSE_DAGSATS) >= 0);
     }
 
     private static BigDecimal finnUtbetalingIPerioden(Periode uttaksperiode, List<BeregningsgrunnlagPeriode> bgPerioder) {
