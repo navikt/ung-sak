@@ -2,7 +2,7 @@ package no.nav.k9.sak.behandling.prosessering.task;
 
 import static no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask.TASKTYPE;
 
-import java.util.Objects;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -46,9 +46,11 @@ public class StartBehandlingTask extends UnderBehandlingProsessTask {
     }
 
     private void precondition(Behandling behandling) {
-        var gyldigStatus = BehandlingStatus.OPPRETTET;
-        if (!Objects.equals(gyldigStatus, behandling.getStatus())) {
+        var gyldigStatus = Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES);
+        if (!gyldigStatus.contains(behandling.getStatus())) {
             throw new IllegalStateException("Utvikler-feil: " + getClass().getSimpleName() + " kan kun benyttes på nyopprettet Behandling (med status " + gyldigStatus + ". Fikk: " + behandling);
         }
+        
+        // TODO sjekk på steg? denne vil vel ikke gå forbi kompletthet eller inreg?
     }
 }
