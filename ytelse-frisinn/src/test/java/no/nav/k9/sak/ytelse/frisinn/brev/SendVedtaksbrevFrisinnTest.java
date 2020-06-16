@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.vedtak.intern;
+package no.nav.k9.sak.ytelse.frisinn.brev;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -6,8 +6,22 @@ import static org.mockito.Mockito.verify;
 
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
+import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,25 +30,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
-import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
-import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-
 @RunWith(CdiRunner.class)
-public class SendVedtaksbrevTest {
+public class SendVedtaksbrevFrisinnTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -54,26 +51,22 @@ public class SendVedtaksbrevTest {
     @Mock
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
 
-    @Mock
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
-
-    private SendVedtaksbrev sendVedtaksbrev;
+    private SendVedtaksbrevFrisinn sendVedtaksbrev;
     private Behandling behandling;
 
     private TestScenarioBuilder scenario;
 
-    public SendVedtaksbrevTest() {
+    public SendVedtaksbrevFrisinnTest() {
         scenario = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
     }
 
     @Before
     public void oppsett() {
-        sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository,
+        sendVedtaksbrev = new SendVedtaksbrevFrisinn(behandlingRepository,
             repositoryProvider.getBehandlingVedtakRepository(),
             vedtakVarselRepository,
             dokumentBestillerApplikasjonTjeneste);
-
     }
 
     @Test
@@ -136,6 +129,22 @@ public class SendVedtaksbrevTest {
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
         behandling = scenario.lagre(repositoryProvider);
+
+        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
+
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
+    }
+
+    @Test
+    public void senderIkkeBrevForFrisinnVedOverstyrt() {
+        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.FRISINN)
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+
+        VedtakVarsel varsel = new VedtakVarsel();
+        varsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
+        vedtakVarselRepository.lagre(behandling.getId(), varsel);
 
         sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
 
