@@ -150,10 +150,19 @@ public enum FagsakYtelseType implements Kodeverdi {
         PLEIEPENGER_SYKT_BARN,
         Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, ENSLIG_FORSØRGER,
             PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER),
-        // FIXME K9 Verdiene under er høyst sannsynlig feil -- kun lagt inn for å komme videre i verdikjedetest.
+
         OMSORGSPENGER,
-        Set.of(SYKEPENGER, SVANGERSKAPSPENGER, FORELDREPENGER, DAGPENGER, ENSLIG_FORSØRGER,
-            PÅRØRENDESYKDOM, PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OMSORGSPENGER, OPPLÆRINGSPENGER));
+        Set.of(SYKEPENGER,
+            SVANGERSKAPSPENGER,
+            FORELDREPENGER,
+            DAGPENGER,
+            ENSLIG_FORSØRGER,
+            PÅRØRENDESYKDOM,
+            PLEIEPENGER_SYKT_BARN,
+            PLEIEPENGER_NÆRSTÅENDE,
+            OMSORGSPENGER,
+            OPPLÆRINGSPENGER,
+            FRISINN));
 
     public boolean girOpptjeningsTid(FagsakYtelseType ytelseType) {
         final var relatertYtelseTypeSet = OPPTJENING_RELATERTYTELSE_CONFIG.get(ytelseType);
