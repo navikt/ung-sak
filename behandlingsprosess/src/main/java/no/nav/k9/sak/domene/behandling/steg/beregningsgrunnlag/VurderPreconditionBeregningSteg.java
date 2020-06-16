@@ -69,7 +69,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))
             .anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()));
 
-        if (altAvslått) {
+        if (!vurdertePerioder.isEmpty() && altAvslått) {
             avslåBerregningsperioderDerHvorOpptjeningErAvslått(kontekst, vilkårene, vilkåret, vurdertePerioder);
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
