@@ -85,11 +85,9 @@ public class TilkjentYtelseTjeneste {
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
         boolean erOpphør = tjeneste.erOpphør(ref);
         Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(ref);
-        LocalDate endringsdato = hentEndringstidspunkt(behandlingId);
-        return new TilkjentYtelse(endringsdato, perioder)
+        return new TilkjentYtelse(null, perioder)
             .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)
-            .setErOpphør(erOpphør)
-            .setEndringsdato(endringsdato);
+            .setErOpphør(erOpphør);
     }
 
     public TilkjentYtelseOppdrag hentTilkjentYtelseOppdrag(Long behandlingId) {
@@ -117,12 +115,6 @@ public class TilkjentYtelseTjeneste {
             return Optional.empty();
         }
         return resultatOpt;
-    }
-
-    private LocalDate hentEndringstidspunkt(Long behandlingId) {
-        return hentResultat(behandlingId)
-            .flatMap(BeregningsresultatEntitet::getEndringsdato)
-            .orElse(null);
     }
 
     private Optional<BeregningsresultatEntitet> hentResultat(Long behandlingId) {
