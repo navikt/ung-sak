@@ -67,7 +67,7 @@ public class VurderOpptjeningsvilkårSteg extends VurderOpptjeningsvilkårStegFe
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))
             .allMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()));
 
-        if (behandleStegResultat.getAksjonspunktListe().isEmpty() && altAvslått) {
+        if (behandleStegResultat.getAksjonspunktListe().isEmpty() && altAvslått && !vurdertePerioder.isEmpty()) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
         }
