@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 
+@FagsakYtelseTypeRef
 @ApplicationScoped
 public class SendVedtaksbrev {
 
@@ -30,72 +32,76 @@ public class SendVedtaksbrev {
 
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
-    private VedtakVarselRepository behandlingsresultatRepository;
+    private VedtakVarselRepository vedtakvarselRepository;
 
-    SendVedtaksbrev() {
+    protected SendVedtaksbrev() {
         // for CDI proxy
     }
 
     @Inject
     public SendVedtaksbrev(BehandlingRepository behandlingRepository,
                            BehandlingVedtakRepository behandlingVedtakRepository,
-                           VedtakVarselRepository behandlingsresultatRepository,
+                           VedtakVarselRepository vedtakvarselRepository,
                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.vedtakvarselRepository = vedtakvarselRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
-    void sendVedtaksbrev(String behandlingId) {
+    public void sendVedtaksbrev(String behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        sendVedtaksbrev(BehandlingReferanse.fra(behandling));
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        if (skalSendeVedtaksbrev(ref)) {
+            behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(ref.getBehandlingId())
+                .ifPresent(behandlingVedtak -> {
+                    dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(ref, behandlingVedtak);
+
+                    if (behandlingVedtak.isBeslutningsvedtak()) {
+                        log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", behandlingId); //$NON-NLS-1$
+                    } else {
+                        log.info("Sender vedtaksbrev({}) for {} i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref.getFagsakYtelseType(), behandlingId); // $NON-NLS-1
+                    }
+                });
+        }
     }
 
-    void sendVedtaksbrev(BehandlingReferanse ref) {
-
+    protected boolean skalSendeVedtaksbrev(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
         Optional<BehandlingVedtak> behandlingVedtakOpt = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId);
         if (behandlingVedtakOpt.isEmpty()) {
             log.info("Det foreligger ikke vedtak i behandling: {}, kan ikke sende vedtaksbrev", behandlingId); //$NON-NLS-1$
-            return;
+            return false;
         }
 
         if (erKunRefusjonTilArbeidsgiver(ref)) {
             log.info("Sender ikke vedtaksbrev for omsorgspenger - refusjon til arbeidsgiver. Gjelder behandlingId {}", behandlingId); //$NON-NLS-1$
-            return;
+            return false;
         }
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (Fagsystem.INFOTRYGD.equals(behandling.getMigrertKilde())) {
-            var behandlingsresultat = behandlingsresultatRepository.hent(behandlingId);
+            var behandlingsresultat = vedtakvarselRepository.hent(behandlingId);
             boolean fritekstVedtaksbrev = Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
             if (!fritekstVedtaksbrev) {
                 log.info("Sender ikke vedtaksbrev for sak som er migrert fra Infotrygd. Gjelder behandlingId {}", behandlingId);
-                return;
+                return false;
             }
         }
 
         if (erBehandlingEtterKlage(behandling)) {
             log.info("Sender ikke vedtaksbrev for vedtak fra omgjøring fra klageinstansen på behandling {}, gjelder medhold fra klageinstans", behandlingId); //$NON-NLS-1$
-            return;
+            return false;
         }
-
-        var behandlingVedtak = behandlingVedtakOpt.get();
-        if (behandlingVedtak.isBeslutningsvedtak()) {
-            log.info("Sender informasjonsbrev om uendret utfall i behandling: {}", behandlingId); //$NON-NLS-1$
-        } else {
-            log.info("Sender vedtaksbrev({}) for {} i behandling: {}", behandlingVedtak.getVedtakResultatType(), ref.getFagsakYtelseType(), behandlingId); // $NON-NLS-1
-        }
-        dokumentBestillerApplikasjonTjeneste.produserVedtaksbrev(ref, behandlingVedtak);
+        return true;
     }
 
-    private boolean erKunRefusjonTilArbeidsgiver(BehandlingReferanse ref) {
+    protected boolean erKunRefusjonTilArbeidsgiver(BehandlingReferanse ref) {
         return ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER;
     }
 
-    private boolean erBehandlingEtterKlage(Behandling behandling) {
+    protected boolean erBehandlingEtterKlage(Behandling behandling) {
         return BehandlingÅrsakType.årsakerEtterKlageBehandling().stream().anyMatch(behandling::harBehandlingÅrsak);
     }
 }
