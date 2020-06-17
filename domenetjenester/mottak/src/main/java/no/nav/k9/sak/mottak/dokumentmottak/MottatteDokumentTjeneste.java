@@ -27,7 +27,8 @@ public class MottatteDokumentTjeneste {
 
     private Period fristForInnsendingAvDokumentasjon;
 
-    private InntektsmeldingParser inntektsmeldingParser;
+    private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
+
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
@@ -44,14 +45,12 @@ public class MottatteDokumentTjeneste {
      */
     @Inject
     public MottatteDokumentTjeneste(@KonfigVerdi(value = "sak.frist.innsending.dok", defaultVerdi = "P6W") Period fristForInnsendingAvDokumentasjon,
-                                    InntektsmeldingParser inntektsmeldingParser,
                                     InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                     MottatteDokumentRepository mottatteDokumentRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     UttakRepository uttakRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.fristForInnsendingAvDokumentasjon = fristForInnsendingAvDokumentasjon;
-        this.inntektsmeldingParser = inntektsmeldingParser;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -61,7 +60,7 @@ public class MottatteDokumentTjeneste {
 
     public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, MottattDokument dokument) {
         if (dokument.harPayload()) {
-            var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(behandling, dokument);
+            var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokument);
             // sendte bare ett dokument her, så forventer kun et svar:
             var arbeidsgiver = inntektsmeldinger.get(0).getArbeidsgiver(); // NOSONAR
             dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());

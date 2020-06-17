@@ -8,6 +8,7 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -47,6 +48,8 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     private BeanManager beanManager;
     private BehandlingLåsRepository behandlingLåsRepository;
+    
+    private InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
     @Inject
     public DokumentmottakerInntektsmelding(DokumentmottakerFelles dokumentMottakerFelles,
@@ -134,6 +137,14 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     public void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         doMottaDokument(mottattDokument, fagsak);
         doFireEvent(new Mottatt(fagsak.getYtelseType(), fagsak.getAktørId(), mottattDokument.getJournalpostId()));
+    }
+    
+    @Override
+    public void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
+        var res = inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
+        if(res.isEmpty()) {
+            throw new IllegalArgumentException("Fikk ingen inntektsmeldinger fra : " + mottattDokument);
+        }
     }
 
     /** Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt. */

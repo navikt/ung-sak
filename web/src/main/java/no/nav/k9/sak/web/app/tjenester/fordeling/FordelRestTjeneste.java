@@ -211,10 +211,11 @@ public class FordelRestTjeneste {
         if (fagsak.isEmpty()) {
             throw new IllegalStateException("Finner ingen fagsak for saksnummer " + saksnummer);
         }
+        var f = fagsak.get();
 
         Optional<String> payload = mottattJournalpost.getPayload();
         InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
-            .medFagsakId(fagsak.get().getId())
+            .medFagsak(f.getId(), f.getYtelseType())
             .medElektroniskSøknad(payload.isPresent())
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());

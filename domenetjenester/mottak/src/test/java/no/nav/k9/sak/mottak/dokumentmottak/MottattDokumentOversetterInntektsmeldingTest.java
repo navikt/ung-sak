@@ -225,7 +225,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     }
 
     private void persisterInntektsmelding(final Behandling behandling, MottattDokument mottattDokument, MottattDokumentWrapperInntektsmelding wrapperSpied) {
-        var innhold = oversetter.trekkUtData(wrapperSpied, mottattDokument, behandling);
+        var innhold = oversetter.trekkUtData(wrapperSpied, mottattDokument);
         
         Long behandlingId = behandling.getId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
@@ -238,7 +238,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
 
         var wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
-        var innhold = oversetter.trekkUtData(wrapper, mottattDokument, behandling);
+        var innhold = oversetter.trekkUtData(wrapper, mottattDokument);
         
         Long behandlingId = behandling.getId();
         var saksnummer = behandling.getFagsak().getSaksnummer();

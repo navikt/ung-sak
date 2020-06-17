@@ -7,23 +7,19 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
 
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @SuppressWarnings("rawtypes")
-@Dependent
 public class InntektsmeldingParser {
 
-    @Inject
     public InntektsmeldingParser() {
     }
 
     @SuppressWarnings("unchecked")
-    private List<InntektsmeldingBuilder> parseInntektsmeldinger(Behandling behandling, List<MottattDokument> mottatteDokumenter) {
+    private List<InntektsmeldingBuilder> parseInntektsmeldinger(List<MottattDokument> mottatteDokumenter) {
         // wrap/dekod alle først
         var mottatt = new IdentityHashMap();
         var oversettere = new IdentityHashMap();
@@ -38,14 +34,14 @@ public class InntektsmeldingParser {
         for (var m : mottatteDokumenter) {
             var wrapper = (MottattInntektsmeldingWrapper) mottatt.get(m);
             var oversetter = (MottattInntektsmeldingOversetter) oversettere.get(m);
-            var im = oversetter.trekkUtData(wrapper, m, behandling);
+            var im = oversetter.trekkUtData(wrapper, m);
             inntektsmeldinger.add(im);
         }
         return inntektsmeldinger;
     }
 
-    public List<InntektsmeldingBuilder> parseInntektsmeldinger(Behandling behandling, MottattDokument... dokument) {
-        return parseInntektsmeldinger(behandling, List.of(dokument));
+    public List<InntektsmeldingBuilder> parseInntektsmeldinger(MottattDokument... dokument) {
+        return parseInntektsmeldinger(List.of(dokument));
     }
 
     public MottattInntektsmeldingWrapper xmlTilWrapper(MottattDokument dokument) {

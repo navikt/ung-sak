@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -22,7 +23,8 @@ public class InngåendeSaksdokument {
     private DokumentKategori dokumentKategori;
     private String kanalreferanse;
     private String journalEnhet;
-    public Brevkode type;
+    private Brevkode type;
+    private FagsakYtelseType fagsakYtelseType;
 
     private InngåendeSaksdokument() {
         // Skjult.
@@ -76,20 +78,26 @@ public class InngåendeSaksdokument {
         return journalEnhet;
     }
 
+    public FagsakYtelseType getFagsakYtelseType() {
+        return fagsakYtelseType;
+    }
+
     public static Builder builder() {
         return new Builder(new InngåendeSaksdokument());
     }
 
     public static class Builder {
         private final InngåendeSaksdokument kladd;
+        private boolean built;
 
         Builder(InngåendeSaksdokument kladd) {
             this.kladd = kladd;
             this.kladd.elektroniskSøknad = Boolean.TRUE;
         }
 
-        public InngåendeSaksdokument.Builder medFagsakId(Long fagsakId) {
+        public InngåendeSaksdokument.Builder medFagsak(Long fagsakId, FagsakYtelseType fagsakYtelseType) {
             this.kladd.fagsakId = fagsakId;
+            this.kladd.fagsakYtelseType = fagsakYtelseType;
             return this;
         }
 
@@ -139,6 +147,10 @@ public class InngåendeSaksdokument {
         }
 
         public InngåendeSaksdokument build() {
+            if (built) {
+                throw new IllegalStateException("Kan ikke kalle flere ganger for " + InngåendeSaksdokument.class.getSimpleName() + ", journalpostId=" + kladd.journalpostId);
+            }
+            built = true;
             return kladd;
         }
 

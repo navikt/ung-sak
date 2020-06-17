@@ -283,6 +283,10 @@ public class MottattDokument extends BaseEntitet {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<journalpostId=" + journalpostId
+            + ", kanalReferanse=" + kanalreferanse
+            + ", arbeidsgiver=" + arbeidsgiver
+            + ", type=" + type
+            + ", journalpostId=" + journalpostId
             + ", mottattDato" + mottattDato + "[" + mottattTidspunkt + "]";
     }
 }

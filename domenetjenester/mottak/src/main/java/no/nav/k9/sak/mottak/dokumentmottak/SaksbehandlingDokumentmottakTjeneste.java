@@ -4,9 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -17,6 +22,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private ProsessTaskRepository prosessTaskRepository;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
+    private Instance<Dokumentmottaker> mottakere;
 
     public SaksbehandlingDokumentmottakTjeneste() {
         // for CDI, jaja
@@ -24,8 +30,10 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     @Inject
     public SaksbehandlingDokumentmottakTjeneste(ProsessTaskRepository prosessTaskRepository,
+                                                @Any Instance<Dokumentmottaker> mottakere,
                                                 MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
+        this.mottakere = mottakere;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
     }
 
@@ -49,6 +57,8 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
         MottattDokument mottattDokument = builder.build();
 
+        valider(mottattDokument, saksdokument.getFagsakYtelseType());
+
         Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
         var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTask.TASKTYPE);
@@ -59,9 +69,22 @@ public class SaksbehandlingDokumentmottakTjeneste {
         prosessTaskRepository.lagre(prosessTaskData);
     }
 
+    private void valider(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
+        var dokumentmottaker = finnMottaker(mottattDokument.getType(), ytelseType);
+        dokumentmottaker.validerDokument(mottattDokument, ytelseType);
+    }
+
     private void settÅrsakHvisDefinert(BehandlingÅrsakType behandlingÅrsakType, ProsessTaskData prosessTaskData) {
         if (behandlingÅrsakType != null && !BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
             prosessTaskData.setProperty(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY, behandlingÅrsakType.getKode());
         }
+    }
+
+    private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
+        String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
+        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode));
+
+        return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
     }
 }
