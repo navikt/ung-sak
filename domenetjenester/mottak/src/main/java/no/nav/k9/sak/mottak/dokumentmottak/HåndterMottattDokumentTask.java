@@ -28,7 +28,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlingRepository behandlingRepository;
-    private InntektsmeldingParser dokumentPersistererTjeneste;
+    private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
 
     HåndterMottattDokumentTask() {
@@ -38,11 +38,9 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     @Inject
     public HåndterMottattDokumentTask(BehandlingRepositoryProvider repositoryProvider, 
                                       InnhentDokumentTjeneste innhentDokumentTjeneste,
-                                      InntektsmeldingParser dokumentPersistererTjeneste, 
                                       MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.innhentDokumentTjeneste = innhentDokumentTjeneste;
-        this.dokumentPersistererTjeneste = dokumentPersistererTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
     }
@@ -58,7 +56,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
             behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY));
         } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.harPayload()) {
-             dokumentPersistererTjeneste.xmlTilWrapper(mottattDokument);
+             inntektsmeldingParser.xmlTilWrapper(mottattDokument);
         }
         innhentDokumentTjeneste.utfør(mottattDokument, behandlingÅrsakType);
     }
