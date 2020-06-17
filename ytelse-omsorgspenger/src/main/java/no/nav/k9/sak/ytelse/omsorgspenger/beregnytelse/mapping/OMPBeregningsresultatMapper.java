@@ -23,8 +23,6 @@ import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -52,7 +50,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
@@ -63,7 +60,6 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private Boolean hentFullUttaksplan;
 
     OMPBeregningsresultatMapper() {
         // For inject
@@ -73,13 +69,11 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     public OMPBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        ÅrskvantumTjeneste årskvantumTjeneste,
-                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                       @KonfigVerdi(value = "OMP_HENT_FULLUTTAKSPLAN_AKTIVERT", defaultVerdi = "true") Boolean hentFullUttaksplan) {
+                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.hentFullUttaksplan = hentFullUttaksplan;
     }
 
     @Override
@@ -110,15 +104,8 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     @NotNull
     private Optional<List<Aktivitet>> hentUttaksplan(BehandlingReferanse ref) {
-        if (hentFullUttaksplan) {
-            var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
-            return Optional.ofNullable(fullUttaksplan).map(FullUttaksplan::getAktiviteter);
-        } else {
-            var forbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
-            return Optional.ofNullable(forbrukteDager)
-                .map(ÅrskvantumForbrukteDager::getSisteUttaksplan)
-                .map(Uttaksplan::getAktiviteter);
-        }
+        var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
+        return Optional.ofNullable(fullUttaksplan).map(FullUttaksplan::getAktiviteter);
     }
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat, Optional<List<Aktivitet>> uttaksplan) {
@@ -311,5 +298,4 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());
         return ny;
     }
-
 }
