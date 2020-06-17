@@ -32,22 +32,15 @@ public class ErEndringIBeregningFRISINN {
 
         List<BeregningsgrunnlagPeriode> originalePerioder = originaltGrunnlag.map(Beregningsgrunnlag::getBeregningsgrunnlagPerioder).orElse(Collections.emptyList());
         List<BeregningsgrunnlagPeriode> revurderingsPerioder = revurderingsGrunnlag.map(Beregningsgrunnlag::getBeregningsgrunnlagPerioder).orElse(Collections.emptyList());
-
+        BigDecimal totalUgunst = BigDecimal.ZERO;
         while (uttaksperioder.hasNext()) {
             Periode periode = uttaksperioder.next();
             BigDecimal orginalUtbetalingIPerioden = finnUtbetalingIPerioden(periode, originalePerioder);
             BigDecimal revurderingUtbetalingIPerioden = finnUtbetalingIPerioden(periode, revurderingsPerioder);
-            if (erUgustBeløpStørreEnnToleranseGrensen(orginalUtbetalingIPerioden, revurderingUtbetalingIPerioden)) {
-                return true;
-            }
+            var ugunstIPerioden = orginalUtbetalingIPerioden.subtract(revurderingUtbetalingIPerioden).max(BigDecimal.ZERO);
+            totalUgunst = totalUgunst.add(ugunstIPerioden);
         }
-        return false;
-    }
-
-    private static boolean erUgustBeløpStørreEnnToleranseGrensen(BigDecimal orginalBeløp, BigDecimal nyttBeløp) {
-        BigDecimal diff = orginalBeløp.subtract(nyttBeløp);
-
-        return (diff.compareTo(TOLERANSE_GRENSE_DAGSATS) >= 0);
+        return totalUgunst.compareTo(TOLERANSE_GRENSE_DAGSATS) >= 0;
     }
 
     private static BigDecimal finnUtbetalingIPerioden(Periode uttaksperiode, List<BeregningsgrunnlagPeriode> bgPerioder) {
