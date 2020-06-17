@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -194,7 +195,7 @@ public class VilkårBuilder {
     public Vilkår build() {
         validerBuilder();
         if (!tilbakestiltePerioder.isEmpty()) {
-            justereUtfallVedTilbakestillingIForkant();
+            justereUtfallVedTilbakestilling();
         }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
@@ -213,8 +214,20 @@ public class VilkårBuilder {
         return vilkåret;
     }
 
-    private void justereUtfallVedTilbakestillingIForkant() {
-        var datoerSomOverlapper = tilbakestiltePerioder.stream().map(DatoIntervallEntitet::getTomDato).map(it -> it.plusDays(1)).map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it)).collect(Collectors.toSet());
+    private void justereUtfallVedTilbakestilling() {
+        var datoerSomOverlapperBakover = tilbakestiltePerioder.stream()
+            .map(DatoIntervallEntitet::getFomDato)
+            .map(it -> it.minusDays(1))
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it))
+            .collect(Collectors.toSet());
+        var datoerSomOverlapperFremover = tilbakestiltePerioder.stream()
+            .map(DatoIntervallEntitet::getTomDato)
+            .map(it -> it.plusDays(1))
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it, it))
+            .collect(Collectors.toSet());
+
+        var datoerSomOverlapper = new HashSet<>(datoerSomOverlapperBakover);
+        datoerSomOverlapper.addAll(datoerSomOverlapperFremover);
 
         for (DatoIntervallEntitet datoIntervallEntitet : datoerSomOverlapper) {
             if (vilkårTidslinje.intersects(new LocalDateTimeline<>(List.of(new LocalDateSegment<WrappedVilkårPeriode>(datoIntervallEntitet.getFomDato(), datoIntervallEntitet.getTomDato(), null))))) {
