@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -59,7 +60,10 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
-        var perioderSomSkalTilbakestilles = perioderSomSkalTilbakestilles(behandlingId);
+        var perioderSomSkalTilbakestilles = Collections.unmodifiableNavigableSet(perioderSomSkalTilbakestilles(behandlingId)
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1)))
+            .collect(Collectors.toCollection(TreeSet::new)));
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
             return utledVilkårsPerioderFraPerioderTilVurdering(vilkårene.get(), perioder, perioderSomSkalTilbakestilles);
@@ -72,7 +76,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkår.getPerioder()
             .stream()
             .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p))
-                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().inkluderer(p.getTomDato().plusDays(1))))
+                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().overlapper(p)))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }

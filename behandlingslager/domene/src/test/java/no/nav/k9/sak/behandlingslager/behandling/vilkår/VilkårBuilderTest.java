@@ -307,6 +307,6 @@ public class VilkårBuilderTest {
         var oppdatertVilkår = oppdateringBuilder.build();
         assertThat(oppdatertVilkår).isNotNull();
         assertThat(oppdatertVilkår.getPerioder()).hasSize(3);
-        assertThat(oppdatertVilkår.getPerioder().stream().filter(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT)).collect(Collectors.toList())).hasSize(1);
+        assertThat(oppdatertVilkår.getPerioder().stream().filter(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT)).collect(Collectors.toList())).hasSize(2);
     }
 }
