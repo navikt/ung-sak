@@ -21,6 +21,9 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
+/**
+ * Kjører tilbakehopp til starten av beregning
+ */
 @ApplicationScoped
 @ProsessTask(TilbakeTilStartBeregningTask.TASKNAME)
 // gruppeSekvens = false for å kunne hoppe tilbake ved feilende fortsettBehandling task
@@ -60,7 +63,7 @@ public class TilbakeTilStartBeregningTask implements ProsessTaskHandler {
             Long fagsakId = prosessTaskData.getFagsakId();
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
-            hoppTilbake(behandling, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, kontekst);
+            hoppTilbake(behandling, BehandlingStegType.PRECONDITION_BEREGNING, kontekst);
 
         }
     }
