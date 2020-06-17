@@ -40,6 +40,7 @@ class MapFraÅrskvantumResultat {
         } else if (arb.getAktørId() != null) {
             arbeidsforholdBuilder.medAktørId(arb.getAktørId());
         }
+        arbeidsforholdBuilder.medArbeidsforholdId(arb.getArbeidsforholdId());
 
         var arbeidsforhold = arbeidsforholdBuilder.build();
         return arbeidsforhold;
