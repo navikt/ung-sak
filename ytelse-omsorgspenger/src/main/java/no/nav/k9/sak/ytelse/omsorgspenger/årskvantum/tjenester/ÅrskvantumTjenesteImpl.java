@@ -140,7 +140,8 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             personMedRelasjoner.getPersonIdent().getIdent(),
             personMedRelasjoner.getFødselsdato(),
             personMedRelasjoner.getDødsdato(),
-            barna);
+            barna,
+            null);
     }
 
     @Override
