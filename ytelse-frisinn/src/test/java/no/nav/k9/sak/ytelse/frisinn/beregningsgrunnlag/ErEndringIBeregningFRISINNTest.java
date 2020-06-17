@@ -34,7 +34,7 @@ public class ErEndringIBeregningFRISINNTest {
     @Test
     public void to_manglende_grunnlag_gir_false() {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.empty(), Optional.empty(), new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.empty(), Optional.empty(), new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isFalse();
     }
 
@@ -42,7 +42,7 @@ public class ErEndringIBeregningFRISINNTest {
     public void manglende_grunnlag_revuredering_gir_true() {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         bgOrginal(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 300000, List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.empty(),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.empty(),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isTrue();
@@ -52,7 +52,7 @@ public class ErEndringIBeregningFRISINNTest {
     public void manglende_grunnlag_orginalbehandling_gir_false() {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         bgRevurdering(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 300000, List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.of(beregningsgrunnlagRevurdering),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.empty(),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isFalse();
@@ -63,7 +63,7 @@ public class ErEndringIBeregningFRISINNTest {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         bgOrginal(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 200000, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 250000, List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.of(beregningsgrunnlagRevurdering),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isFalse();
@@ -74,7 +74,7 @@ public class ErEndringIBeregningFRISINNTest {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         bgOrginal(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 200000, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 150000, List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.of(beregningsgrunnlagRevurdering),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isTrue();
@@ -85,7 +85,7 @@ public class ErEndringIBeregningFRISINNTest {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         bgOrginal(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 200000, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30), 200000, List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.of(beregningsgrunnlagRevurdering),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isFalse();
@@ -100,7 +100,7 @@ public class ErEndringIBeregningFRISINNTest {
 
         bgOrginal(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), bruttoPrÅr, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), nyttBeløp.intValue(), List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.of(beregningsgrunnlagRevurdering),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isFalse();
@@ -115,7 +115,7 @@ public class ErEndringIBeregningFRISINNTest {
 
         bgOrginal(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), bruttoPrÅr, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), nyttBeløp.intValue(), List.of(AktivitetStatus.ARBEIDSTAKER));
-        boolean resultat = ErEndringIBeregningFRISINN.erUgust(Optional.of(beregningsgrunnlagRevurdering),
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
         Assertions.assertThat(resultat).isTrue();

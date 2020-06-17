@@ -22,7 +22,7 @@ public class ErEndringIBeregningFRISINN {
         // Skjuler default
     }
 
-    public static boolean erUgust(Optional<Beregningsgrunnlag> revurderingsGrunnlag, Optional<Beregningsgrunnlag> originaltGrunnlag, UttakAktivitet orginaltUttak) {
+    public static boolean erUgunst(Optional<Beregningsgrunnlag> revurderingsGrunnlag, Optional<Beregningsgrunnlag> originaltGrunnlag, UttakAktivitet orginaltUttak) {
 
         if (revurderingsGrunnlag.isEmpty()) {
             return originaltGrunnlag.isPresent();

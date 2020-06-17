@@ -33,7 +33,7 @@ public class EndringIBeregningTjenesteFRISINN extends EndringIBeregningTjeneste 
         var originaltGrunnlag = kalkulusTjeneste.hentFastsatt(orginalbehandling, skjæringstidspuntk);
         var revurderingsGrunnlag = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
         UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(orginalbehandling.getBehandlingId());
-        return ErEndringIBeregningFRISINN.erUgust(revurderingsGrunnlag, originaltGrunnlag, orginaltUttak);
+        return ErEndringIBeregningFRISINN.erUgunst(revurderingsGrunnlag, originaltGrunnlag, orginaltUttak);
     }
 
 
