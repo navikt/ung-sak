@@ -99,12 +99,10 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            var ref = BehandlingReferanse.fra(behandling);
-            beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
-                .forEach(periode -> deaktiverResultatOgSettPeriodeTilVurdering(ref, kontekst, periode));
-        }
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var ref = BehandlingReferanse.fra(behandling);
+        beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
+            .forEach(periode -> deaktiverResultatOgSettPeriodeTilVurdering(ref, kontekst, periode));
     }
 
     private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periode) {
