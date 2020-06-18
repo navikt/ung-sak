@@ -46,7 +46,7 @@ public class ForeslåVedtakAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
             opprettHistorikkinnslag(behandling);
         }
 
-        oppdaterRedusertUtbetalingÅrsaker(dto, param.getBehandlingId());
+        oppdaterVedtaksvarsel(dto, param.getBehandlingId());
         return builder.build();
     }
 

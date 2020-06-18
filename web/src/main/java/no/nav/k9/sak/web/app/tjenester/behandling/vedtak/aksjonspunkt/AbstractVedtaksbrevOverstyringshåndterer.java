@@ -119,9 +119,14 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         historikkApplikasjonTjeneste.lagInnslag(innslag);
     }
 
-    void oppdaterRedusertUtbetalingÅrsaker(VedtaksbrevOverstyringDto dto, Long behandlingId) {
-        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(
-            v -> v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker())
+    void oppdaterVedtaksvarsel(VedtaksbrevOverstyringDto dto, Long behandlingId) {
+        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(v -> {
+                v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker());
+                if (dto.isSkalUndertrykkeBrev()) {
+                    v.setVedtaksbrev(Vedtaksbrev.INGEN);
+                }
+                vedtakVarselRepository.lagre(behandlingId, v);
+            }
         );
     }
 }

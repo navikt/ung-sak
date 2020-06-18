@@ -24,8 +24,9 @@ public class ForeslaVedtakManueltAksjonspuntDto extends VedtaksbrevOverstyringDt
                                               String overskrift,
                                               String fritekstBrev,
                                               boolean skalBrukeOverstyrendeFritekstBrev,
-                                              Set<String> redusertUtbetalingÅrsaker) {
-        super(begrunnelse, overskrift, fritekstBrev, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker);
+                                              Set<String> redusertUtbetalingÅrsaker,
+                                              boolean skalUndertrykke) {
+        super(begrunnelse, overskrift, fritekstBrev, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker, skalUndertrykke);
     }
 
 }
